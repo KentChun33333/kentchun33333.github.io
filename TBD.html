@@ -1,43 +1,87 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-        <meta charset="utf-8" />
-        <title>Install CUDA in Ubuntu 14.04</title>
-        <link rel="stylesheet" href="/theme/css/main.css" />
+  <link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,400italic' rel='stylesheet' type='text/css'>
 
-        <!--[if IE]>
-            <script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-        <![endif]-->
+    <link rel="stylesheet" type="text/css" href="/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="/theme/font-awesome/css/font-awesome.min.css">
+
+
+
+
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="" />
+
+
+<meta name="author" content="Kent Chiu" />
+<meta name="description" content="Install CUDA in Ubuntu 14.04 LTS¶Introduction¶To install CUDA is painful for most of people since most of data scientists or deep learning researchers are not familiar with system-side knowledge, include me. Few monthes ago, I've successed install CUDA in WINDOWS system, however, for some reasons, the WINDOWS-based version is no longer to satisfited my need." />
+<meta name="keywords" content="env, cuda, ubuntu">
+<meta property="og:site_name" content="Autumn Memo"/>
+<meta property="og:title" content="Install CUDA in Ubuntu 14.04"/>
+<meta property="og:description" content="Install CUDA in Ubuntu 14.04 LTS¶Introduction¶To install CUDA is painful for most of people since most of data scientists or deep learning researchers are not familiar with system-side knowledge, include me. Few monthes ago, I've successed install CUDA in WINDOWS system, however, for some reasons, the WINDOWS-based version is no longer to satisfited my need."/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="/TBD.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2016-11-10 18:00:00+01:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="/author/kent-chiu.html">
+<meta property="article:section" content="AI"/>
+<meta property="article:tag" content="env"/>
+<meta property="article:tag" content="cuda"/>
+<meta property="article:tag" content="ubuntu"/>
+<meta property="og:image" content="">
+
+  <title>Autumn Memo &ndash; Install CUDA in Ubuntu 14.04</title>
+
 </head>
+<body>
+  <aside>
+    <div>
+      <a href="">
+        <img src="/theme/img/profile.png" alt="" title="">
+      </a>
+      <h1><a href=""></a></h1>
 
-<body id="index" class="home">
-        <header id="banner" class="body">
-                <h1><a href="/">Autumn Memo </a></h1>
-                <nav><ul>
-                    <li class="active"><a href="/category/ai.html">AI</a></li>
-                    <li><a href="/category/experiment.html">Experiment</a></li>
-                </ul></nav>
-        </header><!-- /#banner -->
-<section id="content" class="body">
-  <article>
-    <header>
-      <h1 class="entry-title">
-        <a href="/TBD.html" rel="bookmark"
-           title="Permalink to Install CUDA in Ubuntu 14.04">Install CUDA in Ubuntu 14.04</a></h1>
-    </header>
 
-    <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2016-11-10T18:00:00+01:00">
-                Published: Thu 10 November 2016
-        </abbr>
+      <nav>
+        <ul class="list">
 
-        <address class="vcard author">
-                By                         <a class="url fn" href="/author/kent-chiu.html">Kent Chiu</a>
-        </address>
-<p>In <a href="/category/ai.html">AI</a>.</p>
-<p>tags: <a href="/tag/env.html">env</a> <a href="/tag/cuda.html">cuda</a> <a href="/tag/ubuntu.html">ubuntu</a> </p>
-</footer><!-- /.post-info -->      <style type="text/css">/*!
+          <li><a href="http://getpelican.com/" target="_blank">Pelican</a></li>
+          <li><a href="http://keras.io" target="_blank">Keras</a></li>
+        </ul>
+      </nav>
+
+      <ul class="social">
+        <li><a class="sc-Linkedin" href="https://www.linkedin.com/in/kent-chiu-93b745a2?trk=hp-identity-photo" target="_blank"><i class="fa fa-Linkedin"></i></a></li>
+        <li><a class="sc-Github" href="https://github.com/KentChun33333" target="_blank"><i class="fa fa-Github"></i></a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+
+<article class="single">
+  <header>
+    <h1 id="TBD">Install CUDA in Ubuntu 14.04</h1>
+    <p>
+          Posted on Thu 10 November 2016 in <a href="/category/ai.html">AI</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <style type="text/css">/*!
 *
 * IPython notebook
 *
@@ -261,35 +305,39 @@ sudo ~/anaconda2/bin/pip install /tmp/tensorflow_pkg/tensorflow-0.11.0rc2-cp27-c
 }
 </script>
 
-    </div><!-- /.entry-content -->
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="/tag/env.html">env</a>
+      <a href="/tag/cuda.html">cuda</a>
+      <a href="/tag/ubuntu.html">ubuntu</a>
+    </p>
+  </div>
 
-  </article>
-</section>
-        <section id="extras" class="body">
-                <div class="blogroll">
-                        <h2>blogroll</h2>
-                        <ul>
-                            <li><a href="http://getpelican.com/">Pelican</a></li>
-                            <li><a href="http://keras.io">Keras</a></li>
-                        </ul>
-                </div><!-- /.blogroll -->
-                <div class="social">
-                        <h2>social</h2>
-                        <ul>
 
-                            <li><a href="https://www.linkedin.com/in/kent-chiu-93b745a2?trk=hp-identity-photo">Linkedin</a></li>
-                            <li><a href="https://github.com/KentChun33333">Github</a></li>
-                        </ul>
-                </div><!-- /.social -->
-        </section><!-- /#extras -->
 
-        <footer id="contentinfo" class="body">
-                <address id="about" class="vcard body">
-                Proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
-                </address><!-- /#about -->
 
-                <p>The theme is by <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
-        </footer><!-- /#contentinfo -->
+</article>
 
+    <footer>
+<p>&copy; Kent Chiu </p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p>    </footer>
+  </main>
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " Autumn Memo ",
+  "url" : "",
+  "image": "",
+  "description": ""
+}
+</script>
 </body>
 </html>
