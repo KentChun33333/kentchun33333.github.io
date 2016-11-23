@@ -1,0 +1,677 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,400italic' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" type="text/css" href="https://kentchun33333.github.io/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://kentchun33333.github.io/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://kentchun33333.github.io/theme/font-awesome/css/font-awesome.min.css">
+
+
+
+
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="" />
+
+
+<meta name="author" content="Kent Chiu" />
+<meta name="description" content="Introduction¶Batch normalization is a popular method to fasten deep-network training process also solving the gradient vanishing or exploding problem. In this post, I am going to first discuss some ideas, then take a glance at math expression on algorithms in original paper,and finally take a deep look on how to implement it." />
+<meta name="keywords" content="cnn, training, automatic differenciation, moving average">
+<meta property="og:site_name" content="Autumn Memo"/>
+<meta property="og:title" content="A Glance at Batch Normalization"/>
+<meta property="og:description" content="Introduction¶Batch normalization is a popular method to fasten deep-network training process also solving the gradient vanishing or exploding problem. In this post, I am going to first discuss some ideas, then take a glance at math expression on algorithms in original paper,and finally take a deep look on how to implement it."/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="https://kentchun33333.github.io/GlanceAtBatchNormalization.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2016-11-22 20:00:00+01:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="https://kentchun33333.github.io/author/kent-chiu.html">
+<meta property="article:section" content="AI"/>
+<meta property="article:tag" content="cnn"/>
+<meta property="article:tag" content="training"/>
+<meta property="article:tag" content="automatic differenciation"/>
+<meta property="article:tag" content="moving average"/>
+<meta property="og:image" content="https://kentchun33333.github.io/image/profile.png">
+
+  <title>Autumn Memo &ndash; A Glance at Batch Normalization</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://kentchun33333.github.io">
+        <img src="https://kentchun33333.github.io/image/profile.png" alt="Kent Chiu" title="Kent Chiu">
+      </a>
+      <h1><a href="https://kentchun33333.github.io">Kent Chiu</a></h1>
+
+<p>Data Scientist</p>
+
+      <ul class="social">
+        <li><a class="sc-linkedin" href="https://www.linkedin.com/in/kent-chiu-93b745a2?trk=hp-identity-photo" target="_blank"><i class="fa fa-linkedin"></i></a></li>
+        <li><a class="sc-github" href="https://github.com/KentChun33333" target="_blank"><i class="fa fa-github"></i></a></li>
+        <li><a class="sc-facebook" href="https://www.facebook.com/kent.chun" target="_blank"><i class="fa fa-facebook"></i></a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://kentchun33333.github.io">    Home
+</a>
+
+      <a href="/archives.html">Archives</a>
+      <a href="/categories.html">Categories</a>
+      <a href="/tags.html">Tags</a>
+
+
+    </nav>
+
+<article class="single">
+  <header>
+    <h1 id="GlanceAtBatchNormalization">A Glance at Batch Normalization</h1>
+    <p>
+          Posted on Tue 22 November 2016 in <a href="https://kentchun33333.github.io/category/ai.html">AI</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Introduction">Introduction<a class="anchor-link" href="#Introduction">¶</a></h3><p><strong>Batch normalization</strong> is a popular method to fasten deep-network training process also solving the gradient vanishing or exploding problem. In this <a href="https://kentchun33333.github.io/">post</a>, I am going to first discuss some ideas, then take a glance at math expression on algorithms in original <a href="https://arxiv.org/pdf/1502.03167v3.pdf">paper</a>,and finally take a deep look on how to implement it.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="1.-Brief-concepts-about-normalization">1. Brief concepts about normalization<a class="anchor-link" href="#1.-Brief-concepts-about-normalization">¶</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>It is quite common to use normalization in neural network, especially deep convnet. Before batch normalization layer, there are several ways/methods like as per-image-normalize, per-image whitening, per-batch normalization, per-batch whitening, local constrast normalization (LCN) and local response normalization (LRN). These methods are actually really good, and is sucessfully working in some conditions.</p>
+<p>To me, the main core ideal is simple, that is <strong> only difference matters while delievering information</strong>. Just think the information like electricity in cpu, nowadays the driving voltage is much lower than the past cpu, but it carried more heavy work, compute even faster and spend less energy.</p>
+<p><strong>We actually have multiple ways to normalize our data before or after any operation.</strong> A good way or strategy to add the normalization is actually <strong>depending on the operation before or after it.</strong> For example, if you are going to applied a RELU with a threshod equal to 0.5 ( which is not common) and you would like to add a normalization-method before it. You probabily do not want to only add the normalization but also some shift like 0.1 or 0.3 to make sure this RELU-layer do not swipe too many information. For another example, you would like to introduce a <strong>depth-wise or channel-wise normalization</strong> after the conv-layer. Because, the conv-layer is actually a depth-wish operation. Depth in conv-operation is actually the numbers of filters/kernels which coressponding to a <strong>( </strong>filter-width * filter-height * previous-depth<strong> )</strong> of weights/neurals.</p>
+<p>The batch normalization is basically following this concept but adding a trainable feature to it. <strong>This feature makes it beautiful.</strong></p>
+<p>For more informations about normalization, check this <a href="http://yeephycho.github.io/2016/08/03/Normalizations-in-neural-networks/">post</a>.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="2.-Expression-in-Math">2. Expression in Math<a class="anchor-link" href="#2.-Expression-in-Math">¶</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>$ \begin{array} \\
+\text{Algorithm 1 : Batch Normalizing Transform, applied to activation x over a mini-batch. } \\  
+\hline 
+\text{Input : Values of x over a mini-Batch : } B \{  x_{1 \text{ ... m }} \} \text{ ; Parameters to be learned : } \beta \text{ and } \gamma \\
+\text{Output : A set of } Y : \{ y_{i} = \text{ BatchNorm}_{\beta, \gamma}(x^{i}) \} \\
+\text{ } \mu_{ \beta } \leftarrow  \frac{1}{m} \sum_{i=1}^m (x_{i}) \text{ ----------------- mini-batch mean}\\
+\text{ } \alpha^{2}_{ \beta } \leftarrow  \frac{1}{m} \sum_{i=1}^m (x_{i} - \mu_{\beta})^{2} \text{ --------- mini-batch variance}\\
+\text{ } \hat{x}_{i} \leftarrow \frac{x_{i} - \mu_{\beta}}{\sqrt{\alpha^{2}_{\beta}+ \epsilon}} \text{ ---------------------- normalization where epsilon is the number to prevent dividing zero } \\
+\text{ } y_{i} \leftarrow \gamma \hat{x}_{i} + \beta = \text{BN}_{\gamma, \beta}(x_{i}) \text{ -------- scale and shift}\\
+\end{array} $</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>$ \begin{array} \\
+\text{Algorithm 2 : Training a Batch-Normalized Network } \\  
+\hline 
+\text{Input : Network N with trainable parameters } \Theta \text{ ; subset of activations } \{ x^{(k)}\}^{K}_{k=1} \\
+\text{Output : Batch-normalized network for inference, N}^{inf}_{\text{BN}} \\
+\text{ 1: N}^{\text{tr}}_{\text{BN}} \leftarrow \text{ N ------ Training BN network} \\
+\text{ 2: } \textbf{for } k = 1 ... K \textbf{  do } : \\ 
+\text{ 3: Add transformation } y^{(k)} = \text{BN}_{\gamma^{(k)}, \beta^{(k)}}(x^{(k)}) \text{ to N}^{\text{tr}}_{\text{BN}} \text{ ( Alg. 1 )} \\ 
+\text{ 4: Modify each layer in N}^{\text{tr}}_{\text{BN}} \text{ with input } x^{(k)} \text{ to take } y^{(k)} \text{ instead} \\
+\text{ 5: } \textbf{end for }\\
+\\
+\text{ 6: Train N}^{\text{tr}}_{\text{BN}} \text{ to optimize the parameters } \Theta \cup \{ \gamma^{(k)}, \beta^{(k)} \}^{K}_{k=1}\\
+\text{ 7: N}^{\text{inf}}_{\text{BN}} \leftarrow \text{N}^{\text{tr}}_{\text{BN}} text{ ---inference BN network with forzen parameters} \\
+\\
+\text{ 8: } \textbf{for } k = 1 ... K \textbf{  do } : \\ 
+\text{ 9: //For clarity} x=x^{(k)}, \gamma = \gamma^{(k)}, \beta = \beta^{(k)} ... etc \\
+\text{10: Process multiple training mini-batches B, each of size m, and average over them :}\\
+\text{10: E}[x] \leftarrow \text{E}_{\beta}[\mu_{\beta}]\\
+\text{10: Var}[x] \leftarrow \frac{m}{m-1} \text{E}_{\beta}[\alpha^{2}_{\beta}]\\
+\text{11: In N}^{\text{inf}}_{\text{BN}} \text{, replace the transform } y = \text{BN}_{\gamma, \beta}(x) \text{ with } y = \frac{\gamma}{\sqrt{\text{Var}[x]+\epsilon}} \dot x + (\beta - \frac{\gamma \text{E}[x]}{\sqrt{\text{Var}[x]+\epsilon}})\\
+\text{12: } \textbf{end for }\\
+\end{array} $</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="3.-Something-you-should-know-before-diving-into-code.">3. Something you should know before diving into code.<a class="anchor-link" href="#3.-Something-you-should-know-before-diving-into-code.">¶</a></h3><p>To implement batch normalization is, in fact, really simple, as long as, you know the following things :</p>
+<h4 id="3-1-Automatic-Differentiation-:">3-1 Automatic Differentiation :<a class="anchor-link" href="#3-1-Automatic-Differentiation-:">¶</a></h4><p>There are basically 4 main methods to compute derivatives or to say <strong>backpropagation</strong>.</p>
+<ul>
+<li><p>(1) Manually working out derivatives and coding the result</p>
+</li>
+<li><p>(2) Numerical differentiation (using finite difference approximations)</p>
+</li>
+<li><p>(3) <strong>Symbolic differentiation</strong> (expression manipulation in SW such as Max, Mathematica & Maple)</p>
+</li>
+<li><p>(4) <strong>Automatic differentiation</strong> (Forward, Reversed & Optical Jocobian Accumulation)</p>
+</li>
+</ul>
+<p>And most of popular deep learning library had implemented either automatic reverse differenciation or symbolic differenciation while computing gradients and Hessian of an objective fuction.  <strong>Therefore, while implement the batch-normalization layer in real production, we just need to focus on the forward propagation.</strong> (Alg-1)</p>
+<p>For more information about automatic differentiation, check this <a href="https://arxiv.org/pdf/1502.05767v2.pdf">paper</a>.</p>
+<h4 id="3-2-Moving-Average-&amp;-Variance-in-mini-batch-traning">3-2 Moving Average & Variance in mini-batch traning<a class="anchor-link" href="#3-2-Moving-Average-&amp;-Variance-in-mini-batch-traning">¶</a></h4><p>Since we usually use mini-batch traning, <strong>the concept of estimation the population average and variance by moving-methods</strong> is introduced while the batch-normalization is in training state. It just makes an approximation of the suitable mean & variance.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="4.-Batch-normalization-in-Tensorflow.">4. Batch-normalization in Tensorflow.<a class="anchor-link" href="#4.-Batch-normalization-in-Tensorflow.">¶</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The following code is from <a href="https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/layers/python/layers/layers.py">tf-contrib-layer.</a> and the test-case could be found in <a href="http://stackoverflow.com/questions/38312668/how-does-one-do-inference-with-batch-normalization-with-tensor-flow">a stackoverflow-issue.</a></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<div class="highlight"><pre><span></span><span class="nd">@add_arg_scope</span>
+<span class="k">def</span> <span class="nf">batch_norm</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span>
+               <span class="n">decay</span><span class="o">=</span><span class="mf">0.999</span><span class="p">,</span>
+               <span class="n">center</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+               <span class="n">scale</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+               <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+               <span class="n">activation_fn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">updates_collections</span><span class="o">=</span><span class="n">ops</span><span class="o">.</span><span class="n">GraphKeys</span><span class="o">.</span><span class="n">UPDATE_OPS</span><span class="p">,</span>
+               <span class="n">is_training</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+               <span class="n">reuse</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">variables_collections</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">outputs_collections</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">trainable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+               <span class="n">scope</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">"""Adds a Batch Normalization layer from http://arxiv.org/abs/1502.03167.</span>
+<span class="sd">    "Batch Normalization: Accelerating Deep Network Training by Reducing</span>
+<span class="sd">    Internal Covariate Shift"</span>
+<span class="sd">    Sergey Ioffe, Christian Szegedy</span>
+<span class="sd">  Can be used as a normalizer function for conv2d and fully_connected.</span>
+<span class="sd">  Args:</span>
+<span class="sd">    inputs: a tensor of size `[batch_size, height, width, channels]`</span>
+<span class="sd">            or `[batch_size, channels]`.</span>
+<span class="sd">    decay: decay for the moving average.</span>
+<span class="sd">    center: If True, subtract `beta`. If False, `beta` is ignored.</span>
+<span class="sd">    scale: If True, multiply by `gamma`. If False, `gamma` is</span>
+<span class="sd">      not used. When the next layer is linear (also e.g. `nn.relu`), this can be</span>
+<span class="sd">      disabled since the scaling can be done by the next layer.</span>
+<span class="sd">    epsilon: small float added to variance to avoid dividing by zero.</span>
+<span class="sd">    activation_fn: Optional activation function.</span>
+<span class="sd">    updates_collections: collections to collect the update ops for computation.</span>
+<span class="sd">      If None, a control dependency would be added to make sure the updates are</span>
+<span class="sd">      computed.</span>
+<span class="sd">    is_training: whether or not the layer is in training mode. In training mode</span>
+<span class="sd">      it would accumulate the statistics of the moments into `moving_mean` and</span>
+<span class="sd">      `moving_variance` using an exponential moving average with the given</span>
+<span class="sd">      `decay`. When it is not in training mode then it would use the values of</span>
+<span class="sd">      the `moving_mean` and the `moving_variance`.</span>
+<span class="sd">    reuse: whether or not the layer and its variables should be reused. To be</span>
+<span class="sd">      able to reuse the layer scope must be given.</span>
+<span class="sd">    variables_collections: optional collections for the variables.</span>
+<span class="sd">    outputs_collections: collections to add the outputs.</span>
+<span class="sd">    trainable: If `True` also add variables to the graph collection</span>
+<span class="sd">      `GraphKeys.TRAINABLE_VARIABLES` (see tf.Variable).</span>
+<span class="sd">    scope: Optional scope for `variable_op_scope`.</span>
+<span class="sd">  Returns:</span>
+<span class="sd">    a tensor representing the output of the operation.</span>
+<span class="sd">  """</span>
+  <span class="c1"># =========================================================================</span>
+  <span class="c1"># This variable_op_scope is actually depreciate in r1.1 of TF</span>
+  <span class="c1"># It basically provide an context-manager for variable_ops</span>
+  <span class="c1"># </span>
+  <span class="k">with</span> <span class="n">variable_scope</span><span class="o">.</span><span class="n">variable_op_scope</span><span class="p">([</span><span class="n">inputs</span><span class="p">],</span>
+                                        <span class="n">scope</span><span class="p">,</span> <span class="s1">'BatchNorm'</span><span class="p">,</span> <span class="n">reuse</span><span class="o">=</span><span class="n">reuse</span><span class="p">)</span> <span class="k">as</span> <span class="n">sc</span><span class="p">:</span>
+    <span class="n">inputs_shape</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">base_dtype</span>
+
+    <span class="c1"># =======================================================================</span>
+    <span class="c1"># Base on channel : axis = list(range(len(inputs_shape) - 1)) </span>
+    <span class="c1"># -----------------------</span>
+    <span class="c1"># However, it is suggested that to use axis as [0,1,2] to tf.nn.moments </span>
+    <span class="c1"># </span>
+    <span class="n">axis</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">inputs_shape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> 
+    <span class="n">params_shape</span> <span class="o">=</span> <span class="n">inputs_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="c1"># Allocate parameters for the beta and gamma of the normalization.</span>
+    <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+
+
+    <span class="c1"># =======================================================================</span>
+    <span class="c1"># init the variable according to the mode/state/parameters</span>
+
+    <span class="k">if</span> <span class="n">center</span><span class="p">:</span>
+      <span class="n">beta_collections</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_variable_collections</span><span class="p">(</span><span class="n">variables_collections</span><span class="p">,</span>
+                                                        <span class="s1">'beta'</span><span class="p">)</span>
+      <span class="n">beta</span> <span class="o">=</span> <span class="n">variables</span><span class="o">.</span><span class="n">model_variable</span><span class="p">(</span><span class="s1">'beta'</span><span class="p">,</span>
+                                      <span class="n">shape</span><span class="o">=</span><span class="n">params_shape</span><span class="p">,</span>
+                                      <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+                                      <span class="n">initializer</span><span class="o">=</span><span class="n">init_ops</span><span class="o">.</span><span class="n">zeros_initializer</span><span class="p">,</span>
+                                      <span class="n">collections</span><span class="o">=</span><span class="n">beta_collections</span><span class="p">,</span>
+                                      <span class="n">trainable</span><span class="o">=</span><span class="n">trainable</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">scale</span><span class="p">:</span>
+      <span class="n">gamma_collections</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_variable_collections</span><span class="p">(</span><span class="n">variables_collections</span><span class="p">,</span>
+                                                         <span class="s1">'gamma'</span><span class="p">)</span>
+      <span class="n">gamma</span> <span class="o">=</span> <span class="n">variables</span><span class="o">.</span><span class="n">model_variable</span><span class="p">(</span><span class="s1">'gamma'</span><span class="p">,</span>
+                                       <span class="n">shape</span><span class="o">=</span><span class="n">params_shape</span><span class="p">,</span>
+                                       <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+                                       <span class="n">initializer</span><span class="o">=</span><span class="n">init_ops</span><span class="o">.</span><span class="n">ones_initializer</span><span class="p">,</span>
+                                       <span class="n">collections</span><span class="o">=</span><span class="n">gamma_collections</span><span class="p">,</span>
+                                       <span class="n">trainable</span><span class="o">=</span><span class="n">trainable</span><span class="p">)</span>
+    <span class="c1"># =======================================================================</span>
+    <span class="c1"># Somve moving method </span>
+    <span class="c1"># ---------------------</span>
+    <span class="c1"># Create moving_mean and moving_variance variables and add them to the</span>
+    <span class="c1"># appropiate collections.</span>
+
+    <span class="n">moving_mean_collections</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_variable_collections</span><span class="p">(</span>
+        <span class="n">variables_collections</span><span class="p">,</span> <span class="s1">'moving_mean'</span><span class="p">)</span>
+    <span class="n">moving_mean</span> <span class="o">=</span> <span class="n">variables</span><span class="o">.</span><span class="n">model_variable</span><span class="p">(</span>
+        <span class="s1">'moving_mean'</span><span class="p">,</span>
+        <span class="n">shape</span><span class="o">=</span><span class="n">params_shape</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="n">initializer</span><span class="o">=</span><span class="n">init_ops</span><span class="o">.</span><span class="n">zeros_initializer</span><span class="p">,</span>
+        <span class="n">trainable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+        <span class="n">collections</span><span class="o">=</span><span class="n">moving_mean_collections</span><span class="p">)</span>
+    <span class="n">moving_variance_collections</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_variable_collections</span><span class="p">(</span>
+        <span class="n">variables_collections</span><span class="p">,</span> <span class="s1">'moving_variance'</span><span class="p">)</span>
+    <span class="n">moving_variance</span> <span class="o">=</span> <span class="n">variables</span><span class="o">.</span><span class="n">model_variable</span><span class="p">(</span>
+        <span class="s1">'moving_variance'</span><span class="p">,</span>
+        <span class="n">shape</span><span class="o">=</span><span class="n">params_shape</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="n">initializer</span><span class="o">=</span><span class="n">init_ops</span><span class="o">.</span><span class="n">ones_initializer</span><span class="p">,</span>
+        <span class="n">trainable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+        <span class="n">collections</span><span class="o">=</span><span class="n">moving_variance_collections</span><span class="p">)</span>
+
+
+    <span class="c1"># =======================================================================</span>
+    <span class="c1"># mentioned above </span>
+
+    <span class="k">if</span> <span class="n">is_training</span><span class="p">:</span>
+      <span class="c1"># =======================================================================</span>
+      <span class="c1"># Calculate the moments based on the individual batch.</span>
+      <span class="c1"># tf.nn.moments is actually build on top of tf.nn.sufficient_statistics</span>
+      <span class="c1"># if using the conv-2d, set axis = [0,1,2] to return depth-wise normalize</span>
+
+      <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">moments</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="n">moving_mean</span><span class="p">)</span>
+
+      <span class="c1"># =======================================================================</span>
+      <span class="c1"># Update the moving_mean and moving_variance moments.</span>
+
+      <span class="n">update_moving_mean</span> <span class="o">=</span> <span class="n">moving_averages</span><span class="o">.</span><span class="n">assign_moving_average</span><span class="p">(</span>
+          <span class="n">moving_mean</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">decay</span><span class="p">)</span>
+      <span class="n">update_moving_variance</span> <span class="o">=</span> <span class="n">moving_averages</span><span class="o">.</span><span class="n">assign_moving_average</span><span class="p">(</span>
+          <span class="n">moving_variance</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">decay</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">updates_collections</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c1"># =======================================================================</span>
+        <span class="c1"># Make sure the updates are computed here. ( first time )</span>
+        <span class="c1"># ======================================================================= </span>
+        <span class="c1"># control_dependencies </span>
+        <span class="c1"># just make sure compute update first and then compute batch_normalization</span>
+        <span class="c1"># </span>
+        <span class="k">with</span> <span class="n">ops</span><span class="o">.</span><span class="n">control_dependencies</span><span class="p">([</span><span class="n">update_moving_mean</span><span class="p">,</span>
+                                       <span class="n">update_moving_variance</span><span class="p">]):</span>
+          <span class="n">outputs</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">batch_normalization</span><span class="p">(</span>
+              <span class="n">inputs</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Collect the updates to be computed later.</span>
+        <span class="n">ops</span><span class="o">.</span><span class="n">add_to_collections</span><span class="p">(</span><span class="n">updates_collections</span><span class="p">,</span> <span class="n">update_moving_mean</span><span class="p">)</span>
+        <span class="n">ops</span><span class="o">.</span><span class="n">add_to_collections</span><span class="p">(</span><span class="n">updates_collections</span><span class="p">,</span> <span class="n">update_moving_variance</span><span class="p">)</span>
+
+        <span class="c1"># =======================================================================</span>
+        <span class="c1"># After we get mean, variance, beta, gamma, esilon</span>
+        <span class="c1"># we could normalization it (Alg-1, normalization & last line )</span>
+
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">batch_normalization</span><span class="p">(</span>
+            <span class="n">inputs</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">outputs</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">batch_normalization</span><span class="p">(</span>
+          <span class="n">inputs</span><span class="p">,</span> <span class="n">moving_mean</span><span class="p">,</span> <span class="n">moving_variance</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span>
+    <span class="n">outputs</span><span class="o">.</span><span class="n">set_shape</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span>
+
+    <span class="c1"># =======================================================================</span>
+    <span class="c1"># Additional setting </span>
+
+    <span class="k">if</span> <span class="n">activation_fn</span><span class="p">:</span>
+      <span class="n">outputs</span> <span class="o">=</span> <span class="n">activation_fn</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">collect_named_outputs</span><span class="p">(</span><span class="n">outputs_collections</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="5.-Batch-normalization-in-Keras">5. Batch-normalization in Keras<a class="anchor-link" href="#5.-Batch-normalization-in-Keras">¶</a></h3><p>There is another implementation from Keras, which is also nice. If you are going to use Batch-normalization in Conv2d with keras, I would recommend use this with parameters <em>mode</em> = 0, <em>axis</em> = 3 or 1, depending on your input tensor  is  for [b, h, w, c] or [b, c, h, w]</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">keras.engine</span> <span class="kn">import</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">InputSpec</span>
+<span class="kn">from</span> <span class="nn">keras</span> <span class="kn">import</span> <span class="n">initializations</span><span class="p">,</span> <span class="n">regularizers</span>
+<span class="kn">from</span> <span class="nn">keras</span> <span class="kn">import</span> <span class="n">backend</span> <span class="k">as</span> <span class="n">K</span>
+
+
+<span class="k">class</span> <span class="nc">BatchNormalization</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
+    <span class="sd">'''Normalize the activations of the previous layer at each batch,</span>
+<span class="sd">    i.e. applies a transformation that maintains the mean activation</span>
+<span class="sd">    close to 0 and the activation standard deviation close to 1.</span>
+<span class="sd">    # Arguments</span>
+<span class="sd">        epsilon: small float > 0. Fuzz parameter.</span>
+<span class="sd">        mode: integer, 0, 1 or 2.</span>
+<span class="sd">            - 0: feature-wise normalization.</span>
+<span class="sd">                Each feature map in the input will</span>
+<span class="sd">                be normalized separately. The axis on which</span>
+<span class="sd">                to normalize is specified by the `axis` argument.</span>
+<span class="sd">                Note that if the input is a 4D image tensor</span>
+<span class="sd">                using Theano conventions (samples, channels, rows, cols)</span>
+<span class="sd">                then you should set `axis` to `1` to normalize along</span>
+<span class="sd">                the channels axis.</span>
+<span class="sd">                During training we use per-batch statistics to normalize</span>
+<span class="sd">                the data, and during testing we use running averages</span>
+<span class="sd">                computed during the training phase.</span>
+<span class="sd">            - 1: sample-wise normalization. This mode assumes a 2D input.</span>
+<span class="sd">            - 2: feature-wise normalization, like mode 0, but</span>
+<span class="sd">                using per-batch statistics to normalize the data during both</span>
+<span class="sd">                testing and training.</span>
+<span class="sd">        axis: integer, axis along which to normalize in mode 0. For instance,</span>
+<span class="sd">            if your input tensor has shape (samples, channels, rows, cols),</span>
+<span class="sd">            set axis to 1 to normalize per feature map (channels axis).</span>
+<span class="sd">        momentum: momentum in the computation of the</span>
+<span class="sd">            exponential average of the mean and standard deviation</span>
+<span class="sd">            of the data, for feature-wise normalization.</span>
+<span class="sd">        weights: Initialization weights.</span>
+<span class="sd">            List of 2 Numpy arrays, with shapes:</span>
+<span class="sd">            `[(input_shape,), (input_shape,)]`</span>
+<span class="sd">            Note that the order of this list is [gamma, beta, mean, std]</span>
+<span class="sd">        beta_init: name of initialization function for shift parameter</span>
+<span class="sd">            (see [initializations](../initializations.md)), or alternatively,</span>
+<span class="sd">            Theano/TensorFlow function to use for weights initialization.</span>
+<span class="sd">            This parameter is only relevant if you don't pass a `weights` argument.</span>
+<span class="sd">        gamma_init: name of initialization function for scale parameter (see</span>
+<span class="sd">            [initializations](../initializations.md)), or alternatively,</span>
+<span class="sd">            Theano/TensorFlow function to use for weights initialization.</span>
+<span class="sd">            This parameter is only relevant if you don't pass a `weights` argument.</span>
+<span class="sd">        gamma_regularizer: instance of [WeightRegularizer](../regularizers.md)</span>
+<span class="sd">            (eg. L1 or L2 regularization), applied to the gamma vector.</span>
+<span class="sd">        beta_regularizer: instance of [WeightRegularizer](../regularizers.md),</span>
+<span class="sd">            applied to the beta vector.</span>
+<span class="sd">    # Input shape</span>
+<span class="sd">        Arbitrary. Use the keyword argument `input_shape`</span>
+<span class="sd">        (tuple of integers, does not include the samples axis)</span>
+<span class="sd">        when using this layer as the first layer in a model.</span>
+<span class="sd">    # Output shape</span>
+<span class="sd">        Same shape as input.</span>
+<span class="sd">    # References</span>
+<span class="sd">        - [Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift](http://jmlr.org/proceedings/papers/v37/ioffe15.pdf)</span>
+<span class="sd">    '''</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span>
+                 <span class="n">weights</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">beta_init</span><span class="o">=</span><span class="s1">'zero'</span><span class="p">,</span> <span class="n">gamma_init</span><span class="o">=</span><span class="s1">'one'</span><span class="p">,</span>
+                 <span class="n">gamma_regularizer</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">beta_regularizer</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">supports_masking</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta_init</span> <span class="o">=</span> <span class="n">initializations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">beta_init</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gamma_init</span> <span class="o">=</span> <span class="n">initializations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">gamma_init</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="n">epsilon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">momentum</span> <span class="o">=</span> <span class="n">momentum</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gamma_regularizer</span> <span class="o">=</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">gamma_regularizer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta_regularizer</span> <span class="o">=</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">beta_regularizer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_weights</span> <span class="o">=</span> <span class="n">weights</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">uses_learning_phase</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BatchNormalization</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># =======================================================================</span>
+    <span class="c1"># some init , similar to tf implementation</span>
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span> <span class="o">=</span> <span class="p">[</span><span class="n">InputSpec</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">input_shape</span><span class="p">)]</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_shape</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">],)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_init</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'{}_gamma'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_init</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'{}_beta'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trainable_weights</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_regularizer</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gamma_regularizer</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma_regularizer</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_regularizer</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beta_regularizer</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">regularizers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta_regularizer</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">running_mean</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span>
+                                    <span class="n">name</span><span class="o">=</span><span class="s1">'{}_running_mean'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">running_std</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span>
+                                  <span class="n">name</span><span class="o">=</span><span class="s1">'{}_running_std'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">non_trainable_weights</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">running_mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">running_std</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_weights</span><span class="p">)</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_weights</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">built</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">called_with</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">built</span><span class="p">,</span> <span class="s1">'Layer must be built before being called'</span>
+            <span class="n">input_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_spec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+
+            <span class="n">reduction_axes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)))</span>
+            <span class="k">del</span> <span class="n">reduction_axes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">]</span>
+            <span class="n">broadcast_shape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)</span>
+            <span class="n">broadcast_shape</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">]</span> <span class="o">=</span> <span class="n">input_shape</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">x_normed</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">normalize_batch_in_training</span><span class="p">(</span>
+                    <span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">,</span> <span class="n">reduction_axes</span><span class="p">,</span>
+                    <span class="n">epsilon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># mode 0</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">called_with</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="bp">None</span><span class="p">,</span> <span class="n">x</span><span class="p">}:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">'You are attempting to share a '</span>
+                                    <span class="s1">'same `BatchNormalization` layer across '</span>
+                                    <span class="s1">'different data flows. '</span>
+                                    <span class="s1">'This is not possible. '</span>
+                                    <span class="s1">'You should use `mode=2` in '</span>
+                                    <span class="s1">'`BatchNormalization`, which has '</span>
+                                    <span class="s1">'a similar behavior but is shareable '</span>
+                                    <span class="s1">'(see docs for a description of '</span>
+                                    <span class="s1">'the behavior).'</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">called_with</span> <span class="o">=</span> <span class="n">x</span>
+                <span class="n">x_normed</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">normalize_batch_in_training</span><span class="p">(</span>
+                    <span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">,</span> <span class="n">reduction_axes</span><span class="p">,</span>
+                    <span class="n">epsilon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">updates</span> <span class="o">=</span> <span class="p">[</span><span class="n">K</span><span class="o">.</span><span class="n">moving_average_update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">running_mean</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">momentum</span><span class="p">),</span>
+                                <span class="n">K</span><span class="o">.</span><span class="n">moving_average_update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">running_std</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">momentum</span><span class="p">)]</span>
+
+                <span class="k">if</span> <span class="n">K</span><span class="o">.</span><span class="n">backend</span><span class="p">()</span> <span class="o">==</span> <span class="s1">'tensorflow'</span> <span class="ow">and</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">reduction_axes</span><span class="p">)</span> <span class="o">==</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">x</span><span class="p">))[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="c1"># =======================================================================</span>
+                <span class="c1"># Alg-1 : normalization </span>
+
+                    <span class="n">x_normed_running</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">batch_normalization</span><span class="p">(</span>
+                        <span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">running_mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">running_std</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span><span class="p">,</span>
+                        <span class="n">epsilon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># need broadcasting</span>
+                    <span class="n">broadcast_running_mean</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">running_mean</span><span class="p">,</span> <span class="n">broadcast_shape</span><span class="p">)</span>
+                    <span class="n">broadcast_running_std</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">running_std</span><span class="p">,</span> <span class="n">broadcast_shape</span><span class="p">)</span>
+                    <span class="n">broadcast_beta</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">,</span> <span class="n">broadcast_shape</span><span class="p">)</span>
+                    <span class="n">broadcast_gamma</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma</span><span class="p">,</span> <span class="n">broadcast_shape</span><span class="p">)</span>
+                    <span class="n">x_normed_running</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">batch_normalization</span><span class="p">(</span>
+                        <span class="n">x</span><span class="p">,</span> <span class="n">broadcast_running_mean</span><span class="p">,</span> <span class="n">broadcast_running_std</span><span class="p">,</span>
+                        <span class="n">broadcast_beta</span><span class="p">,</span> <span class="n">broadcast_gamma</span><span class="p">,</span>
+                        <span class="n">epsilon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span>
+
+                <span class="c1"># pick the normalized form of x corresponding to the training phase</span>
+                <span class="n">x_normed</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">in_train_phase</span><span class="p">(</span><span class="n">x_normed</span><span class="p">,</span> <span class="n">x_normed_running</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># sample-wise normalization</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">std</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span>
+            <span class="n">x_normed</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">m</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">std</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span>
+            <span class="n">x_normed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">*</span> <span class="n">x_normed</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span>
+        <span class="k">return</span> <span class="n">x_normed</span>
+
+    <span class="k">def</span> <span class="nf">get_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'epsilon'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">,</span>
+                  <span class="s1">'mode'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span>
+                  <span class="s1">'axis'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">,</span>
+                  <span class="s1">'gamma_regularizer'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_regularizer</span><span class="o">.</span><span class="n">get_config</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_regularizer</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
+                  <span class="s1">'beta_regularizer'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_regularizer</span><span class="o">.</span><span class="n">get_config</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta_regularizer</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
+                  <span class="s1">'momentum'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">momentum</span><span class="p">}</span>
+        <span class="n">base_config</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">BatchNormalization</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_config</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">base_config</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="6.-Summary">6. Summary<a class="anchor-link" href="#6.-Summary">¶</a></h3><p>Batch-normalization is a nice trick. Expecially for a fully convnet. 
+If you like my post, you can star my <a href="https://github.com/KentChun33333/kentchun33333.github.io">github project</a> or consider to buy me a coffe. Thank you so much : )</p>
+</div>
+</div>
+</div>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: 'center'," +
+        "    displayIndent: '0em'," +
+        "    showMathMenu: true," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['$','$'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'black ! important'} }" +
+        "    } " +
+        "}); ";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://kentchun33333.github.io/tag/cnn.html">cnn</a>
+      <a href="https://kentchun33333.github.io/tag/training.html">training</a>
+      <a href="https://kentchun33333.github.io/tag/automatic-differenciation.html">automatic differenciation</a>
+      <a href="https://kentchun33333.github.io/tag/moving-average.html">moving average</a>
+    </p>
+  </div>
+
+
+
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'https-kentchun33333-github-io';
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>
+        Please enable JavaScript to view comments.
+
+</noscript>
+</article>
+
+    <footer>
+<p>&copy; Kent Chiu </p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p>    </footer>
+  </main>
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " Autumn Memo ",
+  "url" : "https://kentchun33333.github.io",
+  "image": "https://kentchun33333.github.io/image/profile.png",
+  "description": "Memos from authors, if it is helpful, please consider support me, thank you so ~ much !"
+}
+</script>
+</body>
+</html>
