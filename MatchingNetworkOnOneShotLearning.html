@@ -21,11 +21,11 @@
 
 
 <meta name="author" content="Kent Chiu" />
-<meta name="description" content="Introduction ¶Matching Networks for One Shot Learning is a really interesting paper. It propose a learning-architecture that hibirds unsupervised learning method with standard supervised deep learning paradigm to perform a quick/one-shot learning. Core Idea : ¶ Using the attention-memorized deep network as an Fully Context Embedding Learner to learn the best representation for a unsupervised algorithm which is hihgly inspired by neighborhood and neighborhood component analysis methods." />
+<meta name="description" content="Introduction :¶Matching Networks for One Shot Learning is a really interesting paper. It propose a learning-architecture that hibirds unsupervised learning method with standard supervised deep learning paradigm to perform a quick/one-shot learning. Core Idea :¶ Using the attention-memorized deep network as an Fully Context Embedding Learner to learn the best representation for a unsupervised algorithm which is hihgly inspired by neighborhood and neighborhood component analysis methods." />
 <meta name="keywords" content="cnn, LSTM, embedding learning, attention mechanism, neighborhood">
 <meta property="og:site_name" content="Autumn Memo"/>
 <meta property="og:title" content="A Glance at Matching Network on One-shot Learning"/>
-<meta property="og:description" content="Introduction ¶Matching Networks for One Shot Learning is a really interesting paper. It propose a learning-architecture that hibirds unsupervised learning method with standard supervised deep learning paradigm to perform a quick/one-shot learning. Core Idea : ¶ Using the attention-memorized deep network as an Fully Context Embedding Learner to learn the best representation for a unsupervised algorithm which is hihgly inspired by neighborhood and neighborhood component analysis methods."/>
+<meta property="og:description" content="Introduction :¶Matching Networks for One Shot Learning is a really interesting paper. It propose a learning-architecture that hibirds unsupervised learning method with standard supervised deep learning paradigm to perform a quick/one-shot learning. Core Idea :¶ Using the attention-memorized deep network as an Fully Context Embedding Learner to learn the best representation for a unsupervised algorithm which is hihgly inspired by neighborhood and neighborhood component analysis methods."/>
 <meta property="og:locale" content="en_US"/>
 <meta property="og:url" content="https://kentchun33333.github.io/MatchingNetworkOnOneShotLearning.html"/>
 <meta property="og:type" content="article"/>
@@ -93,7 +93,7 @@
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="-Introduction-"><span style="color:#DF7E22"> Introduction </span><a class="anchor-link" href="#-Introduction-">¶</a></h3><p><a href="https://arxiv.org/pdf/1606.04080v1.pdf">Matching Networks for One Shot Learning</a> is a really interesting paper. It propose a learning-architecture that hibirds unsupervised learning method with standard supervised deep learning paradigm to perform a quick/one-shot learning.</p>
+<h3 id="Introduction-:">Introduction :<a class="anchor-link" href="#Introduction-:">¶</a></h3><p><a href="https://arxiv.org/pdf/1606.04080v1.pdf">Matching Networks for One Shot Learning</a> is a really interesting paper. It propose a learning-architecture that hibirds unsupervised learning method with standard supervised deep learning paradigm to perform a quick/one-shot learning.</p>
 </div>
 </div>
 </div>
@@ -102,10 +102,7 @@
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="-Core-Idea-:-"><span style="color:#DF7E22"> Core Idea : </span><a class="anchor-link" href="#-Core-Idea-:-">¶</a></h3><ul>
-<li>Using the <strong>attention-memorized deep network</strong> as an <strong>Fully Context Embedding Learner</strong> to learn the best representation for a unsupervised algorithm which is hihgly inspired by neighborhood and neighborhood component analysis methods.</li>
-</ul>
-<p><img align="left" src="image/MatchNetOneShotFig1.png" width="500" /></p>
+<h3 id="Core-Idea-:">Core Idea :<a class="anchor-link" href="#Core-Idea-:">¶</a></h3><p><img align="left" src="image/MatchNetOneShotFig1.png" width="500" /></p>
 <p> </p>
 </div>
 </div>
@@ -116,6 +113,8 @@
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <ul>
+<li><p>Using the <strong>attention-memorized deep network</strong> as an <strong>Fully Context Embedding Learner</strong> to learn the best representation for a unsupervised algorithm which is hihgly inspired by neighborhood and neighborhood component analysis methods.</p>
+</li>
 <li><p>The attention-memorized deep network are as following :</p>
 <ul>
 <li>Sequence to sequence (seq2seq) with attention [2]</li>
@@ -136,7 +135,7 @@
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="-Key-Words-:-"><span style="color:#DF7E22"> Key Words : </span><a class="anchor-link" href="#-Key-Words-:-">¶</a></h3><ul>
+<h3 id="Key-Words-:">Key Words :<a class="anchor-link" href="#Key-Words-:">¶</a></h3><ul>
 <li>Word2Vec</li>
 <li>Embbeding </li>
 <li>Auto-encoder </li>
@@ -150,7 +149,7 @@
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="-Math-Expression-:-"><span style="color:#DF7E22"> Math Expression : </span><a class="anchor-link" href="#-Math-Expression-:-">¶</a></h3><ul>
+<h3 id="Math-Expression-:">Math Expression :<a class="anchor-link" href="#Math-Expression-:">¶</a></h3><ul>
 <li><p>$ \hat{y}= \sum_{i=1}^{K} a(\hat{x},x_{i}) y_{i} $</p>
 </li>
 <li><p>where $x_{i} \text{ and } y_{i}$ are the samples and labels from the support set $ S = \{ (x_{i}, y_{i}) \}_{i=1}^{K} $</p>
@@ -175,7 +174,7 @@
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="-Code-Implementation:-"><span style="color:#DF7E22"> Code Implementation: </span><a class="anchor-link" href="#-Code-Implementation:-">¶</a></h3><p><img align="left" src="image/UnderConstruction2.png" width="600" /></p>
+<h3 id="Code-Implementation:">Code Implementation:<a class="anchor-link" href="#Code-Implementation:">¶</a></h3><p><img align="left" src="image/UnderConstruction2.png" width="600" /></p>
 <p> </p>
 </div>
 </div>
@@ -185,7 +184,7 @@
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="-Reference-:-"><span style="color:#DF7E22"> Reference : </span><a class="anchor-link" href="#-Reference-:-">¶</a></h3><ul>
+<h3 id="Reference-:">Reference :<a class="anchor-link" href="#Reference-:">¶</a></h3><ul>
 <li><p><a href="https://ayearofai.com/lenny-2-autoencoders-and-word-embeddings-oh-my-576403b0113a#.rcrh3ybeb">A nice blog : Word-Embbeding and Autoencoder</a></p>
 </li>
 <li><p><a href="http://www.jeyzhang.com/tensorflow-learning-notes-3.html">Blog : Tensorflow Example in Chinese Version</a></p>
