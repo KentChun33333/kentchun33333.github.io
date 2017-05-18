@@ -1,0 +1,430 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,400italic' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" type="text/css" href="https://kentchun33333.github.io/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://kentchun33333.github.io/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://kentchun33333.github.io/theme/font-awesome/css/font-awesome.min.css">
+
+
+
+
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="" />
+
+
+<meta name="author" content="Kent Chiu" />
+<meta name="description" content="Deep Convolutional Generative Adversarial Networks¶Brief Description¶ Deep Convolutional Generative Adversarial Networks (DCGAN) is using CNN to perform GAN on Image Generation or Any continous data domain. Currently, people use it to generate sentence, but suffer the discrete problem while generation. The Key to undersatand DCGAN is to understand the Genrative Adversarial Networks." />
+<meta name="keywords" content="GAN, DCGAN, Game Theory">
+<meta property="og:site_name" content="Autumn Memo"/>
+<meta property="og:title" content="A Glance at Deep Convolution Generative Adversary Network"/>
+<meta property="og:description" content="Deep Convolutional Generative Adversarial Networks¶Brief Description¶ Deep Convolutional Generative Adversarial Networks (DCGAN) is using CNN to perform GAN on Image Generation or Any continous data domain. Currently, people use it to generate sentence, but suffer the discrete problem while generation. The Key to undersatand DCGAN is to understand the Genrative Adversarial Networks."/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="https://kentchun33333.github.io/DCGAN.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2017-04-11 20:00:00+02:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="https://kentchun33333.github.io/author/kent-chiu.html">
+<meta property="article:section" content="Glance"/>
+<meta property="article:tag" content="GAN"/>
+<meta property="article:tag" content="DCGAN"/>
+<meta property="article:tag" content="Game Theory"/>
+<meta property="og:image" content="https://kentchun33333.github.io/image/profile.png">
+
+  <title>Autumn Memo &ndash; A Glance at Deep Convolution Generative Adversary Network</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://kentchun33333.github.io">
+        <img src="https://kentchun33333.github.io/image/profile.png" alt="Kent Chiu" title="Kent Chiu">
+      </a>
+      <h1><a href="https://kentchun33333.github.io">Kent Chiu</a></h1>
+
+<p>Data Scientist</p>
+
+      <ul class="social">
+        <li><a class="sc-linkedin" href="https://www.linkedin.com/in/kent-chiu-93b745a2?trk=hp-identity-photo" target="_blank"><i class="fa fa-linkedin"></i></a></li>
+        <li><a class="sc-github" href="https://github.com/KentChun33333" target="_blank"><i class="fa fa-github"></i></a></li>
+        <li><a class="sc-facebook" href="https://www.facebook.com/kent.chun" target="_blank"><i class="fa fa-facebook"></i></a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://kentchun33333.github.io">    Home
+</a>
+
+      <a href="/archives.html">Archives</a>
+      <a href="/categories.html">Categories</a>
+      <a href="/tags.html">Tags</a>
+
+
+    </nav>
+
+<article class="single">
+  <header>
+    <h1 id="DCGAN">A Glance at Deep Convolution Generative Adversary Network</h1>
+    <p>
+          Posted on Tue 11 April 2017 in <a href="https://kentchun33333.github.io/category/glance.html">Glance</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Deep-Convolutional-Generative-Adversarial-Networks">Deep Convolutional Generative Adversarial Networks<a class="anchor-link" href="#Deep-Convolutional-Generative-Adversarial-Networks">¶</a></h1><h3 id="Brief-Description">Brief Description<a class="anchor-link" href="#Brief-Description">¶</a></h3><ul>
+<li>Deep Convolutional Generative Adversarial Networks (DCGAN) is using CNN to perform GAN on Image Generation or Any continous data domain. </li>
+<li>Currently, people use it to generate sentence, but suffer the discrete problem while generation.</li>
+<li>The Key to undersatand DCGAN is to understand the Genrative Adversarial Networks.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Generative-Adversarial-Net-(GAN)">Generative Adversarial Net (GAN)<a class="anchor-link" href="#Generative-Adversarial-Net-(GAN)">¶</a></h1><h2 id="Basic-Element">Basic Element<a class="anchor-link" href="#Basic-Element">¶</a></h2><h4 id="1.-Discriminator-Net-(like-Critic-Net-in-A3C)">1. Discriminator-Net (like Critic-Net in A3C)<a class="anchor-link" href="#1.-Discriminator-Net-(like-Critic-Net-in-A3C)">¶</a></h4><ul>
+<li><p>Denote as : $D(X)$ where $X \text{ is dataset } : \text{real image + fake-image by G(Z)}$</p>
+</li>
+<li><p>Objective of D(X)</p>
+<ul>
+<li>Denote as $\text{D_loss}$ </li>
+<li>$\text{max}_{D} E[ log(D(X_{\text{real image}})] + E[1-log(D(G(Z))] $</li>
+<li>D_score = 1 if X is from real-data, really low-value but not 0 if it is a fake-image </li>
+</ul>
+</li>
+</ul>
+<h4 id="2.-Generator-Net-(like-Actor-Net-in-A3C)">2. Generator-Net (like Actor-Net in A3C)<a class="anchor-link" href="#2.-Generator-Net-(like-Actor-Net-in-A3C)">¶</a></h4><ul>
+<li><p>Denote as : G(Z) where Z = np.random.ranint(-1, 1, dim=(any-thing))</p>
+</li>
+<li><p>Objective of G(Z)</p>
+<ul>
+<li>G_loss = <strong>D_score</strong> </li>
+<li>The goal of G(Z) is to cheat on D(X), to let E[1-log(D_score(G(Z))]</li>
+</ul>
+<hr>
+</hr></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [ ]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span> 
+
+<span class="k">class</span> <span class="nc">GeneratorNet</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="o">=</span><span class="kc">False</span> <span class="c1"># Faslse for training mode, due to some ops are train-only</span>
+    
+    <span class="k">def</span> <span class="nf">build</span><span class="p">():</span>
+        <span class="k">pass</span>
+    
+        
+<span class="k">class</span> <span class="nc">DiscriminatorNet</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        
+<span class="k">class</span> <span class="nc">AdverarialTrainer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+        
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Training-Method">Training Method<a class="anchor-link" href="#Training-Method">¶</a></h2><p><img src="image/Glance-06-DCGAN-00.png" /></p>
+<ul>
+<li>Min-Max <ul>
+<li>$ \text{min}_{G} \text{max}_{D} E[ log(D(X_{\text{real image}})] + E[1-log(D(G(Z))]  $</li>
+</ul>
+</li>
+</ul>
+<h2 id="Training-Trick">Training Trick<a class="anchor-link" href="#Training-Trick">¶</a></h2><ul>
+<li><a href="https://github.com/soumith/ganhacks">Good Article</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><img src="image/Glance-06-DCGAN-01.png" /></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>There are other ways to train generative models with deep learning, like Variational Autoencoders (VAEs). In this post we’ll only focus on Generative Adversarial Nets (GANs).</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [9]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+<span class="c1"># to assert the distribution dimension and boundary is enough. </span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="nb">print</span> <span class="p">(</span><span class="n">z</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[-0.81272451  0.99729157  0.89747185  0.75653547 -0.37808264]
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Discriminator-Network-Like-Critics-in-Actor-Critc-Network">Discriminator Network Like Critics in Actor-Critc Network<a class="anchor-link" href="#Discriminator-Network-Like-Critics-in-Actor-Critc-Network">¶</a></h3><p>The discriminator network D(x)takes some image x on input and returns the probability that the image x was sampled from pdata.</p>
+<p>The discriminator should return a value closer to 1 when the image is from pdata and a value closer to 0 when the image is fake, like an image sampled from pg.</p>
+<p>In DCGANs, D(x)is a traditional convolutional network.</p>
+<p>$ \sum{x=y+1}$</p>
+<p>Training Pair of D(x) :</p>
+<ol>
+<li>Real Data => target = 1</li>
+<li>Fake Data => target = 0 </li>
+</ol>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Training-Stratgy">Training Stratgy<a class="anchor-link" href="#Training-Stratgy">¶</a></h3><p>Now that we have defined</p>
+<ul>
+<li>G(z): z(vector) -> img[64x64x3] =>| D(x): img[64x64x3] --> 0~1(T/F) </li>
+<li>.................Real Data Pool =>| </li>
+</ul>
+<p>and have seen how powerful the formulation is, how do we train it? We have a lot of latent variables (or parameters in approximator or network) that we need to find.This is where using adversarial networks comes in.</p>
+<p>First let’s define some notation. Let the (unknown) probability distribution of our data be pdata.</p>
+<p>Also we can interpret G(z)(where z∼pz) as drawing samples from a probability distribution, let’s call it the generative probability distribution, pg.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Reference">Reference<a class="anchor-link" href="#Reference">¶</a></h3><p><a href="https://bamos.github.io/2016/08/09/deep-completion/#step-2-quickly-generating-fake-images">Main Blog : Deep Completion </a></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In [10]:</div>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="k">import</span> <span class="n">HTML</span>
+
+<span class="n">HTML</span><span class="p">(</span><span class="s1">'''<script></span>
+<span class="s1">code_show=true;</span>
+
+<span class="s1">function code_toggle() {</span>
+<span class="s1">  if (code_show){</span>
+<span class="s1">    $('div.input').hide();</span>
+<span class="s1">    $('div.prompt').hide();</span>
+<span class="s1">  }</span>
+<span class="s1">  else {</span>
+<span class="s1">    $('div.prompt').show();</span>
+<span class="s1">    $('div.input').show();</span>
+<span class="s1">    } code_show = !code_show ;</span>
+
+<span class="s1">}</span>
+
+<span class="s1">$( document ).ready(code_toggle);</span>
+<span class="s1"></script></span>
+
+<span class="s1"><style></span>
+<span class="s1">input {</span>
+<span class="s1">    width : 100%;</span>
+<span class="s1">    background-color: gray;</span>
+<span class="s1">    border: none;</span>
+<span class="s1">    color: white;</span>
+<span class="s1">    padding: 1px 1px;</span>
+<span class="s1">    text-decoration: none;</span>
+<span class="s1">    margin: 1px 1px;</span>
+<span class="s1">    cursor: pointer;</span>
+<span class="s1">}</span>
+<span class="s1"></style></span>
+
+<span class="s1"><form action="javascript:code_toggle()"></span>
+<span class="s1">  <input type="submit" value="toggle on/off"></span>
+<span class="s1"></form>'''</span><span class="p">)</span>
+
+
+<span class="c1">#### <font color="#126DCE"> </font> color code for gray3</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area"><div class="prompt output_prompt">Out[10]:</div>
+<div class="output_html rendered_html output_subarea output_execute_result">
+<script>
+code_show=true;
+
+function code_toggle() {
+  if (code_show){
+    $('div.input').hide();
+    $('div.prompt').hide();
+  }
+  else {
+    $('div.prompt').show();
+    $('div.input').show();
+    } code_show = !code_show ;
+
+}
+
+$( document ).ready(code_toggle);
+</script>
+<style>
+input {
+    width : 100%;
+    background-color: gray;
+    border: none;
+    color: white;
+    padding: 1px 1px;
+    text-decoration: none;
+    margin: 1px 1px;
+    cursor: pointer;
+}
+</style>
+<form action="javascript:code_toggle()">
+<input type="submit" value="toggle on/off">
+</input></form>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: 'center'," +
+        "    displayIndent: '0em'," +
+        "    showMathMenu: true," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['$','$'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'black ! important'} }" +
+        "    } " +
+        "}); ";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://kentchun33333.github.io/tag/gan.html">GAN</a>
+      <a href="https://kentchun33333.github.io/tag/dcgan.html">DCGAN</a>
+      <a href="https://kentchun33333.github.io/tag/game-theory.html">Game Theory</a>
+    </p>
+  </div>
+
+
+
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'https-kentchun33333-github-io';
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>
+        Please enable JavaScript to view comments.
+
+</noscript>
+</article>
+
+    <footer>
+<p>&copy; Kent Chiu </p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p>    </footer>
+  </main>
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " Autumn Memo ",
+  "url" : "https://kentchun33333.github.io",
+  "image": "https://kentchun33333.github.io/image/profile.png",
+  "description": "Memos from authors, if it is helpful, please consider support me, thank you so ~ much !"
+}
+</script>
+</body>
+</html>
