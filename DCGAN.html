@@ -21,11 +21,11 @@
 
 
 <meta name="author" content="Kent Chiu" />
-<meta name="description" content="Deep Convolutional Generative Adversarial Networks¶Brief Description¶ Deep Convolutional Generative Adversarial Networks (DCGAN) is using CNN to perform GAN on Image Generation or Any continous data domain. Currently, people use it to generate sentence, but suffer the discrete problem while generation. The Key to undersatand DCGAN is to understand the Genrative Adversarial Networks." />
+<meta name="description" content="Brief Description¶ Deep Convolutional Generative Adversarial Networks (DCGAN) is using CNN to perform GAN on Image Generation or Any continous data domain. Currently, people use it to generate sentence, but suffer the discrete problem while generation. The Key to undersatand DCGAN is to understand the Genrative Adversarial Networks. 1. Basic Element¶1-1. Discriminator-Net (like Critic-Net in A3C)¶" />
 <meta name="keywords" content="GAN, DCGAN, Game Theory">
 <meta property="og:site_name" content="Autumn Memo"/>
 <meta property="og:title" content="A Glance at Deep Convolution Generative Adversary Network"/>
-<meta property="og:description" content="Deep Convolutional Generative Adversarial Networks¶Brief Description¶ Deep Convolutional Generative Adversarial Networks (DCGAN) is using CNN to perform GAN on Image Generation or Any continous data domain. Currently, people use it to generate sentence, but suffer the discrete problem while generation. The Key to undersatand DCGAN is to understand the Genrative Adversarial Networks."/>
+<meta property="og:description" content="Brief Description¶ Deep Convolutional Generative Adversarial Networks (DCGAN) is using CNN to perform GAN on Image Generation or Any continous data domain. Currently, people use it to generate sentence, but suffer the discrete problem while generation. The Key to undersatand DCGAN is to understand the Genrative Adversarial Networks. 1. Basic Element¶1-1. Discriminator-Net (like Critic-Net in A3C)¶"/>
 <meta property="og:locale" content="en_US"/>
 <meta property="og:url" content="https://kentchun33333.github.io/DCGAN.html"/>
 <meta property="og:type" content="article"/>
@@ -91,10 +91,10 @@
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Deep-Convolutional-Generative-Adversarial-Networks">Deep Convolutional Generative Adversarial Networks<a class="anchor-link" href="#Deep-Convolutional-Generative-Adversarial-Networks">¶</a></h1><h3 id="Brief-Description">Brief Description<a class="anchor-link" href="#Brief-Description">¶</a></h3><ul>
+<h3 id="Brief-Description">Brief Description<a class="anchor-link" href="#Brief-Description">¶</a></h3><ul>
 <li>Deep Convolutional Generative Adversarial Networks (DCGAN) is using CNN to perform GAN on Image Generation or Any continous data domain. </li>
 <li>Currently, people use it to generate sentence, but suffer the discrete problem while generation.</li>
-<li>The Key to undersatand DCGAN is to understand the Genrative Adversarial Networks.</li>
+<li>The Key to undersatand DCGAN is to understand the <strong>Genrative Adversarial Networks.</strong></li>
 </ul>
 </div>
 </div>
@@ -104,8 +104,9 @@
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Generative-Adversarial-Net-(GAN)">Generative Adversarial Net (GAN)<a class="anchor-link" href="#Generative-Adversarial-Net-(GAN)">¶</a></h1><h2 id="Basic-Element">Basic Element<a class="anchor-link" href="#Basic-Element">¶</a></h2><h4 id="1.-Discriminator-Net-(like-Critic-Net-in-A3C)">1. Discriminator-Net (like Critic-Net in A3C)<a class="anchor-link" href="#1.-Discriminator-Net-(like-Critic-Net-in-A3C)">¶</a></h4><ul>
-<li><p>Denote as : $D(X)$ where $X \text{ is dataset } : \text{real image + fake-image by G(Z)}$</p>
+<h3 id="1.-Basic-Element">1. Basic Element<a class="anchor-link" href="#1.-Basic-Element">¶</a></h3><h4 id="1-1.-Discriminator-Net-(like-Critic-Net-in-A3C)">1-1. Discriminator-Net (like Critic-Net in A3C)<a class="anchor-link" href="#1-1.-Discriminator-Net-(like-Critic-Net-in-A3C)">¶</a></h4><ul>
+<li>Denote as : $D(X)$ </li>
+<li><p>$X \text{ is dataset } : \text{real image + fake-image by G(Z)}$</p>
 </li>
 <li><p>Objective of D(X)</p>
 <ul>
@@ -113,9 +114,30 @@
 <li>$\text{max}_{D} E[ log(D(X_{\text{real image}})] + E[1-log(D(G(Z))] $</li>
 <li>D_score = 1 if X is from real-data, really low-value but not 0 if it is a fake-image </li>
 </ul>
-</li>
+<hr>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">discriminator_model</span><span class="p">():</span>
+  <span class="n">model</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">()</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Convolution2D</span><span class="p">(</span>
+                      <span class="mi">64</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+                      <span class="n">padding</span><span class="o">=</span><span class="s1">'same'</span><span class="p">,</span>
+                      <span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">BatchNormalization</span><span class="p">())</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s1">'tanh'</span><span class="p">))</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">MaxPooling2D</span><span class="p">(</span><span class="n">pool_size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Convolution2D</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)))</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s1">'tanh'</span><span class="p">))</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">MaxPooling2D</span><span class="p">(</span><span class="n">pool_size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Flatten</span><span class="p">())</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1024</span><span class="p">))</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s1">'tanh'</span><span class="p">))</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s1">'sigmoid'</span><span class="p">))</span>
+  <span class="k">return</span> <span class="n">model</span>
+</pre></div>
+</hr></li>
 </ul>
-<h4 id="2.-Generator-Net-(like-Actor-Net-in-A3C)">2. Generator-Net (like Actor-Net in A3C)<a class="anchor-link" href="#2.-Generator-Net-(like-Actor-Net-in-A3C)">¶</a></h4><ul>
+<hr>
+<h4 id="1-2.-Generator-Net-(like-Actor-Net-in-A3C)">1-2. Generator-Net (like Actor-Net in A3C)<a class="anchor-link" href="#1-2.-Generator-Net-(like-Actor-Net-in-A3C)">¶</a></h4><ul>
 <li><p>Denote as : G(Z) where Z = np.random.ranint(-1, 1, dim=(any-thing))</p>
 </li>
 <li><p>Objective of G(Z)</p>
@@ -123,134 +145,106 @@
 <li>G_loss = <strong>D_score</strong> </li>
 <li>The goal of G(Z) is to cheat on D(X), to let E[1-log(D_score(G(Z))]</li>
 </ul>
-<hr>
-</hr></li>
-</ul>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [ ]:</div>
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span> 
-
-<span class="k">class</span> <span class="nc">GeneratorNet</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="o">=</span><span class="kc">False</span> <span class="c1"># Faslse for training mode, due to some ops are train-only</span>
-    
-    <span class="k">def</span> <span class="nf">build</span><span class="p">():</span>
-        <span class="k">pass</span>
-    
-        
-<span class="k">class</span> <span class="nc">DiscriminatorNet</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">():</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
-        
-<span class="k">class</span> <span class="nc">AdverarialTrainer</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">():</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
-        
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Training-Method">Training Method<a class="anchor-link" href="#Training-Method">¶</a></h2><p><img src="image/Glance-06-DCGAN-00.png" /></p>
-<ul>
-<li>Min-Max <ul>
-<li>$ \text{min}_{G} \text{max}_{D} E[ log(D(X_{\text{real image}})] + E[1-log(D(G(Z))]  $</li>
-</ul>
 </li>
 </ul>
-<h2 id="Training-Trick">Training Trick<a class="anchor-link" href="#Training-Trick">¶</a></h2><ul>
+<hr>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">generator_model</span><span class="p">():</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">()</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="n">input_dim</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="mi">1024</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s1">'tanh'</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="mi">128</span><span class="o">*</span><span class="mi">7</span><span class="o">*</span><span class="mi">7</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">BatchNormalization</span><span class="p">())</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s1">'tanh'</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Reshape</span><span class="p">((</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">128</span><span class="p">),</span> <span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="mi">128</span><span class="o">*</span><span class="mi">7</span><span class="o">*</span><span class="mi">7</span><span class="p">,)))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">UpSampling2D</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Convolution2D</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">padding</span><span class="o">=</span><span class="s1">'same'</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s1">'tanh'</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">UpSampling2D</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Convolution2D</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">padding</span><span class="o">=</span><span class="s1">'same'</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s1">'tanh'</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">model</span>
+</pre></div>
+<hr>
+</hr></hr></hr></div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="2.-Adversary-Training-Method">2. Adversary Training Method<a class="anchor-link" href="#2.-Adversary-Training-Method">¶</a></h3><ul>
+<li><p>Here is the key for GAN-group network, which is actually using Game-Theory to train 2 network to forming competition.</p>
+</li>
+<li><p>Min-Max Trick here</p>
+<ul>
+<li>$ \text{min}_{G-Net} \text{max}_{D-Net} E[ log(D(X_{\text{real image}})] + E[1-log(D(G(Z))]  $</li>
+</ul>
+</li>
+<li><p>the pseudo-code from paper are shown below :
+<img src="image/Glance-06-DCGAN-00.png" /></p>
+</li>
+</ul>
+<hr>
+<h3 id="3.-Implementation-of-Adversary-Training">3. Implementation of Adversary Training<a class="anchor-link" href="#3.-Implementation-of-Adversary-Training">¶</a></h3><ul>
+<li>Here we adding a <strong>generator_containing_discriminator</strong> function for the trick-part</li>
+<li>This function would freeze the D-net and also feed the all input from fake-data(generated by G-Net)</li>
+<li>and then train G-Net to cheat the D-Net by giving the training pair to be 1(true)</li>
+</ul>
+<hr>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">generator_containing_discriminator</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">discriminator</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">()</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
+    <span class="n">discriminator</span><span class="o">.</span><span class="n">trainable</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">discriminator</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span>
+
+<span class="o">...</span>
+<span class="o">...</span>
+
+   <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">BATCH_SIZE</span><span class="p">)):</span>
+
+            <span class="c1"># init the seed </span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BATCH_SIZE</span><span class="p">):</span>
+                <span class="n">noise</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+            <span class="n">image_batch</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="n">index</span><span class="o">*</span><span class="n">BATCH_SIZE</span><span class="p">:(</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">BATCH_SIZE</span><span class="p">]</span>
+            <span class="n">generated_images</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">noise</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="c1"># ========================================</span>
+            <span class="c1"># prepare the training-pair of the D-Net</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">image_batch</span><span class="p">,</span> <span class="n">generated_images</span><span class="p">))</span>
+
+            <span class="c1"># mapping the real-image-batch + generated_images</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">BATCH_SIZE</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">BATCH_SIZE</span>
+
+            <span class="c1"># train D-Net here</span>
+            <span class="n">d_loss</span> <span class="o">=</span> <span class="n">discriminator</span><span class="o">.</span><span class="n">train_on_batch</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+            <span class="k">print</span><span class="p">(</span><span class="s2">"batch </span><span class="si">%d</span><span class="s2"> d_loss : </span><span class="si">%f</span><span class="s2">"</span> <span class="o">%</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">d_loss</span><span class="p">))</span>
+
+            <span class="c1"># =========================================</span>
+            <span class="c1"># prepare the training-pair of the G-Net</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BATCH_SIZE</span><span class="p">):</span>
+                <span class="n">noise</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+            <span class="c1"># here we set the D-Net not trainable</span>
+            <span class="n">discriminator</span><span class="o">.</span><span class="n">trainable</span> <span class="o">=</span> <span class="bp">False</span>
+
+            <span class="c1"># in-here, the discriminator only recive fack-data, </span>
+            <span class="c1"># but we give [y] be high/true (1) </span>
+            <span class="c1"># thus by giving a oppersite value  form a adversary training </span>
+            <span class="n">g_loss</span> <span class="o">=</span> <span class="n">discriminator_on_generator</span><span class="o">.</span><span class="n">train_on_batch</span><span class="p">(</span>
+                <span class="n">noise</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">BATCH_SIZE</span><span class="p">)</span>
+            <span class="n">discriminator</span><span class="o">.</span><span class="n">trainable</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">"batch </span><span class="si">%d</span><span class="s2"> g_loss : </span><span class="si">%f</span><span class="s2">"</span> <span class="o">%</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">g_loss</span><span class="p">))</span>
+</pre></div>
+<hr>
+<h3 id="3.-Training-Trick">3. Training Trick<a class="anchor-link" href="#3.-Training-Trick">¶</a></h3><ul>
 <li><a href="https://github.com/soumith/ganhacks">Good Article</a></li>
 </ul>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><img src="image/Glance-06-DCGAN-01.png" /></p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>There are other ways to train generative models with deep learning, like Variational Autoencoders (VAEs). In this post we’ll only focus on Generative Adversarial Nets (GANs).</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [9]:</div>
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
-
-<span class="c1"># to assert the distribution dimension and boundary is enough. </span>
-<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
-<span class="nb">print</span> <span class="p">(</span><span class="n">z</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="output_wrapper">
-<div class="output">
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>[-0.81272451  0.99729157  0.89747185  0.75653547 -0.37808264]
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Discriminator-Network-Like-Critics-in-Actor-Critc-Network">Discriminator Network Like Critics in Actor-Critc Network<a class="anchor-link" href="#Discriminator-Network-Like-Critics-in-Actor-Critc-Network">¶</a></h3><p>The discriminator network D(x)takes some image x on input and returns the probability that the image x was sampled from pdata.</p>
-<p>The discriminator should return a value closer to 1 when the image is from pdata and a value closer to 0 when the image is fake, like an image sampled from pg.</p>
-<p>In DCGANs, D(x)is a traditional convolutional network.</p>
-<p>$ \sum{x=y+1}$</p>
-<p>Training Pair of D(x) :</p>
-<ol>
-<li>Real Data => target = 1</li>
-<li>Fake Data => target = 0 </li>
-</ol>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Training-Stratgy">Training Stratgy<a class="anchor-link" href="#Training-Stratgy">¶</a></h3><p>Now that we have defined</p>
-<ul>
-<li>G(z): z(vector) -> img[64x64x3] =>| D(x): img[64x64x3] --> 0~1(T/F) </li>
-<li>.................Real Data Pool =>| </li>
-</ul>
-<p>and have seen how powerful the formulation is, how do we train it? We have a lot of latent variables (or parameters in approximator or network) that we need to find.This is where using adversarial networks comes in.</p>
-<p>First let’s define some notation. Let the (unknown) probability distribution of our data be pdata.</p>
-<p>Also we can interpret G(z)(where z∼pz) as drawing samples from a probability distribution, let’s call it the generative probability distribution, pg.</p>
-</div>
+</hr></hr></hr></div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered">
@@ -259,95 +253,6 @@
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="Reference">Reference<a class="anchor-link" href="#Reference">¶</a></h3><p><a href="https://bamos.github.io/2016/08/09/deep-completion/#step-2-quickly-generating-fake-images">Main Blog : Deep Completion </a></p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In [10]:</div>
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="k">import</span> <span class="n">HTML</span>
-
-<span class="n">HTML</span><span class="p">(</span><span class="s1">'''<script></span>
-<span class="s1">code_show=true;</span>
-
-<span class="s1">function code_toggle() {</span>
-<span class="s1">  if (code_show){</span>
-<span class="s1">    $('div.input').hide();</span>
-<span class="s1">    $('div.prompt').hide();</span>
-<span class="s1">  }</span>
-<span class="s1">  else {</span>
-<span class="s1">    $('div.prompt').show();</span>
-<span class="s1">    $('div.input').show();</span>
-<span class="s1">    } code_show = !code_show ;</span>
-
-<span class="s1">}</span>
-
-<span class="s1">$( document ).ready(code_toggle);</span>
-<span class="s1"></script></span>
-
-<span class="s1"><style></span>
-<span class="s1">input {</span>
-<span class="s1">    width : 100%;</span>
-<span class="s1">    background-color: gray;</span>
-<span class="s1">    border: none;</span>
-<span class="s1">    color: white;</span>
-<span class="s1">    padding: 1px 1px;</span>
-<span class="s1">    text-decoration: none;</span>
-<span class="s1">    margin: 1px 1px;</span>
-<span class="s1">    cursor: pointer;</span>
-<span class="s1">}</span>
-<span class="s1"></style></span>
-
-<span class="s1"><form action="javascript:code_toggle()"></span>
-<span class="s1">  <input type="submit" value="toggle on/off"></span>
-<span class="s1"></form>'''</span><span class="p">)</span>
-
-
-<span class="c1">#### <font color="#126DCE"> </font> color code for gray3</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="output_wrapper">
-<div class="output">
-<div class="output_area"><div class="prompt output_prompt">Out[10]:</div>
-<div class="output_html rendered_html output_subarea output_execute_result">
-<script>
-code_show=true;
-
-function code_toggle() {
-  if (code_show){
-    $('div.input').hide();
-    $('div.prompt').hide();
-  }
-  else {
-    $('div.prompt').show();
-    $('div.input').show();
-    } code_show = !code_show ;
-
-}
-
-$( document ).ready(code_toggle);
-</script>
-<style>
-input {
-    width : 100%;
-    background-color: gray;
-    border: none;
-    color: white;
-    padding: 1px 1px;
-    text-decoration: none;
-    margin: 1px 1px;
-    cursor: pointer;
-}
-</style>
-<form action="javascript:code_toggle()">
-<input type="submit" value="toggle on/off">
-</input></form>
-</div>
-</div>
 </div>
 </div>
 </div>
