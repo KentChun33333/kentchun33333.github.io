@@ -2,33 +2,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,400italic' rel='stylesheet' type='text/css'>
-
-    <link rel="stylesheet" type="text/css" href="https://kentchun33333.github.io/theme/stylesheet/style.min.css">
-
-  <link rel="stylesheet" type="text/css" href="https://kentchun33333.github.io/theme/pygments/github.min.css">
-  <link rel="stylesheet" type="text/css" href="https://kentchun33333.github.io/theme/font-awesome/css/font-awesome.min.css">
-
-
-
-
-
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="HandheldFriendly" content="True" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="" />
+    <meta name="robots" content="" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="http://localhost:8000/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="http://localhost:8000/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="http://localhost:8000/theme/font-awesome/css/font-awesome.min.css">
+
+
+
+
+
 
 
     <meta name="author" content="Kent Chiu" />
-    <meta name="description" content="Memos from authors, if it is helpful, please consider support me, thank you so ~ much !" />
+    <meta name="description" content="Just Memos" />
 <meta property="og:site_name" content="Autumn Memo"/>
 <meta property="og:type" content="blog"/>
 <meta property="og:title" content="Autumn Memo"/>
-<meta property="og:description" content="Memos from authors, if it is helpful, please consider support me, thank you so ~ much !"/>
+<meta property="og:description" content="Just Memos"/>
 <meta property="og:locale" content="en_US"/>
-<meta property="og:url" content="https://kentchun33333.github.io"/>
-<meta property="og:image" content="https://kentchun33333.github.io/image/profile.png">
+<meta property="og:url" content="http://localhost:8000"/>
+<meta property="og:image" content="https://scontent.fsin5-1.fna.fbcdn.net/v/t1.0-1/p720x720/96215235_3403513689663854_7453417891073884160_o.jpg?_nc_cat=106&_nc_sid=dbb9e7&_nc_ohc=FFyXABpAhHQAX9b-fUS&_nc_ht=scontent.fsin5-1.fna&_nc_tp=6&oh=3f722a46a66c21fadc044d92033c0590&oe=5EED0413">
 
   <title>Autumn Memo &ndash;     Tag moving average
 </title>
@@ -37,12 +38,12 @@
 <body>
   <aside>
     <div>
-      <a href="https://kentchun33333.github.io">
-        <img src="https://kentchun33333.github.io/image/profile.png" alt="Kent Chiu" title="Kent Chiu">
+      <a href="http://localhost:8000">
+        <img src="https://scontent.fsin5-1.fna.fbcdn.net/v/t1.0-1/p720x720/96215235_3403513689663854_7453417891073884160_o.jpg?_nc_cat=106&_nc_sid=dbb9e7&_nc_ohc=FFyXABpAhHQAX9b-fUS&_nc_ht=scontent.fsin5-1.fna&_nc_tp=6&oh=3f722a46a66c21fadc044d92033c0590&oe=5EED0413" alt="Kent Chiu" title="Kent Chiu">
       </a>
-      <h1><a href="https://kentchun33333.github.io">Kent Chiu</a></h1>
+      <h1><a href="http://localhost:8000">Kent Chiu</a></h1>
 
-<p>Data Scientist</p>
+<p>Algorithm Mind Space</p>
 
       <ul class="social">
         <li><a class="sc-linkedin" href="https://www.linkedin.com/in/kent-chiu-93b745a2?trk=hp-identity-photo" target="_blank"><i class="fa fa-linkedin"></i></a></li>
@@ -56,7 +57,7 @@
   <main>
 
     <nav>
-      <a href="https://kentchun33333.github.io">    Home
+      <a href="http://localhost:8000">    Home
 </a>
 
       <a href="/archives.html">Archives</a>
@@ -70,26 +71,20 @@
 
 <article>
   <header>
-    <h2><a href="https://kentchun33333.github.io/GlanceAtBatchNormalization.html#GlanceAtBatchNormalization">A Glance at Batch Normalization</a></h2>
+    <h2><a href="http://localhost:8000/GlanceAtBatchNormalization.html#GlanceAtBatchNormalization">A Glance at Batch Normalization</a></h2>
     <p>
-          Posted on Tue 22 November 2016 in <a href="https://kentchun33333.github.io/category/ai.html">AI</a>
+          Posted on Tue 22 November 2016 in <a href="http://localhost:8000/category/ai.html">AI</a>
 
 
           &#8226;     Tagged with
 
-              <a href="https://kentchun33333.github.io/tag/cnn.html">cnn</a>,              <a href="https://kentchun33333.github.io/tag/training.html">training</a>,              <a href="https://kentchun33333.github.io/tag/automatic-differenciation.html">automatic differenciation</a>,              <a href="https://kentchun33333.github.io/tag/moving-average.html">moving average</a>
+              <a href="http://localhost:8000/tag/cnn.html">cnn</a>,              <a href="http://localhost:8000/tag/training.html">training</a>,              <a href="http://localhost:8000/tag/automatic-differenciation.html">automatic differenciation</a>,              <a href="http://localhost:8000/tag/moving-average.html">moving average</a>
     </p>
   </header>
   <div>
-      
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Introduction">Introduction<a class="anchor-link" href="#Introduction">¶</a></h3><p><strong>Batch normalization</strong> is a popular method to fasten deep-network training process also solving the gradient vanishing or exploding problem. In this <a href="https://kentchun33333.github.io/">post</a>, I am going to first discuss some ideas, then take a glance at math expression on algorithms in original <a href="https://arxiv.org/pdf/1502.03167v3.pdf">paper</a>,and finally take a deep look on how to implement it.</p>
+      <p>A glance at batch normalization</p>
       <br>
-      <a class="btn" href="https://kentchun33333.github.io/GlanceAtBatchNormalization.html#GlanceAtBatchNormalization">    Continue reading
+      <a class="btn" href="http://localhost:8000/GlanceAtBatchNormalization.html#GlanceAtBatchNormalization">    Continue reading
 </a>
   </div>
 </article>
@@ -101,11 +96,10 @@
 
 
     <footer>
-<p>&copy; Kent Chiu </p>
+<p>&copy;  </p>
 <p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
 </p>    </footer>
   </main>
-
 
 
 
@@ -115,10 +109,11 @@
   "@context" : "http://schema.org",
   "@type" : "Blog",
   "name": " Autumn Memo ",
-  "url" : "https://kentchun33333.github.io",
-  "image": "https://kentchun33333.github.io/image/profile.png",
-  "description": "Memos from authors, if it is helpful, please consider support me, thank you so ~ much !"
+  "url" : "http://localhost:8000",
+  "image": "https://scontent.fsin5-1.fna.fbcdn.net/v/t1.0-1/p720x720/96215235_3403513689663854_7453417891073884160_o.jpg?_nc_cat=106&_nc_sid=dbb9e7&_nc_ohc=FFyXABpAhHQAX9b-fUS&_nc_ht=scontent.fsin5-1.fna&_nc_tp=6&oh=3f722a46a66c21fadc044d92033c0590&oe=5EED0413",
+  "description": "Just Memos"
 }
 </script>
+
 </body>
 </html>

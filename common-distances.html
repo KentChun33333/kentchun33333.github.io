@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="http://localhost:8000/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="http://localhost:8000/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="http://localhost:8000/theme/font-awesome/css/font-awesome.min.css">
+
+
+
+
+
+
+
+<meta name="author" content="Kent Chiu" />
+<meta name="description" content="A. Frequent Used Distance 1. Euclidean distance $ \sqrt{ \sum_{t=1}^{p} (x_{it} - x_{jt})^{2} }$ 2. Minkowski distance $ ( \sum_{i=1}^{n} | x_{i} - y_{i} |^{p} )^{1/p} $ 3. Cosine distance $ \frac{\sum_{1}^{n} ( A{i} \text{ x } B_{i} ) }{ \sqrt{ \sum_{1}^{n} A{i …" />
+<meta name="keywords" content="notes">
+
+<meta property="og:site_name" content="Autumn Memo"/>
+<meta property="og:title" content="Common Distances"/>
+<meta property="og:description" content="A. Frequent Used Distance 1. Euclidean distance $ \sqrt{ \sum_{t=1}^{p} (x_{it} - x_{jt})^{2} }$ 2. Minkowski distance $ ( \sum_{i=1}^{n} | x_{i} - y_{i} |^{p} )^{1/p} $ 3. Cosine distance $ \frac{\sum_{1}^{n} ( A{i} \text{ x } B_{i} ) }{ \sqrt{ \sum_{1}^{n} A{i …"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="http://localhost:8000/common-distances.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2018-12-01 20:00:00+01:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="http://localhost:8000/author/kent-chiu.html">
+<meta property="article:section" content="Experiment"/>
+<meta property="article:tag" content="notes"/>
+<meta property="og:image" content="https://scontent.fsin5-1.fna.fbcdn.net/v/t1.0-1/p720x720/96215235_3403513689663854_7453417891073884160_o.jpg?_nc_cat=106&_nc_sid=dbb9e7&_nc_ohc=FFyXABpAhHQAX9b-fUS&_nc_ht=scontent.fsin5-1.fna&_nc_tp=6&oh=3f722a46a66c21fadc044d92033c0590&oe=5EED0413">
+
+  <title>Autumn Memo &ndash; Common Distances</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="http://localhost:8000">
+        <img src="https://scontent.fsin5-1.fna.fbcdn.net/v/t1.0-1/p720x720/96215235_3403513689663854_7453417891073884160_o.jpg?_nc_cat=106&_nc_sid=dbb9e7&_nc_ohc=FFyXABpAhHQAX9b-fUS&_nc_ht=scontent.fsin5-1.fna&_nc_tp=6&oh=3f722a46a66c21fadc044d92033c0590&oe=5EED0413" alt="Kent Chiu" title="Kent Chiu">
+      </a>
+      <h1><a href="http://localhost:8000">Kent Chiu</a></h1>
+
+<p>Algorithm Mind Space</p>
+
+      <ul class="social">
+        <li><a class="sc-linkedin" href="https://www.linkedin.com/in/kent-chiu-93b745a2?trk=hp-identity-photo" target="_blank"><i class="fa fa-linkedin"></i></a></li>
+        <li><a class="sc-github" href="https://github.com/KentChun33333" target="_blank"><i class="fa fa-github"></i></a></li>
+        <li><a class="sc-facebook" href="https://www.facebook.com/kent.chun" target="_blank"><i class="fa fa-facebook"></i></a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="http://localhost:8000">    Home
+</a>
+
+      <a href="/archives.html">Archives</a>
+      <a href="/categories.html">Categories</a>
+      <a href="/tags.html">Tags</a>
+
+
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="common-distances">Common Distances</h1>
+    <p>
+          Posted on Sat 01 December 2018 in <a href="http://localhost:8000/category/experiment.html">Experiment</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <h2>A. Frequent Used Distance</h2>
+<h3>1. Euclidean distance</h3>
+<ul>
+<li>$ \sqrt{ \sum_{t=1}^{p} (x_{it} - x_{jt})^{2} }$</li>
+</ul>
+<h3>2. <a href="https://en.wikipedia.org/wiki/Minkowski_distance">Minkowski distance</a></h3>
+<ul>
+<li>$  ( \sum_{i=1}^{n} | x_{i} - y_{i} |^{p} )^{1/p} $</li>
+</ul>
+<h3>3. Cosine distance</h3>
+<ul>
+<li>$  \frac{\sum_{1}^{n} ( A{i} \text{ x } B_{i} ) }{ \sqrt{ \sum_{1}^{n} A{i}^{2}} \text{ x } \sqrt{ \sum_{1}^{n} B{i}^{2} } } $</li>
+</ul>
+<h3>4. <a href="https://en.wikipedia.org/wiki/Hotelling%27s_T-squared_distribution">Hotelling T2 distance</a></h3>
+<ul>
+<li>Mahalanobis distance is a measure of distance between a point and distribution. So if we want to check if a point belongs to a particular distribution or not, we can use Hotelling's T-test, which is squared Mahalanobis distance. But if we have two sample distribution and we want to check if they belong to the same group or not, we can use two sample Hotelling's T-test, that is,</li>
+</ul>
+<h3>5. Mahalanobis Distance</h3>
+<ul>
+<li>
+<p>Computes the Mahalanobis distance between the points. The Mahalanobis distance between two points $ u $ and $ v $ is  $$ \sqrt{(u-v)(1/V)(u-v)^{T}} $$ where (the VI variable) is the inverse covariance. If VI is not None, VI will be used as the inverse covariance matrix.</p>
+</li>
+<li>
+<p><strong>Limitation</strong> A Mahalanobis distance requires a covariance matrix. A NON-singular covariance matrix. If your matrix is singular, then the computation will produce garbage, since you cannot invert a singular matrix. Since you don't have sufficient data to estimate a complete covariance matrix, mahal must fail.</p>
+</li>
+</ul>
+<h3>6. Seuclidean Distance</h3>
+<ul>
+<li>Computes the standardized Euclidean distance. The standardized Euclidean distance between two n-vectors $u$ and $v$ is
+  $$ \sqrt{ \sum{(u_{i}-v_{i})^{2}} / (V[X_{i}]) }  $$</li>
+<li>V is the variance vector; V[i] is the variance computed over all the i’th components of the points. If not passed, it is automatically computed.</li>
+</ul>
+<h3>7. Edit Distance</h3>
+<h3>8. Shape-Based Distance</h3>
+<ol>
+<li>KD distance </li>
+<li>.....etc </li>
+</ol>
+<h2>B. The Way to Define Threshold Distance</h2>
+<ul>
+<li>pair-wise + average/max/min</li>
+<li>clustter-center + average/max/min</li>
+<li>clusster + pair-wise + average/max/min</li>
+</ul>
+<h2>C. General Methods</h2>
+<h2>D. Clusstering Performance Check</h2>
+<h3>1. Adjusted Rand Index ( Need True Labee )</h3>
+<ul>
+<li></li>
+</ul>
+<h3>2. Mutual Information Based Scores ( Need True Labee )</h3>
+<ul>
+<li></li>
+</ul>
+<h3>3. Homogeneity, completeness and V-measure ( Need True Labee )</h3>
+<ul>
+<li></li>
+</ul>
+<h3>4. Fowlkes-Mallows Scores ( Need True Labee )</h3>
+<ul>
+<li></li>
+</ul>
+<h3>5. Sihouette Coefficient ( Needn't )</h3>
+<ul>
+<li>$ \text{Sihouette} = \frac{ b - a }{ \text{max}(a,b)} $</li>
+<li>$a$  is the average distance of the sample to other-samples in same cluster.</li>
+<li>$b$ is the average distance of the sample to other-samples in different cluster 's.</li>
+</ul>
+<h3>6. Calinski-Harabaz Index ( Needn't )</h3>
+<ul>
+<li>The value represent the difference of cluster to cluster, bigger is nicer.</li>
+<li>$ s(k) = \frac{ \text{tr}(B_{k}) }{ \text{tr}(W_{k}) } \text{ x } \frac{n_{samples}-k}{k-1} $</li>
+<li>$tr$ : trace of covariance matrix by k (diffferent cluster )</li>
+<li>where trace is the sum of diagnol </li>
+<li>B : covariance matrix between clusters </li>
+<li>W : covariance matrix within cluster.</li>
+</ul>
+<h2>Ref</h2>
+<ul>
+<li><a href="https://www.itl.nist.gov/div898/handbook/pmc/section5/pmc543.htm">Hotelling T squre</a></li>
+<li><a href="http://www.spm1d.org/doc/Stats1D/multivariate.html">Python package spm1D</a></li>
+<li><a href="https://www.zhihu.com/question/34554321">Similarity and Clusttering</a></li>
+<li><a href="http://xueshu.baidu.com/s?wd=paperuri%3A%287d9c716d7be7778d470c5517d999ea19%29&amp;filter=sc_long_sign&amp;tn=SE_xueshusource_2kduw22v&amp;sc_vurl=http%3A%2F%2Flink.springer.com%2Fcontent%2Fpdf%2F10.1007%252Fs40745-015-0040-1.pdf&amp;ie=utf-8&amp;sc_us=14227662868908754060">Clusstering Review</a></li>
+<li><a href="https://blog.csdn.net/sinat_26917383/article/details/70577710">Clusstering Blog 1</a></li>
+<li><a href="https://blog.csdn.net/sinat_26917383/article/details/51611519">Clusstering Blog 2</a></li>
+<li><a href="https://ncss-wpengine.netdna-ssl.com/wp-content/themes/ncss/pdf/Procedures/NCSS/Hierarchical_Clustering-Dendrograms.pdf">Hierarchy Clusttering</a></li>
+</ul>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="http://localhost:8000/tag/notes.html">notes</a>
+    </p>
+  </div>
+
+
+
+
+
+<!-- Disqus -->
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'https-kentchun33333-github-io';
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>
+        Please enable JavaScript to view comments.
+
+</noscript>
+<!-- End Disqus -->
+</article>
+
+    <footer>
+<p>&copy;  </p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " Autumn Memo ",
+  "url" : "http://localhost:8000",
+  "image": "https://scontent.fsin5-1.fna.fbcdn.net/v/t1.0-1/p720x720/96215235_3403513689663854_7453417891073884160_o.jpg?_nc_cat=106&_nc_sid=dbb9e7&_nc_ohc=FFyXABpAhHQAX9b-fUS&_nc_ht=scontent.fsin5-1.fna&_nc_tp=6&oh=3f722a46a66c21fadc044d92033c0590&oe=5EED0413",
+  "description": "Just Memos"
+}
+</script>
+
+</body>
+</html>
