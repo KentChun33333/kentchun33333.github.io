@@ -34,7 +34,7 @@
 <meta property="article:published_time" content="2019-01-01 20:00:00+01:00"/>
 <meta property="article:modified_time" content=""/>
 <meta property="article:author" content="https://kentchun33333.github.io/author/kent-chiu.html">
-<meta property="article:section" content="AI"/>
+<meta property="article:section" content="AI Model Architectures"/>
 <meta property="article:tag" content="tensorflow"/>
 <meta property="article:tag" content="implementation"/>
 <meta property="article:tag" content="object detection"/>
@@ -80,7 +80,7 @@
       
     <h1 id="Re-implement YOLO in Tensorflow">Re-implement YOLO in Tensorflow</h1>
     <p>
-          Posted on Tue 01 January 2019 in <a href="https://kentchun33333.github.io/category/ai.html">AI</a>
+          Posted on Tue 01 January 2019 in <a href="https://kentchun33333.github.io/category/ai-model-architectures.html">AI Model Architectures</a>
 
 
     </p>
@@ -1249,12 +1249,11 @@ h6:hover .anchor-link {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="k">import</span> <span class="n">Audio</span><span class="p">,</span><span class="n">Image</span><span class="p">,</span> <span class="n">YouTubeVideo</span>
-<span class="nb">id</span><span class="o">=</span><span class="s1">&#39;NM6lrxy0bxs &#39;</span>
-<span class="n">YouTubeVideo</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span><span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+<span class="nb">id</span><span class="o">=</span><span class="s1">&#39;NM6lrxy0bxs &#39;</span> <span class="p">;</span> <span class="n">YouTubeVideo</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span><span class="n">height</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -1267,7 +1266,7 @@ h6:hover .anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[13]:</div>
+    <div class="prompt output_prompt">Out[1]:</div>
 
 
 
@@ -1292,172 +1291,78 @@ h6:hover .anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Core-Concept">Core Concept<a class="anchor-link" href="#Core-Concept">&#182;</a></h3><ul>
-<li><p>The core concept of the Darknet with YOLO is about the encoded pairs of <strong>input image tensor</strong> and <strong>output tensor</strong>, which is quite different from <strong>output one-hot vector</strong> in general case.</p>
+<h3 id="1.-Key-Concept">1. Key Concept<a class="anchor-link" href="#1.-Key-Concept">&#182;</a></h3><ul>
+<li><p>The key concept of YOLO-v1 could be divied into 2 parts.</p>
+<ul>
+<li>the design of encoded-output-tensor</li>
+<li>the loss to make this encode-output-tensor trainable.</li>
+</ul>
 </li>
-<li><p>The process of encoded tensor is kinds handcafted and is <strong>independent to</strong> the convnet itself.</p>
-</li>
-<li><p>The convnet is just trying to fit the output tensor.</p>
-</li>
-<li><p>YOLO divides the input image into an S × S grid.</p>
-</li>
-<li><p><strong>If the center of an object falls into a grid cell, that grid cell is responsible for detecting that object</strong>.</p>
-</li>
-<li><p>Which is means the grid is about (448/7, 448/7) = (64,64) in resolution</p>
+<li><p>The process of encoded tensor is kinds handcafted and is <strong>independent to</strong> the convnet itself. We could actually to think yolo-v1 is trying to let model to predict a better representation of BBOX output that better fitting the nature of object-detection. But since the output-tensor is kind of larger/sparse, so a coressponding customized loss are proprossed to solve it.</p>
 </li>
 </ul>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-$$ \text{Output } = F_\text{cnn}(\text{ Input }) $$$$ \text{Input } : X \in \mathbb{R}^{448\times448\times3}$$$$ \text{Output } : Y \in \mathbb{R}^{S\times S\times (B\times5+C)}$$<p>where</p>
-$$ \text{Grid Numbers} : S \times S \text{ where, } S \in \{\ \text{ Factors of img w or h}\,\}$$$$ \text{Bounding Box Numbers} : B \ \text{ for each } B \equiv \{\ \text{x1, y1, wid, height, confidence score}\, \}$$$$ \text{Classes Numbers} : C \in \{\ \text{Number of Objects such as cars, cat ...} \} $$
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Single-Grid-Predict-$B$-boxes">Single Grid Predict $B$ boxes<a class="anchor-link" href="#Single-Grid-Predict-$B$-boxes">&#182;</a></h3><ul>
-<li><p>At first glance, it might be a little bit redundant for predicting multi-boxes in single grid.</p>
-</li>
-<li><p>However, it is actually could enpower the capability of convnet, and by decent setting of selective loss function, it gives more generalibily to the convnet.</p>
+<h3 id="2-Design-of-Encoded-Output-Tensor">2 Design of Encoded-Output-Tensor<a class="anchor-link" href="#2-Design-of-Encoded-Output-Tensor">&#182;</a></h3><ul>
+<li>The output tensor is composed by<ul>
+<li>A designed grid system </li>
+<li>bbox representation</li>
+<li>probability of each object in each grid</li>
+</ul>
 </li>
 </ul>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="What-is-Predicted-Bounding-Box-representing-?">What is Predicted Bounding Box representing ?<a class="anchor-link" href="#What-is-Predicted-Bounding-Box-representing-?">&#182;</a></h3><ul>
-<li><p>Each bounding box consists of 5 predictions: { x, y, w, h,and confidence}.</p>
-</li>
-<li><p>The (x, y) coordinates represent the center of the box relative to the bounds of the grid cell.</p>
-</li>
-<li><p>The width and height are predicted relative to the whole image.</p>
-</li>
-<li><p>Finally the confidence prediction represents the IOU between the predicted box and any ground truth box.</p>
-</li>
+<h4 id="What-is-the-grid-system-in-yolo?">What is the grid system in yolo?<a class="anchor-link" href="#What-is-the-grid-system-in-yolo?">&#182;</a></h4><ul>
+<li>YOLO divides the input image into an $S × S$ grid.Ex with 448 as image-width/height and S=7, we have (448/7, 448/7) = (64,64) in resolution. If the center of an object falls into a grid cell, the grid cell is responsible for detecting that object**. $C$ stands for how many class/object we are going to detect. </li>
 </ul>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="What-is-Confidence-representing-?">What is Confidence representing ?<a class="anchor-link" href="#What-is-Confidence-representing-?">&#182;</a></h3><ul>
-<li><p>The <strong>confidence </strong> here is well defined</p>
-</li>
-<li><p>These confidence reflect how confident the model is that the box contains an object andalso how accurate it thinks the box is that it predicts</p>
-</li>
-<li><p>If <strong>no object</strong> exists in that cell, the <strong>confidence scores should be zero</strong>.</p>
-</li>
-<li><p>Otherwise we want the confidence score to equal <strong>the intersection over union (IOU)</strong> between the predicted box and the ground truth</p>
-</li>
+$$ \text{Grid Numbers} : S \times S \in \mathbb{R}^{1} $$<h4 id="What-is-BBox-representation?">What is BBox representation?<a class="anchor-link" href="#What-is-BBox-representation?">&#182;</a></h4><ul>
+<li>In single grid, we predict $B$ BBox. Each BBox is representign a 5 dim tensor (x, y, wid, height, confidence-score). At first glance, it might be a little bit redundant for predicting multi-boxes in single grid.However, it is actually could enpower the capability of convnet, and by decent setting of selective loss function, it gives more generalibily to the convnet.</li>
 </ul>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-$$ \Pr ( \text{Objects} ) \times \text{IOU}^{pred}_{truth} $$$$
-\Pr ( \text{Objects} ) =
+$$ \text{BBox Numbers} : B \in \mathbb{R}^{5} $$$$ B \equiv \{\ \text{x1, y1, wid, height, confidence score}\, \} $$<h4 id="What-is-Confidence-Score-in-BBox-representaton-?">What is Confidence-Score in BBox representaton ?<a class="anchor-link" href="#What-is-Confidence-Score-in-BBox-representaton-?">&#182;</a></h4><ul>
+<li><p>confidence-score reflect how confident the model is that the box contains an object andalso how accurate it thinks the box is that it predicts. If <strong>no object</strong> exists in that cell, the <strong>confidence scores should be zero</strong>. Accordingly, we want the confidence score to equal <strong>the intersection over union (IOU)</strong> between the predicted box and the ground truth</p>
+</li>
+<li><p>$
+\Pr ( \text{Confidence-Score} ) =
 \begin{cases}
 1,&amp; \text{ if there are objects } \\
 0,&amp; \text{ if no object exiests }
-\end{cases}
-$$
+\end{cases}</p>
+</li>
+<li>$</li>
+</ul>
+<h4 id="What-is-the-probability-of-each-object-in-each-grid?">What is the probability of each object in each grid?<a class="anchor-link" href="#What-is-the-probability-of-each-object-in-each-grid?">&#182;</a></h4><ul>
+<li>They are actually simialr the tradicitonal one-hot-encoding output, the difference is we will have it in every grid.</li>
+</ul>
+$$ \text{Number of Objects } : C \in \mathbb{R}^{1}$$<h4 id="What-is-the-size-of-this-encoded-tensor?">What is the size of this encoded tensor?<a class="anchor-link" href="#What-is-the-size-of-this-encoded-tensor?">&#182;</a></h4><ul>
+<li>Finally, the ouput of yolo-backbond is a encoded tensor with the size $S*S*(B*5+C)$, notice that much more sparse that triditional one-hot-vector encoder due to the tensor dimension is basically larger. We only predict one set of class probabilities per grid cell, regardless of the number of boxes B. </li>
+</ul>
+$$ \text{Input } : X \in \mathbb{R}^{448\times448\times3}$$$$ \text{Output } : Y \in \mathbb{R}^{S\times S\times (B\times5+C)}$$$$ Y = F_\text{cnn}(\text{ X }) $$
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="What-is-the-Classes-Numbers-really-representing-?">What is the Classes Numbers really representing ?<a class="anchor-link" href="#What-is-the-Classes-Numbers-really-representing-?">&#182;</a></h3><ul>
-<li><p>$C$ is, in fact, the number of probabilities that descibing how many chances a single grid could be classified as what classes, a car ? or a dog ? or ... ?</p>
-</li>
-<li><p>For a trained pair, the grid that contains the center of the target-bounding box for each class, is actually a one-hot-vector.</p>
-</li>
-<li><p>For a trained pair, the grid that does not contain any center of the target-bounding box, is actually a all-zeron-vector.</p>
-</li>
-<li><p>Each grid cell also predicts C conditional class probabilities,Pr(Classi|Object). These probabilities are conditioned on the grid cell containing an object.</p>
-</li>
-<li><p>We only predict one set of class probabilities per grid cell, regardless of the number of boxes B</p>
+<h3 id="3.-Specific-Loss-Design">3. Specific Loss Design<a class="anchor-link" href="#3.-Specific-Loss-Design">&#182;</a></h3><ul>
+<li>The Loss could be decomposed to 3 part <ul>
+<li>(1) sum-squared error BBox position and size information</li>
+<li>(2) sum-squared error BBox object confidence-score</li>
+<li>(3) sum-squared error of wich Class is in this grid.</li>
+</ul>
 </li>
 </ul>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Some-Insights-about-Encoded-Output-Tensor-(EOT)">Some Insights about Encoded Output Tensor (EOT)<a class="anchor-link" href="#Some-Insights-about-Encoded-Output-Tensor-(EOT)">&#182;</a></h3><ul>
-<li><p>Very Sparse, much more sparse that triditional one-hot-vector encoder due to the tensor dimension is basically larger.</p>
-</li>
-<li></li>
-</ul>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Loss-Function-Design">Loss Function Design<a class="anchor-link" href="#Loss-Function-Design">&#182;</a></h3><p>We use <strong>sum-squared error</strong> because it is easy to optimize, however it does not perfectly align with our goal of maximizing average precision. It weights <strong>localization error</strong> equally with <strong>classification error</strong> which may not be ideal. Also, in every image many grid cells do not contain any object. This pushes the <strong>“confidence” scores</strong> of those cells towards zero, often overpowering the gradient from cells that do contain objects. This can lead to model instability, causing training to diverge early on.</p>
-<p>To remedy this, we increase the loss from bounding box coordinate predictions and decrease the loss from confi-dence predictions for boxes that don’t contain objects. We use two parameters, λcoord and λnoobj to accomplish this. We set <strong>λcoord = 5</strong> and <strong>λnoobj = .5.</strong></p>
-<p><strong>Sum-squared error</strong> also equally weights errors in <strong>large boxes</strong> and <strong>small boxes.</strong> Our <strong>error metric</strong> should reflect that <strong>small deviations in large boxes matter less than in small boxes.</strong>  To partially address this we predict the square root of the bounding box width and height instead of the width and height directly.</p>
-<p>YOLO predicts <strong>multiple bounding boxes per grid cell.</strong> At training time we <strong>only want one bounding box predictor to be responsible for each object.</strong> We assign one predictor to be “responsible” for predicting an object based on which prediction has the <strong>highest current IOU with the ground truth.</strong></p>
-<p>This leads to specialization between the bounding box predictors. Each predictor gets better at predicting certain sizes, aspect ratios, or classes of object, improving overall recall.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>$
+<h4 id="What-is-the-loss-of-BBox-position-and-size-information?">What is the loss of BBox position and size information?<a class="anchor-link" href="#What-is-the-loss-of-BBox-position-and-size-information?">&#182;</a></h4>$$
 \lambda_{coord}\sum\limits_{i=0}^{S^2}{\sum\limits_{j=0}^{B}{1_{ij}^{obj}({(x_i -  \hat{x_i})^2 + (y_j + \hat{y_j})^2}})}
-$</p>
-<p>$
+$$$$
 +{\lambda_{coord}\sum\limits_{i=0}^{S^2}\sum\limits_{j=0}^{B}1_{ij}^{obj}((\sqrt{w_i} - \sqrt{\hat{w_i}})^2 +  (\sqrt{h_i} - \sqrt{\hat{h_i}})^2}
-$</p>
-<p>$
+$$<h4 id="What-is-the-loss-sum-squared-error-BBox-object-confidence-score?">What is the loss sum-squared error BBox object confidence-score?<a class="anchor-link" href="#What-is-the-loss-sum-squared-error-BBox-object-confidence-score?">&#182;</a></h4>$$
 +\sum\limits_{i=0}^{S^2}\sum\limits_{j=0}^{B}1_{ij}^{obj}(c_i - \hat{c_i})^2
-$</p>
-<p>$
+$$$$
 +\lambda_{noobj}\sum\limits_{i=0}^{S^2}\sum\limits_{j=0}^{B}1_{ij}^{noobj}(c_i - \hat{c_i})^2
-$</p>
-<p>$
+$$<h4 id="What-is-the-loss-of-wich-Class-is-in-this-grid?">What is the loss of wich Class is in this grid?<a class="anchor-link" href="#What-is-the-loss-of-wich-Class-is-in-this-grid?">&#182;</a></h4>$$
 +\sum\limits_{i =0}^{S^2}1_{i}^{obj}({\sum\limits_{c \in classes}(p_i(c)-\hat{p_i}(c))^2})
-$</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>where $1^\text{obj}_{i}$ denotes if object appears in cell $i$ and $1^{obj}_{ij}$ denotes that the $j_{th}$ bounding box predictor in cell $i$ is “responsible” for that prediction.</p>
-<p>Note that the loss function only penalizes classification error if an object is present in that grid cell (hence the conditional class probability discussed earlier).</p>
-<p>It also only penalizes bounding box coordinate error if that predictor is
-“responsible” for the ground truth box (i.e. has the highest IOU of any predictor in that grid cell).</p>
-<p>We train the network for about 135 epochs on the training and validation data sets from PASCAL VOC 2007 and 2012.</p>
-<p>When testing on 2012 we also include the VOC 2007 test data for training. Throughout training we use a batch size of 64, a momentum of 0.9 and a decay of 0.0005.
-Our learning rate schedule is as follows: For the first epochs we slowly raise the learning rate from 10−3 to 10−2.</p>
-<p>If we start at a high learning rate our model often diverges due to unstable gradients. We continue training with 10−2 for 75 epochs, then 10−3 for 30 epochs, and finally 10−4 for 30 epochs.</p>
-<p>To avoid overfitting we use dropout and extensive data augmentation. A dropout layer with rate = .5 after the firstconnected layer prevents co-adaptation between layers [18].</p>
-<p>For data augmentation we introduce random scaling and translations of up to 20% of the original image size.</p>
-<p>We also randomly adjust the exposure and saturation of the image by up to a factor of 1.5 in the HSV color space.</p>
-
+$$<h4 id="Why-there-are-some-special-coifficient?">Why there are some special coifficient?<a class="anchor-link" href="#Why-there-are-some-special-coifficient?">&#182;</a></h4><p>Original auther use <strong>sum-squared error</strong> because it is easy to optimize, however it does not perfectly align with our goal of maximizing average precision. It weights <strong>localization error</strong> equally with <strong>classification error</strong> which may not be ideal.</p>
+<p>In (2) Orignal auther set <strong>λcoord = 5</strong> and <strong>λnoobj = .5.</strong> to increase the loss from bounding box coordinate predictions and decrease the loss from confi-dence predictions for boxes that don’t contain objects.</p>
+<p>They want to remedy the model instability, which is caused by many grid cells do not contain any object. This pushes the <strong>“confidence” scores</strong> of those cells towards zero, often overpowering the gradient from cells that do contain objects.</p>
+<p>Notice that: YOLO predicts <strong>multiple bounding boxes per grid cell.</strong> At training time we <strong>only want one bounding box predictor to be responsible for each object.</strong> We assign one predictor to be “responsible” for predicting an object based on which prediction has the <strong>highest current IOU with the ground truth.</strong>  This leads to specialization between the bounding box predictors. Each predictor gets better at predicting certain sizes, aspect ratios, or classes of object, improving overall recall.</p>
+<h4 id="Overall-Math-Expression">Overall Math Expression<a class="anchor-link" href="#Overall-Math-Expression">&#182;</a></h4>
 </div>
 </div>
 </div>
@@ -1472,15 +1377,15 @@ $$$$
 +\lambda_{noobj}\sum\limits_{i=0}^{S^2}\sum\limits_{j=0}^{B}1_{ij}^{noobj}(c_i - \hat{c_i})^2
 $$$$
 +\sum\limits_{i =0}^{S^2}1_{i}^{obj}({\sum\limits_{c \in classes}(p_i(c)-\hat{p_i}(c))^2})
-$$
+$$<p>where $1^\text{obj}_{i}$ denotes if object appears in cell $i$ and $1^{obj}_{ij}$ denotes that the $j_{th}$ bounding box predictor in cell $i$ is “responsible” for that prediction.</p>
+
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="YOLO-Loss-Layer-Implementation">YOLO Loss Layer Implementation<a class="anchor-link" href="#YOLO-Loss-Layer-Implementation">&#182;</a></h3><p>In the orignnal source code, the author provide the .config file on <strong>darknet framework</strong></p>
-<p>Here I am going to translate the model from <strong>darknet Style to Keras and Tensorflow style</strong></p>
+<h3 id="4.-YOLO-Loss-Layer-Implementation">4. YOLO Loss Layer Implementation<a class="anchor-link" href="#4.-YOLO-Loss-Layer-Implementation">&#182;</a></h3><p>The following are my partial implementation of yolo-v1.</p>
 
 </div>
 </div>
@@ -1508,6 +1413,14 @@ $$
 <span class="sd">    this class inherit keras-layer and providse the connectivity of tensorflow </span>
 <span class="sd">    this class implement the customize yolo-loss &amp; encode &amp; decode from [paper]</span>
 <span class="sd">    (https://pjreddie.com/media/files/papers/yolo.pdf) for multi-object recog.  </span>
+<span class="sd">    </span>
+<span class="sd">    Usage: </span>
+<span class="sd">      loss = YoloDetector.loss(true_y, pred_y, batch_size=batch_size) # tf-stle slice must have same rank</span>
+<span class="sd">      summary_op = get_summary_op(model, loss)</span>
+<span class="sd">      ...</span>
+<span class="sd">      _, lossN, summary_log = sess.run([train_step,loss,summary_op], feed_dict =</span>
+<span class="sd">            {input_tensor : images_feed, true_y :labels_feed, K.learning_phase(): 0})</span>
+<span class="sd">            </span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">rImgW</span><span class="o">=</span><span class="mi">448</span><span class="p">,</span> <span class="n">rImgH</span><span class="o">=</span><span class="mi">448</span><span class="p">,</span> <span class="n">S</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">B</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">classMap</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># C = number of class</span>
@@ -1683,7 +1596,6 @@ $$
                     <span class="n">idx_flattened</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="n">B</span><span class="o">+</span><span class="n">j</span><span class="p">)</span>              
                     <span class="k">yield</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">idx_flattened</span><span class="p">)</span>
             <span class="c1"># https://github.com/tensorflow/tensorflow/issues/206</span>
-            
             <span class="n">truB</span>    <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span> <span class="p">([</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">slec_Box</span> <span class="p">(</span><span class="n">truB</span>    <span class="p">,</span> <span class="n">iouT</span><span class="p">)]</span> <span class="p">)</span>
             <span class="n">preB</span>    <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span> <span class="p">([</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">slec_Box</span> <span class="p">(</span><span class="n">preB</span>    <span class="p">,</span> <span class="n">iouT</span><span class="p">)]</span> <span class="p">)</span>
             <span class="n">truConf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span> <span class="p">([</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">slec_conf</span><span class="p">(</span><span class="n">truConf</span> <span class="p">,</span> <span class="n">iouT</span><span class="p">)]</span> <span class="p">)</span>
@@ -1754,6 +1666,31 @@ $$
 </div>
 </div>
 
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Using TensorFlow backend.
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+
+</div>
+</div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">

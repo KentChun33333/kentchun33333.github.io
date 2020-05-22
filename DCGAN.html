@@ -22,25 +22,25 @@
 
 
 <meta name="author" content="Kent Chiu" />
-<meta name="description" content="There are lots of distance that used to measure either point-to-point, sequence-to-seence, tensor-to-tensor ...etc. Following lists some most common-used:" />
-<meta name="keywords" content="distance, similarity, loss function">
+<meta name="description" content="Deep Convolution Generative Adversary Network use a min-max loss to train a Generator/Actor and a Discriminator/Critic." />
+<meta name="keywords" content="GAN, DCGAN, Game Theory">
 
 <meta property="og:site_name" content="Autumn Memo"/>
-<meta property="og:title" content="A Glance at Common Statistic Distance"/>
-<meta property="og:description" content="There are lots of distance that used to measure either point-to-point, sequence-to-seence, tensor-to-tensor ...etc. Following lists some most common-used:"/>
+<meta property="og:title" content="A Glance at Deep Convolution Generative Adversary Network"/>
+<meta property="og:description" content="Deep Convolution Generative Adversary Network use a min-max loss to train a Generator/Actor and a Discriminator/Critic."/>
 <meta property="og:locale" content="en_US"/>
-<meta property="og:url" content="https://kentchun33333.github.io/Common Statistic Distance.html"/>
+<meta property="og:url" content="https://kentchun33333.github.io/DCGAN.html"/>
 <meta property="og:type" content="article"/>
-<meta property="article:published_time" content="2018-12-11 20:00:00+01:00"/>
+<meta property="article:published_time" content="2017-04-11 20:00:00+02:00"/>
 <meta property="article:modified_time" content=""/>
 <meta property="article:author" content="https://kentchun33333.github.io/author/kent-chiu.html">
-<meta property="article:section" content="AI Unit Operations"/>
-<meta property="article:tag" content="distance"/>
-<meta property="article:tag" content="similarity"/>
-<meta property="article:tag" content="loss function"/>
+<meta property="article:section" content="Glance"/>
+<meta property="article:tag" content="GAN"/>
+<meta property="article:tag" content="DCGAN"/>
+<meta property="article:tag" content="Game Theory"/>
 <meta property="og:image" content="https://scontent.fsin5-1.fna.fbcdn.net/v/t1.0-1/p720x720/96215235_3403513689663854_7453417891073884160_o.jpg?_nc_cat=106&_nc_sid=dbb9e7&_nc_ohc=FFyXABpAhHQAX9b-fUS&_nc_ht=scontent.fsin5-1.fna&_nc_tp=6&oh=3f722a46a66c21fadc044d92033c0590&oe=5EED0413">
 
-  <title>Autumn Memo &ndash; A Glance at Common Statistic Distance</title>
+  <title>Autumn Memo &ndash; A Glance at Deep Convolution Generative Adversary Network</title>
 
 </head>
 <body>
@@ -78,9 +78,9 @@
 <article class="single">
   <header>
       
-    <h1 id="Common Statistic Distance">A Glance at Common Statistic Distance</h1>
+    <h1 id="DCGAN">A Glance at Deep Convolution Generative Adversary Network</h1>
     <p>
-          Posted on Tue 11 December 2018 in <a href="https://kentchun33333.github.io/category/ai-unit-operations.html">AI Unit Operations</a>
+          Posted on Tue 11 April 2017 in <a href="https://kentchun33333.github.io/category/glance.html">Glance</a>
 
 
     </p>
@@ -1240,48 +1240,168 @@ h6:hover .anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Common-Distance-that-used-machine-learning">Common Distance that used machine learning<a class="anchor-link" href="#Common-Distance-that-used-machine-learning">&#182;</a></h3><p>There are many distances used in machine learning. Following list several of most common-used distance.</p>
-<h5 id="1.-Euclidean-distance">1. Euclidean distance<a class="anchor-link" href="#1.-Euclidean-distance">&#182;</a></h5><ul>
-<li>$ \sqrt{ \sum_{t=1}^{p} (x_{it} - x_{jt})^{2} }$</li>
+<h3 id="Brief-Description">Brief Description<a class="anchor-link" href="#Brief-Description">&#182;</a></h3><ul>
+<li>Deep Convolutional Generative Adversarial Networks (DCGAN) is using CNN to perform GAN on Image Generation or Any continous data domain. </li>
+<li>Currently, people use it to generate sentence, but suffer the discrete problem while generation.</li>
+<li>The Key to undersatand DCGAN is to understand the <strong>Genrative Adversarial Networks.</strong></li>
 </ul>
-<h5 id="2.-Minkowski-distance">2. <a href="https://en.wikipedia.org/wiki/Minkowski_distance">Minkowski distance</a><a class="anchor-link" href="#2.-Minkowski-distance">&#182;</a></h5><ul>
-<li>$  ( \sum_{i=1}^{n} \| x_{i} - y_{i} \|^{p} )^{1/p} $</li>
-</ul>
-<h5 id="3.-Cosine-distance">3. Cosine distance<a class="anchor-link" href="#3.-Cosine-distance">&#182;</a></h5><ul>
-<li>$  \frac{\sum_{1}^{n} ( A{i} \text{ x } B_{i} ) }{ \sqrt{ \sum_{1}^{n} A{i}^{2}} \text{ x } \sqrt{ \sum_{1}^{n} B{i}^{2} } } $</li>
-</ul>
-<h5 id="4.-Hotelling-T2-distance">4. <a href="https://en.wikipedia.org/wiki/Hotelling%27s_T-squared_distribution">Hotelling T2 distance</a><a class="anchor-link" href="#4.-Hotelling-T2-distance">&#182;</a></h5><ul>
-<li>Mahalanobis distance is a measure of distance between a point and distribution. So if we want to check if a point belongs to a particular distribution or not, we can use Hotelling's T-test, which is squared Mahalanobis distance. But if we have two sample distribution and we want to check if they belong to the same group or not, we can use two sample Hotelling's T-test, that is,</li>
-</ul>
-<h5 id="5.-Mahalanobis-Distance">5. Mahalanobis Distance<a class="anchor-link" href="#5.-Mahalanobis-Distance">&#182;</a></h5><ul>
-<li><p>Computes the Mahalanobis distance between the points. The Mahalanobis distance between two points $ u $ and $ v $ is  $ \sqrt{(u-v)(1/V)(u-v)^{T}} $ where (the VI variable) is the inverse covariance. If VI is not None, VI will be used as the inverse covariance matrix.</p>
-</li>
-<li><p><strong>Limitation</strong> : A Mahalanobis distance requires a covariance matrix. A NON-singular covariance matrix. If your matrix is singular, then the computation will produce garbage, since you cannot invert a singular matrix. Since you don't have sufficient data to estimate a complete covariance matrix, mahal must fail.</p>
-</li>
-</ul>
-<h5 id="6.-Seuclidean-Distance">6. Seuclidean Distance<a class="anchor-link" href="#6.-Seuclidean-Distance">&#182;</a></h5><ul>
-<li>Computes the standardized Euclidean distance. The standardized Euclidean distance between two n-vectors $u$ and $v$ is
-$ \sqrt{ \sum{(u_{i}-v_{i})^{2}} / (V[X_{i}]) }  $<ul>
-<li>V is the variance vector; V[i] is the variance computed over all the i’th components of the points. If not passed, it is automatically computed.</li>
-</ul>
-</li>
-</ul>
-<h5 id="7.-Edit-Distance">7. Edit Distance<a class="anchor-link" href="#7.-Edit-Distance">&#182;</a></h5><h5 id="8.-Shape-Based-Distance">8. Shape-Based Distance<a class="anchor-link" href="#8.-Shape-Based-Distance">&#182;</a></h5><h5 id="9.-KD-distance">9. KD distance<a class="anchor-link" href="#9.-KD-distance">&#182;</a></h5><h5 id="10.-.....etc">10. .....etc<a class="anchor-link" href="#10.-.....etc">&#182;</a></h5>
+
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span> 
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="1.-Basic-Element">1. Basic Element<a class="anchor-link" href="#1.-Basic-Element">&#182;</a></h3><h4 id="1-1.-Discriminator-Net-(like-Critic-Net-in-A3C)">1-1. Discriminator-Net (like Critic-Net in A3C)<a class="anchor-link" href="#1-1.-Discriminator-Net-(like-Critic-Net-in-A3C)">&#182;</a></h4><ul>
+<li>Denote as : $D(X)$ </li>
+<li><p>$X \text{ is dataset } : \text{real image + fake-image by G(Z)}$</p>
+</li>
+<li><p>Objective of D(X)</p>
+<ul>
+<li>Denote as $\text{D_loss}$ </li>
+<li>$\text{max}_{D} E[ log(D(X_{\text{real image}})] + E[1-log(D(G(Z))] $</li>
+<li>D_score = 1 if X is from real-data, really low-value but not 0 if it is a fake-image </li>
+</ul>
+<hr>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">discriminator_model</span><span class="p">():</span>
+  <span class="n">model</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">()</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Convolution2D</span><span class="p">(</span>
+                      <span class="mi">64</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+                      <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">,</span>
+                      <span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">BatchNormalization</span><span class="p">())</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s1">&#39;tanh&#39;</span><span class="p">))</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">MaxPooling2D</span><span class="p">(</span><span class="n">pool_size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Convolution2D</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)))</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s1">&#39;tanh&#39;</span><span class="p">))</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">MaxPooling2D</span><span class="p">(</span><span class="n">pool_size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Flatten</span><span class="p">())</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1024</span><span class="p">))</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s1">&#39;tanh&#39;</span><span class="p">))</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+  <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s1">&#39;sigmoid&#39;</span><span class="p">))</span>
+  <span class="k">return</span> <span class="n">model</span>
 </pre></div>
+</li>
+</ul>
+<hr>
+<h4 id="1-2.-Generator-Net-(like-Actor-Net-in-A3C)">1-2. Generator-Net (like Actor-Net in A3C)<a class="anchor-link" href="#1-2.-Generator-Net-(like-Actor-Net-in-A3C)">&#182;</a></h4><ul>
+<li><p>Denote as : G(Z) where Z = np.random.ranint(-1, 1, dim=(any-thing))</p>
+</li>
+<li><p>Objective of G(Z)</p>
+<ul>
+<li>G_loss = <strong>D_score</strong> </li>
+<li>The goal of G(Z) is to cheat on D(X), to let E[1-log(D_score(G(Z))]</li>
+</ul>
+</li>
+</ul>
+<hr>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">generator_model</span><span class="p">():</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">()</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="n">input_dim</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="mi">1024</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s1">&#39;tanh&#39;</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="mi">128</span><span class="o">*</span><span class="mi">7</span><span class="o">*</span><span class="mi">7</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">BatchNormalization</span><span class="p">())</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s1">&#39;tanh&#39;</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Reshape</span><span class="p">((</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">128</span><span class="p">),</span> <span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="mi">128</span><span class="o">*</span><span class="mi">7</span><span class="o">*</span><span class="mi">7</span><span class="p">,)))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">UpSampling2D</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Convolution2D</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s1">&#39;tanh&#39;</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">UpSampling2D</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Convolution2D</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">))</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Activation</span><span class="p">(</span><span class="s1">&#39;tanh&#39;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">model</span>
+</pre></div>
+<hr>
 
-    </div>
 </div>
 </div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="2.-Adversary-Training-Method">2. Adversary Training Method<a class="anchor-link" href="#2.-Adversary-Training-Method">&#182;</a></h3><ul>
+<li><p>Here is the key for GAN-group network, which is actually using Game-Theory to train 2 network to forming competition.</p>
+</li>
+<li><p>Min-Max Trick here</p>
+<ul>
+<li>$ \text{min}_{G-Net} \text{max}_{D-Net} E[ log(D(X_{\text{real image}})] + E[1-log(D(G(Z))]  $</li>
+</ul>
+</li>
+<li><p>the pseudo-code from paper are shown below :
+<img src='image/Glance-06-DCGAN-00.png' /></p>
+</li>
+</ul>
+<hr>
+<h3 id="3.-Implementation-of-Adversary-Training">3. Implementation of Adversary Training<a class="anchor-link" href="#3.-Implementation-of-Adversary-Training">&#182;</a></h3><ul>
+<li>Here we adding a <strong>generator_containing_discriminator</strong> function for the trick-part</li>
+<li>This function would freeze the D-net and also feed the all input from fake-data(generated by G-Net)</li>
+<li>and then train G-Net to cheat the D-Net by giving the training pair to be 1(true)</li>
+</ul>
+<hr>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">generator_containing_discriminator</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">discriminator</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">()</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
+    <span class="n">discriminator</span><span class="o">.</span><span class="n">trainable</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">discriminator</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span>
 
+<span class="o">...</span>
+<span class="o">...</span>
+
+   <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">BATCH_SIZE</span><span class="p">)):</span>
+
+            <span class="c1"># init the seed </span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BATCH_SIZE</span><span class="p">):</span>
+                <span class="n">noise</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+            <span class="n">image_batch</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="n">index</span><span class="o">*</span><span class="n">BATCH_SIZE</span><span class="p">:(</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">BATCH_SIZE</span><span class="p">]</span>
+            <span class="n">generated_images</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">noise</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="c1"># ========================================</span>
+            <span class="c1"># prepare the training-pair of the D-Net</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">image_batch</span><span class="p">,</span> <span class="n">generated_images</span><span class="p">))</span>
+
+            <span class="c1"># mapping the real-image-batch + generated_images</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">BATCH_SIZE</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">BATCH_SIZE</span>
+
+            <span class="c1"># train D-Net here</span>
+            <span class="n">d_loss</span> <span class="o">=</span> <span class="n">discriminator</span><span class="o">.</span><span class="n">train_on_batch</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;batch </span><span class="si">%d</span><span class="s2"> d_loss : </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">d_loss</span><span class="p">))</span>
+
+            <span class="c1"># =========================================</span>
+            <span class="c1"># prepare the training-pair of the G-Net</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">BATCH_SIZE</span><span class="p">):</span>
+                <span class="n">noise</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+            <span class="c1"># here we set the D-Net not trainable</span>
+            <span class="n">discriminator</span><span class="o">.</span><span class="n">trainable</span> <span class="o">=</span> <span class="bp">False</span>
+
+            <span class="c1"># in-here, the discriminator only recive fack-data, </span>
+            <span class="c1"># but we give [y] be high/true (1) </span>
+            <span class="c1"># thus by giving a oppersite value  form a adversary training </span>
+            <span class="n">g_loss</span> <span class="o">=</span> <span class="n">discriminator_on_generator</span><span class="o">.</span><span class="n">train_on_batch</span><span class="p">(</span>
+                <span class="n">noise</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">BATCH_SIZE</span><span class="p">)</span>
+            <span class="n">discriminator</span><span class="o">.</span><span class="n">trainable</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">print</span><span class="p">(</span><span class="s2">&quot;batch </span><span class="si">%d</span><span class="s2"> g_loss : </span><span class="si">%f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">g_loss</span><span class="p">))</span>
+</pre></div>
+<hr>
+<h3 id="3.-Training-Trick">3. Training Trick<a class="anchor-link" href="#3.-Training-Trick">&#182;</a></h3><ul>
+<li><a href="https://github.com/soumith/ganhacks">Good Article</a></li>
+</ul>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Reference">Reference<a class="anchor-link" href="#Reference">&#182;</a></h3><p><a href="https://bamos.github.io/2016/08/09/deep-completion/#step-2-quickly-generating-fake-images">Main Blog : Deep Completion </a></p>
+
+</div>
+</div>
 </div>
  
 
@@ -1318,9 +1438,9 @@ $ \sqrt{ \sum{(u_{i}-v_{i})^{2}} / (V[X_{i}]) }  $<ul>
   </div>
   <div class="tag-cloud">
     <p>
-      <a href="https://kentchun33333.github.io/tag/distance.html">distance</a>
-      <a href="https://kentchun33333.github.io/tag/similarity.html">similarity</a>
-      <a href="https://kentchun33333.github.io/tag/loss-function.html">loss function</a>
+      <a href="https://kentchun33333.github.io/tag/gan.html">GAN</a>
+      <a href="https://kentchun33333.github.io/tag/dcgan.html">DCGAN</a>
+      <a href="https://kentchun33333.github.io/tag/game-theory.html">Game Theory</a>
     </p>
   </div>
 
