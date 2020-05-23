@@ -1363,278 +1363,283 @@ $$<p>where $1^\text{obj}_{i}$ denotes if object appears in cell $i$ and $1^{obj}
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">keras.engine</span> <span class="kn">import</span> <span class="n">Layer</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span> 
 
-<pre><code>import numpy as np
-from keras.engine import Layer
-import tensorflow as tf 
-
-# =============================================================================
-# encode : (Ground Truth Box | Image ) -&gt; Ground Truth Y
-# decode : Predict Tensor Y -&gt;
-# the encode and decode are symmetric in logic
-# =============================================================================
+<span class="c1"># =============================================================================</span>
+<span class="c1"># encode : (Ground Truth Box | Image ) -&gt; Ground Truth Y</span>
+<span class="c1"># decode : Predict Tensor Y -&gt;</span>
+<span class="c1"># the encode and decode are symmetric in logic</span>
+<span class="c1"># =============================================================================</span>
 
 
-class YoloDetector(Layer):
-    '''
-    Description : 
-    this class inherit keras-layer and providse the connectivity of tensorflow 
-    this class implement the customize yolo-loss &amp; encode &amp; decode from [paper]
-    (https://pjreddie.com/media/files/papers/yolo.pdf) for multi-object recog.  
+<span class="k">class</span> <span class="nc">YoloDetector</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Description : </span>
+<span class="sd">    this class inherit keras-layer and providse the connectivity of tensorflow </span>
+<span class="sd">    this class implement the customize yolo-loss &amp; encode &amp; decode from [paper]</span>
+<span class="sd">    (https://pjreddie.com/media/files/papers/yolo.pdf) for multi-object recog.  </span>
 
-    Usage: 
-      loss = YoloDetector.loss(true_y, pred_y, batch_size=batch_size) # tf-stle slice must have same rank
-      summary_op = get_summary_op(model, loss)
-      ...
-      _, lossN, summary_log = sess.run([train_step,loss,summary_op], feed_dict =
-            {input_tensor : images_feed, true_y :labels_feed, K.learning_phase(): 0})
+<span class="sd">    Usage: </span>
+<span class="sd">      loss = YoloDetector.loss(true_y, pred_y, batch_size=batch_size) # tf-stle slice must have same rank</span>
+<span class="sd">      summary_op = get_summary_op(model, loss)</span>
+<span class="sd">      ...</span>
+<span class="sd">      _, lossN, summary_log = sess.run([train_step,loss,summary_op], feed_dict =</span>
+<span class="sd">            {input_tensor : images_feed, true_y :labels_feed, K.learning_phase(): 0})</span>
 
-    '''
-    def __init__(self, C=20, rImgW=448, rImgH=448, S=7, B=2, classMap=None):
-        # C = number of class
-        self.S = S
-        self.B = B
-        self.C = C
-        self.W = rImgW
-        self.H = rImgH
-        self.iou_threshold=0.1
-        if classMap:
-            self.classMap = classMap
-        else :
-            self.classMap  =  ["aeroplane", "bicycle", "bird", "boat", "bottle", 
-                           "bus", "car", "cat", "chair", "cow", "diningtable",
-                           "dog", "horse", "motorbike", "person", "pottedplant",
-                           "sheep", "sofa", "train","tvmonitor"]
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">rImgW</span><span class="o">=</span><span class="mi">448</span><span class="p">,</span> <span class="n">rImgH</span><span class="o">=</span><span class="mi">448</span><span class="p">,</span> <span class="n">S</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">B</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">classMap</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="c1"># C = number of class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">S</span> <span class="o">=</span> <span class="n">S</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">rImgW</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">=</span> <span class="n">rImgH</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iou_threshold</span><span class="o">=</span><span class="mf">0.1</span>
+        <span class="k">if</span> <span class="n">classMap</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">classMap</span> <span class="o">=</span> <span class="n">classMap</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">classMap</span>  <span class="o">=</span>  <span class="p">[</span><span class="s2">&quot;aeroplane&quot;</span><span class="p">,</span> <span class="s2">&quot;bicycle&quot;</span><span class="p">,</span> <span class="s2">&quot;bird&quot;</span><span class="p">,</span> <span class="s2">&quot;boat&quot;</span><span class="p">,</span> <span class="s2">&quot;bottle&quot;</span><span class="p">,</span> 
+                           <span class="s2">&quot;bus&quot;</span><span class="p">,</span> <span class="s2">&quot;car&quot;</span><span class="p">,</span> <span class="s2">&quot;cat&quot;</span><span class="p">,</span> <span class="s2">&quot;chair&quot;</span><span class="p">,</span> <span class="s2">&quot;cow&quot;</span><span class="p">,</span> <span class="s2">&quot;diningtable&quot;</span><span class="p">,</span>
+                           <span class="s2">&quot;dog&quot;</span><span class="p">,</span> <span class="s2">&quot;horse&quot;</span><span class="p">,</span> <span class="s2">&quot;motorbike&quot;</span><span class="p">,</span> <span class="s2">&quot;person&quot;</span><span class="p">,</span> <span class="s2">&quot;pottedplant&quot;</span><span class="p">,</span>
+                           <span class="s2">&quot;sheep&quot;</span><span class="p">,</span> <span class="s2">&quot;sofa&quot;</span><span class="p">,</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span><span class="s2">&quot;tvmonitor&quot;</span><span class="p">]</span>
 
-    def set_class_map(self, mappingList):
-        assert type(mappingList)==list ; assert len(mappingList) == self.C
-        self.classMap=mappingList
+    <span class="k">def</span> <span class="nf">set_class_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mappingList</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">mappingList</span><span class="p">)</span><span class="o">==</span><span class="nb">list</span> <span class="p">;</span> <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">mappingList</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classMap</span><span class="o">=</span><span class="n">mappingList</span>
 
-    def encode(self, annotations):
-        ''' annotations : nested list contained
-        '''
-        S, B, C, W, H = self.S, self.B, self.C, self.W, self.H
+    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">annotations</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; annotations : nested list contained</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span>
 
-        # init
-        classProb  = np.zeros([S, S, C   ])
-        confidence = np.zeros([S, S, B   ])
-        boxes      = np.zeros([S, S, B, 4])
+        <span class="c1"># init</span>
+        <span class="n">classProb</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">S</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">C</span>   <span class="p">])</span>
+        <span class="n">confidence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">S</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">B</span>   <span class="p">])</span>
+        <span class="n">boxes</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">S</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
 
-        for classid, cX, cY, boxW, boxH in annotations:
-            assert int(classid) &lt;= int(C-1)
+        <span class="k">for</span> <span class="n">classid</span><span class="p">,</span> <span class="n">cX</span><span class="p">,</span> <span class="n">cY</span><span class="p">,</span> <span class="n">boxW</span><span class="p">,</span> <span class="n">boxH</span> <span class="ow">in</span> <span class="n">annotations</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">int</span><span class="p">(</span><span class="n">classid</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">C</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
-            # Target the center grid
-            gridX, gridY = W/S, H/S
-            tarIdX, tarIdY = int(cX/gridX) , int(cY/gridY)    
+            <span class="c1"># Target the center grid</span>
+            <span class="n">gridX</span><span class="p">,</span> <span class="n">gridY</span> <span class="o">=</span> <span class="n">W</span><span class="o">/</span><span class="n">S</span><span class="p">,</span> <span class="n">H</span><span class="o">/</span><span class="n">S</span>
+            <span class="n">tarIdX</span><span class="p">,</span> <span class="n">tarIdY</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cX</span><span class="o">/</span><span class="n">gridX</span><span class="p">)</span> <span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">cY</span><span class="o">/</span><span class="n">gridY</span><span class="p">)</span>    
 
-            # assign the true value
-            classProb[tarIdX, tarIdY, classid] = 1.0
-            confidence[tarIdX, tarIdY, :      ] = 1.0    
+            <span class="c1"># assign the true value</span>
+            <span class="n">classProb</span><span class="p">[</span><span class="n">tarIdX</span><span class="p">,</span> <span class="n">tarIdY</span><span class="p">,</span> <span class="n">classid</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="n">confidence</span><span class="p">[</span><span class="n">tarIdX</span><span class="p">,</span> <span class="n">tarIdY</span><span class="p">,</span> <span class="p">:</span>      <span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>    
 
-            # x,y,w,h
-            boxes[tarIdX, tarIdY, :, 0] = (cX/gridX) - int(cX/gridX)
-            boxes[tarIdX, tarIdY, :, 1] = (cY/gridY) - int(cY/gridY)
-            boxes[tarIdX, tarIdY, :, 2] = np.sqrt(boxW/W)
-            boxes[tarIdX, tarIdY, :, 3] = np.sqrt(boxH/H)
+            <span class="c1"># x,y,w,h</span>
+            <span class="n">boxes</span><span class="p">[</span><span class="n">tarIdX</span><span class="p">,</span> <span class="n">tarIdY</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cX</span><span class="o">/</span><span class="n">gridX</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">cX</span><span class="o">/</span><span class="n">gridX</span><span class="p">)</span>
+            <span class="n">boxes</span><span class="p">[</span><span class="n">tarIdX</span><span class="p">,</span> <span class="n">tarIdY</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cY</span><span class="o">/</span><span class="n">gridY</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">cY</span><span class="o">/</span><span class="n">gridY</span><span class="p">)</span>
+            <span class="n">boxes</span><span class="p">[</span><span class="n">tarIdX</span><span class="p">,</span> <span class="n">tarIdY</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">boxW</span><span class="o">/</span><span class="n">W</span><span class="p">)</span>
+            <span class="n">boxes</span><span class="p">[</span><span class="n">tarIdX</span><span class="p">,</span> <span class="n">tarIdY</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">boxH</span><span class="o">/</span><span class="n">H</span><span class="p">)</span>
 
-        return np.concatenate([classProb.flatten(),confidence.flatten(),
-                               boxes.flatten()])
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">classProb</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span><span class="n">confidence</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+                               <span class="n">boxes</span><span class="o">.</span><span class="n">flatten</span><span class="p">()])</span>
 
-    def traDim(self, pred, mode=3):
-        ''' Dimension Transformation of Tensor '''
-        S, B, C, W, H = self.S, self.B, self.C, self.W, self.H
+    <span class="k">def</span> <span class="nf">traDim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Dimension Transformation of Tensor &#39;&#39;&#39;</span>
+        <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span>
 
-        if mode == 3 :
-            pred = np.array(pred)
-            classProb  = np.reshape(pred[0:S*S*C]         , (S,S,C))
-            confidence = np.reshape(pred[S*S*C: S*S*(C+B)], (S,S,B)) 
-            boxes      = np.reshape(pred[S*S*(C+B):]      , (S,S,B,4))
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="mi">3</span> <span class="p">:</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
+            <span class="n">classProb</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">C</span><span class="p">]</span>         <span class="p">,</span> <span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="n">C</span><span class="p">))</span>
+            <span class="n">confidence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">C</span><span class="p">:</span> <span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="p">(</span><span class="n">C</span><span class="o">+</span><span class="n">B</span><span class="p">)],</span> <span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="n">B</span><span class="p">))</span> 
+            <span class="n">boxes</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="p">(</span><span class="n">C</span><span class="o">+</span><span class="n">B</span><span class="p">):]</span>      <span class="p">,</span> <span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
 
-        elif mode == 2 :
-            classProb  = tf.reshape(pred[0:S*S*C]         , (S*S,C))
-            confidence = tf.reshape(pred[S*S*C: S*S*(C+B)], (S*S,B)) 
-            boxes      = tf.reshape(pred[S*S*(C+B):]      , (S*S,B,4))
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="mi">2</span> <span class="p">:</span>
+            <span class="n">classProb</span>  <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">C</span><span class="p">]</span>         <span class="p">,</span> <span class="p">(</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="p">,</span><span class="n">C</span><span class="p">))</span>
+            <span class="n">confidence</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">C</span><span class="p">:</span> <span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="p">(</span><span class="n">C</span><span class="o">+</span><span class="n">B</span><span class="p">)],</span> <span class="p">(</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="p">,</span><span class="n">B</span><span class="p">))</span> 
+            <span class="n">boxes</span>      <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="p">(</span><span class="n">C</span><span class="o">+</span><span class="n">B</span><span class="p">):]</span>      <span class="p">,</span> <span class="p">(</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
 
-        return classProb, confidence, boxes        
+        <span class="k">return</span> <span class="n">classProb</span><span class="p">,</span> <span class="n">confidence</span><span class="p">,</span> <span class="n">boxes</span>        
 
-    def decode(self, prediction,threshold=8e-25 ,only_objectness=0):
-        '''
-        this part is modified from https://github.com/gliese581gg/YOLO_tensorflow
-        '''
-        S, B, C, W, H = self.S, self.B, self.C, self.W, self.H
-        classProb ,confidence, boxes = self.traDim(prediction, mode =3)
+    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="mf">8e-25</span> <span class="p">,</span><span class="n">only_objectness</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        this part is modified from https://github.com/gliese581gg/YOLO_tensorflow</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span>
+        <span class="n">classProb</span> <span class="p">,</span><span class="n">confidence</span><span class="p">,</span> <span class="n">boxes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traDim</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 
-        # offset (7,7,2) mask, retrieve from offset
-        offset = np.transpose(np.reshape(np.array([np.arange(S)]*S*B),(B,S,S)),(1,2,0))
-        boxes[:,:,:,1] += offset
-        boxes[:,:,:,0] += np.transpose(offset,(1,0,2))
-        boxes[:,:,:,0:2] = boxes[:,:,:,0:2] / float(S)
+        <span class="c1"># offset (7,7,2) mask, retrieve from offset</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">S</span><span class="p">)]</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">B</span><span class="p">),(</span><span class="n">B</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="n">S</span><span class="p">)),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">offset</span>
+        <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">offset</span><span class="p">,(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
 
-        # retrieve from sqrt
-        boxes[:,:,:,2] = np.multiply(boxes[:,:,:,2],boxes[:,:,:,2])
-        boxes[:,:,:,3] = np.multiply(boxes[:,:,:,3],boxes[:,:,:,3])
+        <span class="c1"># retrieve from sqrt</span>
+        <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">2</span><span class="p">],</span><span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">3</span><span class="p">],</span><span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">3</span><span class="p">])</span>
 
-        # retrieve from normalization
-        boxes[:,:,:,0] *= self.W ; boxes[:,:,:,1] *= self.H
-        boxes[:,:,:,2] *= self.W ; boxes[:,:,:,3] *= self.H
+        <span class="c1"># retrieve from normalization</span>
+        <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="p">;</span> <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span>
+        <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="p">;</span> <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span>
 
-        # Pr(class|Obj) * Pr(obj) = Evaluate Proba
-        eProbs = np.zeros((S,S,B,C))
-        for i in range(B):
-            for j in range(C):
-                eProbs[:,:,i,j]=np.multiply(classProb[:,:,j],confidence[:,:,i])
+        <span class="c1"># Pr(class|Obj) * Pr(obj) = Evaluate Proba</span>
+        <span class="n">eProbs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">S</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">C</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">B</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="p">):</span>
+                <span class="n">eProbs</span><span class="p">[:,:,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">classProb</span><span class="p">[:,:,</span><span class="n">j</span><span class="p">],</span><span class="n">confidence</span><span class="p">[:,:,</span><span class="n">i</span><span class="p">])</span>
 
-        # Filter
-        filter_mat_probs = np.array(eProbs &gt;= threshold,dtype='bool')
-        filter_mat_boxes = np.nonzero(filter_mat_probs)
+        <span class="c1"># Filter</span>
+        <span class="n">filter_mat_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">eProbs</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;bool&#39;</span><span class="p">)</span>
+        <span class="n">filter_mat_boxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">filter_mat_probs</span><span class="p">)</span>
 
-        boxes_filtered = boxes[filter_mat_boxes[0],filter_mat_boxes[1],filter_mat_boxes[2]]
-        probs_filtered = eProbs[filter_mat_probs]
-        classes_num_filtered = np.argmax(filter_mat_probs,axis=3)[filter_mat_boxes[0],filter_mat_boxes[1],filter_mat_boxes[2]]
+        <span class="n">boxes_filtered</span> <span class="o">=</span> <span class="n">boxes</span><span class="p">[</span><span class="n">filter_mat_boxes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                               <span class="n">filter_mat_boxes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                               <span class="n">filter_mat_boxes</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
 
-        argsort = np.array(np.argsort(probs_filtered))[::-1]
-        boxes_filtered = boxes_filtered[argsort]
-        probs_filtered = probs_filtered[argsort]
-        classes_num_filtered = classes_num_filtered[argsort]
+        <span class="n">probs_filtered</span> <span class="o">=</span> <span class="n">eProbs</span><span class="p">[</span><span class="n">filter_mat_probs</span><span class="p">]</span>
 
-        # select the best pridect box with the ideal similar to nms
-        # if there are 2 same probs, not likely, random pick one
-        for i in range(len(boxes_filtered)):
-            if probs_filtered[i] == 0 : continue
-            for j in range(i+1,len(boxes_filtered)):
-                if self.iou(boxes_filtered[i],boxes_filtered[j]) &gt; self.iou_threshold :
-                    probs_filtered[j] = 0.0
+        <span class="n">classes_num_filtered</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">filter_mat_probs</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">3</span><span class="p">)[</span>
+            <span class="n">filter_mat_boxes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">filter_mat_boxes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">filter_mat_boxes</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
 
-        filter_iou = np.array(probs_filtered&gt;0.0,dtype='bool')
-        boxes_filtered = boxes_filtered[filter_iou]
-        probs_filtered = probs_filtered[filter_iou]
-        classes_num_filtered = classes_num_filtered[filter_iou]
+        <span class="n">argsort</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">probs_filtered</span><span class="p">))[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">boxes_filtered</span> <span class="o">=</span> <span class="n">boxes_filtered</span><span class="p">[</span><span class="n">argsort</span><span class="p">]</span>
+        <span class="n">probs_filtered</span> <span class="o">=</span> <span class="n">probs_filtered</span><span class="p">[</span><span class="n">argsort</span><span class="p">]</span>
+        <span class="n">classes_num_filtered</span> <span class="o">=</span> <span class="n">classes_num_filtered</span><span class="p">[</span><span class="n">argsort</span><span class="p">]</span>
 
-        result = []
-        for i in range(len(boxes_filtered)):
-            result.append([self.classMap[classes_num_filtered[i]],boxes_filtered[i][0],boxes_filtered[i][1],boxes_filtered[i][2],boxes_filtered[i][3],probs_filtered[i]])
+        <span class="c1"># select the best pridect box with the ideal similar to nms</span>
+        <span class="c1"># if there are 2 same probs, not likely, random pick one</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">boxes_filtered</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">probs_filtered</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">:</span> <span class="k">continue</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">boxes_filtered</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">iou</span><span class="p">(</span><span class="n">boxes_filtered</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">boxes_filtered</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">iou_threshold</span> <span class="p">:</span>
+                    <span class="n">probs_filtered</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-        return result
+        <span class="n">filter_iou</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">probs_filtered</span><span class="o">&gt;</span><span class="mf">0.0</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;bool&#39;</span><span class="p">)</span>
+        <span class="n">boxes_filtered</span> <span class="o">=</span> <span class="n">boxes_filtered</span><span class="p">[</span><span class="n">filter_iou</span><span class="p">]</span>
+        <span class="n">probs_filtered</span> <span class="o">=</span> <span class="n">probs_filtered</span><span class="p">[</span><span class="n">filter_iou</span><span class="p">]</span>
+        <span class="n">classes_num_filtered</span> <span class="o">=</span> <span class="n">classes_num_filtered</span><span class="p">[</span><span class="n">filter_iou</span><span class="p">]</span>
 
-    def loss(self, truY_, preY_, COORD=5. , NOOBJ=.5 , loss_=0 , batch_size=8):
-        '''
-        [description]
-        - mini-batch optimization
-        - the output of loss-function should &gt;= 0
-        - use avg-loss of batch-size
-        - max-gradient clip with loss max =1000.
-        '''
-        S, B, C, W, H = self.S, self.B, self.C, self.W, self.H
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">boxes_filtered</span><span class="p">)):</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">classMap</span><span class="p">[</span><span class="n">classes_num_filtered</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span>
+                           <span class="n">boxes_filtered</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                           <span class="n">boxes_filtered</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                           <span class="n">boxes_filtered</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span>
+                           <span class="n">boxes_filtered</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
+                           <span class="n">probs_filtered</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
 
-        for batch in range(batch_size):
-            truY = truY_[batch,:]
-            preY = preY_[batch,:]
+        <span class="k">return</span> <span class="n">result</span>
 
-            truCP ,truConf, truB = self.traDim(truY, mode=2)
-            preCP ,preConf, preB = self.traDim(preY, mode=2)    
+    <span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">truY_</span><span class="p">,</span> <span class="n">preY_</span><span class="p">,</span> <span class="n">COORD</span><span class="o">=</span><span class="mf">5.</span> <span class="p">,</span> <span class="n">NOOBJ</span><span class="o">=.</span><span class="mi">5</span> <span class="p">,</span> <span class="n">loss_</span><span class="o">=</span><span class="mi">0</span> <span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        [description]</span>
+<span class="sd">        - mini-batch optimization</span>
+<span class="sd">        - the output of loss-function should &gt;= 0</span>
+<span class="sd">        - use avg-loss of batch-size</span>
+<span class="sd">        - max-gradient clip with loss max =1000.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span>
 
-            #print truCP    
+        <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">):</span>
+            <span class="n">truY</span> <span class="o">=</span> <span class="n">truY_</span><span class="p">[</span><span class="n">batch</span><span class="p">,:]</span>
+            <span class="n">preY</span> <span class="o">=</span> <span class="n">preY_</span><span class="p">[</span><span class="n">batch</span><span class="p">,:]</span>
 
-            # Select for responsible box which with max IOU
-            iouT = self.iouTensor(truB,preB)           # iouT (7*7,2)
-            iouT = tf.argmax(iouT, dimension=1) # (7*7)    
+            <span class="n">truCP</span> <span class="p">,</span><span class="n">truConf</span><span class="p">,</span> <span class="n">truB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traDim</span><span class="p">(</span><span class="n">truY</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">preCP</span> <span class="p">,</span><span class="n">preConf</span><span class="p">,</span> <span class="n">preB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traDim</span><span class="p">(</span><span class="n">preY</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>    
 
-            # tf.cast(x, dtype, name=None)
-            def slec_Box(raw , iouT):
-                for i in range(S*S):
-                    j = iouT[i]    
+            <span class="c1">#print truCP    </span>
 
-                    # flatten input 2D 
-                    raw = tf.reshape(raw,[-1])     
+            <span class="c1"># Select for responsible box which with max IOU</span>
+            <span class="n">iouT</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iouTensor</span><span class="p">(</span><span class="n">truB</span><span class="p">,</span><span class="n">preB</span><span class="p">)</span>           <span class="c1"># iouT (7*7,2)</span>
+            <span class="n">iouT</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">iouT</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># (7*7)    </span>
 
-                    # cast the idx to the right tyle
-                    idx = tf.cast(tf.constant([0,1,2,3]), tf.int64)
-                    idx_flattened = idx + (i*B*4+j)              
-                    yield tf.gather(raw, idx_flattened)    
+            <span class="c1"># tf.cast(x, dtype, name=None)</span>
+            <span class="k">def</span> <span class="nf">slec_Box</span><span class="p">(</span><span class="n">raw</span> <span class="p">,</span> <span class="n">iouT</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="p">):</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="n">iouT</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>    
 
-            def slec_conf(raw , iouT):
-                for i in range(S*S):
-                    j = iouT[i]    
+                    <span class="c1"># flatten input 2D </span>
+                    <span class="n">raw</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">raw</span><span class="p">,[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>     
 
-                    # flatten input 2D 
-                    raw = tf.reshape(raw,[-1])     
+                    <span class="c1"># cast the idx to the right tyle</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]),</span> <span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+                    <span class="n">idx_flattened</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="n">B</span><span class="o">*</span><span class="mi">4</span><span class="o">+</span><span class="n">j</span><span class="p">)</span>              
+                    <span class="k">yield</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">idx_flattened</span><span class="p">)</span>    
 
-                    # cast the idx to the right tyle
-                    idx = tf.cast(tf.constant([0]), tf.int64)
-                    idx_flattened = idx + (i*B+j)              
-                    yield tf.gather(raw, idx_flattened)
-            # https://github.com/tensorflow/tensorflow/issues/206
-            truB    = tf.pack ([ a for a in slec_Box (truB    , iouT)] )
-            preB    = tf.pack ([ a for a in slec_Box (preB    , iouT)] )
-            truConf = tf.pack ([ a for a in slec_conf(truConf , iouT)] )
-            preConf = tf.pack ([ a for a in slec_conf(preConf , iouT)] )    
+            <span class="k">def</span> <span class="nf">slec_conf</span><span class="p">(</span><span class="n">raw</span> <span class="p">,</span> <span class="n">iouT</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="p">):</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="n">iouT</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>    
 
-            # Obj or noobj is actually only depend on truth
-            # truCP = (S*S,C)
-            def max_tf(raw):
-                for i in range(S*S):
-                    tmp = raw[i,:]
-                    tmp = tf.reduce_max(tmp)
-                    yield tmp    
+                    <span class="c1"># flatten input 2D </span>
+                    <span class="n">raw</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">raw</span><span class="p">,[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>     
 
-            objMask  = tf.pack([ a for a in max_tf(truCP) ])
-            nobjMask = 1 - objMask    
+                    <span class="c1"># cast the idx to the right tyle</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mi">0</span><span class="p">]),</span> <span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+                    <span class="n">idx_flattened</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="n">B</span><span class="o">+</span><span class="n">j</span><span class="p">)</span>              
+                    <span class="k">yield</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">idx_flattened</span><span class="p">)</span>
+            <span class="c1"># https://github.com/tensorflow/tensorflow/issues/206</span>
+            <span class="n">truB</span>    <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span> <span class="p">([</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">slec_Box</span> <span class="p">(</span><span class="n">truB</span>    <span class="p">,</span> <span class="n">iouT</span><span class="p">)]</span> <span class="p">)</span>
+            <span class="n">preB</span>    <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span> <span class="p">([</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">slec_Box</span> <span class="p">(</span><span class="n">preB</span>    <span class="p">,</span> <span class="n">iouT</span><span class="p">)]</span> <span class="p">)</span>
+            <span class="n">truConf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span> <span class="p">([</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">slec_conf</span><span class="p">(</span><span class="n">truConf</span> <span class="p">,</span> <span class="n">iouT</span><span class="p">)]</span> <span class="p">)</span>
+            <span class="n">preConf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span> <span class="p">([</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">slec_conf</span><span class="p">(</span><span class="n">preConf</span> <span class="p">,</span> <span class="n">iouT</span><span class="p">)]</span> <span class="p">)</span>    
 
-            loss_ += tf.reduce_sum(tf.reduce_sum(tf.pow(truB-preB, 2), 1)   * objMask  ) * COORD 
-            loss_ += tf.reduce_sum(tf.pow(truConf- preConf, 2)              * objMask  )
-            loss_ += tf.reduce_sum(tf.pow(truConf- preConf, 2)              * nobjMask ) * NOOBJ
-            loss_ += tf.reduce_sum(tf.reduce_sum(tf.pow(truCP- preCP, 2), 1)* objMask  )
-        # clip gradient
-        return max(float(loss_ / batch_size), 1000.)
+            <span class="c1"># Obj or noobj is actually only depend on truth</span>
+            <span class="c1"># truCP = (S*S,C)</span>
+            <span class="k">def</span> <span class="nf">max_tf</span><span class="p">(</span><span class="n">raw</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="p">):</span>
+                    <span class="n">tmp</span> <span class="o">=</span> <span class="n">raw</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span>
+                    <span class="n">tmp</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+                    <span class="k">yield</span> <span class="n">tmp</span>    
 
-    def boxArea(self, box):
-        return box[:,:,2]*box[:,:,3]
+            <span class="n">objMask</span>  <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">([</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">max_tf</span><span class="p">(</span><span class="n">truCP</span><span class="p">)</span> <span class="p">])</span>
+            <span class="n">nobjMask</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">objMask</span>    
 
-    def iouTensor(self, box1, box2):
-        S, B, C, W, H = self.S, self.B, self.C, self.W, self.H
-        assert box1.get_shape() == box2.get_shape() == (S*S,B,4)
+            <span class="n">loss_</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">truB</span><span class="o">-</span><span class="n">preB</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>   <span class="o">*</span> <span class="n">objMask</span>  <span class="p">)</span> <span class="o">*</span><span class="n">COORD</span> 
+            <span class="n">loss_</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">truConf</span><span class="o">-</span> <span class="n">preConf</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>              <span class="o">*</span> <span class="n">objMask</span>  <span class="p">)</span>
+            <span class="n">loss_</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">truConf</span><span class="o">-</span> <span class="n">preConf</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>              <span class="o">*</span> <span class="n">nobjMask</span> <span class="p">)</span> <span class="o">*</span><span class="n">NOOBJ</span>
+            <span class="n">loss_</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">truCP</span><span class="o">-</span> <span class="n">preCP</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span> <span class="n">objMask</span>  <span class="p">)</span>
+        <span class="c1"># clip gradient</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">loss_</span> <span class="o">/</span> <span class="n">batch_size</span><span class="p">),</span> <span class="mf">1000.</span><span class="p">)</span>
 
-        minTop = tf.minimum(box1[:,:,0]+0.5*box1[:,:,2],
-                      box2[:,:,0]+0.5*box2[:,:,2])
-        maxBot = tf.maximum(box1[:,:,0]-0.5*box1[:,:,2],
-                      box2[:,:,0]-0.5*box2[:,:,2])
-        minR   = tf.minimum(box1[:,:,1]+0.5*box2[:,:,3],
-                      box1[:,:,1]+0.5*box2[:,:,3])
-        maxL   = tf.maximum(box1[:,:,1]-0.5*box2[:,:,3],
-                      box1[:,:,1]-0.5*box2[:,:,3])
-        # intersection
+    <span class="k">def</span> <span class="nf">boxArea</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">box</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">box</span><span class="p">[:,:,</span><span class="mi">3</span><span class="p">]</span>
 
-        #tf.clip_by_value(t, clip_value_min, clip_value_max, name=None)
+    <span class="k">def</span> <span class="nf">iouTensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box1</span><span class="p">,</span> <span class="n">box2</span><span class="p">):</span>
+        <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span>
+        <span class="k">assert</span> <span class="n">box1</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span> <span class="o">==</span> <span class="n">box2</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span> <span class="o">==</span> <span class="p">(</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
 
-        inters = tf.clip_by_value( minTop-maxBot, clip_value_min=0, clip_value_max=999)* \
-                 tf.clip_by_value( minR-maxL    , clip_value_min=0, clip_value_max=999)
-        noZero = 0.000000001 # Return IOU and avoid devide zero
-        return inters/ (self.boxArea(box1)+ self.boxArea(box2)- inters+ noZero)
+        <span class="n">minTop</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">box1</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box1</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">],</span>
+                      <span class="n">box2</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">maxBot</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">box1</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box1</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">],</span>
+                      <span class="n">box2</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">minR</span>   <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">box1</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[:,:,</span><span class="mi">3</span><span class="p">],</span>
+                      <span class="n">box1</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[:,:,</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">maxL</span>   <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">box1</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[:,:,</span><span class="mi">3</span><span class="p">],</span>
+                      <span class="n">box1</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[:,:,</span><span class="mi">3</span><span class="p">])</span>
+        <span class="c1"># intersection</span>
 
-    def iou(self,box1,box2):
-        tb = min(box1[0]+0.5*box1[2],
-                 box2[0]+0.5*box2[2])-\
-             max(box1[0]-0.5*box1[2],
-                 box2[0]-0.5*box2[2])
-        lr = min(box1[1]+0.5*box1[3],
-                 box2[1]+0.5*box2[3])-\
-             max(box1[1]-0.5*box1[3],
-                 box2[1]-0.5*box2[3])
-        if tb &lt; 0 or lr &lt; 0 : intersection = 0
-        else : intersection =  tb*lr
-        return intersection/ (box1[2]*box1[3] + box2[2]*box2[3] -intersection)
+        <span class="c1">#tf.clip_by_value(t, clip_value_min, clip_value_max, name=None)</span>
 
-    def train(self, ):
-        model = self.build()
-        loss = self.loss
-        model.compile(optimizer=RMSprop(lr=0.001), loss=loss, metrics=['accuracy'])</code></pre>
+        <span class="n">inters</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">minTop</span><span class="o">-</span><span class="n">maxBot</span><span class="p">,</span> <span class="n">clip_value_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">clip_value_max</span><span class="o">=</span><span class="mi">999</span><span class="p">)</span><span class="o">*</span> \
+                 <span class="n">tf</span><span class="o">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">minR</span><span class="o">-</span><span class="n">maxL</span>    <span class="p">,</span> <span class="n">clip_value_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">clip_value_max</span><span class="o">=</span><span class="mi">999</span><span class="p">)</span>
+        <span class="n">noZero</span> <span class="o">=</span> <span class="mf">0.000000001</span> <span class="c1"># Return IOU and avoid devide zero</span>
+        <span class="k">return</span> <span class="n">inters</span><span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">boxArea</span><span class="p">(</span><span class="n">box1</span><span class="p">)</span><span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">boxArea</span><span class="p">(</span><span class="n">box2</span><span class="p">)</span><span class="o">-</span> <span class="n">inters</span><span class="o">+</span> <span class="n">noZero</span><span class="p">)</span>
 
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+    <span class="k">def</span> <span class="nf">iou</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">box1</span><span class="p">,</span><span class="n">box2</span><span class="p">):</span>
+        <span class="n">tb</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">box1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                 <span class="n">box2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">-</span>\
+             <span class="nb">max</span><span class="p">(</span><span class="n">box1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                 <span class="n">box2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">lr</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">box1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box1</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                 <span class="n">box2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="o">-</span>\
+             <span class="nb">max</span><span class="p">(</span><span class="n">box1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box1</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                 <span class="n">box2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">tb</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">lr</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="p">:</span> <span class="n">intersection</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span> <span class="p">:</span> <span class="n">intersection</span> <span class="o">=</span>  <span class="n">tb</span><span class="o">*</span><span class="n">lr</span>
+        <span class="k">return</span> <span class="n">intersection</span><span class="o">/</span> <span class="p">(</span><span class="n">box1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">box1</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">box2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">box2</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span><span class="n">intersection</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="n">RMSprop</span><span class="p">(</span><span class="n">lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">),</span> <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">])</span>
+</pre></div>
 
 </div>
 </div>
