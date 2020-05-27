@@ -1240,13 +1240,6 @@ h6:hover .anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="A-Note-of-Word-Embedding">A Note of Word Embedding<a class="anchor-link" href="#A-Note-of-Word-Embedding">&#182;</a></h1>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="-Core-Concept-:-"><span style="color:#DF7E22"> Core Concept : </span><a class="anchor-link" href="#-Core-Concept-:-">&#182;</a></h3><ul>
 <li><p>Embedding is to transformn from the <strong><span style="color:blue">Sparse</span></strong> representations to a <strong><span style="color:blue">Higher density</span></strong> representations that contain <strong><span style="color:blue">More solid context-information</span></strong> in a <strong><span style="color:blue">Vectors space</span></strong>.</p>
 </li>
@@ -1254,27 +1247,11 @@ h6:hover .anchor-link {
 </li>
 <li><p>This tech is a kind of alternative with <strong><span style="color:blue">Autoencoder</span></strong></p>
 </li>
-<li><p>Due the Embedding learning problem usually a <strong><span style="color:blue">Unnormalized problem</span></strong>, it requires lots of computation. We actually have variable approximation-way to interpret it and implement it.</p>
+<li><p>Due the Embedding learning problem usually a <strong><span style="color:blue">Unnormalized problem</span></strong>, it requires lots of computation. We actually have variable approximation-way to interpret it and implement it. Noise Contrastive Estimation (An alternative to the Hierachical Softmax) or NCE loss ( learn by comparison ) is used.</p>
 </li>
 </ul>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Key-Words-:"><span style="color:#DF7E22">Key Words :</span><a class="anchor-link" href="#Key-Words-:">&#182;</a></h3><ul>
-<li>Continuous Bag of Words (CBOW)</li>
-<li>The Skip-Gram </li>
-<li>Hierachical Softmax : For Fast Computer with O[log(M)] where M is the population/vocabulary <ul>
-<li>Binary Tree </li>
-</ul>
-</li>
-<li>Noise Contrastive Estimation (An alternative to the Hierachical Softmax) <ul>
-<li>NCE loss ( learn by comparison ) </li>
-</ul>
-</li>
+<ul>
+<li>There are several ways to train the work embedding (1) Continuous Bag of Words (CBOW) (2) The Skip-Gram</li>
 </ul>
 
 </div>
