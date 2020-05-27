@@ -22,25 +22,25 @@
 
 
 <meta name="author" content="Kent Chiu" />
-<meta name="description" content="Summary of how to train a word-embedding." />
-<meta name="keywords" content="NLP, embedding, word embedding">
+<meta name="description" content="Reimplement YOLO in Tensorflow with abstracting the deseign as the loss-layer." />
+<meta name="keywords" content="tensorflow, implementation, object detection">
 
 <meta property="og:site_name" content="Autumn Memo"/>
-<meta property="og:title" content="Note of Word Embedding"/>
-<meta property="og:description" content="Summary of how to train a word-embedding."/>
+<meta property="og:title" content="Re-implement YOLO in Tensorflow"/>
+<meta property="og:description" content="Reimplement YOLO in Tensorflow with abstracting the deseign as the loss-layer."/>
 <meta property="og:locale" content="en_US"/>
 <meta property="og:url" content="https://kentchun33333.github.io/Re-implement YOLO in Tensorflow.html"/>
 <meta property="og:type" content="article"/>
-<meta property="article:published_time" content="2018-12-30 20:00:00+01:00"/>
+<meta property="article:published_time" content="2017-12-30 20:00:00+01:00"/>
 <meta property="article:modified_time" content=""/>
 <meta property="article:author" content="https://kentchun33333.github.io/author/kent-chiu.html">
 <meta property="article:section" content="AI Model Architectures"/>
-<meta property="article:tag" content="NLP"/>
-<meta property="article:tag" content="embedding"/>
-<meta property="article:tag" content="word embedding"/>
+<meta property="article:tag" content="tensorflow"/>
+<meta property="article:tag" content="implementation"/>
+<meta property="article:tag" content="object detection"/>
 <meta property="og:image" content="https://scontent.fsin5-1.fna.fbcdn.net/v/t1.0-1/p720x720/96215235_3403513689663854_7453417891073884160_o.jpg?_nc_cat=106&_nc_sid=dbb9e7&_nc_ohc=FFyXABpAhHQAX9b-fUS&_nc_ht=scontent.fsin5-1.fna&_nc_tp=6&oh=3f722a46a66c21fadc044d92033c0590&oe=5EED0413">
 
-  <title>Autumn Memo &ndash; Note of Word Embedding</title>
+  <title>Autumn Memo &ndash; Re-implement YOLO in Tensorflow</title>
 
 </head>
 <body>
@@ -77,14 +77,10 @@
 
 <article class="single">
   <header>
-          <div class="translations">
-    <a class="active" href="https://kentchun33333.github.io/Re-implement YOLO in Tensorflow.html">en</a>
-        <a href="https://kentchun33333.github.io/Re-implement YOLO in Tensorflow.html">en</a>
-    </div>
-
-    <h1 id="Re-implement YOLO in Tensorflow">Note of Word Embedding</h1>
+      
+    <h1 id="Re-implement YOLO in Tensorflow">Re-implement YOLO in Tensorflow</h1>
     <p>
-          Posted on Sun 30 December 2018 in <a href="https://kentchun33333.github.io/category/ai-model-architectures.html">AI Model Architectures</a>
+          Posted on Sat 30 December 2017 in <a href="https://kentchun33333.github.io/category/ai-model-architectures.html">AI Model Architectures</a>
 
 
     </p>
@@ -1244,23 +1240,9 @@ h6:hover .anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="A-Note-of-Word-Embedding">A Note of Word Embedding<a class="anchor-link" href="#A-Note-of-Word-Embedding">&#182;</a></h1>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="-Core-Concept-:-"><span style="color:#DF7E22"> Core Concept : </span><a class="anchor-link" href="#-Core-Concept-:-">&#182;</a></h3><ul>
-<li><p>Embedding is to transformn from the <strong><span style="color:blue">Sparse</span></strong> representations to a <strong><span style="color:blue">Higher density</span></strong> representations that contain <strong><span style="color:blue">More solid context-information</span></strong> in a <strong><span style="color:blue">Vectors space</span></strong>.</p>
-</li>
-<li><p>The original ideal is to solve the sparse representation that we used one-hot vector to represent each word in the Natural Language Process (NPL-domain)</p>
-</li>
-<li><p>This tech is a kind of alternative with <strong><span style="color:blue">Autoencoder</span></strong></p>
-</li>
-<li><p>Due the Embedding learning problem usually a <strong><span style="color:blue">Unnormalized problem</span></strong>, it requires lots of computation. We actually have variable approximation-way to interpret it and implement it.</p>
-</li>
-</ul>
+<h3 id="Introduction">Introduction<a class="anchor-link" href="#Introduction">&#182;</a></h3><p>Recently <a href="https://arxiv.org/pdf/1506.02640v5.pdf">YOLO</a> and <a href="https://arxiv.org/pdf/1512.02325v2.pdf">SSD</a> have been seen as the most state-of-art algorithms on object detection in computer vision. They make a great progress on frame-per-second (FPS) with decent mean-average-perception (mAP).</p>
+<p>One of their main strategy is actually to treat the detection problem as an regression. This ideal seems to be original from <a href="https://arxiv.org/pdf/1312.6229v4.pdf">OverFeat</a> and be strongly boosted by YOLO. Then SSD is a following work that combine the ideal with region-proposal-network from <a href="https://arxiv.org/pdf/1504.08083v2.pdf">FastRCNN</a> to make a trade-off on mAP vs FPS.</p>
+<p>In this article, I am going to share how I reimplemet YOLO with tensorflow and what I have learned from YOLO strategy. My work is actually inspired by many other works. Please check these amazing works in reference section.</p>
 
 </div>
 </div>
@@ -1268,18 +1250,104 @@ h6:hover .anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Key-Words-:"><span style="color:#DF7E22">Key Words :</span><a class="anchor-link" href="#Key-Words-:">&#182;</a></h3><ul>
-<li>Continuous Bag of Words (CBOW)</li>
-<li>The Skip-Gram </li>
-<li>Hierachical Softmax : For Fast Computer with O[log(M)] where M is the population/vocabulary <ul>
-<li>Binary Tree </li>
+<iframe width="100%" height="315"
+src="https://www.youtube.com/embed/NM6lrxy0bxs" 
+frameborder="0" 
+allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
+allowfullscreen></iframe>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="1.-Key-Concept">1. Key Concept<a class="anchor-link" href="#1.-Key-Concept">&#182;</a></h3><ul>
+<li><p>The key concept of YOLO-v1 could be divied into 2 parts.</p>
+<ul>
+<li>the design of encoded-output-tensor</li>
+<li>the loss to make this encode-output-tensor trainable.</li>
 </ul>
 </li>
-<li>Noise Contrastive Estimation (An alternative to the Hierachical Softmax) <ul>
-<li>NCE loss ( learn by comparison ) </li>
+<li><p>The process of encoded tensor is kinds handcafted and is <strong>independent to</strong> the convnet itself. We could actually to think yolo-v1 is trying to let model to predict a better representation of BBOX output that better fitting the nature of object-detection. But since the output-tensor is kind of larger/sparse, so a coressponding customized loss are proprossed to solve it.</p>
+</li>
+</ul>
+<h3 id="2-Design-of-Encoded-Output-Tensor">2 Design of Encoded-Output-Tensor<a class="anchor-link" href="#2-Design-of-Encoded-Output-Tensor">&#182;</a></h3><ul>
+<li>The output tensor is composed by<ul>
+<li>A designed grid system </li>
+<li>bbox representation</li>
+<li>probability of each object in each grid</li>
 </ul>
 </li>
 </ul>
+<h4 id="What-is-the-grid-system-in-yolo?">What is the grid system in yolo?<a class="anchor-link" href="#What-is-the-grid-system-in-yolo?">&#182;</a></h4><ul>
+<li>YOLO divides the input image into an $S × S$ grid.Ex with 448 as image-width/height and S=7, we have (448/7, 448/7) = (64,64) in resolution. If the center of an object falls into a grid cell, the grid cell is responsible for detecting that object**. $C$ stands for how many class/object we are going to detect. </li>
+</ul>
+$$ \text{Grid Numbers} : S \times S \in \mathbb{R}^{1} $$<h4 id="What-is-BBox-representation?">What is BBox representation?<a class="anchor-link" href="#What-is-BBox-representation?">&#182;</a></h4><ul>
+<li>In single grid, we predict $B$ BBox. Each BBox is representign a 5 dim tensor (x, y, wid, height, confidence-score). At first glance, it might be a little bit redundant for predicting multi-boxes in single grid.However, it is actually could enpower the capability of convnet, and by decent setting of selective loss function, it gives more generalibily to the convnet.</li>
+</ul>
+$$ \text{BBox Numbers} : B \in \mathbb{R}^{5} $$$$ B \equiv \{\ \text{x1, y1, wid, height, confidence score}\, \} $$<h4 id="What-is-Confidence-Score-in-BBox-representaton-?">What is Confidence-Score in BBox representaton ?<a class="anchor-link" href="#What-is-Confidence-Score-in-BBox-representaton-?">&#182;</a></h4><ul>
+<li><p>confidence-score reflect how confident the model is that the box contains an object andalso how accurate it thinks the box is that it predicts. If <strong>no object</strong> exists in that cell, the <strong>confidence scores should be zero</strong>. Accordingly, we want the confidence score to equal <strong>the intersection over union (IOU)</strong> between the predicted box and the ground truth</p>
+</li>
+<li><p>$
+\Pr ( \text{Confidence-Score} ) =
+\begin{cases}
+1,&amp; \text{ if there are objects } \\
+0,&amp; \text{ if no object exiests }
+\end{cases}</p>
+</li>
+<li>$</li>
+</ul>
+<h4 id="What-is-the-probability-of-each-object-in-each-grid?">What is the probability of each object in each grid?<a class="anchor-link" href="#What-is-the-probability-of-each-object-in-each-grid?">&#182;</a></h4><ul>
+<li>They are actually simialr the tradicitonal one-hot-encoding output, the difference is we will have it in every grid.</li>
+</ul>
+$$ \text{Number of Objects } : C \in \mathbb{R}^{1}$$<h4 id="What-is-the-size-of-this-encoded-tensor?">What is the size of this encoded tensor?<a class="anchor-link" href="#What-is-the-size-of-this-encoded-tensor?">&#182;</a></h4><ul>
+<li>Finally, the ouput of yolo-backbond is a encoded tensor with the size $S*S*(B*5+C)$, notice that much more sparse that triditional one-hot-vector encoder due to the tensor dimension is basically larger. We only predict one set of class probabilities per grid cell, regardless of the number of boxes B. </li>
+</ul>
+$$ \text{Input } : X \in \mathbb{R}^{448\times448\times3}$$$$ \text{Output } : Y \in \mathbb{R}^{S\times S\times (B\times5+C)}$$$$ Y = F_\text{cnn}(\text{ X }) $$
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="3.-Specific-Loss-Design">3. Specific Loss Design<a class="anchor-link" href="#3.-Specific-Loss-Design">&#182;</a></h3><ul>
+<li>The Loss could be decomposed to 3 part <ul>
+<li>(1) sum-squared error BBox position and size information</li>
+<li>(2) sum-squared error BBox object confidence-score</li>
+<li>(3) sum-squared error of wich Class is in this grid.</li>
+</ul>
+</li>
+</ul>
+<h4 id="What-is-the-loss-of-BBox-position-and-size-information?">What is the loss of BBox position and size information?<a class="anchor-link" href="#What-is-the-loss-of-BBox-position-and-size-information?">&#182;</a></h4>$$
+\lambda_{coord}\sum\limits_{i=0}^{S^2}{\sum\limits_{j=0}^{B}{1_{ij}^{obj}({(x_i -  \hat{x_i})^2 + (y_j + \hat{y_j})^2}})}
+$$$$
++{\lambda_{coord}\sum\limits_{i=0}^{S^2}\sum\limits_{j=0}^{B}1_{ij}^{obj}((\sqrt{w_i} - \sqrt{\hat{w_i}})^2 +  (\sqrt{h_i} - \sqrt{\hat{h_i}})^2}
+$$<h4 id="What-is-the-loss-sum-squared-error-BBox-object-confidence-score?">What is the loss sum-squared error BBox object confidence-score?<a class="anchor-link" href="#What-is-the-loss-sum-squared-error-BBox-object-confidence-score?">&#182;</a></h4>$$
++\sum\limits_{i=0}^{S^2}\sum\limits_{j=0}^{B}1_{ij}^{obj}(c_i - \hat{c_i})^2
+$$$$
++\lambda_{noobj}\sum\limits_{i=0}^{S^2}\sum\limits_{j=0}^{B}1_{ij}^{noobj}(c_i - \hat{c_i})^2
+$$<h4 id="What-is-the-loss-of-wich-Class-is-in-this-grid?">What is the loss of wich Class is in this grid?<a class="anchor-link" href="#What-is-the-loss-of-wich-Class-is-in-this-grid?">&#182;</a></h4>$$
++\sum\limits_{i =0}^{S^2}1_{i}^{obj}({\sum\limits_{c \in classes}(p_i(c)-\hat{p_i}(c))^2})
+$$<h4 id="Why-there-are-some-special-coifficient?">Why there are some special coifficient?<a class="anchor-link" href="#Why-there-are-some-special-coifficient?">&#182;</a></h4><p>Original auther use <strong>sum-squared error</strong> because it is easy to optimize, however it does not perfectly align with our goal of maximizing average precision. It weights <strong>localization error</strong> equally with <strong>classification error</strong> which may not be ideal.</p>
+<p>In (2) Orignal auther set <strong>λcoord = 5</strong> and <strong>λnoobj = .5.</strong> to increase the loss from bounding box coordinate predictions and decrease the loss from confi-dence predictions for boxes that don’t contain objects.</p>
+<p>They want to remedy the model instability, which is caused by many grid cells do not contain any object. This pushes the <strong>“confidence” scores</strong> of those cells towards zero, often overpowering the gradient from cells that do contain objects.</p>
+<p>Notice that: YOLO predicts <strong>multiple bounding boxes per grid cell.</strong> At training time we <strong>only want one bounding box predictor to be responsible for each object.</strong> We assign one predictor to be “responsible” for predicting an object based on which prediction has the <strong>highest current IOU with the ground truth.</strong>  This leads to specialization between the bounding box predictors. Each predictor gets better at predicting certain sizes, aspect ratios, or classes of object, improving overall recall.</p>
+<h4 id="Overall-Math-Expression">Overall Math Expression<a class="anchor-link" href="#Overall-Math-Expression">&#182;</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+$$
+\lambda_{coord}\sum\limits_{i=0}^{S^2}{\sum\limits_{j=0}^{B}{1_{ij}^{obj} } ({(x_i -  \hat{x_i})^2 + (y_j + \hat{y_j})^2 + (\sqrt{w_i} - \sqrt{\hat{w_i}})^2 + (\sqrt{h_i} - \sqrt{\hat{h_i}})^2)}}
+$$$$
++\sum\limits_{i=0}^{S^2}\sum\limits_{j=0}^{B}1_{ij}^{obj}(c_i - \hat{c_i})^2
+$$$$
++\lambda_{noobj}\sum\limits_{i=0}^{S^2}\sum\limits_{j=0}^{B}1_{ij}^{noobj}(c_i - \hat{c_i})^2
+$$$$
++\sum\limits_{i =0}^{S^2}1_{i}^{obj}({\sum\limits_{c \in classes}(p_i(c)-\hat{p_i}(c))^2})
+$$<p>where $1^\text{obj}_{i}$ denotes if object appears in cell $i$ and $1^{obj}_{ij}$ denotes that the $j_{th}$ bounding box predictor in cell $i$ is “responsible” for that prediction.</p>
 
 </div>
 </div>
@@ -1287,69 +1355,7 @@ h6:hover .anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Math-Interpretation-:-"><span style="color:#DF7E22">Math Interpretation : </span><a class="anchor-link" href="#Math-Interpretation-:-">&#182;</a></h3>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<ul>
-<li><p><strong><span style="color:blue"> Neural Probabilistic Language Models </span></strong></p>
-<ul>
-<li>$ P_{\theta}^{h}(w) = \frac{exp(s_{\theta}(w, h))}{\sum_{\hat{w}} exp(s_{\theta}(w, h))}$</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li><p><strong><span style="color:blue"> Scalable Log-bilinear Models </span></strong></p>
-<ul>
-<li>$ \hat{q}(h) = \sum_{i=1}^{n} c_{i} \odot r_{w_{i}} $ </li>
-<li>$c_{i} $ : weight vector for the context word in position i </li>
-<li>$r_{w_{i}} $ : context word</li>
-<li>$ \odot $ denotes element-wise multiplication. </li>
-<li>The context can consist of words preceding, following, or surrounding the word being predicted. </li>
-</ul>
-</li>
-</ul>
-<ul>
-<li><p><strong><span style="color:blue"> The Scoring Function </span></strong></p>
-<ul>
-<li>$ s_{\theta} (w,h) = \hat{q}(h)^\intercal q_{w} + b_{w}$</li>
-<li>which is to compute the similarity between the predicted feature vector and one for word w</li>
-<li>$ \hat{q}(h) $ is the predict word.</li>
-<li>$ q_{w} $ is the targeted word.</li>
-</ul>
-</li>
-<li><p>Predicting an n-word context requires modelling the joint distribution of n words</p>
-<ul>
-<li>$ P^{w}_{\theta}(h) = \Pi_{i=1}^{n}P_{i, \theta}^{w}(w_{i})$</li>
-</ul>
-</li>
-<li><p>The context word distributions $ P_{i, \theta}^{w}(w_{i}) $ are simply vLBL models that condition on the current word</p>
-<ul>
-<li>$ s_{i, \theta}(w_{i}, w) = (c_{i} \odot r_{w_{i}})^\intercal q_{w_{i}} + b_{w_{i}}  $</li>
-</ul>
-</li>
-<li><p><strong><span style="color:blue"> Simpler version that without position-dependent weights, defined by the scoring function </span></strong></p>
-<ul>
-<li>$ s_{i, \theta} (w_{i},w) = r_{w}^\intercal q_{w_{i}} + b_{w_{i}}$ </li>
-<li>The resulting model is the non-hierarchical counterpart of the Skip-gram model</li>
-</ul>
-</li>
-<li><p><strong><span style="color:blue"> Noise Constrastive estimation </span></strong></p>
-<ul>
-<li>Fitting unnormalized models</li>
-<li>NCE is based on the reduction of density estimation to probabilistic binary classification.</li>
-<li>Train a logistic regression classifier to discriminate between samples from the data distribution and samples from some “noise” distribution, based on the ratio of probabilities of the sample under the model and the noise distribution</li>
-<li>Suppose we would like to learn the distribution of words for some specific context h, denoted by $P_{h}(w)$. </li>
-<li>Treating the training data as positive examples and samples from a noise distribution $P_{n}(w)$ as negative examples.</li>
-<li>Assume noise samples are k times more frequent than data samples</li>
-<li>Use the (global) unigram distribution of the training data as the noise distribution.</li>
-<li>$ P^{h}(D=1 \mid w,\theta) = \frac{P^{h}_{\theta}(w)}{P^{h}_{\theta}(w)+ kP_{n}(w)} = \sigma (\nabla s_{\theta}(w,h)) $</li>
-</ul>
-</li>
-</ul>
+<h3 id="4.-YOLO-Loss-Layer-Implementation">4. YOLO Loss Layer Implementation<a class="anchor-link" href="#4.-YOLO-Loss-Layer-Implementation">&#182;</a></h3><p>The following are my partial implementation of yolo-v1.</p>
 
 </div>
 </div>
@@ -1357,15 +1363,296 @@ h6:hover .anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Reference-:-"><span style="color:#DF7E22">Reference : </span><a class="anchor-link" href="#Reference-:-">&#182;</a></h3><ul>
-<li><p><a href="https://ayearofai.com/lenny-2-autoencoders-and-word-embeddings-oh-my-576403b0113a#.rcrh3ybeb">A nice blog : Word-Embbeding and Autoencoder</a></p>
-</li>
-<li><p><a href="https://www.tensorflow.org/versions/r0.12/tutorials/word2vec/index.html">Tensorflow tutorials</a></p>
-</li>
-<li><p><a href="http://www.jeyzhang.com/tensorflow-learning-notes-3.html">TF tutirial in chinese</a></p>
-</li>
-<li><p><a href="https://github.com/deborausujono/word2vecpy/blob/master/word2vec.py">A nice script that implement embedding with Skip-gram and COBV with hierachical softmax</a></p>
-</li>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">keras.engine</span> <span class="kn">import</span> <span class="n">Layer</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span> 
+
+<span class="c1"># =============================================================================</span>
+<span class="c1"># encode : (Ground Truth Box | Image ) -&gt; Ground Truth Y</span>
+<span class="c1"># decode : Predict Tensor Y -&gt;</span>
+<span class="c1"># the encode and decode are symmetric in logic</span>
+<span class="c1"># =============================================================================</span>
+
+
+<span class="k">class</span> <span class="nc">YoloDetector</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Description : </span>
+<span class="sd">    this class inherit keras-layer and providse the connectivity of tensorflow </span>
+<span class="sd">    this class implement the customize yolo-loss &amp; encode &amp; decode from [paper]</span>
+<span class="sd">    (https://pjreddie.com/media/files/papers/yolo.pdf) for multi-object recog.  </span>
+
+<span class="sd">    Usage: </span>
+<span class="sd">      loss = YoloDetector.loss(true_y, pred_y, batch_size=batch_size) # tf-stle slice must have same rank</span>
+<span class="sd">      summary_op = get_summary_op(model, loss)</span>
+<span class="sd">      ...</span>
+<span class="sd">      _, lossN, summary_log = sess.run([train_step,loss,summary_op], feed_dict =</span>
+<span class="sd">            {input_tensor : images_feed, true_y :labels_feed, K.learning_phase(): 0})</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">rImgW</span><span class="o">=</span><span class="mi">448</span><span class="p">,</span> <span class="n">rImgH</span><span class="o">=</span><span class="mi">448</span><span class="p">,</span> <span class="n">S</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">B</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">classMap</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="c1"># C = number of class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">S</span> <span class="o">=</span> <span class="n">S</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">C</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">rImgW</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">=</span> <span class="n">rImgH</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iou_threshold</span><span class="o">=</span><span class="mf">0.1</span>
+        <span class="k">if</span> <span class="n">classMap</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">classMap</span> <span class="o">=</span> <span class="n">classMap</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">classMap</span>  <span class="o">=</span>  <span class="p">[</span><span class="s2">&quot;aeroplane&quot;</span><span class="p">,</span> <span class="s2">&quot;bicycle&quot;</span><span class="p">,</span> <span class="s2">&quot;bird&quot;</span><span class="p">,</span> <span class="s2">&quot;boat&quot;</span><span class="p">,</span> <span class="s2">&quot;bottle&quot;</span><span class="p">,</span> 
+                           <span class="s2">&quot;bus&quot;</span><span class="p">,</span> <span class="s2">&quot;car&quot;</span><span class="p">,</span> <span class="s2">&quot;cat&quot;</span><span class="p">,</span> <span class="s2">&quot;chair&quot;</span><span class="p">,</span> <span class="s2">&quot;cow&quot;</span><span class="p">,</span> <span class="s2">&quot;diningtable&quot;</span><span class="p">,</span>
+                           <span class="s2">&quot;dog&quot;</span><span class="p">,</span> <span class="s2">&quot;horse&quot;</span><span class="p">,</span> <span class="s2">&quot;motorbike&quot;</span><span class="p">,</span> <span class="s2">&quot;person&quot;</span><span class="p">,</span> <span class="s2">&quot;pottedplant&quot;</span><span class="p">,</span>
+                           <span class="s2">&quot;sheep&quot;</span><span class="p">,</span> <span class="s2">&quot;sofa&quot;</span><span class="p">,</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span><span class="s2">&quot;tvmonitor&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">set_class_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mappingList</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">mappingList</span><span class="p">)</span><span class="o">==</span><span class="nb">list</span> <span class="p">;</span> <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">mappingList</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classMap</span><span class="o">=</span><span class="n">mappingList</span>
+
+    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">annotations</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; annotations : nested list contained</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span>
+
+        <span class="c1"># init</span>
+        <span class="n">classProb</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">S</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">C</span>   <span class="p">])</span>
+        <span class="n">confidence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">S</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">B</span>   <span class="p">])</span>
+        <span class="n">boxes</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">S</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">classid</span><span class="p">,</span> <span class="n">cX</span><span class="p">,</span> <span class="n">cY</span><span class="p">,</span> <span class="n">boxW</span><span class="p">,</span> <span class="n">boxH</span> <span class="ow">in</span> <span class="n">annotations</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">int</span><span class="p">(</span><span class="n">classid</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">C</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># Target the center grid</span>
+            <span class="n">gridX</span><span class="p">,</span> <span class="n">gridY</span> <span class="o">=</span> <span class="n">W</span><span class="o">/</span><span class="n">S</span><span class="p">,</span> <span class="n">H</span><span class="o">/</span><span class="n">S</span>
+            <span class="n">tarIdX</span><span class="p">,</span> <span class="n">tarIdY</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cX</span><span class="o">/</span><span class="n">gridX</span><span class="p">)</span> <span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">cY</span><span class="o">/</span><span class="n">gridY</span><span class="p">)</span>    
+
+            <span class="c1"># assign the true value</span>
+            <span class="n">classProb</span><span class="p">[</span><span class="n">tarIdX</span><span class="p">,</span> <span class="n">tarIdY</span><span class="p">,</span> <span class="n">classid</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="n">confidence</span><span class="p">[</span><span class="n">tarIdX</span><span class="p">,</span> <span class="n">tarIdY</span><span class="p">,</span> <span class="p">:</span>      <span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>    
+
+            <span class="c1"># x,y,w,h</span>
+            <span class="n">boxes</span><span class="p">[</span><span class="n">tarIdX</span><span class="p">,</span> <span class="n">tarIdY</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cX</span><span class="o">/</span><span class="n">gridX</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">cX</span><span class="o">/</span><span class="n">gridX</span><span class="p">)</span>
+            <span class="n">boxes</span><span class="p">[</span><span class="n">tarIdX</span><span class="p">,</span> <span class="n">tarIdY</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cY</span><span class="o">/</span><span class="n">gridY</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">cY</span><span class="o">/</span><span class="n">gridY</span><span class="p">)</span>
+            <span class="n">boxes</span><span class="p">[</span><span class="n">tarIdX</span><span class="p">,</span> <span class="n">tarIdY</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">boxW</span><span class="o">/</span><span class="n">W</span><span class="p">)</span>
+            <span class="n">boxes</span><span class="p">[</span><span class="n">tarIdX</span><span class="p">,</span> <span class="n">tarIdY</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">boxH</span><span class="o">/</span><span class="n">H</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">classProb</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span><span class="n">confidence</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span>
+                               <span class="n">boxes</span><span class="o">.</span><span class="n">flatten</span><span class="p">()])</span>
+
+    <span class="k">def</span> <span class="nf">traDim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Dimension Transformation of Tensor &#39;&#39;&#39;</span>
+        <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="mi">3</span> <span class="p">:</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
+            <span class="n">classProb</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">C</span><span class="p">]</span>         <span class="p">,</span> <span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="n">C</span><span class="p">))</span>
+            <span class="n">confidence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">C</span><span class="p">:</span> <span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="p">(</span><span class="n">C</span><span class="o">+</span><span class="n">B</span><span class="p">)],</span> <span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="n">B</span><span class="p">))</span> 
+            <span class="n">boxes</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="p">(</span><span class="n">C</span><span class="o">+</span><span class="n">B</span><span class="p">):]</span>      <span class="p">,</span> <span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="mi">2</span> <span class="p">:</span>
+            <span class="n">classProb</span>  <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">C</span><span class="p">]</span>         <span class="p">,</span> <span class="p">(</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="p">,</span><span class="n">C</span><span class="p">))</span>
+            <span class="n">confidence</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">C</span><span class="p">:</span> <span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="p">(</span><span class="n">C</span><span class="o">+</span><span class="n">B</span><span class="p">)],</span> <span class="p">(</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="p">,</span><span class="n">B</span><span class="p">))</span> 
+            <span class="n">boxes</span>      <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="p">(</span><span class="n">C</span><span class="o">+</span><span class="n">B</span><span class="p">):]</span>      <span class="p">,</span> <span class="p">(</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">classProb</span><span class="p">,</span> <span class="n">confidence</span><span class="p">,</span> <span class="n">boxes</span>        
+
+    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="mf">8e-25</span> <span class="p">,</span><span class="n">only_objectness</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        this part is modified from https://github.com/gliese581gg/YOLO_tensorflow</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span>
+        <span class="n">classProb</span> <span class="p">,</span><span class="n">confidence</span><span class="p">,</span> <span class="n">boxes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traDim</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="c1"># offset (7,7,2) mask, retrieve from offset</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">S</span><span class="p">)]</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">B</span><span class="p">),(</span><span class="n">B</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="n">S</span><span class="p">)),(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">offset</span>
+        <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">offset</span><span class="p">,(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+
+        <span class="c1"># retrieve from sqrt</span>
+        <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">2</span><span class="p">],</span><span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">3</span><span class="p">],</span><span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">3</span><span class="p">])</span>
+
+        <span class="c1"># retrieve from normalization</span>
+        <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="p">;</span> <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span>
+        <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="p">;</span> <span class="n">boxes</span><span class="p">[:,:,:,</span><span class="mi">3</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span>
+
+        <span class="c1"># Pr(class|Obj) * Pr(obj) = Evaluate Proba</span>
+        <span class="n">eProbs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">S</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">C</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">B</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">C</span><span class="p">):</span>
+                <span class="n">eProbs</span><span class="p">[:,:,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">classProb</span><span class="p">[:,:,</span><span class="n">j</span><span class="p">],</span><span class="n">confidence</span><span class="p">[:,:,</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="c1"># Filter</span>
+        <span class="n">filter_mat_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">eProbs</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;bool&#39;</span><span class="p">)</span>
+        <span class="n">filter_mat_boxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">filter_mat_probs</span><span class="p">)</span>
+
+        <span class="n">boxes_filtered</span> <span class="o">=</span> <span class="n">boxes</span><span class="p">[</span><span class="n">filter_mat_boxes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                               <span class="n">filter_mat_boxes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                               <span class="n">filter_mat_boxes</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+
+        <span class="n">probs_filtered</span> <span class="o">=</span> <span class="n">eProbs</span><span class="p">[</span><span class="n">filter_mat_probs</span><span class="p">]</span>
+
+        <span class="n">classes_num_filtered</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">filter_mat_probs</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">3</span><span class="p">)[</span>
+            <span class="n">filter_mat_boxes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">filter_mat_boxes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">filter_mat_boxes</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+
+        <span class="n">argsort</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">probs_filtered</span><span class="p">))[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">boxes_filtered</span> <span class="o">=</span> <span class="n">boxes_filtered</span><span class="p">[</span><span class="n">argsort</span><span class="p">]</span>
+        <span class="n">probs_filtered</span> <span class="o">=</span> <span class="n">probs_filtered</span><span class="p">[</span><span class="n">argsort</span><span class="p">]</span>
+        <span class="n">classes_num_filtered</span> <span class="o">=</span> <span class="n">classes_num_filtered</span><span class="p">[</span><span class="n">argsort</span><span class="p">]</span>
+
+        <span class="c1"># select the best pridect box with the ideal similar to nms</span>
+        <span class="c1"># if there are 2 same probs, not likely, random pick one</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">boxes_filtered</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">probs_filtered</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">:</span> <span class="k">continue</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">boxes_filtered</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">iou</span><span class="p">(</span><span class="n">boxes_filtered</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">boxes_filtered</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">iou_threshold</span> <span class="p">:</span>
+                    <span class="n">probs_filtered</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="n">filter_iou</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">probs_filtered</span><span class="o">&gt;</span><span class="mf">0.0</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;bool&#39;</span><span class="p">)</span>
+        <span class="n">boxes_filtered</span> <span class="o">=</span> <span class="n">boxes_filtered</span><span class="p">[</span><span class="n">filter_iou</span><span class="p">]</span>
+        <span class="n">probs_filtered</span> <span class="o">=</span> <span class="n">probs_filtered</span><span class="p">[</span><span class="n">filter_iou</span><span class="p">]</span>
+        <span class="n">classes_num_filtered</span> <span class="o">=</span> <span class="n">classes_num_filtered</span><span class="p">[</span><span class="n">filter_iou</span><span class="p">]</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">boxes_filtered</span><span class="p">)):</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">classMap</span><span class="p">[</span><span class="n">classes_num_filtered</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span>
+                           <span class="n">boxes_filtered</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                           <span class="n">boxes_filtered</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                           <span class="n">boxes_filtered</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span>
+                           <span class="n">boxes_filtered</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
+                           <span class="n">probs_filtered</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">truY_</span><span class="p">,</span> <span class="n">preY_</span><span class="p">,</span> <span class="n">COORD</span><span class="o">=</span><span class="mf">5.</span> <span class="p">,</span> <span class="n">NOOBJ</span><span class="o">=.</span><span class="mi">5</span> <span class="p">,</span> <span class="n">loss_</span><span class="o">=</span><span class="mi">0</span> <span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        [description]</span>
+<span class="sd">        - mini-batch optimization</span>
+<span class="sd">        - the output of loss-function should &gt;= 0</span>
+<span class="sd">        - use avg-loss of batch-size</span>
+<span class="sd">        - max-gradient clip with loss max =1000.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span>
+
+        <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">):</span>
+            <span class="n">truY</span> <span class="o">=</span> <span class="n">truY_</span><span class="p">[</span><span class="n">batch</span><span class="p">,:]</span>
+            <span class="n">preY</span> <span class="o">=</span> <span class="n">preY_</span><span class="p">[</span><span class="n">batch</span><span class="p">,:]</span>
+
+            <span class="n">truCP</span> <span class="p">,</span><span class="n">truConf</span><span class="p">,</span> <span class="n">truB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traDim</span><span class="p">(</span><span class="n">truY</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">preCP</span> <span class="p">,</span><span class="n">preConf</span><span class="p">,</span> <span class="n">preB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traDim</span><span class="p">(</span><span class="n">preY</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>    
+
+            <span class="c1">#print truCP    </span>
+
+            <span class="c1"># Select for responsible box which with max IOU</span>
+            <span class="n">iouT</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iouTensor</span><span class="p">(</span><span class="n">truB</span><span class="p">,</span><span class="n">preB</span><span class="p">)</span>           <span class="c1"># iouT (7*7,2)</span>
+            <span class="n">iouT</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">iouT</span><span class="p">,</span> <span class="n">dimension</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># (7*7)    </span>
+
+            <span class="c1"># tf.cast(x, dtype, name=None)</span>
+            <span class="k">def</span> <span class="nf">slec_Box</span><span class="p">(</span><span class="n">raw</span> <span class="p">,</span> <span class="n">iouT</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="p">):</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="n">iouT</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>    
+
+                    <span class="c1"># flatten input 2D </span>
+                    <span class="n">raw</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">raw</span><span class="p">,[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>     
+
+                    <span class="c1"># cast the idx to the right tyle</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]),</span> <span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+                    <span class="n">idx_flattened</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="n">B</span><span class="o">*</span><span class="mi">4</span><span class="o">+</span><span class="n">j</span><span class="p">)</span>              
+                    <span class="k">yield</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">idx_flattened</span><span class="p">)</span>    
+
+            <span class="k">def</span> <span class="nf">slec_conf</span><span class="p">(</span><span class="n">raw</span> <span class="p">,</span> <span class="n">iouT</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="p">):</span>
+                    <span class="n">j</span> <span class="o">=</span> <span class="n">iouT</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>    
+
+                    <span class="c1"># flatten input 2D </span>
+                    <span class="n">raw</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">raw</span><span class="p">,[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>     
+
+                    <span class="c1"># cast the idx to the right tyle</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mi">0</span><span class="p">]),</span> <span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+                    <span class="n">idx_flattened</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="n">B</span><span class="o">+</span><span class="n">j</span><span class="p">)</span>              
+                    <span class="k">yield</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">idx_flattened</span><span class="p">)</span>
+            <span class="c1"># https://github.com/tensorflow/tensorflow/issues/206</span>
+            <span class="n">truB</span>    <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span> <span class="p">([</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">slec_Box</span> <span class="p">(</span><span class="n">truB</span>    <span class="p">,</span> <span class="n">iouT</span><span class="p">)]</span> <span class="p">)</span>
+            <span class="n">preB</span>    <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span> <span class="p">([</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">slec_Box</span> <span class="p">(</span><span class="n">preB</span>    <span class="p">,</span> <span class="n">iouT</span><span class="p">)]</span> <span class="p">)</span>
+            <span class="n">truConf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span> <span class="p">([</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">slec_conf</span><span class="p">(</span><span class="n">truConf</span> <span class="p">,</span> <span class="n">iouT</span><span class="p">)]</span> <span class="p">)</span>
+            <span class="n">preConf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span> <span class="p">([</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">slec_conf</span><span class="p">(</span><span class="n">preConf</span> <span class="p">,</span> <span class="n">iouT</span><span class="p">)]</span> <span class="p">)</span>    
+
+            <span class="c1"># Obj or noobj is actually only depend on truth</span>
+            <span class="c1"># truCP = (S*S,C)</span>
+            <span class="k">def</span> <span class="nf">max_tf</span><span class="p">(</span><span class="n">raw</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="p">):</span>
+                    <span class="n">tmp</span> <span class="o">=</span> <span class="n">raw</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span>
+                    <span class="n">tmp</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+                    <span class="k">yield</span> <span class="n">tmp</span>    
+
+            <span class="n">objMask</span>  <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">pack</span><span class="p">([</span> <span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">max_tf</span><span class="p">(</span><span class="n">truCP</span><span class="p">)</span> <span class="p">])</span>
+            <span class="n">nobjMask</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">objMask</span>    
+
+            <span class="n">loss_</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">truB</span><span class="o">-</span><span class="n">preB</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>   <span class="o">*</span> <span class="n">objMask</span>  <span class="p">)</span> <span class="o">*</span><span class="n">COORD</span> 
+            <span class="n">loss_</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">truConf</span><span class="o">-</span> <span class="n">preConf</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>              <span class="o">*</span> <span class="n">objMask</span>  <span class="p">)</span>
+            <span class="n">loss_</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">truConf</span><span class="o">-</span> <span class="n">preConf</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>              <span class="o">*</span> <span class="n">nobjMask</span> <span class="p">)</span> <span class="o">*</span><span class="n">NOOBJ</span>
+            <span class="n">loss_</span> <span class="o">+=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">truCP</span><span class="o">-</span> <span class="n">preCP</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span> <span class="n">objMask</span>  <span class="p">)</span>
+        <span class="c1"># clip gradient</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">loss_</span> <span class="o">/</span> <span class="n">batch_size</span><span class="p">),</span> <span class="mf">1000.</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">boxArea</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">box</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">box</span><span class="p">[:,:,</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">iouTensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">box1</span><span class="p">,</span> <span class="n">box2</span><span class="p">):</span>
+        <span class="n">S</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">S</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span>
+        <span class="k">assert</span> <span class="n">box1</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span> <span class="o">==</span> <span class="n">box2</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span> <span class="o">==</span> <span class="p">(</span><span class="n">S</span><span class="o">*</span><span class="n">S</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="n">minTop</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">box1</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box1</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">],</span>
+                      <span class="n">box2</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">maxBot</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">box1</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box1</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">],</span>
+                      <span class="n">box2</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">minR</span>   <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">box1</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[:,:,</span><span class="mi">3</span><span class="p">],</span>
+                      <span class="n">box1</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[:,:,</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">maxL</span>   <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">box1</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[:,:,</span><span class="mi">3</span><span class="p">],</span>
+                      <span class="n">box1</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[:,:,</span><span class="mi">3</span><span class="p">])</span>
+        <span class="c1"># intersection</span>
+
+        <span class="c1">#tf.clip_by_value(t, clip_value_min, clip_value_max, name=None)</span>
+
+        <span class="n">inters</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">minTop</span><span class="o">-</span><span class="n">maxBot</span><span class="p">,</span> <span class="n">clip_value_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">clip_value_max</span><span class="o">=</span><span class="mi">999</span><span class="p">)</span><span class="o">*</span> \
+                 <span class="n">tf</span><span class="o">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">minR</span><span class="o">-</span><span class="n">maxL</span>    <span class="p">,</span> <span class="n">clip_value_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">clip_value_max</span><span class="o">=</span><span class="mi">999</span><span class="p">)</span>
+        <span class="n">noZero</span> <span class="o">=</span> <span class="mf">0.000000001</span> <span class="c1"># Return IOU and avoid devide zero</span>
+        <span class="k">return</span> <span class="n">inters</span><span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">boxArea</span><span class="p">(</span><span class="n">box1</span><span class="p">)</span><span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">boxArea</span><span class="p">(</span><span class="n">box2</span><span class="p">)</span><span class="o">-</span> <span class="n">inters</span><span class="o">+</span> <span class="n">noZero</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">iou</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">box1</span><span class="p">,</span><span class="n">box2</span><span class="p">):</span>
+        <span class="n">tb</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">box1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                 <span class="n">box2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">-</span>\
+             <span class="nb">max</span><span class="p">(</span><span class="n">box1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                 <span class="n">box2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">lr</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">box1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box1</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                 <span class="n">box2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="o">-</span>\
+             <span class="nb">max</span><span class="p">(</span><span class="n">box1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box1</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                 <span class="n">box2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="n">box2</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">tb</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">lr</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="p">:</span> <span class="n">intersection</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span> <span class="p">:</span> <span class="n">intersection</span> <span class="o">=</span>  <span class="n">tb</span><span class="o">*</span><span class="n">lr</span>
+        <span class="k">return</span> <span class="n">intersection</span><span class="o">/</span> <span class="p">(</span><span class="n">box1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">box1</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">box2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">box2</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span><span class="n">intersection</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="n">RMSprop</span><span class="p">(</span><span class="n">lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">),</span> <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Reference">Reference<a class="anchor-link" href="#Reference">&#182;</a></h3><ul>
+<li><a href="https://github.com/gliese581gg/YOLO_tensorflow">https://github.com/gliese581gg/YOLO_tensorflow</a></li>
+<li><a href="http://guanghan.info/blog/en/my-works/train-yolo/">http://guanghan.info/blog/en/my-works/train-yolo/</a></li>
+<li><a href="https://github.com/thtrieu/yolotf">https://github.com/thtrieu/yolotf</a></li>
+<li><a href="https://github.com/nilboy/tensorflow-yolo">https://github.com/nilboy/tensorflow-yolo</a></li>
+<li><a href="https://github.com/gliese581gg/YOLO_tensorflow/blob/master/YOLO_tiny_tf.py">https://github.com/gliese581gg/YOLO_tensorflow/blob/master/YOLO_tiny_tf.py</a></li>
 </ul>
 
 </div>
@@ -1406,9 +1693,9 @@ h6:hover .anchor-link {
   </div>
   <div class="tag-cloud">
     <p>
-      <a href="https://kentchun33333.github.io/tag/nlp.html">NLP</a>
-      <a href="https://kentchun33333.github.io/tag/embedding.html">embedding</a>
-      <a href="https://kentchun33333.github.io/tag/word-embedding.html">word embedding</a>
+      <a href="https://kentchun33333.github.io/tag/tensorflow.html">tensorflow</a>
+      <a href="https://kentchun33333.github.io/tag/implementation.html">implementation</a>
+      <a href="https://kentchun33333.github.io/tag/object-detection.html">object detection</a>
     </p>
   </div>
 
