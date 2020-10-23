@@ -22,21 +22,20 @@
 
 
 <meta name="author" content="Kent Chiu" />
-<meta name="description" content="0. About Search System Recently I write a simple search system that mostly in python. (Github Link) This post is the introduction of it. 1. Project Overall Typically, search/recommend system would including several key components (1) Web Crawler (2) Indexing (3) Recall model/mechanism (4) Rank model (5) Query …" />
-<meta name="keywords" content="Search, Recommendations">
+<meta name="description" content="It has been a long time for considering to build a personal blog. After tried lots of free-blog such as Wix Wordpress ...etc Benchmarked lots of static-generate-site suit such as : Hexo (node-js) Hugo (go) Jekyll (Ruby) Pelican (python). I just found that Pelican might be have the best support on …" />
+<meta name="keywords" content="notes">
 
 <meta property="og:site_name" content="Autumn Memo"/>
 <meta property="og:title" content="Autumn Memo"/>
-<meta property="og:description" content="0. About Search System Recently I write a simple search system that mostly in python. (Github Link) This post is the introduction of it. 1. Project Overall Typically, search/recommend system would including several key components (1) Web Crawler (2) Indexing (3) Recall model/mechanism (4) Rank model (5) Query …"/>
+<meta property="og:description" content="It has been a long time for considering to build a personal blog. After tried lots of free-blog such as Wix Wordpress ...etc Benchmarked lots of static-generate-site suit such as : Hexo (node-js) Hugo (go) Jekyll (Ruby) Pelican (python). I just found that Pelican might be have the best support on …"/>
 <meta property="og:locale" content="en_US"/>
 <meta property="og:url" content="https://kentchun33333.github.io/autumn-memo.html"/>
 <meta property="og:type" content="article"/>
-<meta property="article:published_time" content="2020-09-01 17:00:00+02:00"/>
+<meta property="article:published_time" content="2016-11-01 17:00:00+01:00"/>
 <meta property="article:modified_time" content=""/>
 <meta property="article:author" content="https://kentchun33333.github.io/author/kent-chiu.html">
-<meta property="article:section" content="AI applications"/>
-<meta property="article:tag" content="Search"/>
-<meta property="article:tag" content="Recommendations"/>
+<meta property="article:section" content="Glance"/>
+<meta property="article:tag" content="notes"/>
 <meta property="og:image" content="https://media-exp1.licdn.com/dms/image/C5103AQGzhSVAx7ReaA/profile-displayphoto-shrink_400_400/0?e=1605744000&v=beta&t=tXvm7MTbUp1JcLLnMymOVBiHLfs0mDiRNQGn7zzryrc">
 
   <title>Autumn Memo &ndash; Autumn Memo</title>
@@ -76,14 +75,10 @@
 
 <article class="single">
   <header>
-          <div class="translations">
-    <a class="active" href="https://kentchun33333.github.io/autumn-memo.html">en</a>
-        <a href="https://kentchun33333.github.io/autumn-memo.html">en</a>
-    </div>
-
+      
     <h1 id="autumn-memo">Autumn Memo</h1>
     <p>
-          Posted on Tue 01 September 2020 in <a href="https://kentchun33333.github.io/category/ai-applications.html">AI applications</a>
+          Posted on Tue 01 November 2016 in <a href="https://kentchun33333.github.io/category/glance.html">Glance</a>
 
 
     </p>
@@ -91,110 +86,25 @@
 
 
   <div>
-    <h1>0. About Search System</h1>
-<p>Recently I write a simple search system that mostly in python. (<a href="https://github.com/KentChun33333/search_eng">Github Link</a>) This post is the introduction of it. </p>
-<h1>1. Project Overall</h1>
-<p>Typically, search/recommend system would including several key components (1) Web Crawler (2) Indexing (3) Recall model/mechanism (4) Rank model (5) Query Web-Interface. </p>
-<p><img src="doc\system_flow.png" alt="image-20200924000928319" style="zoom:75%;" /></p>
-<h2>1.1 Web Crawler</h2>
+    <p>It has been a long time for considering to build a personal blog.</p>
+<p>After tried lots of free-blog such as </p>
 <ul>
-<li>Using <em>selenium</em> and <em>beautifulsoup4</em> to fetch the data from https://stackoverflow.com that mostly related to database. In addition, currently only crawling the title as document for storage concerns. This reop use <em>sqlite3</em> as forward-database for simplicity. </li>
+<li>Wix</li>
+<li>Wordpress </li>
+<li>...etc </li>
 </ul>
-<p><img src="doc\forward_db.png"></p>
-<h2>1.2 Indexing</h2>
+<p>Benchmarked lots of static-generate-site suit such as : </p>
 <ul>
-<li>
-<p>Using <em>nltk</em> and <em>gensim</em> to do the text normalization, stemming, lemmatization and doc2vec. </p>
-</li>
-<li>
-<p>Using a customized object as inverted (index) database. For real applications, we can chose <em>leveldb</em>, <em>dynamodb</em> or <em>rockdb</em>. The customized object is basically a k-value object with the optimization that applies tire-tree on inverted index. </p>
-</li>
+<li>Hexo (node-js)</li>
+<li>Hugo (go)</li>
+<li>Jekyll (Ruby)</li>
+<li>Pelican (python).</li>
 </ul>
-<table>
-<thead>
-<tr>
-<th>index (key word)</th>
-<th>Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>sql</td>
-<td>[ (doc_id, term_frequency), ...]</td>
-</tr>
-<tr>
-<td>database</td>
-<td>[ (doc_id, term_frequency), ...]</td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li>There are many advanced efficient index way, and for vector-database the indexing method often consisted of clustering and quantization methods.</li>
-</ul>
-<h2>1.3 Recall Model / Mechanism</h2>
-<ul>
-<li>Here using traditional bool-query.  It could be further enhance with term-frequency or even a model to recall the candidates.</li>
-</ul>
-<h2>1.4 Ranking Model / Mechanism</h2>
-<ul>
-<li>
-<p>Here using Doc2Vec from <em>gensim</em>. The pretrained weight is from https://github.com/jhlau/doc2vec. </p>
-</li>
-<li>
-<p>The idea is to recommend the item base on vector similarity after recall-model.</p>
-</li>
-</ul>
-<h2>1.5 Query Interface</h2>
-<ul>
-<li>Using Flask and Jinja template with bootstrap UI framework. </li>
-</ul>
-<p><img src="doc\demo.gif"> </p>
-<h1>2. Usage Flow</h1>
-<ul>
-<li>install the requirement packages </li>
-<li>install chrome driver for selenium in data/web_driver</li>
-<li>It should align with the config.py</li>
-<li>python <strong>run_web_crawler.py</strong> </li>
-<li>It would create a forward database and storing blob in local machine.</li>
-<li>python <strong>run_model_indexer.py</strong> </li>
-<li>It would run text normalization and then build the inverted-index object. </li>
-<li>python <strong>run_query_interface.py</strong></li>
-<li>It would run a flask server on localhost:5000. </li>
-<li>Config File </li>
-<li>forward_database = <em>r</em>'data/sqldb/example.db'</li>
-<li>inverted_database = <em>r</em>'data/sqldb/inverted_key_word_db.pkl'</li>
-<li>Doc2Vector300D_model_weight = <em>r</em>"data/model/doc2vec.bin"</li>
-</ul>
-<h1>3. Result Comparison</h1>
-<p>Current result just using traditional bool query, and not counting lots features like voting, user persona, content of question, and content of reply answers. </p>
-<table>
-<thead>
-<tr>
-<th>This Repo</th>
-<th>Original Website</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><img src="doc\image_2.png"></td>
-<td><img src="doc\image.png"></td>
-</tr>
-</tbody>
-</table>
-<h1>4. Further Improvement</h1>
-<ul>
-<li>There are lots of things we could improve on and play with:</li>
-<li><strong>Model-based recall mechanism</strong>:  Personally, I also build the vectors database of title-text, however not index it yet for fast-read. There are some ways to index the dense-vector database via some clustering or quantization methods. I would like to try some of them after more understanding of them.  Also, I am not sure how much improvement would it bring to the overall performance.</li>
-<li><strong>Stronger Ranking model</strong>: There are many rooms to improve the ranking model, like taking extra-features into the model or using a better model.  </li>
-<li><strong>Distributed Storage</strong>: we definitely can shading the database, both on forward-database and inverted database.</li>
-<li><strong>Crawling for more content</strong>: Due to storage limitations, I treat the title of the document as entire document. However, we could also crawling and parsing content as well.</li>
-<li><strong>Advanced Indexing method</strong>: if the data is large, we may need to do some compression on index. In addition, for dense vector-based search/recommend system, we may need to using clustering/product quantization plus multi-index method to index the database. There are several famous method like Non-Orthogonal Inverted Multi-Index or IVFADC.</li>
-</ul>
+<p>I just found that Pelican might be have the best support on ipython-notebook. So, I adopted the Pelican-suit for my personal blog. </p>
   </div>
   <div class="tag-cloud">
     <p>
-      <a href="https://kentchun33333.github.io/tag/search.html">Search</a>
-      <a href="https://kentchun33333.github.io/tag/recommendations.html">Recommendations</a>
+      <a href="https://kentchun33333.github.io/tag/notes.html">notes</a>
     </p>
   </div>
 

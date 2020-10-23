@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="" />
+
+  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="https://kentchun33333.github.io/theme/stylesheet/style.min.css">
+
+  <link rel="stylesheet" type="text/css" href="https://kentchun33333.github.io/theme/pygments/github.min.css">
+  <link rel="stylesheet" type="text/css" href="https://kentchun33333.github.io/theme/font-awesome/css/font-awesome.min.css">
+
+
+
+
+
+
+
+<meta name="author" content="Kent Chiu" />
+<meta name="description" content="0. About Search System Recently I write a simple search system that mostly in python. (Github Link) This post is the introduction of it. 1. Project Overall Typically, search/recommend system would including several key components (1) Web Crawler (2) Indexing (3) Recall model/mechanism (4) Rank model (5) Query …" />
+<meta name="keywords" content="Search, Recommendations">
+
+<meta property="og:site_name" content="Autumn Memo"/>
+<meta property="og:title" content="Build a Search System"/>
+<meta property="og:description" content="0. About Search System Recently I write a simple search system that mostly in python. (Github Link) This post is the introduction of it. 1. Project Overall Typically, search/recommend system would including several key components (1) Web Crawler (2) Indexing (3) Recall model/mechanism (4) Rank model (5) Query …"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:url" content="https://kentchun33333.github.io/build-a-search-system.html"/>
+<meta property="og:type" content="article"/>
+<meta property="article:published_time" content="2020-09-01 17:00:00+02:00"/>
+<meta property="article:modified_time" content=""/>
+<meta property="article:author" content="https://kentchun33333.github.io/author/kent-chiu.html">
+<meta property="article:section" content="AI applications"/>
+<meta property="article:tag" content="Search"/>
+<meta property="article:tag" content="Recommendations"/>
+<meta property="og:image" content="https://media-exp1.licdn.com/dms/image/C5103AQGzhSVAx7ReaA/profile-displayphoto-shrink_400_400/0?e=1605744000&v=beta&t=tXvm7MTbUp1JcLLnMymOVBiHLfs0mDiRNQGn7zzryrc">
+
+  <title>Autumn Memo &ndash; Build a Search System</title>
+
+</head>
+<body>
+  <aside>
+    <div>
+      <a href="https://kentchun33333.github.io">
+        <img src="https://media-exp1.licdn.com/dms/image/C5103AQGzhSVAx7ReaA/profile-displayphoto-shrink_400_400/0?e=1605744000&v=beta&t=tXvm7MTbUp1JcLLnMymOVBiHLfs0mDiRNQGn7zzryrc" alt="Kent Chiu" title="Kent Chiu">
+      </a>
+      <h1><a href="https://kentchun33333.github.io">Kent Chiu</a></h1>
+
+<p>Mind Space</p>
+
+      <ul class="social">
+        <li><a class="sc-linkedin" href="https://www.linkedin.com/in/kent-chiu-93b745a2?trk=hp-identity-photo" target="_blank"><i class="fa fa-linkedin"></i></a></li>
+        <li><a class="sc-github" href="https://github.com/KentChun33333" target="_blank"><i class="fa fa-github"></i></a></li>
+        <li><a class="sc-facebook" href="https://www.facebook.com/kent.chun" target="_blank"><i class="fa fa-facebook"></i></a></li>
+      </ul>
+    </div>
+
+
+  </aside>
+  <main>
+
+    <nav>
+      <a href="https://kentchun33333.github.io">    Home
+</a>
+
+      <a href="/archives.html">Archives</a>
+      <a href="/categories.html">Categories</a>
+      <a href="/tags.html">Tags</a>
+
+
+    </nav>
+
+<article class="single">
+  <header>
+      
+    <h1 id="build-a-search-system">Build a Search System</h1>
+    <p>
+          Posted on Tue 01 September 2020 in <a href="https://kentchun33333.github.io/category/ai-applications.html">AI applications</a>
+
+
+    </p>
+  </header>
+
+
+  <div>
+    <h1>0. About Search System</h1>
+<p>Recently I write a simple search system that mostly in python. (<a href="https://github.com/KentChun33333/search_eng">Github Link</a>) This post is the introduction of it. </p>
+<h1>1. Project Overall</h1>
+<p>Typically, search/recommend system would including several key components (1) Web Crawler (2) Indexing (3) Recall model/mechanism (4) Rank model (5) Query Web-Interface. </p>
+<p><img src="image\system_flow.png" alt="image-20200924000928319" style="zoom:75%;" /></p>
+<h2>1.1 Web Crawler</h2>
+<ul>
+<li>Using <em>selenium</em> and <em>beautifulsoup4</em> to fetch the data from https://stackoverflow.com that mostly related to database. In addition, currently only crawling the title as document for storage concerns. This reop use <em>sqlite3</em> as forward-database for simplicity. </li>
+</ul>
+<p><img src="image\forward_db.png"></p>
+<h2>1.2 Indexing</h2>
+<ul>
+<li>
+<p>Using <em>nltk</em> and <em>gensim</em> to do the text normalization, stemming, lemmatization and doc2vec. </p>
+</li>
+<li>
+<p>Using a customized object as inverted (index) database. For real applications, we can chose <em>leveldb</em>, <em>dynamodb</em> or <em>rockdb</em>. The customized object is basically a k-value object with the optimization that applies tire-tree on inverted index. </p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>index (key word)</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sql</td>
+<td>[ (doc_id, term_frequency), ...]</td>
+</tr>
+<tr>
+<td>database</td>
+<td>[ (doc_id, term_frequency), ...]</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>There are many advanced efficient index way, and for vector-database the indexing method often consisted of clustering and quantization methods.</li>
+</ul>
+<h2>1.3 Recall Model / Mechanism</h2>
+<ul>
+<li>Here using traditional bool-query.  It could be further enhance with term-frequency or even a model to recall the candidates.</li>
+</ul>
+<h2>1.4 Ranking Model / Mechanism</h2>
+<ul>
+<li>
+<p>Here using Doc2Vec from <em>gensim</em>. The pretrained weight is from https://github.com/jhlau/doc2vec. </p>
+</li>
+<li>
+<p>The idea is to recommend the item base on vector similarity after recall-model.</p>
+</li>
+</ul>
+<h2>1.5 Query Interface</h2>
+<ul>
+<li>Using Flask and Jinja template with bootstrap UI framework. </li>
+</ul>
+<p><img src="image\demo.gif"> </p>
+<h1>2. Usage Flow</h1>
+<ul>
+<li>install the requirement packages </li>
+<li>install chrome driver for selenium in data/web_driver</li>
+<li>It should align with the config.py</li>
+<li>python <strong>run_web_crawler.py</strong> </li>
+<li>It would create a forward database and storing blob in local machine.</li>
+<li>python <strong>run_model_indexer.py</strong> </li>
+<li>It would run text normalization and then build the inverted-index object. </li>
+<li>python <strong>run_query_interface.py</strong></li>
+<li>It would run a flask server on localhost:5000. </li>
+<li>Config File </li>
+<li>forward_database = <em>r</em>'data/sqldb/example.db'</li>
+<li>inverted_database = <em>r</em>'data/sqldb/inverted_key_word_db.pkl'</li>
+<li>Doc2Vector300D_model_weight = <em>r</em>"data/model/doc2vec.bin"</li>
+</ul>
+<h1>3. Result Comparison</h1>
+<p>Current result just using traditional bool query, and not counting lots features like voting, user persona, content of question, and content of reply answers. </p>
+<table>
+<thead>
+<tr>
+<th>This Repo</th>
+<th>Original Website</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="image\image_2.png"></td>
+<td><img src="image\image.png"></td>
+</tr>
+</tbody>
+</table>
+<h1>4. Further Improvement</h1>
+<ul>
+<li>There are lots of things we could improve on and play with:</li>
+<li><strong>Model-based recall mechanism</strong>:  Personally, I also build the vectors database of title-text, however not index it yet for fast-read. There are some ways to index the dense-vector database via some clustering or quantization methods. I would like to try some of them after more understanding of them.  Also, I am not sure how much improvement would it bring to the overall performance.</li>
+<li><strong>Stronger Ranking model</strong>: There are many rooms to improve the ranking model, like taking extra-features into the model or using a better model.  </li>
+<li><strong>Distributed Storage</strong>: we definitely can shading the database, both on forward-database and inverted database.</li>
+<li><strong>Crawling for more content</strong>: Due to storage limitations, I treat the title of the document as entire document. However, we could also crawling and parsing content as well.</li>
+<li><strong>Advanced Indexing method</strong>: if the data is large, we may need to do some compression on index. In addition, for dense vector-based search/recommend system, we may need to using clustering/product quantization plus multi-index method to index the database. There are several famous method like Non-Orthogonal Inverted Multi-Index or IVFADC.</li>
+</ul>
+  </div>
+  <div class="tag-cloud">
+    <p>
+      <a href="https://kentchun33333.github.io/tag/search.html">Search</a>
+      <a href="https://kentchun33333.github.io/tag/recommendations.html">Recommendations</a>
+    </p>
+  </div>
+
+
+
+
+
+<!-- Disqus -->
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'https-kentchun33333-github-io';
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>
+        Please enable JavaScript to view comments.
+
+</noscript>
+<!-- End Disqus -->
+</article>
+
+    <footer>
+<p>&copy;  </p>
+<p>    Powered by <a href="http://getpelican.com" target="_blank">Pelican</a> - <a href="https://github.com/alexandrevicenzi/flex" target="_blank">Flex</a> theme by <a href="http://alexandrevicenzi.com" target="_blank">Alexandre Vicenzi</a>
+</p>    </footer>
+  </main>
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context" : "http://schema.org",
+  "@type" : "Blog",
+  "name": " Autumn Memo ",
+  "url" : "https://kentchun33333.github.io",
+  "image": "https://media-exp1.licdn.com/dms/image/C5103AQGzhSVAx7ReaA/profile-displayphoto-shrink_400_400/0?e=1605744000&v=beta&t=tXvm7MTbUp1JcLLnMymOVBiHLfs0mDiRNQGn7zzryrc",
+  "description": "Just Memos"
+}
+</script>
+
+</body>
+</html>
