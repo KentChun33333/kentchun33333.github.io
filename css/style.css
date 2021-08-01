@@ -84,7 +84,7 @@ img{
     max-height: 100%;	
 }
 a, button.submit {
-    color:#6E7173;
+    color:#444;
     text-decoration:none;
     -webkit-transition:all .1s ease-in;
     -moz-transition:all .1s ease-in;
@@ -92,7 +92,7 @@ a, button.submit {
     transition:all .1s ease-in;
 }
 a:hover, a:active {
-    color:#6E7173;
+    color:#444;
 }
 mark {
     padding: 3px 3px 3px 5px;
@@ -193,7 +193,7 @@ textarea {
     **/
     font-size: 37.5px;
     font-weight: bold;
-    color:#555;
+    color:#444;
 }
 #logo span {
     color:#555;
@@ -203,7 +203,7 @@ textarea {
 }
 .description {
     margin:5px 0 0;
-    color:#ba3925;
+    color:#173baa;
 }
 #nav-menu {
     margin:10px 0 -1px;
@@ -580,7 +580,7 @@ textarea.textarea {
     margin-bottom:30px;
 }
 .widget-title {
-    color:#6E7173;
+    color:#444;
     line-height:2.7;
     margin-top:0;
     font-size:16px;
