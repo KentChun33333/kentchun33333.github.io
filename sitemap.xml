@@ -28,8 +28,6 @@
   </url><url>
     <loc>https://kentchun33333.github.io/post/kenttest/</loc>
   </url><url>
-    <loc>https://kentchun33333.github.io/post/workflow-of-hugoblog/</loc>
-  </url><url>
     <loc>https://kentchun33333.github.io/categories/</loc>
   </url><url>
     <loc>https://kentchun33333.github.io/tags/index/</loc>
@@ -39,5 +37,7 @@
     <loc>https://kentchun33333.github.io/series/</loc>
   </url><url>
     <loc>https://kentchun33333.github.io/tags/workflow/</loc>
+  </url><url>
+    <loc>https://kentchun33333.github.io/post/workflow-of-hugoblog/</loc>
   </url>
 </urlset>
