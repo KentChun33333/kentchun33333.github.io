@@ -1,24 +1,30 @@
 <!doctype html>
 <html lang="en">
 <head>
-	<meta name="generator" content="Hugo 0.86.1" />
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
 
-    <title>Hugo Themes | </title>
-    <meta property="og:title" content="Hugo Themes | ">
-    <meta property="og:type" content="website">
+    <title>Emoji Support | Hugo Themes</title>
+    <meta property="og:title" content="Emoji Support - Hugo Themes">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2019-03-05T00:00:00&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2019-03-05T00:00:00&#43;08:00'>
+        
     <meta name="Keywords" content="">
-    <meta name="description" content="">
-    <meta property="og:url" content="https://gohugo.io/">
+    <meta name="description" content="Guide to emoji usage in Hugo">
+        <meta name="author" content="Hugo Authors">
+        
+    <meta property="og:url" content="https://gohugo.io/post/emoji-support/">
     <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
 
     <link rel="stylesheet" href='/css/normalize.css'>
     <link rel="stylesheet" href='/css/style.css'>
-    <link rel="alternate" type="application/rss+xml" href="https://gohugo.io/index.xml" title="Hugo Themes" />
     <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
     
@@ -36,11 +42,9 @@
         <div class="col-group">
             <div class="site-name ">
                 
-                    <h1>
-                        <a id="logo" href="https://gohugo.io">
-                            Hugo Themes
-                        </a>
-                    </h1>
+                    <a id="logo" href="https://gohugo.io">
+                        Hugo Themes
+                    </a>
                 
                 
             </div>
@@ -66,91 +70,62 @@
     
     <article class="post">
         <header>
-            <h1 class="post-title">
-                <a href="https://gohugo.io/post/markdown-syntax/" title="Markdown Syntax Guide">Markdown Syntax Guide</a>
-            </h1>
+            <h1 class="post-title">Emoji Support</h1>
         </header>
         <date class="post-meta meta-date">
-            2019年3月11日
+            2019年3月5日
         </date>
         
-        <div class="post-meta">
-            <span>|</span>
-            
-            <span class="meta-category"><a href='/categories/themes'>themes</a></span>
-            
-            <span class="meta-category"><a href='/categories/syntax'>syntax</a></span>
-            
-        </div>
+        
         
         <div class="post-content">
-            <p>This article offers a sample of basic Markdown syntax that can be used in Hugo content files, also it shows whether basic HTML elements are decorated with CSS in a Hugo theme.</p>……
+            <p>Emoji can be enabled in a Hugo project in a number of ways.</p>
+<p>The <a href="https://gohugo.io/functions/emojify/"><code>emojify</code></a> function can be called directly in templates or <a href="https://gohugo.io/templates/shortcode-templates/#inline-shortcodes">Inline Shortcodes</a>.</p>
+<p>To enable emoji globally, set <code>enableEmoji</code> to <code>true</code> in your site&rsquo;s <a href="https://gohugo.io/getting-started/configuration/">configuration</a> and then you can type emoji shorthand codes directly in content files; e.g.</p>
+<!-- raw HTML omitted -->
+<p>The <a href="http://www.emoji-cheat-sheet.com/">Emoji cheat sheet</a> is a useful reference for emoji shorthand codes.</p>
+<hr>
+<p><strong>N.B.</strong> The above steps enable Unicode Standard emoji characters and sequences in Hugo, however the rendering of these glyphs depends on the browser and the platform. To style the emoji you can either use a third party emoji font or a font stack; e.g.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">.emoji {
+  font-family: Apple Color Emoji, Segoe UI Emoji, NotoColorEmoji, Segoe UI Symbol, Android Emoji, EmojiSymbols;
+}</code></pre></div>
+
+<style>
+.emojify {
+	font-family: Apple Color Emoji, Segoe UI Emoji, NotoColorEmoji, Segoe UI Symbol, Android Emoji, EmojiSymbols;
+	font-size: 2rem;
+	vertical-align: middle;
+}
+@media screen and (max-width:650px) {
+  .nowrap {
+    display: block;
+    margin: 25px 0;
+  }
+}
+</style>
         </div>
-        <p class="readmore"><a href="https://gohugo.io/post/markdown-syntax/">阅读全文</a></p>
-    </article>
-    
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://gohugo.io/post/rich-content/" title="Rich Content">Rich Content</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2019年3月10日
-        </date>
+
         
-        <div class="post-content">
-            <p>Hugo ships with several <a href="https://gohugo.io/content-management/shortcodes/#use-hugos-built-in-shortcodes">Built-in Shortcodes</a> for rich content, along with a <a href="https://gohugo.io/about/hugo-and-gdpr/">Privacy Config</a> and a set of Simple Shortcodes that enable static and no-JS versions of various social media embeds.</p>……
-        </div>
-        <p class="readmore"><a href="https://gohugo.io/post/rich-content/">阅读全文</a></p>
-    </article>
-    
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://gohugo.io/post/placeholder-text/" title="Placeholder Text">Placeholder Text</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2019年3月9日
-        </date>
+
+
         
-        <div class="post-content">
-            <p>Lorem est tota propiore conpellat pectoribus de pectora summo.</p>……
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/emoji'>emoji</a></li>
+                
+            </ul>
+            
         </div>
-        <p class="readmore"><a href="https://gohugo.io/post/placeholder-text/">阅读全文</a></p>
     </article>
     
     
 
-
-
-<ol class="page-navigator">
     
-
     
-    <li  class="current">
-        <a href="https://gohugo.io/">1</a>
-    </li>
-    
-    <li >
-        <a href="https://gohugo.io/page/2/">2</a>
-    </li>
-    
-    <li >
-        <a href="https://gohugo.io/page/3/">3</a>
-    </li>
-    
-
-    
-    <li class="next">
-        <a href="https://gohugo.io/page/2/">下一页</a>
-    </li>
-    
-</ol>
-
-
-
 </div>
 
                     <footer id="footer">
@@ -173,6 +148,16 @@
 </footer>
 
 
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
 
 <a id="rocket" href="#top"></a>
 <script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
