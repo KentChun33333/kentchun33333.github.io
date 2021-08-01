@@ -1,35 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Graph Neural Net on Autumn Memo</title>
-    <link>https://kentchun33333.github.io/tags/graph-neural-net/</link>
-    <description>Recent content in Graph Neural Net on Autumn Memo</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en</language><atom:link href="https://kentchun33333.github.io/tags/graph-neural-net/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title> GNN 教程：Graph 基础知识介绍</title>
-      <link>https://kentchun33333.github.io/private/gnn-%E6%95%99%E7%A8%8Bgraph-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E4%BB%8B%E7%BB%8D/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://kentchun33333.github.io/private/gnn-%E6%95%99%E7%A8%8Bgraph-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E4%BB%8B%E7%BB%8D/</guid>
-      <description>https://archwalker.github.io/blog/2019/05/31/GNN-basics.html
-  GNN
-  May 31, 2019
-  0 views
-  引言 图卷积神经网络(Graph Convolutional Network)作为最近几年兴起的一种基于图结构的广义神经网络结构，因为其独特的计算能力，而受到广泛学者的关注与研究。传统深度学习模型 LSTM 和 CNN 在欧几里得空间数据(语言，图像，视频等)上取得了不错的成绩，但是在对非欧几里得空间数据(eg：社交网络、信息网络等)进行处理上却存在一定的局限性。
-针对该问题，研究者们引入了图论中抽象意义上的图(Graph)来表示非欧几里得结构化数据。并利用图卷积网络对来图(Graph)数据进行处理，以深入发掘其特征和规律。
-本文首先分别介绍了欧几里得结构化数据和非欧几里得结构化数据特点；然后，针对非欧几里得结构化数据的表示问题，引入了图论中抽象意义上的图(Graph)概念，并对图(Graph)中一些表示形式进行介绍；最后，通过一个简单的例子，对图(Graph)数据的应用进行介绍。以帮助读者加深对图(Graph)的理解。
-一、欧几里得结构化数据 1、欧几里得空间 欧几里德空间(Euclidean Space)，简称为欧氏空间(也可以称为平直空间)，在数学中是对欧几里德所研究的2维和3维空间的一般化。这个一般化把欧几里德对于距离、以及相关的概念长度和角度，转换成任意数维的坐标系。如下图所示。
- 图 a 表示二维欧几里得空间
-  图 b 表示三维欧几里得空间
- 2、 常见的欧几里得结构化数据 将数据转换到欧几里得空间中，所得到的数据称为欧几里得结构化数据。
-常见的欧几里得结构化数据主要包含：
- 1D：声音，时间序列等； 2D：图像等； 3D：视频，高光谱图像等；  二、非欧几里得结构化数据 1、非欧几里得空间 然而，科学研究中并不是所有的数据都能够被转换到欧几里得空间中(eg：社交网络、信息网络等)，对于不能进行欧几里得结构化的数据，我们将其称为非欧几里得结构化数据。
-2、 非常见的欧几里得结构化数据 常见的非欧几里得结构化数据主要包含：
- 1D：社交网络(eg：Facebook，Twitter等)等； 2D：生物网络(基因，分子，大脑连接)等； 3D：基础设施网络(eg：能源，交通，互联网，通信等)等；  三、图(Graph) 1、图(Graph)的引入 针对非欧几里得结构化数据表示问题，研究者们引入了图论中抽象意义上的图(Graph)来表示非欧几里得结构化数据。
-2、图(Graph)的定义 图(Graph)定义形式为G=(V,E)G=(V,E)，其结构如下图所示：
- 一个有标号的简单图，点集V={1,2,3,4,5,6}V={1,2,3,4,5,6}，边集E={{1,2},{1,5},{2,3},{2,5},{3,4},{4,5},{4,6}}E={{1,2},{1,5},{2,3},{2,5},{3,4},{4,5},{4,6}}</description>
-    </item>
-    
-  </channel>
-</rss>
