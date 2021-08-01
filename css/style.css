@@ -68,7 +68,7 @@
 }
 body {
     background-color:#FFF;
-    color:#444;
+    color:#333;
     font-size: 15px;
     /**
     font-family:"TIBch", "Classic Grotesque W01", "Helvetica Neue", Arial, "Hiragino Sans GB", "STHeiti", "Microsoft YaHei", "WenQuanYi Micro Hei", SimSun, sans-serif;
@@ -129,7 +129,7 @@ blockquote::before{
     font-family: times;
     font-style: normal;
     font-size: 48px;
-    color: #444;
+    color: #333;
     font-weight: bold;
     line-height: 30px;
     margin-left: -50px;
@@ -196,14 +196,14 @@ textarea {
     color:#555;
 }
 #logo span {
-    color:#777;
+    color:#555;
 }
 #logo:hover {
-    color:#777;
+    color:#555;
 }
 .description {
     margin:5px 0 0;
-    color:#999;
+    color:#214184;
 }
 #nav-menu {
     margin:10px 0 -1px;
@@ -216,7 +216,7 @@ textarea {
     padding:0 1em;
     height:32px;
     line-height:32px;
-    color:#444;
+    color:#333;
 }
 #nav-menu a:first-child {
     border:none;
@@ -248,7 +248,7 @@ textarea {
     padding:14px 0;
     width:auto;
     height:48px;
-    color:#444;
+    color:#333;
     background:none;
 }
 .col-8 {
@@ -358,7 +358,7 @@ textarea {
 .post-content {
     font-size: 1em;
     line-height: 1.7;
-    color:#444;
+    color:#333;
     padding-top:27px;
 }
 .post-content h2,.post-content h3,.post-content h4,.post-content h5,.post-content h6 {
@@ -474,7 +474,7 @@ textarea {
 .comment-author {
     display:block;
     margin-bottom:3px;
-    color:#444;
+    color:#333;
 }
 .comment-author .avatar {
     float:left;
@@ -491,7 +491,7 @@ textarea {
     font-style:normal;
     float:right;
     margin-top:-20px;
-    color:#777;
+    color:#555;
 }
 .comment-list .respond {
     margin:15px 0;
@@ -719,7 +719,7 @@ img.alignright {
     border-radius: 50px;
     text-align: center;
     cursor: pointer;
-    background: #444;
+    background: #333;
     font-weight: 500;
     line-height: 14px;
     letter-spacing: 1px;
@@ -981,7 +981,7 @@ img.alignright {
 /* read more*/
 .readmore a {
     font-size: 14px;
-    color: #444;
+    color: #333;
     margin: -10px 0;
     padding: 5px 10px;
     border: 1px solid #ddd;
