@@ -14,7 +14,7 @@
     <meta property="og:type" content="article">
         
         
-    <meta name="Keywords" content="Life Design, AI, Machine Learning, Problem Solving">
+    <meta name="Keywords" content="">
     <meta name="description" content="">
         
     <meta name="author" content="Kent Chiu">
@@ -67,180 +67,7 @@
                 <div class="col-8" id="main">
                     
 <div class="res-cons">
-    <style type="text/css">
-    .post-toc {
-        position: fixed;
-        width: 200px;
-        margin-left: -210px;
-        padding: 5px 10px;
-        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
-        font-size: 12px;
-        border: 1px solid rgba(0, 0, 0, .07);
-        border-radius: 5px;
-        background-color: rgba(255, 255, 255, 0.98);
-        background-clip: padding-box;
-        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
-        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
-        word-wrap: break-word;
-        white-space: nowrap;
-        -webkit-box-sizing: border-box;
-        box-sizing: border-box;
-        z-index: 999;
-        cursor: pointer;
-        max-height: 70%;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-
-    .post-toc .post-toc-title {
-        width: 100%;
-        margin: 0 auto;
-        font-size: 20px;
-        font-weight: 400;
-        text-transform: uppercase;
-        text-align: center;
-    }
-
-    .post-toc .post-toc-content {
-        font-size: 15px;
-    }
-
-    .post-toc .post-toc-content>nav>ul {
-        margin: 10px 0;
-    }
-
-    .post-toc .post-toc-content ul {
-        padding-left: 20px;
-        list-style: square;
-        margin: 0.5em;
-        line-height: 1.8em;
-    }
-
-    .post-toc .post-toc-content ul ul {
-        padding-left: 15px;
-        display: none;
-    }
-
-    @media print,
-    screen and (max-width:1057px) {
-        .post-toc {
-            display: none;
-        }
-    }
-</style>
-<div class="post-toc" style="position: absolute; top: 188px;">
-    <h2 class="post-toc-title"> Tree</h2>
-    <div class="post-toc-content">
-        <nav id="TableOfContents">
-  <ul>
-    <li><a href="#引言">引言</a></li>
-    <li><a href="#一欧几里得结构化数据">一、欧几里得结构化数据</a>
-      <ul>
-        <li><a href="#1欧几里得空间">1、欧几里得空间</a></li>
-        <li><a href="#2-常见的欧几里得结构化数据">2、 常见的欧几里得结构化数据</a></li>
-      </ul>
-    </li>
-    <li><a href="#二非欧几里得结构化数据">二、非欧几里得结构化数据</a>
-      <ul>
-        <li><a href="#1非欧几里得空间">1、非欧几里得空间</a></li>
-        <li><a href="#2-非常见的欧几里得结构化数据">2、 非常见的欧几里得结构化数据</a></li>
-      </ul>
-    </li>
-    <li><a href="#三图graph">三、图(Graph)</a>
-      <ul>
-        <li><a href="#1图graph的引入">1、图(Graph)的引入</a></li>
-        <li><a href="#2图graph的定义">2、图(Graph)的定义</a></li>
-        <li><a href="#3图graph的表示形式">3、图(Graph)的表示形式</a></li>
-      </ul>
-    </li>
-    <li><a href="#四图上的学习任务">四、图上的学习任务</a></li>
-    <li><a href="#五图数据应用举例">五、图数据应用举例</a></li>
-    <li><a href="#六系列规划">六、系列规划</a></li>
-    <li><a href="#参考资料">参考资料</a></li>
-    <li><a href="#引言-1">引言</a></li>
-    <li><a href="#卷积层的设计">卷积层的设计</a>
-      <ul>
-        <li><a href="#graphconv">GraphConv</a></li>
-        <li><a href="#relgraphconv">RelGraphConv</a></li>
-        <li><a href="#tagconv">TAGConv</a></li>
-        <li><a href="#gatconv">GATConv</a></li>
-        <li><a href="#pointconv">PointConv</a></li>
-        <li><a href="#edgeconv">EdgeConv</a></li>
-        <li><a href="#sageconv">SAGEConv</a></li>
-        <li><a href="#sgconv">SGConv</a></li>
-        <li><a href="#appnpconv">APPNPConv</a></li>
-        <li><a href="#ginconv">GINConv</a></li>
-        <li><a href="#gatedgraphconv">GatedGraphConv</a></li>
-        <li><a href="#gmmconv">GMMConv</a></li>
-        <li><a href="#chebconv">ChebConv</a></li>
-        <li><a href="#agnnconv">AGNNConv</a></li>
-        <li><a href="#nnconv">NNConv</a></li>
-        <li><a href="#dnaconv">DNAConv</a></li>
-      </ul>
-    </li>
-    <li><a href="#池化层的设计">池化层的设计</a>
-      <ul>
-        <li><a href="#sumpooling">SumPooling</a></li>
-        <li><a href="#avgpooling">AvgPooling</a></li>
-        <li><a href="#maxpooling">MaxPooling</a></li>
-        <li><a href="#sortpooling">SortPooling</a></li>
-        <li><a href="#topkpooling">TopKPooling</a></li>
-        <li><a href="#sagpooling">SAGPooling</a></li>
-        <li><a href="#globalattentionpooling">GlobalAttentionPooling</a></li>
-        <li><a href="#set2set">Set2Set</a></li>
-        <li><a href="#settrasformerencoder--settrasformerdecoder">SetTrasformerEncoder &amp; SetTrasformerDecoder</a></li>
-      </ul>
-    </li>
-  </ul>
-
-  <ul>
-    <li><a href="#引言-2">引言</a></li>
-    <li><a href="#问题定义">问题定义</a></li>
-    <li><a href="#图上的快速卷积近似">图上的快速卷积近似</a>
-      <ul>
-        <li><a href="#谱图卷积spectral-graph-convolutions">谱图卷积(Spectral Graph Convolutions)</a></li>
-        <li><a href="#逐层线性模型">逐层线性模型</a></li>
-      </ul>
-    </li>
-    <li><a href="#半监督学习节点分类">半监督学习节点分类</a></li>
-    <li><a href="#传播公式解释">传播公式解释</a>
-      <ul>
-        <li><a href="#例子">例子</a></li>
-      </ul>
-    </li>
-    <li><a href="#后话">后话</a></li>
-    <li><a href="#reference">Reference</a></li>
-  </ul>
-</nav>
-    </div>
-</div>
-<script type="text/javascript">
-    $(document).ready(function () {
-        var postToc = $(".post-toc");
-        if (postToc.length) {
-            var leftPos = $("#main").offset().left;
-            if(leftPos<220){
-                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
-            }
-
-            var t = postToc.offset().top - 20,
-                a = {
-                    start: {
-                        position: "absolute",
-                        top: t
-                    },
-                    process: {
-                        position: "fixed",
-                        top: 20
-                    },
-                };
-            $(window).scroll(function () {
-                var e = $(window).scrollTop();
-                e < t ? postToc.css(a.start) : postToc.css(a.process)
-            })
-        }
-    })
-</script>
+    
     <article class="post">
         <header>
             <h1 class="post-title"></h1>
@@ -703,23 +530,6 @@
 
         
 
-<div class="post-archive">
-    <h2>See Also</h2>
-    <ul class="listing">
-        
-        <li><a href="/about/">About</a></li>
-        
-        <li><a href="/archives/">Archives</a></li>
-        
-        <li><a href="/post/math-typesetting/">Math Typesetting</a></li>
-        
-        <li><a href="/post/kenttest/">Career Roadmap</a></li>
-        
-        <li><a href="/post/workflow-of-hugoblog/">WorkFlow of HUGO Blog</a></li>
-        
-    </ul>
-</div>
-
 
         <div class="post-meta meta-tags">
             
@@ -741,7 +551,7 @@
             return;
         }
         var d = document, s = d.createElement('script'); s.async = true;
-        s.src = '//' + "kentchun" + '.disqus.com/embed.js';
+        s.src = '//' + "http://disqus.com/by/kentchun" + '.disqus.com/embed.js';
         s.setAttribute('data-timestamp', +new Date());
         (d.head || d.body).appendChild(s);
     })();
