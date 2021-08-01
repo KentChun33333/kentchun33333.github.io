@@ -27,10 +27,10 @@
     
     <item>
       <title></title>
-      <link>https://kentchun33333.github.io/post/WorkFlow-of-HuGoBlog/</link>
+      <link>https://kentchun33333.github.io/post/workflow-of-hugoblog/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://kentchun33333.github.io/post/WorkFlow-of-HuGoBlog/</guid>
+      <guid>https://kentchun33333.github.io/post/workflow-of-hugoblog/</guid>
       <description>WorkFlow of HUGO Blog   install GO and hugo
   install theme
   cd &amp;lt;YOUR Bolg Root Dir&amp;gt;git clone https://github.com/flysnow-org/maupassant-hugo themes/maupassant  Hugo command  hugo server -t maupassant  it will server the website on local machine   hugo -D -t maupassant  it will generate the statistic-files to public folder Note that the asset (image/video) would not be copy to the public folders.</description>
@@ -38,10 +38,10 @@
     
     <item>
       <title>Career Roadmap</title>
-      <link>https://kentchun33333.github.io/post/KentTest/</link>
+      <link>https://kentchun33333.github.io/post/kenttest/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://kentchun33333.github.io/post/KentTest/</guid>
+      <guid>https://kentchun33333.github.io/post/kenttest/</guid>
       <description>=======(Work Level) 27 (Seniro 2 : PHD) (8k =18w 250w==&amp;gt; house allowance 3k 28 (Sepcialist) 250~300 (1.2k 25w 29 (Senior specialist/engineer manager) 300~400 (1.5k) 30 (manager) M3 (400-500) =======(Stategy Level)
 31 (director ) == Poll M4 32(Manager director ) M6~M7
 (E) 33 (VP) 34 (EVP) 35(SVP) 36(GVP) 37 (CEO)
