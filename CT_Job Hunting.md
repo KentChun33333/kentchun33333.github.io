@@ -279,3 +279,30 @@ About**S$145K - S$155K**/yr Base Pay
 
 About**S$ 23K - S$25K**/yrAdditional Pay
 
+
+
+
+
+git push --set-upstream origin hugo
+
+in github, we can set different branch to previow
+
+https://github.com/KentChun33333/kentchun33333.github.io/settings
+
+## [Choosing a publishing source](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site#choosing-a-publishing-source)
+
+Before you configure a publishing source, make sure the branch you want to use as your publishing source already exists in your repository.
+
+1. On GitHub, navigate to your site's repository.
+2. Under your repository name, click **Settings**.![Repository settings button](https://docs.github.com/assets/images/help/repository/repo-actions-settings.png)
+3. In the left sidebar, click **Pages**.![Page tab in the left-hand sidebar](https://docs.github.com/assets/images/help/pages/pages-tab.png)
+4. Under "GitHub Pages", use the **None** or **Branch** drop-down menu and select a publishing source.![Drop-down menu to select a publishing source](https://docs.github.com/assets/images/help/pages/publishing-source-drop-down.png)
+5. Optionally, use the drop-down menu to select a folder for your publishing source.![Drop-down menu to select a folder for publishing source](https://docs.github.com/assets/images/help/pages/publishing-source-folder-drop-down.png)
+
+in Typora if we call 
+
+image.png
+
+in Serving web we will call 
+
+from public\post\kenttest\image.png
