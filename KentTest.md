@@ -9,7 +9,7 @@ tags = ["Roadmap"]
 
 
 
-![image-20200702070459148](static/test.png)
+![image-20200702070459148](post/kenttest/test.png)
 
 =======(Work Level) 
 27 (Seniro 2 : PHD) (8k =18w 250w==> house allowance 3k
