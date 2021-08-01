@@ -7,12 +7,12 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language><atom:link href="https://kentchun33333.github.io/private/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title></title>
+      <title> GNN 教程：Graph 基础知识介绍</title>
       <link>https://kentchun33333.github.io/private/gnn-%E6%95%99%E7%A8%8Bgraph-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E4%BB%8B%E7%BB%8D/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://kentchun33333.github.io/private/gnn-%E6%95%99%E7%A8%8Bgraph-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E4%BB%8B%E7%BB%8D/</guid>
-      <description>GNN 教程：Graph 基础知识介绍 https://archwalker.github.io/blog/2019/05/31/GNN-basics.html
+      <description>https://archwalker.github.io/blog/2019/05/31/GNN-basics.html
   GNN
   May 31, 2019
   0 views
@@ -27,7 +27,8 @@
  1D：声音，时间序列等； 2D：图像等； 3D：视频，高光谱图像等；  二、非欧几里得结构化数据 1、非欧几里得空间 然而，科学研究中并不是所有的数据都能够被转换到欧几里得空间中(eg：社交网络、信息网络等)，对于不能进行欧几里得结构化的数据，我们将其称为非欧几里得结构化数据。
 2、 非常见的欧几里得结构化数据 常见的非欧几里得结构化数据主要包含：
  1D：社交网络(eg：Facebook，Twitter等)等； 2D：生物网络(基因，分子，大脑连接)等； 3D：基础设施网络(eg：能源，交通，互联网，通信等)等；  三、图(Graph) 1、图(Graph)的引入 针对非欧几里得结构化数据表示问题，研究者们引入了图论中抽象意义上的图(Graph)来表示非欧几里得结构化数据。
-2、图(Graph)的定义 图(Graph)定义形式为G=(V,E)G=(V,E)，其结构如下图所示：</description>
+2、图(Graph)的定义 图(Graph)定义形式为G=(V,E)G=(V,E)，其结构如下图所示：
+ 一个有标号的简单图，点集V={1,2,3,4,5,6}V={1,2,3,4,5,6}，边集E={{1,2},{1,5},{2,3},{2,5},{3,4},{4,5},{4,6}}E={{1,2},{1,5},{2,3},{2,5},{3,4},{4,5},{4,6}}</description>
     </item>
     
   </channel>

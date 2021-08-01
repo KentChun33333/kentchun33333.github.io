@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-	<meta name="generator" content="Hugo 0.86.1" />
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,17 +9,21 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
     
 
-    <title>Autumn Memo | A place recording the core memo.</title>
-    <meta property="og:title" content="Autumn Memo | A place recording the core memo.">
-    <meta property="og:type" content="website">
+    <title>Graph Neural Net | Autumn Memo</title>
+    <meta property="og:title" content="Graph Neural Net - Autumn Memo">
+    <meta property="og:type" content="article">
+        
+        
     <meta name="Keywords" content="">
-    <meta name="description" content="">
-    <meta property="og:url" content="https://kentchun33333.github.io/">
+    <meta name="description" content="Graph Neural Net">
+        
+    <meta name="author" content="Kent Chiu">
+    <meta property="og:url" content="https://kentchun33333.github.io/tags/graph-neural-net/">
     <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
 
     <link rel="stylesheet" href='/css/normalize.css'>
     <link rel="stylesheet" href='/css/style.css'>
-    <link rel="alternate" type="application/rss+xml" href="https://kentchun33333.github.io/index.xml" title="Autumn Memo" />
+    <link rel="alternate" type="application/rss+xml" href="https://kentchun33333.github.io/tags/graph-neural-net/index.xml" title="Autumn Memo" />
     <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
     
@@ -38,17 +41,15 @@
         <div class="col-group">
             <div class="site-name ">
                 
-                    <h1>
-                        <a id="logo" href="https://kentchun33333.github.io">
-                            Autumn Memo
-                        </a>
-                    </h1>
+                    <a id="logo" href="https://kentchun33333.github.io">
+                        Autumn Memo
+                    </a>
                 
                 <p class="description">A place recording the core memo.</p>
             </div>
             <div>
                 <nav id="nav-menu" class="clearfix">
-                    <a class="current" href="https://kentchun33333.github.io">Head Page</a>
+                    <a class="" href="https://kentchun33333.github.io">Head Page</a>
                     
                     <a  href="https://kentchun33333.github.io/archives/" title="Archives">Archives</a>
                     
@@ -68,26 +69,18 @@
                     
 <div class="res-cons">
     
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://kentchun33333.github.io/post/math-typesetting/" title="Math Typesetting">Math Typesetting</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            2019 - 3 - 8 
-        </date>
-        
-        <div class="post-content">
-            <p>Mathematical notation in a Hugo project can be enabled by using third party JavaScript libraries.</p>……
-        </div>
-        <p class="readmore"><a href="https://kentchun33333.github.io/post/math-typesetting/">Reading ...</a></p>
-    </article>
+    <h3 class="archive-title">
+        Tags: 
+        <span class="keyword">Graph Neural Net</span>
+        Articles
+    </h3>
+    
+
     
     <article class="post">
         <header>
             <h1 class="post-title">
-                <a href="https://kentchun33333.github.io/post/kenttest/" title="Career Roadmap">Career Roadmap</a>
+                <a href="https://kentchun33333.github.io/private/gnn-%E6%95%99%E7%A8%8Bgraph-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E4%BB%8B%E7%BB%8D/"> GNN 教程：Graph 基础知识介绍</a>
             </h1>
         </header>
         <date class="post-meta meta-date">
@@ -95,31 +88,28 @@
         </date>
         
         <div class="post-content">
-            =======(Work Level)
-Data Science Manager (Singapore based) Agoda Drive the growth of your team and build a diverse, entrepreneurial team. You are a developer of people. You love leading diverse teams of professionals with both qualitative and quantitative backgrounds using data-driven and insights-led approaches to respond quickly in a dynamic, competitive, and fast changing industry.
-Get your hands dirty. Tackle complex problems in the online travel and ecommerce space using a range of ML and data analysis methods.……
+            https://archwalker.github.io/blog/2019/05/31/GNN-basics.html
+  GNN
+  May 31, 2019
+  0 views
+  引言 图卷积神经网络(Graph Convolutional Network)作为最近几年兴起的一种基于图结构的广义神经网络结构，因为其独特的计算能力，而受到广泛学者的关注与研究。传统深度学习模型 LSTM 和 CNN 在欧几里得空间数据(语言，图像，视频等)上取得了不错的成绩，但是在对非欧几里得空间数据(eg：社交网络、信息网络等)进行处理上却存在一定的局限性。
+针对该问题，研究者们引入了图论中抽象意义上的图(Graph)来表示非欧几里得结构化数据。并利用图卷积网络对来图(Graph)数据进行处理，以深入发掘其特征和规律。
+本文首先分别介绍了欧几里得结构化数据和非欧几里得结构化数据特点；然后，针对非欧几里得结构化数据的表示问题，引入了图论中抽象意义上的图(Graph)概念，并对图(Graph)中一些表示形式进行介绍；最后，通过一个简单的例子，对图(Graph)数据的应用进行介绍。以帮助读者加深对图(Graph)的理解。
+一、欧几里得结构化数据 1、欧几里得空间 欧几里德空间(Euclidean Space)，简称为欧氏空间(也可以称为平直空间)，在数学中是对欧几里德所研究的2维和3维空间的一般化。这个一般化把欧几里德对于距离、以及相关的概念长度和角度，转换成任意数维的坐标系。如下图所示。
+ 图 a 表示二维欧几里得空间
+  图 b 表示三维欧几里得空间
+ 2、 常见的欧几里得结构化数据 将数据转换到欧几里得空间中，所得到的数据称为欧几里得结构化数据。
+常见的欧几里得结构化数据主要包含：
+ 1D：声音，时间序列等； 2D：图像等； 3D：视频，高光谱图像等；  二、非欧几里得结构化数据 1、非欧几里得空间 然而，科学研究中并不是所有的数据都能够被转换到欧几里得空间中(eg：社交网络、信息网络等)，对于不能进行欧几里得结构化的数据，我们将其称为非欧几里得结构化数据。
+2、 非常见的欧几里得结构化数据 常见的非欧几里得结构化数据主要包含：
+ 1D：社交网络(eg：Facebook，Twitter等)等； 2D：生物网络(基因，分子，大脑连接)等； 3D：基础设施网络(eg：能源，交通，互联网，通信等)等；  三、图(Graph) 1、图(Graph)的引入 针对非欧几里得结构化数据表示问题，研究者们引入了图论中抽象意义上的图(Graph)来表示非欧几里得结构化数据。
+2、图(Graph)的定义 图(Graph)定义形式为G=(V,E)G=(V,E)，其结构如下图所示：
+ 一个有标号的简单图，点集V={1,2,3,4,5,6}V={1,2,3,4,5,6}，边集E={{1,2},{1,5},{2,3},{2,5},{3,4},{4,5},{4,6}}E={{1,2},{1,5},{2,3},{2,5},{3,4},{4,5},{4,6}}……
+            <p class="readmore"><a href="https://kentchun33333.github.io/private/gnn-%E6%95%99%E7%A8%8Bgraph-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E4%BB%8B%E7%BB%8D/">Reading ... </a></p>
         </div>
-        <p class="readmore"><a href="https://kentchun33333.github.io/post/kenttest/">Reading ...</a></p>
     </article>
     
-    <article class="post">
-        <header>
-            <h1 class="post-title">
-                <a href="https://kentchun33333.github.io/post/workflow-of-hugoblog/" title="WorkFlow of HUGO Blog">WorkFlow of HUGO Blog</a>
-            </h1>
-        </header>
-        <date class="post-meta meta-date">
-            1 - 1 - 1 
-        </date>
-        
-        <div class="post-content">
-            Set Up Env   install GO and hugo
-  install theme
-  cd &lt;YOUR Bolg Root Dir&gt;git clone https://github.com/flysnow-org/maupassant-hugo themes/maupassant  Hugo command  hugo server -t maupassant  it will server the website on local machine   hugo -D -t maupassant  it will generate the statistic-files to public folder Note that the asset (image/video) would not be copy to the public folders..    Handling assets in Hugo-post with Typora  src = img.……
-        </div>
-        <p class="readmore"><a href="https://kentchun33333.github.io/post/workflow-of-hugoblog/">Reading ...</a></p>
-    </article>
-    
+
     
 
 
