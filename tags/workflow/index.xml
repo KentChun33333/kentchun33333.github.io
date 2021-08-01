@@ -12,9 +12,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://kentchun33333.github.io/post/workflow-of-hugoblog/</guid>
-      <description>Set Up Env   install GO and hugo
-  install theme
-  cd &amp;lt;YOUR Bolg Root Dir&amp;gt;git clone https://github.com/flysnow-org/maupassant-hugo themes/maupassant  Hugo command  hugo server -t maupassant  it will server the website on local machine   hugo -D -t maupassant  it will generate the statistic-files to public folder Note that the asset (image/video) would not be copy to the public folders..    Handling assets in Hugo-post with Typora  src = img.</description>
+      <description>Set Up Env  install GO and hugo install theme  cd &amp;lt;YOUR Bolg Root Dir&amp;gt; git clone https://github.com/flysnow-org/maupassant-hugo themes/maupassant Hugo command  hugo server -t maupassant  it will server the website on local machine   hugo -D -t maupassant  it will generate the statistic-files to public folder Note that the asset (image/video) would not be copy to the public folders..    Writing   Adding your md file into the contect and then compile</description>
     </item>
     
   </channel>

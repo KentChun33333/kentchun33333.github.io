@@ -28,22 +28,12 @@ Hugo makes use of a variety of open source projects including:
     </item>
     
     <item>
-      <title>Math Typesetting</title>
-      <link>https://kentchun33333.github.io/post/math-typesetting/</link>
-      <pubDate>Fri, 08 Mar 2019 00:00:00 +0000</pubDate>
-      
-      <guid>https://kentchun33333.github.io/post/math-typesetting/</guid>
-      <description>&lt;p&gt;Mathematical notation in a Hugo project can be enabled by using third party JavaScript libraries.&lt;/p&gt;</description>
-    </item>
-    
-    <item>
       <title>Career Roadmap</title>
-      <link>https://kentchun33333.github.io/post/kenttest/</link>
+      <link>https://kentchun33333.github.io/post/careerroadmap/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://kentchun33333.github.io/post/kenttest/</guid>
-      <description>Data Science Manager (Singapore based) Agoda Drive the growth of your team and build a diverse, entrepreneurial team. You are a developer of people. You love leading diverse teams of professionals with both qualitative and quantitative backgrounds using data-driven and insights-led approaches to respond quickly in a dynamic, competitive, and fast changing industry.
-Get your hands dirty. Tackle complex problems in the online travel and ecommerce space using a range of ML and data analysis methods.</description>
+      <guid>https://kentchun33333.github.io/post/careerroadmap/</guid>
+      <description>There are several key skills.</description>
     </item>
     
     <item>
@@ -52,9 +42,7 @@ Get your hands dirty. Tackle complex problems in the online travel and ecommerce
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://kentchun33333.github.io/post/workflow-of-hugoblog/</guid>
-      <description>Set Up Env   install GO and hugo
-  install theme
-  cd &amp;lt;YOUR Bolg Root Dir&amp;gt;git clone https://github.com/flysnow-org/maupassant-hugo themes/maupassant  Hugo command  hugo server -t maupassant  it will server the website on local machine   hugo -D -t maupassant  it will generate the statistic-files to public folder Note that the asset (image/video) would not be copy to the public folders..    Handling assets in Hugo-post with Typora  src = img.</description>
+      <description>Set Up Env  install GO and hugo install theme  cd &amp;lt;YOUR Bolg Root Dir&amp;gt; git clone https://github.com/flysnow-org/maupassant-hugo themes/maupassant Hugo command  hugo server -t maupassant  it will server the website on local machine   hugo -D -t maupassant  it will generate the statistic-files to public folder Note that the asset (image/video) would not be copy to the public folders..    Writing   Adding your md file into the contect and then compile</description>
     </item>
     
   </channel>

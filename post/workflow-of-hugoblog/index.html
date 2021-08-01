@@ -67,106 +67,7 @@
                 <div class="col-8" id="main">
                     
 <div class="res-cons">
-    <style type="text/css">
-    .post-toc {
-        position: fixed;
-        width: 200px;
-        margin-left: -210px;
-        padding: 5px 10px;
-        font-family: Athelas, STHeiti, Microsoft Yahei, serif;
-        font-size: 12px;
-        border: 1px solid rgba(0, 0, 0, .07);
-        border-radius: 5px;
-        background-color: rgba(255, 255, 255, 0.98);
-        background-clip: padding-box;
-        -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
-        box-shadow: 1px 1px 2px rgba(0, 0, 0, .125);
-        word-wrap: break-word;
-        white-space: nowrap;
-        -webkit-box-sizing: border-box;
-        box-sizing: border-box;
-        z-index: 999;
-        cursor: pointer;
-        max-height: 70%;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-
-    .post-toc .post-toc-title {
-        width: 100%;
-        margin: 0 auto;
-        font-size: 15px;
-        font-weight: 400;
-        text-transform: uppercase;
-        text-align: center;
-    }
-
-    .post-toc .post-toc-content {
-        font-size: 15px;
-    }
-
-    .post-toc .post-toc-content>nav>ul {
-        margin: 10px 0;
-    }
-
-    .post-toc .post-toc-content ul {
-        padding-left: 20px;
-        list-style: square;
-        margin: 0.5em;
-        line-height: 1.8em;
-    }
-
-    .post-toc .post-toc-content ul ul {
-        padding-left: 15px;
-        display: none;
-    }
-
-    @media print,
-    screen and (max-width:1057px) {
-        .post-toc {
-            display: none;
-        }
-    }
-</style>
-<div class="post-toc" style="position: absolute; top: 188px;">
-    <h4 class="post-toc-title"> Tree</h4>
-    <div class="post-toc-content">
-        <nav id="TableOfContents">
-  <ul>
-    <li><a href="#set-up-env">Set Up Env</a></li>
-    <li><a href="#hugo-command">Hugo command</a></li>
-    <li><a href="#handling-assets-in-hugo-post-with-typora">Handling assets in Hugo-post with Typora</a></li>
-  </ul>
-</nav>
-    </div>
-</div>
-<script type="text/javascript">
-    $(document).ready(function () {
-        var postToc = $(".post-toc");
-        if (postToc.length) {
-            var leftPos = $("#main").offset().left;
-            if(leftPos<220){
-                postToc.css({"width":leftPos-10,"margin-left":(0-leftPos)})
-            }
-
-            var t = postToc.offset().top - 20,
-                a = {
-                    start: {
-                        position: "absolute",
-                        top: t
-                    },
-                    process: {
-                        position: "fixed",
-                        top: 20
-                    },
-                };
-            $(window).scroll(function () {
-                var e = $(window).scrollTop();
-                e < t ? postToc.css(a.start) : postToc.css(a.process)
-            })
-        }
-    })
-</script>
+    
     <article class="post">
         <header>
             <h1 class="post-title">WorkFlow of HUGO Blog</h1>
@@ -185,18 +86,12 @@
         <div class="post-content">
             <h2 id="set-up-env">Set Up Env</h2>
 <ul>
-<li>
-<p>install GO and hugo</p>
-</li>
-<li>
-<p>install theme</p>
-</li>
-<li>
-<pre><code>cd &lt;YOUR Bolg Root Dir&gt;
-git clone https://github.com/flysnow-org/maupassant-hugo themes/maupassant
-</code></pre></li>
+<li>install GO and hugo</li>
+<li>install theme</li>
 </ul>
-<h2 id="hugo-command">Hugo command</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cd &lt;YOUR Bolg Root Dir&gt;
+git clone https://github.com/flysnow-org/maupassant-hugo themes/maupassant
+</code></pre></div><h2 id="hugo-command">Hugo command</h2>
 <ul>
 <li>hugo server -t maupassant
 <ul>
@@ -210,13 +105,44 @@ git clone https://github.com/flysnow-org/maupassant-hugo themes/maupassant
 </ul>
 </li>
 </ul>
+<h2 id="writing">Writing</h2>
+<ul>
+<li>
+<p>Adding your md file into the contect and then compile</p>
+</li>
+<li>
+<p>Math using fill mode  so both Typora and Web can parse</p>
+</li>
+<li>
+<p>$$
+Y = aX +ｂ
+$$</p>
+</li>
+<li>
+<p>using H2 as the main-section in the md. file so that Web-Theme can parse</p>
+</li>
+</ul>
 <h2 id="handling-assets-in-hugo-post-with-typora">Handling assets in Hugo-post with Typora</h2>
+<ul>
+<li>Notice that in Web, it would
 <ul>
 <li>src = img.png &ndash;&gt; <a href="https://kentchun33333.github.io/post/kenttest/img.png">https://kentchun33333.github.io/post/kenttest/img.png</a></li>
 <li>src = /img.png &ndash;&gt; <a href="https://kentchun33333.github.io/img.png">https://kentchun33333.github.io/img.png</a></li>
-<li></li>
 </ul>
-
+</li>
+<li>In pratical</li>
+<li>With Hugo, we need to use YAML seeting style on the top of md file, like following</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">typora-root-url</span>: <span style="color:#ae81ff">..\..\static</span>
+<span style="color:#f92672">title </span>: <span style="color:#e6db74">&#34;Career Roadmap&#34;</span>
+<span style="color:#f92672">description </span>: <span style="color:#e6db74">&#34;Personal Plan.&#34;</span>
+<span style="color:#f92672">tags </span>: [<span style="color:#e6db74">&#34;Roadmap&#34;</span>]
+</code></pre></div><ul>
+<li>Then we put the image in static folder so it can be ranger directly</li>
+<li>Recommend in Typora with setting Image Inssert to customized folder ../../static/img/${filename}</li>
+</ul>
+<pre><code>![](/img/test.png) 
+</code></pre>
         </div>
 
         
@@ -301,11 +227,7 @@ git clone https://github.com/flysnow-org/maupassant-hugo themes/maupassant
 <ul class="widget-list">
     
     <li>
-        <a href="https://kentchun33333.github.io/post/math-typesetting/" title="Math Typesetting">Math Typesetting</a>
-    </li>
-    
-    <li>
-        <a href="https://kentchun33333.github.io/post/kenttest/" title="Career Roadmap">Career Roadmap</a>
+        <a href="https://kentchun33333.github.io/post/careerroadmap/" title="Career Roadmap">Career Roadmap</a>
     </li>
     
     <li>
