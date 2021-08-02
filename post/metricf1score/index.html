@@ -9,21 +9,24 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
     
 
-    <title>Workflow Note | Autumn Memo</title>
-    <meta property="og:title" content="Workflow Note - Autumn Memo">
+    <title>F1 Score on Multi Classes | Autumn Memo</title>
+    <meta property="og:title" content="F1 Score on Multi Classes - Autumn Memo">
     <meta property="og:type" content="article">
         
+    <meta property="article:published_time" content='2020-01-27T00:00:00&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2020-01-27T00:00:00&#43;08:00'>
         
     <meta name="Keywords" content="">
-    <meta name="description" content="Workflow Note">
+    <meta name="description" content="Personal Plan.">
+        <meta name="author" content="Kent Chiu">
         
-    <meta name="author" content="Kent Chiu">
-    <meta property="og:url" content="https://kentchun33333.github.io/categories/workflow-note/">
+    <meta property="og:url" content="https://kentchun33333.github.io/post/metricf1score/">
     <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
 
     <link rel="stylesheet" href='/css/normalize.css'>
     <link rel="stylesheet" href='/css/style.css'>
-    <link rel="alternate" type="application/rss+xml" href="https://kentchun33333.github.io/categories/workflow-note/index.xml" title="Autumn Memo" />
     <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
     
@@ -49,7 +52,7 @@
             </div>
             <div>
                 <nav id="nav-menu" class="clearfix">
-                    <a class="" href="https://kentchun33333.github.io">Main</a>
+                    <a class="current" href="https://kentchun33333.github.io">Main</a>
                     
                     <a  href="https://kentchun33333.github.io/archives/" title="Archives">Archives</a>
                     
@@ -69,44 +72,87 @@
                     
 <div class="res-cons">
     
-    <h3 class="archive-title">
-        Categories: 
-        <span class="keyword">Workflow Note</span>
-        Articles
-    </h3>
-    
-
-    
     <article class="post">
         <header>
-            <h1 class="post-title">
-                <a href="https://kentchun33333.github.io/post/memosystem/">Memo System</a>
-            </h1>
+            <h1 class="post-title">F1 Score on Multi Classes</h1>
         </header>
         <date class="post-meta meta-date">
-            2021 - 8 - 1 
+            2020 - 1 - 27 
         </date>
         
-        <div class="post-meta meta-category">
-            |
+        <div class="post-meta">
+            <span>|</span>
             
-            <a href='/categories/workflow-note'>Workflow Note</a>
+            <span class="meta-category"><a href='/categories/algorithm'>Algorithm</a></span>
             
         </div>
         
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    Reading </span></span>
+        </div>
+        
+        
         <div class="post-content">
-            In 2021, the blog is upgraded to Hugo + Typora. It combines the notebook and blog into single system.……
-            <p class="readmore"><a href="https://kentchun33333.github.io/post/memosystem/">Reading ... </a></p>
+            <p>In multi-class tasks, there is always 2 kinds of trade-offs. One is the precision and recall: when tuning a classifier, improving the precision score often results in lowering the recall score. The other is the trade-off between classes. To address this problem, there are 3 main variants of F1 scores as design options.</p>
+<h2 id="f1-score-on-single-class">F1 Score on Single Class</h2>
+<p>Let&rsquo;s look the basic F1-score first. It is computed using a <strong>Harmonic Mean</strong> of perception ($P$​​) and recall ($R$​​​​): 
+$$
+\text{F1} = 2 \times \frac{P \times R}{P+R}
+$$
+Similar to <strong>Arithmetic Mean</strong>, it will always be somewhere in between precision and mean. But it behaves differently that it would implicitly give a larger weight to lower numbers. For example, when Precision is 100% and Recall is 0%, the F1-score will be 0%, not 50%.</p>
+<h2 id="f1-score-on-multi-class">F1 Score on Multi Class</h2>
+<p>Now, lets say we have $N$​ classes and each class will have a $F1_{i \in N}$​​​​​ scores. In order to have an single scaler to indicate the model performancem, we usually have simple average on multiple F1 scores. **Macro-F1** is the most common F1 score that we gave equal weights to each class.</p>
+<p>$$
+\text{Macro-F1} = \frac{\sum_{i}^{N} F1_{i}}{N}
+$$
+However, we probabiliy dont want to do that if the data is highly imbalance. **Weighted-F1**, we weight the F1-score of each class by the number of samples from that class $i$, denote as $W_{i}$​
+$$
+\text{Weighted-F1} = \frac{\sum_{i}^{N} W_{i} \times F1_{i}}{N}
+$$
+There is an alternative way of doing it, called **Micro-F1**. The idea is rather then computing F1 score for each class, lets ignore the class. We first compute the overall perception and overall recall. They are also called **Micro perception** ($P_{m}$​) and **Micro recall **($R_{m}$​​​​​​). Then we apply them into F1 socre function.<br>
+$$
+\text{Micro F1} = 2 \times \frac{P_{m} \times R_{m}}{P_{m}+R_{m}}
+$$</p>
+<h2 id="summary">Summary</h2>
+<p>As mentioned earlier there are 3 main variants of F1 scores that giving different tastes for evaluating model performance. The key concept is, just like design loss function, the relative importance assigned to precision and recall or to different classes should be task-oriented. Sometimes, we would customize the Weighted-F1 score by some huristics or priors.</p>
+
+        </div>
+
+        
+
+
+        
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/metrics'>Metrics</a></li>
+                
+                <li><a href='/tags/machine-learning'>Machine Learning</a></li>
+                
+            </ul>
+            
         </div>
     </article>
     
-
     
 
-
-
-
-
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "KentChun33333/kentchun33333.github.io"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
 </div>
 
                     <footer id="footer">
@@ -119,6 +165,16 @@
 </footer>
 
 
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
 
 <a id="rocket" href="#top"></a>
 <script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>

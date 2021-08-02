@@ -280,7 +280,7 @@ textarea {
 }
 .post-title {
     margin:0;
-    color:#555;
+    color:#ba3925;
     text-align:left;
     /**font:bold 25px/1.1 "ff-tisa-web-pro", Cambria, "Times New Roman", Georgia, Times, sans-serif;**/
     font-size: 1.5em;
@@ -808,7 +808,7 @@ img.alignright {
         padding:0 20px;
     }
     .post-title {
-        font-size:22px;
+        font-size:24px;
     }
     .page-navigator {
         padding:15px 0 0;
