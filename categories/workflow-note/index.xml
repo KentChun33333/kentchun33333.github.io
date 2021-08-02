@@ -8,12 +8,12 @@
     <language>en</language>
     <lastBuildDate>Sun, 01 Aug 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/categories/workflow-note/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Memo Sys by HUGO and Typora</title>
-      <link>https://kentchun33333.github.io/post/workflow-of-hugoblog/</link>
+      <title>Memo System</title>
+      <link>https://kentchun33333.github.io/post/memosystem/</link>
       <pubDate>Sun, 01 Aug 2021 00:00:00 +0000</pubDate>
       
-      <guid>https://kentchun33333.github.io/post/workflow-of-hugoblog/</guid>
-      <description>Set Up Env  install GO and hugo install theme  cd &amp;lt;YOUR Bolg Root Dir&amp;gt; git clone https://github.com/flysnow-org/maupassant-hugo themes/maupassant Hugo command  hugo server -t maupassant  it will server the website on local machine   hugo -D -t maupassant  it will generate the statistic-files to public folder Note that the asset (image/video) would not be copy to the public folders..    Writing   Adding your md file into the contect and then compile</description>
+      <guid>https://kentchun33333.github.io/post/memosystem/</guid>
+      <description>In 2021, the blog is upgraded to Hugo + Typora. It combines the notebook and blog into single system.</description>
     </item>
     
   </channel>
