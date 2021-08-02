@@ -423,16 +423,6 @@ textarea {
     width:50%;
 }
 
-.image-container {
-    overflow: hidden;
-    height: 150px;
-}
-.image-container img {
-    display: block;
-    height: auto;
-    width: 100%;
-}
-
 .page-navigator {
     border-top:1px solid #ddd;
     list-style:none;
@@ -609,6 +599,7 @@ textarea.textarea {
 .widget-list {
     list-style:none;
     padding:0;
+    text-decoration-line: underline;
 }
 .widget-list li {
     margin:5px 0;
@@ -621,6 +612,8 @@ textarea.textarea {
 .widget .tagcloud a {
     line-height: 1.5;
     padding: 5px; 
+    text-decoration-line: underline;
+
 }
 #footer {
     padding:.8em 0 3.6em;
@@ -656,6 +649,19 @@ textarea.textarea {
     border-width:1px 0 0 0;
     position: relative;
 }
+
+.image-container {
+    overflow: hidden;
+    height: 150px;
+}
+.image-container img {
+    display: block;
+    height: auto;
+    width: 100%;
+    margin: -10% 0 0 0;
+}
+
+
 .aligncenter, div.aligncenter {
     display:block;
     margin-left:auto;
