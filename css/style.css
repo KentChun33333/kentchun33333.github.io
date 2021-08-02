@@ -283,7 +283,7 @@ textarea {
     color:#ba3925;
     text-align:left;
     /**font:bold 25px/1.1 "ff-tisa-web-pro", Cambria, "Times New Roman", Georgia, Times, sans-serif;**/
-    font-size: 1.5em;
+    font-size: 1.6em;
     font-weight: bold;
 }
 .post-title a, .keyword {
@@ -355,14 +355,19 @@ textarea {
 .meta-tags ul a:hover:before {
     border-color: transparent #555 transparent transparent;
 }
+
 .post-content {
     font-size: 1em;
-    line-height: 1.7;
+    line-height: 1.75;
     color:#333;
-    padding-top:27px;
+    padding-top: 25px;
+}
+/* when multi css-class, running order refers here from top to bottom */
+.padding_5 {
+    padding-top: 12px;
 }
 .post-content h2,.post-content h3,.post-content h4,.post-content h5,.post-content h6 {
-    color: #ba3925;
+    color: #555;
 }
 .page-content{
     padding-top: 40px;
@@ -417,6 +422,17 @@ textarea {
 .protected .text {
     width:50%;
 }
+
+.image-container {
+    overflow: hidden;
+    height: 150px;
+}
+.image-container img {
+    display: block;
+    height: auto;
+    width: 100%;
+}
+
 .page-navigator {
     border-top:1px solid #ddd;
     list-style:none;
@@ -625,7 +641,7 @@ textarea.textarea {
 }
 .post-content img, .comment-content img {
     max-width:100%;
-    margin: auto;
+    margin: 0;
     display: block;
 }
 .post-content a img {
@@ -634,7 +650,7 @@ textarea.textarea {
     bottom:-4px;
 }
 .post-content hr, .comment-content hr {
-    margin:2.1em auto;
+    margin:1.1em auto;
     width:200px;
     border:1px solid #ccc;
     border-width:1px 0 0 0;
@@ -808,7 +824,7 @@ img.alignright {
         padding:0 20px;
     }
     .post-title {
-        font-size:24px;
+        font-size:26px;
     }
     .page-navigator {
         padding:15px 0 0;
