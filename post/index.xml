@@ -8,7 +8,7 @@
     <language>en</language>
     <lastBuildDate>Sun, 01 Aug 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Memo System</title>
+      <title>Blog Memo by Hugo with Typora</title>
       <link>https://kentchun33333.github.io/post/memosystem/</link>
       <pubDate>Sun, 01 Aug 2021 00:00:00 +0000</pubDate>
       
@@ -17,7 +17,7 @@
     </item>
     
     <item>
-      <title>2021 SG House</title>
+      <title>Buying Our First Condo in Singapore</title>
       <link>https://kentchun33333.github.io/post/buyinghouse2021/</link>
       <pubDate>Mon, 28 Jun 2021 00:00:00 +0000</pubDate>
       
@@ -26,12 +26,21 @@
     </item>
     
     <item>
+      <title>Build a Simple Search System from Scratch</title>
+      <link>https://kentchun33333.github.io/post/simplesearchsys/</link>
+      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/post/simplesearchsys/</guid>
+      <description>In 2020 Sep. I implemented a simple search system from scrach.</description>
+    </item>
+    
+    <item>
       <title>F1 Score on Multi Classes</title>
       <link>https://kentchun33333.github.io/post/metricf1score/</link>
       <pubDate>Mon, 27 Jan 2020 00:00:00 +0000</pubDate>
       
       <guid>https://kentchun33333.github.io/post/metricf1score/</guid>
-      <description>In multi-class tasks, there is always 2 kinds of trade-offs.</description>
+      <description>In multi-class clasification tasks, there is always 2 kinds of trade-offs.</description>
     </item>
     
     <item>
