@@ -2,35 +2,35 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on Autumn Memo</title>
-    <link>//localhost:1313/categories/</link>
+    <link>https://kentchun33333.github.io/categories/</link>
     <description>Recent content in Categories on Autumn Memo</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 01 Aug 2021 00:00:00 +0000</lastBuildDate><atom:link href="//localhost:1313/categories/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 01 Aug 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Workflow Note</title>
-      <link>//localhost:1313/categories/workflow-note/</link>
+      <link>https://kentchun33333.github.io/categories/workflow-note/</link>
       <pubDate>Sun, 01 Aug 2021 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/categories/workflow-note/</guid>
+      <guid>https://kentchun33333.github.io/categories/workflow-note/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Life Design</title>
-      <link>//localhost:1313/categories/life-design/</link>
+      <link>https://kentchun33333.github.io/categories/life-design/</link>
       <pubDate>Mon, 28 Jun 2021 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/categories/life-design/</guid>
+      <guid>https://kentchun33333.github.io/categories/life-design/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Algorithm</title>
-      <link>//localhost:1313/categories/algorithm/</link>
+      <link>https://kentchun33333.github.io/categories/algorithm/</link>
       <pubDate>Mon, 27 Jan 2020 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/categories/algorithm/</guid>
+      <guid>https://kentchun33333.github.io/categories/algorithm/</guid>
       <description></description>
     </item>
     

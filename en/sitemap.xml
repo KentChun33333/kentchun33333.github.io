@@ -2,105 +2,105 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>//localhost:1313/</loc>
+    <loc>https://kentchun33333.github.io/</loc>
     <lastmod>2021-08-01T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="//localhost:1313/zh-cn/"
+                href="https://kentchun33333.github.io/zh-cn/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="//localhost:1313/"
+                href="https://kentchun33333.github.io/"
                 />
   </url><url>
-    <loc>//localhost:1313/categories/</loc>
+    <loc>https://kentchun33333.github.io/categories/</loc>
     <lastmod>2021-08-01T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="//localhost:1313/zh-cn/categories/"
+                href="https://kentchun33333.github.io/zh-cn/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="//localhost:1313/categories/"
+                href="https://kentchun33333.github.io/categories/"
                 />
   </url><url>
-    <loc>//localhost:1313/tags/hugo/</loc>
+    <loc>https://kentchun33333.github.io/tags/hugo/</loc>
     <lastmod>2021-08-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>//localhost:1313/post/memosystem/</loc>
+    <loc>https://kentchun33333.github.io/post/memosystem/</loc>
     <lastmod>2021-08-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>//localhost:1313/post/</loc>
+    <loc>https://kentchun33333.github.io/post/</loc>
     <lastmod>2021-08-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>//localhost:1313/tags/</loc>
+    <loc>https://kentchun33333.github.io/tags/</loc>
     <lastmod>2021-08-01T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="//localhost:1313/zh-cn/tags/"
+                href="https://kentchun33333.github.io/zh-cn/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="//localhost:1313/tags/"
+                href="https://kentchun33333.github.io/tags/"
                 />
   </url><url>
-    <loc>//localhost:1313/tags/typora/</loc>
+    <loc>https://kentchun33333.github.io/tags/typora/</loc>
     <lastmod>2021-08-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>//localhost:1313/categories/workflow-note/</loc>
+    <loc>https://kentchun33333.github.io/categories/workflow-note/</loc>
     <lastmod>2021-08-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>//localhost:1313/post/buyinghouse2021/</loc>
+    <loc>https://kentchun33333.github.io/post/buyinghouse2021/</loc>
     <lastmod>2021-06-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>//localhost:1313/tags/investment/</loc>
+    <loc>https://kentchun33333.github.io/tags/investment/</loc>
     <lastmod>2021-06-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>//localhost:1313/categories/life-design/</loc>
+    <loc>https://kentchun33333.github.io/categories/life-design/</loc>
     <lastmod>2021-06-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>//localhost:1313/archives/</loc>
+    <loc>https://kentchun33333.github.io/archives/</loc>
     <lastmod>2021-05-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>//localhost:1313/categories/algorithm/</loc>
+    <loc>https://kentchun33333.github.io/categories/algorithm/</loc>
     <lastmod>2020-01-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>//localhost:1313/post/metricf1score/</loc>
+    <loc>https://kentchun33333.github.io/post/metricf1score/</loc>
     <lastmod>2020-01-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>//localhost:1313/tags/machine-learning/</loc>
+    <loc>https://kentchun33333.github.io/tags/machine-learning/</loc>
     <lastmod>2020-01-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>//localhost:1313/tags/metrics/</loc>
+    <loc>https://kentchun33333.github.io/tags/metrics/</loc>
     <lastmod>2020-01-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>//localhost:1313/post/careerroadmap/</loc>
+    <loc>https://kentchun33333.github.io/post/careerroadmap/</loc>
     <lastmod>2019-03-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>//localhost:1313/tags/roadmap/</loc>
+    <loc>https://kentchun33333.github.io/tags/roadmap/</loc>
     <lastmod>2019-03-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>//localhost:1313/about/</loc>
+    <loc>https://kentchun33333.github.io/about/</loc>
     <lastmod>2016-09-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>//localhost:1313/tags/index/</loc>
+    <loc>https://kentchun33333.github.io/tags/index/</loc>
   </url><url>
-    <loc>//localhost:1313/series/</loc>
+    <loc>https://kentchun33333.github.io/series/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="//localhost:1313/zh-cn/series/"
+                href="https://kentchun33333.github.io/zh-cn/series/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="//localhost:1313/series/"
+                href="https://kentchun33333.github.io/series/"
                 />
   </url>
 </urlset>

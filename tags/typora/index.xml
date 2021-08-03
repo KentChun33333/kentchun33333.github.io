@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Typora on Autumn Memo</title>
-    <link>//localhost:1313/tags/typora/</link>
+    <link>https://kentchun33333.github.io/tags/typora/</link>
     <description>Recent content in Typora on Autumn Memo</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 01 Aug 2021 00:00:00 +0000</lastBuildDate><atom:link href="//localhost:1313/tags/typora/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 01 Aug 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/tags/typora/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Memo System</title>
-      <link>//localhost:1313/post/memosystem/</link>
+      <link>https://kentchun33333.github.io/post/memosystem/</link>
       <pubDate>Sun, 01 Aug 2021 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/memosystem/</guid>
+      <guid>https://kentchun33333.github.io/post/memosystem/</guid>
       <description>In 2021, the blog is upgraded to Hugo + Typora.</description>
     </item>
     
