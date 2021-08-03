@@ -111,20 +111,20 @@ $$
 $$
 Similar to <strong>Arithmetic Mean</strong>, it will always be somewhere in between precision and mean. But it behaves differently that it would implicitly give a larger weight to lower numbers. For example, when Precision is 100% and Recall is 0%, the F1-score will be 0%, not 50%.</p>
 <h2 id="f1-score-on-multi-class">F1 Score on Multi Class</h2>
-<p>Now, lets say we have $N$​ classes and each class will have a $F1_{i \in N}$​​​​​ scores. In order to have an single scaler to indicate the model performancem, we usually have simple average on multiple F1 scores. **Macro-F1** is the most common F1 score that we gave equal weights to each class.</p>
+<p>Now, lets say we have $N$ classes and each class will have a $F1_{i \in N}$ scores. In order to have an single scaler to indicate the model performance, we usually have simple average on multiple F1 scores. **Macro-F1** is the most common F1 score that we gave equal weights to each class.</p>
 <p>$$
 \text{Macro-F1} = \frac{\sum_{i}^{N} F1_{i}}{N}
 $$
-However, we probabiliy dont want to do that if the data is highly imbalance. **Weighted-F1**, we weight the F1-score of each class by the number of samples from that class $i$, denote as $W_{i}$​
+However, we probability don&rsquo;t want to do that if the data is highly imbalance. **Weighted-F1**, we weight the F1-score of each class by the number of samples from that class $i$, denote as $W_{i}$
 $$
 \text{Weighted-F1} = \frac{\sum_{i}^{N} W_{i} \times F1_{i}}{N}
 $$
-There is an alternative way of doing it, called **Micro-F1**. The idea is rather then computing F1 score for each class, lets ignore the class. We first compute the overall perception and overall recall. They are also called **Micro perception** ($P_{m}$​) and **Micro recall **($R_{m}$​​​​​​). Then we apply them into F1 socre function.<br>
+There is an alternative way of doing it, called **Micro-F1**. The idea is rather then computing F1 score for each class, lets ignore the class. We first compute the overall perception and overall recall. They are also called **Micro perception** ($P_{m}$) and **Micro recall **($R_{m}$). Then we apply them into F1 score function.<br>
 $$
 \text{Micro F1} = 2 \times \frac{P_{m} \times R_{m}}{P_{m}+R_{m}}
 $$</p>
 <h2 id="summary">Summary</h2>
-<p>As mentioned earlier there are 3 main variants of F1 scores that giving different tastes for evaluating model performance. The key concept is, just like design loss function, the relative importance assigned to precision and recall or to different classes should be task-oriented. Sometimes, we would customize the Weighted-F1 score by some huristics or priors.</p>
+<p>As mentioned earlier there are 3 main variants of F1 scores that giving different tastes for evaluating model performance. The key concept is, just like design loss function, the relative importance assigned to precision and recall or to different classes should be task-oriented. Sometimes, we would customize the Weighted-F1 score by some heuristics or priors.</p>
 
         </div>
 
