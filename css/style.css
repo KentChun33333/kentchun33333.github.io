@@ -803,7 +803,8 @@ img.alignright {
         padding-top:5px;
     }
     .post-content {
-        font-size: 14px;
+        font-size: 15px;
+        letter-spacing: 1px;
     }
 }
 @media print, screen and (max-width:860px) {
