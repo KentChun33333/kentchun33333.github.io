@@ -103,20 +103,15 @@
         
         <div class="post-content">
             <p>For model productization, evaluating the efficacy of the ML system is essential. In pratical, we usually leverage a series of combination method to model the efficacy or uncertainty.  It is a big topic and this memo will only talk about 4 types of uncertainties.</p>
+<p>
+        <img class="mx-auto" alt="image-20210804220752837" src="/img/Scedasticicity/image-20210804220752837.png" />   
+    </p>
 <h2 id="aleatoric-and-epistemic">Aleatoric and Epistemic</h2>
 <p>In general, the uncertainty can be categorized into 2 group. Aleatoric uncertainty and Epistemic uncertainty.</p>
 <p><strong>Aleatoric uncertainty</strong> captures noise inherent in the observations or raw data. It describes randomness arising from the data generating process itself. This noise that cannot be eliminated by simply drawing more data. In pratical, the inconsistance of labeling data is one of the biggest contribution to aleatoric uncertainty.</p>
 <p><strong>Epistemic uncertainty</strong> accounts for uncertainty in the model parameters. It is more likely to see if we have over-parameterized model or we dont have enough data. Widely speaking, I am considering overfitting as an observation of Epistemic uncertainty. Intuitively, It could be reduced by have more data or decreasing the model parameters. To further push the idea, by using variational inference like Monte Carlo (MC) dropout or Boostraped Ensemble Model, we could potentially reduce this uncertainty as well.</p>
 <h2 id="homoscedastic-and-heteroscedastic">Homoscedastic and Heteroscedastic</h2>
-<p>
-        <img class="mx-auto" alt="image-20210804212454552" src="/img/Scedasticicity/image-20210804212454552.png" />   
-    </p>
-<p>From another angle, the uncertainty itself could be homogeneous or heterogeneous with respect to the input $X$​​. <strong>Homoscedastic</strong> uncertainty describe the value of uncertainty is a constant for different inputs. $(D_1=D_2=D_3)$​ On the other hand, <strong>heteroscedastic</strong> uncertainty means with some inputs potentially it would have more noisy outputs than others.</p>
-<p>To notice that, usually <strong>Epistemic uncertainty</strong> is hard to be measurable in single deterministic model.</p>
-<h2 id="summary">Summary</h2>
-<p>
-        <img class="mx-auto" alt="image-20210804220752837" src="/img/Scedasticicity/image-20210804220752837.png" />   
-    </p>
+<p>From another angle, the uncertainty itself could be homogeneous or heterogeneous with respect to the input $X$​​​. <strong>Homoscedastic</strong> uncertainty describe the value of uncertainty is a constant for different inputs.​ On the other hand, <strong>heteroscedastic</strong> uncertainty means with some inputs potentially it would have more noisy outputs than others. To notice that, usually <strong>Epistemic uncertainty</strong> is hard to be measurable in single deterministic model.</p>
 <h2 id="reference">Reference</h2>
 <ul>
 <li>
