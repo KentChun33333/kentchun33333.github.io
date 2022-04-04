@@ -1,14 +1,13 @@
 ---
 typora-root-url: ..\..\static
-title : "SSH with bitbucket on windows"
+title : "Setting Bitbucket on Windows"
 author : "Kent Chiu"
 featured_image : /img/algo_ref.png
 date : 2022-04-02
-categories: ["Software"]
+categories: ["Workflow"]
 tags : ["Environment"]
 ---
-
-To set ssh-key is more intuitive on linux rather then in windows. You just need to manuel check some configs if it goes as expected.
+Recently, Bitbucket retired the simple password login via git-https. So we will need a ssh-key on it. Ok not a big deal....
 
 ## Step 1: Check SSH config 
 
