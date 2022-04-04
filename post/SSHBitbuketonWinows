@@ -1,0 +1,37 @@
+---
+typora-root-url: ..\..\static
+title : "SSH with bitbucket on windows"
+author : "Kent Chiu"
+featured_image : /img/SimpleSearchSys/demo.gif
+date : 2022-04-02
+categories: ["Software"]
+tags : ["Environment"]
+---
+
+To set ssh-key is more intuitive on linux rather then in windows. You just need to manuel check some configs if it goes as expected.
+
+## Step 1: Check SSH config 
+
+Need to check add `.config` into the `.ssh` folder after using ssh-keygen 
+```
+Host bitbucket.org
+    User git
+    Hostname bitbucket.org
+    PreferredAuthentications publickey
+    IdentityFile ~/.ssh/{id_rsa}
+```
+
+Make sure `.config` in the `.git` folder is as following 
+
+## Step 2: Git config
+
+Need to check the config 
+```
+[remote "bitbucket"]
+url = git@bitbucket.org:{acc}/{repo}.git
+fetch = +refs/heads/*:refs/remotes/bitbucket/*
+```
+## Step 3: Adding the public key to the repo 
+
+This one is surprisingly tricky in bitbucket. It is actually funny that there are 3 entry points of adding public SSH key into your repo. You need to go personal setting to add key otherwise it will fail while pushing the code. 
+And ... if you are adding the key by repo-setting or project-setting, I am talking about you. 
