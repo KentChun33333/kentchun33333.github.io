@@ -10,25 +10,21 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
     
 
-    <title>Build a Simple Search System | Autumn Memo</title>
-    <meta property="og:title" content="Build a Simple Search System - Autumn Memo">
+    <title> | Autumn Memo</title>
+    <meta property="og:title" content=" - Autumn Memo">
     <meta property="og:type" content="article">
         
-    <meta property="article:published_time" content='2020-09-25T00:00:00&#43;08:00'>
-        
-        
-    <meta property="article:modified_time" content='2020-09-25T00:00:00&#43;08:00'>
         
     <meta name="Keywords" content="">
-    <meta name="description" content="Build a Simple Search System">
-        <meta name="author" content="Kent Chiu">
+    <meta name="description" content="">
         
+    <meta name="author" content="Kent Chiu">
 
 
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8949849444403982"
     crossorigin="anonymous"></script>
     
-    <meta property="og:url" content="https://kentchun33333.github.io/post/simplesearchsys/">
+    <meta property="og:url" content="https://kentchun33333.github.io/post/taskmanagement/">
     <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
 
     <link rel="stylesheet" href='/css/normalize.css'>
@@ -85,18 +81,11 @@
     
     <article class="post">
         <header>
-            <h1 class="post-title">Build a Simple Search System</h1>
+            <h1 class="post-title"></h1>
         </header>
         <date class="post-meta meta-date">
-            2020 - 9 - 25 
+            1 - 1 - 1 
         </date>
-        
-        <div class="post-meta">
-            <span>|</span>
-            
-            <span class="meta-category"><a href='/categories/software'>Software</a></span>
-            
-        </div>
         
         
         <div class="post-meta">
@@ -106,144 +95,128 @@
         
         
         <div class="post-content">
-            <p>In 2020 Sep. I implemented a simple search system from scrach. The repo is at <a href="https://github.com/KentChun33333/search_eng">Here</a>. The result is something like this:</p>
-<p>
-        <img class="mx-auto" alt="" src="/img/SimpleSearchSys/demo.gif" />   
-    </p>
-<blockquote>
-<p>Of course, there is a story behind..</p>
-</blockquote>
-<p>In 2020 Aug, I got interview opportunity of Apple Machine learning Engineer. Interestingly, the first interview is conducted with how to design a search system. As an algorithm developer or data scientist, I spend most of my time on applying/customizing algorithms and learning the domain knowledges. Developing simple systems is still ok to me. But a search system? Never done it before. Absolutely unexpected and of course, it went south.</p>
-<p><strong>The failure motivates me to implement a simple search system from scratch.</strong> The following are the summary of what I learned and implemented.</p>
-<h2 id="1-project-introduction">1. Project Introduction</h2>
-<p>A simple search system that mostly written in python. Usually, a search/recommend system is composed by several key components (1) Web Crawler (2) Indexing (3) Recall model/mechanism (4) Rank model (5) Query Web-Interface.</p>
-<p>
-        <img class="mx-auto" alt="" src="/img/SimpleSearchSys/system_flow.png" />   
-    </p>
-<h3 id="11-web-crawler">1.1 Web Crawler</h3>
-<ul>
-<li>
-<p>Using <em>selenium</em> and <em>beautifulsoup4</em> to fetch the data from <a href="https://stackoverflow.com">https://stackoverflow.com</a> that mostly related to database. In addition, currently only crawling the title as document for storage concerns. This reop use <em>sqlite3</em> as forward-database for simplicity.</p>
-<p>
-        <img class="mx-auto" alt="" src="/img/SimpleSearchSys/forward_db.png" />   
-    </p>
-</li>
-</ul>
-<h3 id="12-indexing">1.2 Indexing</h3>
-<ul>
-<li>
-<p>Using <em>nltk</em> and <em>gensim</em> to do the text normalization, stemming, lemmatization and doc2vec.</p>
-</li>
-<li>
-<p>Using a customized object as inverted (index) database. For real applications, we can chose <em>leveldb</em>, <em>dynamodb</em> or <em>rockdb</em>. The customized object is basically a k-value object with the optimization that applies tire-tree on inverted index.</p>
+            <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">title </span>: <span style="color:#e6db74">&#34;Collaborative Task Managements&#34;</span>
+<span style="color:#f92672">author </span>: <span style="color:#e6db74">&#34;Kent Chiu&#34;</span>
+<span style="color:#f92672">featured_image </span>: <span style="color:#ae81ff">/img/Scedasticicity/image-20210804220752837.png</span>
+<span style="color:#f92672">date </span>: <span style="color:#e6db74">2022-09-27</span>
+<span style="color:#f92672">categories</span>: [<span style="color:#e6db74">&#34;Workflow&#34;</span>]
+<span style="color:#f92672">tags </span>: [<span style="color:#e6db74">&#34;Project Management&#34;</span>]
+</code></pre></div><p>Nowadays, we have jira and confluence to help us managing the task and actual works. However, without good strategy, it can not help much.</p>
+<h2 id="task-type-with-expected-outputs">Task Type with Expected Outputs</h2>
+<p>It is important to have clear definition on the expected outputs of each type of tasks.</p>
 <table>
 <thead>
 <tr>
-<th>index (key word)</th>
-<th>Value</th>
+<th>Task Type</th>
+<th>Description</th>
+<th>Expected Outputs</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>sql</td>
-<td>[ (doc_id, term_frequency), &hellip;]</td>
+<td>Issue</td>
+<td>New issue, query&rsquo;s</td>
+<td>EmailsError MessageProblem Statement</td>
 </tr>
 <tr>
-<td>database</td>
-<td>[ (doc_id, term_frequency), &hellip;]</td>
+<td>Request</td>
+<td>New Functions / Idea from others</td>
+<td>Problem Statement | Measurement on Success</td>
+</tr>
+<tr>
+<td>Idea</td>
+<td>anything</td>
+<td>Problem Statement | Potential solutions | Documentation</td>
+</tr>
+<tr>
+<td>Solutioning</td>
+<td>- Idea propose<!-- raw HTML omitted -->- Communications<!-- raw HTML omitted -->  - Designs</td>
+<td>Emails and Documentation base on Request DocumentationResult can be decomposed of multiple problem statement. each with different solutions</td>
+</tr>
+<tr>
+<td>Implementation - Feature</td>
+<td>Functions need to be implement in <!-- raw HTML omitted --><!-- raw HTML omitted -->- code<!-- raw HTML omitted -->- document<!-- raw HTML omitted -->- &hellip;etc</td>
+<td>PR based on Solutioning DocumentationPass BuildBot &hellip; etc</td>
+</tr>
+<tr>
+<td>Runs</td>
+<td>- Run Experiment from feature branch <!-- raw HTML omitted -->- Runs from Dev branch for UAT<!-- raw HTML omitted -->- Runs from Master for Production (IT)<!-- raw HTML omitted -->- chase IT/DE &hellip;etc on Data Issues<!-- raw HTML omitted -->- &hellip; etc</td>
+<td>Experiment DocumentationReproducibility, that config and metric is on Database, so ppl can check into git-version and reproduce the result.</td>
+</tr>
+<tr>
+<td>Output for UAT</td>
+<td></td>
+<td>- Feature Dictionary<!-- raw HTML omitted -->- Data Dictionary <!-- raw HTML omitted -->- Reports  ..etc<!-- raw HTML omitted -->- Model Documentation</td>
+</tr>
+<tr>
+<td>Get Feedback of UAT</td>
+<td></td>
+<td>DocumentationUser Confirmation Email</td>
+</tr>
+<tr>
+<td>Implement to Dev</td>
+<td></td>
+<td>PR + Documentation of UAT result +Documentation of Model Government + &hellip; etc</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 </tbody>
 </table>
-</li>
-<li>
-<p>There are many advanced efficient index way, and for vector-database the indexing method often consisted of clustering and quantization methods.</p>
-</li>
-</ul>
-<h3 id="13-recall-model--mechanism">1.3 Recall Model / Mechanism</h3>
-<ul>
-<li>Here using traditional bool-query.  It could be further enhance with term-frequency or even a model to recall the candidates.</li>
-</ul>
-<h3 id="14-ranking-model--mechanism">1.4 Ranking Model / Mechanism</h3>
-<ul>
-<li>
-<p>Here using Doc2Vec from <em>gensim</em>. The pretrained weight is from <a href="https://github.com/jhlau/doc2vec">https://github.com/jhlau/doc2vec</a>.</p>
-</li>
-<li>
-<p>The idea is to recommend the item base on vector similarity after recall-model.</p>
-</li>
-</ul>
-<h3 id="15-query-interface">1.5 Query Interface</h3>
-<ul>
-<li>
-<p>Using Flask and Jinja template with bootstrap UI framework.</p>
-<p>
-        <img class="mx-auto" alt="" src="/img/SimpleSearchSys/demo.gif" />   
-    </p>
-</li>
-</ul>
-<h2 id="2-usage-flow">2. Usage Flow</h2>
-<ul>
-<li>install the requirement packages</li>
-<li>install chrome driver for selenium in data/web_driver
-<ul>
-<li>It should align with the config.py</li>
-</ul>
-</li>
-<li>python <strong>run_web_crawler.py</strong>
-<ul>
-<li>It would create a forward database and storing blob in local machine.</li>
-</ul>
-</li>
-<li>python <strong>run_model_indexer.py</strong>
-<ul>
-<li>It would run text normalization and then build the inverted-index object.</li>
-</ul>
-</li>
-<li>python <strong>run_query_interface.py</strong>
-<ul>
-<li>It would run a flask server on localhost:5000.</li>
-</ul>
-</li>
-<li>Config File
-<ul>
-<li>forward_database = <em>r</em>&lsquo;data/sqldb/example.db&rsquo;</li>
-<li>inverted_database = <em>r</em>&lsquo;data/sqldb/inverted_key_word_db.pkl&rsquo;</li>
-<li>Doc2Vector300D_model_weight = <em>r</em>&ldquo;data/model/doc2vec.bin&rdquo;</li>
-</ul>
-</li>
-</ul>
-<h2 id="3-result-comparison">3. Result Comparison</h2>
-<p>Current result just using traditional bool query, and not counting lots features like voting, user persona, content of question, and content of reply answers.</p>
+<h2 id="documentations">Documentations</h2>
 <table>
 <thead>
 <tr>
-<th>This Repo</th>
-<th>Original Website</th>
+<th>Document Type</th>
+<th>Description</th>
+<th>Comment</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>
-        <img class="mx-auto" alt="" src="/img/SimpleSearchSys/image_2.png" />   
-    </td>
-<td>
-        <img class="mx-auto" alt="" src="/img/SimpleSearchSys/image.png" />   
-    </td>
+<td>Product Dictionary</td>
+<td>The name and description base on a set of info.</td>
+<td>- Model Feature dictionary: for feature monitoring, user communication, explanation<!-- raw HTML omitted -->- Input data dictionary : to database management, communication to DE, monitoring data quality<!-- raw HTML omitted -->- Output data dictionary : to monitor model performance<!-- raw HTML omitted -->- All I/O Table dictionary : to monitor in and out in table-lvl<!-- raw HTML omitted -->- Model dictionary : for model selection, experiment explanation. <!-- raw HTML omitted -->- Training Method dictionary<!-- raw HTML omitted -->- Metric Dictionary<!-- raw HTML omitted -->- Agent Dictionary<!-- raw HTML omitted -->- Experiment Dictionary</td>
+</tr>
+<tr>
+<td>Project Dictionary</td>
+<td></td>
+<td>- Task Tracking Table | and its dictionary<!-- raw HTML omitted -->- Issue summary Table | and its dictionary<!-- raw HTML omitted -->- Task Type Dictionary <!-- raw HTML omitted -->- …</td>
+</tr>
+<tr>
+<td>UML</td>
+<td>The abstraction of code. usually we use it in solutioning phase to penetrate the ideas to target audience like develops/users/advocators &hellip;etc</td>
+<td>- Class Diagram<!-- raw HTML omitted --><!-- raw HTML omitted -->- User Story<!-- raw HTML omitted -->- …</td>
+</tr>
+<tr>
+<td>Project LOG</td>
+<td>The project catalog with timestamp. This can be generated by Task Management Table</td>
+<td>record with time-stamp for auditing trails, the content point to the relevant pages.</td>
+</tr>
+<tr>
+<td>Experiment Result</td>
+<td>currently in a more loosen definition.</td>
+<td>need to clarify with the <!-- raw HTML omitted --><!-- raw HTML omitted --><!-- raw HTML omitted --><!-- raw HTML omitted -->1. problem statement / objectives<!-- raw HTML omitted -->2. current code version, input versions &hellip; etc <!-- raw HTML omitted -->3. experiment config, result tables&hellip;etc</td>
+</tr>
+<tr>
+<td>User confirmation records</td>
+<td>upload the importance evidence</td>
+<td>Report tracking Email Tracking</td>
+</tr>
+<tr>
+<td>Success Metrics</td>
+<td>the key measurement of project/products during a period of time</td>
+<td>- UAT checklist<!-- raw HTML omitted -->- Model Performance<!-- raw HTML omitted -->- Forward testing Tracking<!-- raw HTML omitted -->- System Performance<!-- raw HTML omitted -->- QPS Peak-Measurement<!-- raw HTML omitted -->- API testing | J-meter and glucos/postman…etc</td>
+</tr>
+<tr>
+<td>Evaluation Document</td>
+<td>document how we validate project/ produce/ model ..etc</td>
+<td></td>
 </tr>
 </tbody>
 </table>
-<h1 id="4-further-improvement">4. Further Improvement</h1>
-<ul>
-<li>There are lots of things we could improve on and play with:
-<ul>
-<li><strong>Model-based recall mechanism</strong>:  Personally, I also build the vectors database of title-text, however not index it yet for fast-read. There are some ways to index the dense-vector database via some clustering or quantization methods. I would like to try some of them after more understanding of them.  Also, I am not sure how much improvement would it bring to the overall performance.</li>
-<li><strong>Stronger Ranking model</strong>: There are many rooms to improve the ranking model, like taking extra-features into the model or using a better model.</li>
-<li><strong>Distributed Storage</strong>: we definitely can shading the database, both on forward-database and inverted database.</li>
-<li><strong>Crawling for more content</strong>: Due to storage limitations, I treat the title of the document as entire document. However, we could also crawling and parsing content as well.</li>
-<li><strong>Advanced Indexing method</strong>: if the data is large, we may need to do some compression on index. In addition, for dense vector-based search/recommend system, we may need to using clustering/product quantization plus multi-index method to index the database. There are several famous method like Non-Orthogonal Inverted Multi-Index or IVFADC.</li>
-</ul>
-</li>
-</ul>
 
         </div>
 
@@ -255,15 +228,7 @@
 
         <div class="post-meta meta-tags">
             
-            <ul class="clearfix">
-                
-                <li><a href='/tags/search-system'>Search System</a></li>
-                
-                <li><a href='/tags/github-project'>Github Project</a></li>
-                
-                <li><a href='/tags/inverted-index'>Inverted Index</a></li>
-                
-            </ul>
+            No Tags
             
         </div>
     </article>
