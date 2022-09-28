@@ -6,7 +6,16 @@
     <description>Recent content in Workflow on Autumn Memo</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sat, 02 Apr 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/categories/workflow/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 27 Sep 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/categories/workflow/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Collaborative Task Management</title>
+      <link>https://kentchun33333.github.io/post/taskmanagement/</link>
+      <pubDate>Tue, 27 Sep 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/post/taskmanagement/</guid>
+      <description>Nowadays, we have jira and confluence to help us managing the task and actual works.</description>
+    </item>
+    
     <item>
       <title>Setting Bitbucket on Windows</title>
       <link>https://kentchun33333.github.io/post/sshbitbuketonwinows/</link>
