@@ -68,7 +68,7 @@
 }
 body {
     background-color:#FFF;
-    color:#333;
+    color:#444;
     font-size: 15px;
     /**
     font-family:"TIBch", "Classic Grotesque W01", "Helvetica Neue", Arial, "Hiragino Sans GB", "STHeiti", "Microsoft YaHei", "WenQuanYi Micro Hei", SimSun, sans-serif;
@@ -287,7 +287,7 @@ textarea {
     font-weight: bold;
 }
 .post-title a, .keyword {
-    color:#555;
+    color:#ba3925;
 }
 .post-meta {
     padding:0;
