@@ -44,6 +44,8 @@
     <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
     
+    <script data-ad-client="ca-pub-5108790028230107" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
     
     
     
@@ -62,7 +64,7 @@
                         Autumn Memo
                     </a>
                 
-                <p class="description">A place of a investment, algorithm and lift flavor.</p>
+                <p class="description">A place of a investment, algorithm and Life flavor.</p>
             </div>
             <div>
                 <nav id="nav-menu" class="clearfix">
@@ -119,21 +121,21 @@
     </p>
 <p>In multi-class clasification tasks, there is always 2 kinds of trade-offs. One is the precision and recall: when tuning a classifier, improving the precision score often results in lowering the recall score. The other is the trade-off between classes. To address this problem, there are 3 main variants of F1 scores as design options.</p>
 <h2 id="f1-score-on-single-class">F1 Score on Single Class</h2>
-<p>Let&rsquo;s look the basic F1-score first. It is computed using a <strong>Harmonic Mean</strong> of perception ($P$​​) and recall ($R$​​​​): 
+<p>Let&rsquo;s look the basic F1-score first. It is computed using a <strong>Harmonic Mean</strong> of perception ($P$​​) and recall ($R$​​​​):
 $$
 \text{F1} = 2 \times \frac{P \times R}{P+R}
 $$
 Similar to <strong>Arithmetic Mean</strong>, it will always be somewhere in between precision and mean. But it behaves differently that it would implicitly give a larger weight to lower numbers. For example, when Precision is 100% and Recall is 0%, the F1-score will be 0%, not 50%.</p>
 <h2 id="f1-score-on-multi-class">F1 Score on Multi Class</h2>
-<p>Now, lets say we have $N$ classes and each class will have a $F1_{i \in N}$ scores. In order to have an single scaler to indicate the model performance, we usually have simple average on multiple F1 scores. **Macro-F1** is the most common F1 score that we gave equal weights to each class.</p>
+<p>Now, lets say we have $N$ classes and each class will have a $F1_{i \in N}$ scores. In order to have an single scaler to indicate the model performance, we usually have simple average on multiple F1 scores. <strong>Macro-F1</strong> is the most common F1 score that we gave equal weights to each class.</p>
 <p>$$
 \text{Macro-F1} = \frac{\sum_{i}^{N} F1_{i}}{N}
 $$
-However, we probability don&rsquo;t want to do that if the data is highly imbalance. **Weighted-F1**, we weight the F1-score of each class by the number of samples from that class $i$, denote as $W_{i}$
+However, we probability don&rsquo;t want to do that if the data is highly imbalance. <strong>Weighted-F1</strong>, we weight the F1-score of each class by the number of samples from that class $i$, denote as $W_{i}$
 $$
 \text{Weighted-F1} = \frac{\sum_{i}^{N} W_{i} \times F1_{i}}{N}
 $$
-There is an alternative way of doing it, called **Micro-F1**. The idea is rather then computing F1 score for each class, lets ignore the class. We first compute the overall perception and overall recall. They are also called **Micro perception** ($P_{m}$) and **Micro recall **($R_{m}$). Then we apply them into F1 score function.<br>
+There is an alternative way of doing it, called <strong>Micro-F1</strong>. The idea is rather then computing F1 score for each class, lets ignore the class. We first compute the overall perception and overall recall. They are also called <strong>Micro perception</strong> ($P_{m}$) and **Micro recall **($R_{m}$). Then we apply them into F1 score function.<br>
 $$
 \text{Micro F1} = 2 \times \frac{P_{m} \times R_{m}}{P_{m}+R_{m}}
 $$</p>
@@ -179,7 +181,7 @@ $$</p>
 
                     <footer id="footer">
     <div>
-        &copy; 2022 <a href="https://kentchun33333.github.io">Autumn Memo By Kent Chiu</a>
+        &copy; 2023 <a href="https://kentchun33333.github.io">Autumn Memo By Kent Chiu</a>
         
     </div>
     <br />
@@ -238,7 +240,7 @@ $$</p>
 <ul class="widget-list">
     
     <li>
-        <a href="https://kentchun33333.github.io/post/set-up-googleadsense/" title="Set Up GoogleAdsense" >Set Up GoogleAdsense</a>
+        <a href="https://kentchun33333.github.io/post/tradingtactic/" title="Trading Strategy" >Trading Strategy</a>
     </li>
     
     <li>
@@ -282,11 +284,13 @@ $$</p>
     
     <li><a href="https://kentchun33333.github.io/categories/life-design/">Life Design (2)</a></li>
     
+    <li><a href="https://kentchun33333.github.io/categories/log/">Log (1)</a></li>
+    
     <li><a href="https://kentchun33333.github.io/categories/software/">Software (1)</a></li>
     
-    <li><a href="https://kentchun33333.github.io/categories/workflow/">Workflow (3)</a></li>
+    <li><a href="https://kentchun33333.github.io/categories/trading/">Trading (1)</a></li>
     
-    <li><a href="https://kentchun33333.github.io/categories/wrokflow/">Wrokflow (1)</a></li>
+    <li><a href="https://kentchun33333.github.io/categories/workflow/">Workflow (3)</a></li>
     
 </ul>
     </section>
@@ -294,8 +298,6 @@ $$</p>
     <section class="widget">
         <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
 <div class="tagcloud">
-    
-    <a href="https://kentchun33333.github.io/tags/blog/">Blog</a>
     
     <a href="https://kentchun33333.github.io/tags/environment/">Environment</a>
     
@@ -316,6 +318,8 @@ $$</p>
     <a href="https://kentchun33333.github.io/tags/project-management/">Project Management</a>
     
     <a href="https://kentchun33333.github.io/tags/search-system/">Search System</a>
+    
+    <a href="https://kentchun33333.github.io/tags/trading/">Trading</a>
     
     <a href="https://kentchun33333.github.io/tags/typora/">Typora</a>
     
