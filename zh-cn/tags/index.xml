@@ -2,9 +2,127 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Autumn Memo</title>
-    <link>https://kentchun33333.github.io/zh-cn/tags/</link>
+    <link>https://kentchun33333.github.io/tags/</link>
     <description>Recent content in Tags on Autumn Memo</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>zh-CN</language><atom:link href="https://kentchun33333.github.io/zh-cn/tags/index.xml" rel="self" type="application/rss+xml" />
+    <language>en</language>
+    <lastBuildDate>Thu, 29 Sep 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Blog</title>
+      <link>https://kentchun33333.github.io/tags/blog/</link>
+      <pubDate>Thu, 29 Sep 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/tags/blog/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Project Management</title>
+      <link>https://kentchun33333.github.io/tags/project-management/</link>
+      <pubDate>Tue, 27 Sep 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/tags/project-management/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Environment</title>
+      <link>https://kentchun33333.github.io/tags/environment/</link>
+      <pubDate>Sat, 02 Apr 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/tags/environment/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>HUGO</title>
+      <link>https://kentchun33333.github.io/tags/hugo/</link>
+      <pubDate>Sun, 01 Aug 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/tags/hugo/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Typora</title>
+      <link>https://kentchun33333.github.io/tags/typora/</link>
+      <pubDate>Sun, 01 Aug 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/tags/typora/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Investment</title>
+      <link>https://kentchun33333.github.io/tags/investment/</link>
+      <pubDate>Mon, 28 Jun 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/tags/investment/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Machine Learning</title>
+      <link>https://kentchun33333.github.io/tags/machine-learning/</link>
+      <pubDate>Tue, 27 Apr 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/tags/machine-learning/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Metrics</title>
+      <link>https://kentchun33333.github.io/tags/metrics/</link>
+      <pubDate>Tue, 27 Apr 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/tags/metrics/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Uncertainty Estimation</title>
+      <link>https://kentchun33333.github.io/tags/uncertainty-estimation/</link>
+      <pubDate>Tue, 27 Apr 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/tags/uncertainty-estimation/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Github Project</title>
+      <link>https://kentchun33333.github.io/tags/github-project/</link>
+      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/tags/github-project/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Inverted Index</title>
+      <link>https://kentchun33333.github.io/tags/inverted-index/</link>
+      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/tags/inverted-index/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Search System</title>
+      <link>https://kentchun33333.github.io/tags/search-system/</link>
+      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/tags/search-system/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>index</title>
+      <link>https://kentchun33333.github.io/tags/index/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/tags/index/</guid>
+      <description></description>
+    </item>
+    
   </channel>
 </rss>
