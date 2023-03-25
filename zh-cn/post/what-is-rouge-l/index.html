@@ -10,8 +10,8 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
     
 
-    <title>Recall-Oriented Understudy for Gisting Evaluation | Autumn Memo</title>
-    <meta property="og:title" content="Recall-Oriented Understudy for Gisting Evaluation - Autumn Memo">
+    <title>Recall-Oriented Understudy for Gisting Evaluation (ROUGE) | Autumn Memo</title>
+    <meta property="og:title" content="Recall-Oriented Understudy for Gisting Evaluation (ROUGE) - Autumn Memo">
     <meta property="og:type" content="article">
         
     <meta property="article:published_time" content='2023-02-11T00:00:00&#43;08:00'>
@@ -20,7 +20,7 @@
     <meta property="article:modified_time" content='2023-02-11T00:00:00&#43;08:00'>
         
     <meta name="Keywords" content="">
-    <meta name="description" content="Recall-Oriented Understudy for Gisting Evaluation">
+    <meta name="description" content="Recall-Oriented Understudy for Gisting Evaluation (ROUGE)">
         <meta name="author" content="Kent Chiu">
         
 
@@ -95,7 +95,7 @@
     
     <article class="post">
         <header>
-            <h1 class="post-title">Recall-Oriented Understudy for Gisting Evaluation</h1>
+            <h1 class="post-title">Recall-Oriented Understudy for Gisting Evaluation (ROUGE)</h1>
         </header>
         <date class="post-meta meta-date">
             2023 - 2 - 11 
@@ -116,41 +116,23 @@
         
         
         <div class="post-content">
-            <p>Recall-Oriented Understudy for Gisting Evaluation (ROUGE) is a set of evaluation metrics used to measure the quality of automatic summarization and machine translation outputs. In this article, we will talk about 2 variations ROUGE-1 (unigram overlap), and ROUGE-L (longest common subsequence).</p>
-<h3 id="introduction">Introduction</h3>
-<ul>
-<li>
-<p>ROUGE-1 (Recall-Oriented Understudy for Gisting Evaluation 1) is a metric that measures the overlap of unigrams (single words) between the generated summary and reference summary. It computes precision, recall, and F1 score based on the count of overlapping unigrams.</p>
-</li>
-<li>
-<p>ROUGE-L (or longest common subsequence ROUGE) measures the longest common subsequence (LCS) between the generated and reference summaries. A subsequence is a sequence of words that appear in the same order, but not necessarily consecutively. The LCS is the longest subsequence that appears in both summaries. This measures the extent to which the generated summary captures the same sequence of concepts as the reference summary.</p>
-</li>
-</ul>
+            <h3 id="introduction">Introduction</h3>
+<p>Recall-Oriented Understudy for Gisting Evaluation (ROUGE) is a set of evaluation metrics used to measure the quality of automatic summarization and machine translation outputs.</p>
+<p>In this article, we will talk about 2 variations ROUGE-1 (unigram overlap), and ROUGE-L (longest common subsequence).</p>
 <h3 id="explanation">Explanation</h3>
+<p><strong>ROUGE-1</strong> is a metric that measures the overlap of unigrams (single words) between the generated summary and reference summary. It computes precision, recall, and F1 score based on the count of overlapping unigrams.</p>
+<p><strong>ROUGE-L</strong> measures the longest common subsequence (LCS) between the generated and reference summaries. A subsequence is a sequence of words that appear in the same order, but not necessarily consecutively. The LCS is the longest subsequence that appears in both summaries. This measures the extent to which the generated summary captures the same sequence of concepts as the reference summary.</p>
+<h3 id="example">Example</h3>
 <p>Lets say we have</p>
 <ul>
 <li>
-<p>Machine-generated summary: The quick brown fox jumped over the lazy dog&quot; (machine-generated summary)</p>
+<p>Machine-generated Summary: <code>The quick brown fox jumped over the lazy dog</code></p>
 </li>
 <li>
-<p>Reference : The lazy dog was jumped over by the quick brown fox</p>
+<p>Reference : <code>The lazy dog was jumped over by the quick brown fox</code></p>
 </li>
 </ul>
-<p>step by step</p>
-<ol>
-<li>
-<p>Convert the summary and reference into lists of words:</p>
-<ol>
-<li>
-<p>summary = [&ldquo;The&rdquo;, &ldquo;quick&rdquo;, &ldquo;brown&rdquo;, &ldquo;fox&rdquo;, &ldquo;jumped&rdquo;, &ldquo;over&rdquo;, &ldquo;the&rdquo;, &ldquo;lazy&rdquo;, &ldquo;dog&rdquo;]</p>
-</li>
-<li>
-<p>reference = [&ldquo;The&rdquo;, &ldquo;lazy&rdquo;, &ldquo;dog&rdquo;, &ldquo;was&rdquo;, &ldquo;jumped&rdquo;, &ldquo;over&rdquo;, &ldquo;by&rdquo;, &ldquo;the&rdquo;, &ldquo;quick&rdquo;, &ldquo;brown&rdquo;, &ldquo;fox&rdquo;]</p>
-</li>
-</ol>
-</li>
-<li>
-<p>Calculate the length of the summary and reference</p>
+<p><strong>Calculate the length of  summary and reference</strong></p>
 <ol>
 <li>
 <p>len_summary = len(summary) = 9</p>
@@ -159,9 +141,7 @@
 <p>len_reference = len(reference) = 11</p>
 </li>
 </ol>
-</li>
-<li>
-<p>Calculation on ROUGE-1</p>
+<p><strong>Calculation on ROUGE-1</strong></p>
 <ol>
 <li>
 <p>Precision  = (number of overlapping unigrams) / (number of unigrams in machine-generated summary) = 9/9 = 1</p>
@@ -173,9 +153,7 @@
 <p>F1 = 0.9</p>
 </li>
 </ol>
-</li>
-<li>
-<p>Caculation on ROUGE-L</p>
+<p><strong>Caculation on ROUGE-L</strong></p>
 <ol>
 <li>
 <p>Calculate the longest common subsequence length (LCS) between the summary and reference. LCS = 4</p>
@@ -188,8 +166,6 @@
 </li>
 <li>
 <p>F1 = 0.4</p>
-</li>
-</ol>
 </li>
 </ol>
 <h3 id="python-example">Python Example</h3>
@@ -315,7 +291,7 @@
     </li>
     
     <li>
-        <a href="https://kentchun33333.github.io/post/what-is-rouge-l/" title="Recall-Oriented Understudy for Gisting Evaluation" >Recall-Oriented Understudy for Gisting Evaluation</a>
+        <a href="https://kentchun33333.github.io/post/what-is-rouge-l/" title="Recall-Oriented Understudy for Gisting Evaluation (ROUGE)" >Recall-Oriented Understudy for Gisting Evaluation (ROUGE)</a>
     </li>
     
     <li>
