@@ -2,174 +2,174 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://kentchun33333.github.io/categories/algorithm/</loc>
+    <loc>//localhost:1313/categories/algorithm/</loc>
     <lastmod>2023-03-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/</loc>
-    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
-    <xhtml:link
-                rel="alternate"
-                hreflang="zh-cn"
-                href="https://kentchun33333.github.io/zh-cn/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="en"
-                href="https://kentchun33333.github.io/"
-                />
-  </url><url>
-    <loc>https://kentchun33333.github.io/categories/</loc>
+    <loc>//localhost:1313/</loc>
     <lastmod>2023-03-20T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="https://kentchun33333.github.io/zh-cn/categories/"
+                href="//localhost:1313/zh-cn/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://kentchun33333.github.io/categories/"
+                href="//localhost:1313/"
                 />
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/chatgpt/</loc>
-    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kentchun33333.github.io/tags/large-language-model/</loc>
-    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kentchun33333.github.io/tags/nlp/</loc>
-    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kentchun33333.github.io/tags/paper-summary/</loc>
-    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kentchun33333.github.io/post/self-instruct-aligning-language-model-with-self-generated-instructions/</loc>
-    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kentchun33333.github.io/post/</loc>
-    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kentchun33333.github.io/tags/</loc>
+    <loc>//localhost:1313/categories/</loc>
     <lastmod>2023-03-20T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="https://kentchun33333.github.io/zh-cn/tags/"
+                href="//localhost:1313/zh-cn/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://kentchun33333.github.io/tags/"
+                href="//localhost:1313/categories/"
                 />
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/trading/</loc>
+    <loc>//localhost:1313/tags/chatgpt/</loc>
+    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>//localhost:1313/tags/large-language-model/</loc>
+    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>//localhost:1313/tags/nlp/</loc>
+    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>//localhost:1313/tags/paper-summary/</loc>
+    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>//localhost:1313/post/self-instruct-aligning-language-model-with-self-generated-instructions/</loc>
+    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>//localhost:1313/post/</loc>
+    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>//localhost:1313/tags/</loc>
+    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
+    <xhtml:link
+                rel="alternate"
+                hreflang="zh-cn"
+                href="//localhost:1313/zh-cn/tags/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="//localhost:1313/tags/"
+                />
+  </url><url>
+    <loc>//localhost:1313/tags/trading/</loc>
     <lastmod>2023-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/categories/trading/</loc>
+    <loc>//localhost:1313/categories/trading/</loc>
     <lastmod>2023-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/post/tradingtactic/</loc>
+    <loc>//localhost:1313/post/tradingtactic/</loc>
     <lastmod>2023-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/metrix/</loc>
+    <loc>//localhost:1313/tags/metrix/</loc>
     <lastmod>2023-02-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/post/what-is-rouge-l/</loc>
+    <loc>//localhost:1313/post/what-is-rouge-l/</loc>
     <lastmod>2023-02-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/post/cblof/</loc>
+    <loc>//localhost:1313/post/cblof/</loc>
     <lastmod>2022-11-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/unsupervise-learning/</loc>
+    <loc>//localhost:1313/tags/unsupervise-learning/</loc>
     <lastmod>2022-11-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/post/taskmanagement/</loc>
+    <loc>//localhost:1313/post/taskmanagement/</loc>
     <lastmod>2022-09-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/project-management/</loc>
+    <loc>//localhost:1313/tags/project-management/</loc>
     <lastmod>2022-09-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/categories/workflow/</loc>
+    <loc>//localhost:1313/categories/workflow/</loc>
     <lastmod>2022-09-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/environment/</loc>
+    <loc>//localhost:1313/tags/environment/</loc>
     <lastmod>2022-04-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/post/sshbitbuketonwinows/</loc>
+    <loc>//localhost:1313/post/sshbitbuketonwinows/</loc>
     <lastmod>2022-04-02T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/post/memosystem/</loc>
+    <loc>//localhost:1313/post/memosystem/</loc>
     <lastmod>2021-08-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/hugo/</loc>
+    <loc>//localhost:1313/tags/hugo/</loc>
     <lastmod>2021-08-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/typora/</loc>
+    <loc>//localhost:1313/tags/typora/</loc>
     <lastmod>2021-08-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/post/buyinghouse2021/</loc>
+    <loc>//localhost:1313/post/buyinghouse2021/</loc>
     <lastmod>2021-06-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/investment/</loc>
+    <loc>//localhost:1313/tags/investment/</loc>
     <lastmod>2021-06-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/categories/life-design/</loc>
+    <loc>//localhost:1313/categories/life-design/</loc>
     <lastmod>2021-06-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/archives/</loc>
+    <loc>//localhost:1313/archives/</loc>
     <lastmod>2021-05-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/machine-learning/</loc>
+    <loc>//localhost:1313/tags/machine-learning/</loc>
     <lastmod>2021-04-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/metrics/</loc>
+    <loc>//localhost:1313/tags/metrics/</loc>
     <lastmod>2021-04-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/post/scedasticicity/</loc>
+    <loc>//localhost:1313/post/scedasticicity/</loc>
     <lastmod>2021-04-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/uncertainty-estimation/</loc>
+    <loc>//localhost:1313/tags/uncertainty-estimation/</loc>
     <lastmod>2021-04-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/post/simplesearchsys/</loc>
+    <loc>//localhost:1313/post/simplesearchsys/</loc>
     <lastmod>2020-09-25T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/github-project/</loc>
+    <loc>//localhost:1313/tags/github-project/</loc>
     <lastmod>2020-09-25T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/inverted-index/</loc>
+    <loc>//localhost:1313/tags/inverted-index/</loc>
     <lastmod>2020-09-25T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/search-system/</loc>
+    <loc>//localhost:1313/tags/search-system/</loc>
     <lastmod>2020-09-25T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/categories/software/</loc>
+    <loc>//localhost:1313/categories/software/</loc>
     <lastmod>2020-09-25T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/post/metricf1score/</loc>
+    <loc>//localhost:1313/post/metricf1score/</loc>
     <lastmod>2020-01-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/about/</loc>
+    <loc>//localhost:1313/about/</loc>
     <lastmod>2016-09-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/categories/log/</loc>
+    <loc>//localhost:1313/categories/log/</loc>
     <lastmod>2016-09-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/log/</loc>
+    <loc>//localhost:1313/log/</loc>
     <lastmod>2016-09-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/index/</loc>
+    <loc>//localhost:1313/tags/index/</loc>
   </url><url>
-    <loc>https://kentchun33333.github.io/series/</loc>
+    <loc>//localhost:1313/series/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="https://kentchun33333.github.io/zh-cn/series/"
+                href="//localhost:1313/zh-cn/series/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://kentchun33333.github.io/series/"
+                href="//localhost:1313/series/"
                 />
   </url>
 </urlset>
