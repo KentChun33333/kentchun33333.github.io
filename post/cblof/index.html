@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Caveat' rel='stylesheet'>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>Cluster-Based Local Outlier Factor | Autumn Memo</title>
+    <meta property="og:title" content="Cluster-Based Local Outlier Factor - Autumn Memo">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-11-02T00:00:00&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-11-02T00:00:00&#43;08:00'>
+        
+    <meta name="Keywords" content="">
+    <meta name="description" content="Cluster-Based Local Outlier Factor">
+        <meta name="author" content="Kent Chiu">
+        
+
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8949849444403982"
+    crossorigin="anonymous"></script>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PZF7WLJRQL"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-PZF7WLJRQL');
+    </script>
+    <meta property="og:url" content="https://kentchun33333.github.io/post/cblof/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-5108790028230107" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://kentchun33333.github.io">
+                        Autumn Memo
+                    </a>
+                
+                <p class="description">A place of a investment, algorithm and Life flavor.</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    
+                    
+                    
+                    <a  href="https://kentchun33333.github.io/post/" title="Main">Main</a>
+                    
+                    <a  href="https://kentchun33333.github.io/archives/" title="Archives">Archives</a>
+                    
+                    <a  href="https://kentchun33333.github.io/about/" title="About">About</a>
+                    
+                    <a  href="https://kentchun33333.github.io" title=""></a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">Cluster-Based Local Outlier Factor</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022 - 11 - 2 
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/algorithm'>Algorithm</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    Reading </span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>Cluster-Based Local Outlier Factor (CBLOF) is an unsupervised anomaly detection algorithm that identifies outliers in a dataset by taking into account the local density of points.</p>
+<h3 id="step-by-step">Step-by-step</h3>
+<ol>
+<li>Partition the data into clusters using a clustering algorithm such as k-means.</li>
+<li>For each point in a cluster, calculate the local outlier factor (LOF) based on the density of its neighboring points.</li>
+<li>Calculate the cluster outlier factor (COF) by combining the LOF scores of all points in a cluster. The COF of a cluster is the average of the LOF scores of its points.</li>
+<li>Combine the COF scores of all clusters to obtain the outlier scores of individual points in the dataset.</li>
+<li>Identify the points with high outlier scores as potential outliers.</li>
+</ol>
+<p>Note that the choice of clustering algorithm and the number of clusters are hyperparameters that need to be chosen by the user. Also, the LOF score calculation is based on the distance metric chosen, and different distance metrics may result in different outlier scores.</p>
+<p>In praticle, we also need to weight in business metric into the process when</p>
+<p>CBLOF first partitions the data into clusters using a clustering algorithm such as k-means. Then, for each point in a cluster, the local outlier factor (LOF) is calculated based on the density of its neighboring points. The LOF of a point measures how much the density of its neighbors differs from its own density. Points with a high LOF are considered to be outliers.</p>
+<p>CBLOF combines the LOF scores of all points in a cluster to obtain the cluster outlier factor (COF), which represents the outlierness of the cluster. The COF of a cluster is calculated as the average of the LOF scores of its points. Finally, the COF scores of all clusters are combined to obtain the outlier scores of individual points in the dataset.</p>
+<p>The advantage of CBLOF over other outlier detection methods is that it can detect outliers that are present in clusters and have a similar density to the cluster, which may not be detected by other methods. It is also less sensitive to the choice of distance metric and can handle datasets with high-dimensional features. However, the performance of CBLOF depends on the quality of the clustering algorithm used and the choice of hyperparameters such as the number of clusters.</p>
+
+        </div>
+
+        
+
+
+        
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/unsupervise-learning'>Unsupervise Learning</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "KentChun33333/kentchun33333.github.io"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://kentchun33333.github.io">Autumn Memo By Kent Chiu</a>
+        
+    </div>
+    <br />
+
+    <div>
+       
+        <div class="github-badge">
+            <a href="https://kentchun33333.github.io/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value  bg-blue"> Kent Chiu </span></a>
+        </div>
+
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Powered by</span><span class="badge-value bg-yellowgreen"> Maupassant-Hugo</span></a>
+        </div>
+
+    </div>
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://kentchun33333.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://kentchun33333.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">Recent Post</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://kentchun33333.github.io/post/self-instruct-aligning-language-model-with-self-generated-instructions/" title="*Paper Summay on Aligning LLM with Self Generated Instructions" >Paper Summay on Aligning LLM with Self Generated Instructions</a>
+    </li>
+    
+    <li>
+        <a href="https://kentchun33333.github.io/post/tradingtactic/" title="*Trading Strategy" >Trading Strategy</a>
+    </li>
+    
+    <li>
+        <a href="https://kentchun33333.github.io/post/what-is-rouge-l/" title="*Recall-Oriented Understudy for Gisting Evaluation (ROUGE)" >Recall-Oriented Understudy for Gisting Evaluation (ROUGE)</a>
+    </li>
+    
+    <li>
+        <a href="https://kentchun33333.github.io/post/cblof/" title="*Cluster-Based Local Outlier Factor" >Cluster-Based Local Outlier Factor</a>
+    </li>
+    
+    <li>
+        <a href="https://kentchun33333.github.io/post/taskmanagement/" title="*Collaborative Task Management" >Collaborative Task Management</a>
+    </li>
+    
+    <li>
+        <a href="https://kentchun33333.github.io/post/sshbitbuketonwinows/" title="*Setting Bitbucket on Windows" >Setting Bitbucket on Windows</a>
+    </li>
+    
+    <li>
+        <a href="https://kentchun33333.github.io/post/memosystem/" title="*Blog Memo by Hugo with Typora" >Blog Memo by Hugo with Typora</a>
+    </li>
+    
+    <li>
+        <a href="https://kentchun33333.github.io/post/buyinghouse2021/" title="*Buy Our First Condo in Singapore" >Buy Our First Condo in Singapore</a>
+    </li>
+    
+    <li>
+        <a href="https://kentchun33333.github.io/post/scedasticicity/" title="*Modeling Uncertainty of ML Systems (01)" >Modeling Uncertainty of ML Systems (01)</a>
+    </li>
+    
+    <li>
+        <a href="https://kentchun33333.github.io/post/simplesearchsys/" title="*Build a Simple Search System" >Build a Simple Search System</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://kentchun33333.github.io/categories/algorithm/">Algorithm (5)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/life-design/">Life Design (2)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/log/">Log (1)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/software/">Software (1)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/trading/">Trading (1)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/workflow/">Workflow (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://kentchun33333.github.io/tags/chatgpt/">ChatGPT</a>
+    
+    <a href="https://kentchun33333.github.io/tags/environment/">Environment</a>
+    
+    <a href="https://kentchun33333.github.io/tags/github-project/">Github Project</a>
+    
+    <a href="https://kentchun33333.github.io/tags/hugo/">HUGO</a>
+    
+    <a href="https://kentchun33333.github.io/tags/index/">index</a>
+    
+    <a href="https://kentchun33333.github.io/tags/inverted-index/">Inverted Index</a>
+    
+    <a href="https://kentchun33333.github.io/tags/investment/">Investment</a>
+    
+    <a href="https://kentchun33333.github.io/tags/large-language-model/">Large Language Model</a>
+    
+    <a href="https://kentchun33333.github.io/tags/machine-learning/">Machine Learning</a>
+    
+    <a href="https://kentchun33333.github.io/tags/metrics/">Metrics</a>
+    
+    <a href="https://kentchun33333.github.io/tags/metrix/">Metrix</a>
+    
+    <a href="https://kentchun33333.github.io/tags/nlp/">NLP</a>
+    
+    <a href="https://kentchun33333.github.io/tags/paper-summary/">Paper Summary</a>
+    
+    <a href="https://kentchun33333.github.io/tags/project-management/">Project Management</a>
+    
+    <a href="https://kentchun33333.github.io/tags/search-system/">Search System</a>
+    
+    <a href="https://kentchun33333.github.io/tags/trading/">Trading</a>
+    
+    <a href="https://kentchun33333.github.io/tags/typora/">Typora</a>
+    
+    <a href="https://kentchun33333.github.io/tags/uncertainty-estimation/">Uncertainty Estimation</a>
+    
+    <a href="https://kentchun33333.github.io/tags/unsupervise-learning/">Unsupervise Learning</a>
+    
+</div>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">Others</h3>
+        <ul class="widget-list">
+            <li><a href="https://kentchun33333.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
