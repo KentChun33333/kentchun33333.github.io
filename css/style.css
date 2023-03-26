@@ -296,6 +296,17 @@ textarea {
     text-align:left;
     display: inline-block;
 }
+
+.post-recent {
+    margin:1px 0 0;
+    padding: 1px 0px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    color:rgb(153, 71, 0);
+    text-align:left;
+    display: inline-block;
+}
+
 .meta-category a {
     position: relative;
 }
