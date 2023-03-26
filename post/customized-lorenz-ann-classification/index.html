@@ -10,8 +10,8 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
     
 
-    <title>Approximate Nearest Neighbors with Lorentzian Distance on Stock Prediction | Autumn Memo</title>
-    <meta property="og:title" content="Approximate Nearest Neighbors with Lorentzian Distance on Stock Prediction - Autumn Memo">
+    <title>Stock Prediction with LorenzANN | Autumn Memo</title>
+    <meta property="og:title" content="Stock Prediction with LorenzANN - Autumn Memo">
     <meta property="og:type" content="article">
         
     <meta property="article:published_time" content='2023-03-24T00:00:00&#43;08:00'>
@@ -20,7 +20,7 @@
     <meta property="article:modified_time" content='2023-03-24T00:00:00&#43;08:00'>
         
     <meta name="Keywords" content="">
-    <meta name="description" content="Approximate Nearest Neighbors with Lorentzian Distance on Stock Prediction">
+    <meta name="description" content="Stock Prediction with LorenzANN">
         <meta name="author" content="Kent Chiu">
         
 
@@ -95,7 +95,7 @@
     
     <article class="post">
         <header>
-            <h1 class="post-title">Approximate Nearest Neighbors with Lorentzian Distance on Stock Prediction</h1>
+            <h1 class="post-title">Stock Prediction with LorenzANN</h1>
         </header>
         <date class="post-meta meta-date">
             2023 - 3 - 24 
@@ -116,23 +116,30 @@
         
         
         <div class="post-content">
-            <h3 id="introduction">Introduction</h3>
+            <h2 id="introduction">Introduction</h2>
 <p>
         <img class="mx-auto" alt="" src="/img/2023-03-26-20-12-40-image.png" />   
     </p>
-<p>The Approximate Nearest Neighbors Search with Lorentzian Distance (LorenzANN) is one popular customized machine learning algorithm out there for sometime.</p>
-<p>The algortihm is so famous that some youbuters are calling this is one of the best machine learning indicators.</p>
-<p>There is source code share in TradingView however there are some drawbacks that</p>
+<p>LorenzANN, the algorithm of <strong>Approximate Nearest Neighbors Search with Lorentzian Distance</strong>, has gained popularity as a customized machine learning tool. There are youTubers even consider it to be one of the best machine learning indicators available.</p>
+<h2 id="core-method">Core Method</h2>
+<p>The cusomized LorenzANN algorithm uses the following methodology:</p>
 <ol>
 <li>
-<p>it is hard code with fixed inputs that the model can only take max to 5 features.</p>
+<p>The algorithm maintains a list of the k-similar neighbors simultaneously in both a predictions array and a corresponding distances array.</p>
 </li>
 <li>
-<p>It is writen in Pine-Script that the core logic is embedded with visualization logics.</p>
+<p>If the predictions array size exceeds the number of nearest neighbors specified in settings.neighborsCount, the algorithm removes the first neighbor from both the predictions array and the corresponding distances array.</p>
+</li>
+<li>
+<p>The lastDistance variable is overridden to be a distance in the lower 25% of the array. This step helps to increase accuracy by ensuring that newly added distance values increase at a slower rate.</p>
+</li>
+<li>
+<p>Lorentzian distance is used as a distance metric, which minimizes the effect of outliers and takes into account the warping of &ldquo;price-time&rdquo; due to proximity to significant economic events.</p>
 </li>
 </ol>
-<h3 id="python-example-on-lorenzann">Python Example on LorenzANN</h3>
-<p>I translate the code shared on Trading-view to python and generalize it without limitations on features numbers.</p>
+<h2 id="python-example">Python Example</h2>
+<p>While the source code for LorenzANN is shared on TradingView, there are certain limitations to its use. Firstly, the algorithm is hard-coded with fixed inputs and can only handle a maximum of five features. Additionally, it is written in Pine-Script, which embeds the core logic with visualization logics, making it difficult to separate the two functionalities.</p>
+<p>To overcome the limitations of the LorenzANN algorithm, I have translated the code shared on TradingView from Pine-Script to Python. The translated code is now capable of handling any number of features, making it more flexible than the original version. This updated algorithm has been successfully integrated into my trading bot, allowing me to utilize its enhanced capabilities for my trading strategies.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">approximate_nearest_neighbors</span>(df, y_col, x_cols, sampling_factor<span style="color:#f92672">=</span><span style="color:#ae81ff">4</span>, neighber_count<span style="color:#f92672">=</span><span style="color:#ae81ff">8</span>, look_back_period<span style="color:#f92672">=</span><span style="color:#ae81ff">80</span>):
 </span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;&#39;&#39;
 </span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    1. The algorithm iterates through the dataset (df) in chronological order, 
@@ -183,16 +190,16 @@
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">.</span>append(np<span style="color:#f92672">.</span>mean(predictions))
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> res
 </span></span></code></pre></div><p>Notice that the result will be different on TradingView since the overall shared trading stratgy also including some technical filters like golden cross with 200 EMA/SME &hellip; etc.</p>
-<h3 id="heading"></h3>
-<h3 id="back-testing-result">Back Testing Result</h3>
-<p>The algorithm is tested with some equalty. With the inputs of traditional technical indicators, like ADX/RSI &hellip; etc.</p>
-<p>
-        <img class="mx-auto" alt="" src="/img/2023-03-26-20-14-27-image.png" />   
+<h2 id="summary">Summary</h2>
+<p>Overall, the method with some technical indicators as input did show some profitable experiment during the backtesting. For example as below backtesting reuslt.</p>
+<p><strong>Simulation Result</strong>
+        <img class="mx-auto" alt="" src="/img/2023-03-26-20-48-45-image.png" />   
     </p>
+<p><strong>Key Statistic</strong></p>
 <table>
 <thead>
 <tr>
-<th>Name</th>
+<th>Item</th>
 <th>Value</th>
 </tr>
 </thead>
@@ -207,7 +214,7 @@
 </tr>
 <tr>
 <td>Back Test Cash</td>
-<td>30k</td>
+<td>30000</td>
 </tr>
 <tr>
 <td>Frequency</td>
@@ -235,11 +242,8 @@
 </tr>
 </tbody>
 </table>
-<p>Overall, the method with some technical indicators as input did show some profitable experiment during the backtesting. Especially on some stocks under centain timeframe like 5/15mins, as shown above, it performs really well.</p>
 <h3 id="reference">Reference</h3>
-<ul>
-<li>[Machine Learning: Lorentzian Classification — Indicator by jdehorty — TradingView](<a href="https://www.tradingview.com/script/WhBzgfDu-Machine-Learning-Lorentzian-Classification/#:~:text=A%20Lorentzian%20Distance%20Classifier%20(%20LDC,a%20multi%2Ddimensional%20feature%20space.)">https://www.tradingview.com/script/WhBzgfDu-Machine-Learning-Lorentzian-Classification/#:~:text=A%20Lorentzian%20Distance%20Classifier%20(%20LDC,a%20multi%2Ddimensional%20feature%20space.)</a></li>
-</ul>
+<p><a href="https://www.tradingview.com/script/WhBzgfDu-Machine-Learning-Lorentzian-Classification/#:~:text=A%20Lorentzian%20Distance%20Classifier%20(%20LDC,a%20multi%2Ddimensional%20feature%20space">https://www.tradingview.com/script/WhBzgfDu-Machine-Learning-Lorentzian-Classification/#:~:text=A%20Lorentzian%20Distance%20Classifier%20(%20LDC,a%20multi%2Ddimensional%20feature%20space</a>.</p>
 
         </div>
 

@@ -8,12 +8,12 @@
     <language>en</language>
     <lastBuildDate>Fri, 24 Mar 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/categories/algorithm/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Approximate Nearest Neighbors with Lorentzian Distance on Stock Prediction</title>
+      <title>Stock Prediction with LorenzANN</title>
       <link>https://kentchun33333.github.io/post/customized-lorenz-ann-classification/</link>
       <pubDate>Fri, 24 Mar 2023 00:00:00 +0000</pubDate>
       
       <guid>https://kentchun33333.github.io/post/customized-lorenz-ann-classification/</guid>
-      <description>Introduction The Approximate Nearest Neighbors Search with Lorentzian Distance (LorenzANN) is one popular customized machine learning algorithm out there for sometime.</description>
+      <description>Introduction LorenzANN, the algorithm of Approximate Nearest Neighbors Search with Lorentzian Distance, has gained popularity as a customized machine learning tool.</description>
     </item>
     
     <item>
