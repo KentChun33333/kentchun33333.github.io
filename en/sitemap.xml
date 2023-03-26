@@ -2,6 +2,9 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://kentchun33333.github.io/tags/ai/</loc>
+    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>https://kentchun33333.github.io/categories/algorithm/</loc>
     <lastmod>2023-03-20T00:00:00+00:00</lastmod>
   </url><url>
@@ -62,7 +65,10 @@
                 href="https://kentchun33333.github.io/tags/"
                 />
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/trading/</loc>
+    <loc>https://kentchun33333.github.io/tags/algotrading/</loc>
+    <lastmod>2023-03-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/tags/equitytrading/</loc>
     <lastmod>2023-03-11T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kentchun33333.github.io/categories/trading/</loc>
@@ -71,7 +77,10 @@
     <loc>https://kentchun33333.github.io/post/tradingtactic/</loc>
     <lastmod>2023-03-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/metrix/</loc>
+    <loc>https://kentchun33333.github.io/tags/workflow/</loc>
+    <lastmod>2023-03-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/tags/metric/</loc>
     <lastmod>2023-02-11T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kentchun33333.github.io/post/what-is-rouge-l/</loc>
@@ -86,16 +95,22 @@
     <loc>https://kentchun33333.github.io/post/taskmanagement/</loc>
     <lastmod>2022-09-27T00:00:00+00:00</lastmod>
   </url><url>
+    <loc>https://kentchun33333.github.io/categories/communication/</loc>
+    <lastmod>2022-09-27T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>https://kentchun33333.github.io/tags/project-management/</loc>
     <lastmod>2022-09-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/categories/workflow/</loc>
+    <loc>https://kentchun33333.github.io/tags/scrum/</loc>
     <lastmod>2022-09-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kentchun33333.github.io/tags/environment/</loc>
     <lastmod>2022-04-02T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kentchun33333.github.io/post/sshbitbuketonwinows/</loc>
+    <lastmod>2022-04-02T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/categories/software/</loc>
     <lastmod>2022-04-02T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kentchun33333.github.io/post/memosystem/</loc>
@@ -110,20 +125,14 @@
     <loc>https://kentchun33333.github.io/post/buyinghouse2021/</loc>
     <lastmod>2021-06-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/investment/</loc>
+    <loc>https://kentchun33333.github.io/categories/design-life/</loc>
     <lastmod>2021-06-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/categories/life-design/</loc>
+    <loc>https://kentchun33333.github.io/tags/investment/</loc>
     <lastmod>2021-06-28T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kentchun33333.github.io/archives/</loc>
     <lastmod>2021-05-28T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kentchun33333.github.io/tags/machine-learning/</loc>
-    <lastmod>2021-04-27T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kentchun33333.github.io/tags/metrics/</loc>
-    <lastmod>2021-04-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kentchun33333.github.io/post/scedasticicity/</loc>
     <lastmod>2021-04-27T00:00:00+00:00</lastmod>
@@ -143,22 +152,14 @@
     <loc>https://kentchun33333.github.io/tags/search-system/</loc>
     <lastmod>2020-09-25T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/categories/software/</loc>
-    <lastmod>2020-09-25T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://kentchun33333.github.io/post/metricf1score/</loc>
     <lastmod>2020-01-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kentchun33333.github.io/about/</loc>
     <lastmod>2016-09-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/categories/log/</loc>
-    <lastmod>2016-09-01T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://kentchun33333.github.io/log/</loc>
     <lastmod>2016-09-01T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kentchun33333.github.io/tags/index/</loc>
   </url><url>
     <loc>https://kentchun33333.github.io/series/</loc>
     <xhtml:link
