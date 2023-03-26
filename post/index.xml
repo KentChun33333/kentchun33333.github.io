@@ -2,107 +2,107 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on Autumn Memo</title>
-    <link>//localhost:1313/post/</link>
+    <link>https://kentchun33333.github.io/post/</link>
     <description>Recent content in Posts on Autumn Memo</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 20 Mar 2023 00:00:00 +0000</lastBuildDate><atom:link href="//localhost:1313/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 20 Mar 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Paper Summay on Aligning LLM with Self Generated Instructions</title>
-      <link>//localhost:1313/post/self-instruct-aligning-language-model-with-self-generated-instructions/</link>
+      <link>https://kentchun33333.github.io/post/self-instruct-aligning-language-model-with-self-generated-instructions/</link>
       <pubDate>Mon, 20 Mar 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/self-instruct-aligning-language-model-with-self-generated-instructions/</guid>
+      <guid>https://kentchun33333.github.io/post/self-instruct-aligning-language-model-with-self-generated-instructions/</guid>
       <description>The paper &amp;ldquo;Self-Instruct: Aligning Language Model with Self Generated Instructions&amp;rdquo; introduces a framework called Self-Instruct for improving the instruction-following capabilities of pretrained language models by bootstrapping off its own generations.</description>
     </item>
     
     <item>
       <title>Trading Strategy</title>
-      <link>//localhost:1313/post/tradingtactic/</link>
+      <link>https://kentchun33333.github.io/post/tradingtactic/</link>
       <pubDate>Sat, 11 Mar 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/tradingtactic/</guid>
+      <guid>https://kentchun33333.github.io/post/tradingtactic/</guid>
       <description>The indicators of price actions are more critical to the interprete the micro-market.</description>
     </item>
     
     <item>
       <title>Recall-Oriented Understudy for Gisting Evaluation (ROUGE)</title>
-      <link>//localhost:1313/post/what-is-rouge-l/</link>
+      <link>https://kentchun33333.github.io/post/what-is-rouge-l/</link>
       <pubDate>Sat, 11 Feb 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/what-is-rouge-l/</guid>
+      <guid>https://kentchun33333.github.io/post/what-is-rouge-l/</guid>
       <description>Introduction Recall-Oriented Understudy for Gisting Evaluation (ROUGE) is a set of evaluation metrics used to measure the quality of automatic summarization and machine translation outputs.</description>
     </item>
     
     <item>
       <title>Cluster-Based Local Outlier Factor</title>
-      <link>//localhost:1313/post/cblof/</link>
+      <link>https://kentchun33333.github.io/post/cblof/</link>
       <pubDate>Wed, 02 Nov 2022 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/cblof/</guid>
+      <guid>https://kentchun33333.github.io/post/cblof/</guid>
       <description>Cluster-Based Local Outlier Factor (CBLOF) is an unsupervised anomaly detection algorithm that identifies outliers in a dataset by taking into account the local density of points.</description>
     </item>
     
     <item>
       <title>Collaborative Task Management</title>
-      <link>//localhost:1313/post/taskmanagement/</link>
+      <link>https://kentchun33333.github.io/post/taskmanagement/</link>
       <pubDate>Tue, 27 Sep 2022 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/taskmanagement/</guid>
+      <guid>https://kentchun33333.github.io/post/taskmanagement/</guid>
       <description>Nowadays, we have jira and confluence to help us managing the task and actual works.</description>
     </item>
     
     <item>
       <title>Setting Bitbucket on Windows</title>
-      <link>//localhost:1313/post/sshbitbuketonwinows/</link>
+      <link>https://kentchun33333.github.io/post/sshbitbuketonwinows/</link>
       <pubDate>Sat, 02 Apr 2022 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/sshbitbuketonwinows/</guid>
+      <guid>https://kentchun33333.github.io/post/sshbitbuketonwinows/</guid>
       <description>Recently, Bitbucket retired the simple password login via git-https. So we will need a ssh-key on it.</description>
     </item>
     
     <item>
       <title>Blog Memo by Hugo with Typora</title>
-      <link>//localhost:1313/post/memosystem/</link>
+      <link>https://kentchun33333.github.io/post/memosystem/</link>
       <pubDate>Sun, 01 Aug 2021 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/memosystem/</guid>
+      <guid>https://kentchun33333.github.io/post/memosystem/</guid>
       <description>In 2021, the blog is upgraded to Hugo + Typora.</description>
     </item>
     
     <item>
       <title>Buy Our First Condo in Singapore</title>
-      <link>//localhost:1313/post/buyinghouse2021/</link>
+      <link>https://kentchun33333.github.io/post/buyinghouse2021/</link>
       <pubDate>Mon, 28 Jun 2021 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/buyinghouse2021/</guid>
+      <guid>https://kentchun33333.github.io/post/buyinghouse2021/</guid>
       <description>In 2021 May, my wife and I become PR in Singapore.</description>
     </item>
     
     <item>
       <title>Modeling Uncertainty of ML Systems (01)</title>
-      <link>//localhost:1313/post/scedasticicity/</link>
+      <link>https://kentchun33333.github.io/post/scedasticicity/</link>
       <pubDate>Tue, 27 Apr 2021 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/scedasticicity/</guid>
+      <guid>https://kentchun33333.github.io/post/scedasticicity/</guid>
       <description>For model productization, evaluating the efficacy of the ML system is essential.</description>
     </item>
     
     <item>
       <title>Build a Simple Search System</title>
-      <link>//localhost:1313/post/simplesearchsys/</link>
+      <link>https://kentchun33333.github.io/post/simplesearchsys/</link>
       <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/simplesearchsys/</guid>
+      <guid>https://kentchun33333.github.io/post/simplesearchsys/</guid>
       <description>In 2020 Sep. I implemented a simple search system from scrach.</description>
     </item>
     
     <item>
       <title>F1 Score on Multi Classes</title>
-      <link>//localhost:1313/post/metricf1score/</link>
+      <link>https://kentchun33333.github.io/post/metricf1score/</link>
       <pubDate>Mon, 27 Jan 2020 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/metricf1score/</guid>
+      <guid>https://kentchun33333.github.io/post/metricf1score/</guid>
       <description>In multi-class clasification tasks, there is always 2 kinds of trade-offs.</description>
     </item>
     

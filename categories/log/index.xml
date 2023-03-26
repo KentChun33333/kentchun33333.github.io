@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Log on Autumn Memo</title>
-    <link>//localhost:1313/categories/log/</link>
+    <link>https://kentchun33333.github.io/categories/log/</link>
     <description>Recent content in Log on Autumn Memo</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 01 Sep 2016 00:00:00 +0000</lastBuildDate><atom:link href="//localhost:1313/categories/log/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 01 Sep 2016 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/categories/log/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Log of Blog</title>
-      <link>//localhost:1313/log/</link>
+      <link>https://kentchun33333.github.io/log/</link>
       <pubDate>Thu, 01 Sep 2016 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/log/</guid>
+      <guid>https://kentchun33333.github.io/log/</guid>
       <description>2021-08-01 : move to Hugo with Typora 2022-09-29 : add google-ad.</description>
     </item>
     

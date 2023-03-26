@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Paper Summary on Autumn Memo</title>
-    <link>//localhost:1313/tags/paper-summary/</link>
+    <link>https://kentchun33333.github.io/tags/paper-summary/</link>
     <description>Recent content in Paper Summary on Autumn Memo</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 20 Mar 2023 00:00:00 +0000</lastBuildDate><atom:link href="//localhost:1313/tags/paper-summary/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 20 Mar 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/tags/paper-summary/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Paper Summay on Aligning LLM with Self Generated Instructions</title>
-      <link>//localhost:1313/post/self-instruct-aligning-language-model-with-self-generated-instructions/</link>
+      <link>https://kentchun33333.github.io/post/self-instruct-aligning-language-model-with-self-generated-instructions/</link>
       <pubDate>Mon, 20 Mar 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/self-instruct-aligning-language-model-with-self-generated-instructions/</guid>
+      <guid>https://kentchun33333.github.io/post/self-instruct-aligning-language-model-with-self-generated-instructions/</guid>
       <description>The paper &amp;ldquo;Self-Instruct: Aligning Language Model with Self Generated Instructions&amp;rdquo; introduces a framework called Self-Instruct for improving the instruction-following capabilities of pretrained language models by bootstrapping off its own generations.</description>
     </item>
     

@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Uncertainty Estimation on Autumn Memo</title>
-    <link>//localhost:1313/tags/uncertainty-estimation/</link>
+    <link>https://kentchun33333.github.io/tags/uncertainty-estimation/</link>
     <description>Recent content in Uncertainty Estimation on Autumn Memo</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 27 Apr 2021 00:00:00 +0000</lastBuildDate><atom:link href="//localhost:1313/tags/uncertainty-estimation/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 27 Apr 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/tags/uncertainty-estimation/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Modeling Uncertainty of ML Systems (01)</title>
-      <link>//localhost:1313/post/scedasticicity/</link>
+      <link>https://kentchun33333.github.io/post/scedasticicity/</link>
       <pubDate>Tue, 27 Apr 2021 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/scedasticicity/</guid>
+      <guid>https://kentchun33333.github.io/post/scedasticicity/</guid>
       <description>For model productization, evaluating the efficacy of the ML system is essential.</description>
     </item>
     
