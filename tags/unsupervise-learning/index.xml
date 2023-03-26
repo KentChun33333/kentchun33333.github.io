@@ -6,7 +6,16 @@
     <description>Recent content in Unsupervise Learning on Autumn Memo</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 02 Nov 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/tags/unsupervise-learning/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 24 Mar 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/tags/unsupervise-learning/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Approximate Nearest Neighbors with Lorentzian Distance on Stock Prediction</title>
+      <link>https://kentchun33333.github.io/post/customized-lorenz-ann-classification/</link>
+      <pubDate>Fri, 24 Mar 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/post/customized-lorenz-ann-classification/</guid>
+      <description>Introduction The Approximate Nearest Neighbors Search with Lorentzian Distance (LorenzANN) is one popular customized machine learning algorithm out there for sometime.</description>
+    </item>
+    
     <item>
       <title>Cluster-Based Local Outlier Factor</title>
       <link>https://kentchun33333.github.io/post/cblof/</link>
