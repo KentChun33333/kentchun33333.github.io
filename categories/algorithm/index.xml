@@ -44,6 +44,15 @@
     </item>
     
     <item>
+      <title>Metric for hyperparamter search in Unsupervise Learning</title>
+      <link>https://kentchun33333.github.io/post/db-index-vs-silhouette-score/</link>
+      <pubDate>Sat, 02 Jul 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/post/db-index-vs-silhouette-score/</guid>
+      <description>Metrics Clustering is an unsupervised machine learning technique used to group similar data points together.</description>
+    </item>
+    
+    <item>
       <title>Modeling Uncertainty of ML Systems (01)</title>
       <link>https://kentchun33333.github.io/post/scedasticicity/</link>
       <pubDate>Tue, 27 Apr 2021 00:00:00 +0000</pubDate>

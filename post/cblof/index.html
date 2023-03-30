@@ -117,7 +117,7 @@
         
         <div class="post-content">
             <p>Cluster-Based Local Outlier Factor (CBLOF) is an unsupervised anomaly detection algorithm that identifies outliers in a dataset by taking into account the local density of points.</p>
-<h3 id="step-by-step">Step-by-step</h3>
+<h3 id="core-method">Core Method</h3>
 <ol>
 <li>Partition the data into clusters using a clustering algorithm such as k-means.</li>
 <li>For each point in a cluster, calculate the local outlier factor (LOF) based on the density of its neighboring points.</li>
@@ -126,10 +126,6 @@
 <li>Identify the points with high outlier scores as potential outliers.</li>
 </ol>
 <p>Note that the choice of clustering algorithm and the number of clusters are hyperparameters that need to be chosen by the user. Also, the LOF score calculation is based on the distance metric chosen, and different distance metrics may result in different outlier scores.</p>
-<p>In praticle, we also need to weight in business metric into the process when</p>
-<p>CBLOF first partitions the data into clusters using a clustering algorithm such as k-means. Then, for each point in a cluster, the local outlier factor (LOF) is calculated based on the density of its neighboring points. The LOF of a point measures how much the density of its neighbors differs from its own density. Points with a high LOF are considered to be outliers.</p>
-<p>CBLOF combines the LOF scores of all points in a cluster to obtain the cluster outlier factor (COF), which represents the outlierness of the cluster. The COF of a cluster is calculated as the average of the LOF scores of its points. Finally, the COF scores of all clusters are combined to obtain the outlier scores of individual points in the dataset.</p>
-<p>The advantage of CBLOF over other outlier detection methods is that it can detect outliers that are present in clusters and have a similar density to the cluster, which may not be detected by other methods. It is also less sensitive to the choice of distance metric and can handle datasets with high-dimensional features. However, the performance of CBLOF depends on the quality of the clustering algorithm used and the choice of hyperparameters such as the number of clusters.</p>
 
         </div>
 
@@ -141,6 +137,8 @@
 <div class="post-archive">
     <h2>See Also</h2>
     <ul class="listing" >
+        
+        <li><a href="/post/db-index-vs-silhouette-score/">Metric for hyperparamter search in Unsupervise Learning</a></li>
         
         <li><a href="/post/scedasticicity/">Modeling Uncertainty of ML Systems (01)</a></li>
         
@@ -243,7 +241,7 @@
         <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
 <ul class="widget-list">
     
-    <li><a href="https://kentchun33333.github.io/categories/algorithm/">Algorithm (6)</a></li>
+    <li><a href="https://kentchun33333.github.io/categories/algorithm/">Algorithm (7)</a></li>
     
     <li><a href="https://kentchun33333.github.io/categories/communication/">Communication (1)</a></li>
     
