@@ -26,6 +26,15 @@
     </item>
     
     <item>
+      <title>Host Personal Chatgpt-ish Service on AWS</title>
+      <link>https://kentchun33333.github.io/post/hostpersonalgpt/</link>
+      <pubDate>Sun, 01 Aug 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/post/hostpersonalgpt/</guid>
+      <description>AWS Lambda can be used to host a personal ChatGPT service, but it might not be the most suitable service for this use case.</description>
+    </item>
+    
+    <item>
       <title>Build a Simple Search System</title>
       <link>https://kentchun33333.github.io/post/simplesearchsys/</link>
       <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
