@@ -162,11 +162,29 @@
     
     <item>
       <title></title>
+      <link>https://kentchun33333.github.io/post/cubejs_tryout/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/post/cubejs_tryout/</guid>
+      <description>o get started, you&amp;rsquo;ll need to have Node.js and NPM installed on your machine.</description>
+    </item>
+    
+    <item>
+      <title></title>
       <link>https://kentchun33333.github.io/post/timeseries/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://kentchun33333.github.io/post/timeseries/</guid>
       <description>How to check if a time series data is stationary A stationary time series is a series whose statistical properties such as mean, variance, and autocorrelation are constant over time.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://kentchun33333.github.io/post/track_memory/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/post/track_memory/</guid>
+      <description>title : &amp;#34;Memory Usage Tracking in python&amp;#34; author : &amp;#34;Kent Chiu&amp;#34; date : 2023-02-15 categories: [&amp;#34;Software&amp;#34;] tags : [&amp;#34;Python&amp;#34;] The code example for tracking the memory usage in python.</description>
     </item>
     
   </channel>
