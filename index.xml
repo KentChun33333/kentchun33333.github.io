@@ -35,6 +35,15 @@
     </item>
     
     <item>
+      <title>Paper Summay on Aligning LLM with Self-Instruct</title>
+      <link>https://kentchun33333.github.io/post/self-instruct-aligning-language-model-with-self-generated-instructions/</link>
+      <pubDate>Mon, 20 Mar 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/post/self-instruct-aligning-language-model-with-self-generated-instructions/</guid>
+      <description>The paper &amp;ldquo;Self-Instruct: Aligning Language Model with Self Generated Instructions&amp;rdquo; introduces a framework called Self-Instruct for improving the instruction-following capabilities of pretrained language models by bootstrapping off its own generations.</description>
+    </item>
+    
+    <item>
       <title>Trading Strategy</title>
       <link>https://kentchun33333.github.io/post/tradingtactic/</link>
       <pubDate>Sat, 11 Mar 2023 00:00:00 +0000</pubDate>
@@ -185,6 +194,15 @@
       
       <guid>https://kentchun33333.github.io/post/timeseries/</guid>
       <description>How to check if a time series data is stationary A stationary time series is a series whose statistical properties such as mean, variance, and autocorrelation are constant over time.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://kentchun33333.github.io/post/track_memory/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/post/track_memory/</guid>
+      <description>title : &amp;#34;Memory Usage Tracking in python&amp;#34; author : &amp;#34;Kent Chiu&amp;#34; date : 2023-05-01 categories: [&amp;#34;Software&amp;#34;] tags : [&amp;#34;Python&amp;#34;] The code example for tracking the memory usage in python.</description>
     </item>
     
   </channel>
