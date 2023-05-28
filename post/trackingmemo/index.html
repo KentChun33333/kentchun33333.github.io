@@ -10,8 +10,8 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
     
 
-    <title>Memory Usage Tracking in python | Autumn Memo</title>
-    <meta property="og:title" content="Memory Usage Tracking in python - Autumn Memo">
+    <title>Time and Memory Profile Tracking in python | Autumn Memo</title>
+    <meta property="og:title" content="Time and Memory Profile Tracking in python - Autumn Memo">
     <meta property="og:type" content="article">
         
     <meta property="article:published_time" content='2023-05-15T00:00:00&#43;08:00'>
@@ -20,7 +20,7 @@
     <meta property="article:modified_time" content='2023-05-15T00:00:00&#43;08:00'>
         
     <meta name="Keywords" content="">
-    <meta name="description" content="Memory Usage Tracking in python">
+    <meta name="description" content="Time and Memory Profile Tracking in python">
         <meta name="author" content="Kent Chiu">
         
 
@@ -95,7 +95,7 @@
     
     <article class="post">
         <header>
-            <h1 class="post-title">Memory Usage Tracking in python</h1>
+            <h1 class="post-title">Time and Memory Profile Tracking in python</h1>
         </header>
         <date class="post-meta meta-date">
             2023 - 5 - 15 
@@ -116,13 +116,32 @@
         
         
         <div class="post-content">
-            <p>To track the object size is important especially if doing distributing computing. The following code is a simple decorator that can do the work.</p>
+            <p>To track the object size is important especially if doing distributing computing.</p>
+<p>The following code provides 4 decorators for tracking</p>
+<ol>
+<li>
+<p>overall time profiles cross functions by pyinstrument</p>
+</li>
+<li>
+<p>time/memory/memory-usage profile in decorated function by memory_profiler and line_profiler</p>
+</li>
+</ol>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> sys 
-</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> logging
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> memory_profiler <span style="color:#f92672">import</span> profile, memory_usage
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> memory_profiler <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
 </span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> functools <span style="color:#f92672">import</span> partial
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd 
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np 
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> inspect
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> io <span style="color:#f92672">import</span> StringIO 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pyinstrument <span style="color:#f92672">import</span> Profiler
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> line_profiler <span style="color:#f92672">import</span> LineProfiler
 </span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> collections.abc <span style="color:#f92672">import</span> Mapping, Container
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> logging
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> functools <span style="color:#f92672">import</span> wraps
+</span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">dfs_getsizeof</span>(obj, ids<span style="color:#f92672">=</span>set()):
 </span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;get the size of an object
@@ -132,7 +151,7 @@
 </span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Args:
 </span></span></span><span style="display:flex;"><span><span style="color:#e6db74">       obj: a python object
 </span></span></span><span style="display:flex;"><span><span style="color:#e6db74">       ides: the set of memory address of objects
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      
 </span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> id(obj) <span style="color:#f92672">in</span> ids:
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>
@@ -171,6 +190,88 @@
 </span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> _inner
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> _dec
 </span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">dec_memo_profile</span>(func<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>, logger<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>, precision<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>, backend<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;psutil&#39;</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Decorator that will run the function and print a line-by-line profile
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    backend <span style="color:#f92672">=</span> choose_backend(backend)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> logger <span style="color:#f92672">is</span> <span style="color:#f92672">not</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> hasattr(logger, <span style="color:#e6db74">&#39;write&#39;</span>):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> hasattr(logger, <span style="color:#e6db74">&#39;warning&#39;</span>):
+</span></span><span style="display:flex;"><span>                logger<span style="color:#f92672">.</span>write <span style="color:#f92672">=</span> logger<span style="color:#f92672">.</span>warning
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">ValueError</span>(<span style="color:#e6db74">&#39;your logger must have write function&#39;</span>)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> backend <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;tracemalloc&#39;</span> <span style="color:#f92672">and</span> choose_backend:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> tracemalloc<span style="color:#f92672">.</span>is_tracing():
+</span></span><span style="display:flex;"><span>            tracemalloc<span style="color:#f92672">.</span>start()
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> func <span style="color:#f92672">is</span> <span style="color:#f92672">not</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>        get_prof <span style="color:#f92672">=</span> partial(LineProfiler, backend<span style="color:#f92672">=</span>backend)
+</span></span><span style="display:flex;"><span>        show_results_bound <span style="color:#f92672">=</span> partial(
+</span></span><span style="display:flex;"><span>            show_results, stream<span style="color:#f92672">=</span>logger, precision<span style="color:#f92672">=</span>precision
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> iscoroutinefunction(func):
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">@wraps</span>(wrapped<span style="color:#f92672">=</span>func)
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">@coroutine</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">wrapper</span>(<span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
+</span></span><span style="display:flex;"><span>                prof <span style="color:#f92672">=</span> get_prof()
+</span></span><span style="display:flex;"><span>                val <span style="color:#f92672">=</span> <span style="color:#66d9ef">yield from</span> prof(func)(<span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs)
+</span></span><span style="display:flex;"><span>                show_results_bound(prof)
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> val
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">@wraps</span>(wrapped<span style="color:#f92672">=</span>func)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">wrapper</span>(<span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
+</span></span><span style="display:flex;"><span>                prof <span style="color:#f92672">=</span> get_prof()
+</span></span><span style="display:flex;"><span>                val <span style="color:#f92672">=</span> prof(func)(<span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs)
+</span></span><span style="display:flex;"><span>                show_results_bound(prof)
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> val
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> wrapper
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">inner_wrapper</span>(f):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> profile(f, stream<span style="color:#f92672">=</span>logger, precision<span style="color:#f92672">=</span>precision,
+</span></span><span style="display:flex;"><span>                           backend<span style="color:#f92672">=</span>backend)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> inner_wrapper
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">dec_retrun_pyinstrument</span>(logger<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;global run time profiler
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_dec</span>(func):
+</span></span><span style="display:flex;"><span>        p <span style="color:#f92672">=</span> Profiler(async_mode<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;disabled&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">@wraps</span>(func)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_inner</span>(<span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">with</span> p:
+</span></span><span style="display:flex;"><span>                result <span style="color:#f92672">=</span> func(<span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            logger<span style="color:#f92672">.</span>warning(p<span style="color:#f92672">.</span>output_text(
+</span></span><span style="display:flex;"><span>                unicode<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>,
+</span></span><span style="display:flex;"><span>                color<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>,
+</span></span><span style="display:flex;"><span>                show_all<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>,
+</span></span><span style="display:flex;"><span>                timeline<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>,
+</span></span><span style="display:flex;"><span>            ))
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> result
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> _inner
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> _dec
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">dec_return_lineprofiler</span>(logger<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_dec</span>(func):
+</span></span><span style="display:flex;"><span>        lp <span style="color:#f92672">=</span> LineProfiler()
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">@wraps</span>(func)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_inner</span>(<span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
+</span></span><span style="display:flex;"><span>            lp<span style="color:#f92672">.</span>add_function(func) <span style="color:#75715e"># add additional function to profile</span>
+</span></span><span style="display:flex;"><span>            lp<span style="color:#f92672">.</span>enable()
+</span></span><span style="display:flex;"><span>            res <span style="color:#f92672">=</span> func(<span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            txt_io <span style="color:#f92672">=</span> StringIO()
+</span></span><span style="display:flex;"><span>            lp<span style="color:#f92672">.</span>print_stats(stream<span style="color:#f92672">=</span>txt_io)
+</span></span><span style="display:flex;"><span>            logger<span style="color:#f92672">.</span>warning(txt_io<span style="color:#f92672">.</span>getvalue())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> res
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> _inner
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> _dec
+</span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#a6e22e">@dec_memory_usage</span>(logger<span style="color:#f92672">=</span>logging)
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">example_1</span>(x):
@@ -179,42 +280,32 @@
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">.</span>append([range(i)])
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> res 
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@dec_memory_usage</span>(logger<span style="color:#f92672">=</span>logging)
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@dec_memo_profile</span>(logger<span style="color:#f92672">=</span>logging)
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">example_2</span>(x):
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd 
 </span></span><span style="display:flex;"><span>    res <span style="color:#f92672">=</span> []
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(x):
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">.</span>append([range(i)])
+</span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    df <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>DataFrame(res)
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> df 
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@dec_memory_usage</span>(logger<span style="color:#f92672">=</span>logging)
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@dec_return_lineprofiler</span>(logger<span style="color:#f92672">=</span>logging)
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">example_3</span>(x):
-</span></span><span style="display:flex;"><span>    res<span style="color:#f92672">=</span> []
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(x):
-</span></span><span style="display:flex;"><span>        res<span style="color:#f92672">.</span>append(<span style="color:#e6db74">&#39;abc&#39;</span><span style="color:#f92672">*</span>x)
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> res 
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@dec_memory_usage</span>(logger<span style="color:#f92672">=</span>logging)
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">example_4</span>(x):
-</span></span><span style="display:flex;"><span>    <span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np 
-</span></span><span style="display:flex;"><span>    res <span style="color:#f92672">=</span> []
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(x):
-</span></span><span style="display:flex;"><span>        res<span style="color:#f92672">.</span>append([range(i)])
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> np<span style="color:#f92672">.</span>array(res)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@dec_memory_usage</span>(logger<span style="color:#f92672">=</span>logging)
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">example_5</span>(x):
 </span></span><span style="display:flex;"><span>    res <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;&#39;</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(x):
 </span></span><span style="display:flex;"><span>        res <span style="color:#f92672">+=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">{</span>i<span style="color:#e6db74">}</span><span style="color:#e6db74">,&#39;</span><span style="color:#f92672">*</span>i
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> res
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@dec_retrun_pyinstrument</span>(logger<span style="color:#f92672">=</span>logging)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">main</span>():
 </span></span><span style="display:flex;"><span>    example_1(x<span style="color:#f92672">=</span><span style="color:#ae81ff">1000</span>)
-</span></span><span style="display:flex;"><span>    example_5(<span style="color:#ae81ff">1000</span>)
-</span></span><span style="display:flex;"><span>    example_5(x<span style="color:#f92672">=</span><span style="color:#ae81ff">1000</span>)
+</span></span><span style="display:flex;"><span>    example_2(<span style="color:#ae81ff">1000</span>)
+</span></span><span style="display:flex;"><span>    example_3(x<span style="color:#f92672">=</span><span style="color:#ae81ff">1000</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    main()
+</span></span><span style="display:flex;"><span> 
 </span></span></code></pre></div>
         </div>
 

@@ -28,9 +28,6 @@
                 href="https://kentchun33333.github.io/categories/"
                 />
   </url><url>
-    <loc>https://kentchun33333.github.io/post/trackingmemo/</loc>
-    <lastmod>2023-05-15T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://kentchun33333.github.io/post/</loc>
     <lastmod>2023-05-15T00:00:00+00:00</lastmod>
   </url><url>
@@ -55,6 +52,9 @@
                 hreflang="en"
                 href="https://kentchun33333.github.io/tags/"
                 />
+  </url><url>
+    <loc>https://kentchun33333.github.io/post/trackingmemo/</loc>
+    <lastmod>2023-05-15T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kentchun33333.github.io/tags/workflow/</loc>
     <lastmod>2023-05-15T00:00:00+00:00</lastmod>
