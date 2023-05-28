@@ -126,21 +126,14 @@
 <p>time/memory/memory-usage profile in decorated function by memory_profiler and line_profiler</p>
 </li>
 </ol>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> sys 
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> memory_profiler <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> functools <span style="color:#f92672">import</span> partial
-</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd 
-</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np 
-</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> inspect
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> sys<span style="color:#f92672">,</span> logging
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> functools <span style="color:#f92672">import</span> partial, wraps
 </span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> io <span style="color:#f92672">import</span> StringIO 
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pyinstrument <span style="color:#f92672">import</span> Profiler
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> line_profiler <span style="color:#f92672">import</span> LineProfiler
 </span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> collections.abc <span style="color:#f92672">import</span> Mapping, Container
-</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> logging
-</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> functools <span style="color:#f92672">import</span> wraps
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> memory_profiler <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pyinstrument <span style="color:#f92672">import</span> Profiler
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> line_profiler <span style="color:#f92672">import</span> LineProfiler
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">dfs_getsizeof</span>(obj, ids<span style="color:#f92672">=</span>set()):
@@ -248,7 +241,7 @@
 </span></span><span style="display:flex;"><span>            logger<span style="color:#f92672">.</span>warning(p<span style="color:#f92672">.</span>output_text(
 </span></span><span style="display:flex;"><span>                unicode<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>,
 </span></span><span style="display:flex;"><span>                color<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>,
-</span></span><span style="display:flex;"><span>                show_all<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>,
+</span></span><span style="display:flex;"><span>                show_all<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>,
 </span></span><span style="display:flex;"><span>                timeline<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>,
 </span></span><span style="display:flex;"><span>            ))
 </span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> result
@@ -282,10 +275,10 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#a6e22e">@dec_memo_profile</span>(logger<span style="color:#f92672">=</span>logging)
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">example_2</span>(x):
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd 
 </span></span><span style="display:flex;"><span>    res <span style="color:#f92672">=</span> []
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(x):
 </span></span><span style="display:flex;"><span>        res<span style="color:#f92672">.</span>append([range(i)])
-</span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    df <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>DataFrame(res)
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> df 
 </span></span><span style="display:flex;"><span>
@@ -299,12 +292,16 @@
 </span></span><span style="display:flex;"><span><span style="color:#a6e22e">@dec_retrun_pyinstrument</span>(logger<span style="color:#f92672">=</span>logging)
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">main</span>():
 </span></span><span style="display:flex;"><span>    example_1(x<span style="color:#f92672">=</span><span style="color:#ae81ff">1000</span>)
+</span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    example_2(<span style="color:#ae81ff">1000</span>)
+</span></span><span style="display:flex;"><span>    
 </span></span><span style="display:flex;"><span>    example_3(x<span style="color:#f92672">=</span><span style="color:#ae81ff">1000</span>)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    main()
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>    res <span style="color:#f92672">=</span> main()
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;!!!!&#39;</span>, res)
 </span></span><span style="display:flex;"><span> 
 </span></span></code></pre></div>
         </div>
