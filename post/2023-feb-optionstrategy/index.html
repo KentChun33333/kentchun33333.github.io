@@ -10,17 +10,17 @@
     <meta name="referrer" content="no-referrer-when-downgrade">
     
 
-    <title>A Glance of cloudpickle | Autumn Memo</title>
-    <meta property="og:title" content="A Glance of cloudpickle - Autumn Memo">
+    <title>Top 5 Option Strategies | Autumn Memo</title>
+    <meta property="og:title" content="Top 5 Option Strategies - Autumn Memo">
     <meta property="og:type" content="article">
         
-    <meta property="article:published_time" content='2023-04-27T00:00:00&#43;08:00'>
+    <meta property="article:published_time" content='2023-04-05T00:00:00&#43;08:00'>
         
         
-    <meta property="article:modified_time" content='2023-04-27T00:00:00&#43;08:00'>
+    <meta property="article:modified_time" content='2023-04-05T00:00:00&#43;08:00'>
         
     <meta name="Keywords" content="">
-    <meta name="description" content="A Glance of cloudpickle">
+    <meta name="description" content="Top 5 Option Strategies">
         <meta name="author" content="Kent Chiu">
         
 
@@ -36,7 +36,7 @@
 
     gtag('config', 'G-PZF7WLJRQL');
     </script>
-    <meta property="og:url" content="https://kentchun33333.github.io/post/cloudpickle/">
+    <meta property="og:url" content="https://kentchun33333.github.io/post/2023-feb-optionstrategy/">
     <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
 
     <link rel="stylesheet" href='/css/normalize.css'>
@@ -95,16 +95,16 @@
     
     <article class="post">
         <header>
-            <h1 class="post-title">A Glance of cloudpickle</h1>
+            <h1 class="post-title">Top 5 Option Strategies</h1>
         </header>
         <date class="post-meta meta-date">
-            2023 - 4 - 27 
+            2023 - 4 - 5 
         </date>
         
         <div class="post-meta">
             <span>|</span>
             
-            <span class="meta-category"><a href='/categories/software'>Software</a></span>
+            <span class="meta-category"><a href='/categories/trading'>Trading</a></span>
             
         </div>
         
@@ -116,34 +116,207 @@
         
         
         <div class="post-content">
-            <p><code>cloudpickle</code> is a Python library used for serializing Python objects, including functions, classes, and instances, to a byte stream. It is an extension of the standard <code>pickle</code> module with added support for more complex object types and serialization of code objects.</p>
-<p>Here are some key features and use cases of <code>cloudpickle</code>:</p>
+            <p>There are only 3 senarios of stock movement that it goes up or down or remain steady.</p>
+<p>It is possible for trader to profit from all scenarios by operating multiple instruments in a right combination. The following are the common stratgies in options :</p>
+<h3 id="1-short-strangle">1. Short Strangle</h3>
+<p>
+        <img class="mx-auto" alt="" src="/img/2023-07-10-23-29-31-image.png" />   
+    </p>
+<p>A short strangle consists of <!-- raw HTML omitted -->one short call with a higher strike price<!-- raw HTML omitted --> and <!-- raw HTML omitted -->one short put with a lower strike<!-- raw HTML omitted -->. Both options have the same underlying stock and the same expiration date, but they have different strike prices. A short strangle is established for a net credit (or net receipt) and profits if the underlying stock trades in a narrow range between the break-even points.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Item</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Max Profit</td>
+<td>Profit potential is the total premiums received - commissions.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Max Risk</td>
+<td>Basically unlimited on both upside and downside. For the downside the loss capped when the price of underlying asset becomes zero.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Option Legs</td>
+<td>2 legs</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Time Effect</td>
+<td>Positive that potential profit increases with time passing.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-long-strangle">2. Long Strangle</h3>
+<p>
+        <img class="mx-auto" alt="" src="/img/2023-07-10-23-48-30-image.png" />   
+    </p>
+<p>A long strangle is made up of a long call option and a long put option purchased out-of-the-money with the same expiration date. The combined cost of the long call and long put defines the maximum risk for the trade.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Item</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Max Profit</td>
+<td>Profit potential is unlimited</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Max Risk</td>
+<td>Max loss is the premium</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Option Legs</td>
+<td>2 legs</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Time Effect</td>
+<td>Positive that potential profit increases with time passing.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="3-short-straddle">3. Short Straddle</h3>
+<p>
+        <img class="mx-auto" alt="" src="/img/2023-07-10-23-55-35-image.png" />   
+    </p>
+<p>A short straddle consists of a short call option and a short put option with the same strike price and expiration. Short straddles are typically sold at-the-money of the underlying asset. However, a short straddle can be opened above or below the stock price to create a bullish or bearish bias.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Item</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Max Profit</td>
+<td>Profit potential is limited to the premium.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Max Risk</td>
+<td>Unlimited loss</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Option Legs</td>
+<td>2 legs</td>
+</tr>
+<tr>
+<td>4.</td>
+<td>Time Effect</td>
+<td>Positive that potential profit increases with time passing.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="4-long-straddle">4. Long Straddle</h3>
+<!-- raw HTML omitted -->
+<p>A long straddle consists of a <!-- raw HTML omitted -->long call option<!-- raw HTML omitted --> and <!-- raw HTML omitted -->long put option<!-- raw HTML omitted --> centered at the same strike price with the same expiration. Long straddles are typically purchased at-the-money of the underlying asset. However, they can be set up above or below the stock price to create a bullish or bearish bias.</p>
+<p>The combined cost of the long call and long put define the maximum risk for the trade. The long straddle will capitalize on a large move in either direction and/or an increase in implied volatility. The potential profit is unlimited beyond the debit paid to enter the trade.</p>
+<p>Long straddles benefit when <a href="https://optionalpha.com/learn/implied-volatility">implied volatility</a> increases. Higher implied volatility results in higher option premium prices. Ideally, when a long straddle is initiated, implied volatility is lower than where it will be at exit or expiration. Future volatility, or vega, is uncertain and unpredictable. Still, it is good to know how volatility will affect the pricing of the straddle options.</p>
+<p>Time is your enemy = Long straddles lose value as time passes.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Item</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Max Profit</td>
+<td>Profit potential is unlimited.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Max Risk</td>
+<td>Limited loss as if the price is not moving at all, you loss all premium</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Option Legs</td>
+<td>2 legs</td>
+</tr>
+<tr>
+<td>4.</td>
+<td>Time Effect</td>
+<td>Negative that potential profit decay with time passing.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="5-iron-condor">5. Iron Condor</h3>
+<p>
+        <img class="mx-auto" alt="" src="/img/2023-07-10-23-56-42-image.png" />   
+    </p>
+<p>An iron condor consists of selling an out-of-the-money <a href="https://optionalpha.com/strategies/bear-call-credit-spread">bear call credit spread</a> above the stock price and an out-of-the-money <a href="https://optionalpha.com/strategies/bull-put-credit-spread">bull put credit spread</a> below the stock price with the same expiration date. </p>
 <ol>
 <li>
-<p>Serialization of Functions: <code>cloudpickle</code> allows you to serialize Python functions, including lambda functions, closures, and functions defined interactively, preserving their code, closure variables, and the entire execution context.</p>
+<p>selling a call option and purchasing a call option at a higher price.</p>
 </li>
 <li>
-<p>Serialization of Classes and Instances: You can serialize Python classes and instances using <code>cloudpickle</code>. This is particularly useful when you want to save and restore the state of an object, including its attributes and methods.</p>
-</li>
-<li>
-<p>Support for Third-Party Libraries: <code>cloudpickle</code> provides support for serializing objects from various third-party libraries, including NumPy arrays, Pandas DataFrames, and scikit-learn models. This allows you to save and load complex objects from these libraries.</p>
-</li>
-<li>
-<p>Distributed Computing: <code>cloudpickle</code> is commonly used in distributed computing frameworks like Apache Spark and Dask. It enables the serialization of functions and data structures so that they can be sent across multiple nodes for parallel processing.</p>
-</li>
-<li>
-<p>Model Deployment: <code>cloudpickle</code> can be helpful when deploying machine learning models that have custom preprocessing steps or dependencies on external libraries. It allows you to serialize the model along with its associated code and dependencies, making it easier to deploy the model in different environments.</p>
+<p>selling a put option and purchasing a put option at a lower price</p>
 </li>
 </ol>
-<p>Here&rsquo;s a basic example of using <code>cloudpickle</code> to serialize and deserialize a Python object:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> cloudpickle 
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Serialize an object </span>
-</span></span><span style="display:flex;"><span>serialized_object <span style="color:#f92672">=</span> cloudpickle<span style="color:#f92672">.</span>dumps(my_object)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e"># Deserialize the object </span>
-</span></span><span style="display:flex;"><span>deserialized_object <span style="color:#f92672">=</span> cloudpickle<span style="color:#f92672">.</span>loads(serialized_object)
-</span></span></code></pre></div><p>Note that <code>cloudpickle</code> is not a secure way to deserialize untrusted data. It executes the deserialized code as is, so it&rsquo;s important to only deserialize data from trusted sources. You can install <code>cloudpickle</code> using pip:</p>
+<p>The strategy looks to take advantage of a drop in volatility, time decay, and little or no movement from the underlying asset. Iron condors are essentially a short strangle with long option protection purchased above and below the short strikes to define risk.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Item</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Max Profit</td>
+<td>limited. Profit is the total premiums received - commissions.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Max Risk</td>
+<td>limited.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Option Legs</td>
+<td>4 legs</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Time Effect</td>
+<td>Positive that potential profit increases with time passing.</td>
+</tr>
+</tbody>
+</table>
+<p>Reference</p>
+<ul>
+<li>
+<p><a href="https://www.fidelity.com/learning-center/investment-products/options/options-strategy-guide/short-strangle#:~:text=Explanation,they%20have%20different%20strike%20prices.">What Is A Short Strangle? - Fidelity</a></p>
+</li>
+<li>
+<p><a href="https://optionalpha.com/options-strategies">Complete Guide to Options Strategies | Option Alpha</a></p>
+</li>
+</ul>
 
         </div>
 
@@ -157,7 +330,7 @@
             
             <ul class="clearfix">
                 
-                <li><a href='/tags/python'>Python</a></li>
+                <li><a href='/tags/trading'>Trading</a></li>
                 
             </ul>
             
