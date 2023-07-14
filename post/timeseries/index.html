@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Caveat' rel='stylesheet'>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title> | Autumn Memo</title>
+    <meta property="og:title" content=" - Autumn Memo">
+    <meta property="og:type" content="article">
+        
+        
+    <meta name="Keywords" content="">
+    <meta name="description" content="">
+        
+    <meta name="author" content="Kent Chiu">
+
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8949849444403982"
+    crossorigin="anonymous"></script>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PZF7WLJRQL"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-PZF7WLJRQL');
+    </script>
+    <meta property="og:url" content="https://kentchun33333.github.io/post/timeseries/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-5108790028230107" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://kentchun33333.github.io">
+                        Autumn Memo
+                    </a>
+                
+                <p class="description">Investment, Algorithm and Life Design.</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    
+                    
+                    
+                    <a  href="https://kentchun33333.github.io/post/" title="Main">Main</a>
+                    
+                    <a  href="https://kentchun33333.github.io/archives/" title="Archives">Archives</a>
+                    
+                    <a  href="https://kentchun33333.github.io/about/" title="About">About</a>
+                    
+                    <a  href="https://kentchun33333.github.io" title=""></a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title"></h1>
+        </header>
+        <date class="post-meta meta-date">
+            1 - 1 - 1 
+        </date>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    Reading </span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <h1 id="how-to-check-if-a-time-series-data-is-stationary">How to check if a time series data is stationary</h1>
+<p>A stationary time series is a series whose statistical properties such as mean, variance, and autocorrelation are constant over time. A stationary series has the same distribution at every point in time, and the distribution does not change over time.</p>
+<p>There are two main types of stationarity that are relevant in time series analysis:</p>
+<ol>
+<li>
+<p><strong>Strict stationary</strong>: A time series is said to be strictly stationary if the joint distribution of any set of observations is invariant to time shifts. That is, the distribution of any group of observations remains the same, regardless of the time at which they were observed.</p>
+</li>
+<li>
+<p><strong>Weak stationary</strong>: A time series is said to be weakly stationary if the mean, variance, and autocorrelation structure of the series do not change over time. In other words, the mean and variance of the series are constant over time, and the autocorrelation between any two observations only depends on the time lag between them, and not on the absolute time at which they were observed.</p>
+</li>
+</ol>
+<p>To test for stationarity, there are several statistical tests available, including:</p>
+<ol>
+<li>
+<p><strong>Visual inspection</strong>: A simple way to check for stationarity is to plot the time series and visually inspect it for trends, seasonality, and other patterns that might indicate non-stationarity.</p>
+</li>
+<li>
+<p><strong>Summary statistics</strong>: Summary statistics such as the mean, variance, and autocorrelation can also provide clues about the stationarity of a series. If the mean and variance are roughly constant over time, and the autocorrelation decreases quickly to zero as the lag increases, then the series is likely stationary.</p>
+</li>
+<li>
+<p><strong>Augmented Dickey-Fuller (ADF) test</strong>: The ADF test is a popular statistical test used to determine whether a series is stationary. The test involves regressing the series on its lagged values and testing for the significance of the coefficient on the lagged value. If the coefficient is not significantly different from zero, then the series is likely stationary.</p>
+</li>
+<li>
+<p><strong>KPSS test</strong>: The Kwiatkowski-Phillips-Schmidt-Shin (KPSS) test is another statistical test used to determine the stationarity of a series. The test involves regressing the series on a constant and a time trend, and testing for the significance of the trend coefficient. If the trend coefficient is not significantly different from zero, then the series is likely stationary.</p>
+</li>
+</ol>
+<p>In summary, a stationary time series is one whose statistical properties do not change over time. There are several methods available to test for stationarity, including visual inspection, summary statistics, and statistical tests such as the ADF and KPSS tests.</p>
+<h1 id="methods-to-handle-non-stationary-time-series-data">Methods to handle Non-stationary time series data</h1>
+<p>Yes, there are several modeling approaches that can be used to deal with non-stationary time series data:</p>
+<ol>
+<li>
+<p><strong>Differencing</strong>: One of the most common methods to make a time series stationary is to apply differencing. This involves taking the first or second difference of the series to remove the trend or seasonal components. Once differenced, the series may be more amenable to modeling using methods that assume stationary data.</p>
+</li>
+<li>
+<p><strong>Transformation</strong>: Another approach is to transform the data using a logarithmic, square root, or power transformation to stabilize the variance of the series.</p>
+</li>
+<li>
+<p><strong>ARIMA models</strong>: Autoregressive Integrated Moving Average (ARIMA) models are widely used to model stationary time series. However, ARIMA models can also be used for non-stationary series by first differencing or applying other transformations to make the series stationary.</p>
+</li>
+<li>
+<p><strong>Exponential smoothing models</strong>: Exponential smoothing models, such as the Holt-Winters method, are useful for modeling time series data with a trend and/or seasonal component, even if the series is non-stationary.</p>
+</li>
+<li>
+<p><strong>Structural time series models</strong>: Structural time series models can handle non-stationary time series by modeling the underlying trend, seasonal, and cyclical components separately, allowing for more flexibility in modeling non-stationary data.</p>
+</li>
+<li>
+<p><strong>Deep learning models</strong>: Deep learning models such as recurrent neural networks (RNNs) and long short-term memory (LSTM) networks can handle non-stationary time series by learning the underlying patterns in the data, including trends and seasonal cycles.</p>
+</li>
+</ol>
+<p>In summary, while non-stationary time series data can pose challenges for traditional statistical methods, there are a variety of techniques available to model and analyze this type of data. The choice of method will depend on the specific characteristics of the data and the research question at hand.</p>
+<h1 id="a-brief-history-of-time-series-models">A Brief History of Time Series Models</h1>
+<p>TL;DR: For folks who are interested in learning more about time series models, below is an incomplete roadmap that attempts to summarize the development of this complex, fast evolving field.</p>
+<p>M Competition is the equivalence of ImageNet to computer vision for time series model and deep learning beat traditional statistical models for the first time in M4 that took place in 2018 despite all the advancement in computer visions and NLP prior to that. For univariate forecasting, I would recommend trying N-BEATS and N-HiTS while TFT shows good promise for multivariate forecasting. If your time series is too short for deep learning model, you may want to try multi-task (or, is it meta?) learning by using the M4 data as shown in ESRNN. As always, if the simpler approach such as Exponential Smoothing and ARIMA(X) works, it is unnecessary to go nuclear with deep learning. For instance, the Theta model won the M3 competition. Finally, if you can only afford one Python package for time series model, you won’t regret by going with Darts.</p>
+<h1 id="competitions">Competitions</h1>
+<p>M Competition is the equivalence of ImageNet to computer vision for time series model. Traditional statistical models had always dominated the competitions until M4 where a hybrid approach of Exponential Smoothing and RNN proposed by Uber called ESRNN won the competition. There are typically several publications after the M competitions that summarize the findings and we can learn a lot from them. M6 is currently ongoing focusing on financial time series. Below is a list of relevant competitions (for M competition, the year refers to the year of publication). Obviously, there are also multiple relevant competitions on Kaggle but they are not included here.</p>
+<ul>
+<li>
+<p>1982 — M1</p>
+</li>
+<li>
+<p>1993 — M2</p>
+</li>
+<li>
+<p>2000 — <a href="https://www.sciencedirect.com/science/article/abs/pii/S0169207000000571">M3: Theta model was the winner</a></p>
+</li>
+<li>
+<p>2006 — <a href="http://www.neural-forecasting-competition.com/NN3/">NN3</a></p>
+</li>
+<li>
+<p>2008 — <a href="http://www.neural-forecasting-competition.com/NN5/">NN5</a></p>
+</li>
+<li>
+<p>2011 — <a href="https://www.sciencedirect.com/science/article/abs/pii/S016920701000107X">Tourism forecasting competition</a></p>
+</li>
+<li>
+<p>2020 — <a href="https://www.sciencedirect.com/science/article/pii/S0169207019301128">M4: ESRNN was the winner (ended in May 2018)</a></p>
+</li>
+<li>
+<p>2021 — <a href="https://www.sciencedirect.com/science/article/pii/S0169207021001874">M5: LightGBM was the winner on Walmart hierarchical time series sales data (ended in June 2020)</a></p>
+</li>
+<li>
+<p>2023 — <a href="https://mofc.unic.ac.cy/the-m6-competition/">M6: Currently ongoing till the beginning of 2023 on financial time series</a></p>
+</li>
+</ul>
+<h1 id="statistical-and-ml-models">Statistical and ML Models</h1>
+<p>Below is a chronology of both statistical and ML time series models. It is not a comprehensive list but should capture the key development. Also, the timeline is not exact as the year when something was “formally” released or published can sometimes be ambiguous.</p>
+<ul>
+<li>
+<p>1950s — Exponential Smoothing</p>
+</li>
+<li>
+<p>1970s — ARIMA(X)</p>
+</li>
+<li>
+<p>1980 — VAR</p>
+</li>
+<li>
+<p>1980s — GARCH</p>
+</li>
+<li>
+<p>2000 — <a href="https://arxiv.org/abs/1503.03529">Theta model</a></p>
+</li>
+<li>
+<p>2011 — <a href="https://www.researchgate.net/publication/222105772_Forecasting_Time_Series_With_Complex_Seasonal_Patterns_Using_Exponential_Smoothing">TBATS</a></p>
+</li>
+<li>
+<p>2014 — <a href="https://arxiv.org/abs/1603.02754">XGBoost (University of Washington)</a></p>
+</li>
+<li>
+<p>2016 — <a href="https://proceedings.neurips.cc/paper/6907-lightgbm-a-highly-efficient-gradient-boosting-decision-tree.pdf">LightGBM (Microsoft)</a></p>
+</li>
+<li>
+<p>2017 — <a href="https://arxiv.org/abs/1810.11363">CatBoost (Yandex)</a></p>
+</li>
+<li>
+<p>2017 — <a href="https://peerj.com/preprints/3190.pdf">Prophet (Facebook)</a></p>
+</li>
+<li>
+<p>2017 — <a href="https://www.sciencedirect.com/science/article/pii/S0169207019301888">DeepAR (Amazon)</a></p>
+</li>
+<li>
+<p>2017 — <a href="https://arxiv.org/abs/1711.11053">Multi-Horizon Quantile Recurrent Forecaster — MQRNN (Amazon)</a></p>
+</li>
+<li>
+<p>2018 — <a href="https://papers.nips.cc/paper/8004-deep-state-space-models-for-time-series-forecasting">Deep State Space Model — DSSM (Amazon)</a></p>
+</li>
+<li>
+<p>2018 — <a href="https://arxiv.org/abs/1803.01271">Temporal Convolution Network — TCN (CMU)</a></p>
+</li>
+<li>
+<p>2018 — <a href="https://arxiv.org/abs/1811.05320">Temporal Graph Convolutional Network — T-GCN (Central South University, Changsha, China)</a></p>
+</li>
+<li>
+<p>2018 — <a href="https://www.sciencedirect.com/science/article/abs/pii/S0169207019301153">ESRNN (Uber)</a></p>
+</li>
+<li>
+<p>2019 — <a href="https://arxiv.org/abs/1905.10437">N-BEATS (ElementAI)</a></p>
+</li>
+<li>
+<p>2019 — <a href="https://arxiv.org/abs/1911.12436">AR-Net (Facebook)</a></p>
+</li>
+<li>
+<p>2020 — <a href="https://arxiv.org/abs/2111.15397">NeuralProphet (Facebook)</a></p>
+</li>
+<li>
+<p>2020 — <a href="https://arxiv.org/abs/1912.09363">Temporal Fusion Transformer — TFT (Google)</a></p>
+</li>
+<li>
+<p>2021 — <a href="https://github.com/tblume1992/ThymeBoost">ThymeBoost</a></p>
+</li>
+<li>
+<p>2021 — <a href="https://arxiv.org/abs/2105.01098">Greykite/Silverkite (Linkedin)</a></p>
+</li>
+<li>
+<p>2021 — <a href="https://github.com/uber/orbit">Orbit (Uber)</a></p>
+</li>
+<li>
+<p>2022 — <a href="https://arxiv.org/abs/2201.12886">N-HiTS (CMU/Unity Technologies/Nixtla)</a></p>
+</li>
+</ul>
+<p>From Exponential Smoothing in the 1950s and ARIMA(X) in the 1970s to TBATS in 2011, traditional statistical models dominated the time series field especially for univariate forecasting until ESRNN won M4 in 2018. Although NLP essentially works with sequences, a lot of the advancement in NLP cannot be translated to time series effectively because regular time series data lacks the deep structure prevalent with text data. So, in order to make deep learning works for time series, specific neural network architecture is required. N-BEATS is one such example and it outperforms ESRNN for M4 data while N-HiTS subsequently become the state-of-the-art. For NLP fans who are obsessed with attention and transformer, you should be excited about Temporal Fusion Transformer (TFT) proposed by Google in 2020. It works well for multivariate forecasting.</p>
+<p>ESRNN introduced a form of multi-task (or, is it meta?) learning that is critical for common business application. Deep learning typically requires a lot of data. While an electricity demand forecasting problem with minute by minute weather data for a large region over the last ten years can easily satisfy the most complex deep neural network, most business applications deal with monthly or quarterly data say for the last ten years (if you are lucky). Instead of building one model (single task) for each time series like a traditional statistical model would do, ESRNN feed all the data into one complex model to forecast multiple time series (multi-task). For example, in M4, there are 24,000 quarterly time series that originated from different domains covering different time period. This is particularly relevant when you have hierarchical data such as different products in the same store or same product across many stores.</p>
+<p>N-BEATS introduced another important approach of ensembling models with different input horizons (2x to 7x of forecast horizon), metrics and random initializations for bagging. They found that it is a more helpful regularization technique compared to using dropout or L2 norm penalty.</p>
+<p>Gradient boosting algorithms such as XGBoost and LightGBM are not exactly time series models but one can often reduce a time series problem into something more cross-sectional-like. For example, LightGBM won the M5 competition for hierarchical time series. ThymeBoost is a gradient boosting model designed specifically for time series but it is still relatively new. Currently, it does not consistently outperform ESRNN for M4 data.</p>
+<p>If you are working with time series that has a heavy seasonal component with strong holiday effect (think Facebook and Linkedin), you may find Prophet and Greykite helpful but they are not based on deep learning. Facebook subsequently adapted AR-Net into Prophet and created NeuralProphet which is essentially a deep learning extension of ARIMA just like how ESRNN is a deep learning extension of Exponential Smoothing.</p>
+<h1 id="packages">Packages</h1>
+<p>Below are some Python packages that are useful for time series forecasting and they implement some of the algorithms mentioned above. Darts is particularly useful for trying multiple advanced algorithms along with helpful functions such as rolling cross validation etc. which are also provided by sktime. AutoML is a relatively new entrant for time series models with PyCaret and some automated feature engineering libraries. Note that one interesting feature engineering method is to apply Fourier transformation on calendar dates (more discussion <a href="https://www.tensorflow.org/tutorials/structured_data/time_series#time">here</a>).</p>
+<p>If you miss the old-school econometrics concepts such as Augmented Dickey Fuller test for stationarity, Breusch-Pagan test for heteroskedasticity and Ljung-Box test for autocorrelation, statsmodels will prove to be handy. “<a href="https://otexts.com/fpp3/">Forecasting: Principles and Practice</a>” is a classic text book for old-school time series models.</p>
+<ul>
+<li>
+<p>statsmodels — Standard statistical models such as ARIMA(X), exponential smoothing, Theta, VAR and useful tools such as various statistical tests, acf/pacf plots, time series decomposition etc.</p>
+</li>
+<li>
+<p>pmdarima — Automated ARIMA</p>
+</li>
+<li>
+<p>sktime (2019) — Sklearn-like library for time series with AutoETS and AutoARIMA including utility for rolling cross validation and grid search</p>
+</li>
+<li>
+<p>PyTorch Forecasting (2020) — State-of-the-art time series forecasting with deep neural networks</p>
+</li>
+<li>
+<p>Darts (2020) — A hybrid of sktime and PyTorch Forecasting</p>
+</li>
+<li>
+<p>PyCaret (2021) — AutoML for time series recently integrated into the stable release</p>
+</li>
+<li>
+<p>tsfresh and tsfeatures — Automated feature engineering for time series</p>
+</li>
+</ul>
+<h1 id="appendix">Appendix</h1>
+<p>Here is a quick summary for a few selected models mentioned above. It is impossible to do justice to them with the short descriptions below. So, I would recommend that you do more research to further your understanding.</p>
+<h2 id="exponential-smoothing">Exponential Smoothing</h2>
+<p>One naive forecast approach is to simply use the last observed value as the next prediction. One could also take the simple average of all observed data to make the forecast. Exponential smoothing is in between these two extreme approaches giving larger weights to more recent observations.</p>
+<p>
+        <img class="mx-auto" alt="" src="https://miro.medium.com/v2/resize:fit:1202/1*2OXlpRIUnsRZkqMM3GdcUQ.jpeg" />   
+    </p>
+<p>This simple concept was subsequently extended to have an error/level, trend and seasonal component with either additive or multiplicative formulation.</p>
+<p>
+        <img class="mx-auto" alt="" src="https://miro.medium.com/v2/resize:fit:1400/1*DkA9Q1C6HXDaE6PG-DfkLQ.png" />   
+    </p>
+<p>“Forecasting: Principles and Practice”, Hyndman et al. (2021)</p>
+<h2 id="arimax">ARIMA(X)</h2>
+<p>An autoregressive model uses the lagged values of the target as predictors in a regression. An autoregressive model of order p can be written as:</p>
+<p>
+        <img class="mx-auto" alt="" src="https://miro.medium.com/v2/resize:fit:1254/1*4f_FTgsk6ltH9sLpKhPOaA.jpeg" />   
+    </p>
+<p>Rather than using the past values of the forecast variable in a regression, a moving average model uses past forecast errors in a regression-like model.</p>
+<p>
+        <img class="mx-auto" alt="" src="https://miro.medium.com/v2/resize:fit:1234/1*9H38hkyYZlwXuytnkug2rw.jpeg" />   
+    </p>
+<p>These two approaches can be combined into one framework which was subsequently extended to capture seasonality and additional regressors. Note that the time series has to be stationary to satisfy the underlying assumptions of the model. Typically taking the first difference of the time series would render it stationary.</p>
+<h2 id="theta-model">Theta Model</h2>
+<p>The original Theta method proposes the decomposition of the de-seasonalized data into two theta lines. The first theta line removes completely the curvature of the data, thus being a good estimator of the long term trend component. The second theta line doubles the curvature of the series, as to better approximate the short-term behavior. A generalization of the Theta method was subsequently proposed to optimize the selection of the second theta line.</p>
+<h2 id="tbats">TBATS</h2>
+<p>This model forecasts time series with complex multiple seasonal patterns using exponential smoothing. The acronym stands for:</p>
+<ul>
+<li>
+<p>T — Trigonometric seasonality</p>
+</li>
+<li>
+<p>B — Box-Cox transformation</p>
+</li>
+<li>
+<p>A — ARIMA errors</p>
+</li>
+<li>
+<p>T — Trend</p>
+</li>
+<li>
+<p>S — Seasonal components</p>
+</li>
+</ul>
+<h2 id="prophet">Prophet</h2>
+<p>A modular regression model with interpretable parameters that can be intuitively adjusted by analysts with domain knowledge about the time series. The specification is similar to a generalized additive model (GAM) framing the forecasting problem as a curve fitting exercise with interpretable parameters and components. Also, additional regressors can be accommodated. Note that the default behavior is to rely on the first 80% of the data for the trend component when making future forecast. This may or may not make sense for your application.</p>
+<p>
+        <img class="mx-auto" alt="" src="https://miro.medium.com/v2/resize:fit:1400/1*Fws9e0HGYOFS_XXQbmzQGg.png" />   
+    </p>
+<p>“Forecasting at Scale”, Taylor et al. (2017)</p>
+<h2 id="esrnn">ESRNN</h2>
+<p>The model cleverly combines the classic Exponential Smoothing model (ES) and a Recurrent Neural Network (RNN). The ES decomposes the time series in level, trend and seasonality components. The RNN is trained with all the series, has shared parameters and it is used to learn common local trends among the series while the ES parameters are specific for each time series. The models are combined by including the output of the RNN as the local trend component in the ES model. Note that the basic architecture is a dilated-RNN with LSTM cells, this allowed the RNN to reduce the number of parameters while stacking more layers.</p>
+<p>The ESRNN model optimizes over two losses. First, the quantile loss which minimize the quantile of the target variable and second, a penalty on the variance or wiggliness of the predictions as a regularizer. Intuitively, the level should be a smooth version of the time series, with no seasonality patterns. It turned out that the smoothness of level helped substantially the forecasting accuracy. It appears that when the input to the NN was smooth, the NN concentrated on predicting the trend, instead of overfitting on some spurious, seasonality-related patterns. A smooth level also means that the seasonality components properly absorbed the seasonality.</p>
+<p>
+        <img class="mx-auto" alt="" src="https://miro.medium.com/v2/resize:fit:1400/1*gvRxihFOGX0Bv5lef_vIOA.png" />   
+    </p>
+<p>
+        <img class="mx-auto" alt="" src="https://miro.medium.com/v2/resize:fit:484/1*GRkdcXRsOlb9HRm7L67dtQ.png" />   
+    </p>
+<p>“A hybrid method of Exponential Smoothing and Recurrent Neural Networks for time series forecasting”, Smyl (2019)</p>
+<h2 id="n-beats">N-BEATS</h2>
+<p>This is the first work to empirically demonstrate that pure DL using no time-series specific components outperforms well-established statistical approaches on M3, M4 and TOURISM datasets. It focuses “on solving the univariate time series point forecasting problem using deep learning”. Subsequently, the Darts package adapts the original N-BEATS architecture to multivariate time series by flattening the source data to a 1-dimensional series. So, you can include additional regressors as features.</p>
+<p>Note that N-BEATS is not based on a recurrent architecture such as LSTM. N-BEATS uses a simple but powerful architecture of ensembled feed-forward networks with a novel hierarchical doubly residual topology of forecasts and ‘backcasts’. Previous block removes the portion of the signal that it can approximate well, making the forecast job of the downstream blocks easier. The proposed architecture design generalizes well across time series of different nature while ESRNN had to use very different architectures hand crafted for different horizons. Finally, if interpretability is important for your application, this model offers an “interpretable” architecture consisting of two stacks: A trend stack and a seasonality stack.</p>
+<p>
+        <img class="mx-auto" alt="" src="https://miro.medium.com/v2/resize:fit:1400/1*XLYp1_y7QmaQOFT7a6PoHw.png" />   
+    </p>
+<p>“N-BEATS: Neural basis expansion analysis for interpretable time series forecasting” , Oreshkin et al. (2020)</p>
+<h2 id="temporal-fusion-transformer-tft">Temporal Fusion Transformer (TFT)</h2>
+<p>TFT is an attention-based DNN designed to explicitly align the model with the general multi-horizon forecasting task, i.e. predicting variables-of-interest at multiple future time steps, for both accuracy and interpretability. TFT supports 3 types of features: i) temporal data with known inputs into the future ii) temporal data known only up to the present and iii) exogenous categorical/static variables. See more discussion <a href="https://ai.googleblog.com/2021/12/interpretable-deep-learning-for-time.html">here</a>.</p>
+<p>The architecture integrates the mechanisms of several other neural architectures:</p>
+<ul>
+<li>
+<p>A temporal multi-head attention block that identifies the long-range patterns</p>
+</li>
+<li>
+<p>LSTM sequence-to-sequence encoders/decoders to summarize shorter patterns</p>
+</li>
+<li>
+<p>Gated residual network blocks, GRNs, that are to weed out the unimportant, unused inputs</p>
+</li>
+</ul>
+<p>
+        <img class="mx-auto" alt="" src="https://miro.medium.com/v2/resize:fit:1400/1*d9QMgnyy6Z8tnKJ497UWUg.png" />   
+    </p>
+<p>“Temporal Fusion Transformers for Interpretable Multi-horizon Time Series Forecasting”, Lim et al. (2020)</p>
+<h1 id="heading"></h1>
+<p>This article represents my own opinion and does not necessarily represent the opinions of T. Rowe Price, and has not been sanctioned by T. Rowe Price.</p>
+
+        </div>
+
+        
+
+
+        
+
+
+        <div class="post-meta meta-tags">
+            
+            No Tags
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "KentChun33333/kentchun33333.github.io"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://kentchun33333.github.io">Autumn Memo By Kent Chiu</a>
+        
+    </div>
+    <br />
+
+    <div>
+       
+        <div class="github-badge">
+            <a href="https://kentchun33333.github.io/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value  bg-blue"> Kent Chiu </span></a>
+        </div>
+
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Powered by</span><span class="badge-value bg-yellowgreen"> Maupassant-Hugo</span></a>
+        </div>
+
+    </div>
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://kentchun33333.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://kentchun33333.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://kentchun33333.github.io/categories/algorithm/">Algorithm (7)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/communication/">Communication (1)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/design-life/">Design Life (2)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/software/">Software (6)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/trading/">Trading (4)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/ai/">AI</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/algotrading/">AlgoTrading</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/chatgpt/">ChatGPT</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/economic/">Economic</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/environment/">Environment</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/equitytrading/">EquityTrading</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/github-project/">Github Project</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/hugo/">HUGO</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/inverted-index/">Inverted Index</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/investment/">Investment</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/large-language-model/">Large Language Model</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/metric/">Metric</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/nlp/">NLP</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/paper-summary/">Paper Summary</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/project-management/">Project Management</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/python/">Python</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/scrum/">SCRUM</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/search-system/">Search System</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/trading/">Trading</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/typora/">Typora</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/uncertainty-estimation/">Uncertainty Estimation</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/unsupervise-learning/">Unsupervise Learning</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/workflow/">Workflow</a>
+    </div>
+    
+</div>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">Others</h3>
+        <ul class="widget-list">
+            <li><a href="https://kentchun33333.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

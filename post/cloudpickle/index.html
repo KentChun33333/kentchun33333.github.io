@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Caveat' rel='stylesheet'>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>cloudpickle for distributing serializing | Autumn Memo</title>
+    <meta property="og:title" content="cloudpickle for distributing serializing - Autumn Memo">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-04-27T00:00:00&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-04-27T00:00:00&#43;08:00'>
+        
+    <meta name="Keywords" content="">
+    <meta name="description" content="cloudpickle for distributing serializing">
+        <meta name="author" content="Kent Chiu">
+        
+
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8949849444403982"
+    crossorigin="anonymous"></script>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PZF7WLJRQL"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-PZF7WLJRQL');
+    </script>
+    <meta property="og:url" content="https://kentchun33333.github.io/post/cloudpickle/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-5108790028230107" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://kentchun33333.github.io">
+                        Autumn Memo
+                    </a>
+                
+                <p class="description">Investment, Algorithm and Life Design.</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    
+                    
+                    
+                    <a  href="https://kentchun33333.github.io/post/" title="Main">Main</a>
+                    
+                    <a  href="https://kentchun33333.github.io/archives/" title="Archives">Archives</a>
+                    
+                    <a  href="https://kentchun33333.github.io/about/" title="About">About</a>
+                    
+                    <a  href="https://kentchun33333.github.io" title=""></a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">cloudpickle for distributing serializing</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2023 - 4 - 27 
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/software'>Software</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    Reading </span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p><code>cloudpickle</code> is a Python library used for serializing Python objects, including functions, classes, and instances, to a byte stream. It is an extension of the standard <code>pickle</code> module with added support for more complex object types and serialization of code objects.</p>
+<p>Here are some key features and use cases of <code>cloudpickle</code>:</p>
+<ol>
+<li>
+<p>Serialization of Functions: <code>cloudpickle</code> allows you to serialize Python functions, including lambda functions, closures, and functions defined interactively, preserving their code, closure variables, and the entire execution context.</p>
+</li>
+<li>
+<p>Serialization of Classes and Instances: You can serialize Python classes and instances using <code>cloudpickle</code>. This is particularly useful when you want to save and restore the state of an object, including its attributes and methods.</p>
+</li>
+<li>
+<p>Support for Third-Party Libraries: <code>cloudpickle</code> provides support for serializing objects from various third-party libraries, including NumPy arrays, Pandas DataFrames, and scikit-learn models. This allows you to save and load complex objects from these libraries.</p>
+</li>
+<li>
+<p>Distributed Computing: <code>cloudpickle</code> is commonly used in distributed computing frameworks like Apache Spark and Dask. It enables the serialization of functions and data structures so that they can be sent across multiple nodes for parallel processing.</p>
+</li>
+<li>
+<p>Model Deployment: <code>cloudpickle</code> can be helpful when deploying machine learning models that have custom preprocessing steps or dependencies on external libraries. It allows you to serialize the model along with its associated code and dependencies, making it easier to deploy the model in different environments.</p>
+</li>
+</ol>
+<p>Here&rsquo;s a basic example of using <code>cloudpickle</code> to serialize and deserialize a Python object:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> cloudpickle 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Serialize an object </span>
+</span></span><span style="display:flex;"><span>serialized_object <span style="color:#f92672">=</span> cloudpickle<span style="color:#f92672">.</span>dumps(my_object)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Deserialize the object </span>
+</span></span><span style="display:flex;"><span>deserialized_object <span style="color:#f92672">=</span> cloudpickle<span style="color:#f92672">.</span>loads(serialized_object)
+</span></span></code></pre></div><p>Note that <code>cloudpickle</code> is not a secure way to deserialize untrusted data. It executes the deserialized code as is, so it&rsquo;s important to only deserialize data from trusted sources. You can install <code>cloudpickle</code> using pip.</p>
+
+        </div>
+
+        
+
+
+        
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/python'>Python</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "KentChun33333/kentchun33333.github.io"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://kentchun33333.github.io">Autumn Memo By Kent Chiu</a>
+        
+    </div>
+    <br />
+
+    <div>
+       
+        <div class="github-badge">
+            <a href="https://kentchun33333.github.io/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value  bg-blue"> Kent Chiu </span></a>
+        </div>
+
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Powered by</span><span class="badge-value bg-yellowgreen"> Maupassant-Hugo</span></a>
+        </div>
+
+    </div>
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://kentchun33333.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://kentchun33333.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://kentchun33333.github.io/categories/algorithm/">Algorithm (7)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/communication/">Communication (1)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/design-life/">Design Life (2)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/software/">Software (6)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/trading/">Trading (4)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/ai/">AI</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/algotrading/">AlgoTrading</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/chatgpt/">ChatGPT</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/economic/">Economic</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/environment/">Environment</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/equitytrading/">EquityTrading</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/github-project/">Github Project</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/hugo/">HUGO</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/inverted-index/">Inverted Index</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/investment/">Investment</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/large-language-model/">Large Language Model</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/metric/">Metric</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/nlp/">NLP</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/paper-summary/">Paper Summary</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/project-management/">Project Management</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/python/">Python</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/scrum/">SCRUM</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/search-system/">Search System</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/trading/">Trading</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/typora/">Typora</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/uncertainty-estimation/">Uncertainty Estimation</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/unsupervise-learning/">Unsupervise Learning</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/workflow/">Workflow</a>
+    </div>
+    
+</div>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">Others</h3>
+        <ul class="widget-list">
+            <li><a href="https://kentchun33333.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

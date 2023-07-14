@@ -44,6 +44,8 @@
     <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
     
+    <script data-ad-client="ca-pub-5108790028230107" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
     
     
     
@@ -62,7 +64,7 @@
                         Autumn Memo
                     </a>
                 
-                <p class="description">A place of a investment, algorithm and lift flavor.</p>
+                <p class="description">Investment, Algorithm and Life Design.</p>
             </div>
             <div>
                 <nav id="nav-menu" class="clearfix">
@@ -102,7 +104,7 @@
         <div class="post-meta">
             <span>|</span>
             
-            <span class="meta-category"><a href='/categories/workflow'>Workflow</a></span>
+            <span class="meta-category"><a href='/categories/software'>Software</a></span>
             
         </div>
         
@@ -114,19 +116,19 @@
         
         
         <div class="post-content">
-            <p>Recently, Bitbucket retired the simple password login via git-https. So we will need a ssh-key on it. 
+            <p>Recently, Bitbucket retired the simple password login via git-https. So we will need a ssh-key on it.
 I thought it was not a big deal but later I realized there are some tricky points to deal with this combination.</p>
 <p>Following are the tips to save time.</p>
 <h2 id="first-check-the-ssh-config">First: Check the SSH config</h2>
 <p>In windows, this config might missing or not generated properly. Better to check add <code>.config</code> into the <code>.ssh</code> folder after using ssh-keygen.</p>
-<pre><code>Host bitbucket.org
+<pre tabindex="0"><code>Host bitbucket.org
     User git
     Hostname bitbucket.org
     PreferredAuthentications publickey
     IdentityFile ~/.ssh/{id_rsa}
 </code></pre><h2 id="second-git-config">Second: GIT config</h2>
 <p>Make sure <code>.config</code> in the <code>.git</code> folder is as following.</p>
-<pre><code>[remote &quot;bitbucket&quot;]
+<pre tabindex="0"><code>[remote &#34;bitbucket&#34;]
 url = git@bitbucket.org:{acc}/{repo}.git
 fetch = +refs/heads/*:refs/remotes/bitbucket/*
 </code></pre><h2 id="finally-adding-the-key-in-bitbucket">Finally: Adding the KEY in Bitbucket</h2>
@@ -169,7 +171,7 @@ fetch = +refs/heads/*:refs/remotes/bitbucket/*
 
                     <footer id="footer">
     <div>
-        &copy; 2022 <a href="https://kentchun33333.github.io">Autumn Memo By Kent Chiu</a>
+        &copy; 2023 <a href="https://kentchun33333.github.io">Autumn Memo By Kent Chiu</a>
         
     </div>
     <br />
@@ -223,44 +225,7 @@ fetch = +refs/heads/*:refs/remotes/bitbucket/*
 </form>
     </section>
     
-    <section class="widget">
-        <h3 class="widget-title">Recent Post</h3>
-<ul class="widget-list">
     
-    <li>
-        <a href="https://kentchun33333.github.io/post/set-up-googleadsense/" title="Set Up GoogleAdsense" >Set Up GoogleAdsense</a>
-    </li>
-    
-    <li>
-        <a href="https://kentchun33333.github.io/post/taskmanagement/" title="Collaborative Task Management" >Collaborative Task Management</a>
-    </li>
-    
-    <li>
-        <a href="https://kentchun33333.github.io/post/sshbitbuketonwinows/" title="Setting Bitbucket on Windows" >Setting Bitbucket on Windows</a>
-    </li>
-    
-    <li>
-        <a href="https://kentchun33333.github.io/post/memosystem/" title="Blog Memo by Hugo with Typora" >Blog Memo by Hugo with Typora</a>
-    </li>
-    
-    <li>
-        <a href="https://kentchun33333.github.io/post/buyinghouse2021/" title="Buy Our First Condo in Singapore" >Buy Our First Condo in Singapore</a>
-    </li>
-    
-    <li>
-        <a href="https://kentchun33333.github.io/post/scedasticicity/" title="Modeling Uncertainty of ML Systems (01)" >Modeling Uncertainty of ML Systems (01)</a>
-    </li>
-    
-    <li>
-        <a href="https://kentchun33333.github.io/post/simplesearchsys/" title="Build a Simple Search System" >Build a Simple Search System</a>
-    </li>
-    
-    <li>
-        <a href="https://kentchun33333.github.io/post/metricf1score/" title="F1 Score on Multi Classes" >F1 Score on Multi Classes</a>
-    </li>
-    
-</ul>
-    </section>
 
     
 
@@ -268,15 +233,15 @@ fetch = +refs/heads/*:refs/remotes/bitbucket/*
         <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
 <ul class="widget-list">
     
-    <li><a href="https://kentchun33333.github.io/categories/algorithm/">Algorithm (2)</a></li>
+    <li><a href="https://kentchun33333.github.io/categories/algorithm/">Algorithm (7)</a></li>
     
-    <li><a href="https://kentchun33333.github.io/categories/life-design/">Life Design (2)</a></li>
+    <li><a href="https://kentchun33333.github.io/categories/communication/">Communication (1)</a></li>
     
-    <li><a href="https://kentchun33333.github.io/categories/software/">Software (1)</a></li>
+    <li><a href="https://kentchun33333.github.io/categories/design-life/">Design Life (2)</a></li>
     
-    <li><a href="https://kentchun33333.github.io/categories/workflow/">Workflow (3)</a></li>
+    <li><a href="https://kentchun33333.github.io/categories/software/">Software (6)</a></li>
     
-    <li><a href="https://kentchun33333.github.io/categories/wrokflow/">Wrokflow (1)</a></li>
+    <li><a href="https://kentchun33333.github.io/categories/trading/">Trading (4)</a></li>
     
 </ul>
     </section>
@@ -285,31 +250,97 @@ fetch = +refs/heads/*:refs/remotes/bitbucket/*
         <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
 <div class="tagcloud">
     
-    <a href="https://kentchun33333.github.io/tags/blog/">Blog</a>
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/ai/">AI</a>
+    </div>
     
-    <a href="https://kentchun33333.github.io/tags/environment/">Environment</a>
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/algotrading/">AlgoTrading</a>
+    </div>
     
-    <a href="https://kentchun33333.github.io/tags/github-project/">Github Project</a>
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/chatgpt/">ChatGPT</a>
+    </div>
     
-    <a href="https://kentchun33333.github.io/tags/hugo/">HUGO</a>
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/economic/">Economic</a>
+    </div>
     
-    <a href="https://kentchun33333.github.io/tags/index/">index</a>
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/environment/">Environment</a>
+    </div>
     
-    <a href="https://kentchun33333.github.io/tags/inverted-index/">Inverted Index</a>
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/equitytrading/">EquityTrading</a>
+    </div>
     
-    <a href="https://kentchun33333.github.io/tags/investment/">Investment</a>
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/github-project/">Github Project</a>
+    </div>
     
-    <a href="https://kentchun33333.github.io/tags/machine-learning/">Machine Learning</a>
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/hugo/">HUGO</a>
+    </div>
     
-    <a href="https://kentchun33333.github.io/tags/metrics/">Metrics</a>
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/inverted-index/">Inverted Index</a>
+    </div>
     
-    <a href="https://kentchun33333.github.io/tags/project-management/">Project Management</a>
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/investment/">Investment</a>
+    </div>
     
-    <a href="https://kentchun33333.github.io/tags/search-system/">Search System</a>
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/large-language-model/">Large Language Model</a>
+    </div>
     
-    <a href="https://kentchun33333.github.io/tags/typora/">Typora</a>
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/metric/">Metric</a>
+    </div>
     
-    <a href="https://kentchun33333.github.io/tags/uncertainty-estimation/">Uncertainty Estimation</a>
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/nlp/">NLP</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/paper-summary/">Paper Summary</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/project-management/">Project Management</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/python/">Python</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/scrum/">SCRUM</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/search-system/">Search System</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/trading/">Trading</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/typora/">Typora</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/uncertainty-estimation/">Uncertainty Estimation</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/unsupervise-learning/">Unsupervise Learning</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/workflow/">Workflow</a>
+    </div>
     
 </div>
     </section>

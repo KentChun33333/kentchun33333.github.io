@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://kentchun33333.github.io/</loc>
-    <lastmod>2022-09-29T00:00:00+00:00</lastmod>
+    <lastmod>2023-06-27T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
@@ -15,11 +15,8 @@
                 href="https://kentchun33333.github.io/"
                 />
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/blog/</loc>
-    <lastmod>2022-09-29T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://kentchun33333.github.io/categories/</loc>
-    <lastmod>2022-09-29T00:00:00+00:00</lastmod>
+    <lastmod>2023-06-27T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
@@ -31,14 +28,20 @@
                 href="https://kentchun33333.github.io/categories/"
                 />
   </url><url>
-    <loc>https://kentchun33333.github.io/post/</loc>
-    <lastmod>2022-09-29T00:00:00+00:00</lastmod>
+    <loc>https://kentchun33333.github.io/tags/economic/</loc>
+    <lastmod>2023-06-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/post/set-up-googleadsense/</loc>
-    <lastmod>2022-09-29T00:00:00+00:00</lastmod>
+    <loc>https://kentchun33333.github.io/post/2023-0711-economicweather/</loc>
+    <lastmod>2023-06-27T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/tags/investment/</loc>
+    <lastmod>2023-06-27T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/post/</loc>
+    <lastmod>2023-06-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kentchun33333.github.io/tags/</loc>
-    <lastmod>2022-09-29T00:00:00+00:00</lastmod>
+    <lastmod>2023-06-27T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
@@ -50,17 +53,92 @@
                 href="https://kentchun33333.github.io/tags/"
                 />
   </url><url>
-    <loc>https://kentchun33333.github.io/categories/wrokflow/</loc>
-    <lastmod>2022-09-29T00:00:00+00:00</lastmod>
+    <loc>https://kentchun33333.github.io/tags/trading/</loc>
+    <lastmod>2023-06-27T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/categories/trading/</loc>
+    <lastmod>2023-06-27T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/tags/project-management/</loc>
+    <lastmod>2023-05-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/tags/scrum/</loc>
+    <lastmod>2023-05-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/categories/software/</loc>
+    <lastmod>2023-05-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/post/trackingmemo/</loc>
+    <lastmod>2023-05-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/tags/workflow/</loc>
+    <lastmod>2023-05-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/post/cloudpickle/</loc>
+    <lastmod>2023-04-27T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/tags/python/</loc>
+    <lastmod>2023-04-27T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/post/2023-feb-optionstrategy/</loc>
+    <lastmod>2023-04-05T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/tags/ai/</loc>
+    <lastmod>2023-03-24T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/tags/algotrading/</loc>
+    <lastmod>2023-03-24T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/post/customized-lorenz-ann-classification/</loc>
+    <lastmod>2023-03-24T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/tags/unsupervise-learning/</loc>
+    <lastmod>2023-03-24T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/categories/algorithm/</loc>
+    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/tags/chatgpt/</loc>
+    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/tags/large-language-model/</loc>
+    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/tags/nlp/</loc>
+    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/tags/paper-summary/</loc>
+    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/post/self-instruct-aligning-language-model-with-self-generated-instructions/</loc>
+    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/post/self-instruct-aligning-language-model-with-self-generated-instructions/</loc>
+    <lastmod>2023-03-20T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/tags/equitytrading/</loc>
+    <lastmod>2023-03-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/post/tradingtactic/</loc>
+    <lastmod>2023-03-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/tags/metric/</loc>
+    <lastmod>2023-02-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/post/what-is-rouge-l/</loc>
+    <lastmod>2023-02-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/post/cblof/</loc>
+    <lastmod>2022-11-02T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kentchun33333.github.io/post/taskmanagement/</loc>
     <lastmod>2022-09-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/project-management/</loc>
+    <loc>https://kentchun33333.github.io/categories/communication/</loc>
     <lastmod>2022-09-27T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/categories/workflow/</loc>
-    <lastmod>2022-09-27T00:00:00+00:00</lastmod>
+    <loc>https://kentchun33333.github.io/post/db-index-vs-silhouette-score/</loc>
+    <lastmod>2022-07-02T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kentchun33333.github.io/tags/environment/</loc>
     <lastmod>2022-04-02T00:00:00+00:00</lastmod>
@@ -69,6 +147,9 @@
     <lastmod>2022-04-02T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kentchun33333.github.io/post/memosystem/</loc>
+    <lastmod>2021-08-01T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/post/hostpersonalgpt/</loc>
     <lastmod>2021-08-01T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kentchun33333.github.io/tags/hugo/</loc>
@@ -80,23 +161,11 @@
     <loc>https://kentchun33333.github.io/post/buyinghouse2021/</loc>
     <lastmod>2021-06-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/investment/</loc>
-    <lastmod>2021-06-28T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kentchun33333.github.io/categories/life-design/</loc>
+    <loc>https://kentchun33333.github.io/categories/design-life/</loc>
     <lastmod>2021-06-28T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kentchun33333.github.io/archives/</loc>
     <lastmod>2021-05-28T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kentchun33333.github.io/categories/algorithm/</loc>
-    <lastmod>2021-04-27T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kentchun33333.github.io/tags/machine-learning/</loc>
-    <lastmod>2021-04-27T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://kentchun33333.github.io/tags/metrics/</loc>
-    <lastmod>2021-04-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kentchun33333.github.io/post/scedasticicity/</loc>
     <lastmod>2021-04-27T00:00:00+00:00</lastmod>
@@ -116,16 +185,20 @@
     <loc>https://kentchun33333.github.io/tags/search-system/</loc>
     <lastmod>2020-09-25T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/categories/software/</loc>
-    <lastmod>2020-09-25T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://kentchun33333.github.io/post/metricf1score/</loc>
     <lastmod>2020-01-27T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://kentchun33333.github.io/about/</loc>
     <lastmod>2016-09-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://kentchun33333.github.io/tags/index/</loc>
+    <loc>https://kentchun33333.github.io/log/</loc>
+    <lastmod>2016-09-01T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://kentchun33333.github.io/post/20230607-learntorank/</loc>
+  </url><url>
+    <loc>https://kentchun33333.github.io/post/timeseries/</loc>
+  </url><url>
+    <loc>https://kentchun33333.github.io/post/track_memory/</loc>
   </url><url>
     <loc>https://kentchun33333.github.io/series/</loc>
     <xhtml:link

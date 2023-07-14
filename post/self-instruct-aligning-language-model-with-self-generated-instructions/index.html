@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Caveat' rel='stylesheet'>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>Paper Summay on Aligning LLM with Self-Instruct | Autumn Memo</title>
+    <meta property="og:title" content="Paper Summay on Aligning LLM with Self-Instruct - Autumn Memo">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-03-20T00:00:00&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-03-20T00:00:00&#43;08:00'>
+        
+    <meta name="Keywords" content="">
+    <meta name="description" content="Paper Summay on Aligning LLM with Self-Instruct">
+        <meta name="author" content="Kent Chiu">
+        
+
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8949849444403982"
+    crossorigin="anonymous"></script>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PZF7WLJRQL"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-PZF7WLJRQL');
+    </script>
+    <meta property="og:url" content="https://kentchun33333.github.io/post/self-instruct-aligning-language-model-with-self-generated-instructions/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-5108790028230107" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://kentchun33333.github.io">
+                        Autumn Memo
+                    </a>
+                
+                <p class="description">Investment, Algorithm and Life Design.</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    
+                    
+                    
+                    <a  href="https://kentchun33333.github.io/post/" title="Main">Main</a>
+                    
+                    <a  href="https://kentchun33333.github.io/archives/" title="Archives">Archives</a>
+                    
+                    <a  href="https://kentchun33333.github.io/about/" title="About">About</a>
+                    
+                    <a  href="https://kentchun33333.github.io" title=""></a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">Paper Summay on Aligning LLM with Self-Instruct</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2023 - 3 - 20 
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/algorithm'>Algorithm</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    Reading </span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>The paper &ldquo;Self-Instruct: Aligning Language Model with Self Generated Instructions&rdquo; introduces a framework called Self-Instruct for improving the instruction-following capabilities of pretrained language models by bootstrapping off its own generations. The framework generates instruction, input, and output samples from a language model, then prunes them before using them to finetune the original model, which results in a significant improvement in model performance.</p>
+<h3 id="key-insight">Key Insight</h3>
+<p><strong>Key insights and lessons learned:</strong></p>
+<ol>
+<li>
+<p>The Self-Instruct framework achieves comparable performance to the InstructGPT_001 model, which is trained with private user data and human annotations, on the Super-NaturalInstructions dataset.</p>
+</li>
+<li>
+<p>Tuning GPT3 with Self-Instruct outperforms using existing public instruction datasets, as demonstrated through human evaluation.</p>
+</li>
+</ol>
+<h3 id="core-method">Core Method</h3>
+<p>The key method proposed in the paper is a self-instruct data generation process. There are 4 kinds of prompt-template prepared as following</p>
+<ol>
+<li>
+<p>Generating the instruction (Table 6 in paper)</p>
+</li>
+<li>
+<p>classifying whether an instruction represents a classification task or not (T7)</p>
+</li>
+<li>
+<p>generating non-classification instances with the input-first approach (T8)</p>
+</li>
+<li>
+<p>generating classification instances with the output-first approach (T9)</p>
+</li>
+</ol>
+<p>They are feed in to following workflow.</p>
+<p>
+        <img class="mx-auto" alt="" src="/img/2023-03-25-09-48-42-image.png" />   
+    </p>
+<p>Finally, the ROUGE-L will be used for filtering step. To encourage diversity, a new instruction is added to the task pool only when its ROUGE-L overlap with any existing instruction is less than 0.7. Authers also exclude instructions that contain some specific keywords (e.g., images, pictures, graphs) that usually can not be processed by language models. When generating new instances for each instruction, we filter out instances that are exactly the same or those with the same input but different outputs.</p>
+<p>The fine-tunning process is in supervise-learning method.</p>
+<h3 id="reference">Reference</h3>
+<ul>
+<li><a href="https://arxiv.org/pdf/2212.10560.pdf">https://arxiv.org/pdf/2212.10560.pdf</a></li>
+<li><a href="https://github.com/yizhongw/self-instruct">GitHub - yizhongw/self-instruct: Aligning pretrained language models with instruction data generated by themselves.</a></li>
+</ul>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing" >
+        
+        <li><a href="/post/self-instruct-aligning-language-model-with-self-generated-instructions/">Paper Summay on Aligning LLM with Self-Instruct</a></li>
+        
+        <li><a href="/post/what-is-rouge-l/">Recall-Oriented Understudy for Gisting Evaluation (ROUGE)</a></li>
+        
+        <li><a href="/post/cblof/">Cluster-Based Local Outlier Factor</a></li>
+        
+        <li><a href="/post/db-index-vs-silhouette-score/">Metric for hyperparamter search in Unsupervise Learning</a></li>
+        
+        <li><a href="/post/scedasticicity/">Modeling Uncertainty of ML Systems (01)</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/nlp'>NLP</a></li>
+                
+                <li><a href='/tags/large-language-model'>Large Language Model</a></li>
+                
+                <li><a href='/tags/paper-summary'>Paper Summary</a></li>
+                
+                <li><a href='/tags/chatgpt'>ChatGPT</a></li>
+                
+                <li><a href='/tags/ai'>AI</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "KentChun33333/kentchun33333.github.io"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://kentchun33333.github.io">Autumn Memo By Kent Chiu</a>
+        
+    </div>
+    <br />
+
+    <div>
+       
+        <div class="github-badge">
+            <a href="https://kentchun33333.github.io/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value  bg-blue"> Kent Chiu </span></a>
+        </div>
+
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Powered by</span><span class="badge-value bg-yellowgreen"> Maupassant-Hugo</span></a>
+        </div>
+
+    </div>
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://kentchun33333.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://kentchun33333.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://kentchun33333.github.io/categories/algorithm/">Algorithm (7)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/communication/">Communication (1)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/design-life/">Design Life (2)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/software/">Software (6)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/trading/">Trading (4)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/ai/">AI</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/algotrading/">AlgoTrading</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/chatgpt/">ChatGPT</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/economic/">Economic</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/environment/">Environment</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/equitytrading/">EquityTrading</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/github-project/">Github Project</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/hugo/">HUGO</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/inverted-index/">Inverted Index</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/investment/">Investment</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/large-language-model/">Large Language Model</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/metric/">Metric</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/nlp/">NLP</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/paper-summary/">Paper Summary</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/project-management/">Project Management</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/python/">Python</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/scrum/">SCRUM</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/search-system/">Search System</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/trading/">Trading</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/typora/">Typora</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/uncertainty-estimation/">Uncertainty Estimation</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/unsupervise-learning/">Unsupervise Learning</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/workflow/">Workflow</a>
+    </div>
+    
+</div>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">Others</h3>
+        <ul class="widget-list">
+            <li><a href="https://kentchun33333.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
