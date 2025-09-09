@@ -2,224 +2,224 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Autumn Memo</title>
-    <link>//localhost:1313/tags/</link>
+    <link>https://kentchun33333.github.io/tags/</link>
     <description>Recent content in Tags on Autumn Memo</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 20 Sep 2023 00:00:00 +0000</lastBuildDate><atom:link href="//localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 01 Jul 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Metric</title>
-      <link>//localhost:1313/tags/metric/</link>
-      <pubDate>Wed, 20 Sep 2023 00:00:00 +0000</pubDate>
+      <title>capybara</title>
+      <link>https://kentchun33333.github.io/tags/capybara/</link>
+      <pubDate>Tue, 01 Jul 2025 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/metric/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Quant</title>
-      <link>//localhost:1313/tags/quant/</link>
-      <pubDate>Wed, 20 Sep 2023 00:00:00 +0000</pubDate>
-      
-      <guid>//localhost:1313/tags/quant/</guid>
+      <guid>https://kentchun33333.github.io/tags/capybara/</guid>
       <description></description>
     </item>
     
     <item>
       <title>AI</title>
-      <link>//localhost:1313/tags/ai/</link>
+      <link>https://kentchun33333.github.io/tags/ai/</link>
       <pubDate>Thu, 31 Aug 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/ai/</guid>
+      <guid>https://kentchun33333.github.io/tags/ai/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Unsupervise Learning</title>
-      <link>//localhost:1313/tags/unsupervise-learning/</link>
+      <link>https://kentchun33333.github.io/tags/unsupervise-learning/</link>
       <pubDate>Thu, 31 Aug 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/unsupervise-learning/</guid>
+      <guid>https://kentchun33333.github.io/tags/unsupervise-learning/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Economic</title>
-      <link>//localhost:1313/tags/economic/</link>
+      <link>https://kentchun33333.github.io/tags/economic/</link>
       <pubDate>Tue, 27 Jun 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/economic/</guid>
+      <guid>https://kentchun33333.github.io/tags/economic/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Investment</title>
-      <link>//localhost:1313/tags/investment/</link>
+      <link>https://kentchun33333.github.io/tags/investment/</link>
       <pubDate>Tue, 27 Jun 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/investment/</guid>
+      <guid>https://kentchun33333.github.io/tags/investment/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Trading</title>
-      <link>//localhost:1313/tags/trading/</link>
+      <link>https://kentchun33333.github.io/tags/trading/</link>
       <pubDate>Tue, 27 Jun 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/trading/</guid>
+      <guid>https://kentchun33333.github.io/tags/trading/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Project Management</title>
-      <link>//localhost:1313/tags/project-management/</link>
+      <link>https://kentchun33333.github.io/tags/project-management/</link>
       <pubDate>Mon, 15 May 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/project-management/</guid>
+      <guid>https://kentchun33333.github.io/tags/project-management/</guid>
       <description></description>
     </item>
     
     <item>
       <title>SCRUM</title>
-      <link>//localhost:1313/tags/scrum/</link>
+      <link>https://kentchun33333.github.io/tags/scrum/</link>
       <pubDate>Mon, 15 May 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/scrum/</guid>
+      <guid>https://kentchun33333.github.io/tags/scrum/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Workflow</title>
-      <link>//localhost:1313/tags/workflow/</link>
+      <link>https://kentchun33333.github.io/tags/workflow/</link>
       <pubDate>Mon, 15 May 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/workflow/</guid>
+      <guid>https://kentchun33333.github.io/tags/workflow/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Python</title>
-      <link>//localhost:1313/tags/python/</link>
+      <link>https://kentchun33333.github.io/tags/python/</link>
       <pubDate>Thu, 27 Apr 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/python/</guid>
+      <guid>https://kentchun33333.github.io/tags/python/</guid>
       <description></description>
     </item>
     
     <item>
       <title>AlgoTrading</title>
-      <link>//localhost:1313/tags/algotrading/</link>
+      <link>https://kentchun33333.github.io/tags/algotrading/</link>
       <pubDate>Fri, 24 Mar 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/algotrading/</guid>
+      <guid>https://kentchun33333.github.io/tags/algotrading/</guid>
       <description></description>
     </item>
     
     <item>
       <title>ChatGPT</title>
-      <link>//localhost:1313/tags/chatgpt/</link>
+      <link>https://kentchun33333.github.io/tags/chatgpt/</link>
       <pubDate>Mon, 20 Mar 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/chatgpt/</guid>
+      <guid>https://kentchun33333.github.io/tags/chatgpt/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Large Language Model</title>
-      <link>//localhost:1313/tags/large-language-model/</link>
+      <link>https://kentchun33333.github.io/tags/large-language-model/</link>
       <pubDate>Mon, 20 Mar 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/large-language-model/</guid>
+      <guid>https://kentchun33333.github.io/tags/large-language-model/</guid>
       <description></description>
     </item>
     
     <item>
       <title>NLP</title>
-      <link>//localhost:1313/tags/nlp/</link>
+      <link>https://kentchun33333.github.io/tags/nlp/</link>
       <pubDate>Mon, 20 Mar 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/nlp/</guid>
+      <guid>https://kentchun33333.github.io/tags/nlp/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Paper Summary</title>
-      <link>//localhost:1313/tags/paper-summary/</link>
+      <link>https://kentchun33333.github.io/tags/paper-summary/</link>
       <pubDate>Mon, 20 Mar 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/paper-summary/</guid>
+      <guid>https://kentchun33333.github.io/tags/paper-summary/</guid>
       <description></description>
     </item>
     
     <item>
       <title>EquityTrading</title>
-      <link>//localhost:1313/tags/equitytrading/</link>
+      <link>https://kentchun33333.github.io/tags/equitytrading/</link>
       <pubDate>Sat, 11 Mar 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/equitytrading/</guid>
+      <guid>https://kentchun33333.github.io/tags/equitytrading/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Metric</title>
+      <link>https://kentchun33333.github.io/tags/metric/</link>
+      <pubDate>Sat, 11 Feb 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/tags/metric/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Environment</title>
-      <link>//localhost:1313/tags/environment/</link>
+      <link>https://kentchun33333.github.io/tags/environment/</link>
       <pubDate>Sat, 02 Apr 2022 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/environment/</guid>
+      <guid>https://kentchun33333.github.io/tags/environment/</guid>
       <description></description>
     </item>
     
     <item>
       <title>HUGO</title>
-      <link>//localhost:1313/tags/hugo/</link>
+      <link>https://kentchun33333.github.io/tags/hugo/</link>
       <pubDate>Sun, 01 Aug 2021 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/hugo/</guid>
+      <guid>https://kentchun33333.github.io/tags/hugo/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Typora</title>
-      <link>//localhost:1313/tags/typora/</link>
+      <link>https://kentchun33333.github.io/tags/typora/</link>
       <pubDate>Sun, 01 Aug 2021 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/typora/</guid>
+      <guid>https://kentchun33333.github.io/tags/typora/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Uncertainty Estimation</title>
-      <link>//localhost:1313/tags/uncertainty-estimation/</link>
+      <link>https://kentchun33333.github.io/tags/uncertainty-estimation/</link>
       <pubDate>Tue, 27 Apr 2021 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/uncertainty-estimation/</guid>
+      <guid>https://kentchun33333.github.io/tags/uncertainty-estimation/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Github Project</title>
-      <link>//localhost:1313/tags/github-project/</link>
+      <link>https://kentchun33333.github.io/tags/github-project/</link>
       <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/github-project/</guid>
+      <guid>https://kentchun33333.github.io/tags/github-project/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Inverted Index</title>
-      <link>//localhost:1313/tags/inverted-index/</link>
+      <link>https://kentchun33333.github.io/tags/inverted-index/</link>
       <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/inverted-index/</guid>
+      <guid>https://kentchun33333.github.io/tags/inverted-index/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Search System</title>
-      <link>//localhost:1313/tags/search-system/</link>
+      <link>https://kentchun33333.github.io/tags/search-system/</link>
       <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/tags/search-system/</guid>
+      <guid>https://kentchun33333.github.io/tags/search-system/</guid>
       <description></description>
     </item>
     

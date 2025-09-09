@@ -2,53 +2,62 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on Autumn Memo</title>
-    <link>//localhost:1313/categories/</link>
+    <link>https://kentchun33333.github.io/categories/</link>
     <description>Recent content in Categories on Autumn Memo</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 20 Sep 2023 00:00:00 +0000</lastBuildDate><atom:link href="//localhost:1313/categories/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 01 Jul 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Video</title>
+      <link>https://kentchun33333.github.io/categories/video/</link>
+      <pubDate>Tue, 01 Jul 2025 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/categories/video/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>Algorithm</title>
-      <link>//localhost:1313/categories/algorithm/</link>
-      <pubDate>Wed, 20 Sep 2023 00:00:00 +0000</pubDate>
+      <link>https://kentchun33333.github.io/categories/algorithm/</link>
+      <pubDate>Thu, 31 Aug 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/categories/algorithm/</guid>
+      <guid>https://kentchun33333.github.io/categories/algorithm/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Trading</title>
-      <link>//localhost:1313/categories/trading/</link>
+      <link>https://kentchun33333.github.io/categories/trading/</link>
       <pubDate>Tue, 27 Jun 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/categories/trading/</guid>
+      <guid>https://kentchun33333.github.io/categories/trading/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Software</title>
-      <link>//localhost:1313/categories/software/</link>
+      <link>https://kentchun33333.github.io/categories/software/</link>
       <pubDate>Mon, 15 May 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/categories/software/</guid>
+      <guid>https://kentchun33333.github.io/categories/software/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Communication</title>
-      <link>//localhost:1313/categories/communication/</link>
+      <link>https://kentchun33333.github.io/categories/communication/</link>
       <pubDate>Tue, 27 Sep 2022 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/categories/communication/</guid>
+      <guid>https://kentchun33333.github.io/categories/communication/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Design Life</title>
-      <link>//localhost:1313/categories/design-life/</link>
+      <link>https://kentchun33333.github.io/categories/design-life/</link>
       <pubDate>Mon, 28 Jun 2021 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/categories/design-life/</guid>
+      <guid>https://kentchun33333.github.io/categories/design-life/</guid>
       <description></description>
     </item>
     

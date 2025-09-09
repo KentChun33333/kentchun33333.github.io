@@ -2,44 +2,44 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Unsupervise Learning on Autumn Memo</title>
-    <link>//localhost:1313/tags/unsupervise-learning/</link>
+    <link>https://kentchun33333.github.io/tags/unsupervise-learning/</link>
     <description>Recent content in Unsupervise Learning on Autumn Memo</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 31 Aug 2023 00:00:00 +0000</lastBuildDate><atom:link href="//localhost:1313/tags/unsupervise-learning/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 31 Aug 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/tags/unsupervise-learning/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Top 10 Correlation Coefficient</title>
-      <link>//localhost:1313/post/top-10-correlation-coeff/</link>
+      <link>https://kentchun33333.github.io/post/top-10-correlation-coeff/</link>
       <pubDate>Thu, 31 Aug 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/top-10-correlation-coeff/</guid>
+      <guid>https://kentchun33333.github.io/post/top-10-correlation-coeff/</guid>
       <description>Certainly, correlation coefficients are statistical measures that indicate the strength and direction of the linear relationship between two variables.</description>
     </item>
     
     <item>
       <title>Stock Prediction with LorenzANN</title>
-      <link>//localhost:1313/post/customized-lorenz-ann-classification/</link>
+      <link>https://kentchun33333.github.io/post/customized-lorenz-ann-classification/</link>
       <pubDate>Fri, 24 Mar 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/customized-lorenz-ann-classification/</guid>
+      <guid>https://kentchun33333.github.io/post/customized-lorenz-ann-classification/</guid>
       <description>Introduction LorenzANN, the algorithm of Approximate Nearest Neighbors Search with Lorentzian Distance, has gained popularity as a customized machine learning tool.</description>
     </item>
     
     <item>
       <title>Cluster-Based Local Outlier Factor</title>
-      <link>//localhost:1313/post/cblof/</link>
+      <link>https://kentchun33333.github.io/post/cblof/</link>
       <pubDate>Wed, 02 Nov 2022 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/cblof/</guid>
+      <guid>https://kentchun33333.github.io/post/cblof/</guid>
       <description>Cluster-Based Local Outlier Factor (CBLOF) is an unsupervised anomaly detection algorithm that identifies outliers in a dataset by taking into account the local density of points.</description>
     </item>
     
     <item>
       <title>Metric for hyperparamter search in Unsupervise Learning</title>
-      <link>//localhost:1313/post/db-index-vs-silhouette-score/</link>
+      <link>https://kentchun33333.github.io/post/db-index-vs-silhouette-score/</link>
       <pubDate>Sat, 02 Jul 2022 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/db-index-vs-silhouette-score/</guid>
+      <guid>https://kentchun33333.github.io/post/db-index-vs-silhouette-score/</guid>
       <description>Metrics Clustering is an unsupervised machine learning technique used to group similar data points together.</description>
     </item>
     

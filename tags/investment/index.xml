@@ -2,26 +2,26 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Investment on Autumn Memo</title>
-    <link>//localhost:1313/tags/investment/</link>
+    <link>https://kentchun33333.github.io/tags/investment/</link>
     <description>Recent content in Investment on Autumn Memo</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Tue, 27 Jun 2023 00:00:00 +0000</lastBuildDate><atom:link href="//localhost:1313/tags/investment/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 27 Jun 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/tags/investment/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Economic Weather x All Weather Portfolio</title>
-      <link>//localhost:1313/post/2023-0711-economicweather/</link>
+      <link>https://kentchun33333.github.io/post/2023-0711-economicweather/</link>
       <pubDate>Tue, 27 Jun 2023 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/2023-0711-economicweather/</guid>
+      <guid>https://kentchun33333.github.io/post/2023-0711-economicweather/</guid>
       <description>The sky has its weather, so as the economics. The idea is proposed by Dalio and Bridgewater that they framed these four economic environments as follow</description>
     </item>
     
     <item>
       <title>Buy a Condo in Singapore</title>
-      <link>//localhost:1313/post/buyinghouse2021/</link>
+      <link>https://kentchun33333.github.io/post/buyinghouse2021/</link>
       <pubDate>Mon, 28 Jun 2021 00:00:00 +0000</pubDate>
       
-      <guid>//localhost:1313/post/buyinghouse2021/</guid>
+      <guid>https://kentchun33333.github.io/post/buyinghouse2021/</guid>
       <description>In short, my wife and I become PR in Singapore at May 2021.</description>
     </item>
     
