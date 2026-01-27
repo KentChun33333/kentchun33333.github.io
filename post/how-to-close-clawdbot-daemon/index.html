@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Caveat' rel='stylesheet'>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>How to Properly Close Clawdbot Daemon | Autumn Memo</title>
+    <meta property="og:title" content="How to Properly Close Clawdbot Daemon - Autumn Memo">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2026-01-27T00:00:00&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2026-01-27T00:00:00&#43;08:00'>
+        
+    <meta name="Keywords" content="Clawdbot, Daemon, launchd, macOS">
+    <meta name="description" content="How to Properly Close Clawdbot Daemon">
+        <meta name="author" content="Kent Chiu">
+        
+
+
+    <meta property="og:url" content="//localhost:1313/post/how-to-close-clawdbot-daemon/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="/">
+                        Autumn Memo
+                    </a>
+                
+                <p class="description">Investment, Algorithm and Life Design.</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    
+                    
+                    
+                    <a  href="/post/" title="Main">Main</a>
+                    
+                    <a  href="/archives/" title="Archives">Archives</a>
+                    
+                    <a  href="/about/" title="About">About</a>
+                    
+                    <a  href="/" title=""></a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">How to Properly Close Clawdbot Daemon</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2026 - 01 - 27 
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/software'>Software</a></span>
+            
+        </div>
+        
+        
+        <div class="post-content">
+            <p>If you have installed Clawdbot as a daemon on macOS, you might find that simply killing the process doesn't work—it just keeps coming back. This is by design, as daemons are meant to be persistent services managed by the system.</p>
+
+<h3 id="why-kill-wont-work">Why 'Kill' Doesn't Work</h3>
+<p>When Clawdbot runs as a daemon, it is managed by <code>launchd</code>, the macOS service management framework. If you manually kill the process (using Activity Monitor or the <code>kill</code> command), <code>launchd</code> detects the crash and immediately restarts the service to ensure uptime.</p>
+
+<h3 id="the-proper-way-launchctl">The Proper Way: launchctl</h3>
+<p>To stop the daemon permanently, you must instruct <code>launchd</code> to unload the service configuration. This stops the current process <strong>and</strong> disables the automatic restart.</p>
+
+<h4 id="1-stop-and-disable-the-daemon">1. Stop and Disable the Daemon</h4>
+<p>Run the following command in your terminal:</p>
+<pre><code>launchctl unload ~/Library/LaunchAgents/com.clawdbot.gateway.plist</code></pre>
+
+<h4 id="2-verify-it-is-stopped">2. Verify It Is Stopped</h4>
+<p>You can check if the service is still running with:</p>
+<pre><code>launchctl list | grep clawdbot</code></pre>
+<p>If this command returns no output, the daemon has been successfully stopped.</p>
+
+<h4 id="how-to-start-it-again">How to Start It Again</h4>
+<p>If you later decide you want the daemon running again, use the <code>load</code> command:</p>
+<pre><code>launchctl load ~/Library/LaunchAgents/com.clawdbot.gateway.plist</code></pre>
+
+        </div>
+
+    </article>
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "KentChun33333/kentchun33333.github.io"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2026 <a href="/">Autumn Memo By Kent Chiu</a>
+        
+    </div>
+    <br />
+
+    <div>
+       
+        <div class="github-badge">
+            <a href="https://kentchun33333.github.io/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value  bg-blue"> Kent Chiu </span></a>
+        </div>
+
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Powered by</span><span class="badge-value bg-yellowgreen"> Maupassant-Hugo</span></a>
+        </div>
+
+    </div>
+    
+</footer>
+
+<script type="text/javascript">
+    window.MathJax = {
+        tex2jax: {
+            inlineMath: [['$', '$']],
+            processEscapes: true
+            }
+        };
+</script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+                </div>
+
+                <div id="secondary">
+    
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="/tags/ai/">AI</a>
+    </div>
+    
+    <div class="post-meta">
+        <a class="simple-meta-tag" href="/tags/software/">Software</a>
+    </div>
+    
+</div>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Others</h3>
+        <ul class="widget-list">
+            <li><a href="/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
