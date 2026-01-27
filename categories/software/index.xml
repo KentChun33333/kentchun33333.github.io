@@ -6,7 +6,52 @@
     <description>Recent content in Software on Autumn Memo</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 25 Sep 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/categories/software/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 15 May 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/categories/software/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Time and Memory Profile Tracking in python</title>
+      <link>https://kentchun33333.github.io/post/trackingmemo/</link>
+      <pubDate>Mon, 15 May 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/post/trackingmemo/</guid>
+      <description>To track the object size is important especially if doing distributing computing.</description>
+    </item>
+    
+    <item>
+      <title>cloudpickle for distributing serializing</title>
+      <link>https://kentchun33333.github.io/post/cloudpickle/</link>
+      <pubDate>Thu, 27 Apr 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/post/cloudpickle/</guid>
+      <description>cloudpickle is a Python library used for serializing Python objects, including functions, classes, and instances, to a byte stream.</description>
+    </item>
+    
+    <item>
+      <title>Setting Bitbucket on Windows</title>
+      <link>https://kentchun33333.github.io/post/sshbitbuketonwinows/</link>
+      <pubDate>Sat, 02 Apr 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/post/sshbitbuketonwinows/</guid>
+      <description>Recently, Bitbucket retired the simple password login via git-https. So we will need a ssh-key on it.</description>
+    </item>
+    
+    <item>
+      <title>Blog Memo by Hugo with Typora</title>
+      <link>https://kentchun33333.github.io/post/memosystem/</link>
+      <pubDate>Sun, 01 Aug 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/post/memosystem/</guid>
+      <description>In 2021, the blog is upgraded to Hugo + Typora.</description>
+    </item>
+    
+    <item>
+      <title>Host Personal Chatgpt-ish Service on AWS</title>
+      <link>https://kentchun33333.github.io/post/hostpersonalgpt/</link>
+      <pubDate>Sun, 01 Aug 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/post/hostpersonalgpt/</guid>
+      <description>AWS Lambda can be used to host a personal ChatGPT service, but it might not be the most suitable service for this use case.</description>
+    </item>
+    
     <item>
       <title>Build a Simple Search System</title>
       <link>https://kentchun33333.github.io/post/simplesearchsys/</link>

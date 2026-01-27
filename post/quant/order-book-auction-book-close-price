@@ -1,0 +1,81 @@
+Here we are, presented with another chance to delve into machine learning. This competition is titled "Trading at the Close," and it's hosted by Optiver, a market maker. The objective of this competition is to predict the future price movement of stocks in comparison to a synthetic Nasdaq stock index's future price movement. To accomplish this, we'll utilize historical data from the daily ten-minute closing auctions.
+
+Let’s discuss my initial challenges. Understanding the features wasn’t a walk in the park for me, even with Optiver’s fantastic tutorial kernel and resources. Therefore, I’m here to provide an additional explanation that I hope will assist others.
+
+Optiver gives us access to a training dataset containing 17 columns and more than 5.2 million rows. This data represents a fusion of the order book from continuous trading and the auction book. The opening and closing prices are determined through an auction system, just like in nearly all organized markets
+
+Here is the procedure:
+
+> At 4 pm Nasdaq calculates the price that will maximize the number of shares matches based on closed orders (MOC, LOC, IO) and continuous market orders and execute the cross at a single price called the Nasdaq Official Close Price (NOCP).
+
+Ok at this point of the movie I was totally lost, but bear with me. Keep these three point in mind:
+
+1. The order book and the auction book are not the same.
+2. The closing price comes from the merging of both books.
+3. The price will maximize the number of shares matches from both books. This is important.
+
+Now, let's get into some of the features in the training set using an example from the order and auction book.
+
+If you are new to this, the order book is essentially a list of buying and selling orders for stocks at different price levels.
+
+To illustrate this, **let's imagine you want to sell 10 Kaggle stocks at a price of 9.** At that moment in the market, the order book looks like this:
+
+![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F14403190%2Fb2eb47a12efec74ac3e684e1e667fa6e%2FScreenshot%20from%202023-10-04%2019-31-42.png?generation=1696444328284948&alt=media)
+
+As you can see in the order book, when you place your order in the market, there’s one person willing to buy 2 stocks at the price of 9. So, after you launch your order, the order book will look like this:  
+![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F14403190%2F119c4fe0e2bbe4b22a3a8d96905014d9%2FScreenshot%20from%202023-10-04%2019-34-04.png?generation=1696444459554108&alt=media)
+
+As you can observe, the individual who was looking to purchase 2 shares at a price of 9 has acquired two shares from your order. Consequently, the order book now reflects that there are no more buyers, and there are two sell orders at prices of 10 and 9.
+
+Now that we have a grasp of what the order book is and how bid and ask work, we can better comprehend some features from our training set:
+
+- Bid-Ask Prices, and Bid-Ask Size: We’ve already covered what these represent.
+- Seconds in bucket: This denotes the number of seconds that have passed since the beginning of the day’s closing auction, starting from 0.
+- Stock_id and date_id are unique identifiers for the stock and for the date.
+
+As we mentioned earlier, Nasdaq combines the order book with the auction book to ensure efficient and fair price discovery. The closing process offers a moment when a substantial volume of orders can be matched at a single transparent price.
+
+The auction book is essentially a compilation of orders gathered throughout the auction process. To illustrate this, let's take a look at the situation of the auction book following the example from the kernel:  
+![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F14403190%2F60cd74c3b67a7d5cb49ae557d0e1176c%2FScreenshot%20from%202023-10-04%2019-35-19.png?generation=1696444532710922&alt=media)
+
+In this scenario, the book is described as "**in cross**" because **there are overlapping orders** (if you're uncertain, you can cross-reference this with the order book, where you can see there is no overlap).
+
+The closing price is known as the "**uncross price**", and it is the matched price resulting from the shares that were involved in the cross.
+
+Let’s merge the two books  
+![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F14403190%2F24a4a6da44500bc0841cac18ce38328a%2FScreenshot%20from%202023-10-04%2019-36-17.png?generation=1696444587061662&alt=media)
+
+Remember that Nasdaq “**calculates the price that will maximize the number of shares matches based on closed orders (MOC, LOC, IO) and continuous market orders and execute the cross at a single price called the Nasdaq Official Close Price (NOCP).**”
+
+The part that follows took me a bit of time to grasp. I believe the most effective way to grasp the process of obtaining the uncross price is by understanding these tables.  
+![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F14403190%2F26bda55f2d0d225ad47cfa1c270018d8%2FScreenshot%20from%202023-10-04%2019-37-16.png?generation=1696444650201039&alt=media)
+
+Examining the combined book, we can discern the following:
+
+- At a price of 10, there are only 2 shares available for sale.
+- At a price of 9, there are buyers willing to purchase 5 shares, and sellers willing to sell 6 shares. These 6 shares come from a seller who wanted to sell 2 shares at 9, and from another seller who aimed to sell 4 shares at a price of 8 but is now willing to sell at 9. Out of these, 5 shares will be matched.
+- At a price of 8, there are buyers eager to buy 9 shares (5 from those willing to buy at 9 and 4 from those willing to buy at 8), and there are sellers offering 4 shares. This results in 4 matches.
+
+Therefore, it's evident that **the price that maximizes the number of share matches is 9**, which is referred to as **the uncross price**.
+
+The **difference between the bid lots and ask lots at the uncross price** is termed the "**imbalance**". In this case, the imbalance would be 1 lot, in the sell direction.
+
+Going back to our training set, you can find:
+
+- Imbalance Size ('imbalance_size') and the Imbalance Buy-Sell Flag: This flag indicates the direction of the imbalance, with 'buy' represented as 1, 'sell' as -1, and 'no imbalance' as 0.
+- Near Price: This is the near indicative clearing price, calculated to maximize the number of shares matched based on close orders (auction book) and continuous market orders, just 5 minutes before the closing cross.
+- Far Price: The far price information pertains to the crossing price that maximizes the number of shares matched based on closing interest only, excluding continuous market orders
+- Reference Price: The reference price is the price within the Nasdaq Best Bid and Offer (BBO) where paired shares are maximized, the imbalance is minimized, and the distance from the midpoint is minimized, in that order.
+- Weighted Average Price (WAP): This WAP considers both the bid and ask prices, weighted by their respective sizes. This weighted average reflects the average price at which trades are likely to occur based on the available buy and sell orders.  
+  ![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F14403190%2Fa8185435247df9d2314bd10bc7f94792%2FScreenshot%20from%202023-10-04%2019-39-51.png?generation=1696444805237792&alt=media)
+
+The last thing left for us to understand is our target variable, the one we aim to predict, is the change in the weighted average price (WAP) of the stock over the next 60 seconds, minus the change in the weighted average price of the synthetic index over the same 60 seconds. The unit of measurement for this target variable is basis points (bps). To clarify, 1% corresponds to 100 bps, and 1 bps is equivalent to a 0.01% price move.  
+![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F14403190%2F8ac3a43d2e35ecc6b822f3c24c8e1495%2FScreenshot%20from%202023-10-04%2019-40-33.png?generation=1696444848628419&alt=media)
+
+I hope this post can assist you in gaining a better understanding of this competition. There are more posts on the forum covering similar topics, and honestly, the kernel provided by Optiver was quite helpful. So, this post might not introduce anything new. However, it was valuable for me to write it as it helped clarify and comprehend certain aspects of the data. Whether it's redundant or not, I don't mind. If you find yourself in a similar situation, I encourage you to do the same. It does take time and effort, but it pays off.
+
+Here some valuable resources:  
+[NASDAQ 1](https://nasdaqtrader.com/content/productsservices/trading/crosses/openclose_faqs.pdf)  
+[NASDAQ 2](https://www.nasdaqtrader.com/content/productsservices/Trading/ClosingCrossfaq.pdf)
+
+## 

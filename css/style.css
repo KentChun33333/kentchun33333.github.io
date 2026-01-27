@@ -296,6 +296,29 @@ textarea {
     text-align:left;
     display: inline-block;
 }
+
+.post-recent-kc {
+    margin:2px 0 0;
+    padding: 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-align:left;
+    display: inline-block;
+}
+
+.simple-meta-tag {
+    margin-left: 0px;
+    list-style: none;
+    font-size: 85%;
+    padding: 0;
+    margin: 1px;
+    background: #0089e0;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 2px;
+    display: inline-block;
+}
+
 .meta-category a {
     position: relative;
 }

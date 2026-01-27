@@ -1,0 +1,38 @@
+# https://plantuml.com/activity-diagram-beta
+@startuml
+
+|Get Data|
+start
+
+repeat 
+repeat
+repeat :Update TD API Token;
+:Acct/Order Info;
+:Cash/Value A.T.M;
+
+if (Is Value Droped > 5%) then (yes)
+stop
+endif
+
+:Get Price Data;
+repeatwhile (is Data Delay) is (yes)
+
+|#gold|Inference|
+
+:Proensity Model;
+
+repeatwhile (has Buy/Sell signal?) is (no)
+-> yes;
+
+:Compute target prices;
+
+|#palegreen|Send Data|
+if (Is Holding Position?) then (yes)
+:Get Cover Order;
+else (no)
+:Get Buy/Sell Oder;
+endif 
+:Submit Order;
+repeatwhile (Sleep for next period)
+
+@endml

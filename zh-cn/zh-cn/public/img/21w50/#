@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en-US" prefix="og: https://ogp.me/ns# fb: https://ogp.me/ns/fb# article: https://ogp.me/ns/article#">
+
+<head ><script>if(navigator.userAgent.match(/MSIE|Internet Explorer/i)||navigator.userAgent.match(/Trident\/7\..*?rv:11/i)){var href=document.location.href;if(!href.match(/[?&]nowprocket/)){if(href.indexOf("?")==-1){if(href.indexOf("#")==-1){document.location.href=href+"?nowprocket=1"}else{document.location.href=href.replace("#","?nowprocket=1#")}}else{if(href.indexOf("#")==-1){document.location.href=href+"&nowprocket=1"}else{document.location.href=href.replace("#","&nowprocket=1#")}}}}</script><script>class RocketLazyLoadScripts{constructor(e){this.triggerEvents=e,this.eventOptions={passive:!0},this.userEventListener=this.triggerListener.bind(this),this.delayedScripts={normal:[],async:[],defer:[]},this.allJQueries=[]}_addUserInteractionListener(e){this.triggerEvents.forEach((t=>window.addEventListener(t,e.userEventListener,e.eventOptions)))}_removeUserInteractionListener(e){this.triggerEvents.forEach((t=>window.removeEventListener(t,e.userEventListener,e.eventOptions)))}triggerListener(){this._removeUserInteractionListener(this),"loading"===document.readyState?document.addEventListener("DOMContentLoaded",this._loadEverythingNow.bind(this)):this._loadEverythingNow()}async _loadEverythingNow(){this._delayEventListeners(),this._delayJQueryReady(this),this._handleDocumentWrite(),this._registerAllDelayedScripts(),this._preloadAllScripts(),await this._loadScriptsFromList(this.delayedScripts.normal),await this._loadScriptsFromList(this.delayedScripts.defer),await this._loadScriptsFromList(this.delayedScripts.async),await this._triggerDOMContentLoaded(),await this._triggerWindowLoad(),window.dispatchEvent(new Event("rocket-allScriptsLoaded"))}_registerAllDelayedScripts(){document.querySelectorAll("script[type=rocketlazyloadscript]").forEach((e=>{e.hasAttribute("src")?e.hasAttribute("async")&&!1!==e.async?this.delayedScripts.async.push(e):e.hasAttribute("defer")&&!1!==e.defer||"module"===e.getAttribute("data-rocket-type")?this.delayedScripts.defer.push(e):this.delayedScripts.normal.push(e):this.delayedScripts.normal.push(e)}))}async _transformScript(e){return await this._requestAnimFrame(),new Promise((t=>{const n=document.createElement("script");let i;[...e.attributes].forEach((e=>{let t=e.nodeName;"type"!==t&&("data-rocket-type"===t&&(t="type",i=e.nodeValue),n.setAttribute(t,e.nodeValue))})),e.hasAttribute("src")&&this._isValidScriptType(i)?(n.addEventListener("load",t),n.addEventListener("error",t)):(n.text=e.text,t()),e.parentNode.replaceChild(n,e)}))}_isValidScriptType(e){return!e||""===e||"string"==typeof e&&["text/javascript","text/x-javascript","text/ecmascript","text/jscript","application/javascript","application/x-javascript","application/ecmascript","application/jscript","module"].includes(e.toLowerCase())}async _loadScriptsFromList(e){const t=e.shift();return t?(await this._transformScript(t),this._loadScriptsFromList(e)):Promise.resolve()}_preloadAllScripts(){var e=document.createDocumentFragment();[...this.delayedScripts.normal,...this.delayedScripts.defer,...this.delayedScripts.async].forEach((t=>{const n=t.getAttribute("src");if(n){const t=document.createElement("link");t.href=n,t.rel="preload",t.as="script",e.appendChild(t)}})),document.head.appendChild(e)}_delayEventListeners(){let e={};function t(t,n){!function(t){function n(n){return e[t].eventsToRewrite.indexOf(n)>=0?"rocket-"+n:n}e[t]||(e[t]={originalFunctions:{add:t.addEventListener,remove:t.removeEventListener},eventsToRewrite:[]},t.addEventListener=function(){arguments[0]=n(arguments[0]),e[t].originalFunctions.add.apply(t,arguments)},t.removeEventListener=function(){arguments[0]=n(arguments[0]),e[t].originalFunctions.remove.apply(t,arguments)})}(t),e[t].eventsToRewrite.push(n)}function n(e,t){let n=e[t];Object.defineProperty(e,t,{get:()=>n||function(){},set(i){e["rocket"+t]=n=i}})}t(document,"DOMContentLoaded"),t(window,"DOMContentLoaded"),t(window,"load"),t(window,"pageshow"),t(document,"readystatechange"),n(document,"onreadystatechange"),n(window,"onload"),n(window,"onpageshow")}_delayJQueryReady(e){let t=window.jQuery;Object.defineProperty(window,"jQuery",{get:()=>t,set(n){if(n&&n.fn&&!e.allJQueries.includes(n)){n.fn.ready=n.fn.init.prototype.ready=function(t){e.domReadyFired?t.bind(document)(n):document.addEventListener("rocket-DOMContentLoaded",(()=>t.bind(document)(n)))};const t=n.fn.on;n.fn.on=n.fn.init.prototype.on=function(){if(this[0]===window){function e(e){return e.split(" ").map((e=>"load"===e||0===e.indexOf("load.")?"rocket-jquery-load":e)).join(" ")}"string"==typeof arguments[0]||arguments[0]instanceof String?arguments[0]=e(arguments[0]):"object"==typeof arguments[0]&&Object.keys(arguments[0]).forEach((t=>{delete Object.assign(arguments[0],{[e(t)]:arguments[0][t]})[t]}))}return t.apply(this,arguments),this},e.allJQueries.push(n)}t=n}})}async _triggerDOMContentLoaded(){this.domReadyFired=!0,await this._requestAnimFrame(),document.dispatchEvent(new Event("rocket-DOMContentLoaded")),await this._requestAnimFrame(),window.dispatchEvent(new Event("rocket-DOMContentLoaded")),await this._requestAnimFrame(),document.dispatchEvent(new Event("rocket-readystatechange")),await this._requestAnimFrame(),document.rocketonreadystatechange&&document.rocketonreadystatechange()}async _triggerWindowLoad(){await this._requestAnimFrame(),window.dispatchEvent(new Event("rocket-load")),await this._requestAnimFrame(),window.rocketonload&&window.rocketonload(),await this._requestAnimFrame(),this.allJQueries.forEach((e=>e(window).trigger("rocket-jquery-load"))),window.dispatchEvent(new Event("rocket-pageshow")),await this._requestAnimFrame(),window.rocketonpageshow&&window.rocketonpageshow()}_handleDocumentWrite(){const e=new Map;document.write=document.writeln=function(t){const n=document.currentScript;n||console.error("WPRocket unable to document.write this: "+t);const i=document.createRange(),r=n.parentElement;let a=e.get(n);void 0===a&&(a=n.nextSibling,e.set(n,a));const o=document.createDocumentFragment();i.setStart(o,0),o.appendChild(i.createContextualFragment(t)),r.insertBefore(o,a)}}async _requestAnimFrame(){return new Promise((e=>requestAnimationFrame(e)))}static run(){const e=new RocketLazyLoadScripts(["keydown","mousemove","touchmove","touchstart","touchend","wheel"]);e._addUserInteractionListener(e)}}RocketLazyLoadScripts.run();
+</script>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="pingback" href="https://www.enhelix.com/xmlrpc.php" />
+	<script>var et_site_url='https://www.enhelix.com';var et_post_id='1837';function et_core_page_resource_fallback(a,b){"undefined"===typeof b&&(b=a.sheet.cssRules&&0===a.sheet.cssRules.length);b&&(a.onerror=null,a.onload=null,a.href?a.href=et_site_url+"/?et_core_page_resource="+a.id+et_post_id:a.src&&(a.src=et_site_url+"/?et_core_page_resource="+a.id+et_post_id))}
+</script>
+	<!-- Meta Tag Manager -->
+	<meta name="icbm" content="29.7604;-95.366302" />
+	<meta name="geo.region" content="US-TX" />
+	<meta name="geo.placename" content="HOUSTON" />
+	<meta name="geo.position" content="29.7604;-95.366302" />
+	<meta name="google" content="Oil, Gas, Software, Logistics, LNG, Energy, ETRM, CTRM, Artificial Intelligence, Blockchain, Big Data, Upstream, midstream, downstream, NGL, Coal, Turnkey solution" />
+	<meta name="MobileOptimized" content="width" />
+	<meta name="HandheldFriendly" content="true" />
+	<!-- / Meta Tag Manager -->
+
+<script type="rocketlazyloadscript">
+dataLayer = [{"title":"Commodity Risk Management","author":"radmin","wordcount":668,"logged_in":"false","page_id":1837,"post_date":"2019-12-27 22:13:24","post_type":"page"}];
+</script>
+
+	<!-- This site is optimized with the Yoast SEO Premium plugin v14.4.1 - https://yoast.com/wordpress/plugins/seo/ -->
+	<title>Commodity Risk Management : Facts You Should Know</title><style id="rocket-critical-css">.wp-block-image{max-width:100%;margin-bottom:1em}.wp-block-image img{max-width:100%}button::-moz-focus-inner{padding:0;border:0}html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}body{margin:0}figure{display:block}a{background-color:transparent}strong{font-weight:bold}h1{font-size:2em;margin:0.67em 0}img{border:0}svg:not(:root){overflow:hidden}figure{margin:1em 40px}button,input{color:inherit;font:inherit;margin:0}button{overflow:visible}button{text-transform:none}button{-webkit-appearance:button}button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}input{line-height:normal}*{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}*:before,*:after{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}html{font-size:10px}body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:14px;line-height:1.42857143;color:#333;background-color:#fff}input,button{font-family:inherit;font-size:inherit;line-height:inherit}a{color:#337ab7;text-decoration:none}figure{margin:0}img{vertical-align:middle}h1,h2{font-family:inherit;font-weight:500;line-height:1.1;color:inherit}h1,h2{margin-top:20px;margin-bottom:10px}h1{font-size:36px}h2{font-size:30px}p{margin:0 0 10px}.text-left{text-align:left}.text-right{text-align:right}.text-center{text-align:center}ul{margin-top:0;margin-bottom:10px}ul ul{margin-bottom:0}.container{margin-right:auto;margin-left:auto;padding-left:15px;padding-right:15px}@media (min-width:768px){.container{width:750px}}@media (min-width:992px){.container{width:970px}}@media (min-width:1200px){.container{width:1170px}}.collapse{display:none}.caret{display:inline-block;width:0;height:0;margin-left:2px;vertical-align:middle;border-top:4px dashed;border-right:4px solid transparent;border-left:4px solid transparent}.dropdown{position:relative}.dropdown-menu{position:absolute;top:100%;left:0;z-index:1000;display:none;float:left;min-width:160px;padding:5px 0;margin:2px 0 0;list-style:none;font-size:14px;text-align:left;background-color:#fff;border:1px solid #ccc;border:1px solid rgba(0,0,0,0.15);border-radius:4px;-webkit-box-shadow:0 6px 12px rgba(0,0,0,0.175);box-shadow:0 6px 12px rgba(0,0,0,0.175);-webkit-background-clip:padding-box;background-clip:padding-box}.dropdown-menu>li>a{display:block;padding:3px 20px;clear:both;font-weight:normal;line-height:1.42857143;color:#333;white-space:nowrap}.nav{margin-bottom:0;padding-left:0;list-style:none}.nav>li{position:relative;display:block}.nav>li>a{position:relative;display:block;padding:10px 15px}.navbar{position:relative;min-height:50px;margin-bottom:20px;border:1px solid transparent}@media (min-width:992px){.navbar{border-radius:4px}}@media (min-width:992px){.navbar-header{float:left}}.navbar-collapse{overflow-x:visible;padding-right:15px;padding-left:15px;border-top:1px solid transparent;-webkit-box-shadow:inset 0 1px 0 rgba(255,255,255,0.1);box-shadow:inset 0 1px 0 rgba(255,255,255,0.1);-webkit-overflow-scrolling:touch}@media (min-width:992px){.navbar-collapse{width:auto;border-top:0;-webkit-box-shadow:none;box-shadow:none}.navbar-collapse.collapse{display:block!important;height:auto!important;padding-bottom:0;overflow:visible!important}}.container>.navbar-header{margin-right:-15px;margin-left:-15px}@media (min-width:992px){.container>.navbar-header{margin-right:0;margin-left:0}}.navbar-brand{float:left;padding:15px 15px;font-size:18px;line-height:20px;height:50px}@media (min-width:992px){.navbar>.container .navbar-brand{margin-left:-15px}}.navbar-nav{margin:7.5px -15px}.navbar-nav>li>a{padding-top:10px;padding-bottom:10px;line-height:20px}@media (min-width:992px){.navbar-nav{float:left;margin:0}.navbar-nav>li{float:left}.navbar-nav>li>a{padding-top:15px;padding-bottom:15px}}.navbar-nav>li>.dropdown-menu{margin-top:0;border-top-right-radius:0;border-top-left-radius:0}.navbar-default{background-color:#f8f8f8;border-color:#e7e7e7}.navbar-default .navbar-brand{color:#777}.navbar-default .navbar-nav>li>a{color:#777}.navbar-default .navbar-collapse{border-color:#e7e7e7}.clearfix:before,.clearfix:after,.container:before,.container:after,.nav:before,.nav:after,.navbar:before,.navbar:after,.navbar-header:before,.navbar-header:after,.navbar-collapse:before,.navbar-collapse:after{content:" ";display:table}.clearfix:after,.container:after,.nav:after,.navbar:after,.navbar-header:after,.navbar-collapse:after{clear:both}.pull-right{float:right!important}.pull-left{float:left!important}@-ms-viewport{width:device-width}.navbar-nav .dropdown-menu>li>a{white-space:normal}*,*:before,*:after{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}:focus{outline:0!important}figure{margin:0;padding:0}figure img{max-width:100%}body{overflow-x:hidden;font-size:14px;font-weight:normal;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-text-size-adjust:100%;color:#595959;font-family:'Work Sans',sans-serif;background:none;display:flex;height:100vh;flex-direction:column}.navbar{flex-shrink:0}.content-wrapper{flex:1 0 auto}.container{padding-right:0;padding-left:0}body,li{line-height:22px}input,button{font-family:inherit;font-weight:normal;color:inherit!important}p{margin:0 0 20px}a{color:#7bc4e6}strong{font-weight:600}h1,h2{margin-top:0;color:#303030;margin-bottom:10px;font-weight:500;letter-spacing:-0.5px}h1{font-size:40px;line-height:45px;margin-bottom:15px}h2{font-size:22px;line-height:30px;margin-bottom:20px}.section-title{margin-bottom:25px;overflow:hidden}.section-title h2{padding:0 20px;margin:0;overflow:hidden;font-size:24px;line-height:32px;letter-spacing:-1px;font-weight:500;color:#303030}.section-title h2:before,.section-title h2:after{content:'';width:100%;border-bottom:2px solid rgba(0,0,0,0.09);display:inline-block;vertical-align:middle}.section-title h2:before{margin-left:-100%;margin-right:20px}.section-title h2:after{margin-right:-100%;margin-left:20px}.page-title h1{font-size:18px;line-height:22px;margin:0}.page-title .more a{color:#707070}.page-title .more:after{display:none}.breadcrumbs.more span:after{content:"/";vertical-align:middle;font-size:12px;padding:0 10px 0 10px;color:#707070}.breadcrumbs.more span:last-child:after{display:none}.inner{padding-top:70px;padding-bottom:70px}.inner3{padding-top:30px;padding-bottom:30px}.more{color:#707070;font-size:12px;text-transform:uppercase;font-weight:500}.more:after{content:"→";padding-left:5px}ul{padding:0 0 0 18px}ul{margin-bottom:15px}.navbar{z-index:1008;border:0;border-radius:0;min-height:inherit;width:100%;top:0;left:0;margin:0;position:relative}.navbar.extended{background:#fefefe}.navbar .navbar-header{display:table;position:relative;table-layout:fixed}.container>.navbar-header{margin:0;padding:0}.navbar-brand{padding:0;line-height:0;float:none;height:auto;position:relative;box-shadow:none;margin:0!important;vertical-align:middle;display:table-cell;width:100%}.navbar .nav-bars-wrapper{display:none}.navbar .navbar-collapse{border:0;box-shadow:none;overflow:hidden}.navbar .navbar-nav{margin:0!important}.navbar .navbar-nav>li>a{padding:0;font-size:12px;letter-spacing:0.5px;text-transform:uppercase;font-weight:600;line-height:1;color:#303030!important;position:relative}.navbar .dropdown-menu{padding:0;margin:0;min-width:150px;border:none;background:none;border-radius:0;box-shadow:none;z-index:-1!important}.navbar .dropdown-menu li:first-child{border:0}.navbar .dropdown-menu li a{background:none;border:none;color:#d2d2d2!important;font-size:12px;letter-spacing:0.5px;text-transform:uppercase;font-weight:600;padding:0;line-height:1}.navbar .nav>li>.dropdown-menu:after{display:none}.info{list-style:none;padding:0;margin:0}.caret{border:0;top:0;vertical-align:0;margin-left:1px;position:relative}.caret:before{content:'\f123';font-family:"Ionicons";font-weight:normal;font-size:9px}.navbar-nav:not(.sm-collapsible) ul{margin-top:11px}.navbar .info,.navbar .social-wrapper{display:none}@media (min-width:992px){.navbar.extended .navbar-nav{height:54px}.navbar.extended .navbar-nav>li>a{line-height:54px}}.nav-bars{display:block;position:relative;overflow:hidden;padding:0;width:30px;height:30px;font-size:0;text-indent:-9999px;float:right;-webkit-appearance:none;-moz-appearance:none;appearance:none;box-shadow:none;border-radius:none;border:none}.nav-bars span{display:block;position:absolute;top:13px;left:0px;right:0px;height:3px;background:#2e2e2e}.nav-bars span::before,.nav-bars span::after{position:absolute;display:block;left:0;width:100%;height:3px;background-color:#2e2e2e;content:""}.nav-bars span::before{top:-8px}.nav-bars span::after{bottom:-8px}figure{display:block;overflow:hidden;position:relative}::-webkit-input-placeholder{color:#595959!important;font-weight:normal!important}:-moz-placeholder{color:#595959!important;font-weight:normal!important;opacity:1}::-moz-placeholder{color:#595959!important;font-weight:normal!important;opacity:1}:-ms-input-placeholder{color:#595959!important;font-weight:normal!important}.social{padding:0;margin:0;margin-bottom:-20px;font-size:0;line-height:1}.social li{display:inline-block;margin:0 20px 20px 0}.social li a{display:table;line-height:1}.social li a i{background:none;box-shadow:none;border:0;height:auto!important;width:auto;font-size:16px}.social li a{color:#595959}.bm0{margin-bottom:0!important}@media (min-width:992px){.navbar .navbar-collapse{float:right;position:relative;right:0}.navbar .navbar-nav{float:none;position:relative;display:table-cell;vertical-align:middle;margin:0!important}.navbar .navbar-nav>li{margin:0;display:inline-block}.navbar.extended.centered .navbar-nav>li>a{padding-left:10px;padding-right:30px}.navbar.extended .navbar-nav>li>a{padding-right:30px;padding-left:0}.navbar .navbar-nav>li:last-child>a{padding-right:0}.navbar .dropdown-menu{padding-top:11px;padding-bottom:11px;background:#393939}.navbar .dropdown-menu li{border:none}.navbar .dropdown-menu li a{padding:11px 22px}.navbar.extended .navbar-header{width:100%;height:auto;padding:30px 0}.navbar.extended .navbar-collapse{float:none!important;width:100%}.navbar.extended.centered .navbar-brand,.navbar.extended.centered .navbar-header,.navbar.extended.centered .navbar-collapse{float:none!important;text-align:center}.navbar.extended .info,.navbar.extended .social-wrapper{display:table-cell;vertical-align:middle;width:100%}.navbar.extended.centered .social-wrapper{display:table-cell;vertical-align:middle;width:100%}.navbar.extended .social-wrapper{width:auto}.navbar.extended.centered .navbar-nav>li{margin:0 10px}.navbar.extended .navbar-nav>li{margin:0 20px 0 0}.navbar.extended.centered .navbar-nav>li>a{padding-left:15px;padding-right:15px}.navbar.extended .navbar-collapse{background:#f3f3f3}.navbar.extended .navbar-collapse .navbar-nav{float:none;display:inline-block}.navbar.extended .navbar-collapse .navbar-nav>li{display:inline-block}}@media (max-width:991px){.navbar .container{width:100%;padding:0}.navbar .navbar-header .navbar-brand{width:100%}.navbar .nav-bars-wrapper{display:table-cell;vertical-align:middle}.navbar .dropdown-menu{padding-left:20px}.navbar .navbar-nav>li{margin:0 30px}.navbar .navbar-nav>li>a{color:#ffffff!important}.navbar-nav>li>a,.navbar .dropdown-menu li a{padding:10px 0px!important}.navbar .info{display:none}.navbar:not(.fixed) .navbar-header{height:94px!important}.navbar .navbar-brand{text-align:left!important}.navbar-default:not(.fixed){background:#f3f3f3!important}.navbar .navbar-collapse{background:#393939!important;padding:0}.navbar .navbar-nav{padding-top:10px;padding-bottom:10px}}@media (min-width:768px) and (max-width:991px){.container{padding-right:15px;padding-left:15px}.navbar .navbar-header{width:750px;margin:0 auto;padding-left:15px;padding-right:15px}}@media (max-width:767px){.container{padding-right:20px;padding-left:20px}.navbar .navbar-header{padding-left:20px;padding-right:20px;width:100%}.page-title h1,.breadcrumbs{float:none!important}.breadcrumbs{margin-top:5px}.section-title h2{padding:0}.section-title h2:before,.section-title h2:after{display:none}}@font-face{font-family:"Ionicons";src:url(https://www.enhelix.com/wp-content/themes/morello_theme_work/style/type/ion/ionicons.eot?v=2.0.0);src:url(https://www.enhelix.com/wp-content/themes/morello_theme_work/style/type/ion/ionicons.eot?v=2.0.0#iefix) format("embedded-opentype"),url(https://www.enhelix.com/wp-content/themes/morello_theme_work/style/type/ion/ionicons.ttf?v=2.0.0) format("truetype"),url(https://www.enhelix.com/wp-content/themes/morello_theme_work/style/type/ion/ionicons.woff?v=2.0.0) format("woff"),url(https://www.enhelix.com/wp-content/themes/morello_theme_work/style/type/ion/ionicons.svg?v=2.0.0#Ionicons) format("svg");font-weight:normal;font-style:normal}[class^="ion-"]:before{display:inline-block;font-family:"Ionicons";speak:none;font-style:normal;font-weight:normal;font-variant:normal;text-transform:none;text-rendering:auto;line-height:1;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.ion-social-facebook:before{content:"\f231"}.ion-social-linkedin:before{content:"\f239"}.ion-social-twitter:before{content:"\f243"}.ion-social-youtube:before{content:"\f24d"}.et_bloom .et_bloom_optin div,.et_bloom .et_bloom_optin span,.et_bloom .et_bloom_optin h2,.et_bloom .et_bloom_optin p,.et_bloom .et_bloom_optin img{text-transform:none;font-weight:normal;margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background-image:none;-webkit-box-sizing:content-box;-moz-box-sizing:content-box;box-sizing:content-box;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.et_bloom .et_bloom_optin button{background:none}@font-face{font-family:'ET-Bloom';src:url(https://www.enhelix.com/wp-content/plugins/bloom/css/fonts/ET-Bloom.eot?gd6mr8);src:url(https://www.enhelix.com/wp-content/plugins/bloom/css/fonts/ET-Bloom.eot?#iefixgd6mr8) format('embedded-opentype'),url(https://www.enhelix.com/wp-content/plugins/bloom/css/fonts/ET-Bloom.woff?gd6mr8) format('woff'),url(https://www.enhelix.com/wp-content/plugins/bloom/css/fonts/ET-Bloom.ttf?gd6mr8) format('truetype'),url(https://www.enhelix.com/wp-content/plugins/bloom/css/fonts/ET-Bloom.svg?gd6mr8#ETdashboard) format('svg');font-weight:normal;font-style:normal}.et_bloom button.et_bloom_submit_subscription{position:relative}.et_bloom .et_bloom_subscribe_loader{display:none;background:url(https://www.enhelix.com/wp-content/plugins/bloom/images/subscribe-loader.gif)!important;width:16px;height:16px;position:absolute;left:50%;top:50%;margin:-8px auto auto -8px!important}.et_bloom .et_bloom_1_field p.et_bloom_popup_input{width:68%}.et_bloom .et_bloom_bottom_stacked p.et_bloom_popup_input{width:100%;margin-bottom:10px;padding-right:0}.et_bloom .et_bloom_bottom_stacked button.et_bloom_submit_subscription{width:100%}.et_bloom .et_bloom_header_text_light h2{color:#fff!important}.et_bloom .et_bloom_header_text_light p{color:rgba(255,255,255,0.7)!important}.et_bloom .et_bloom_form_header img{height:auto;width:auto}.et_bloom .et_bloom_header_outer{height:auto}.et_bloom .et_bloom_flyin{display:none;position:fixed;bottom:0;z-index:999999;box-sizing:border-box}.et_bloom .et_bloom_flyin_left{left:0;padding-right:10%;max-width:100%}.et_bloom .et_bloom_stacked_flyin.et_bloom_form_container{width:320px}.et_bloom .et_bloom_popup .et_bloom_form_container{position:relative;z-index:999999999;top:290px;margin:0 auto;opacity:0}.et_bloom .et_bloom_popup{display:none;top:0;left:0;width:100%;height:100%;position:fixed;z-index:99999999}.et_bloom .et_bloom_popup:after{content:"";background-color:rgba(0,0,0,.6);top:0;left:0;width:100%;height:100%;position:fixed;opacity:0}.et_bloom .et_bloom_form_container_wrapper{position:relative}.et_bloom .et_bloom_inline_form,.et_bloom .et_bloom_inline_form .et_bloom_form_container{width:100%;max-width:100%}.et_bloom .et_bloom_inline_form span.et_bloom_close_button{display:none}.et_bloom .et_bloom_inline_form .et_bloom_form_container{box-shadow:none;-webkit-box-shadow:none;-moz-box-shadow:none}.et_bloom .et_bloom_inline_form{clear:both;margin:30px 0;display:inline-block}.et_bloom .et_bloom_below_post .et_bloom_inline_form{margin-bottom:0}.et_bloom .et_bloom_inline_form .et_bloom_form_container{z-index:99}.et_bloom .et_bloom_form_container,.et_bloom .et_bloom_form_container div,.et_bloom .et_bloom_form_container span,.et_bloom .et_bloom_form_container h2,.et_bloom .et_bloom_form_container p,.et_bloom .et_bloom_form_container img{font-family:'Open Sans',helvetica,arial,sans-serif;line-height:1em;text-transform:none;font-weight:normal;margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background-image:none;-webkit-box-sizing:content-box;-moz-box-sizing:content-box;box-sizing:content-box;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.et_bloom .et_bloom_form_container .clearfix:after{visibility:hidden;display:block;font-size:0;content:" ";clear:both;height:0}.et_bloom .et_bloom_form_container{position:relative}.et_bloom .et_bloom_form_container .et_bloom_close_button,.et_bloom .et_bloom_success_checkmark:before{font-family:'ET-Bloom';speak:none;font-style:normal;font-weight:normal;font-variant:normal;text-transform:none;line-height:1;font-size:16px!important;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.et_bloom .et_bloom_success_container{height:0;overflow:hidden;opacity:0;position:relative;margin:0 auto!important;z-index:-1}.et_bloom .et_bloom_form_container h2.et_bloom_success_message{line-height:1.4em;position:relative;font-size:14px;display:none;opacity:0;z-index:-1;text-align:center;color:#888;background:#fff;padding:10px 10%;width:80%;max-width:300px;border-radius:5px;margin:auto}.et_bloom h2.et_bloom_success_message:after{content:'';position:absolute;left:50%;top:-5px;margin-left:-3px;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:5px solid #fff}.et_bloom .et_bloom_success_checkmark:before{content:"\e60e";font-size:25px!important;line-height:25px}.et_bloom span.et_bloom_success_checkmark{opacity:0;color:#fff!important;background:#82C016;padding:8px 7px 7px 10px!important;border-radius:30px;left:50%;margin-left:-20px;-webkit-transform:rotate(180deg);-ms-transform:rotate(180deg);transform:rotate(180deg);display:block;height:28px;width:28px;position:absolute;top:30px}.et_bloom .et_bloom_close_button:before{content:"\e60d";position:absolute;top:7px;right:7px}.et_bloom .et_bloom_form_container .et_bloom_close_button{position:absolute;top:-10px;right:-10px;width:30px;height:30px;-webkit-border-radius:30px;-moz-border-radius:30px;border-radius:30px;background-color:#fff;-webkit-box-shadow:0px 2px 4px 0px rgba(0,0,0,0.34);-moz-box-shadow:0px 2px 4px 0px rgba(0,0,0,0.34);box-shadow:0px 2px 4px 0px rgba(0,0,0,0.34)}.et_bloom .et_bloom_form_container{background-color:#dadfe4;max-width:640px;z-index:999999999;-webkit-box-shadow:0px 0px 60px rgba(0,0,0,0.2);-moz-box-shadow:0px 0px 60px rgba(0,0,0,0.2);box-shadow:0px 0px 60px rgba(0,0,0,0.2);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.et_bloom .et_bloom_popup .et_bloom_form_container{width:80%}.et_bloom .et_bloom_form_container,.et_bloom .et_bloom_form_container div,.et_bloom .et_bloom_form_container img,.et_bloom .et_bloom_form_container .et_bloom_popup_input,.et_bloom .et_bloom_form_container input{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}.et_bloom .et_bloom_form_container .et_bloom_form_header{background-color:#fff;padding:15px;overflow:hidden;position:relative}.et_bloom .et_bloom_form_container .et_bloom_form_text{max-width:100%;padding:15px;display:table-cell}.et_bloom .et_bloom_form_header h2{font-size:24px!important;padding-bottom:0!important;font-weight:600!important;line-height:1.1em!important;color:rgba(0,0,0,0.8);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.et_bloom .et_bloom_form_header p{color:rgba(0,0,0,0.5);line-height:1.6em;font-size:14px;margin-top:0.5em}.et_bloom .et_bloom_form_container .et_bloom_form_content{padding:40px 30px;color:rgba(0,0,0,0.5);width:100%;background-color:#E9E9E9;position:relative}.et_bloom .et_bloom_form_container .et_bloom_form_content input{display:block}.et_bloom .et_bloom_form_container .et_bloom_form_content span{color:#444;font-weight:700!important;margin-bottom:10px!important}.et_bloom .et_bloom_form_container.et_bloom_form_text_light .et_bloom_form_content span{color:#fff!important}.et_bloom .et_bloom_form_container .et_bloom_form_content input{background-color:#fff;width:100%;font-weight:600;color:rgba(0,0,0,0.5);-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box;border:none}.et_bloom .et_bloom_form_container .et_bloom_form_content input{padding:14px!important}.et_bloom .et_bloom_form_container .et_bloom_form_content .et_bloom_popup_input input{padding:10px!important}.et_bloom .et_bloom_form_container.et_bloom_form_text_light .et_bloom_form_content input{background-color:rgba(0,0,0,0.15);color:#fff}.et_bloom .et_bloom_form_text_light input::-webkit-input-placeholder{color:#fff}.et_bloom .et_bloom_form_text_light input:-moz-placeholder{color:#fff}.et_bloom .et_bloom_form_text_light input::-moz-placeholder{color:#fff}.et_bloom .et_bloom_form_text_light input:-ms-input-placeholder{color:#fff}.et_bloom .et_bloom_popup_input input::-webkit-input-placeholder{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.et_bloom .et_bloom_popup_input input:-moz-placeholder{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.et_bloom .et_bloom_popup_input input::-moz-placeholder{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.et_bloom .et_bloom_popup_input input:-ms-input-placeholder{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.et_bloom .et_bloom_form_container.et_bloom_rounded input,.et_bloom .et_bloom_form_container.et_bloom_rounded button{-moz-border-radius:3px!important;-webkit-border-radius:3px!important;border-radius:3px!important}.et_bloom .et_bloom_form_container.et_bloom_form_text_light .et_bloom_form_content{color:rgba(255,255,255,0.6)}.et_bloom .et_bloom_form_content .et_bloom_popup_input{float:left;width:34%;padding-right:20px}.et_bloom .et_bloom_form_content button{width:32%;background-color:#46C8C8;color:#FFF;font-weight:600;text-transform:uppercase;letter-spacing:1px;border:none}.et_bloom .et_bloom_form_content input,.et_bloom .et_bloom_form_content button{padding:10px;font-family:'Open Sans',sans-serif;font-size:14px}.et_bloom .et_bloom_button_text{color:#FFF!important;font-weight:600!important;text-transform:uppercase;letter-spacing:1px;margin-bottom:0!important}.et_bloom .with_edge .et_bloom_form_header:after,.et_bloom .with_edge .et_bloom_form_content:before{position:absolute;content:'';display:block}.et_bloom .wedge_edge .et_bloom_form_content{padding-top:60px}.et_bloom .wedge_edge .triangle{position:absolute;top:0;left:-1px;fill:#fff;z-index:99}.et_bloom .et_bloom_form_header img{margin:auto}.et_bloom .et_bloom_form_header img,.et_bloom .et_bloom_form_header .et_bloom_form_text{max-width:100%;padding:15px;display:block;clear:both}.et_bloom .split .et_bloom_form_text{display:table-cell;clear:none}.et_bloom .et_bloom_form_header.split img{float:left;max-width:40%}.et_bloom_form_container .et_bloom_form_content .et_bloom_fields{height:100%}@-webkit-keyframes et_bloom_fadeInTop{0%{opacity:0;-webkit-transform:translateY(30%)}100%{opacity:1;-webkit-transform:translateY(0)}}@-moz-keyframes et_bloom_fadeInTop{0%{opacity:0;-moz-transform:translateY(30%)}100%{opacity:1;-moz-transform:translateY(0)}}@-o-keyframes et_bloom_fadeInTop{0%{opacity:0;-o-transform:translateY(30%)}100%{opacity:1;-o-transform:translateY(0)}}@keyframes et_bloom_fadeInTop{0%{opacity:0;transform:translateY(30%)}100%{opacity:1;transform:translateY(0)}}.et_bloom .et_bloom_image{opacity:0}.et_bloom .et_bloom_inline_form .et_bloom_image.et_bloom_image_slideup{opacity:1;-webkit-animation:et_bloom_fadeInTop 1s 1 cubic-bezier(0.77,0,.175,1);-moz-animation:et_bloom_fadeInTop 1s 1 cubic-bezier(0.77,0,.175,1);-o-animation:et_bloom_fadeInTop 1s 1 cubic-bezier(0.77,0,.175,1);animation:et_bloom_fadeInTop 1s 1 cubic-bezier(0.77,0,.175,1)}@media only screen and (max-width:767px){.et_bloom .et_bloom_form_content{clear:both}}@media screen and (max-width:640px){.et_bloom .et_bloom_form_container .et_bloom_popup_input{padding-right:0!important}.et_bloom .et_bloom_form_container .et_bloom_form_header,.et_bloom .et_bloom_form_container .et_bloom_popup_input,.et_bloom .et_bloom_form_container button{width:100%!important;max-width:100%!important;float:left!important}.et_bloom .et_bloom_bottom_inline p.et_bloom_popup_input{padding-bottom:10px}}@media screen and (max-width:479px){.et_bloom .et_bloom_form_container_wrapper{flex-direction:column}.et_bloom .et_bloom_form_container .et_bloom_form_header img{float:none!important;max-width:100%!important}.et_bloom .et_bloom_form_text{text-align:center}.et_bloom .et_bloom_flyin{width:100%!important;padding:0 10%!important}.et_bloom .et_bloom_stacked_flyin.et_bloom_form_container{margin:0;width:100%}}</style><link rel="preload" href="https://fonts.googleapis.com/css?family=Work%20Sans%3A400%2C500%2C600%2C700%2C800%2C900%2C300%2C200%2C100%7CLora%3A400%2C400italic%2C700%2C700italic%7COpen%20Sans%3A400%2C700&#038;display=swap" data-rocket-async="style" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+	<meta name="description" content="EnHelix has a long expertise and experience with commodity risk management to drive profitable decisions and trades. Overview and explanations." />
+	<meta name="robots" content="index, follow" />
+	<meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+	<meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+	<link rel="canonical" href="https://www.enhelix.com/what-is/commodity-risk-management/" />
+	<!-- / Yoast SEO Premium plugin. -->
+
+
+<link rel='dns-prefetch' href='//maps-api-ssl.google.com' />
+<link rel='dns-prefetch' href='//fonts.googleapis.com' />
+<link href='https://fonts.gstatic.com' crossorigin rel='preconnect' />
+<link rel="alternate" type="application/rss+xml" title="EnHelix: ETRM &amp; CTRM Software with AI &amp; Blockchain &raquo; Feed" href="https://www.enhelix.com/feed/" />
+<link rel="alternate" type="application/rss+xml" title="EnHelix: ETRM &amp; CTRM Software with AI &amp; Blockchain &raquo; Comments Feed" href="https://www.enhelix.com/comments/feed/" />
+<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+	<link rel='preload'   href='https://www.enhelix.com/wp-includes/css/dist/block-library/style.min.css?ver=5.3' data-rocket-async="style" as="style" onload="this.onload=null;this.rel='stylesheet'" type='text/css' media='all' />
+<link rel='preload'   href='https://www.enhelix.com/wp-includes/css/dist/block-library/theme.min.css?ver=5.3' data-rocket-async="style" as="style" onload="this.onload=null;this.rel='stylesheet'" type='text/css' media='all' />
+<link data-minify="1" rel='preload'   href='https://www.enhelix.com/wp-content/cache/min/1/wp-content/plugins/revslider/public/assets/css/settings.css?ver=1627248660' data-rocket-async="style" as="style" onload="this.onload=null;this.rel='stylesheet'" type='text/css' media='all' />
+<style id='rs-plugin-settings-inline-css' type='text/css'>
+#rs-demo-id {}
+</style>
+<!--[if lt IE 9]>
+<link rel='stylesheet' id='vc_lte_ie9-css'  href='https://www.enhelix.com/wp-content/plugins/js_composer/assets/css/vc_lte_ie9.min.css?ver=6.0.3' type='text/css' media='screen' />
+<![endif]-->
+<link data-minify="1" rel='preload'   href='https://www.enhelix.com/wp-content/cache/min/1/wp-content/plugins/divi-builder/includes/builder/styles/frontend-builder-plugin-style.unified.css?ver=1627248661' data-rocket-async="style" as="style" onload="this.onload=null;this.rel='stylesheet'" type='text/css' media='all' />
+<link data-minify="1" rel='preload'   href='https://www.enhelix.com/wp-content/cache/min/1/wp-includes/css/dashicons.min.css?ver=1627248661' data-rocket-async="style" as="style" onload="this.onload=null;this.rel='stylesheet'" type='text/css' media='all' />
+
+<link data-minify="1" rel='preload'   href='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/css/bootstrap.min.css?ver=1627248661' data-rocket-async="style" as="style" onload="this.onload=null;this.rel='stylesheet'" type='text/css' media='all' />
+<link data-minify="1" rel='preload'   href='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/css/plugins.css?ver=1627248661' data-rocket-async="style" as="style" onload="this.onload=null;this.rel='stylesheet'" type='text/css' media='all' />
+<link data-minify="1" rel='preload'   href='https://www.enhelix.com/wp-content/cache/min/1/wp-content/uploads/wp-less/morello_theme_work/style/css/theme-0924650a8d.css?ver=1627248661' data-rocket-async="style" as="style" onload="this.onload=null;this.rel='stylesheet'" type='text/css' media='all' />
+<link data-minify="1" rel='preload'   href='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/type/icons.css?ver=1627248661' data-rocket-async="style" as="style" onload="this.onload=null;this.rel='stylesheet'" type='text/css' media='all' />
+<link data-minify="1" rel='preload'   href='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work-child/style.css?ver=1627248661' data-rocket-async="style" as="style" onload="this.onload=null;this.rel='stylesheet'" type='text/css' media='all' />
+<style id='ebor-style-inline-css' type='text/css'>
+footer.footer-bg1 {
+    padding-bottom: 0px;
+}
+			footer.footer-bg1 {
+			    background-image: url() !important;
+			}
+			footer.footer-bg2 {
+			    background-image: url(http://themes.iki-bir.com/morello/style/images/art/footer2.jpg) !important;
+			}
+			figure a .overlay {
+			    background: rgba(123,196,230, 0.9);
+			}
+		
+</style>
+<script type="rocketlazyloadscript" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-includes/js/jquery/jquery.js?ver=1.12.4-wp'></script>
+<script type="rocketlazyloadscript" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-includes/js/jquery/jquery-migrate.min.js?ver=1.4.1' defer></script>
+<script type="rocketlazyloadscript" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/plugins/revslider/public/assets/js/jquery.themepunch.tools.min.js?ver=5.4.8.2' defer></script>
+<script type="rocketlazyloadscript" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/plugins/revslider/public/assets/js/jquery.themepunch.revolution.min.js?ver=5.4.8.2' defer></script>
+<script type='text/javascript'>
+/* <![CDATA[ */
+var eio_lazy_vars = {"exactdn_domain":"","skip_autoscale":"0"};
+/* ]]> */
+</script>
+<script type='text/javascript' src='https://www.enhelix.com/wp-content/plugins/ewww-image-optimizer/includes/lazysizes.min.js?ver=601' defer></script>
+<link rel='https://api.w.org/' href='https://www.enhelix.com/wp-json/' />
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://www.enhelix.com/xmlrpc.php?rsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="https://www.enhelix.com/wp-includes/wlwmanifest.xml" /> 
+<meta name="generator" content="WordPress 5.3" />
+<link rel="alternate" type="application/json+oembed" href="https://www.enhelix.com/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fwww.enhelix.com%2Fwhat-is%2Fcommodity-risk-management%2F" />
+<!-- Favicon Rotator -->
+<link rel="shortcut icon" href="https://www.enhelix.com/wp-content/uploads/2019/12/logo_enhelix-2.png" />
+<link rel="apple-touch-icon-precomposed" href="https://www.enhelix.com/wp-content/uploads/2019/12/logo_enhelix-3.png" />
+<!-- End Favicon Rotator -->
+
+		<!-- GA Google Analytics @ https://m0n.co/ga -->
+		<script type="rocketlazyloadscript" async src="https://www.googletagmanager.com/gtag/js?id=UA-135302830-1"></script>
+		<script type="rocketlazyloadscript">
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments);}
+			gtag('js', new Date());
+			gtag('config', 'UA-135302830-1');
+		</script>
+
+	<style type="text/css" id="et-bloom-custom-css">
+					.et_bloom .et_bloom_optin_1 .et_bloom_form_container h2, .et_bloom .et_bloom_optin_1 .et_bloom_form_container h2 span, .et_bloom .et_bloom_optin_1 .et_bloom_form_container h2 strong { font-family: "Open Sans", Helvetica, Arial, Lucida, sans-serif; }.et_bloom .et_bloom_optin_1 .et_bloom_form_container p, .et_bloom .et_bloom_optin_1 .et_bloom_form_container p span, .et_bloom .et_bloom_optin_1 .et_bloom_form_container p strong, .et_bloom .et_bloom_optin_1 .et_bloom_form_container form input, .et_bloom .et_bloom_optin_1 .et_bloom_form_container form button span { font-family: "Open Sans", Helvetica, Arial, Lucida, sans-serif; } .et_bloom .et_bloom_optin_4 .et_bloom_form_content { background-color: #ffffff !important; } .et_bloom .et_bloom_optin_4 .et_bloom_form_container .et_bloom_form_header { background-color: #2c94f2 !important; } .et_bloom .et_bloom_optin_4 .wedge_edge .triangle { fill: #2c94f2} .et_bloom .et_bloom_optin_4 .et_bloom_form_content button { background-color: #3b3b3b !important; } .et_bloom .et_bloom_optin_4 .et_bloom_form_content .et_bloom_fields i { color: #3b3b3b !important; } .et_bloom .et_bloom_optin_4 .et_bloom_form_content .et_bloom_custom_field_radio i:before { background: #3b3b3b !important; } .et_bloom .et_bloom_optin_4 .et_bloom_form_content button { background-color: #3b3b3b !important; } .et_bloom .et_bloom_optin_4 .et_bloom_form_container h2, .et_bloom .et_bloom_optin_4 .et_bloom_form_container h2 span, .et_bloom .et_bloom_optin_4 .et_bloom_form_container h2 strong { font-family: "Open Sans", Helvetica, Arial, Lucida, sans-serif; }.et_bloom .et_bloom_optin_4 .et_bloom_form_container p, .et_bloom .et_bloom_optin_4 .et_bloom_form_container p span, .et_bloom .et_bloom_optin_4 .et_bloom_form_container p strong, .et_bloom .et_bloom_optin_4 .et_bloom_form_container form input, .et_bloom .et_bloom_optin_4 .et_bloom_form_container form button span { font-family: "Open Sans", Helvetica, Arial, Lucida, sans-serif; } .et_bloom .et_bloom_optin_5 .et_bloom_form_content { background-color: #f1632d !important; } .et_bloom .et_bloom_optin_5 .et_bloom_form_container .et_bloom_form_header { background-color: #c44219 !important; } .et_bloom .et_bloom_optin_5 .et_bloom_form_content button { background-color: #353637 !important; } .et_bloom .et_bloom_optin_5 .et_bloom_form_content .et_bloom_fields i { color: #353637 !important; } .et_bloom .et_bloom_optin_5 .et_bloom_form_content .et_bloom_custom_field_radio i:before { background: #353637 !important; } .et_bloom .et_bloom_optin_5 .et_bloom_form_content button { background-color: #353637 !important; } .et_bloom .et_bloom_optin_5 .et_bloom_form_container h2, .et_bloom .et_bloom_optin_5 .et_bloom_form_container h2 span, .et_bloom .et_bloom_optin_5 .et_bloom_form_container h2 strong { font-family: "Open Sans", Helvetica, Arial, Lucida, sans-serif; }.et_bloom .et_bloom_optin_5 .et_bloom_form_container p, .et_bloom .et_bloom_optin_5 .et_bloom_form_container p span, .et_bloom .et_bloom_optin_5 .et_bloom_form_container p strong, .et_bloom .et_bloom_optin_5 .et_bloom_form_container form input, .et_bloom .et_bloom_optin_5 .et_bloom_form_container form button span { font-family: "Open Sans", Helvetica, Arial, Lucida, sans-serif; } 
+				</style><link rel="preload" href="https://www.enhelix.com/wp-content/plugins/divi-builder/core/admin/fonts/modules.ttf" as="font" crossorigin="anonymous"><style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>
+
+<!-- social and search optimization by WPSSO Core v8.18.0 - https://wpsso.com/ -->
+<!-- wpsso meta tags begin -->
+<meta name="wpsso:mark:begin" content="wpsso meta tags begin"/>
+<!-- generator:1 --><meta name="generator" content="WPSSO Core 8.18.0/S"/>
+<!-- generator:2 --><meta name="generator" content="WPSSO FAQ 3.9.0/S"/>
+<!-- generator:3 --><meta name="generator" content="WPSSO JSON 4.12.0/S"/>
+<link rel="shortlink" href="https://www.enhelix.com/?p=1837"/>
+<meta property="og:type" content="article"/>
+<meta property="og:url" content="https://www.enhelix.com/what-is/commodity-risk-management/"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:site_name" content="EnHelix: ETRM &amp; CTRM Software with AI &amp; Blockchain"/>
+<meta property="og:title" content="Commodity Risk Management"/>
+<meta property="og:description" content="The term commodity refers to physical goods which are used to create more complex products. They are essential products which are sold without qualitative differentiation across an associated market. The management of risk associated with commodity trading is called commodity risk management..."/>
+<meta property="og:updated_time" content="2020-02-03T00:31:01+00:00"/>
+<!-- og:image:1 --><meta property="og:image" content="https://www.enhelix.com/wp-content/uploads/2020/02/risk-management.jpg"/>
+<!-- og:image:1 --><meta property="og:image:width" content="1428"/>
+<!-- og:image:1 --><meta property="og:image:height" content="764"/>
+<!-- og:image:1 --><meta property="og:image:alt" content="risk-management"/>
+<meta property="article:publisher" content="https://www.facebook.com/EnHelixCompany"/>
+<meta property="article:published_time" content="2019-12-28T04:13:24+00:00"/>
+<meta property="article:modified_time" content="2020-02-03T00:31:01+00:00"/>
+<meta name="twitter:domain" content="www.enhelix.com"/>
+<meta name="twitter:site" content="@enhelix"/>
+<meta name="twitter:title" content="Commodity Risk Management"/>
+<meta name="twitter:description" content="The term commodity refers to physical goods which are used to create more complex products. They are essential products which are sold without qualitative differentiation across an associated..."/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://www.enhelix.com/wp-content/uploads/2020/02/risk-management.jpg?p=1837"/>
+<meta name="twitter:image:alt" content="risk-management"/>
+<meta name="twitter:label1" content="Written by"/>
+<meta name="twitter:data1" content="radmin"/>
+<meta name="twitter:label2" content="Est. reading time"/>
+<meta name="twitter:data2" content="3 minutes"/>
+<meta name="author" content="radmin"/>
+<meta name="thumbnail" content="https://www.enhelix.com/wp-content/uploads/2020/02/risk-management.jpg"/>
+<script type="application/ld+json">{
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@id": "/what-is/commodity-risk-management/#sso/article",
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "mainEntityOfPage": "https://www.enhelix.com/what-is/commodity-risk-management/",
+            "url": "https://www.enhelix.com/what-is/commodity-risk-management/",
+            "sameAs": [
+                "https://www.enhelix.com/?p=1837"
+            ],
+            "name": "Commodity Risk Management",
+            "description": "The term commodity refers to physical goods which are used to create more complex products. They are essential products which are sold without qualitative differentiation across an associated market. The management of risk associated with...",
+            "image": [
+                {
+                    "@id": "/wp-content/uploads/2020/02/risk-management.jpg#sso/image.object"
+                }
+            ],
+            "publisher": [
+                {
+                    "@id": "#sso/organization/site/org_logo_url"
+                }
+            ],
+            "headline": "Commodity Risk Management",
+            "copyrightYear": "2019",
+            "inLanguage": "en_US",
+            "dateCreated": "2019-12-28T04:13:24+00:00",
+            "datePublished": "2019-12-28T04:13:24+00:00",
+            "dateModified": "2020-02-03T00:31:01+00:00",
+            "author": {
+                "@id": "/21b0bbfb2c7b2bb9bfb15ba2232bcb6c#sso/person"
+            },
+            "thumbnailUrl": "https://www.enhelix.com/wp-content/uploads/2020/02/risk-management.jpg",
+            "articleBody": "What Is Commodity Risk Management? The term commodity refers to physical goods which are used to create more complex products. They are essential products which are sold without qualitative differentiation across an associated market. The management of risk associated with commodity trading is called commodity risk management. They can be traded two separate markets: the cash (spot) market and the futures market. At the cash market, the trading of physical commodities involves cash transactions, and the exchange of the commodities occur in the present. With the futures market, trading involves future obligations to make or take delivery at a future date, instead of the actual commodity. They are traded on commodity exchanges which are platforms that allow numerous traders to trade commodities. However, there are risks involved in the trade of commodities. What Are Commodity Risks The volatile nature of commodity pricing makes commodity risks a crucial element in commodity trading. The market forces of demand and supply cause huge price fluctuations that can adversely affect the commodity market. Especially as these markets have become more complex by the day. What are the types of Risk? Commodity traders are likely to be exposed to any of, or a combination of the following commodity risks: Price risks:&nbsp;These arise as a result of adverse movement in the prices of commodities that are determined by macroeconomic factors.Quantity Risk:Quantity risks arise due to changes in the availability of commodities.Cost risk:&nbsp;Costs risks are a result of an increase in the costs of commodities.Regulatory risk:&nbsp;When laws and regulations have the potential to impact on the prices or availability of commodities, then there is a regulatory risk. Which Sectors are More Exposed to Commodities Risk? While risk is a part of commodity trading, traders in the following sectors of the commodity markets are mostly exposed to commodities risks. Mining and Minerals sector like Gold, steel, coal. The agricultural sector like wheat, cotton, sugar. Energy sectors like Oil, Gas, Electricity. What Is Risk Management? Dealing in commodities and the attendant volatility of prices exposes traders to lots of risks. This is why it is imperative to execute risk management strategies to mitigate and manage the risks associated with trading in commodities. Nonetheless, with an effective risk management program, investors can gain a consolidated view of these risks; understanding market swings, quantifying net exposures and determining applications for hedge accounting serve to establish a firm handle on these commodity risks and how to effectively manage them. Essentially, commodity risk management means reducing uncertainty by controlling those factors that can be controlled since it is impossible to predict the outcome of an uncertain event. However, effective risk management can be expensive though- building and managing a risk management team, ascertaining the level of exposures in the market, and paying a premium for the hedging products. To effectively manage commodity risks, having the relevant risk management framework with the right people with the right tools, provides a clear vision of the state of the business and the risks associated with the trading. Risk Management Tools. Managing commodity risk is a complex task with enormous amount of data to process. The software like EnHelix can process the trades into configurable risk factors like mark-to-market, realized profits and loss, and sensitivities. Sensitivities are Delta, Gamma, Theta, Rho and Vega are can also be calculated with various option models. The results of these risk metrics are put into a common data repository like a data warehouse. EnHelix has a built-in risk data warehouse so that there is no need to purchase a 3rd party software. The data warehouse present the data in easy to understand format with the ability to slice and dice the data. In addition, EnHelix provides web-based Big Data analytics for advanced risk and AI analytics. Takeaways Commodity risk management is essential to mitigate those risks that are part and parcel of commodity trading. This is because these risks are inevitable, and it is best to be prepared for their possibility."
+        },
+        {
+            "@id": "/wp-content/uploads/2020/02/risk-management.jpg#sso/image.object",
+            "@context": "https://schema.org",
+            "@type": "ImageObject",
+            "url": "https://www.enhelix.com/wp-content/uploads/2020/02/risk-management.jpg",
+            "identifier": "2010-wpsso-schema-16-9",
+            "name": "risk management software",
+            "alternativeHeadline": "risk-management",
+            "description": "risk-management",
+            "fileFormat": "image/jpeg",
+            "uploadDate": "2020-02-03T00:25:58+00:00",
+            "width": 1428,
+            "height": 764
+        },
+        {
+            "@id": "#sso/organization/site/org_logo_url",
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "url": "https://www.enhelix.com",
+            "name": "EnHelix: ETRM &amp; CTRM Software with AI &amp; Blockchain",
+            "description": "Commodity Trading and Logistics Software with AI &amp; Blockchain",
+            "sameAs": [
+                "https://www.facebook.com/EnHelixCompany",
+                "https://www.linkedin.com/company/enhelix",
+                "https://www.pinterest.com/enhelix/",
+                "https://twitter.com/enhelix",
+                "https://www.youtube.com/channel/UCdS9PfB4aTqfQhDD34-70kQ/videos"
+            ]
+        },
+        {
+            "@id": "/21b0bbfb2c7b2bb9bfb15ba2232bcb6c#sso/person",
+            "@context": "https://schema.org",
+            "@type": "Person",
+            "name": "radmin"
+        }
+    ]
+}</script>
+<meta name="wpsso:mark:end" content="wpsso meta tags end"/>
+<!-- wpsso meta tags end -->
+<!-- added on 2021-12-13T07:52:52+00:00 in 0.011925 secs from https://www.enhelix.com -->
+
+<meta name="generator" content="Powered by WPBakery Page Builder - drag and drop page builder for WordPress."/>
+<noscript><style>.lazyload[data-src]{display:none !important;}</style></noscript><style>.lazyload{background-image:none !important;}</style><meta name="generator" content="Powered by Slider Revolution 5.4.8.2 - responsive, Mobile-Friendly Slider Plugin for WordPress with comfortable drag and drop interface." />
+<script type="rocketlazyloadscript" data-rocket-type="text/javascript">
+var $zoho=$zoho || {};$zoho.salesiq = $zoho.salesiq || {widgetcode:"39ba82e5ff4571994d9dadd211bc7f7e7bd143cacd8ef741d6a6d0a97ca5d5a431b4f372be5d4be253ea9c792ef79611", values:{},ready:function(){}};var d=document;s=d.createElement("script");s.type="text/javascript";s.id="zsiqscript";s.defer=true;s.src="https://salesiq.zoho.com/widget";t=d.getElementsByTagName("script")[0];t.parentNode.insertBefore(s,t);d.write("<div id='zsiqwidget' class="lazyload"></div>");
+</script>
+<meta name="icbm" content="29.7604;-95.366302"/>
+<meta name="geo.region" content="US-TX"/>
+<meta name="geo.placename" content="HOUSTON"/>
+<meta name="geo.position" content="29.7604;-95.366302"/>
+<meta name="rights" content="EnHelix"/>
+<meta name="google" content="Oil, Gas, Software, Logistics, LNG, Energy, ETRM, CTRM, Artificial
+Intelligence, Blockchain, Big Data, Upstream, midstream, downstream, NGL, Coal, Turnkey solution"/>
+<meta name="MobileOptimized" content="width"/>
+<meta name="HandheldFriendly" content="true"/>
+
+<script type="rocketlazyloadscript" data-rocket-type="text/javascript">function setREVStartSize(e){									
+						try{ e.c=jQuery(e.c);var i=jQuery(window).width(),t=9999,r=0,n=0,l=0,f=0,s=0,h=0;
+							if(e.responsiveLevels&&(jQuery.each(e.responsiveLevels,function(e,f){f>i&&(t=r=f,l=e),i>f&&f>r&&(r=f,n=e)}),t>r&&(l=n)),f=e.gridheight[l]||e.gridheight[0]||e.gridheight,s=e.gridwidth[l]||e.gridwidth[0]||e.gridwidth,h=i/s,h=h>1?1:h,f=Math.round(h*f),"fullscreen"==e.sliderLayout){var u=(e.c.width(),jQuery(window).height());if(void 0!=e.fullScreenOffsetContainer){var c=e.fullScreenOffsetContainer.split(",");if (c) jQuery.each(c,function(e,i){u=jQuery(i).length>0?u-jQuery(i).outerHeight(!0):u}),e.fullScreenOffset.split("%").length>1&&void 0!=e.fullScreenOffset&&e.fullScreenOffset.length>0?u-=jQuery(window).height()*parseInt(e.fullScreenOffset,0)/100:void 0!=e.fullScreenOffset&&e.fullScreenOffset.length>0&&(u-=parseInt(e.fullScreenOffset,0))}f=u}else void 0!=e.minHeight&&f<e.minHeight&&(f=e.minHeight);e.c.closest(".rev_slider_wrapper").css({height:f})					
+						}catch(d){console.log("Failure at Presize of Slider:"+d)}						
+					};</script>
+<noscript><style> .wpb_animate_when_almost_visible { opacity: 1; }</style></noscript><noscript><style id="rocket-lazyload-nojs-css">.rll-youtube-player, [data-lazy-src]{display:none !important;}</style></noscript><script type="rocketlazyloadscript">
+/*! loadCSS rel=preload polyfill. [c]2017 Filament Group, Inc. MIT License */
+(function(w){"use strict";if(!w.loadCSS){w.loadCSS=function(){}}
+var rp=loadCSS.relpreload={};rp.support=(function(){var ret;try{ret=w.document.createElement("link").relList.supports("preload")}catch(e){ret=!1}
+return function(){return ret}})();rp.bindMediaToggle=function(link){var finalMedia=link.media||"all";function enableStylesheet(){link.media=finalMedia}
+if(link.addEventListener){link.addEventListener("load",enableStylesheet)}else if(link.attachEvent){link.attachEvent("onload",enableStylesheet)}
+setTimeout(function(){link.rel="stylesheet";link.media="only x"});setTimeout(enableStylesheet,3000)};rp.poly=function(){if(rp.support()){return}
+var links=w.document.getElementsByTagName("link");for(var i=0;i<links.length;i++){var link=links[i];if(link.rel==="preload"&&link.getAttribute("as")==="style"&&!link.getAttribute("data-loadcss")){link.setAttribute("data-loadcss",!0);rp.bindMediaToggle(link)}}};if(!rp.support()){rp.poly();var run=w.setInterval(rp.poly,500);if(w.addEventListener){w.addEventListener("load",function(){rp.poly();w.clearInterval(run)})}else if(w.attachEvent){w.attachEvent("onload",function(){rp.poly();w.clearInterval(run)})}}
+if(typeof exports!=="undefined"){exports.loadCSS=loadCSS}
+else{w.loadCSS=loadCSS}}(typeof global!=="undefined"?global:this))
+</script></head>
+
+<body class="page-template-default page page-id-1837 page-child parent-pageid-1769 et_divi_builder et_bloom full-layout et-pb-theme-morello child et-db et_minified_js et_minified_css wpb-js-composer js-comp-ver-6.0.3 vc_responsive">
+
+
+<div class="content-wrapper lazyload">
+
+<div class="navbar navbar-default default extended centered lazyload" role="navigation">
+
+	<div class="container lazyload">
+		<div class="navbar-header lazyload">
+		
+			<div class="social-wrapper text-left lazyload">
+				
+<ul class="social">
+	<li>
+					      <a href="https://www.facebook.com/EnHelix-Software-115561053186772" target="_blank">
+						      <i class="ion-social-facebook"></i>
+					      </a>
+					  </li><li>
+					      <a href="https://twitter.com/enhelix" target="_blank">
+						      <i class="ion-social-twitter"></i>
+					      </a>
+					  </li><li>
+					      <a href="https://www.linkedin.com/company/enhelix" target="_blank">
+						      <i class="ion-social-linkedin"></i>
+					      </a>
+					  </li><li>
+					      <a href="https://www.youtube.com/channel/UCdS9PfB4aTqfQhDD34-70kQ/featured" target="_blank">
+						      <i class="ion-social-youtube"></i>
+					      </a>
+					  </li></ul><!--/.social --> 			</div><!--/.social-wrapper -->
+			
+			<div class="navbar-brand text-center lazyload">
+				
+<a href="https://www.enhelix.com/">
+	<img 
+	 src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%200%200'%3E%3C/svg%3E" 
+	 data-lazy-srcset="https://www.enhelix.com/wp-content/uploads/2019/10/enhelixlogonew.png 1x, https://www.enhelix.com/wp-content/uploads/2019/10/enhelixlogonew.png 2x" 
+		alt="EnHelix: ETRM &amp; CTRM Software with AI &amp; Blockchain" 
+ data-lazy-src="#"	/><noscript><img 
+		src="#" 
+		srcset="https://www.enhelix.com/wp-content/uploads/2019/10/enhelixlogonew.png 1x, https://www.enhelix.com/wp-content/uploads/2019/10/enhelixlogonew.png 2x" 
+		alt="EnHelix: ETRM &amp; CTRM Software with AI &amp; Blockchain" 
+	/></noscript>
+</a>			</div>
+			
+			<ul class="info text-right">
+							</ul><!-- /.info -->
+			
+			<div class="nav-bars-wrapper lazyload">
+	<div class="nav-bars-inner lazyload">
+		<div class="nav-bars lazyload" data-toggle="collapse" data-target=".navbar-collapse"><span></span></div>
+	</div><!-- /.nav-bars-inner --> 
+</div><!-- /.nav-bars-wrapper --> 			
+		</div><!-- /.nav-header --> 
+	</div><!--/.container -->
+	
+	<div class="navbar-collapse collapse lazyload">
+		<div class="container lazyload">
+			<ul id="menu-standard-navigation" class="nav navbar-nav"><li id="menu-item-650" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-650 dropdown"><a class="dropdown-toggle js-activated" href="#" data-toggle="dropdown">Industry <span class="caret"></span></a>
+<ul role="menu" class=" dropdown-menu">
+	<li id="menu-item-664" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-664"><a href="https://www.enhelix.com/crude-oil-trading-software/">Crude Oil Trading</a></li>
+	<li id="menu-item-784" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-784"><a href="https://www.enhelix.com/natural-gas-trading-risk-management-software/">Natural Gas Trading</a></li>
+	<li id="menu-item-783" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-783"><a href="https://www.enhelix.com/ctrm-etrm-lng-trading/">LNG</a></li>
+	<li id="menu-item-782" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-782"><a href="https://www.enhelix.com/petroleum-refining-trading-software/">Petroleum/Refined Products</a></li>
+	<li id="menu-item-781" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-781"><a href="https://www.enhelix.com/chemical-trading-supply-chain/">Chemical</a></li>
+	<li id="menu-item-780" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-780"><a href="https://www.enhelix.com/ngl-trading-software/">NGL/LPG</a></li>
+	<li id="menu-item-779" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-779"><a href="https://www.enhelix.com/power-trading-transmission/">Power Trading</a></li>
+	<li id="menu-item-778" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-778"><a href="https://www.enhelix.com/renewable-energy-trading-credit-software/">Renewable</a></li>
+	<li id="menu-item-1604" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1604"><a href="https://www.enhelix.com/coal-trading-software/">Coal Trading</a></li>
+</ul>
+</li>
+<li id="menu-item-651" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-651 dropdown"><a class="dropdown-toggle js-activated" href="#" data-toggle="dropdown">Software <span class="caret"></span></a>
+<ul role="menu" class=" dropdown-menu">
+	<li id="menu-item-790" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-790"><a href="https://www.enhelix.com/etrm-oil-gas-trading/">ETRM System for Oil and Gas Trading &#038; Logistics</a></li>
+	<li id="menu-item-789" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-789"><a href="https://www.enhelix.com/oil-gas-software/">Enterprise Software</a></li>
+	<li id="menu-item-788" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-788"><a href="https://www.enhelix.com/commodity-blockchain/">Trading Blockchain</a></li>
+	<li id="menu-item-787" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-787"><a href="https://www.enhelix.com/commodity-logistics-supplychain-blockchain/">Logistics Blockchain</a></li>
+	<li id="menu-item-786" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-786"><a href="https://www.enhelix.com/accounting-blockchain/">Settlement Blockchain</a></li>
+	<li id="menu-item-785" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-785"><a href="https://www.enhelix.com/artificial-intelligence-software-oil-gas-energy/">Artificial Intelligence</a></li>
+</ul>
+</li>
+<li id="menu-item-652" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-652 dropdown"><a class="dropdown-toggle js-activated" href="#" data-toggle="dropdown">Sustainability <span class="caret"></span></a>
+<ul role="menu" class=" dropdown-menu">
+	<li id="menu-item-791" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-791"><a href="https://www.enhelix.com/esg-software/">Energy Sustainability &#038; ESG</a></li>
+</ul>
+</li>
+<li id="menu-item-657" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-657"><a href="https://www.enhelix.com/enhelix-oil-gas-software-awards/">Awards/Media</a></li>
+<li id="menu-item-1786" class="menu-item menu-item-type-post_type menu-item-object-page current-page-ancestor menu-item-1786"><a href="https://www.enhelix.com/what-is/">FAQ</a></li>
+<li id="menu-item-923" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-923"><a href="https://www.enhelix.com/enegy-etrm-blog/">Blogs</a></li>
+<li id="menu-item-911" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-911"><a href="https://www.enhelix.com/contact-us/">About</a></li>
+</ul>		</div><!--/.container --> 
+	</div><!--/.nav-collapse --> 
+
+</div><!--/.navbar -->
+			<div data-bg="https://www.enhelix.com/wp-content/uploads/2020/02/risk-management.jpg" class="page-title no rocket-lazyload" style="">
+				<div class="container inner3 lazyload">
+					<h1 class="pull-left">Commodity Risk Management</h1>
+					<div class="more breadcrumbs pull-right bm0 lazyload"><span><a href="https://www.enhelix.com/" class="home-link" rel="home">Home</a></span><span><a href="https://www.enhelix.com/what-is/">FAQ</a></span><span>Commodity Risk Management</span></div>
+				</div><!-- /.container --> 
+			</div><!-- /.dark-wrapper -->
+		<div class="light-wrapper lazyload">
+<div class="container inner lazyload"><div class="section-title lazyload"><h2>Commodity Risk Management</h2></div>
+<h1><strong>What Is Commodity Risk Management?</strong></h1>
+
+
+
+<figure class="wp-block-image"><img width="800" height="533" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20800%20533'%3E%3C/svg%3E" alt="commodity-risk-management" class="wp-image-1838" data-lazy-src="https://www.enhelix.com/wp-content/uploads/2019/12/commodity-risk-management.jpg"/><noscript><img width="800" height="533" src="https://www.enhelix.com/wp-content/uploads/2019/12/commodity-risk-management.jpg" alt="commodity-risk-management" class="wp-image-1838"/></noscript></figure>
+
+
+
+<p>The term <a href="https://en.wikipedia.org/wiki/Commodity">commodity</a> refers to physical goods which are used to create more complex products. They are essential products which are sold without qualitative differentiation across an associated market. The management of risk associated with commodity trading is called commodity risk management.</p>
+
+
+
+<p>They can be traded two separate markets: the cash (spot) market and the futures market. At the cash market, the trading of physical commodities involves cash transactions, and the exchange of the commodities occur in the present. With the futures market, trading involves future obligations to make or take delivery at a future date, instead of the actual commodity. They are traded on commodity exchanges which are platforms that allow numerous traders to trade commodities. However, there are risks involved in the trade of commodities.</p>
+
+
+
+<h2><strong>What Are Commodity Risks</strong></h2>
+
+
+
+<p>The volatile nature of commodity pricing makes commodity risks a crucial element in commodity trading. The market forces of demand and supply cause huge price fluctuations that can adversely affect the commodity market. Especially as these markets have become more complex by the day.</p>
+
+
+
+<h2><strong>What are the types of Risk?</strong></h2>
+
+
+
+<p>Commodity traders are likely to be exposed to any of, or a combination of the following commodity risks:</p>
+
+
+
+<ul><li><strong>Price risks:&nbsp;</strong>These arise as a result of adverse movement in the prices of commodities that are determined by macroeconomic factors.</li><li><strong>Quantity Risk:</strong>Quantity risks arise due to changes in the availability of commodities.</li><li><strong>Cost risk:&nbsp;</strong>Costs risks are a result of an increase in the costs of commodities.</li><li><strong>Regulatory risk:&nbsp;</strong>When laws and regulations have the potential to impact on the prices or availability of commodities, then there is a regulatory risk.</li></ul>
+
+
+
+<h2><strong>Which Sectors are More Exposed to Commodities Risk?</strong></h2>
+
+
+
+<p>While risk is a part of commodity trading, traders in the following sectors of the commodity markets are mostly exposed to commodities risks.</p>
+
+
+
+<ul><li>Mining and Minerals sector like Gold, steel, coal</li><li>The agricultural sector like wheat, cotton, sugar</li><li>Energy sectors like <a href="https://www.enhelix.com/crude-oil-trading-software/">Oil</a>, <a href="https://www.enhelix.com/natural-gas-trading-risk-management-software/">Gas</a>, Electricity</li></ul>
+
+
+
+<figure class="wp-block-image size-large"><img width="1200" height="628" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201200%20628'%3E%3C/svg%3E" alt="commodity-risk-management" class="wp-image-2012" data-lazy-src="https://www.enhelix.com/wp-content/uploads/2020/02/enhelix-risk-management.png"/><noscript><img width="1200" height="628" src="https://www.enhelix.com/wp-content/uploads/2020/02/enhelix-risk-management.png" alt="commodity-risk-management" class="wp-image-2012"/></noscript></figure>
+
+
+
+<h2><strong>What Is Risk Management</strong>?</h2>
+
+
+
+<p>Dealing in commodities and the attendant volatility of prices exposes traders to lots of risks. This is why it is imperative to execute risk management strategies to mitigate and manage the risks associated with trading in commodities.</p>
+
+
+
+<p>Nonetheless, with an effective risk management program, investors can gain a consolidated view of these risks; understanding market swings, quantifying net exposures and determining applications for hedge accounting serve to establish a firm handle on these commodity risks and how to effectively manage them.</p>
+
+
+
+<p>Essentially, commodity risk management means reducing uncertainty by controlling those factors that can be controlled since it is impossible to predict the outcome of an uncertain event. However, effective risk management can be expensive though- building and managing a risk management team, ascertaining the level of exposures in the market, and paying a premium for the hedging products. To effectively manage commodity risks, having the relevant risk management framework with the right people with the right tools, provides a clear vision of the state of the business and the risks associated with the trading.</p>
+
+
+
+<figure class="wp-block-image size-large"><img width="1428" height="764" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201428%20764'%3E%3C/svg%3E" alt="risk-management" class="wp-image-2010" data-lazy-src="https://www.enhelix.com/wp-content/uploads/2020/02/risk-management.jpg"/><noscript><img width="1428" height="764" src="https://www.enhelix.com/wp-content/uploads/2020/02/risk-management.jpg" alt="risk-management" class="wp-image-2010"/></noscript></figure>
+
+
+
+<h2>Risk Management Tools</h2>
+
+
+
+<p>Managing commodity risk is a complex task with enormous amount of data to process. The software like EnHelix can process the trades into configurable risk factors like mark-to-market, realized profits and loss, and sensitivities. Sensitivities are Delta, Gamma, Theta, Rho and Vega are can also be calculated with various option models. </p>
+
+
+
+<p>The results of these risk metrics are put into a common data repository like a data warehouse. EnHelix has a built-in risk data warehouse so that there is no need to purchase a 3rd party software. The data warehouse present the data in easy to understand format with the ability to slice and dice the data. In addition, EnHelix provides web-based Big Data analytics for advanced risk and AI analytics.</p>
+
+
+
+<h2><strong>Takeaways</strong></h2>
+
+
+
+<p>Commodity risk management is essential to mitigate those risks that are part and parcel of commodity trading. This is because these risks are inevitable, and it is best to be prepared for their possibility.</p>
+<div class="et_bloom_below_post lazyload"><div class="et_bloom_inline_form et_bloom_optin et_bloom_make_form_visible et_bloom_optin_4" style="display: none;">
+				
+				<div class="et_bloom_form_container  with_edge wedge_edge et_bloom_rounded et_bloom_form_text_light et_bloom_form_bottom et_bloom_inline_2_fields lazyload">
+					
+			<div class="et_bloom_form_container_wrapper clearfix lazyload">
+				<div class="et_bloom_header_outer lazyload">
+					<div class="et_bloom_form_header et_bloom_header_text_light lazyload">
+						<img width="580" height="163" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20580%20163'%3E%3C/svg%3E" alt="Register for Online Demo" class=" et_bloom_image_slideup et_bloom_image" data-lazy-src="https://www.enhelix.com/wp-content/plugins/bloom/images/premade-image-17.png"><noscript><img width="580" height="163" src="https://www.enhelix.com/wp-content/plugins/bloom/images/premade-image-17.png" alt="Register for Online Demo" class=" et_bloom_image_slideup et_bloom_image"></noscript>
+						<div class="et_bloom_form_text lazyload">
+						<h2>Register for Online Demo</h2><p>Register and you will receive notification on EnHelix demo.</p>
+					</div>
+						
+					</div>
+				</div>
+				<div class="et_bloom_form_content et_bloom_2_fields et_bloom_bottom_inline lazyload">
+					
+					<svg class="triangle et_bloom_default_edge" xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="20" viewBox="0 0 100 100" preserveAspectRatio="none">
+						<path d="M0 0 L50 100 L100 0 Z" fill=""></path>
+					</svg>
+					<form method="post" class="clearfix">
+						<div class="et_bloom_fields lazyload">
+							<p class="et_bloom_popup_input et_bloom_subscribe_name">
+								<input placeholder="Name" maxlength="50">
+							</p>
+							<p class="et_bloom_popup_input et_bloom_subscribe_email">
+								<input placeholder="Email">
+							</p>
+							
+							<button data-optin_id="optin_4" data-service="mailerlite" data-list_id="82290136" data-page_id="1837" data-account="enhelixapp@gmailcom" data-ip_address="true" class="et_bloom_submit_subscription">
+								<span class="et_bloom_subscribe_loader"></span>
+								<span class="et_bloom_button_text et_bloom_button_text_color_light">REGISTER!</span>
+							</button>
+						</div>
+					</form>
+					<div class="et_bloom_success_container lazyload">
+						<span class="et_bloom_success_checkmark"></span>
+					</div>
+					<h2 class="et_bloom_success_message">You have Successfully Subscribed!</h2>
+					
+				</div>
+			</div>
+			<span class="et_bloom_close_button"></span>
+				</div>
+			</div></div><span class="et_bloom_bottom_trigger"></span></div><!-- /.container --> 
+</div><!-- /.light-wrapper --> </div><!-- /.content-wrapper -->
+
+
+	<footer class="footer dark-wrapper footer-bg1">
+		<div class="container inner lazyload">
+			<div class="row lazyload">
+	<div class="col-sm-3 lazyload"><div id="custom_html-2" class="widget_text widget clearfix widget_custom_html lazyload"><div class="textwidget custom-html-widget lazyload"><img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%200%200'%3E%3C/svg%3E" data-lazy-srcset="https://www.enhelix.com/wp-content/uploads/2019/10/enhelixlogosmall-nbg.png 1x, https://www.enhelix.com/wp-content/uploads/2019/10/enhelixlogosmall-retina.png 2x" alt="" data-lazy-src="#"><noscript><img src="#" srcset="https://www.enhelix.com/wp-content/uploads/2019/10/enhelixlogosmall-nbg.png 1x, https://www.enhelix.com/wp-content/uploads/2019/10/enhelixlogosmall-retina.png 2x" alt=""></noscript>
+          <div style="height:9px"></div>
+          
+          <p>© Copyright 2019. All rights reserved.</p>
+  </div></div></div><div class="col-sm-3 lazyload"><div id="custom_html-3" class="widget_text widget clearfix widget_custom_html lazyload"><div class="textwidget custom-html-widget lazyload">          <h4 class="widget-title">Our mission</h4>
+          <p>EnHelix is a global software leader in providing commodity trading and logistics management solutions driven by integrated Artificial Intelligence, Blockchain, and Cloud to serve the
+value chain across crude oil, natural gas, LNG, refined products, petroleum, chemical, NGL, renewable, power, coal, and other commodity markets.</p>
+          <!-- /.info --> 
+          
+ </div></div></div><div class="col-sm-3 lazyload"><div id="custom_html-8" class="widget_text widget clearfix widget_custom_html lazyload"><div class="textwidget custom-html-widget lazyload">          <h4 class="widget-title">Get in Touch</h4>
+          <p>We are located in Houston, Texas. USA.<br>EnHelix Software</p>
+
+          <ul class="info">
+            <li><i class="ion-ios-location"></i>
+              <p>2101 CityWest Blvd <br>
+                Houston TX 77042, USA<br>
+              </p>
+            </li>
+						<li><i class="ion-ios-telephone"></i>
+              <p>+1 (832) 856 74 16</p>
+            </li>
+            <li><i class="ion-android-mail"></i>
+              <p><a href="mailto:info@enhelix.com" class="email-link">info@enhelix.com</a></p>
+            </li>
+            
+          </ul>
+          <!-- /.info --> 
+          
+ </div></div></div><div class="col-sm-3 lazyload"><div id="custom_html-9" class="widget_text widget clearfix widget_custom_html lazyload"><div class="textwidget custom-html-widget lazyload">        <div class="widget lazyload">
+          <h4 class="widget-title">About Us</h4>
+          <ul class="list-unstyled">
+            <li> <a href="https://www.enhelix.com/contact-us/">Contact Us</a> </li>
+            <li> <a href="https://www.enhelix.com/terms-of-use/">Terms of Use</a> </li>
+            <li> <a href="https://www.enhelix.com/privacy-policy-enhelix/">Privacy Policy</a> </li>
+          </ul>
+        </div>
+        <!-- /.widget -->
+        <div class="widget lazyload">
+          <h4 class="widget-title">Elsewhere</h4>
+          <ul class="social">
+            
+            <li> <a href="https://www.facebook.com/EnHelix-Software-115561053186772"><i class="ion-social-facebook"></i></a> </li>
+            <li> <a href="https://twitter.com/enhelix"><i class="ion-social-twitter"></i></a> </li>
+            <li> <a href="https://www.linkedin.com/company/enhelix"><i class="ion-social-linkedin"></i></a> </li>
+            <li> <a href="https://www.youtube.com/channel/UCdS9PfB4aTqfQhDD34-70kQ/featured"><i class="ion-social-youtube"></i></a> </li>
+            
+          </ul>
+        </div>
+        <!-- /.widget --> 
+        
+  </div></div></div><div class="clear lazyload"></div></div>		</div><!-- .container -->  
+	</footer><!-- /footer --> 
+
+<script type="rocketlazyloadscript" data-rocket-type="text/javascript" id="zsiqchat">var $zoho=$zoho || {};$zoho.salesiq = $zoho.salesiq || {widgetcode: "39ba82e5ff4571994d9dadd211bc7f7e7bd143cacd8ef741d6a6d0a97ca5d5a431b4f372be5d4be253ea9c792ef79611", values:{},ready:function(){}};var d=document;s=d.createElement("script");s.type="text/javascript";s.id="zsiqscript";s.defer=true;s.src="https://salesiq.zoho.com/widget?plugin_source=wordpress";t=d.getElementsByTagName("script")[0];t.parentNode.insertBefore(s,t);</script><div class="et_bloom_flyin et_bloom_optin et_bloom_resize et_bloom_flyin_left et_bloom_optin_1 et_bloom_auto_popup lazyload" data-delay="10">
+							<div class="et_bloom_form_container et_bloom_form_bottom with_edge wedge_edge et_bloom_stacked_flyin et_bloom_rounded et_bloom_form_text_dark et_bloom_animation_slideup et_flyin_1_field lazyload">
+								
+			<div class="et_bloom_form_container_wrapper clearfix lazyload">
+				<div class="et_bloom_header_outer lazyload">
+					<div class="et_bloom_form_header et_bloom_header_text_dark lazyload">
+						
+						<div class="et_bloom_form_text lazyload">
+						<h2>Download EnHelix Case Studies</h2><p>Join and receive the latest news about energy trading & logistics.</p>
+					</div>
+						
+					</div>
+				</div>
+				<div class="et_bloom_form_content et_bloom_1_field et_bloom_bottom_stacked lazyload">
+					
+					<svg class="triangle et_bloom_default_edge" xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="20" viewBox="0 0 100 100" preserveAspectRatio="none">
+						<path d="M0 0 L50 100 L100 0 Z" fill=""></path>
+					</svg>
+					<form method="post" class="clearfix">
+						<div class="et_bloom_fields lazyload">
+							
+							<p class="et_bloom_popup_input et_bloom_subscribe_email">
+								<input placeholder="Email">
+							</p>
+							
+							<button data-optin_id="optin_1" data-service="mailerlite" data-list_id="82290420" data-page_id="1837" data-account="enhelixapp@gmailcom" data-ip_address="true" class="et_bloom_submit_subscription">
+								<span class="et_bloom_subscribe_loader"></span>
+								<span class="et_bloom_button_text et_bloom_button_text_color_light">SUBSCRIBE!</span>
+							</button>
+						</div>
+					</form>
+					<div class="et_bloom_success_container lazyload">
+						<span class="et_bloom_success_checkmark"></span>
+					</div>
+					<h2 class="et_bloom_success_message">You have Successfully Subscribed!</h2>
+					
+				</div>
+			</div>
+			<span class="et_bloom_close_button"></span>
+							</div>
+						</div><div class="et_bloom_popup et_bloom_optin et_bloom_resize et_bloom_optin_5 et_bloom_scroll lazyload" data-scroll_pos="75">
+							<div class="et_bloom_form_container et_bloom_popup_container et_bloom_form_bottom et_bloom_rounded et_bloom_form_text_dark et_bloom_animation_fadein lazyload">
+								
+			<div class="et_bloom_form_container_wrapper clearfix lazyload">
+				<div class="et_bloom_header_outer lazyload">
+					<div class="et_bloom_form_header split et_bloom_header_text_light lazyload">
+						<img width="150" height="150" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20150%20150'%3E%3C/svg%3E" alt="Want More Info? Download Brochure!" class=" et_bloom_image_slideup et_bloom_image" data-lazy-src="https://www.enhelix.com/wp-content/plugins/bloom/images/premade-image-05.png"><noscript><img width="150" height="150" src="https://www.enhelix.com/wp-content/plugins/bloom/images/premade-image-05.png" alt="Want More Info? Download Brochure!" class=" et_bloom_image_slideup et_bloom_image"></noscript>
+						<div class="et_bloom_form_text lazyload">
+						<h2>Want More Info? Download Brochure!</h2><p>Brochure and white paper have more info that you really want to know.</p>
+					</div>
+						
+					</div>
+				</div>
+				<div class="et_bloom_form_content et_bloom_1_field et_bloom_bottom_inline lazyload">
+					
+					
+					<form method="post" class="clearfix">
+						<div class="et_bloom_fields lazyload">
+							
+							<p class="et_bloom_popup_input et_bloom_subscribe_email">
+								<input placeholder="Email">
+							</p>
+							
+							<button data-optin_id="optin_5" data-service="mailerlite" data-list_id="82290484" data-page_id="1837" data-account="enhelixapp@gmailcom" data-ip_address="true" class="et_bloom_submit_subscription">
+								<span class="et_bloom_subscribe_loader"></span>
+								<span class="et_bloom_button_text et_bloom_button_text_color_light">DOWNLOAD!</span>
+							</button>
+						</div>
+					</form>
+					<div class="et_bloom_success_container lazyload">
+						<span class="et_bloom_success_checkmark"></span>
+					</div>
+					<h2 class="et_bloom_success_message">You have Successfully Subscribed!</h2>
+					
+				</div>
+			</div>
+			<span class="et_bloom_close_button"></span>
+							</div>
+						</div><!-- Event snippet for MailerLite Signup conversion page -->
+<script type="rocketlazyloadscript">
+  gtag('event', 'conversion', {'send_to': 'AW-760245449/7mkdCOrPwrkBEMnZweoC'});
+</script>
+
+<link data-minify="1" rel='preload'   href='https://www.enhelix.com/wp-content/cache/min/1/wp-content/plugins/bloom/css/style.css?ver=1627248661' data-rocket-async="style" as="style" onload="this.onload=null;this.rel='stylesheet'" type='text/css' media='all' />
+<script type="rocketlazyloadscript" data-rocket-type='text/javascript'>
+"use strict";var _createClass=function(){function defineProperties(target,props){for(var i=0;i<props.length;i++){var descriptor=props[i];descriptor.enumerable=descriptor.enumerable||!1,descriptor.configurable=!0,"value"in descriptor&&(descriptor.writable=!0),Object.defineProperty(target,descriptor.key,descriptor)}}return function(Constructor,protoProps,staticProps){return protoProps&&defineProperties(Constructor.prototype,protoProps),staticProps&&defineProperties(Constructor,staticProps),Constructor}}();function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor))throw new TypeError("Cannot call a class as a function")}var RocketBrowserCompatibilityChecker=function(){function RocketBrowserCompatibilityChecker(options){_classCallCheck(this,RocketBrowserCompatibilityChecker),this.passiveSupported=!1,this._checkPassiveOption(this),this.options=!!this.passiveSupported&&options}return _createClass(RocketBrowserCompatibilityChecker,[{key:"_checkPassiveOption",value:function(self){try{var options={get passive(){return!(self.passiveSupported=!0)}};window.addEventListener("test",null,options),window.removeEventListener("test",null,options)}catch(err){self.passiveSupported=!1}}},{key:"initRequestIdleCallback",value:function(){!1 in window&&(window.requestIdleCallback=function(cb){var start=Date.now();return setTimeout(function(){cb({didTimeout:!1,timeRemaining:function(){return Math.max(0,50-(Date.now()-start))}})},1)}),!1 in window&&(window.cancelIdleCallback=function(id){return clearTimeout(id)})}},{key:"isDataSaverModeOn",value:function(){return"connection"in navigator&&!0===navigator.connection.saveData}},{key:"supportsLinkPrefetch",value:function(){var elem=document.createElement("link");return elem.relList&&elem.relList.supports&&elem.relList.supports("prefetch")&&window.IntersectionObserver&&"isIntersecting"in IntersectionObserverEntry.prototype}},{key:"isSlowConnection",value:function(){return"connection"in navigator&&"effectiveType"in navigator.connection&&("2g"===navigator.connection.effectiveType||"slow-2g"===navigator.connection.effectiveType)}}]),RocketBrowserCompatibilityChecker}();
+</script>
+<script type="rocketlazyloadscript" data-rocket-type='text/javascript'>
+/* <![CDATA[ */
+var RocketPreloadLinksConfig = {"excludeUris":"\/(.+\/)?feed\/?.+\/?|\/(?:.+\/)?embed\/|\/(index\\.php\/)?wp\\-json(\/.*|$)|\/wp-admin\/|\/logout\/|\/wp-login.php","usesTrailingSlash":"1","imageExt":"jpg|jpeg|gif|png|tiff|bmp|webp|avif","fileExt":"jpg|jpeg|gif|png|tiff|bmp|webp|avif|php|pdf|html|htm","siteUrl":"https:\/\/www.enhelix.com","onHoverDelay":"100","rateThrottle":"3"};
+/* ]]> */
+</script>
+<script type="rocketlazyloadscript" data-rocket-type='text/javascript'>
+(function() {
+"use strict";var r="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e},e=function(){function i(e,t){for(var n=0;n<t.length;n++){var i=t[n];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(e,i.key,i)}}return function(e,t,n){return t&&i(e.prototype,t),n&&i(e,n),e}}();function i(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}var t=function(){function n(e,t){i(this,n),this.browser=e,this.config=t,this.options=this.browser.options,this.prefetched=new Set,this.eventTime=null,this.threshold=1111,this.numOnHover=0}return e(n,[{key:"init",value:function(){!this.browser.supportsLinkPrefetch()||this.browser.isDataSaverModeOn()||this.browser.isSlowConnection()||(this.regex={excludeUris:RegExp(this.config.excludeUris,"i"),images:RegExp(".("+this.config.imageExt+")$","i"),fileExt:RegExp(".("+this.config.fileExt+")$","i")},this._initListeners(this))}},{key:"_initListeners",value:function(e){-1<this.config.onHoverDelay&&document.addEventListener("mouseover",e.listener.bind(e),e.listenerOptions),document.addEventListener("mousedown",e.listener.bind(e),e.listenerOptions),document.addEventListener("touchstart",e.listener.bind(e),e.listenerOptions)}},{key:"listener",value:function(e){var t=e.target.closest("a"),n=this._prepareUrl(t);if(null!==n)switch(e.type){case"mousedown":case"touchstart":this._addPrefetchLink(n);break;case"mouseover":this._earlyPrefetch(t,n,"mouseout")}}},{key:"_earlyPrefetch",value:function(t,e,n){var i=this,r=setTimeout(function(){if(r=null,0===i.numOnHover)setTimeout(function(){return i.numOnHover=0},1e3);else if(i.numOnHover>i.config.rateThrottle)return;i.numOnHover++,i._addPrefetchLink(e)},this.config.onHoverDelay);t.addEventListener(n,function e(){t.removeEventListener(n,e,{passive:!0}),null!==r&&(clearTimeout(r),r=null)},{passive:!0})}},{key:"_addPrefetchLink",value:function(i){return this.prefetched.add(i.href),new Promise(function(e,t){var n=document.createElement("link");n.rel="prefetch",n.href=i.href,n.onload=e,n.onerror=t,document.head.appendChild(n)}).catch(function(){})}},{key:"_prepareUrl",value:function(e){if(null===e||"object"!==(void 0===e?"undefined":r(e))||!1 in e||-1===["http:","https:"].indexOf(e.protocol))return null;var t=e.href.substring(0,this.config.siteUrl.length),n=this._getPathname(e.href,t),i={original:e.href,protocol:e.protocol,origin:t,pathname:n,href:t+n};return this._isLinkOk(i)?i:null}},{key:"_getPathname",value:function(e,t){var n=t?e.substring(this.config.siteUrl.length):e;return n.startsWith("/")||(n="/"+n),this._shouldAddTrailingSlash(n)?n+"/":n}},{key:"_shouldAddTrailingSlash",value:function(e){return this.config.usesTrailingSlash&&!e.endsWith("/")&&!this.regex.fileExt.test(e)}},{key:"_isLinkOk",value:function(e){return null!==e&&"object"===(void 0===e?"undefined":r(e))&&(!this.prefetched.has(e.href)&&e.origin===this.config.siteUrl&&-1===e.href.indexOf("?")&&-1===e.href.indexOf("#")&&!this.regex.excludeUris.test(e.href)&&!this.regex.images.test(e.href))}}],[{key:"run",value:function(){"undefined"!=typeof RocketPreloadLinksConfig&&new n(new RocketBrowserCompatibilityChecker({capture:!0,passive:!0}),RocketPreloadLinksConfig).init()}}]),n}();t.run();
+}());
+</script>
+<script type="rocketlazyloadscript" data-rocket-type='text/javascript'>
+/* <![CDATA[ */
+var et_pb_custom = {"ajaxurl":"https:\/\/www.enhelix.com\/wp-admin\/admin-ajax.php","images_uri":"https:\/\/www.enhelix.com\/wp-content\/themes\/morello_theme_work\/images","builder_images_uri":"https:\/\/www.enhelix.com\/wp-content\/plugins\/divi-builder\/includes\/builder\/images","et_frontend_nonce":"71edce0a0e","subscription_failed":"Please, check the fields below to make sure you entered the correct information.","et_ab_log_nonce":"83e7f27e14","fill_message":"Please, fill in the following fields:","contact_error_message":"Please, fix the following errors:","invalid":"Invalid email","captcha":"Captcha","prev":"Prev","previous":"Previous","next":"Next","wrong_captcha":"You entered the wrong number in captcha.","wrong_checkbox":"Checkbox","ignore_waypoints":"yes","is_divi_theme_used":"","widget_search_selector":".widget_search","ab_tests":[],"is_ab_testing_active":"","page_id":"1837","unique_test_id":"","ab_bounce_rate":"5","is_cache_plugin_active":"yes","is_shortcode_tracking":"","tinymce_uri":""}; var et_builder_utils_params = {"condition":{"diviTheme":false,"extraTheme":false},"scrollLocations":["app","top"],"builderScrollLocations":{"desktop":"app","tablet":"app","phone":"app"},"onloadScrollLocation":"app","builderType":"fe"}; var et_frontend_scripts = {"builderCssContainerPrefix":"#et-boc","builderCssLayoutPrefix":"#et-boc .et-l"};
+var et_pb_box_shadow_elements = [];
+var et_pb_motion_elements = {"desktop":[],"tablet":[],"phone":[]};
+var et_pb_sticky_elements = [];
+/* ]]> */
+</script>
+<script type="rocketlazyloadscript" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/plugins/divi-builder/js/divi-builder.min.js?ver=4.7.7' defer></script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/cache/min/1/wp-content/plugins/divi-builder/core/admin/js/common.js?ver=1627248662' defer></script>
+<script type="rocketlazyloadscript" data-rocket-type='text/javascript' src='https://maps-api-ssl.google.com/maps/api/js?key=AIzaSyAkTwvk68NbbTHi3puegQ9ncziMCFhdCm0&#038;ver=5.3' defer></script>
+<script type="rocketlazyloadscript" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/themes/morello_theme_work/style/js/bootstrap.min.js?ver=5.3' defer></script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/js/circle-progressbar.js?ver=1627248662' defer></script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/js/counterup.js?ver=1627248662' defer></script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/js/goodshare.js?ver=1627248662' defer></script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/js/gototop.js?ver=1627248662' defer></script>
+<script type="rocketlazyloadscript" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-includes/js/imagesloaded.min.js?ver=3.2.0' defer></script>
+<script type="rocketlazyloadscript" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/plugins/js_composer/assets/lib/bower/isotope/dist/isotope.pkgd.min.js?ver=6.0.3' defer></script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/js/js-maps.js?ver=1627248662' defer></script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/js/lightgallery.js?ver=1627248662' defer></script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/js/owl-carousel.js?ver=1627248662' defer></script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/js/picturefill.js?ver=1627248662' defer></script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/js/progressbar.js?ver=1627248662' defer></script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/js/smartmenus.js?ver=1627248662' defer></script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/js/sticky-header.js?ver=1627248662' defer></script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/js/tab-collapse.js?ver=1627248662' defer></script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/js/wow.js?ver=1627248662' defer></script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/js/scripts.js?ver=1627248662' defer></script>
+<script type='text/javascript' src='https://www.enhelix.com/wp-includes/js/wp-embed.min.js?ver=5.3' defer></script>
+<script type="rocketlazyloadscript" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/plugins/bloom/js/jquery.uniform.min.js?ver=1.3.11' defer></script>
+<script type="rocketlazyloadscript" data-rocket-type='text/javascript'>
+/* <![CDATA[ */
+var bloomSettings = {"ajaxurl":"https:\/\/www.enhelix.com\/wp-admin\/admin-ajax.php","pageurl":"https:\/\/www.enhelix.com\/what-is\/commodity-risk-management\/","stats_nonce":"b0f4830502","subscribe_nonce":"872d9faa87","is_user_logged_in":"not_logged"};
+/* ]]> */
+</script>
+<script type="rocketlazyloadscript" data-minify="1" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/cache/min/1/wp-content/plugins/bloom/js/custom.js?ver=1627248662' defer></script>
+<script type="rocketlazyloadscript" data-rocket-type='text/javascript' src='https://www.enhelix.com/wp-content/plugins/bloom/js/idle-timer.min.js?ver=1.3.11' defer></script>
+<script>window.lazyLoadOptions={elements_selector:"img[data-lazy-src],.rocket-lazyload",data_src:"lazy-src",data_srcset:"lazy-srcset",data_sizes:"lazy-sizes",class_loading:"lazyloading",class_loaded:"lazyloaded",threshold:300,callback_loaded:function(element){if(element.tagName==="IFRAME"&&element.dataset.rocketLazyload=="fitvidscompatible"){if(element.classList.contains("lazyloaded")){if(typeof window.jQuery!="undefined"){if(jQuery.fn.fitVids){jQuery(element).parent().fitVids()}}}}}};window.addEventListener('LazyLoad::Initialized',function(e){var lazyLoadInstance=e.detail.instance;if(window.MutationObserver){var observer=new MutationObserver(function(mutations){var image_count=0;var iframe_count=0;var rocketlazy_count=0;mutations.forEach(function(mutation){for(i=0;i<mutation.addedNodes.length;i++){if(typeof mutation.addedNodes[i].getElementsByTagName!=='function'){continue}
+if(typeof mutation.addedNodes[i].getElementsByClassName!=='function'){continue}
+images=mutation.addedNodes[i].getElementsByTagName('img');is_image=mutation.addedNodes[i].tagName=="IMG";iframes=mutation.addedNodes[i].getElementsByTagName('iframe');is_iframe=mutation.addedNodes[i].tagName=="IFRAME";rocket_lazy=mutation.addedNodes[i].getElementsByClassName('rocket-lazyload');image_count+=images.length;iframe_count+=iframes.length;rocketlazy_count+=rocket_lazy.length;if(is_image){image_count+=1}
+if(is_iframe){iframe_count+=1}}});if(image_count>0||iframe_count>0||rocketlazy_count>0){lazyLoadInstance.update()}});var b=document.getElementsByTagName("body")[0];var config={childList:!0,subtree:!0};observer.observe(b,config)}},!1)</script><script data-no-minify="1" async src="https://www.enhelix.com/wp-content/plugins/wp-rocket/assets/js/lazyload/16.1/lazyload.min.js"></script><script type="rocketlazyloadscript">"use strict";var wprRemoveCPCSS=function wprRemoveCPCSS(){var elem;document.querySelector('link[data-rocket-async="style"][rel="preload"]')?setTimeout(wprRemoveCPCSS,200):(elem=document.getElementById("rocket-critical-css"))&&"remove"in elem&&elem.remove()};window.addEventListener?window.addEventListener("load",wprRemoveCPCSS):window.attachEvent&&window.attachEvent("onload",wprRemoveCPCSS);</script><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Work%20Sans%3A400%2C500%2C600%2C700%2C800%2C900%2C300%2C200%2C100%7CLora%3A400%2C400italic%2C700%2C700italic%7COpen%20Sans%3A400%2C700&#038;display=swap" /><link rel='stylesheet' id='wp-block-library-css'  href='https://www.enhelix.com/wp-includes/css/dist/block-library/style.min.css?ver=5.3' type='text/css' media='all' /><link rel='stylesheet' id='wp-block-library-theme-css'  href='https://www.enhelix.com/wp-includes/css/dist/block-library/theme.min.css?ver=5.3' type='text/css' media='all' /><link data-minify="1" rel='stylesheet' id='rs-plugin-settings-css'  href='https://www.enhelix.com/wp-content/cache/min/1/wp-content/plugins/revslider/public/assets/css/settings.css?ver=1627248660' type='text/css' media='all' /><link data-minify="1" rel='stylesheet' id='et-builder-modules-style-css'  href='https://www.enhelix.com/wp-content/cache/min/1/wp-content/plugins/divi-builder/includes/builder/styles/frontend-builder-plugin-style.unified.css?ver=1627248661' type='text/css' media='all' /><link data-minify="1" rel='stylesheet' id='dashicons-css'  href='https://www.enhelix.com/wp-content/cache/min/1/wp-includes/css/dashicons.min.css?ver=1627248661' type='text/css' media='all' /><link data-minify="1" rel='stylesheet' id='bootstrap-css'  href='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/css/bootstrap.min.css?ver=1627248661' type='text/css' media='all' /><link data-minify="1" rel='stylesheet' id='ebor-plugins-css'  href='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/css/plugins.css?ver=1627248661' type='text/css' media='all' /><link data-minify="1" rel='stylesheet' id='ebor-theme-styles-css'  href='https://www.enhelix.com/wp-content/cache/min/1/wp-content/uploads/wp-less/morello_theme_work/style/css/theme-0924650a8d.css?ver=1627248661' type='text/css' media='all' /><link data-minify="1" rel='stylesheet' id='ebor-fonts-css'  href='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work/style/type/icons.css?ver=1627248661' type='text/css' media='all' /><link data-minify="1" rel='stylesheet' id='ebor-style-css'  href='https://www.enhelix.com/wp-content/cache/min/1/wp-content/themes/morello_theme_work-child/style.css?ver=1627248661' type='text/css' media='all' /><link data-minify="1" rel='stylesheet' id='et_bloom-css-css'  href='https://www.enhelix.com/wp-content/cache/min/1/wp-content/plugins/bloom/css/style.css?ver=1627248661' type='text/css' media='all' /></noscript></body>
+</html>
+<!-- This website is like a Rocket, isn't it? Performance optimized by WP Rocket. Learn more: https://wp-rocket.me - Debug: cached@1639381972 -->

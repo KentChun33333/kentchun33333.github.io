@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Caveat' rel='stylesheet'>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
+
+    <title>Clawdbot Memory System Analysis | Autumn Memo</title>
+    <meta property="og:title" content="Clawdbot Memory System Analysis - Autumn Memo">
+    <meta property="og:type" content="article">
+
+    <meta property="article:published_time" content='2026-01-28T00:00:00&#43;08:00'>
+
+
+    <meta property="article:modified_time" content='2026-01-28T00:00:00&#43;08:00'>
+
+    <meta name="Keywords" content="">
+    <meta name="description" content="Clawdbot Memory System Analysis">
+    <meta name="author" content="Kent Chiu">
+
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8949849444403982"
+        crossorigin="anonymous"></script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PZF7WLJRQL"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-PZF7WLJRQL');
+    </script>
+    <meta property="og:url" content="https://kentchun33333.github.io/post/clawdbot-memory-system-analysis/">
+    <link rel="shortcut icon" href='/favicon.ico' type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+
+    <script data-ad-client="ca-pub-5108790028230107" async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+
+
+
+
+
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+        <div class="container">
+            <div class="col-group">
+                <div class="site-name ">
+
+                    <a id="logo" href="https://kentchun33333.github.io">
+                        Autumn Memo
+                    </a>
+
+                    <p class="description">Investment, Algorithm and Life Design.</p>
+                </div>
+                <div>
+                    <nav id="nav-menu" class="clearfix">
+
+
+
+                        <a href="https://kentchun33333.github.io/post/" title="Main">Main</a>
+
+                        <a href="https://kentchun33333.github.io/archives/" title="Archives">Archives</a>
+
+                        <a href="https://kentchun33333.github.io/about/" title="About">About</a>
+
+                        <a href="https://kentchun33333.github.io" title=""></a>
+
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+
+                    <div class="res-cons">
+
+                        <article class="post">
+                            <header>
+                                <h1 class="post-title">Clawdbot Memory System Analysis</h1>
+                            </header>
+                            <date class="post-meta meta-date">
+                                2026 - 01 - 28
+                            </date>
+
+                            <div class="post-meta">
+                                <span>|</span>
+
+                                <span class="meta-category"><a href='/categories/software'>Software/Algorithm</a></span>
+
+                            </div>
+
+
+                            <div class="post-meta">
+                                <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                                        Reading </span></span>
+                            </div>
+
+
+                            <div class="post-content">
+                                <p>This document details the architecture and implementation of the Clawdbot memory
+                                    system.</p>
+
+                                <h2>Overview</h2>
+
+                                <p>Clawdbot implements a <strong>Hybrid Retrieval Augmented Generation (RAG)</strong>
+                                    system. It combines <strong>Vector Search</strong> (semantic understanding) with
+                                    <strong>Full-Text Search</strong> (keyword precision) to retrieve relevant context
+                                    from a local knowledge base.</p>
+
+                                <p>Key Technologies:</p>
+                                <ul>
+                                    <li><strong>Storage</strong>: <code>node:sqlite</code> (Local SQLite database)</li>
+                                    <li><strong>Vector Search</strong>: <code>sqlite-vec</code> extension
+                                        (<code>vec0</code> virtual tables)</li>
+                                    <li><strong>Keyword Search</strong>: SQLite FTS5 extension (<code>fts5</code>
+                                        virtual tables)</li>
+                                    <li><strong>File Watcher</strong>: <code>chokidar</code> (Real-time updates)</li>
+                                </ul>
+
+                                <h2>Core Architecture</h2>
+
+                                <h3>1. Data Sources</h3>
+
+                                <p>The memory system indexes content from two primary sources:</p>
+                                <ol>
+                                    <li><strong>Memory Files</strong>: Markdown files located in
+                                        <code>&lt;workspace&gt;/memory/</code> and
+                                        <code>&lt;workspace&gt;/MEMORY.md</code>. These are watched for real-time
+                                        updates.</li>
+                                    <li><strong>Session Transcripts</strong>: Active or archived conversation logs (if
+                                        configured).</li>
+                                </ol>
+
+                                <h3>2. Storage Schema</h3>
+
+                                <p>The system uses a unified SQLite database (<code>memory.sqlite</code>) with the
+                                    following key tables:</p>
+
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align:left">Table</th>
+                                            <th style="text-align:left">Purpose</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td style="text-align:left"><code>files</code></td>
+                                            <td style="text-align:left">Tracks indexed files, modification times, and
+                                                hashes to support incremental updates.</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align:left"><code>chunks</code></td>
+                                            <td style="text-align:left">Stores the actual text chunks derived from
+                                                files. Maps 1:N from files.</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align:left"><code>chunks_vec</code></td>
+                                            <td style="text-align:left"><strong>Virtual Table (sqlite-vec)</strong>.
+                                                Stores the vector embeddings for each chunk. Used for semantic search.
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align:left"><code>chunks_fts</code></td>
+                                            <td style="text-align:left"><strong>Virtual Table (FTS5)</strong>. Stores
+                                                the full text of chunks. Used for BM25/keyword search.</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align:left"><code>embedding_cache</code></td>
+                                            <td style="text-align:left">Caches embeddings by (Provider, Model, TextHash)
+                                                to prevent expensive re-computation.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <h3>3. Indexing Pipeline (Code Snapshot)</h3>
+
+                                <p>The system uses a token-aware chunking strategy optimized for Markdown. It handles
+                                    overlaps to maintain context across chunk boundaries.</p>
+
+                                <p><strong><code>src/memory/internal.ts</code></strong>:</p>
+
+                                <pre><code class="language-typescript">export function chunkMarkdown(
+  content: string,
+  chunking: { tokens: number; overlap: number },
+): MemoryChunk[] {
+  // ... (setup code) ...
+  const lines = content.split(&quot;\n&quot;);
+  
+  // Iterate line by line to respect markdown structure
+  for (let i = 0; i &lt; lines.length; i += 1) {
+    const line = lines[i] ?? &quot;&quot;;
+    // ... (splitting long lines) ...
+    for (const segment of segments) {
+      const lineSize = segment.length + 1;
+      // Flush chunk if size limit reached
+      if (currentChars + lineSize &gt; maxChars &amp;&amp; current.length &gt; 0) {
+        flush();
+        carryOverlap(); // Function to keep the last N chars for the next chunk
+      }
+      current.push({ line: segment, lineNo });
+      currentChars += lineSize;
+    }
+  }
+  flush(); // Final flush
+  return chunks;
+}
+</code></pre>
+
+                                <h3>4. Retrieval Pipeline (Hybrid Search Logic)</h3>
+
+                                <p>Clawdbot explicitly merges vector results (semantic) with keyword results (lexical).
+                                </p>
+
+                                <p><strong><code>src/memory/manager.ts</code></strong>:</p>
+
+                                <pre><code class="language-typescript">  async search(query: string, opts?: { ... }): Promise&lt;MemorySearchResult[]&gt; {
+    // ...
+    // 1. Keyword Search (FTS5)
+    const keywordResults = hybrid.enabled
+      ? await this.searchKeyword(cleaned, candidates).catch(() =&gt; [])
+      : [];
+
+    // 2. Vector Search (sqlite-vec)
+    const queryVec = await this.embedQueryWithTimeout(cleaned);
+    const vectorResults = hasVector
+      ? await this.searchVector(queryVec, candidates).catch(() =&gt; [])
+      : [];
+
+    if (!hybrid.enabled) {
+      return vectorResults.filter((entry) =&gt; entry.score &gt;= minScore);
+    }
+
+    // 3. Merge & Rank
+    const merged = this.mergeHybridResults({
+      vector: vectorResults,
+      keyword: keywordResults,
+      vectorWeight: hybrid.vectorWeight,
+      textWeight: hybrid.textWeight,
+    });
+
+    return merged.filter((entry) =&gt; entry.score &gt;= minScore).slice(0, maxResults);
+  }
+</code></pre>
+
+                                <h3>5. Session Memory Hook</h3>
+
+                                <p>The system includes a specialized hook (<code>session-memory</code>) that bridges the
+                                    gap between ephemeral conversation and long-term memory.</p>
+
+                                <ul>
+                                    <li><strong>Trigger</strong>: <code>/new</code> command (start of new session).</li>
+                                    <li><strong>Action</strong>:
+                                        1. Extracts the summary/context of the ending session.
+                                        2. Uses an LLM to generate a descriptive filename (slug).
+                                        3. Writes the context to a new Markdown file in <code>memory/</code>.</li>
+                                    <li><strong>Result</strong>: Past conversations automatically become part of the
+                                        searchable knowledge base for future sessions.</li>
+                                </ul>
+
+                                <h2>File Structure Reference</h2>
+
+                                <ul>
+                                    <li><strong><code>src/memory/manager.ts</code></strong>: The "brain" of the system.
+                                        Orchestrates indexing, searching, and provider management.</li>
+                                    <li><strong><code>src/memory/internal.ts</code></strong>: Handles file reading,
+                                        hashing, and the critical <strong>chunking</strong> logic.</li>
+                                    <li><strong><code>src/memory/memory-schema.ts</code></strong>: Defines the SQLite
+                                        tables and virtual tables.</li>
+                                    <li><strong><code>src/memory/embeddings-*.ts</code></strong>: Adapters for different
+                                        AI providers (OpenAI, Gemini).</li>
+                                </ul>
+
+                                <h2>Memory for Coding Agents: Analysis &amp; Comparison</h2>
+
+                                <p>Clawdbot uses a <strong>General Text Memory</strong> approach. While effective for
+                                    documentation and conversation history, it differs significantly from specialized
+                                    <strong>Code-Aware Memory</strong> systems (like LSP) often used in advanced coding
+                                    agents.</p>
+
+                                <h3>1. The Disconnect: Text vs. Structure</h3>
+
+                                <ul>
+                                    <li>
+                                        <p><strong>Clawdbot (Text-Based)</strong>: Treats code as text chunks.</p>
+                                        <ul>
+                                            <li><em>Pros</em>: Simple, universal, good for finding comments and
+                                                high-level logic in documentation.</li>
+                                            <li><em>Cons</em>: "Blind" to code structure. It might split a function in
+                                                half if it crosses a chunk boundary (though overlap helps). It doesn't
+                                                understand that <code>class Dog</code> is related to
+                                                <code>dog.bark()</code> unless they are textually close.</li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <p><strong>LSP / Code-Aware (Structure-Based)</strong>: treating code as a graph
+                                            or tree (AST).</p>
+                                        <ul>
+                                            <li><em>Pros</em>: Precise navigation (Go to Definition, Find References).
+                                                Understands "symbols" independent of file position.</li>
+                                            <li><em>Cons</em>: Language-specific, complex to implement and maintain.
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+
+                                <h3>2. Is Clawdbot Good at Coding? (Analysis)</h3>
+
+                                <p>Despite lacking an LSP index, Clawdbot is a highly effective <strong>Coding Assistant
+                                        (Pair Programmer)</strong>, but with a different strength profile than an
+                                    IDE-native agent.</p>
+
+                                <h4>Strengths</h4>
+
+                                <ul>
+                                    <li><strong>Active Coding</strong>: It can execute shell commands, run tests, lint
+                                        files, and read massive documentation files into its context.</li>
+                                    <li><strong>Correction Loop</strong>: It uses <code>bash</code> and
+                                        <code>node</code> to verify its own work. If it generates broken code, it can
+                                        run it, see the error, and fix it—mimicking a human developer's workflow.</li>
+                                    <li><strong>Explanation</strong>: Its generalist memory is excellent for explaining
+                                        high-level architecture decisions found in design docs or READMEs.</li>
+                                </ul>
+
+                                <h4>Limitations (The "LSP Gap")</h4>
+
+                                <ul>
+                                    <li><strong>Refactoring at Scale</strong>: Because it "sees" code as documents, it
+                                        struggles with tasks like <em>"Rename this method and update all 50 files that
+                                            use it"</em>. It might miss usages that don't match the text search exactly.
+                                    </li>
+                                    <li><strong>Implicit Graphs</strong>: It doesn't inherently know that modifying
+                                        <code>A.ts</code> breaks <code>Z.ts</code> unless they are explicitly linked in
+                                        the documentation or textually close.</li>
+                                </ul>
+
+                                <h3>3. LSP-Like Memory Design</h3>
+
+                                <p>For a highly effective *Coding Agent*, memory should ideally be layered:</p>
+
+                                <h4>Layer 1: The Index (What Clawdbot lacks)</h4>
+
+                                <p>An LSP-like system indexes <strong>Symbols</strong> rather than just text chunks.</p>
+
+                                <ul>
+                                    <li><strong>Query</strong>: "Where is <code>User</code> defined?"</li>
+                                    <li><strong>Text Search</strong>: Returns every file containing the word "User"
+                                        (thousands of results).</li>
+                                    <li><strong>Symbol Search</strong>: Returns
+                                        <code>src/models/user.ts:class User</code>.</li>
+                                </ul>
+
+                                <h4>Layer 2: The Graph (Dependency Awareness)</h4>
+
+                                <p>Code is a graph of dependencies. A strong memory system maps these relationships.</p>
+
+                                <ul>
+                                    <li><em>node</em>: <code>auth.ts</code></li>
+                                    <li><em>edge</em>: <code>imports</code> -&gt; <code>user.ts</code></li>
+                                    <li><em>edge</em>: <code>calls</code> -&gt; <code>login()</code></li>
+                                    <li><strong>Agent Utility</strong>: When modifying <code>user.ts</code>, the agent
+                                        automatically knows to check <code>auth.ts</code> because of the graph
+                                        connection.</li>
+                                </ul>
+
+                                <h3>3. Recommendation for Evolution</h3>
+
+                                <p>To evolve Clawdbot into a stronger coding assistant, the memory system could be
+                                    augmented with a <strong>Symbol Index</strong>:</p>
+
+                                <ol>
+                                    <li><strong>Parser</strong>: Use <code>tree-sitter</code> to parse code files when
+                                        indexing.</li>
+                                    <li><strong>Extraction</strong>: Extract top-level symbols (Classes, Functions,
+                                        Interfaces).</li>
+                                    <li><strong>Storage</strong>: Store these as metadata in the <code>chunks</code>
+                                        table or a separate <code>symbols</code> table.</li>
+                                    <li><strong>Retrieval</strong>: Allow the agent to query "definition of X" which
+                                        maps to the specific chunk containing that symbol.</li>
+                                </ol>
+
+                                <p>Code Snapshot Concept for Symbol Indexing:</p>
+
+                                <pre><code class="language-typescript">// Conceptual Future Implementation
+import Parser from 'tree-sitter';
+
+function extractSymbols(code: string) {
+  const tree = parser.parse(code);
+  // Traverse tree to find function/class declarations
+  // Return list of { name, type, line_number }
+}
+
+// In Indexing Pipeline:
+const symbols = extractSymbols(fileContent);
+await db.storeSymbols(fileId, symbols);
+</code></pre>
+
+                            </div>
+
+
+
+
+
+
+
+                            <div class="post-archive">
+                                <h2>See Also</h2>
+                                <ul class="listing">
+
+                                    <li><a href="/post/how-to-close-clawdbot-daemon/">How to Properly Close Clawdbot
+                                            Daemon</a></li>
+
+                                </ul>
+                            </div>
+
+
+                            <div class="post-meta meta-tags">
+
+                                <ul class="clearfix">
+
+                                    <li><a href='/tags/software'>Software</a></li>
+
+                                    <li><a href='/tags/ai'>AI</a></li>
+
+                                </ul>
+
+                            </div>
+                        </article>
+
+
+
+
+
+
+                        <div class="post bg-white">
+                            <script src="https://utteranc.es/client.js" repo="KentChun33333/kentchun33333.github.io"
+                                issue-term="pathname" theme="github-light" crossorigin="anonymous" async>
+                                </script>
+                        </div>
+
+                    </div>
+
+                    <footer id="footer">
+                        <div>
+                            &copy; 2026 <a href="https://kentchun33333.github.io">Autumn Memo By Kent Chiu</a>
+
+                        </div>
+                        <br />
+
+                        <div>
+
+                            <div class="github-badge">
+                                <a href="https://kentchun33333.github.io/" target="_black"><span
+                                        class="badge-subject">Design by</span><span class="badge-value  bg-blue"> Kent
+                                        Chiu </span></a>
+                            </div>
+
+                            <div class="github-badge">
+                                <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span
+                                        class="badge-subject">Powered by</span><span class="badge-value bg-yellowgreen">
+                                        Maupassant-Hugo</span></a>
+                            </div>
+
+                        </div>
+
+                    </footer>
+
+
+
+                    <script type="text/javascript">
+                        window.MathJax = {
+                            tex2jax: {
+                                inlineMath: [['$', '$']],
+                                processEscapes: true
+                            }
+                        };
+                    </script>
+                    <script
+                        src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML'
+                        async></script>
+
+                    <a id="rocket" href="#top"></a>
+                    <script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+                    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"
+                        async></script>
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+                    <section class="widget">
+                        <form id="search" action='https://kentchun33333.github.io/search/' method="get"
+                            accept-charset="utf-8" target="_blank" _lpchecked="1">
+
+                            <input type="text" name="q" maxlength="20" placeholder="Search">
+                            <input type="hidden" name="sitesearch" value="https://kentchun33333.github.io">
+                            <button type="submit" class="submit icon-search"></button>
+                        </form>
+                    </section>
+
+                    <section class="widget">
+
+                        <h3 class="widget-title"><a href="/categories">Categories</a></h3>
+
+                        <div class="tagcloud">
+                            <a>Algorithm (8)</a>
+                            <div class="article-list">
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/top-10-correlation-coeff/"> Top 10 Correlation Coefficient</a></li>
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/self-instruct-aligning-language-model-with-self-generated-instructions/">
+                                        Paper Summay on Aligning LLM with Self-Instruct</a></li>
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/self-instruct-aligning-language-model-with-self-generated-instructions/">
+                                        Paper Summay on Aligning LLM with Self-Instruct</a></li>
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/what-is-rouge-l/"> Recall-Oriented Understudy for Gisting Evaluation
+                                        (ROUGE)</a></li>
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a href="/post/cblof/">
+                                        Cluster-Based Local Outlier Factor</a></li>
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/db-index-vs-silhouette-score/"> Metric for hyperparamter search in
+                                        Unsupervise Learning</a></li>
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/scedasticicity/"> Modeling Uncertainty of ML Systems (01)</a></li>
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/metricf1score/"> F1 Score on Multi Classes</a></li>
+
+                            </div>
+                        </div>
+
+                        <div class="tagcloud">
+                            <a>Communication (1)</a>
+                            <div class="article-list">
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/taskmanagement/"> Collaborative Task Management</a></li>
+
+                            </div>
+                        </div>
+
+                        <div class="tagcloud">
+                            <a>Design Life (2)</a>
+                            <div class="article-list">
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/buyinghouse2021/"> Buy a Condo in Singapore</a></li>
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a href="/about/"> About
+                                        the Author with Blog.</a></li>
+
+                            </div>
+                        </div>
+
+                        <div class="tagcloud">
+                            <a>Software (7)</a>
+                            <div class="article-list">
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/clawdbot-memory-system-analysis/"> Clawdbot Memory System
+                                        Analysis</a></li>
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/trackingmemo/"> Time and Memory Profile Tracking in python</a></li>
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/cloudpickle/"> cloudpickle for distributing serializing</a></li>
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/sshbitbuketonwinows/"> Setting Bitbucket on Windows</a></li>
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/hostpersonalgpt/"> Host Personal Chatgpt-ish Service on AWS</a></li>
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/memosystem/"> Blog Memo by Hugo with Typora</a></li>
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/simplesearchsys/"> Build a Simple Search System</a></li>
+
+                            </div>
+                        </div>
+
+                        <div class="tagcloud">
+                            <a>Trading (4)</a>
+                            <div class="article-list">
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/2023-0711-economicweather/"> Economic Weather x All Weather
+                                        Portfolio</a></li>
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/2023-feb-optionstrategy/"> Top 5 Option Strategies</a></li>
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/customized-lorenz-ann-classification/"> Stock Prediction with
+                                        LorenzANN</a></li>
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/tradingtactic/"> Trading Strategy</a></li>
+
+                            </div>
+                        </div>
+
+                        <div class="tagcloud">
+                            <a>Video (1)</a>
+                            <div class="article-list">
+
+                                <li style="background-color: blanchedalmond;font-size: small;"><a
+                                        href="/post/small-capybara-video/"> Small Capybara July 2025</a></li>
+
+                            </div>
+                        </div>
+
+
+                        <script>
+
+                            $('.article-list').hide();
+
+
+                            $('.tagcloud').click(function () {
+                                $(this).find('.article-list').slideToggle();
+                            });
+                        </script>
+
+                    </section>
+
+
+
+
+
+                    <section class="widget">
+                        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+                        <div class="tagcloud">
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/ai/">AI</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/algotrading/">AlgoTrading</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/capybara/">capybara</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/chatgpt/">ChatGPT</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/economic/">Economic</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/environment/">Environment</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/equitytrading/">EquityTrading</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/github-project/">Github Project</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/hugo/">HUGO</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/inverted-index/">Inverted Index</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/investment/">Investment</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/large-language-model/">Large Language
+                                    Model</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/metric/">Metric</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/nlp/">NLP</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/paper-summary/">Paper Summary</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/project-management/">Project
+                                    Management</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/python/">Python</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag" href="https://kentchun33333.github.io/tags/scrum/">SCRUM</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/search-system/">Search System</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/trading/">Trading</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/typora/">Typora</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/uncertainty-estimation/">Uncertainty
+                                    Estimation</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/unsupervise-learning/">Unsupervise
+                                    Learning</a>
+                            </div>
+
+                            <div class="post-meta">
+                                <a class="simple-meta-tag"
+                                    href="https://kentchun33333.github.io/tags/workflow/">Workflow</a>
+                            </div>
+
+                        </div>
+                    </section>
+
+
+
+
+                    <section class="widget">
+                        <h3 class="widget-title">Others</h3>
+                        <ul class="widget-list">
+                            <li><a href="https://kentchun33333.github.io/index.xml">RSS</a></li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

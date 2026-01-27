@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Trading on Autumn Memo</title>
+    <link>https://kentchun33333.github.io/tags/trading/</link>
+    <description>Recent content in Trading on Autumn Memo</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 27 Jun 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://kentchun33333.github.io/tags/trading/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Economic Weather x All Weather Portfolio</title>
+      <link>https://kentchun33333.github.io/post/2023-0711-economicweather/</link>
+      <pubDate>Tue, 27 Jun 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/post/2023-0711-economicweather/</guid>
+      <description>The sky has its weather, so as the economics. The idea is proposed by Dalio and Bridgewater that they framed these four economic environments as follow</description>
+    </item>
+    
+    <item>
+      <title>Top 5 Option Strategies</title>
+      <link>https://kentchun33333.github.io/post/2023-feb-optionstrategy/</link>
+      <pubDate>Wed, 05 Apr 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://kentchun33333.github.io/post/2023-feb-optionstrategy/</guid>
+      <description>There are only 3 senarios of stock movement that it goes up or down or remain steady.</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,16 @@
+# https://plantuml.com/activity-diagram-beta
+@startuml
+
+|Get Data|
+start
+
+repeat : Get YF OHLC DATA
+:Check OHLC Datetime and Time Zone;
+:Check Local Time with Time Zone;
+
+repeatwhile (is Data Delay) is (yes)
+
+|Inference|
+:Model;
+stop
+@endml

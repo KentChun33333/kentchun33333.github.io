@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on Autumn Memo</title>
+    <link>//localhost:1313/tags/</link>
+    <description>Recent content in Tags on Autumn Memo</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 11 Mar 2023 00:00:00 +0000</lastBuildDate><atom:link href="//localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Trading</title>
+      <link>//localhost:1313/tags/trading/</link>
+      <pubDate>Sat, 11 Mar 2023 00:00:00 +0000</pubDate>
+      
+      <guid>//localhost:1313/tags/trading/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Project Management</title>
+      <link>//localhost:1313/tags/project-management/</link>
+      <pubDate>Tue, 27 Sep 2022 00:00:00 +0000</pubDate>
+      
+      <guid>//localhost:1313/tags/project-management/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Environment</title>
+      <link>//localhost:1313/tags/environment/</link>
+      <pubDate>Sat, 02 Apr 2022 00:00:00 +0000</pubDate>
+      
+      <guid>//localhost:1313/tags/environment/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>HUGO</title>
+      <link>//localhost:1313/tags/hugo/</link>
+      <pubDate>Sun, 01 Aug 2021 00:00:00 +0000</pubDate>
+      
+      <guid>//localhost:1313/tags/hugo/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Typora</title>
+      <link>//localhost:1313/tags/typora/</link>
+      <pubDate>Sun, 01 Aug 2021 00:00:00 +0000</pubDate>
+      
+      <guid>//localhost:1313/tags/typora/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Investment</title>
+      <link>//localhost:1313/tags/investment/</link>
+      <pubDate>Mon, 28 Jun 2021 00:00:00 +0000</pubDate>
+      
+      <guid>//localhost:1313/tags/investment/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Machine Learning</title>
+      <link>//localhost:1313/tags/machine-learning/</link>
+      <pubDate>Tue, 27 Apr 2021 00:00:00 +0000</pubDate>
+      
+      <guid>//localhost:1313/tags/machine-learning/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Metrics</title>
+      <link>//localhost:1313/tags/metrics/</link>
+      <pubDate>Tue, 27 Apr 2021 00:00:00 +0000</pubDate>
+      
+      <guid>//localhost:1313/tags/metrics/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Uncertainty Estimation</title>
+      <link>//localhost:1313/tags/uncertainty-estimation/</link>
+      <pubDate>Tue, 27 Apr 2021 00:00:00 +0000</pubDate>
+      
+      <guid>//localhost:1313/tags/uncertainty-estimation/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Github Project</title>
+      <link>//localhost:1313/tags/github-project/</link>
+      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>//localhost:1313/tags/github-project/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Inverted Index</title>
+      <link>//localhost:1313/tags/inverted-index/</link>
+      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>//localhost:1313/tags/inverted-index/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Search System</title>
+      <link>//localhost:1313/tags/search-system/</link>
+      <pubDate>Fri, 25 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>//localhost:1313/tags/search-system/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>index</title>
+      <link>//localhost:1313/tags/index/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>//localhost:1313/tags/index/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

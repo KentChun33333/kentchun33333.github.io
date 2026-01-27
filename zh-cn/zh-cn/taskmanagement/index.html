@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Caveat' rel='stylesheet'>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    
+
+    <title>Collaborative Task Management | Autumn Memo</title>
+    <meta property="og:title" content="Collaborative Task Management - Autumn Memo">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2022-09-27T00:00:00&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2022-09-27T00:00:00&#43;08:00'>
+        
+    <meta name="Keywords" content="">
+    <meta name="description" content="Collaborative Task Management">
+        <meta name="author" content="Kent Chiu">
+        
+
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8949849444403982"
+    crossorigin="anonymous"></script>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PZF7WLJRQL"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-PZF7WLJRQL');
+    </script>
+    <meta property="og:url" content="https://kentchun33333.github.io/post/taskmanagement/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    <script data-ad-client="ca-pub-5108790028230107" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+    
+    
+    
+    
+    
+</head>
+
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://kentchun33333.github.io">
+                        Autumn Memo
+                    </a>
+                
+                <p class="description">A place of a investment, algorithm and Life flavor.</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    
+                    
+                    
+                    <a  href="https://kentchun33333.github.io/post/" title="Main">Main</a>
+                    
+                    <a  href="https://kentchun33333.github.io/archives/" title="Archives">Archives</a>
+                    
+                    <a  href="https://kentchun33333.github.io/about/" title="About">About</a>
+                    
+                    <a  href="https://kentchun33333.github.io" title=""></a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">Collaborative Task Management</h1>
+        </header>
+        <date class="post-meta meta-date">
+            2022 - 9 - 27 
+        </date>
+        
+        <div class="post-meta">
+            <span>|</span>
+            
+            <span class="meta-category"><a href='/categories/workflow'>Workflow</a></span>
+            
+        </div>
+        
+        
+        <div class="post-meta">
+            <span id="busuanzi_container_page_pv">|<span id="busuanzi_value_page_pv"></span><span>
+                    Reading </span></span>
+        </div>
+        
+        
+        <div class="post-content">
+            <p>Nowadays, we have jira and confluence to help us managing the task and actual works. However, without good strategy, it can not help much.</p>
+<h2 id="task-type-with-expected-outputs">Task Type with Expected Outputs</h2>
+<p>It is important to have clear definition on the expected outputs of each type of tasks.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Task Type</th>
+<th>Description</th>
+<th>Expected Outputs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Issue</td>
+<td>Raise Issue to others</td>
+<td>Email, Error Message, Problem Statement</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Request</td>
+<td>Rasie new functions needs to others</td>
+<td>Problem Statement, Measurement on Success</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Idea</td>
+<td>Have something to share</td>
+<td>Problem Statement, Potential solutions , Documentation</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Solutioning</td>
+<td>Idea propose, Communications,  System Designs that is aiming for request</td>
+<td>Emails , Documentation ,  decomposed of multiple problem statement. each with different solutions</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Implementation</td>
+<td>Functions need to be implement</td>
+<td>PR based on Documentation, CI-Test Pass</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Runs</td>
+<td>Run Experiment or Chase other teams progress</td>
+<td>Experiment result,  Documentation, Config and Metric, With version control that people can check into git-version and reproduce the result.</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Output for UAT</td>
+<td>Prepare particular output to external party</td>
+<td>Feature Dictionary, Data Dictionary, Reports</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Acquisition</td>
+<td>Close the deal from UAT or ..etc</td>
+<td>Confirmation Email</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Implement to Dev</td>
+<td>Shipping the project or product.</td>
+<td>PR,  Documentation of UAT result , Documentation of Model Government + &hellip; etc</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+        </div>
+
+        
+
+
+        
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/project-management'>Project Management</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    <div class="post bg-white">
+      <script src="https://utteranc.es/client.js"
+            repo= "KentChun33333/kentchun33333.github.io"
+            issue-term="pathname"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+      </script>
+    </div>
+    
+</div>
+
+                    <footer id="footer">
+    <div>
+        &copy; 2023 <a href="https://kentchun33333.github.io">Autumn Memo By Kent Chiu</a>
+        
+    </div>
+    <br />
+
+    <div>
+       
+        <div class="github-badge">
+            <a href="https://kentchun33333.github.io/" target="_black"><span class="badge-subject">Design by</span><span class="badge-value  bg-blue"> Kent Chiu </span></a>
+        </div>
+
+        <div class="github-badge">
+            <a href="https://github.com/flysnow-org/maupassant-hugo" target="_black"><span class="badge-subject">Powered by</span><span class="badge-value bg-yellowgreen"> Maupassant-Hugo</span></a>
+        </div>
+
+    </div>
+    
+</footer>
+
+
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+
+
+
+    <script type="text/javascript" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script>
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='https://kentchun33333.github.io/search/' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://kentchun33333.github.io">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+    
+    <section class="widget">
+        <h3 class="widget-title">Recent Post</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://kentchun33333.github.io/post/tradingtactic/" title="Trading Strategy" >Trading Strategy</a>
+    </li>
+    
+    <li>
+        <a href="https://kentchun33333.github.io/post/taskmanagement/" title="Collaborative Task Management" >Collaborative Task Management</a>
+    </li>
+    
+    <li>
+        <a href="https://kentchun33333.github.io/post/sshbitbuketonwinows/" title="Setting Bitbucket on Windows" >Setting Bitbucket on Windows</a>
+    </li>
+    
+    <li>
+        <a href="https://kentchun33333.github.io/post/memosystem/" title="Blog Memo by Hugo with Typora" >Blog Memo by Hugo with Typora</a>
+    </li>
+    
+    <li>
+        <a href="https://kentchun33333.github.io/post/buyinghouse2021/" title="Buy Our First Condo in Singapore" >Buy Our First Condo in Singapore</a>
+    </li>
+    
+    <li>
+        <a href="https://kentchun33333.github.io/post/scedasticicity/" title="Modeling Uncertainty of ML Systems (01)" >Modeling Uncertainty of ML Systems (01)</a>
+    </li>
+    
+    <li>
+        <a href="https://kentchun33333.github.io/post/simplesearchsys/" title="Build a Simple Search System" >Build a Simple Search System</a>
+    </li>
+    
+    <li>
+        <a href="https://kentchun33333.github.io/post/metricf1score/" title="F1 Score on Multi Classes" >F1 Score on Multi Classes</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://kentchun33333.github.io/categories/algorithm/">Algorithm (2)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/life-design/">Life Design (2)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/log/">Log (1)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/software/">Software (1)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/trading/">Trading (1)</a></li>
+    
+    <li><a href="https://kentchun33333.github.io/categories/workflow/">Workflow (3)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://kentchun33333.github.io/tags/environment/">Environment</a>
+    
+    <a href="https://kentchun33333.github.io/tags/github-project/">Github Project</a>
+    
+    <a href="https://kentchun33333.github.io/tags/hugo/">HUGO</a>
+    
+    <a href="https://kentchun33333.github.io/tags/index/">index</a>
+    
+    <a href="https://kentchun33333.github.io/tags/inverted-index/">Inverted Index</a>
+    
+    <a href="https://kentchun33333.github.io/tags/investment/">Investment</a>
+    
+    <a href="https://kentchun33333.github.io/tags/machine-learning/">Machine Learning</a>
+    
+    <a href="https://kentchun33333.github.io/tags/metrics/">Metrics</a>
+    
+    <a href="https://kentchun33333.github.io/tags/project-management/">Project Management</a>
+    
+    <a href="https://kentchun33333.github.io/tags/search-system/">Search System</a>
+    
+    <a href="https://kentchun33333.github.io/tags/trading/">Trading</a>
+    
+    <a href="https://kentchun33333.github.io/tags/typora/">Typora</a>
+    
+    <a href="https://kentchun33333.github.io/tags/uncertainty-estimation/">Uncertainty Estimation</a>
+    
+</div>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title">Others</h3>
+        <ul class="widget-list">
+            <li><a href="https://kentchun33333.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
