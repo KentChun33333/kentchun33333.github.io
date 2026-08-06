@@ -1,4 +1,3 @@
-/Users/kentchiu/.zshenv:.:1: no such file or directory: /Users/kentchiu/.cargo/env
 # Prompt v1 — BANK Multi-Agent TER / STR Demonstration
 
 Create a second, standalone single-file HTML demonstration for an agent-assisted bank-compliance Trigger Event Report (TER) and Suspicious Transaction Report (STR) workflow. Use a neutral BANK visual schema—red, white and warm grey; compact professional typography; strong evidence traceability—and clearly label the experience as a fictional concept demo. Use a generic BANK wordmark with no real financial-institution branding.
