@@ -73,6 +73,16 @@ Then use short staggered animation to reveal:
 
 The reveal must stop within the current frame. Only a presenter click or autoplay timer may advance to the next frame. When the next frame opens, collapse prior processing detail into compact retained-result chips.
 
+### Mandatory frame-to-frame continuity
+
+- Treat every animation as a stateful sequence, not a collection of independent scenes.
+- Before finalizing a frame, compare it with the frame immediately before and after it.
+- Every non-terminal `OUTPUT / HANDOFF`, `NEXT DELEGATION`, owner, queued state and main-canvas handoff must name the exact agent that becomes active in the next frame and the exact task that agent performs.
+- The active dialogue, workforce status, workflow/progress strip, main-canvas cards and retained-result chips must describe the same current state and next state.
+- Use only the stable workforce names and abbreviations defined below. Do not reintroduce legacy or phantom roles such as `KYC Agent`, `Flow Agent`, `Transaction Agent`, `ENT Agent`, `INV Agent` or a separate OCR/VLM agent; express those activities as tasks owned by the appropriate stable agent.
+- If the next frame keeps the same agent active, state the next task explicitly. If the current frame is terminal, label the output as a human-review, filing or report decision rather than implying another agent frame.
+- Audit all three animations from first frame to last frame after implementation. No visible handoff may contradict the next frame’s active agent, task, status or result.
+
 ## Rich document-scanning theatre
 
 Preserve the progressive v8 information design, but restore the most compelling v7-style document animation inside the **main canvas**.
@@ -178,4 +188,6 @@ Render every stage through the same workforce roster. Preserve the distinction b
 18. The active-agent speech bubble reveals its structured summary word by word and remains readable after completion.
 19. Document Intelligence Agent is the only document-processing workforce role; OCR and VLM appear as its tools in the main canvas.
 20. No workforce role or visible status is labelled `External Intelligence`; the role is consistently `External Web Agent`.
-21. JavaScript parsing, complete click-through, desktop/mobile rendering, horizontal overflow and browser console output are verified before delivery.
+21. Every non-terminal handoff, next-delegation label, owner and queued state matches the exact active agent and task in the following frame across all three animations; terminal frames point to a human/report decision.
+22. No legacy or phantom agent labels appear in the animation story when a stable workforce role owns that work.
+23. JavaScript parsing, complete click-through, desktop/mobile rendering, horizontal overflow and browser console output are verified before delivery.
