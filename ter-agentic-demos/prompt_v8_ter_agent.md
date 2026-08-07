@@ -1,167 +1,139 @@
-/Users/kentchiu/.zshenv:.:1: no such file or directory: /Users/kentchiu/.cargo/env
-# Prompt v8 — Progressive Agent Workflow and Staged Result Reveal
+# Prompt v8 — Agent Workforce and Progressive Result Assembly
 
 ## Objective
 
-Create `ter-bank-multi-agent-flow-v8.html` as a new standalone evolution of v7. Preserve v7 unchanged and retain the fictional Orchid Meridian Trading case, BANK styling, three-page analyst journey, seven-source evidence review, six-frame investigation, five-frame refinement, recommendation/provenance placement, micro reports, reset, print, autoplay, and compact icon-only animation navigation.
+Create `ter-bank-multi-agent-flow-v8.html` as a standalone evolution of v7. Preserve v7 unchanged and retain the fictional Orchid Meridian Trading case, BANK styling, three-page analyst journey, seven evidence sources, recommendation/provenance placement above Refinement, micro reports, reset, print, autoplay, and compact icon-only animation navigation.
 
-V8 must reduce the amount of information visible when an animation frame begins. Each frame should first communicate which source and agent are active, then reveal the agent action, then reveal the structured result. Completed processing detail should collapse into compact retained-result indicators when the next frame begins.
+V8 must make agent work immediately understandable without filling either animation panel at frame start. The left panel is a compact workforce roster inspired by the supplied reference. The right panel progressively assembles structured results, one component at a time.
 
-Do not expose private chain-of-thought. Show concise operational reasoning summaries only: assigned task, tool/action, source, result, confidence, validation status, and next handoff.
+Never expose private chain-of-thought. For the active agent, show an auditable **reasoning summary** containing only its assigned task, source, action/tool, decision rationale, output, confidence or validation state, and next handoff.
 
 ## Reference-derived visual direction
 
-Use the supplied workflow references as inspiration for information architecture, not as artwork to reproduce.
+Use the reference as information-architecture inspiration, not artwork to reproduce.
 
-- Prefer a light workflow canvas with subtle dots, simple connected nodes, directional arrows, and clear active/completed states.
-- Construct only the current path plus essential completed context. Do not render every possible source and specialist at the beginning.
-- Attach small contextual action callouts to the active node, similar to a workflow-builder annotation.
-- Keep connectors meaningful: source → active agent → tool/action → normalized result/shared memory → next agent.
-- Use restrained colour blocks for source, agent, tool, memory, and result roles.
-- Avoid the dark-grey command banner used by v7.
+- Present a vertical `Agent workforce` list with small icon/initial badges, agent name, capability, and a clear active/completed/queued/idle status.
+- Highlight only the active agent row with a restrained BANK-red tint and pulse.
+- Expand a compact dialogue beneath the active row. Label its content `TASK`, `ACTION`, `REASONING SUMMARY`, and `OUTPUT / HANDOFF`.
+- Keep completed agents compact; do not leave their working dialogue open.
+- Use green status dots for completed work, red/amber for active work, and grey for queued/idle agents.
+- Keep the workforce panel narrower than the main structured-results canvas.
 
-## Required v8 changes
+## Animation 1 — five progressive source-processing stages
 
-### 1. Staged reveal in Structured Actions and Results
+All seven sources remain represented, but related work is grouped so every presenter click advances the story.
 
-The main animation canvas must no longer appear fully populated at frame start.
+### Frame 1 — Short-document parsing
 
-For every frame, reveal content in this order:
+- Activate `Document Intelligence`.
+- Show it parsing the commercial invoice, two-page supply contract, and customs declaration as one short-document batch.
+- Use direct text/layout parsing; do not overstate OCR/VLM work.
+- In the main canvas, reveal the action first, then publish the three document results one by one.
+- Retain invoice value/goods/counterparty, contract terms/gap, and customs HS-code conflict.
 
-1. **Active work header** — name the active agent or collaborating group and state its current task in plain language.
-2. **Action/tool summary** — show the simplified operation, such as `Extracting KYC document`, `Mapping tables with VLM`, `Reading long contract with OCR + LLM`, `Extracting email context`, `Querying related transaction data`, or `Querying customer and related-client profiles`.
-3. **Structured processing component** — reveal the relevant document, email, SQL, entity, Web, validation, or relationship component.
-4. **Result** — reveal extracted values, ranked rows, resolved entity, mismatch, validation result, or report update.
-5. **Retained result** — when advancing to the next frame, replace the completed processing detail with a compact result chip in the retained-results strip.
+### Frame 2 — Long-document OCR + VLM
 
-Use short staggered reveal animation. The frame still remains under presenter control; the within-frame reveal must not automatically advance to another frame.
+- Activate `OCR + VLM`.
+- Process the 12-page KYC profile and 8-page bill of lading.
+- Clearly state `Reading long documents in reconstructed page order` and `Mapping tables, stamps and cargo regions`.
+- Reveal KYC and shipping results separately, including the low-confidence cargo overwrite signal.
 
-### 2. Explicit agent activity labels
+### Frame 3 — Email context
 
-Make the current work unmistakable.
+- Activate `Context Agent`.
+- State `Extracting customer explanation, named entities, chronology and attachment gaps from email`.
+- Reveal thread reconstruction, then the unsupported-credit-note result.
 
-- Document Agent: `Extracting [document name]`.
-- VLM: `Mapping layout, tables, stamps and signatures`.
-- OCR + LLM: `Reading a long document in reconstructed page order`.
-- Context Agent: `Extracting customer explanation, entities and chronology from email`.
-- Internal Data Agent transaction task: `Querying and extracting related transaction data`.
-- Internal Data Agent profile task: `Querying customer profile and related-client profile data`.
-- Entity Agent: `Resolving exact entity identity and jurisdiction`.
-- Web Agent: `Checking simulated Nature of Business and adverse-news sources`.
-- Evidence QA: `Replaying citations and validating material claims`.
-- Risk/Narrative group: `Converting validated findings into STR language`.
+### Frame 4 — Internal-data extraction
 
-When an agent completes, change the activity from a live verb to a compact completed result.
+- Activate `Data Analyst / Internal Data Agent`.
+- Show two distinct actions and two staged outputs:
+  1. `Querying and extracting related transaction data`.
+  2. `Querying customer profile and related-client profile data`.
+- Treat XLSX/ledger and bank profile data as structured SQL work, not OCR/VLM work.
 
-### 3. Simplify Progressive Agent Workflow
+### Frame 5 — Evidence normalization and Web handoff
 
-Remove the dark `PROGRESSIVE EVIDENCE ROUTING / ROUTE … SOURCE` banner.
+- Activate `Evidence QA` with the Orchestrator coordinating.
+- Normalize keys, replay material citations, preserve low-confidence fields, and publish the complete case-memory package.
+- Only now change `External Intelligence / Web Agent` from queued to ready.
+- State that simulated Nature of Business and adverse-news checks are unlocked for the investigation animation.
 
-Replace the left panel with a light workflow-builder-style canvas:
+## Main canvas behavior
 
-- subtle dotted background;
-- one current source node;
-- one active agent node or compact active collaboration group;
-- an optional tool/action node such as VLM, OCR + LLM, SQL, registry or Web search;
-- a normalized-result/shared-memory node;
-- directional connectors between visible nodes;
-- a small action callout attached to the active agent explaining what it is doing;
-- newly added nodes animate into place;
-- the active path pulses or highlights;
-- completed nodes remain compact and future nodes do not appear until required.
+At the beginning of every frame, show only:
 
-At the first extraction frame, show only:
+1. the retained-results strip from earlier frames; and
+2. a concise active-work header naming the active agent and current task.
 
-- the current KYC source;
-- Document Agent;
-- VLM/OCR + LLM action;
-- an empty or starting result-memory node.
+Then use short staggered animation to reveal:
 
-Do not show Email, Database, Context Agent, Internal Data Agent or Web Agent before their workflow step is reached.
+1. current action/tool;
+2. first structured result;
+3. subsequent result(s);
+4. validation status or handoff.
 
-### 4. Source-specific progressive paths
+The reveal must stop within the current frame. Only a presenter click or autoplay timer may advance to the next frame. When the next frame opens, collapse prior processing detail into compact retained-result chips.
 
-#### Document frames
+## Workforce roster
 
-`Document source → Document Agent → VLM`.
+Use this stable roster across all three animations:
 
-For long documents, extend the current path with `OCR + LLM`. Show a callout such as `Extracting key values from 12 pages` and update the result memory when complete.
+- `OR` — Orchestrator: plans, delegates and synthesizes.
+- `DI` — Document Intelligence: parses short documents and key values.
+- `OV` — OCR + VLM: reads long documents and reasons over layout.
+- `CT` — Context Agent: reconstructs email context and claims.
+- `DA` — Data Analyst: runs transaction/profile SQL and rankings.
+- `ER` — Entity Resolver: resolves exact entities, jurisdictions and directors.
+- `XI` — External Intelligence: runs simulated NOB/adverse-news searches.
+- `QA` — Evidence QA: validates citations, confidence and source convergence.
+- `RN` — Risk + Narrative: converts validated findings into report language.
 
-#### Email frame
+For collaborating stages, highlight the lead agent and show collaborators in the active dialogue or as a small status annotation. Never expand more than one reasoning dialogue at a time.
 
-`Email source → Context Agent → Context extraction → Result memory`.
+## Animation 2 — six-frame investigation
 
-Show customer explanation, named entities, chronology and evidence gaps progressively.
+Keep the existing six-stage story: orchestrator scope, customer/profile baseline, transaction extraction and counterparty ranking, Aster Peak entity/Web resolution with NOB loop-back, source convergence/QA, and validated STR finding formation.
 
-#### Internal-data frame
+Render every stage through the same workforce roster. The main canvas must still reveal its components progressively and retain previous results as chips.
 
-`Internal database → Internal Data Agent → SQL transaction query → SQL profile query → Result memory`.
+## Animation 3 — five-frame refinement
 
-Clearly show both operations:
+Keep the existing five-stage story: analyst scope, counterparty #2 isolation, director and simulated adverse-news resolution, relationship/validation review, and final report update.
 
-- extracting related transaction data;
-- extracting customer and related-client profile data.
+Render every stage through the same workforce roster. Preserve the distinction between bank facts, registry facts and an unverified simulated news lead.
 
-Do not label the account statement as OCR/VLM work in the main canvas when the intended story is structured internal-data extraction.
+## Content and footer requirements
 
-#### Web activation
+- Remove all low-value small footer prose and animation legends.
+- Keep only frame count, progress bar, progress dots, Exit, Previous, Replay and compact icon-only Next/Finish.
+- Recommendation and provenance must appear once above Refinement; remove any duplicate placement.
+- Recommendation copy remains `FILE STR · HIGH` with the established escalation wording.
 
-Only add Web Agent after normalized customer, document, email and internal-data keys are ready. Its visible actions are simulated NOB verification and adverse-news search.
+## Visual, accessibility and technical requirements
 
-### 5. Remove low-value footer text
-
-Remove all small explanatory footer sentences inside animation pages, including:
-
-- `LIVE FRAME · OCR continues paging, VLM regions keep reasoning and the investigation agent keeps challenging until the presenter advances.`
-- autoplay/pause explanatory sentences in the animation footer;
-- `QUEUED → ACTIVE → COMPLETE · RESULTS RETAINED` and similar tiny legend text.
-
-Keep only controls, the progress bar, progress dots, frame count, and meaningful workflow/status content.
-
-## Animation behavior
-
-### Animation 1 — Seven-source processing
-
-- Keep exactly seven frames.
-- Frames 1–5 progressively process document evidence.
-- Frame 6 progressively processes email through Context Agent.
-- Frame 7 uses Internal Data Agent and separate transaction/profile SQL actions.
-- Web becomes available only after the final normalized key-value set is ready.
-
-### Animation 2 — Six-frame investigation
-
-- Keep exactly six frames.
-- Progressively reveal ORCH scope, profile SQL, transaction SQL/ranking, entity/Web resolution, source convergence/QA, and STR finding formation.
-- Construct only the nodes required in the current frame.
-- Preserve the Aster Peak discovery and NOB loop-back story.
-
-### Animation 3 — Five-frame refinement
-
-- Keep exactly five frames.
-- Progressively reveal counterparty #2 isolation, entity/director resolution, simulated Web search, relationship reconstruction, validation gap, and report update.
-
-## Visual and accessibility requirements
-
-- Keep the left workflow panel smaller than the main result canvas.
-- Avoid page-level horizontal overflow.
-- On mobile, stack the workflow and result panels and keep current action, controls, and active node visible.
-- Retain the compact icon-only Next/Finish control with dynamic `aria-label` and tooltip.
-- Use native buttons, visible focus styling and reduced-motion support.
-- Clearly label simulated registry/news data and fictional content.
+- Light panels, white agent rows, subtle dotted texture, restrained BANK red, green completion and grey queue states.
+- No dark-grey progressive-routing block.
+- No page-level horizontal overflow.
+- Stack panels on mobile; keep agent status, active dialogue and controls readable.
+- Native buttons, visible focus styling, dynamic Next/Finish `aria-label` and tooltip, and reduced-motion support.
+- Clearly label all simulated registry/news content and fictional data.
 - Keep all CSS, JavaScript and case data in one HTML file with no backend dependency.
 
 ## Acceptance criteria
 
-1. A new v8 prompt and v8 HTML exist; v7 remains unchanged.
-2. The dark progressive-routing banner is removed.
-3. Frame 1 starts with only the current source, active document agent/tool path and starting result memory.
-4. Main-canvas content reveals sequentially rather than appearing fully populated immediately.
-5. Document, VLM, OCR+LLM, Context, Internal Data, Entity, Web, QA and Risk/Narrative work use explicit activity labels.
-6. The Internal Data frame visibly performs distinct transaction and customer/related-client profile queries.
-7. Email and database agents do not appear before their frames.
-8. Web Agent does not appear before normalized identifiers and context are ready.
-9. Completed processing collapses into retained-result chips on subsequent frames.
-10. All low-value animation footer/legend sentences are removed.
-11. Animation counts remain seven, six and five.
-12. Previous, Replay, Exit, autoplay, Next/Finish, refinement, recommendation update, micro reports, reset and printing continue to work.
-13. JavaScript parsing, complete click-through, desktop rendering, mobile rendering, horizontal overflow and browser console output are verified before delivery.
+1. Prompt v8 and HTML v8 exist; v7 is unchanged.
+2. Animation 1 has five grouped stages while visibly accounting for all seven sources.
+3. The left panel is a compact icon-based workforce list, not a node-routing diagram.
+4. Only the active agent expands a structured reasoning dialogue; hidden chain-of-thought is never shown.
+5. Frame 1 begins sparse and publishes invoice, contract and customs results one by one.
+6. Long-document work is a separate OCR+VLM stage for KYC and bill of lading.
+7. Email context and internal-data SQL are separate, explicit stages.
+8. Transaction SQL and profile/related-client SQL are distinct actions and outputs.
+9. Web/External Intelligence remains queued until evidence normalization completes.
+10. Completed processing collapses into retained-result chips on later frames.
+11. Investigation remains six frames; refinement remains five frames.
+12. Recommendation/provenance appears once above Refinement.
+13. Low-value animation footer prose is absent.
+14. All controls, refinement, recommendation update, micro reports, reset and printing continue to work.
+15. JavaScript parsing, complete click-through, desktop/mobile rendering, horizontal overflow and browser console output are verified before delivery.
