@@ -31,13 +31,14 @@ All seven sources remain represented, but related work is grouped so every prese
 - In the main canvas, reveal the action first, then publish the three document results one by one.
 - Retain invoice value/goods/counterparty, contract terms/gap, and customs HS-code conflict.
 
-### Frame 2 — Long-document OCR + VLM
+### Frame 2 — Long-document OCR → LLM → Validate
 
-- Keep the same unified `Document Intelligence Agent` active; do not create a separate OCR/VLM workforce agent.
+- Keep the same unified `Document Intelligence Agent` active; OCR and LLM are tools, not separate workforce agents.
 - Process the 12-page KYC profile and 8-page bill of lading.
-- Clearly state `Reading long documents in reconstructed page order` and `Mapping tables, stamps and cargo regions`.
-- Reveal KYC and shipping results separately, including the low-confidence cargo overwrite signal.
-- Make OCR + LLM reading and VLM layout reasoning the primary visual workbench in the main canvas.
+- Present the main-canvas sequence explicitly as `OCR → LLM → Validate`; do not show VLM in this frame.
+- OCR scans pages and reconstructs reading order; LLM structures profile fields, tables, stamps and cargo-description content; Validate tests page order, field agreement and the low-confidence cargo overwrite signal.
+- Keep the animated scanner, live page/token counters and validation checks, but do not add separate KYC/Bill-of-Lading published-result cards or a duplicate Document Intelligence handoff beneath the workbench.
+- Use the left-panel `OUTPUT / HANDOFF` as the authoritative summary for this frame.
 
 ### Frame 3 — Email context
 
@@ -98,18 +99,18 @@ Preserve the progressive v8 information design, but restore the most compelling 
 
 ### Long-document stage
 
-- Reuse and refine the v7 visual language: stacked pages, continuously moving OCR beam, live page/token counters, animated VLM region boxes, and file-level validation checks.
-- Show OCR and VLM working side by side before results appear.
+- Reuse and refine the v7 visual language: stacked pages, continuously moving OCR beam, live page/token counters, animated LLM extraction fields, and file-level validation checks.
+- Show the exact sequence `OCR → LLM → Validate`.
 - Visually distinguish the two documents being processed: 12-page KYC profile and 8-page bill of lading.
-- The VLM map should call out profile grids, table regions, stamps and the cargo-description box.
+- The LLM workbench should structure profile grids, table content, stamps and the cargo-description field from the OCR output.
 - Validation checks should animate in sequence and visibly flag the low-confidence cargo-region overwrite.
-- After the theatre appears, publish KYC and shipping results separately and retain their confidence/provenance.
+- Do not repeat the completed KYC/Bill-of-Lading results or handoff below the workbench; the active-agent dialogue carries the frame output and next handoff.
 
 ### Motion constraints
 
 - Scanning motion continues while the frame is held, but it must not advance the presentation automatically.
 - Keep scan effects purposeful and readable; avoid decorative particles that do not explain the work.
-- Respect `prefers-reduced-motion` and keep mobile layouts usable by stacking the OCR, VLM and validation workbenches.
+- Respect `prefers-reduced-motion` and keep mobile layouts usable by stacking the OCR, LLM and validation workbenches.
 - Do not restore v7’s low-value `LIVE FRAME` footer sentence.
 
 ## Workforce roster
@@ -173,7 +174,7 @@ Render every stage through the same workforce roster. Preserve the distinction b
 3. The left panel is a compact icon-based workforce list, not a node-routing diagram.
 4. Only the active agent expands a structured reasoning dialogue; hidden chain-of-thought is never shown.
 5. Frame 1 begins sparse and publishes invoice, contract and customs results one by one.
-6. Long-document work is a separate OCR+VLM stage for KYC and bill of lading.
+6. Long-document work is a separate `OCR → LLM → Validate` stage for KYC and bill of lading, with no VLM label in that frame.
 7. Email context and internal-data SQL are separate, explicit stages.
 8. Transaction SQL and profile/related-client SQL are distinct actions and outputs.
 9. External Web Agent remains queued until the two Internal Data SQL results are published.
@@ -183,7 +184,7 @@ Render every stage through the same workforce roster. Preserve the distinction b
 13. Low-value animation footer prose is absent.
 14. All controls, refinement, recommendation update, micro reports, reset and printing continue to work.
 15. The short-document stage visibly scans a three-file tray before publishing three results.
-16. The long-document stage includes animated stacked pages, OCR beam, live page/token counters, VLM region mapping and sequential validation checks.
+16. The long-document stage includes animated stacked pages, OCR beam, live page/token counters, LLM structured extraction and sequential validation checks.
 17. No standalone Evidence QA normalization frame exists in Animation 1.
 18. The active-agent speech bubble reveals its structured summary word by word and remains readable after completion.
 19. Document Intelligence Agent is the only document-processing workforce role; OCR and VLM appear as its tools in the main canvas.
@@ -191,3 +192,4 @@ Render every stage through the same workforce roster. Preserve the distinction b
 21. Every non-terminal handoff, next-delegation label, owner and queued state matches the exact active agent and task in the following frame across all three animations; terminal frames point to a human/report decision.
 22. No legacy or phantom agent labels appear in the animation story when a stable workforce role owns that work.
 23. JavaScript parsing, complete click-through, desktop/mobile rendering, horizontal overflow and browser console output are verified before delivery.
+24. Animation 1 frame 2 ends after the OCR/LLM/Validate workbench; it does not repeat KYC/Bill-of-Lading result cards or a Document Intelligence handoff in the main canvas.
