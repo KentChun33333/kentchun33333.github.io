@@ -75,6 +75,35 @@ Then use short staggered animation to reveal:
 
 The reveal must stop within the current frame. Only a presenter click or autoplay timer may advance to the next frame. When the next frame opens, collapse prior processing detail into compact retained-result chips.
 
+## Rich document-scanning theatre
+
+Preserve the progressive v8 information design, but restore the most compelling v7-style document animation inside the **main canvas**.
+
+### Short-document stage
+
+- Begin with a compact three-file intake tray for invoice, contract and customs declaration.
+- Animate the current file rising from the tray into a scanner.
+- Run a visible red scan beam over the page while text and table regions become highlighted.
+- Show a small live file counter such as `FILE 1 / 3` and a parser status that changes from `READING` to `KEYS FOUND`.
+- Publish invoice, contract and customs result cards one at a time after the scan component appears.
+- Keep the story accurate: this is direct text/layout parsing for short, digitally legible files, not the long-document OCR pipeline.
+
+### Long-document stage
+
+- Reuse and refine the v7 visual language: stacked pages, continuously moving OCR beam, live page/token counters, animated VLM region boxes, and file-level validation checks.
+- Show OCR and VLM working side by side before results appear.
+- Visually distinguish the two documents being processed: 12-page KYC profile and 8-page bill of lading.
+- The VLM map should call out profile grids, table regions, stamps and the cargo-description box.
+- Validation checks should animate in sequence and visibly flag the low-confidence cargo-region overwrite.
+- After the theatre appears, publish KYC and shipping results separately and retain their confidence/provenance.
+
+### Motion constraints
+
+- Scanning motion continues while the frame is held, but it must not advance the presentation automatically.
+- Keep scan effects purposeful and readable; avoid decorative particles that do not explain the work.
+- Respect `prefers-reduced-motion` and keep mobile layouts usable by stacking the OCR, VLM and validation workbenches.
+- Do not restore v7’s low-value `LIVE FRAME` footer sentence.
+
 ## Workforce roster
 
 Use this stable roster across all three animations:
@@ -136,4 +165,6 @@ Render every stage through the same workforce roster. Preserve the distinction b
 12. Recommendation/provenance appears once above Refinement.
 13. Low-value animation footer prose is absent.
 14. All controls, refinement, recommendation update, micro reports, reset and printing continue to work.
-15. JavaScript parsing, complete click-through, desktop/mobile rendering, horizontal overflow and browser console output are verified before delivery.
+15. The short-document stage visibly scans a three-file tray before publishing three results.
+16. The long-document stage includes animated stacked pages, OCR beam, live page/token counters, VLM region mapping and sequential validation checks.
+17. JavaScript parsing, complete click-through, desktop/mobile rendering, horizontal overflow and browser console output are verified before delivery.
