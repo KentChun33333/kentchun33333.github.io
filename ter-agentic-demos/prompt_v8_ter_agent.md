@@ -19,7 +19,7 @@ Use the reference as information-architecture inspiration, not artwork to reprod
 - Use green status dots for completed work, red/amber for active work, and grey for queued/idle agents.
 - Keep the workforce panel narrower than the main structured-results canvas.
 
-## Animation 1 — five progressive source-processing stages
+## Animation 1 — four progressive source-processing stages
 
 All seven sources remain represented, but related work is grouped so every presenter click advances the story.
 
@@ -51,13 +51,10 @@ All seven sources remain represented, but related work is grouped so every prese
   1. `Querying and extracting related transaction data`.
   2. `Querying customer profile and related-client profile data`.
 - Treat XLSX/ledger and bank profile data as structured SQL work, not OCR/VLM work.
-
-### Frame 5 — Evidence normalization and Web handoff
-
-- Activate `Evidence QA` with the Orchestrator coordinating.
-- Normalize keys, replay material citations, preserve low-confidence fields, and publish the complete case-memory package.
-- Only now change `External Intelligence / Web Agent` from queued to ready.
+- End this frame with a compact orchestrator handoff stating that the seven-source case memory is ready.
+- Change `External Intelligence / Web Agent` from queued to ready only after both SQL results are published.
 - State that simulated Nature of Business and adverse-news checks are unlocked for the investigation animation.
+- Do not create a separate `Evidence QA · Normalizing the complete evidence package` frame.
 
 ## Main canvas behavior
 
@@ -120,6 +117,16 @@ Use this stable roster across all three animations:
 
 For collaborating stages, highlight the lead agent and show collaborators in the active dialogue or as a small status annotation. Never expand more than one reasoning dialogue at a time.
 
+### Talking-dialogue behavior
+
+- Style the expanded active-agent dialogue as a familiar speech bubble attached to the agent icon.
+- Reveal its message naturally, word by word, as if the agent is talking.
+- Show a small animated typing indicator before the first words appear.
+- Reveal `TASK`, `ACTION`, `REASONING SUMMARY`, and `OUTPUT / HANDOFF` in sequence rather than displaying the full bubble immediately.
+- Keep the final message visible after typing completes.
+- Restart the word-by-word animation whenever the presenter enters a new frame.
+- For reduced-motion users, show the complete dialogue immediately.
+
 ## Animation 2 — six-frame investigation
 
 Keep the existing six-stage story: orchestrator scope, customer/profile baseline, transaction extraction and counterparty ranking, Aster Peak entity/Web resolution with NOB loop-back, source convergence/QA, and validated STR finding formation.
@@ -152,14 +159,14 @@ Render every stage through the same workforce roster. Preserve the distinction b
 ## Acceptance criteria
 
 1. Prompt v8 and HTML v8 exist; v7 is unchanged.
-2. Animation 1 has five grouped stages while visibly accounting for all seven sources.
+2. Animation 1 has four grouped stages while visibly accounting for all seven sources.
 3. The left panel is a compact icon-based workforce list, not a node-routing diagram.
 4. Only the active agent expands a structured reasoning dialogue; hidden chain-of-thought is never shown.
 5. Frame 1 begins sparse and publishes invoice, contract and customs results one by one.
 6. Long-document work is a separate OCR+VLM stage for KYC and bill of lading.
 7. Email context and internal-data SQL are separate, explicit stages.
 8. Transaction SQL and profile/related-client SQL are distinct actions and outputs.
-9. Web/External Intelligence remains queued until evidence normalization completes.
+9. Web/External Intelligence remains queued until the two Internal Data SQL results are published.
 10. Completed processing collapses into retained-result chips on later frames.
 11. Investigation remains six frames; refinement remains five frames.
 12. Recommendation/provenance appears once above Refinement.
@@ -167,4 +174,6 @@ Render every stage through the same workforce roster. Preserve the distinction b
 14. All controls, refinement, recommendation update, micro reports, reset and printing continue to work.
 15. The short-document stage visibly scans a three-file tray before publishing three results.
 16. The long-document stage includes animated stacked pages, OCR beam, live page/token counters, VLM region mapping and sequential validation checks.
-17. JavaScript parsing, complete click-through, desktop/mobile rendering, horizontal overflow and browser console output are verified before delivery.
+17. No standalone Evidence QA normalization frame exists in Animation 1.
+18. The active-agent speech bubble reveals its structured summary word by word and remains readable after completion.
+19. JavaScript parsing, complete click-through, desktop/mobile rendering, horizontal overflow and browser console output are verified before delivery.
