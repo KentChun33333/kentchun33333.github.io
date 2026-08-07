@@ -25,18 +25,19 @@ All seven sources remain represented, but related work is grouped so every prese
 
 ### Frame 1 — Short-document parsing
 
-- Activate `Document Intelligence`.
+- Activate the unified `Document Intelligence Agent`.
 - Show it parsing the commercial invoice, two-page supply contract, and customs declaration as one short-document batch.
-- Use direct text/layout parsing; do not overstate OCR/VLM work.
+- Present OCR and VLM as tools used by this agent in the main canvas, with a lightweight direct-text/layout path for digitally legible pages.
 - In the main canvas, reveal the action first, then publish the three document results one by one.
 - Retain invoice value/goods/counterparty, contract terms/gap, and customs HS-code conflict.
 
 ### Frame 2 — Long-document OCR + VLM
 
-- Activate `OCR + VLM`.
+- Keep the same unified `Document Intelligence Agent` active; do not create a separate OCR/VLM workforce agent.
 - Process the 12-page KYC profile and 8-page bill of lading.
 - Clearly state `Reading long documents in reconstructed page order` and `Mapping tables, stamps and cargo regions`.
 - Reveal KYC and shipping results separately, including the low-confidence cargo overwrite signal.
+- Make OCR + LLM reading and VLM layout reasoning the primary visual workbench in the main canvas.
 
 ### Frame 3 — Email context
 
@@ -52,7 +53,7 @@ All seven sources remain represented, but related work is grouped so every prese
   2. `Querying customer profile and related-client profile data`.
 - Treat XLSX/ledger and bank profile data as structured SQL work, not OCR/VLM work.
 - End this frame with a compact orchestrator handoff stating that the seven-source case memory is ready.
-- Change `External Intelligence / Web Agent` from queued to ready only after both SQL results are published.
+- Change `External Web Agent` from queued to ready only after both SQL results are published.
 - State that simulated Nature of Business and adverse-news checks are unlocked for the investigation animation.
 - Do not create a separate `Evidence QA · Normalizing the complete evidence package` frame.
 
@@ -106,12 +107,11 @@ Preserve the progressive v8 information design, but restore the most compelling 
 Use this stable roster across all three animations:
 
 - `OR` — Orchestrator: plans, delegates and synthesizes.
-- `DI` — Document Intelligence: parses short documents and key values.
-- `OV` — OCR + VLM: reads long documents and reasons over layout.
+- `DI` — Document Intelligence Agent: owns document parsing, OCR + LLM reading, VLM layout reasoning and key-value extraction.
 - `CT` — Context Agent: reconstructs email context and claims.
 - `DA` — Data Analyst: runs transaction/profile SQL and rankings.
 - `ER` — Entity Resolver: resolves exact entities, jurisdictions and directors.
-- `XI` — External Intelligence: runs simulated NOB/adverse-news searches.
+- `EW` — External Web Agent: runs simulated NOB and adverse-news searches.
 - `QA` — Evidence QA: validates citations, confidence and source convergence.
 - `RN` — Risk + Narrative: converts validated findings into report language.
 
@@ -166,7 +166,7 @@ Render every stage through the same workforce roster. Preserve the distinction b
 6. Long-document work is a separate OCR+VLM stage for KYC and bill of lading.
 7. Email context and internal-data SQL are separate, explicit stages.
 8. Transaction SQL and profile/related-client SQL are distinct actions and outputs.
-9. Web/External Intelligence remains queued until the two Internal Data SQL results are published.
+9. External Web Agent remains queued until the two Internal Data SQL results are published.
 10. Completed processing collapses into retained-result chips on later frames.
 11. Investigation remains six frames; refinement remains five frames.
 12. Recommendation/provenance appears once above Refinement.
@@ -176,4 +176,6 @@ Render every stage through the same workforce roster. Preserve the distinction b
 16. The long-document stage includes animated stacked pages, OCR beam, live page/token counters, VLM region mapping and sequential validation checks.
 17. No standalone Evidence QA normalization frame exists in Animation 1.
 18. The active-agent speech bubble reveals its structured summary word by word and remains readable after completion.
-19. JavaScript parsing, complete click-through, desktop/mobile rendering, horizontal overflow and browser console output are verified before delivery.
+19. Document Intelligence Agent is the only document-processing workforce role; OCR and VLM appear as its tools in the main canvas.
+20. No workforce role or visible status is labelled `External Intelligence`; the role is consistently `External Web Agent`.
+21. JavaScript parsing, complete click-through, desktop/mobile rendering, horizontal overflow and browser console output are verified before delivery.
