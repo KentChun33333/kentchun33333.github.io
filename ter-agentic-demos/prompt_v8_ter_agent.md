@@ -2,7 +2,7 @@
 
 ## Objective
 
-Create `ter-bank-multi-agent-flow-v8.html` as a standalone evolution of v7. Preserve v7 unchanged and retain the fictional Orchid Meridian Trading case, BANK styling, three-page analyst journey, seven evidence sources, recommendation/provenance placement above Refinement, micro reports, reset, print, autoplay, and compact icon-only animation navigation.
+Create `ter-bank-multi-agent-flow-v8.html` as a standalone evolution of v7. Preserve v7 unchanged and retain the fictional Orchid Meridian Trading case, BANK styling, three-page analyst journey, seven evidence sources, recommendation/provenance placement above Refinement, appendix reports, reset, print, autoplay, and compact icon-only animation navigation.
 
 V8 must make agent work immediately understandable without filling either animation panel at frame start. The left panel is a compact workforce roster inspired by the supplied reference. The right panel progressively assembles structured results, one component at a time.
 
@@ -23,7 +23,24 @@ Use the reference as information-architecture inspiration, not artwork to reprod
 
 All seven sources remain represented, but related work is grouped so every presenter click advances the story.
 
-### Frame 1 — Short-document parsing
+### Frame 1 — Email context
+
+- Activate `Context Agent` first.
+- State `Extracting customer explanation, named entities, chronology and attachment gaps from email`.
+- Reveal thread reconstruction, then the unsupported-credit-note result.
+- Hand the email context and evidence gap to Data Analyst.
+
+### Frame 2 — Internal-data analysis
+
+- Activate `Data Analyst / Internal Data Agent` after Context Agent.
+- Show two distinct actions and two staged outputs:
+  1. `Querying and extracting related transaction data`.
+  2. `Querying customer profile and related-client profile data`.
+- Treat XLSX/ledger and bank profile data as structured SQL work, not OCR/VLM work.
+- Hand the analyzed transaction/profile baseline to Document Intelligence Agent.
+- Change `External Web Agent` from queued to ready after both SQL results are published.
+
+### Frame 3 — Short-document parsing
 
 - Activate the unified `Document Intelligence Agent`.
 - Show it parsing the commercial invoice, two-page supply contract, and customs declaration as one short-document batch.
@@ -31,7 +48,7 @@ All seven sources remain represented, but related work is grouped so every prese
 - In the main canvas, reveal the action first, then publish the three document results one by one.
 - Retain invoice value/goods/counterparty, contract terms/gap, and customs HS-code conflict.
 
-### Frame 2 — Long-document OCR → LLM → Validate
+### Frame 4 — Long-document OCR → LLM → Validate
 
 - Keep the same unified `Document Intelligence Agent` active; OCR and LLM are tools, not separate workforce agents.
 - Process the 12-page KYC profile and 8-page bill of lading.
@@ -39,23 +56,7 @@ All seven sources remain represented, but related work is grouped so every prese
 - OCR scans pages and reconstructs reading order; LLM structures profile fields, tables, stamps and cargo-description content; Validate tests page order, field agreement and the low-confidence cargo overwrite signal.
 - Keep the animated scanner, live page/token counters and validation checks, but do not add separate KYC/Bill-of-Lading published-result cards or a duplicate Document Intelligence handoff beneath the workbench.
 - Use the left-panel `OUTPUT / HANDOFF` as the authoritative summary for this frame.
-
-### Frame 3 — Email context
-
-- Activate `Context Agent`.
-- State `Extracting customer explanation, named entities, chronology and attachment gaps from email`.
-- Reveal thread reconstruction, then the unsupported-credit-note result.
-
-### Frame 4 — Internal-data extraction
-
-- Activate `Data Analyst / Internal Data Agent`.
-- Show two distinct actions and two staged outputs:
-  1. `Querying and extracting related transaction data`.
-  2. `Querying customer profile and related-client profile data`.
-- Treat XLSX/ledger and bank profile data as structured SQL work, not OCR/VLM work.
-- End this frame with a compact orchestrator handoff stating that the seven-source case memory is ready.
-- Change `External Web Agent` from queued to ready only after both SQL results are published.
-- State that simulated Nature of Business and adverse-news checks are unlocked for the investigation animation.
+- End with the complete seven-source case memory handed to Orchestrator for investigation.
 - Do not create a separate `Evidence QA · Normalizing the complete evidence package` frame.
 
 ## Main canvas behavior
@@ -115,7 +116,7 @@ Preserve the progressive v8 information design, but restore the most compelling 
 
 ## Workforce roster
 
-Use this stable roster across all three animations:
+Use this stable roster across the extraction and refinement animations:
 
 - `OR` — Orchestrator: plans, delegates and synthesizes.
 - `DI` — Document Intelligence Agent: owns document parsing, OCR + LLM reading, VLM layout reasoning and key-value extraction.
@@ -125,6 +126,8 @@ Use this stable roster across all three animations:
 - `EW` — External Web Agent: runs simulated NOB and adverse-news searches.
 - `QA` — Evidence QA: validates citations, confidence and source convergence.
 - `RN` — Risk + Narrative: converts validated findings into report language.
+
+For Animation 2, merge entity resolution, evidence QA, mismatch analysis, risk scoring and narrative formation into one `IV` Investigation Agent. Show only Orchestrator and Investigation Agent in that animation. Do not rerun or display Data Analyst because transaction, profile and document data are already available from Animation 1.
 
 For collaborating stages, highlight the lead agent and show collaborators in the active dialogue or as a small status annotation. Never expand more than one reasoning dialogue at a time.
 
@@ -138,11 +141,14 @@ For collaborating stages, highlight the lead agent and show collaborators in the
 - Restart the word-by-word animation whenever the presenter enters a new frame.
 - For reduced-motion users, show the complete dialogue immediately.
 
-## Animation 2 — six-frame investigation
+## Animation 2 — four-frame investigation
 
-Keep the existing six-stage story: orchestrator scope, customer/profile baseline, transaction extraction and counterparty ranking, Aster Peak entity/Web resolution with NOB loop-back, source convergence/QA, and validated STR finding formation.
+1. Orchestrator hands the ready evidence case to Investigation Agent without repeating data extraction.
+2. Investigation Agent resolves Aster Peak FZE and builds a simple relationship-dot network.
+3. Investigation Agent cross-checks the customer profile, invoice, shipping, customs, payment and registry evidence across that network.
+4. Investigation Agent identifies plain-language mismatches and potential risks, then prepares the validated finding for human review.
 
-Render every stage through the same workforce roster. The main canvas must still reveal its components progressively and retain previous results as chips.
+The left panel contains only Orchestrator and Investigation Agent. The main canvas progressively moves through entity resolution, the dot network, evidence cross-checks, mismatch identification and potential-risk formation. Retain previous results as chips.
 
 ## Animation 3 — five-frame refinement
 
@@ -156,6 +162,19 @@ Render every stage through the same workforce roster. Preserve the distinction b
 - Keep only frame count, progress bar, progress dots, Exit, Previous, Replay and compact icon-only Next/Finish.
 - Recommendation and provenance must appear once above Refinement; remove any duplicate placement.
 - Recommendation copy remains `FILE STR · HIGH` with the established escalation wording.
+
+## Appendix report requirements
+
+- Use the visible name `Appendix report`; do not call it a micro report.
+- The report structure is: executive conclusion, evidence chain, an optional key-transactions table, and external references when present.
+- Treat the evidence chain as the authoritative evidence summary. Do not add a separate Evidence register because it duplicates the chain.
+- Make the evidence chain easy to understand with numbered evidence points and mock file links whose displayed names match the seven files loaded at the beginning of the demo.
+- When a risk relies on transactions, add a compact table with `Name`, `Amount` and `When` columns.
+- Do not display raw `bank://` or `evidence://` protocol strings.
+- Put external HTTP(S) links only in a `References` section at the bottom of the appendix report, never inside the evidence chain.
+- Do not include the Case/Risk rating/Confidence/Review status metadata strip.
+- Do not include a `Limitations and next action` section.
+- Apply the same structure to modal and printable appendix reports.
 
 ## Visual, accessibility and technical requirements
 
@@ -173,16 +192,16 @@ Render every stage through the same workforce roster. Preserve the distinction b
 2. Animation 1 has four grouped stages while visibly accounting for all seven sources.
 3. The left panel is a compact icon-based workforce list, not a node-routing diagram.
 4. Only the active agent expands a structured reasoning dialogue; hidden chain-of-thought is never shown.
-5. Frame 1 begins sparse and publishes invoice, contract and customs results one by one.
+5. Frame 1 begins with Context Agent email extraction; Frame 2 performs Data Analyst SQL analysis; Document Intelligence Agent owns Frames 3 and 4.
 6. Long-document work is a separate `OCR → LLM → Validate` stage for KYC and bill of lading, with no VLM label in that frame.
-7. Email context and internal-data SQL are separate, explicit stages.
+7. Email context and internal-data SQL are separate, explicit stages and occur before document-intelligence processing.
 8. Transaction SQL and profile/related-client SQL are distinct actions and outputs.
 9. External Web Agent remains queued until the two Internal Data SQL results are published.
 10. Completed processing collapses into retained-result chips on later frames.
-11. Investigation remains six frames; refinement remains five frames.
+11. Investigation has four frames; refinement remains five frames.
 12. Recommendation/provenance appears once above Refinement.
 13. Low-value animation footer prose is absent.
-14. All controls, refinement, recommendation update, micro reports, reset and printing continue to work.
+14. All controls, refinement, recommendation update, appendix reports, reset and printing continue to work.
 15. The short-document stage visibly scans a three-file tray before publishing three results.
 16. The long-document stage includes animated stacked pages, OCR beam, live page/token counters, LLM structured extraction and sequential validation checks.
 17. No standalone Evidence QA normalization frame exists in Animation 1.
@@ -193,3 +212,5 @@ Render every stage through the same workforce roster. Preserve the distinction b
 22. No legacy or phantom agent labels appear in the animation story when a stable workforce role owns that work.
 23. JavaScript parsing, complete click-through, desktop/mobile rendering, horizontal overflow and browser console output are verified before delivery.
 24. Animation 1 frame 2 ends after the OCR/LLM/Validate workbench; it does not repeat KYC/Bill-of-Lading result cards or a Document Intelligence handoff in the main canvas.
+25. Appendix reports use the evidence chain as the only evidence summary; no duplicate Evidence register or limitations section is rendered.
+26. Transaction-related appendix reports show Name, Amount and When, while external links appear only under References at the bottom.
