@@ -1,10 +1,10 @@
-# Prompt v8 — Agent Workforce and Progressive Result Assembly
+# Prompt v9 — Explainable Partial-to-Full Exit Escalation
 
 ## Objective
 
-Create `ter-bank-multi-agent-flow-v8.html` as a standalone evolution of v7. Preserve v7 unchanged and retain the fictional Orchid Meridian Trading case, BANK styling, three-page analyst journey, seven evidence sources, recommendation/provenance placement above Refinement, appendix reports, reset, print, autoplay, and compact icon-only animation navigation.
+Create `ter-bank-multi-agent-flow-v9.html` as a standalone evolution of v8. Preserve v8 unchanged and retain the current visual UI, fictional Orchid Meridian Trading case, BANK styling, three-page analyst journey, seven evidence sources, recommendation/provenance placement above Refinement, appendix reports, reset, print, autoplay, and compact icon-only animation navigation.
 
-V8 must make agent work immediately understandable without filling either animation panel at frame start. The left panel is a compact workforce roster inspired by the supplied reference. The right panel progressively assembles structured results, one component at a time.
+V9 must make both the evidence story and the change in exit decision immediately understandable. The left panel remains a compact workforce roster. The right panel progressively assembles structured results, while Page 3 clearly explains why the initial outcome is Partial Exit and what new evidence changes it to Full Exit.
 
 Never expose private chain-of-thought. For the active agent, show an auditable **reasoning summary** containing only its assigned task, source, action/tool, decision rationale, output, confidence or validation state, and next handoff.
 
@@ -26,8 +26,12 @@ All seven sources remain represented, but related work is grouped so every prese
 ### Frame 1 — Email context
 
 - Activate `Context Agent` first.
-- State `Extracting customer explanation, named entities, chronology and attachment gaps from email`.
-- Reveal thread reconstruction, then the unsupported-credit-note result.
+- Show a machine-learning TER trigger model receiving either email or document inputs and detecting a potential trigger event.
+- Use a recognizable envelope icon—not only `EML` text—for the email input and Context Agent roster badge.
+- Make the primary visual read `Email / Document → Event understanding`; place the `TER TRIGGER MODEL · Potential trade anomaly detected · Email + document inputs routed for context review` card underneath as supporting context.
+- Route the ML trigger result into Context Agent; the model detects and routes, while Context Agent understands and explains the TER context.
+- State `Understanding the TER trigger event from ML-routed email and document signals`.
+- Reveal what happened, who is involved, the event chronology and the unsupported-credit-note gap.
 - Hand the email context and evidence gap to Data Analyst.
 
 ### Frame 2 — Internal-data analysis
@@ -87,7 +91,7 @@ The reveal must stop within the current frame. Only a presenter click or autopla
 
 ## Rich document-scanning theatre
 
-Preserve the progressive v8 information design, but restore the most compelling v7-style document animation inside the **main canvas**.
+Preserve the progressive v9 information design and the current document animation inside the **main canvas**.
 
 ### Short-document stage
 
@@ -124,6 +128,7 @@ Use this stable roster across the extraction and refinement animations:
 - `DA` — Data Analyst: runs transaction/profile SQL and rankings.
 - `ER` — Entity Resolver: resolves exact entities, jurisdictions and directors.
 - `EW` — External Web Agent: runs simulated NOB and adverse-news searches.
+- Give External Web Agent a distinct, clearly visible blue `WEB` logo badge in the workforce roster, including when it is active.
 - `QA` — Evidence QA: validates citations, confidence and source convergence.
 - `RN` — Risk + Narrative: converts validated findings into report language.
 
@@ -148,20 +153,41 @@ For collaborating stages, highlight the lead agent and show collaborators in the
 3. External Web Agent searches the selected entity’s core business activity and adverse-news signals using traceable simulated queries. Preserve negative searches and unconfirmed leads as validation gaps.
 4. Investigation Agent reconciles internal and open-web evidence, confirms plain-language mismatches, identifies key risks and red flags, distinguishes supported findings from open gaps, and hands the validated outcome to human review.
 
+In Frame 4, show only the two supported finding cards: `Nature-of-business mismatch` and `Rapid onward movement`. Do not add a separate `Why Partial Exit / Ultimate recipient not yet resolved` card; the recommendation panel owns that rationale.
+
 The left panel contains Orchestrator, Investigation Agent and External Web Agent. The active dialogue and handoff must visibly move between those agents. The main canvas progressively animates cross-checking, risk-ranked target selection, open-web deep dive and terminal evidence/risk reconciliation. Retain previous results as chips.
 
 ## Animation 3 — five-frame refinement
 
-Keep the existing five-stage story: analyst scope, counterparty #2 isolation, director and simulated adverse-news resolution, relationship/validation review, and final report update.
+Use a five-stage escalation story:
 
-Render every stage through the same workforce roster. Preserve the distinction between bank facts, registry facts and an unverified simulated news lead.
+1. The analyst asks the agents to trace the USD 204,300 rapid onward payment and identify its ultimate recipient.
+2. Data Analyst reconstructs the two-hop flow: Orchid Meridian → Aster Peak FZE → Vale Industrial Holdings within 24 hours.
+3. Entity Resolver and External Web Agent confirm Vale Industrial’s exact identity, common controller with Aster Peak, and a two-source simulated adverse-news match.
+4. Evidence QA joins the transaction path, registry control link and attributed adverse-news sources into one auditable escalation chain.
+5. Risk + Narrative explains why the new evidence changes the recommendation from Partial Exit to Full Exit.
+
+Render every stage through the same workforce roster. Preserve the distinction between verified bank transactions, registry facts and attributed simulated adverse-news allegations. Make the before/after decision threshold explicit in the final frame.
+
+## Page 3 decision storyline
+
+- Before refinement, show a yellow `PARTIAL EXIT` recommendation.
+- The initial report contains exactly two risk disclosures: `Nature-of-business mismatch` and `Rapid onward movement`.
+- Make the nature-of-business conflict self-explanatory wherever it appears in the animation: define the expected stationery trade as paper, pens and office supplies; define CNC equipment as computer-controlled machinery used to cut and shape metal (including aluminium); and show the comparison explicitly as `Office stationery ≠ computer-controlled metal-cutting machines`.
+- Do not show `Major counterparty mismatch` as a separate initial risk; its underlying facts may support the NOB and flow analysis without being duplicated as a third finding.
+- Explain why the exit is partial: exit the trade-finance relationship, but do not yet exit the full customer relationship because the ultimate recipient of the onward funds is unresolved.
+- After refinement, reveal `Hidden major-counterparty adverse-news exposure` as a distinct third risk supported by the verified two-hop payment, exact entity/control resolution and attributed adverse-news match.
+- Change the recommendation to a red `FULL EXIT` and explain that the new evidence expands the concern from a product-level trade-finance issue to relationship-wide exposure.
+- Use a visible before/after decision comparison so the escalation is easy to present and audit.
+- In the report header, use only `Suspicious Transaction Report`; remove `Agent-assisted draft`.
+- Keep the report itself firm. Before refinement, show a single `REPORT DECISION · Partial Exit` block; do not show an `OPEN QUESTION`, `Who received the onward funds?`, or tentative follow-up wording inside the report.
 
 ## Content and footer requirements
 
 - Remove all low-value small footer prose and animation legends.
 - Keep only frame count, progress bar, progress dots, Exit, Previous, Replay and compact icon-only Next/Finish.
 - Recommendation and provenance must appear once above Refinement; remove any duplicate placement.
-- Recommendation copy remains `FILE STR · HIGH` with the established escalation wording.
+- Recommendation starts as yellow `PARTIAL EXIT` and changes to red `FULL EXIT` only after refinement completes.
 
 ## Appendix report requirements
 
@@ -188,7 +214,7 @@ Render every stage through the same workforce roster. Preserve the distinction b
 
 ## Acceptance criteria
 
-1. Prompt v8 and HTML v8 exist; v7 is unchanged.
+1. Prompt v9 and HTML v9 exist; v8 is unchanged.
 2. Animation 1 has four grouped stages while visibly accounting for all seven sources.
 3. The left panel is a compact icon-based workforce list, not a node-routing diagram.
 4. Only the active agent expands a structured reasoning dialogue; hidden chain-of-thought is never shown.
@@ -214,3 +240,10 @@ Render every stage through the same workforce roster. Preserve the distinction b
 24. Animation 1 frame 2 ends after the OCR/LLM/Validate workbench; it does not repeat KYC/Bill-of-Lading result cards or a Document Intelligence handoff in the main canvas.
 25. Appendix reports use the evidence chain as the only evidence summary; no duplicate Evidence register or limitations section is rendered.
 26. Transaction-related appendix reports show Name, Amount and When, while external links appear only under References at the bottom.
+27. Initial Page 3 recommendation is yellow Partial Exit and shows only Nature-of-business mismatch and Rapid onward movement.
+28. The initial decision clearly states that the hidden onward-payment recipient is unresolved, preventing Full Exit.
+29. Refinement traces USD 204,300 from Aster Peak to Vale Industrial, resolves common control and finds an attributed two-source adverse-news match.
+30. After refinement, Page 3 and the final animation frame visibly compare Partial Exit with red Full Exit and explain the threshold change.
+31. Animation 1 Frame 1 visibly shows `Email or document input → ML TER trigger model → Context Agent`, with the Context Agent explaining the trigger event.
+32. External Web Agent uses a distinct blue `WEB` logo badge in its animation roster.
+33. The report heading excludes `Agent-assisted draft`, and the pre-refinement report contains no open-question block.
