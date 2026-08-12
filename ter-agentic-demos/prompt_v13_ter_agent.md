@@ -33,4 +33,6 @@ Create `ter-bank-multi-agent-flow-v13.html` as a standalone evolution of v12. Pr
 - The Refinement drawer is fixed on the left and remains foldable.
 - All three animations retain populated final-frame content without continuing motion.
 - Animation 2 keeps its assembled evidence relationship graph visible at the top of the final validation frame.
+- Page 3 places the single recommendation-approval control in the top action bar beside Export.
+- Refinement is an in-layout sliding left drawer, not a floating overlay layer.
 - JavaScript parses successfully and the new controls have working event handlers.
