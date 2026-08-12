@@ -32,4 +32,5 @@ Create `ter-bank-multi-agent-flow-v13.html` as a standalone evolution of v12. Pr
 - Page 2 contains only one analyst-feedback textarea.
 - The Refinement drawer is fixed on the left and remains foldable.
 - All three animations retain populated final-frame content without continuing motion.
+- Animation 2 keeps its assembled evidence relationship graph visible at the top of the final validation frame.
 - JavaScript parses successfully and the new controls have working event handlers.
