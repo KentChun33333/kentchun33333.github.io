@@ -26,4 +26,5 @@ Create `ter-bank-multi-agent-flow-v14.html` as a standalone evolution of v13. Pr
 - New-case intake folds and reopens from its summary control.
 - CIF search continues to filter active and historical rows.
 - Existing v13 animation completion behavior, report export, ZIP download and Page 3 refinement drawer remain functional.
+- Investigation and Refinement final frames explicitly reveal every delayed element before freezing and retain a populated three-part terminal outcome strip in both playback locations.
 - JavaScript parses successfully and all new queue controls have working event handlers.
