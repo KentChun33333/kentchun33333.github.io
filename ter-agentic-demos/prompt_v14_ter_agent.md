@@ -27,4 +27,5 @@ Create `ter-bank-multi-agent-flow-v14.html` as a standalone evolution of v13. Pr
 - CIF search continues to filter active and historical rows.
 - Existing v13 animation completion behavior, report export, ZIP download and Page 3 refinement drawer remain functional.
 - Investigation and Refinement final frames explicitly reveal every delayed element before freezing and retain a populated three-part terminal outcome strip in both playback locations.
+- Page 1 treats Customer Name as optional and places Start Date beside Lookback Date in the same form row; both dates persist in active case data and detail export.
 - JavaScript parses successfully and all new queue controls have working event handlers.
