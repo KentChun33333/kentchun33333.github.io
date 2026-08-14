@@ -31,4 +31,5 @@ Create `ter-bank-multi-agent-flow-v14.html` as a standalone evolution of v13. Pr
 - The Refinement drawer does not display the decision trace; audit events remain retained internally for approval history and detail export.
 - Page 3 does not propose Partial Exit, Full Exit or any other account strategy. Its recommendation card is a single `Next Step`: run an additional OpenWeb search to resolve the onward beneficiary and check relevant adverse news.
 - The left refinement drawer presents that investigation scope for human review, includes an `Agree & Start Investigation` button, and provides a drag-and-drop multi-document upload zone. Uploaded filenames are retained in the case-detail ZIP manifest.
+- Page 2 includes a responsive `OpenWeb Review` section beneath the extraction table. It presents key entity, business-profile and adverse-news findings with confidence/context labels, mocked traceable URLs and an explicit simulated-source notice.
 - JavaScript parses successfully and all new queue controls have working event handlers.
