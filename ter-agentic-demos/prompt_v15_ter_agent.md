@@ -2,7 +2,7 @@
 
 ## Objective
 
-Create `ter-bank-multi-agent-flow-v15.html` as a standalone evolution of v14. Preserve every earlier version unchanged and retain v14’s queue-driven flow, evidence, OpenWeb review, investigation, refinement, report, export and animation behavior. Add a concise Trigger Context section at the top of Page 2.
+Create `ter-bank-multi-agent-flow-v15.html` as a standalone evolution of v14. Preserve every earlier version unchanged and retain v14’s queue-driven flow, evidence, OpenWeb review, investigation, refinement, report, export and animation behavior. Keep Page 2 focused on extraction and place Trigger Context in a secondary foldable panel.
 
 ## Required flow
 
@@ -32,5 +32,5 @@ Create `ter-bank-multi-agent-flow-v15.html` as a standalone evolution of v14. Pr
 - Page 3 does not propose Partial Exit, Full Exit or any other account strategy. Its recommendation card is a single `Next Step`: run an additional OpenWeb search to resolve the onward beneficiary and check relevant adverse news.
 - The left refinement drawer presents that investigation scope for human review, includes an `Agree & Start Investigation` button, and provides a drag-and-drop multi-document upload zone. Uploaded filenames are retained in the case-detail ZIP manifest.
 - Page 2 includes a responsive `OpenWeb Review` section beneath the extraction table. It presents key entity, business-profile and adverse-news findings with confidence/context labels, mocked traceable URLs and an explicit simulated-source notice.
-- Page 2 begins with a responsive `Trigger Context` section above Profile and Key Insight Extraction. It summarizes the trigger event, profile deviation, customer explanation, initial evidence gap and routing rationale, while stating that no risk conclusion was made at trigger stage.
+- Page 2 keeps Profile and Key Insight Extraction as the primary workspace. `Trigger Context` uses a Page 3–style sliding left panel that is collapsed by default and can be expanded when needed. It summarizes the trigger event, profile deviation, customer explanation, initial evidence gap and routing rationale, while stating that no risk conclusion was made at trigger stage.
 - JavaScript parses successfully and all new queue controls have working event handlers.
