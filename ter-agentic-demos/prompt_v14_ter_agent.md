@@ -29,4 +29,6 @@ Create `ter-bank-multi-agent-flow-v14.html` as a standalone evolution of v13. Pr
 - Investigation and Refinement final frames explicitly reveal every delayed element before freezing and retain a populated three-part terminal outcome strip in both playback locations.
 - Page 1 treats Customer Name as optional and places Start Date beside Lookback Date in the same form row; both dates persist in active case data and detail export.
 - The Refinement drawer does not display the decision trace; audit events remain retained internally for approval history and detail export.
+- Page 3 does not propose Partial Exit, Full Exit or any other account strategy. Its recommendation card is a single `Next Step`: run an additional OpenWeb search to resolve the onward beneficiary and check relevant adverse news.
+- The left refinement drawer presents that investigation scope for human review, includes an `Agree & Start Investigation` button, and provides a drag-and-drop multi-document upload zone. Uploaded filenames are retained in the case-detail ZIP manifest.
 - JavaScript parses successfully and all new queue controls have working event handlers.
