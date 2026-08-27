@@ -24,6 +24,53 @@
 @media(max-width:850px){.topbar{padding:0 14px}.concept{display:none}.nav{justify-content:flex-start;overflow:auto}.nav a{white-space:nowrap}.wrap{padding:22px 15px}.hero-grid,.thesis,.demo-body,.results-grid,.critical{grid-template-columns:1fr}.hero h1{font-size:42px}.metrics{grid-template-columns:1fr 1fr}.section{padding-top:58px}.section-head{display:block}.section-head h2{font-size:31px}.component-grid,.enterprise-grid{grid-template-columns:1fr}.demo-body{min-height:0}.agent-list{border-right:0;border-bottom:1px solid var(--line)}.canvas{min-height:450px}.operating-model{grid-template-columns:1fr}.op-arrow{transform:rotate(90deg);text-align:center}.verdict{grid-template-columns:1fr}.footer-inner{display:block}.footer a{margin:0 14px 0 0}.compare-row{grid-template-columns:1fr}.compare-row>span{margin-top:6px}}
 @media(max-width:520px){.hero h1{font-size:36px}.hero .lead{font-size:15px}.metrics{grid-template-columns:1fr}.bar-row{grid-template-columns:92px 1fr 42px}.demo-head h3{font-size:17px}.trace-row{grid-template-columns:1fr}.demo-foot{grid-template-columns:1fr auto auto}.demo-foot .dots{display:none}.operating-model{padding:14px}.verdict blockquote{font-size:20px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+
+/* Readability pass — presentation-scale typography and lower visual density */
+:root{--muted:#565d63;--line:#d4d6d7;--shadow:0 14px 38px rgba(25,25,25,.09)}
+body{font-size:16px;line-height:1.55}
+.topbar{height:72px;padding:0 32px}.brand-copy b{font-size:16px}.brand-copy span{font-size:13px}.concept{font-size:12px;padding:8px 11px}
+.nav{height:54px;top:72px;gap:8px}.nav a{font-size:13px;padding:17px 15px 14px}
+.wrap{max-width:1260px;padding:34px 30px}.hero{padding-top:54px}.eyebrow{font-size:13px}
+.hero-grid{grid-template-columns:1.25fr .75fr;gap:36px}.hero h1{font-size:64px;line-height:1.04;margin:13px 0 22px}.hero .lead{font-size:21px;line-height:1.65}
+.hero-note{padding:28px}.hero-note small{font-size:12px}.hero-note h2{font-size:25px}.formula{font-size:14px;padding:15px}.pill{font-size:12px;padding:8px 11px}
+.metrics{margin-top:40px}.metric{padding:22px}.metric span{font-size:11px}.metric b{font-size:34px}.metric small{font-size:13px}
+.section{padding-top:94px}.section-head{margin-bottom:25px}.section-head h2{font-size:43px}.section-head p{max-width:600px;font-size:17px;line-height:1.65}
+.thesis{grid-template-columns:.82fr 1.18fr}.thesis-side{padding:36px;min-height:360px}.thesis-side .big{font-size:34px}.thesis-side p{font-size:13px}.compare{padding:30px}
+.compare-row{grid-template-columns:145px 1fr 1fr;gap:14px;padding:17px 0}.compare-row>span{font-size:11px}.compare-cell{padding:14px}.compare-cell b{font-size:15px}.compare-cell small{font-size:13px;line-height:1.45}
+.component-grid,.enterprise-grid{gap:17px}.component{padding:25px}.component-icon{width:46px;height:46px;font-size:13px}.component h3{font-size:25px}
+.component>p{font-size:15px;line-height:1.65;min-height:78px}.component li{font-size:14px;line-height:1.65}.axis{font-size:11px;padding:6px 8px}
+.demo-head{padding:20px 24px}.demo-head small{font-size:11px}.demo-head h3{font-size:26px}.demo-counter b{font-size:14px}.demo-counter span{font-size:11px}
+.demo-body{grid-template-columns:.95fr 1.05fr;min-height:580px}.agent-list{padding:17px}.agent-item{grid-template-columns:42px 1fr auto;gap:12px;padding:14px;margin-bottom:10px}
+.agent-item i{width:40px;height:40px;font-size:11px}.agent-item b{font-size:13px}.agent-item span{font-size:12px;line-height:1.4}.agent-item em{font-size:10px}
+.canvas{padding:30px}.canvas-kicker{font-size:11px}.canvas h4{font-size:30px}.canvas-intro{font-size:15px;line-height:1.65}
+.trace{margin:23px 0;gap:10px}.trace-row{grid-template-columns:105px 1fr auto;padding:14px}.trace-row label,.trace-row span{font-size:11px}.trace-row b{font-size:14px}
+.diagnosis{padding:18px;margin-top:17px}.diagnosis small{font-size:11px}.diagnosis b{font-size:18px;line-height:1.45}.diagnosis p{font-size:14px}
+.code{font-size:12px;line-height:1.85;padding:18px}.vbox{padding:18px}.vbox small{font-size:10px}.vbox b{font-size:26px}
+.demo-foot{padding:14px 18px}.btn{font-size:13px;padding:10px 14px}
+.results-grid{gap:18px}.result-card{padding:26px}.result-card h3{font-size:21px}.result-card>p{font-size:14px;line-height:1.6}
+.bar-row{grid-template-columns:150px 1fr 56px;gap:12px;margin:15px 0}.bar-row label{font-size:13px}.bar-row b{font-size:12px}.track{height:11px}
+.evidence-table{font-size:14px}.evidence-table th{font-size:10px;padding:11px}.evidence-table td{padding:12px 11px}.evidence-table td:last-child{font-size:12px}
+.callout{padding:25px}.callout small{font-size:11px}.callout b{font-size:27px}.callout p{font-size:14px}
+.legend{font-size:10px}.enterprise-card{padding:25px}.enterprise-card small{font-size:11px}.enterprise-card h3{font-size:21px}.enterprise-card p{font-size:14px;line-height:1.65}
+.example{padding:14px;font-size:13px;line-height:1.6}.operating-model{padding:25px}.op-node{padding:19px}.op-node b{font-size:15px}.op-node span{font-size:12px}
+.critical{gap:18px}.critical-card{padding:26px}.critical-card h3{font-size:21px}.critical-item{grid-template-columns:34px 1fr;gap:12px;margin:17px 0}
+.critical-item i{width:32px;height:32px;font-size:11px}.critical-item b{font-size:14px}.critical-item span{font-size:13px;line-height:1.6}
+.verdict{padding:34px;grid-template-columns:155px 1fr;gap:30px}.verdict-label{font-size:12px}.verdict blockquote{font-size:28px}.verdict p{font-size:15px}
+.footer{padding:34px}.footer b{font-size:15px}.footer p,.footer a{font-size:12px}
+@media(max-width:850px){
+  .topbar{height:66px;padding:0 15px}.nav{top:66px}.wrap{padding:26px 18px}.hero{padding-top:38px}
+  .hero-grid,.thesis,.demo-body,.results-grid,.critical{grid-template-columns:1fr}.hero h1{font-size:46px}.hero .lead{font-size:18px}
+  .section{padding-top:66px}.section-head h2{font-size:35px}.section-head p{font-size:16px}
+  .demo-body{min-height:0}.agent-list{border-right:0}.canvas{min-height:480px}.component>p{min-height:0}
+  .compare-row{grid-template-columns:1fr}.verdict{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+  .hero h1{font-size:39px}.hero .lead{font-size:17px}.metrics{grid-template-columns:1fr}
+  .section-head h2{font-size:32px}.bar-row{grid-template-columns:112px 1fr 46px}.bar-row label{font-size:11px}
+  .demo-head h3{font-size:20px}.canvas{padding:22px;min-height:460px}.canvas h4{font-size:25px}
+  .trace-row{grid-template-columns:1fr}.verdict blockquote{font-size:23px}
+}
+
 </style>
 </head>
 <body>
