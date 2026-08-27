@@ -1,0 +1,4 @@
+interface:
+  display_name: "Executive Resume Evaluator"
+  short_description: "Score senior resumes for fit, tone, and credibility"
+  default_prompt: "Use $evaluate-executive-resume to compare my tailored resumes against the source evidence and target job description."

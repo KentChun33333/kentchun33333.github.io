@@ -1,0 +1,4 @@
+interface:
+  display_name: "Async Agentic Web Demo Builder"
+  short_description: "Build governed async agentic web demos"
+  default_prompt: "Use $build-async-agentic-web-demo to create a polished queue-driven agentic web application demo."
