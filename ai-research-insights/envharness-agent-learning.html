@@ -6,7 +6,7 @@
 <meta name="description" content="A visual research note on EnvHarness: Awakening Static Worlds for Agent Learning.">
 <title>EnvHarness — Adaptive Environments for Agent Learning</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap');
 :root{--red:#d71920;--red2:#a90f16;--redsoft:#fff0f0;--ink:#202124;--muted:#6e7378;--line:#dedfdf;--paper:#fff;--bg:#f4f4f1;--green:#087f5b;--greensoft:#edf8f4;--amber:#b76b00;--ambersoft:#fff7e8;--blue:#2f64c8;--bluesoft:#f1f5fd;--dark:#22262b;--shadow:0 12px 34px rgba(25,25,25,.08)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:'DM Sans',Arial,sans-serif}button,a{font:inherit}button{cursor:pointer}a{color:inherit}.mono{font-family:'IBM Plex Mono',monospace}.muted{color:var(--muted)}
 .topbar{height:66px;background:white;border-bottom:4px solid var(--red);padding:0 26px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:30}.brand{display:flex;align-items:center;gap:13px}.mark{width:32px;height:32px;border:4px double var(--red);border-radius:50%;display:grid;place-items:center;color:var(--red);font-weight:700}.brand-copy b{display:block;font-size:14px}.brand-copy span{display:block;color:var(--muted);font-size:11px}.concept{font:11px 'IBM Plex Mono';color:var(--muted);background:#f1f1ef;padding:7px 9px;border-radius:5px}.nav{height:48px;background:#fff;border-bottom:1px solid var(--line);display:flex;justify-content:center;gap:4px;position:sticky;top:66px;z-index:29}.nav a{text-decoration:none;font-size:11px;font-weight:700;padding:16px 13px 12px;color:var(--muted);border-bottom:3px solid transparent}.nav a:hover,.nav a.active{color:var(--red);border-bottom-color:var(--red)}
@@ -111,6 +111,26 @@ body{background:var(--bg);font-family:'Instrument Sans',sans-serif;color:var(--i
  .agent-list{grid-template-columns:1fr}.canvas{padding:22px;min-height:500px}.canvas h4{font-size:30px}.demo-foot{grid-template-columns:1fr auto auto}
  .critical-item span{font-size:14px}.verdict blockquote{font-size:27px}
 }
+
+
+/* Modern cobalt theme — no red or serif typography */
+:root{
+ --red:#2563eb;--red2:#1d4ed8;--redsoft:#eff6ff;--ink:#111827;--muted:#5f6b7a;
+ --line:#dbe3ec;--bg:#f7f9fc;--green:#0f766e;--greensoft:#ecfdf5;
+ --dark:#111827;--shadow:0 1px 2px rgba(15,23,42,.05)
+}
+body{font-family:'Inter',system-ui,sans-serif}
+.hero h1,.section-head h2,.component h3,.enterprise-card h3,.result-card h3,.critical-card h3,
+.hero .lead,.hero-note h2,.metric b,.thesis-side .big,.canvas h4,.canvas-intro,
+.critical-item span,.verdict blockquote{font-family:'Inter Tight','Inter',system-ui,sans-serif}
+.hero h1{font-weight:650;letter-spacing:-.052em}.hero .lead{font-weight:400;letter-spacing:-.018em}
+.section-head h2{font-weight:650}.section-head p{font-family:'Inter',system-ui,sans-serif}
+.mark{font-family:'Inter Tight',sans-serif;background:linear-gradient(135deg,#2563eb,#0891b2)}
+.reading-progress i{background:linear-gradient(90deg,#2563eb,#06b6d4)}
+.nav a.active:after{background:#2563eb}.hero-note{border-left-color:#2563eb}
+.formula b,.thesis-side .big em{color:#1d4ed8}.demo-head{background:linear-gradient(120deg,#0f172a,#172554)}
+.demo-head small,.demo-counter b{color:#7dd3fc}.callout,.footer{background:#0f172a}
+.agent-item.active{border-left-color:#2563eb}.component-icon{color:#2563eb}.example{border-left-color:#2563eb}
 
 </style>
 </head>
