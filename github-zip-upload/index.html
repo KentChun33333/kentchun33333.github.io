@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>GitHub ZIP Publisher</title>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" crossorigin="anonymous"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#07111f;--card:#0e1c2f;--line:#243750;--text:#edf5ff;--muted:#96aac4;--blue:#55a7ff;--green:#46d6a0;--red:#ff6b78}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0,#12345c 0,transparent 34%),var(--bg);color:var(--text);font:15px/1.55 Inter,ui-sans-serif,system-ui,sans-serif}
+    main{width:min(900px,calc(100% - 32px));margin:48px auto}.eyebrow{color:var(--blue);font-weight:700;letter-spacing:.12em;text-transform:uppercase}h1{font-size:clamp(30px,5vw,52px);line-height:1.06;margin:.2em 0}.intro{color:var(--muted);max-width:700px;font-size:17px}
+    .card{background:color-mix(in srgb,var(--card) 94%,transparent);border:1px solid var(--line);border-radius:18px;padding:22px;margin-top:22px;box-shadow:0 20px 55px #0005}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:650px){.grid{grid-template-columns:1fr}}
+    label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}input,button{width:100%;border:1px solid var(--line);border-radius:10px;background:#091525;color:var(--text);padding:12px;font:inherit}input:focus{outline:2px solid #55a7ff66;border-color:var(--blue)}
+    .drop{display:block;border:1.5px dashed #3d6087;border-radius:14px;padding:28px;text-align:center;cursor:pointer}.drop:hover{border-color:var(--blue);background:#11233a}.drop input{display:none}.drop strong{display:block;font-size:18px}.drop span{color:var(--muted)}
+    button{cursor:pointer;background:linear-gradient(135deg,#2385f5,#2563eb);border:0;font-weight:750;margin-top:16px}button:disabled{opacity:.45;cursor:not-allowed}.note{color:var(--muted);font-size:13px}.status{white-space:pre-wrap;background:#07111f;border:1px solid var(--line);border-radius:12px;padding:14px;min-height:52px;margin-top:16px}.ok{color:var(--green)}.error{color:var(--red)}
+    details{margin-top:14px}summary{cursor:pointer;color:var(--blue)}ul{color:var(--muted)}code{color:#b8d9ff}.links{display:flex;gap:14px;flex-wrap:wrap;margin-top:18px}.links a{color:var(--blue)}
+  </style>
+</head>
+<body><main>
+  <div class="eyebrow">Private browser-side tool</div>
+  <h1>Publish a ZIP to the Hugo branch</h1>
+  <p class="intro">The archive is extracted in this browser, converted into one Git commit, and sent directly to GitHub. Your token stays in memory and is never stored by this page.</p>
+  <section class="card">
+    <div class="grid">
+      <div><label for="repo">Repository</label><input id="repo" value="KentChun33333/kentchun33333.github.io" autocomplete="off"></div>
+      <div><label for="branch">Target branch</label><input id="branch" value="hugo" autocomplete="off"></div>
+      <div><label for="path">Destination folder (blank = repository root)</label><input id="path" placeholder="e.g. demos/new-demo" autocomplete="off"></div>
+      <div><label for="message">Commit message</label><input id="message" value="Upload ZIP from web publisher" autocomplete="off"></div>
+    </div>
+    <div style="margin-top:16px"><label for="token">Fine-grained personal access token</label><input id="token" type="password" placeholder="github_pat_…" autocomplete="off" spellcheck="false"></div>
+    <label class="drop" style="margin-top:18px"><input id="zip" type="file" accept=".zip,application/zip"><strong id="fileName">Choose a ZIP archive</strong><span id="fileMeta">Files are inspected before upload</span></label>
+    <button id="publish" disabled>Review and publish</button>
+    <div id="status" class="status" role="status">Waiting for a ZIP archive.</div>
+    <details><summary>Safety and token scope</summary><ul><li>Use a fine-grained token limited to this repository with <code>Contents: Read and write</code>.</li><li>The archive may not contain absolute paths, <code>..</code> traversal, <code>.git</code>, or files larger than 25 MiB.</li><li>This tool adds or replaces files. It does not delete files absent from the ZIP.</li><li>Close or refresh the tab to clear the token from memory.</li></ul></details>
+    <div class="links"><a href="issue/">Use Issue + Action instead</a><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Create fine-grained token ↗</a></div>
+  </section>
+</main>
+<script>
+(() => {
+  const $=id=>document.getElementById(id), zipInput=$('zip'), publish=$('publish'), status=$('status');
+  let archive=null, entries=[];
+  const setStatus=(text,kind='')=>{status.textContent=text;status.className='status '+kind};
+  const cleanPath=p=>p.replace(/\\/g,'/').replace(/^\.\//,'').replace(/^\/+|\/+$/g,'');
+  const safePath=p=>p && !p.startsWith('/') && !p.split('/').some(x=>x==='..'||x==='.git') && !p.includes('\0');
+  const bytesToBase64=bytes=>{let out='',step=0x8000;for(let i=0;i<bytes.length;i+=step)out+=String.fromCharCode(...bytes.subarray(i,i+step));return btoa(out)};
+  async function api(url,token,options={}){const r=await fetch('https://api.github.com'+url,{...options,headers:{Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28',Authorization:'Bearer '+token,'Content-Type':'application/json',...(options.headers||{})}});if(!r.ok){let detail='';try{detail=(await r.json()).message||''}catch{}throw new Error(`GitHub ${r.status}: ${detail||r.statusText}`)}return r.status===204?null:r.json()}
+  zipInput.addEventListener('change',async()=>{
+    archive=null;entries=[];publish.disabled=true;const file=zipInput.files[0];if(!file)return;
+    $('fileName').textContent=file.name;$('fileMeta').textContent=(file.size/1048576).toFixed(2)+' MiB · inspecting…';
+    try{
+      if(file.size>100*1048576)throw new Error('ZIP exceeds the 100 MiB browser-tool limit.');
+      archive=await JSZip.loadAsync(file,{checkCRC32:true});
+      for(const [raw,item] of Object.entries(archive.files)){if(item.dir)continue;const name=cleanPath(raw);if(!safePath(name))throw new Error('Unsafe path: '+raw);entries.push({name,item,size:item._data?.uncompressedSize||0});}
+      if(!entries.length)throw new Error('The ZIP contains no files.');if(entries.length>1000)throw new Error('Archive has more than 1,000 files.');
+      const tooLarge=entries.find(x=>x.size>25*1048576);if(tooLarge)throw new Error('File exceeds 25 MiB: '+tooLarge.name);
+      $('fileMeta').textContent=`${(file.size/1048576).toFixed(2)} MiB · ${entries.length} files`;publish.disabled=false;setStatus(`Ready to publish ${entries.length} files.`, 'ok');
+    }catch(e){archive=null;setStatus(e.message,'error')}
+  });
+  publish.addEventListener('click',async()=>{
+    const token=$('token').value.trim(), repo=$('repo').value.trim(), branch=$('branch').value.trim(), root=cleanPath($('path').value), message=$('message').value.trim();
+    if(!archive||!token||!repo.includes('/')||!branch||!message)return setStatus('Complete all required fields and choose a valid ZIP.','error');
+    if(root&&!safePath(root))return setStatus('Destination folder is unsafe.','error');
+    if(!confirm(`Publish ${entries.length} files to ${repo}:${branch}${root?'/'+root:''}?`))return;
+    publish.disabled=true;
+    try{
+      setStatus('Reading branch…');const ref=await api(`/repos/${repo}/git/ref/heads/${encodeURIComponent(branch)}`,token);const parent=ref.object.sha;
+      const commit=await api(`/repos/${repo}/git/commits/${parent}`,token);const tree=[];
+      for(let i=0;i<entries.length;i++){
+        const e=entries[i];setStatus(`Uploading ${i+1}/${entries.length}: ${e.name}`);const data=await e.item.async('uint8array');
+        const blob=await api(`/repos/${repo}/git/blobs`,token,{method:'POST',body:JSON.stringify({content:bytesToBase64(data),encoding:'base64'})});
+        tree.push({path:[root,e.name].filter(Boolean).join('/'),mode:'100644',type:'blob',sha:blob.sha});
+      }
+      setStatus('Creating tree and commit…');const newTree=await api(`/repos/${repo}/git/trees`,token,{method:'POST',body:JSON.stringify({base_tree:commit.tree.sha,tree})});
+      const newCommit=await api(`/repos/${repo}/git/commits`,token,{method:'POST',body:JSON.stringify({message,tree:newTree.sha,parents:[parent]})});
+      await api(`/repos/${repo}/git/refs/heads/${encodeURIComponent(branch)}`,token,{method:'PATCH',body:JSON.stringify({sha:newCommit.sha,force:false})});
+      setStatus(`Published successfully.\nCommit: https://github.com/${repo}/commit/${newCommit.sha}`,'ok');
+    }catch(e){setStatus(e.message,'error')}finally{publish.disabled=false}
+  });
+})();
+</script></body></html>
