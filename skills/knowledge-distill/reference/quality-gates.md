@@ -5,7 +5,9 @@
 1. Never invent missing facts.
 2. Every major claim must trace back to cooked source IDs.
 3. Terminology must reflect actual usage.
-4. Charts are visual companions, not primary evidence. **Mermaid is forbidden**; use ASCII-style diagrams. Workflow diagrams must use a stacked layout with input data contracts on the left, core modules in the center, and output data contracts on the right (`input -> module -> output`).
+4. Charts are visual companions, not primary evidence.
+   - **Markdown Knowledge Artifacts**: **Mermaid is strictly forbidden**; use ASCII-style stacking diagrams. Workflow diagrams must use a stacked layout with input data contracts on the left, core modules in the center, and output data contracts on the right (`[Input Data Contract] --> [Core Module] --> [Output Data Contract]`).
+   - **Interactive Web Insight Artifacts (HTML)**: Use semantic HTML/CSS cards, responsive 3-column layouts, and interactive visual flow engines (see [web-insight-artifact.md](web-insight-artifact.md)).
 5. Contradictions must be preserved.
 6. Low confidence must be marked explicitly.
 7. Parser uncertainty must be visible.
@@ -14,6 +16,22 @@
 10. Related-work candidates must not be presented as validated winners unless the source evaluates them.
 11. Repeated concepts must have exactly one canonical explanation. The knowledge stage must be heavily compressed and deduplicated while maintaining high-coverage cross-references.
 12. Every major practical recommendation should include an invalidation test.
+
+## Automated Verification
+
+Before completing distillation, run the automated quality guardian:
+
+```bash
+python3 skills/knowledge-distill/scripts/engine.py audit-all [project_dir] --write
+```
+
+This verifies:
+- Folder contract completeness (`data-raw/`, `data-cooked/`, `analysis/`, `knowledge/`).
+- Provenance headers across all cooked files.
+- Zero hallucinated source ID citations.
+- Absence of forbidden mermaid blocks in markdown.
+- 7-dimension IQ scoring report generation.
+- Generation of `knowledge/manifest.json`.
 
 ## IQ-Style Review Dimensions
 
@@ -42,8 +60,10 @@ Use these dimensions when reviewing output quality:
 - `knowledge/read-order.md` exists for multi-file outputs.
 - `knowledge/big-picture.md` exists.
 - `knowledge/executive-summary.md` exists.
+- `knowledge/manifest.json` exists for agent consumers.
 - Agent/harness outputs include activation/adherence metrics or templates.
 - Repeated concepts have one canonical explanation.
 - Open questions and low-confidence areas are clearly marked.
 - Skill evolution caused by feedback is recorded in a ledger.
+
 

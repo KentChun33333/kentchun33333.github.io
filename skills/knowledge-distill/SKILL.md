@@ -12,8 +12,20 @@ Turn raw sources into compact, traceable knowledge. Flow comes first, terminolog
 - For a code repository, read [reference/topology-code-repo.md](reference/topology-code-repo.md).
 - For a paper, read [reference/topology-paper.md](reference/topology-paper.md).
 - For a heterogeneous corpus, read [reference/topology-heterogeneous-corpus.md](reference/topology-heterogeneous-corpus.md).
+- For an architecture migration, refactoring, or version diff, read [reference/topology-migration-diff.md](reference/topology-migration-diff.md).
 
 When the requested output is an interactive research-insight HTML artifact, also read [reference/web-insight-artifact.md](reference/web-insight-artifact.md). Use a descriptive kebab-case filename rather than `index.html` unless the user explicitly requests a site root.
+
+## Automation and Code Engine
+
+Use the bundled Python engine in `scripts/engine.py` to accelerate execution and eliminate manual errors:
+
+- `python3 skills/knowledge-distill/scripts/engine.py scaffold <raw_dir> <project_dir>` — automatically catalog raw sources into `data-cooked/source-index.md` and generate template cooked stubs.
+- `python3 skills/knowledge-distill/scripts/engine.py diagram --input "..." --module "..." --output "..."` — format aligned 3-column ASCII stacking contract diagrams.
+- `python3 skills/knowledge-distill/scripts/engine.py manifest <project_dir>` — compile `knowledge/manifest.json` for downstream agents.
+- `python3 skills/knowledge-distill/scripts/engine.py guard <project_dir>` — run automated quality gate and citation integrity checks.
+- `python3 skills/knowledge-distill/scripts/engine.py evaluate <project_dir> --write` — score output on 7 IQ dimensions and save `analysis/iq-training-evaluation.md`.
+- `python3 skills/knowledge-distill/scripts/engine.py audit-all <project_dir> --write` — execute full guardian, evaluation, and manifest pipeline.
 
 ## Execute the distillation
 
@@ -32,6 +44,7 @@ Distinguish demonstrated implementation, inference, recommendation, planned beha
 
 ## Validate
 
-Apply [reference/quality-gates.md](reference/quality-gates.md) before delivery. For interactive HTML, also run the validation and interaction checks required by the web-artifact reference and any selected demo-building skill.
+Apply [reference/quality-gates.md](reference/quality-gates.md) before delivery. Run `python3 skills/knowledge-distill/scripts/engine.py audit-all <project_dir> --write` to verify structural contracts, zero hallucinated citations, absence of forbidden mermaid markdown blocks, and high token density. For interactive HTML, also run the validation and interaction checks required by the web-artifact reference and any selected demo-building skill.
 
 When user feedback reveals a reusable process failure, follow [reference/feedback-evolution.md](reference/feedback-evolution.md) and update [reference/skill-evolution-ledger.md](reference/skill-evolution-ledger.md).
+

@@ -9,7 +9,7 @@ Output:
 
 Actions:
 
-- Inventory raw sources.
+- Inventory raw sources. (Use `python3 skills/knowledge-distill/scripts/engine.py scaffold data-raw [project_dir]` to auto-index and create cooked template stubs).
 - Classify type, size, source, likely domain, and parsing difficulty.
 - Identify duplicates, noisy material, generated material, scans, images, URLs, and source gaps.
 - Assign stable `source-XXX` IDs.
@@ -111,7 +111,8 @@ Outputs:
 - `knowledge/workflow-reference.md`
 - `knowledge/system-model.md`
 - `knowledge/activation-adherence-scorecard.md` for agent/harness topics
-- Embedded ASCII-style stacking diagrams in Markdown (Mermaid is forbidden)
+- `knowledge/manifest.json` machine-readable index (generated via `python3 skills/knowledge-distill/scripts/engine.py manifest [project_dir]`)
+- Embedded ASCII-style stacking diagrams in Markdown (Mermaid is forbidden; generate via `python3 skills/knowledge-distill/scripts/engine.py diagram`)
 
 Rules:
 
@@ -126,13 +127,13 @@ Rules:
 
 ## Loop 6: Feedback-Driven Skill Evolution
 
-Use when the user critiques or evaluates the output.
+Use when the user critiques or evaluates the output. Run `python3 skills/knowledge-distill/scripts/engine.py audit-all [project_dir] --write` to evaluate quality and compliance.
 
 Outputs:
 
 - `analysis/feedback-log.md`
-- `analysis/iq-training-evaluation.md`
-- `analysis/skill-evolution-ledger.md` when the skill itself changes
+- `analysis/iq-training-evaluation.md` (generated/updated via `python3 skills/knowledge-distill/scripts/engine.py evaluate [project_dir] --write`)
+- `reference/skill-evolution-ledger.md` when the skill itself changes
 
 Actions:
 
@@ -141,4 +142,5 @@ Actions:
 - Patch current output first.
 - Patch the skill only when feedback generalizes.
 - Record what changed and why.
+
 

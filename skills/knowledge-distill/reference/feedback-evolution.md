@@ -45,7 +45,7 @@ Structure:
 
 1. Patch the current output first.
 2. Patch the skill only when feedback generalizes.
-3. Record skill changes in `analysis/skill-evolution-ledger.md`.
+3. Record skill changes in `reference/skill-evolution-ledger.md`.
 
 ## Skill Evolution Ledger
 
@@ -53,4 +53,5 @@ Structure:
 | Date | Feedback | Skill Rule Added | Files Updated |
 |---|---|---|---|
 ```
+
 

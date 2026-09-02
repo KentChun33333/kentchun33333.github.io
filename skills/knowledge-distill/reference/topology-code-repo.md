@@ -25,11 +25,17 @@ entrypoints
 - Contracts: function signatures, interface expectations, env vars, config keys.
 - Tests and validation: how behavior is verified.
 - Failure modes: errors, retries, missing config, security risks, hidden coupling.
+- **Spec Drift & Divergence Matrix**: Explicitly capture divergence between README/comments and actual code:
+  ```markdown
+  | Feature / Claim | Documented Behavior (Docs/README) | Verified Code Reality | Divergence Severity | Code Path & Source ID |
+  |---|---|---|---|---|
+  ```
 
 ## Output Preferences
 
 Add or emphasize:
 
+- `analysis/spec-drift.md` when documentation diverges from code.
 - `knowledge/module-map.md`
 - `knowledge/runtime-workflow.md`
 - `knowledge/contracts-reference.md`

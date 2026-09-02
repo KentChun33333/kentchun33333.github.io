@@ -43,6 +43,20 @@ Each algorithm card must include:
 - failure mode or boundary;
 - evidence source ID or exact code path.
 
+For interactive component deep dives, make the data contract the primary visual structure:
+
+```text
+[Input conditions]  -->  [Internal mechanism]  -->  [Output conditions]
+```
+
+- Keep input conditions persistently on the left and output conditions persistently on the right at desktop widths.
+- Put ordered steps, state transitions, explanatory prose, diagrams, and source-shaped code in the center mechanism region.
+- Selecting an internal step must highlight its corresponding input and output conditions so the causal transformation remains visible.
+- Give each collapsed card a compact preview of its initial input condition and final output condition; do not hide the contract entirely behind interaction.
+- Give each interactive component three source-grounded example fixtures that cover a normal path, a meaningful alternate/control path, and a boundary or failure path. Let the learner inspect the input before revealing or checking the expected output.
+- Clearly label fixture checks as teaching simulations or expected contract behavior unless the artifact actually executes the inspected implementation. Never present a static comparison as a live runtime test.
+- On narrow screens, preserve semantic order as input conditions → internal mechanism → output conditions.
+
 Do not invent quantitative metrics. Label conceptual pseudocode as conceptual; label source-shaped excerpts as simplified.
 
 ## Software components and code references
