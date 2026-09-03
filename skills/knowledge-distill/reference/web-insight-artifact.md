@@ -17,6 +17,8 @@ Use this mode for a source-grounded technical study delivered as standalone HTML
 4. **Implementation path** — exact source files, small code excerpts, runtime effect, and extension point.
 5. **Principles and critique** — why it works, failure modes, use/avoid conditions, and invalidation tests.
 
+When the page proposes or compares a framework with two or more components, controls, design choices, or ablations, also include a **contribution simulator** following [contribution-simulator.md](contribution-simulator.md). The simulator should expose how the claimed contribution changes across configurations or scenarios; it does not replace the readable explanation or experiment design.
+
 Avoid repeating one concept across sections. Define it canonically once and cross-reference it elsewhere.
 
 ## Workflow animation formula
@@ -86,11 +88,43 @@ Use explicit labels:
 
 For every major recommendation, state what implementation evidence would weaken or falsify it.
 
+## Contribution-simulator declaration
+
+Every new research-insight HTML artifact must declare whether the contribution-simulator pattern applies:
+
+```html
+<meta name="knowledge-distill:contribution-simulator" content="included">
+```
+
+or, when the artifact is descriptive and has no meaningful multi-component contribution to vary:
+
+```html
+<meta name="knowledge-distill:contribution-simulator" content="not-applicable">
+<meta name="knowledge-distill:contribution-simulator-rationale"
+      content="Descriptive implementation trace; no component contribution claim.">
+```
+
+For `included`, mark the simulator root and its evidence status:
+
+```html
+<section data-contribution-simulator
+         data-evidence-status="hypothesis">
+```
+
+Include the visible disclosure inside the simulator on an element marked `data-evidence-disclosure`, for example:
+
+```html
+<span data-evidence-disclosure>Illustrative hypothesis — not an empirical result</span>
+```
+
+Allowed evidence-status values are `empirical`, `source-reported`, `hypothesis`, and `conceptual`. Read [contribution-simulator.md](contribution-simulator.md) for behavior, labeling, and validation requirements.
+
 ## Validation
 
 - Parse inline JavaScript.
 - Verify unique IDs and all event targets.
 - Exercise autoplay, manual frame selection, replay, tabs, keyboard exits, and the stable final frame.
+- Exercise contribution-simulator scenarios, component toggles, baseline state, keyboard controls, disclosure label, and mobile layout when included.
 - Check desktop and 360px width without horizontal overflow.
 - Confirm every displayed code path exists in the inspected checkout.
 - Confirm the descriptive output filename and that no replacement `index.html` was introduced.
