@@ -88,6 +88,26 @@ Annotate each field as `explicit`, `implicit-answerable`, `latent-discoverable`,
 - interaction-cost tolerance;
 - preferred intervention when evidence is inconclusive.
 
+For interactive elicitation episodes, also annotate decision dependencies and ownership:
+
+```yaml
+decision_tree:
+  - id: objective
+    owner: user
+    prerequisites: []
+  - id: reproducibility
+    owner: agent
+    prerequisites: [objective]
+  - id: minimum_gain
+    owner: user
+    prerequisites: [objective, reproducibility]
+  - id: intervention_scope
+    owner: joint
+    prerequisites: [root_cause, invariants]
+```
+
+This supports objective measurement of frontier validity: a question is premature when at least one annotated prerequisite remains unresolved.
+
 ## 4. Oracle user contract
 
 The oracle user:
@@ -120,4 +140,3 @@ Measure agreement for root cause, correct action, requirement criticality, and r
 - Swap superficial domain terms across intervention owners.
 - Keep expected outputs inaccessible to candidate generators.
 - Split by skill family to prevent near-duplicate procedures crossing train and test.
-

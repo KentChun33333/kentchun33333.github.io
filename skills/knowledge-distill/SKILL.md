@@ -14,7 +14,7 @@ Turn raw sources into compact, traceable knowledge. Flow comes first, terminolog
 - For a heterogeneous corpus, read [reference/topology-heterogeneous-corpus.md](reference/topology-heterogeneous-corpus.md).
 - For an architecture migration, refactoring, or version diff, read [reference/topology-migration-diff.md](reference/topology-migration-diff.md).
 
-When the requested output is an interactive research-insight HTML artifact, also read [reference/web-insight-artifact.md](reference/web-insight-artifact.md). Use a descriptive kebab-case filename rather than `index.html` unless the user explicitly requests a site root.
+When the requested output is an interactive research-insight HTML artifact, also read [reference/web-insight-artifact.md](reference/web-insight-artifact.md). When the study proposes or compares a framework with multiple components, controls, or ablations, apply the contribution-simulator standard in [reference/contribution-simulator.md](reference/contribution-simulator.md). Use a descriptive kebab-case filename rather than `index.html` unless the user explicitly requests a site root.
 
 ## Automation and Code Engine
 
@@ -44,7 +44,6 @@ Distinguish demonstrated implementation, inference, recommendation, planned beha
 
 ## Validate
 
-Apply [reference/quality-gates.md](reference/quality-gates.md) before delivery. Run `python3 skills/knowledge-distill/scripts/engine.py audit-all <project_dir> --write` to verify structural contracts, zero hallucinated citations, absence of forbidden mermaid markdown blocks, and high token density. For interactive HTML, also run the validation and interaction checks required by the web-artifact reference and any selected demo-building skill.
+Apply [reference/quality-gates.md](reference/quality-gates.md) before delivery. Run `python3 skills/knowledge-distill/scripts/engine.py audit-all <project_dir> --write` to verify structural contracts, zero hallucinated citations, absence of forbidden mermaid markdown blocks, and high token density. For interactive HTML, also run the validation and interaction checks required by the web-artifact reference and any selected demo-building skill. Declare whether a contribution simulator is included or not applicable; the guardian validates the declaration, evidence-status labeling, and required simulator marker.
 
 When user feedback reveals a reusable process failure, follow [reference/feedback-evolution.md](reference/feedback-evolution.md) and update [reference/skill-evolution-ledger.md](reference/skill-evolution-ledger.md).
-

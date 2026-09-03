@@ -11,7 +11,8 @@ The central claim is simple:
 - [`paper.md`](paper.md) — paper-style research draft
 - [`experiment-protocol.md`](experiment-protocol.md) — reproducible factorial experiment and analysis plan
 - [`benchmark-schema.md`](benchmark-schema.md) — episode format, request taxonomy, and annotation contract
-- [`index.html`](index.html) — interactive visual explanation and experiment simulator
+- [`guarded-skill-evolution-v2.html`](guarded-skill-evolution-v2.html) — v2 interactive paper with decision-frontier elicitation and contribution simulator
+- [`index.html`](index.html) — redirects to the latest interactive version
 
 ## Proposed citation
 
@@ -27,4 +28,3 @@ The central claim is simple:
 ## Status
 
 This is a research design, not a report of completed experimental results. Numerical values shown in the interactive experiment simulator are labeled as hypotheses or illustrative projections.
-

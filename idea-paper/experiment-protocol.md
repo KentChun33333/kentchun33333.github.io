@@ -53,6 +53,8 @@ Stop elicitation when any of these conditions holds:
 - expected information gain falls below the interaction-cost threshold;
 - the maximum turn budget is reached.
 
+For GSE conditions, represent unresolved user decisions as a dependency tree. In each round, ask only the current frontier: unresolved decisions whose prerequisites are resolved. Investigate environment-resolvable facts directly rather than asking the user. Recompute the frontier after every round or material evidence update, and require explicit confirmation of the resulting change contract before candidate generation.
+
 Run a human validation subset of at least 40 stratified episodes to measure oracle-user realism and question burden.
 
 ## 5. Candidate protocol
@@ -105,6 +107,8 @@ Fraction of oracle no-change or non-skill-repair episodes in which the method ne
 - requirement-field recall and precision;
 - critical-invariant recovery;
 - targeted-question yield per turn;
+- frontier validity and premature-question rate;
+- question count and round count;
 - average clarification turns;
 - source-case repair rate;
 - target held-out performance;
@@ -176,4 +180,3 @@ Release:
 - executable evaluators and judge rubrics;
 - per-episode decisions, confidence values, costs, and receipts;
 - analysis notebooks and preregistration.
-

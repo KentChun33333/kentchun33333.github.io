@@ -234,6 +234,84 @@ class KnowledgeGuardian:
                     message=f"Web insight artifact uses descriptive filename: '{filename}'."
                 ))
 
+            self.check_contribution_simulator_contract(html_path)
+
+    def check_contribution_simulator_contract(self, html_path: Path):
+        """Enforces applicability and evidence labeling for contribution simulators."""
+        content = html_path.read_text(encoding="utf-8", errors="ignore")
+        filename = html_path.name
+        declaration = re.search(
+            r'<meta\b(?=[^>]*\bname=["\']knowledge-distill:contribution-simulator["\'])'
+            r'(?=[^>]*\bcontent=["\'](included|not-applicable)["\'])[^>]*>',
+            content,
+            re.IGNORECASE,
+        )
+
+        if not declaration:
+            self.results.append(CheckResult(
+                name=f"Contribution Simulator ({filename})",
+                status="FAIL",
+                message="Missing or invalid contribution-simulator applicability metadata.",
+                details=[
+                    "Declare content='included', or content='not-applicable' with a rationale."
+                ],
+            ))
+            return
+
+        mode = declaration.group(1).lower()
+        if mode == "not-applicable":
+            rationale = re.search(
+                r'<meta\b(?=[^>]*\bname=["\']knowledge-distill:contribution-simulator-rationale["\'])'
+                r'(?=[^>]*\bcontent=["\']([^"\']{12,})["\'])[^>]*>',
+                content,
+                re.IGNORECASE,
+            )
+            if not rationale:
+                self.results.append(CheckResult(
+                    name=f"Contribution Simulator ({filename})",
+                    status="FAIL",
+                    message="Contribution simulator is marked not applicable without a meaningful rationale.",
+                ))
+            else:
+                self.results.append(CheckResult(
+                    name=f"Contribution Simulator ({filename})",
+                    status="PASS",
+                    message="Simulator is explicitly not applicable and the rationale is recorded.",
+                ))
+            return
+
+        roots = re.findall(r'<[^>]+\bdata-contribution-simulator(?:\s|=|>)', content, re.IGNORECASE)
+        valid_root = re.search(
+            r'<(?=[^>]*\bdata-contribution-simulator(?:\s|=|>))'
+            r'(?=[^>]*\bdata-evidence-status=["\']'
+            r'(empirical|source-reported|hypothesis|conceptual)["\'])[^>]+>',
+            content,
+            re.IGNORECASE,
+        )
+        has_disclosure = bool(re.search(r'\bdata-evidence-disclosure(?:\s|=|>)', content, re.IGNORECASE))
+
+        problems = []
+        if len(roots) != 1:
+            problems.append(f"Expected exactly one primary simulator root; found {len(roots)}.")
+        if not valid_root:
+            problems.append("Simulator root lacks a valid data-evidence-status.")
+        if not has_disclosure:
+            problems.append("Simulator lacks a visible data-evidence-disclosure element.")
+
+        if problems:
+            self.results.append(CheckResult(
+                name=f"Contribution Simulator ({filename})",
+                status="FAIL",
+                message="Contribution-simulator contract is incomplete.",
+                details=problems,
+            ))
+        else:
+            self.results.append(CheckResult(
+                name=f"Contribution Simulator ({filename})",
+                status="PASS",
+                message="Simulator root, evidence status, and visible disclosure are declared.",
+            ))
+
     def format_report(self) -> str:
         """Formats the results into a clean markdown / terminal report."""
         passed = sum(1 for r in self.results if r.status == "PASS")

@@ -87,7 +87,21 @@ R=(O,P,E,C,I,N),
 
 containing the objective \(O\), observed problem \(P\), supporting evidence \(E\), constraints \(C\), invariants \(I\), and excluded scope \(N\). It evaluates ambiguity, consequence, evidence sufficiency, and contradictions. The gate does not force an interview for every request: it asks targeted questions only when additional information may change the intervention or acceptance criteria.
 
-### 3.2 Failure-owner diagnosis
+### 3.2 Decision-frontier elicitation
+
+To operationalize adaptive clarification, GSE represents unresolved requirements as a **design tree**: decisions are nodes and prerequisite relations are directed edges. Following the frontier concept described in Matt Pocock's grilling method, the next question set contains only unresolved decisions whose prerequisites have been settled:
+
+\[
+F_t=\{d\in D_{unresolved}:\operatorname{pred}(d)\subseteq D_{resolved,t}\}.
+\]
+
+Questions within a frontier may be asked together because none logically depends on another answer in the same round. After the answers arrive, GSE updates the tree and computes a new frontier rather than following a fixed questionnaire.
+
+GSE adapts the grilling mechanism in four ways. First, it separates **environment-resolvable facts** from **user-owned decisions**: the agent inspects traces, tools, and skill activation itself, while the user decides objectives, trade-offs, and acceptable risk. Second, it stops when the expected decision value of another question falls below interaction cost. Third, new execution evidence can invalidate an upstream assumption and reopen affected branches. Fourth, an empty frontier does not authorize mutation; the resolved tree is compiled into a change contract and presented for confirmation.
+
+This structure makes question-order quality measurable through frontier validity, premature-question rate, requirement coverage, round count, and interaction burden.
+
+### 3.3 Failure-owner diagnosis
 
 The system attributes the problem across a structured failure topology:
 
@@ -104,7 +118,7 @@ The system attributes the problem across a structured failure topology:
 
 The diagnosis may assign a primary owner and connected secondary repairs. It must not create a duplicate skill to compensate for a routing failure or accumulate instructions to mask a tool defect.
 
-### 3.3 Change contract
+### 3.4 Change contract
 
 Before editing, GSE produces a compact contract that can be checked by the user and evaluator:
 
@@ -133,11 +147,11 @@ proposed_change:
 
 The contract makes a proposed evolution falsifiable and provides a stable evaluation target even if the candidate wording changes.
 
-### 3.4 Candidate generation
+### 3.5 Candidate generation
 
 The editor receives the incumbent, contract, triggering traces, and a strict edit budget. Every edit must be linked to a diagnosed defect or contract requirement. Candidate generation favors deletion, substitution, conditionalization, and focused additions over unbounded instruction accumulation.
 
-### 3.5 Paired version gate
+### 3.6 Paired version gate
 
 The incumbent and candidate run on identical cases, seeds, tools, and model settings. Evaluation has four slices:
 
@@ -148,7 +162,7 @@ The incumbent and candidate run on identical cases, seeds, tools, and model sett
 
 The gate returns **accept**, **reject**, or **insufficient evidence**. The third outcome avoids converting noisy measurements into permanent behavior.
 
-### 3.6 Version ledger
+### 3.7 Version ledger
 
 Every proposal records:
 
@@ -223,8 +237,8 @@ This framing makes no-change a successful outcome, clarification an optimization
 
 - Gong, J. et al. (2026). [SkillMOO: Multi-Objective Optimization of Agent Skills for Software Engineering](https://arxiv.org/abs/2604.09297).
 - Jin, D. et al. (2026). [ReqElicitGym: An Evaluation Environment for Interview Competence in Conversational Requirements Elicitation](https://arxiv.org/abs/2602.18306).
+- Pocock, M. (2026). [Grilling: Design Trees, Frontiers, and Decision Rounds](https://github.com/mattpocock/skills/blob/main/docs/productivity/grilling.md).
 - Wang, Z. et al. (2026). [MetaSkill-Evolve: Recursive Self-Improvement of LLM Agents via Two-Timescale Meta-Skill Evolution](https://arxiv.org/abs/2607.05297).
 - [SkillOpt: Agent Skill Optimization as Bounded Textual Learning](https://arxiv.org/abs/2605.23904) (2026).
 - [SkillRevise: Improving LLM-Authored Agent Skills via Trace-Conditioned Skill Revision](https://arxiv.org/abs/2606.01139) (2026).
 - Wang, G. et al. (2023). [Voyager: An Open-Ended Embodied Agent with Large Language Models](https://arxiv.org/abs/2305.16291).
-

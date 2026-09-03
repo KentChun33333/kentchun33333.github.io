@@ -16,6 +16,8 @@
 10. Related-work candidates must not be presented as validated winners unless the source evaluates them.
 11. Repeated concepts must have exactly one canonical explanation. The knowledge stage must be heavily compressed and deduplicated while maintaining high-coverage cross-references.
 12. Every major practical recommendation should include an invalidation test.
+13. Research-insight HTML must declare contribution-simulator applicability. Multi-component contribution claims require an interactive counterfactual or ablation surface; descriptive pages may declare `not-applicable` with a rationale.
+14. Contribution simulators must label their evidence status and must not present hypothetical, conceptual, or source-reported values as independently observed results.
 
 ## Automated Verification
 
@@ -65,5 +67,5 @@ Use these dimensions when reviewing output quality:
 - Repeated concepts have one canonical explanation.
 - Open questions and low-confidence areas are clearly marked.
 - Skill evolution caused by feedback is recorded in a ledger.
-
+- Every research-insight HTML declares contribution-simulator applicability; included simulators expose a baseline, benefit/trade-off outcomes, causal interpretation, and visible evidence-status disclosure.
 

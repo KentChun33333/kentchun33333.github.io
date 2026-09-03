@@ -123,6 +123,47 @@ class TestKnowledgeDistillEngine(unittest.TestCase):
         self.assertFalse(success)
         self.assertTrue(any(r.name == "Diagram Quality Rule" and r.status == "FAIL" for r in guardian.results))
 
+    def test_guardian_requires_simulator_applicability_declaration(self):
+        self._create_mock_project()
+        (self.test_dir / "research-insight.html").write_text(
+            "<!doctype html><html><head><title>Study</title></head><body></body></html>"
+        )
+        guardian = KnowledgeGuardian(self.test_dir)
+        success = guardian.run_all()
+        self.assertFalse(success)
+        self.assertTrue(any(
+            r.name == "Contribution Simulator (research-insight.html)" and r.status == "FAIL"
+            for r in guardian.results
+        ))
+
+    def test_guardian_accepts_labeled_contribution_simulator(self):
+        self._create_mock_project()
+        (self.test_dir / "research-insight.html").write_text(
+            "<!doctype html><html><head>"
+            '<meta name="knowledge-distill:contribution-simulator" content="included">'
+            "<title>Study</title></head><body>"
+            '<section data-contribution-simulator data-evidence-status="hypothesis">'
+            '<span data-evidence-disclosure>Illustrative hypothesis, not an empirical result.</span>'
+            "</section></body></html>"
+        )
+        guardian = KnowledgeGuardian(self.test_dir)
+        success = guardian.run_all()
+        self.assertTrue(success, guardian.format_report())
+
+    def test_guardian_requires_not_applicable_rationale(self):
+        self._create_mock_project()
+        (self.test_dir / "research-insight.html").write_text(
+            "<!doctype html><html><head>"
+            '<meta name="knowledge-distill:contribution-simulator" content="not-applicable">'
+            "<title>Study</title></head><body></body></html>"
+        )
+        guardian = KnowledgeGuardian(self.test_dir)
+        success = guardian.run_all()
+        self.assertFalse(success)
+        self.assertTrue(any(
+            "without a meaningful rationale" in r.message for r in guardian.results
+        ))
+
     def test_evaluator_scoring(self):
         self._create_mock_project()
         evaluator = KnowledgeEvaluator(self.test_dir)
