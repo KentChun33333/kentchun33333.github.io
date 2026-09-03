@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "input_data": [
+    "data-raw/sources.md"
+  ],
+  "knowledge_package": "knowledge/manifest.json",
+  "objective": "Help technical readers understand how TimesFM-3 transforms multivariate time-series inputs and known future covariates into point and quantile forecasts, while preserving evidence boundaries.",
+  "audience": "ML engineers, data scientists, and technically curious product builders",
+  "deliverables": [
+    {
+      "id": "timesfm3-system-demo",
+      "type": "system-demo",
+      "output_path": "../../ai-research-insights/timesfm-3-explained.html",
+      "requirements": {
+        "claims": [
+          "TimesFM-3 uses 32-step patches and per-series normalization",
+          "Temporal causal attention alternates with full variate attention",
+          "Past-future covariates remain visible in the masked forecast horizon",
+          "The horizon is decoded in one forward pass",
+          "The model emits point forecasts and nine quantiles for each target"
+        ],
+        "functions": [
+          "Toggle past and future covariates",
+          "Step through the complete input-to-output flow",
+          "Switch between architecture and tensor-shape component views",
+          "Reveal evidence and limitations"
+        ],
+        "observable_effects": [
+          "The sample forecast responds to known promotion days only when the future covariate is enabled",
+          "Each workflow step highlights the active component and explains the state transition",
+          "Input and output contracts update with the selected scenario"
+        ]
+      },
+      "evaluation": {
+        "skill": "evaluate-web-deliverable",
+        "profile": "system-demo-v1",
+        "rules": [
+          "Clearly distinguish sourced model behavior from the illustrative browser simulation",
+          "Expose the absence of a dedicated TimesFM-3 technical paper",
+          "Keep the full explanation usable without running the animation"
+        ]
+      },
+      "skill": "web"
+    }
+  ],
+  "preparation": {
+    "strategy": "direct-reading",
+    "graphify": "off",
+    "semantic_retrieval": "off"
+  },
+  "iteration": {
+    "use_user_feedback": true,
+    "max_rounds": 2
+  },
+  "input_fingerprint": "99345aafbf02bb073c82a476191f056f21819bc70bea334ea6b778a63a5f7cf1"
+}

@@ -1,0 +1,38 @@
+{
+  "research-site-v1": {
+    "category": "research-site",
+    "dimensions": {
+      "evidence_fidelity": 25,
+      "thesis_audience_fit": 15,
+      "mechanism_depth": 15,
+      "boundaries_uncertainty": 15,
+      "information_design": 10,
+      "requested_effects": 10,
+      "usability_accessibility": 10
+    }
+  },
+  "system-demo-v1": {
+    "category": "system-demo",
+    "dimensions": {
+      "architecture_fidelity": 25,
+      "end_to_end_trace": 15,
+      "state_transition_clarity": 15,
+      "requested_effects": 20,
+      "alternate_failure_path": 10,
+      "information_design": 5,
+      "usability_accessibility": 10
+    }
+  },
+  "agentic-demo-v1": {
+    "category": "agentic-demo",
+    "dimensions": {
+      "workflow_state_integrity": 20,
+      "human_authority": 20,
+      "provenance_truthfulness": 15,
+      "agent_handoff_clarity": 10,
+      "requested_effects": 15,
+      "replay_refinement_behavior": 10,
+      "usability_accessibility": 10
+    }
+  }
+}

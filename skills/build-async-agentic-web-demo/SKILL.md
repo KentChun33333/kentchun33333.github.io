@@ -7,6 +7,8 @@ description: Build or refactor polished, standalone agentic web application demo
 
 Create a believable product demo in which agent work happens asynchronously and users remain in control. Treat the queue as the source of truth and agent animation as an optional explanation layer.
 
+When invoked from a Knowledge Distill task contract, require deliverable type `agentic-demo`, consume its objective, audience, functions, and observable effects, and evaluate the result with the assigned `agentic-demo-v1` profile. The sibling `web` skill owns category selection; this skill owns agentic-demo implementation.
+
 ## Start from the demo contract
 
 Before coding, define:

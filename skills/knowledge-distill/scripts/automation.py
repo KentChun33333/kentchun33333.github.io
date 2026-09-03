@@ -9,6 +9,7 @@ Capabilities:
 """
 
 import json
+import hashlib
 import os
 import re
 import sys
@@ -141,12 +142,27 @@ def build_knowledge_manifest(project_dir: Path) -> Dict[str, Any]:
     cooked_dir = project_dir / "data-cooked"
 
     manifest: Dict[str, Any] = {
+        "schema_version": 2,
         "project_name": project_dir.name,
         "entrypoint": "knowledge/big-picture.md" if (knowledge_dir / "big-picture.md").exists() else "knowledge/read-order.md",
         "artifacts": [],
         "sources": [],
         "total_knowledge_files": 0,
+        "task_contract": None,
+        "deliverables": [],
     }
+
+    task_contract = project_dir / "task-config.resolved.json"
+    if task_contract.exists():
+        try:
+            contract = json.loads(task_contract.read_text(encoding="utf-8"))
+            manifest["task_contract"] = str(task_contract.relative_to(project_dir))
+            manifest["input_fingerprint"] = contract.get("input_fingerprint")
+            manifest["objective"] = contract.get("objective")
+            manifest["audience"] = contract.get("audience")
+            manifest["deliverables"] = contract.get("deliverables", [])
+        except (OSError, json.JSONDecodeError):
+            manifest["task_contract"] = "invalid"
 
     if cooked_dir.is_dir():
         for sf in sorted(cooked_dir.glob("source-*.md")):
@@ -168,6 +184,7 @@ def build_knowledge_manifest(project_dir: Path) -> Dict[str, Any]:
                 "title": title,
                 "approx_words": word_count,
                 "citations": citations,
+                "content_sha256": hashlib.sha256(content.encode()).hexdigest(),
             })
 
         manifest["total_knowledge_files"] = len(manifest["artifacts"])

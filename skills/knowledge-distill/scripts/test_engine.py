@@ -90,9 +90,23 @@ class TestKnowledgeDistillEngine(unittest.TestCase):
 
     def test_manifest_builder(self):
         self._create_mock_project()
+        (self.test_dir / "task-config.resolved.json").write_text(
+            json.dumps(
+                {
+                    "objective": "Explain checkout",
+                    "audience": "Maintainers",
+                    "input_fingerprint": "abc123",
+                    "deliverables": [{"id": "demo", "type": "system-demo"}],
+                }
+            )
+        )
         manifest = build_knowledge_manifest(self.test_dir)
+        self.assertEqual(manifest["schema_version"], 2)
         self.assertEqual(manifest["total_knowledge_files"], 2)
         self.assertIn("source-001", manifest["sources"])
+        self.assertEqual(manifest["input_fingerprint"], "abc123")
+        self.assertEqual(manifest["deliverables"][0]["type"], "system-demo")
+        self.assertTrue(manifest["artifacts"][0]["content_sha256"])
         self.assertTrue((self.test_dir / "knowledge/manifest.json").is_file())
 
     def test_guardian_passes_valid_project(self):

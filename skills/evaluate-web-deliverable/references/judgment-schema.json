@@ -1,0 +1,31 @@
+{
+  "claim_results": [
+    {
+      "requirement": "Exact claim text from the task contract",
+      "passed": true,
+      "evidence": "Visible artifact statement and supporting source reference"
+    }
+  ],
+  "function_results": [
+    {
+      "requirement": "Exact function text from the task contract",
+      "passed": true,
+      "evidence": "Action performed and observed behavior"
+    }
+  ],
+  "effect_results": [
+    {
+      "requirement": "Exact observable-effect text from the task contract",
+      "passed": true,
+      "evidence": "Action performed and visible before/after state"
+    }
+  ],
+  "rubric_scores": {
+    "dimension_from_selected_profile": {
+      "score": 0,
+      "evidence": "Artifact or source evidence supporting the 0-5 score"
+    }
+  },
+  "hard_failures": [],
+  "feedback": ["Specific correction for the next iteration"]
+}

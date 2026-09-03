@@ -1,0 +1,39 @@
+{
+  "contract_fingerprint": "c5b48deb1a761883301312d055a259f46044b708210ada792e6fd0d0a7114be0",
+  "deliverable_id": "timesfm3-system-demo",
+  "profile": "system-demo-v1",
+  "artifact": "ai-research-insights/timesfm-3-explained.html",
+  "preflight": [
+    {
+      "name": "html_document",
+      "passed": true
+    },
+    {
+      "name": "viewport",
+      "passed": true
+    },
+    {
+      "name": "unique_ids",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "scripted_interaction",
+      "passed": true
+    },
+    {
+      "name": "live_feedback",
+      "passed": true
+    },
+    {
+      "name": "category_matches_profile",
+      "passed": true
+    }
+  ],
+  "quality_score": 96.0,
+  "errors": [],
+  "hard_failures": [],
+  "complete": true,
+  "reproducible": false,
+  "promotable": false
+}

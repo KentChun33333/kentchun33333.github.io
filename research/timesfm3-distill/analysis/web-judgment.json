@@ -1,0 +1,31 @@
+{
+  "claim_results": [
+    {"requirement":"TimesFM-3 uses 32-step patches and per-series normalization","passed":true,"evidence":"Hero facts, I/M/O core contract, workflow normalization and patch stages, plus official-source links."},
+    {"requirement":"Temporal causal attention alternates with full variate attention","passed":true,"evidence":"Workflow stages 5–6 and component tabs separately explain axes, masks, and responsibilities."},
+    {"requirement":"Past-future covariates remain visible in the masked forecast horizon","passed":true,"evidence":"Playground observable-effect copy and patch-grid workflow explicitly contrast visible future covariates with masked target horizon."},
+    {"requirement":"The horizon is decoded in one forward pass","passed":true,"evidence":"Hero, main-model contract, and decode stage consistently state single-pass horizon completion."},
+    {"requirement":"The model emits point forecasts and nine quantiles for each target","passed":true,"evidence":"Output contract shows point (T,H), quantiles (T,H,9), levels 0.1–0.9; decode visualization shows all nine bars."}
+  ],
+  "function_results": [
+    {"requirement":"Toggle past and future covariates","passed":true,"evidence":"Related-series and known-future buttons update state, ARIA pressed state, tensor contract, chart paths, labels, and explanatory status."},
+    {"requirement":"Step through the complete input-to-output flow","passed":true,"evidence":"Seven selectable stages plus previous/next/replay controls deterministically update title, visualization, description, and state labels."},
+    {"requirement":"Switch between architecture and tensor-shape component views","passed":true,"evidence":"Six component tabs update responsibility, tensor/config specs, and purpose in the detail panel."},
+    {"requirement":"Reveal evidence and limitations","passed":true,"evidence":"Persistent Evidence & limits section provides four primary links, source roles, five boundaries, and an invalidation test."}
+  ],
+  "effect_results": [
+    {"requirement":"The sample forecast responds to known promotion days only when the future covariate is enabled","passed":true,"evidence":"Promotion toggle adds/removes event blocks and +20 fixture response in the green forecast while the dashed univariate baseline stays fixed."},
+    {"requirement":"Each workflow step highlights the active component and explains the state transition","passed":true,"evidence":"Active step class, completed/queued labels, stage-specific visual, and why-it-matters explanation update for every selected stage."},
+    {"requirement":"Input and output contracts update with the selected scenario","passed":true,"evidence":"Input shape values and impact/output labels update with channel selection; retail/operations changes the scenario title and event fixture."}
+  ],
+  "rubric_scores": {
+    "architecture_fidelity":{"score":5,"evidence":"Architecture and shape claims trace to the launch post/model card; original-paper lineage and v3 boundary are explicit."},
+    "end_to_end_trace":{"score":5,"evidence":"Seven ordered transformations cover validation through point/quantile decode, with a separate I/M/O contract."},
+    "state_transition_clarity":{"score":5,"evidence":"Every step changes active/completed state, visualization, responsibility description, and causal rationale."},
+    "requested_effects":{"score":5,"evidence":"All controls produce domain-relevant chart, contract, workflow, or evidence changes rather than decorative effects."},
+    "alternate_failure_path":{"score":4,"evidence":"Leak-risk action removes an invalid future-known input and explains why; local calibration/deployment invalidation is also visible."},
+    "information_design":{"score":5,"evidence":"Progressive structure moves from intuition to contracts, runtime, components, and evidence boundaries with responsive layouts."},
+    "usability_accessibility":{"score":4,"evidence":"Semantic buttons, ARIA pressed/live regions, keyboard-native controls, responsive layouts, and reduced-motion support are present."}
+  },
+  "hard_failures": [],
+  "feedback": ["A future iteration could add a true TimesFM-3 inference endpoint if licensing, hosting compute, and latency requirements are resolved."]
+}

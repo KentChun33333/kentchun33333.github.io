@@ -125,6 +125,8 @@ Rules:
   [Input Data Contract]  -->  [Core Module]  -->  [Output Data Contract]
   ```
 
+`knowledge/manifest.json` is the normalized handoff to builder skills. Generate it after placing `task-config.resolved.json` at the project root so the manifest carries the objective, audience, input fingerprint, and deliverable/evaluator bindings alongside artifact citations and content hashes.
+
 ## Loop 6: Feedback-Driven Skill Evolution
 
 Use when the user critiques or evaluates the output. Run `python3 skills/knowledge-distill/scripts/engine.py audit-all [project_dir] --write` to evaluate quality and compliance.
@@ -142,5 +144,4 @@ Actions:
 - Patch current output first.
 - Patch the skill only when feedback generalizes.
 - Record what changed and why.
-
 

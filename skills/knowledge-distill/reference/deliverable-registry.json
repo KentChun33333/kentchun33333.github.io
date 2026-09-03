@@ -1,0 +1,26 @@
+{
+  "knowledge-pack": {
+    "skill": "knowledge-distill",
+    "evaluation_skill": "knowledge-distill",
+    "evaluation_profile": "knowledge-pack-iq-v1",
+    "extensions": [".json", ".md"]
+  },
+  "research-site": {
+    "skill": "web",
+    "evaluation_skill": "evaluate-web-deliverable",
+    "evaluation_profile": "research-site-v1",
+    "extensions": [".html"]
+  },
+  "system-demo": {
+    "skill": "web",
+    "evaluation_skill": "evaluate-web-deliverable",
+    "evaluation_profile": "system-demo-v1",
+    "extensions": [".html"]
+  },
+  "agentic-demo": {
+    "skill": "build-async-agentic-web-demo",
+    "evaluation_skill": "evaluate-web-deliverable",
+    "evaluation_profile": "agentic-demo-v1",
+    "extensions": [".html"]
+  }
+}

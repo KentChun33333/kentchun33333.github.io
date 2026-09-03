@@ -34,6 +34,7 @@ openmemo/agent-learner/output/[project-folder]/
     iq-training-evaluation.md
 
   knowledge/
+    manifest.json
     read-order.md
     executive-summary.md
     big-picture.md
@@ -52,4 +53,4 @@ openmemo/agent-learner/output/[project-folder]/
 - Write reusable artifacts to `knowledge/`.
 - Preserve source IDs across every stage.
 - Use one canonical explanation per concept; cross-reference instead of duplicating.
-
+- Treat `knowledge/manifest.json` as the stable handoff to deliverable skills. Schema version 2 includes the resolved objective, audience, input fingerprint, deliverable bindings, artifact hashes, citations, and read-order entrypoint when available.

@@ -43,15 +43,17 @@ Each algorithm card must include:
 - failure mode or boundary;
 - evidence source ID or exact code path.
 
-For interactive component deep dives, make the data contract the primary visual structure:
+Whenever the distilled knowledge contains explicit Input → Model → Output tensor contracts, make the data contract the primary page-level architecture structure as well as the component deep-dive structure:
 
 ```text
 [Input conditions]  -->  [Internal mechanism]  -->  [Output conditions]
 ```
 
-- Keep input conditions persistently on the left and output conditions persistently on the right at desktop widths.
+- Keep input tensors or conditions persistently on the left, the model and its transformations in the middle, and output tensors or conditions persistently on the right at desktop widths.
+- Treat this as a layout trigger, not an optional diagram style: steppers, tabs, animations, and component selectors may update the middle region but must not displace or hide either boundary contract.
+- Include tensor names, shapes, masks or availability rules, and semantic roles in their corresponding left or right region when the sources define them.
 - Put ordered steps, state transitions, explanatory prose, diagrams, and source-shaped code in the center mechanism region.
-- Selecting an internal step must highlight its corresponding input and output conditions so the causal transformation remains visible.
+- Selecting an internal step must highlight its corresponding left-side input and right-side output so the causal transformation remains visible across all three regions.
 - Give each collapsed card a compact preview of its initial input condition and final output condition; do not hide the contract entirely behind interaction.
 - Give each interactive component three source-grounded example fixtures that cover a normal path, a meaningful alternate/control path, and a boundary or failure path. Let the learner inspect the input before revealing or checking the expected output.
 - Clearly label fixture checks as teaching simulations or expected contract behavior unless the artifact actually executes the inspected implementation. Never present a static comparison as a live runtime test.

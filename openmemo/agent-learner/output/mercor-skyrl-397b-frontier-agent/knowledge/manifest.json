@@ -1,0 +1,43 @@
+{
+  "project_name": "mercor-skyrl-397b-frontier-agent",
+  "entrypoint": "knowledge/big-picture.md",
+  "artifacts": [
+    {
+      "path": "knowledge/big-picture.md",
+      "title": "Big Picture Reference: Frontier Knowledge Work RL Post-Training",
+      "approx_words": 300,
+      "citations": [
+        "source-001"
+      ]
+    },
+    {
+      "path": "knowledge/executive-summary.md",
+      "title": "Executive Summary: 397B Knowledge Work RL Training",
+      "approx_words": 202,
+      "citations": [
+        "source-001"
+      ]
+    },
+    {
+      "path": "knowledge/read-order.md",
+      "title": "Read Order: Mercor SkyRL 397B Knowledge Work RL Training",
+      "approx_words": 95,
+      "citations": [
+        "source-001"
+      ]
+    },
+    {
+      "path": "knowledge/workflow-reference.md",
+      "title": "Workflow Reference Guide: 397B Knowledge Work RL Training",
+      "approx_words": 419,
+      "citations": [
+        "source-001"
+      ]
+    }
+  ],
+  "sources": [
+    "source-001",
+    "source-index"
+  ],
+  "total_knowledge_files": 4
+}

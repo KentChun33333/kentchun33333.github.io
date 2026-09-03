@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "input_data": ["data-raw"],
+  "knowledge_package": "knowledge/manifest.json",
+  "objective": "Help engineering leaders understand the request path and inspect failure behavior.",
+  "audience": "Engineering leaders and new maintainers",
+  "preparation": {"strategy": "auto", "graphify": "detect", "semantic_retrieval": "auto"},
+  "deliverables": [
+    {
+      "id": "request-path-demo",
+      "type": "system-demo",
+      "output_path": "deliverables/request-path-demo.html",
+      "requirements": {
+        "claims": ["Show the complete request path"],
+        "functions": ["Advance and reset the flow"],
+        "observable_effects": ["The active component and emitted output change visibly"]
+      },
+      "evaluation": {
+        "skill": "evaluate-web-deliverable",
+        "profile": "system-demo-v1",
+        "rules": ["A user can trace one normal path and one failure path"]
+      }
+    },
+    {
+      "id": "architecture-research",
+      "type": "research-site",
+      "output_path": "deliverables/architecture-research.html",
+      "requirements": {
+        "claims": ["Explain why the architecture uses staged grounding"],
+        "functions": ["Switch between evidence and boundary views"],
+        "observable_effects": ["The selected claim view changes while provenance remains visible"]
+      },
+      "evaluation": {
+        "skill": "evaluate-web-deliverable",
+        "profile": "research-site-v1",
+        "rules": ["Every major conclusion links to evidence or is labeled as inference"]
+      }
+    }
+  ],
+  "iteration": {"use_user_feedback": true, "max_rounds": 3}
+}

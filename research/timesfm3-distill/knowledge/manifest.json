@@ -1,0 +1,132 @@
+{
+  "schema_version": 2,
+  "project_name": "timesfm3-distill",
+  "entrypoint": "knowledge/big-picture.md",
+  "artifacts": [
+    {
+      "path": "knowledge/algorithm-reference.md",
+      "title": "Algorithm reference",
+      "approx_words": 68,
+      "citations": [
+        "source-001",
+        "source-003"
+      ],
+      "content_sha256": "fc20b178fe37ec18f8793ed4fcb37e0b0204d454711424e0ee4f9984b4e95b65"
+    },
+    {
+      "path": "knowledge/big-picture.md",
+      "title": "Big picture",
+      "approx_words": 47,
+      "citations": [
+        "source-001"
+      ],
+      "content_sha256": "59bdff111e51601741a2190aa0d8db7c42228643b67aa27c6cf6f2e322897e5e"
+    },
+    {
+      "path": "knowledge/domain-reference.md",
+      "title": "Domain reference",
+      "approx_words": 64,
+      "citations": [
+        "source-001",
+        "source-003"
+      ],
+      "content_sha256": "e0d3eaa26eb8c0073ae487a5bbe9b5c40789c884e16ee4bfbec89bb561175630"
+    },
+    {
+      "path": "knowledge/executive-summary.md",
+      "title": "Executive summary",
+      "approx_words": 89,
+      "citations": [
+        "source-001",
+        "source-002",
+        "source-003"
+      ],
+      "content_sha256": "96ace93bf957d4939f4e68db0f5097ee0dbeda33bc06600e9468d5ca94b2fed8"
+    },
+    {
+      "path": "knowledge/implementation-notes.md",
+      "title": "Implementation notes",
+      "approx_words": 95,
+      "citations": [
+        "source-003"
+      ],
+      "content_sha256": "64dc0dbf49b9054fed6a7eca5f110a9cad7c27b28e0fcb9cb9ad7dfe24f16134"
+    },
+    {
+      "path": "knowledge/read-order.md",
+      "title": "Read order",
+      "approx_words": 15,
+      "citations": [],
+      "content_sha256": "9322203846d238d6967b5b4b0bd9e83fbb786716b157c85a59f096c3823d7c70"
+    },
+    {
+      "path": "knowledge/system-model.md",
+      "title": "System model",
+      "approx_words": 46,
+      "citations": [
+        "source-001",
+        "source-003"
+      ],
+      "content_sha256": "b1bcf0e35936138c546af4c2be03074b76b978ad10a47dc5d405dbceeeae24ae"
+    },
+    {
+      "path": "knowledge/workflow-reference.md",
+      "title": "Workflow reference",
+      "approx_words": 57,
+      "citations": [
+        "source-001",
+        "source-003"
+      ],
+      "content_sha256": "3c1d4d2064950a193208309d6336f8e214f7f0d5bf0843265f2a25fee74f6483"
+    }
+  ],
+  "sources": [
+    "source-001",
+    "source-002",
+    "source-003",
+    "source-004",
+    "source-index"
+  ],
+  "total_knowledge_files": 8,
+  "task_contract": "task-config.resolved.json",
+  "deliverables": [
+    {
+      "id": "timesfm3-system-demo",
+      "type": "system-demo",
+      "output_path": "../../ai-research-insights/timesfm-3-explained.html",
+      "requirements": {
+        "claims": [
+          "TimesFM-3 uses 32-step patches and per-series normalization",
+          "Temporal causal attention alternates with full variate attention",
+          "Past-future covariates remain visible in the masked forecast horizon",
+          "The horizon is decoded in one forward pass",
+          "The model emits point forecasts and nine quantiles for each target"
+        ],
+        "functions": [
+          "Toggle past and future covariates",
+          "Step through the complete input-to-output flow",
+          "Switch between architecture and tensor-shape component views",
+          "Reveal evidence and limitations"
+        ],
+        "observable_effects": [
+          "The sample forecast responds to known promotion days only when the future covariate is enabled",
+          "Each workflow step highlights the active component and explains the state transition",
+          "Input and output contracts update with the selected scenario"
+        ]
+      },
+      "evaluation": {
+        "skill": "evaluate-web-deliverable",
+        "profile": "system-demo-v1",
+        "rules": [
+          "Clearly distinguish sourced model behavior from the illustrative browser simulation",
+          "Expose the absence of a dedicated TimesFM-3 technical paper",
+          "Keep the full explanation usable without running the animation"
+        ]
+      },
+      "skill": "web"
+    }
+  ],
+  "input_fingerprint": "99345aafbf02bb073c82a476191f056f21819bc70bea334ea6b778a63a5f7cf1",
+  "objective": "Help technical readers understand how TimesFM-3 transforms multivariate time-series inputs and known future covariates into point and quantile forecasts, while preserving evidence boundaries.",
+  "audience": "ML engineers, data scientists, and technically curious product builders"
+}

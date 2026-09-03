@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Research Site Pattern</title>
+  <style>
+    :root{--ink:#17202a;--paper:#fbfaf6;--accent:#a53d2d;--line:#d8d3c8;--soft:#eee9de}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 ui-serif,Georgia,serif}main{max-width:1050px;margin:auto;padding:clamp(24px,6vw,72px)}header{border-bottom:1px solid var(--line);padding-bottom:28px}.kicker{color:var(--accent);font:700 12px ui-sans-serif;letter-spacing:.12em;text-transform:uppercase}h1{font-size:clamp(38px,7vw,76px);line-height:.98;max-width:900px;margin:.25em 0}.thesis{font-size:1.3rem;max-width:760px}.grid{display:grid;grid-template-columns:1.05fr 1.95fr;gap:30px;margin-top:40px}.rail button{display:block;width:100%;text-align:left;padding:12px;margin:0 0 8px;border:1px solid var(--line);background:transparent;cursor:pointer}.rail button[aria-selected=true]{background:var(--ink);color:white}.panel{border-top:3px solid var(--ink);padding-top:20px}.evidence{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.card{border:1px solid var(--line);padding:16px;background:white}.label{font:700 11px ui-sans-serif;color:var(--accent);text-transform:uppercase}.boundary{background:var(--soft);padding:18px;margin-top:28px}@media(max-width:700px){.grid,.evidence{grid-template-columns:1fr}}@media(prefers-reduced-motion:no-preference){.panel{animation:enter .2s ease}@keyframes enter{from{opacity:.4;transform:translateY(4px)}}}
+  </style>
+</head>
+<body><main>
+  <header><div class="kicker">Research pattern · illustrative content</div><h1>Evidence should shape the interface.</h1><p class="thesis">A research site succeeds when readers can trace a claim to evidence and see the conditions that would weaken it.</p></header>
+  <section class="grid" aria-label="Claim explorer">
+    <nav class="rail" aria-label="Claims">
+      <button aria-selected="true" data-view="mechanism">Mechanism</button>
+      <button aria-selected="false" data-view="evidence">Evidence</button>
+      <button aria-selected="false" data-view="boundary">Boundary</button>
+    </nav>
+    <article class="panel" id="research-panel" aria-live="polite"></article>
+  </section>
+  <section class="evidence" id="evidence"><article class="card"><div class="label">Implemented</div><p>Verified behavior belongs here.</p></article><article class="card"><div class="label">Inference</div><p>Reasoned interpretation is visibly distinct.</p></article><article class="card"><div class="label">Open question</div><p>Missing evidence remains visible.</p></article></section>
+  <aside class="boundary"><strong>Invalidation condition:</strong> state what observation would weaken the thesis.</aside>
+</main><script>
+const views={mechanism:['Mechanism','Show the causal chain rather than repeating the thesis.'],evidence:['Evidence','Connect each major claim to a stable source identifier.'],boundary:['Boundary','Explain where the evidence no longer supports the conclusion.']};
+const panel=document.querySelector('#research-panel');function render(k){const [h,p]=views[k];panel.innerHTML=`<div class="label">${k}</div><h2>${h}</h2><p>${p}</p>`}render('mechanism');
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-view]').forEach(x=>x.setAttribute('aria-selected','false'));b.setAttribute('aria-selected','true');render(b.dataset.view)}));
+</script></body></html>
