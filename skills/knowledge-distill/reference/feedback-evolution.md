@@ -1,66 +1,78 @@
-# Feedback-Driven Skill Evolution
+# Feedback-Driven Guarded Skill Evolution
 
-Use this when the user critiques a completed distillation or one of its deliverables.
+Use this when the user critiques a completed distillation, reports deliverable defects, or explicitly requests a reusable skill modification.
 
-Also use it when the user explicitly requests a reusable skill modification. In that case, run the **Skill-modification intent hook** in `../SKILL.md` before editing: establish intention and exclusions, expose current practice, map potential impacts, and classify the change as bounded or substantial.
+Always invoke the **Guarded Skill Evolution (GSE) Hook** in `../SKILL.md` and follow [reference/guarded-skill-evolution.md](guarded-skill-evolution.md). Skill evolution is a selective intervention problem—never default to an automatic skill rewrite.
 
-For substantial changes, use an isolated version-controlled candidate following the principles in `../../cross-evolve-skill/skill.md`. Freeze the baseline and evaluation conditions, compare the candidate under the same conditions, present the diff and impact analysis, and obtain explicit user approval before promotion. For bounded changes, a narrow direct patch is acceptable after the intent and impact review, followed by validation and ledger entry.
+---
 
-## Feedback Capture
+## 1. Feedback Triage and Attribution Matrix
 
-Output:
+Before editing any code or prompt, classify the feedback across the 8 candidate failure owners. Do not assume the skill instructions caused the defect.
 
-- `analysis/feedback-log.md`
+Output: `analysis/feedback-log.md`
 
-Suggested table:
-
-```md
-| Feedback | Affected Output | Failure Pattern | Severity | Skill Update Needed? | Correction |
+| Feedback Item | Affected Output / ID | Observed Symptom | True Failure Owner (`skill`, `routing`, `tool`, `data`, `model`, `evaluator`, `spec`, `noise`) | Selected Intervention (`clarify`, `revise-skill`, `repair-other`, `retain`) | Action / Correction |
 |---|---|---|---|---|---|
-```
 
-## Error Patterns
+### Attribution Rules:
+1. **`tool` or `routing` owner:** If execution failed in a deterministic script, parser, or event trigger, repair the tool or routing directly. **Do not modify the skill** to mask an underlying tool defect.
+2. **`spec` owner:** If the feedback reveals conflicting or underspecified requirements, walk the decision-frontier design tree ("Grilling") to clarify rather than guessing.
+3. **`noise` owner:** If the failure cannot be reproduced on matched reruns, retain the incumbent and monitor.
+4. **`skill` owner:** Proceed to Change Contract generation and paired candidate evaluation only when procedural instructions are genuinely absent or incorrect.
 
-- Boundary ambiguity: unclear what is updated, frozen, demonstrated, inferred, or recommended.
-- Output duplication: repeated explanations reduce density.
-- Evidence weakness: claim lacks source ID or confidence label.
-- Missing invalidation: recommendation lacks falsification test.
-- Shallow reasoning: summary lacks mechanism, causal chain, failure mode, or second-order implication.
-- Oversized output: artifact set is larger than useful payload.
-- Code-example ambiguity: example does not clarify frozen, updated, trainable, omitted, or conceptual parts.
-- Implementation readiness gap: metrics are named but no scorecard or collection schema is provided.
+---
 
-## IQ-Style Review
+## 2. Common Error Patterns
 
-Output:
+- **Boundary ambiguity:** Unclear what is updated, frozen, demonstrated, inferred, or recommended.
+- **Output duplication:** Repeated explanations reduce information density.
+- **Evidence weakness:** Claim lacks source ID or confidence label.
+- **Missing invalidation:** Recommendation lacks falsification test.
+- **Shallow reasoning:** Summary lacks mechanism, causal chain, failure mode, or second-order implication.
+- **Oversized output:** Artifact set is larger than useful payload.
+- **Code-example ambiguity:** Example does not clarify frozen, updated, trainable, omitted, or conceptual parts.
+- **Implementation readiness gap:** Metrics are named but no scorecard or collection schema is provided.
 
-- `analysis/iq-training-evaluation.md`
+---
 
-Structure:
+## 3. IQ-Style Review Structure
 
-1. Working-memory scratchpad: objective, facts, variables, constraints, hypothesis, confidence.
-2. Independent assessment: score key dimensions.
-3. Red-team critique: assumptions, weak evidence, duplication, missing boundaries, invalidation gaps.
-4. Revised assessment: updated score after critique.
-5. Error journal: failure pattern, root cause, corrective rule.
-6. Extracted principles: general rules for future distillations.
+Output: `analysis/iq-training-evaluation.md`
 
-## Patch Order
+1. **Working-memory scratchpad:** Objective, facts, variables, constraints, hypothesis, confidence.
+2. **Independent assessment:** Score key dimensions (Structure, Flow, Provenance, Invalidation, Causality, Density, Executability).
+3. **Red-team critique:** Assumptions, weak evidence, duplication, missing boundaries, invalidation gaps.
+4. **Revised assessment:** Updated score after critique.
+5. **Error journal:** Failure pattern, root cause, failure owner, corrective rule.
+6. **Extracted principles:** General rules for future distillations.
 
-1. Run the skill-modification intent hook when reusable skill behavior is explicitly in scope.
-2. Record feedback against the affected deliverable ID and its current evaluation profile.
-3. Convert requested functions or effects into explicit evaluation rules for the next contract revision.
-4. Patch the current output first and rerun that deliverable's assigned evaluator.
-5. Patch the builder or evaluator skill only when the failure generalizes across tasks.
-6. For substantial or controlled evolution, keep held-out tasks separate and compare the isolated candidate against the baseline under one frozen contract fingerprint.
-7. Present the candidate diff and impact analysis and obtain explicit approval before promoting a substantial change.
-8. Record generalized skill changes in `reference/skill-evolution-ledger.md`.
+---
 
-Do not average scores across different deliverable types or profile versions. User feedback is valid optimization data, but a preference observed on one artifact is not evidence of generalization until it improves held-out tasks without regression.
+## 4. GSE Patch Order
 
-## Skill Evolution Ledger
-
-```md
-| Date | Feedback | Skill Rule Added | Files Updated |
-|---|---|---|---|
-```
+1. **Conduct Decision-Frontier Grilling:**
+   - Resolve Root Intent (downstream outcome and beneficiary).
+   - Investigate facts autonomously (agent checks logs, test cases, code paths).
+   - Elicit user constraints and non-negotiable hard invariants.
+2. **Diagnose Failure Owner:**
+   - Confirm whether the issue is `skill`, `tool`, `routing`, `data`, `model`, `evaluator`, `spec`, or `noise`.
+   - If non-skill, repair that component and verify delivery.
+3. **Patch Deliverable First:**
+   - Patch the specific task output and rerun its assigned evaluator to confirm local satisfaction.
+4. **Draft Falsifiable Change Contract:**
+   - If and only if the failure generalizes and the owner is `skill`, draft `change-contract.yaml` (`problem`, `objective`, `invariants`, `proposed_change`, `minimal_scope`).
+   - Validate with `python3 skills/knowledge-distill/scripts/task_contract.py validate-change-contract <change-contract.yaml>`.
+5. **Isolate Sandboxed Candidate ($s' = s_0 + \Delta$):**
+   - Apply minimal edits adhering strictly to the contract scope budget.
+6. **Paired 4-Slice Empirical Gate:**
+   - Run baseline $s_0$ and candidate $s'$ under identical conditions across:
+     - *Source repair* (triggering tasks),
+     - *Target generalization* (unseen held-out tasks),
+     - *Regression preservation* (existing capabilities and hard invariants),
+     - *Challenge cases* (boundary and adversarial inputs).
+7. **Promotion Verification:**
+   - Require lower confidence bound improvement $> \delta$, critical regression rate $\le \rho$, and 100% hard invariant adherence.
+   - Present diff and impact analysis for explicit human confirmation.
+8. **Record in Evolution Ledger:**
+   - Document the promotion in [`reference/skill-evolution-ledger.md`](skill-evolution-ledger.md) with rollback pointers.

@@ -2,7 +2,7 @@
 
 ## `research-site-v1`
 
-Prioritize fidelity and argument quality. Verify that the thesis serves the named audience, major claims have inspectable evidence, mechanisms are explained rather than asserted, uncertainty remains visible, and interactions improve comparison or traceability.
+Prioritize fidelity and argument quality. Verify that the thesis serves the named audience, major claims have inspectable evidence, mechanisms are explained rather than asserted, uncertainty remains visible, and interactions improve comparison or traceability. When algorithmic mechanisms or training/inference regimes are evaluated, verify that concrete, production-style code architectures (e.g. PyTorch) are provided with tabbed multi-paradigm views to support engineering transfer.
 
 Hard failures include an unsupported major claim, hidden or fabricated provenance, or a requested evidence interaction that produces no observable effect.
 

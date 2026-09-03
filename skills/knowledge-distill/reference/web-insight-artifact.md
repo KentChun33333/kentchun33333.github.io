@@ -14,7 +14,7 @@ Use this mode for a source-grounded technical study delivered as standalone HTML
 1. **Summary and thesis** — purpose, one-sentence architecture thesis, evidence basis, and boundaries.
 2. **Dependency-aware workflow** — input contract → core module → output contract, followed by a staged interactive animation.
 3. **Component deep dive** — switchable Algorithm and Software views.
-4. **Implementation path** — exact source files, small code excerpts, runtime effect, and extension point.
+4. **Implementation path & code architecture** — exact source files, small code excerpts, runtime effect, and extension point. When the study investigates an algorithmic mechanism (e.g., test-time compute, policy optimization, search regimes), provide concrete, production-style PyTorch/code implementations with interactive tabbed code inspectors to ensure practical engineering transfer.
 5. **Principles and critique** — why it works, failure modes, use/avoid conditions, and invalidation tests.
 
 When the page proposes or compares a framework with two or more components, controls, design choices, or ablations, also include a **contribution simulator** following [contribution-simulator.md](contribution-simulator.md). The simulator should expose how the claimed contribution changes across configurations or scenarios; it does not replace the readable explanation or experiment design.

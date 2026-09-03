@@ -1,0 +1,83 @@
+{
+  "schema_version": 2,
+  "project_name": "rlvr-grpo-deep-dive",
+  "entrypoint": "knowledge/big-picture.md",
+  "artifacts": [
+    {
+      "path": "knowledge/big-picture.md",
+      "title": "Big Picture: Verifiable Reward RL (RLVR) & GRPO",
+      "approx_words": 247,
+      "citations": [
+        "source-001",
+        "source-002",
+        "source-003",
+        "source-004",
+        "source-005"
+      ],
+      "content_sha256": "086f14df083fcd20b3967be38910ebf6442f79c0ec584db683e71d0e7f7ac645"
+    },
+    {
+      "path": "knowledge/workflow-reference.md",
+      "title": "Workflow Reference: GRPO Training Loop",
+      "approx_words": 148,
+      "citations": [
+        "source-001",
+        "source-002",
+        "source-005"
+      ],
+      "content_sha256": "ed5153b073666127040e9afbdf018171e264e15e8bf8b4ad15d417493c8b1f19"
+    }
+  ],
+  "sources": [
+    "source-001",
+    "source-002",
+    "source-003",
+    "source-004",
+    "source-005",
+    "source-index"
+  ],
+  "total_knowledge_files": 2,
+  "task_contract": "task-config.resolved.json",
+  "deliverables": [
+    {
+      "id": "rlvr-grpo-deep-dive",
+      "type": "research-site",
+      "output_path": "../../ai-research-insights/rlvr-grpo-explained.html",
+      "requirements": {
+        "claims": [
+          "GRPO eliminates the Value Network critic by normalizing advantages across a sampled group of G candidate rollouts",
+          "RLVR replaces learned reward model sycophancy and length-gaming with deterministic programmatic verification",
+          "Homogeneous rollout groups naturally emit zero gradient, concentrating compute strictly on the model's active learning boundary",
+          "Wen et al. (ICLR 2026) demonstrate that prolonged RLVR training expands reasoning boundaries beyond baseline search compression",
+          "Knowledge-to-Verification (K2V) adapts structured checklist verifiers to mitigate reward sparsity in non-coding domains"
+        ],
+        "functions": [
+          "Interactive GRPO & RLVR Ablation Simulator",
+          "3-Column Input / Transformation / Output Contract Flow",
+          "6-Stage GRPO Training Iteration Walkthrough",
+          "Algorithmic Comparison Matrix (GRPO vs PPO vs DPO)",
+          "The Thinker vs Sampler Debate with Pass@K curves",
+          "Empirical Boundaries and Invalidation Criteria"
+        ],
+        "observable_effects": [
+          "Switching between Deterministic Sandbox, Subjective RLHF, and Noisy Heuristic verifiers alters the simulated Pass@1 convergence and reward hacking vulnerability",
+          "Adjusting group size G from 2 to 32 dynamically updates gradient variance, training stability, and simulated VRAM footprint",
+          "Toggling between GRPO and PPO highlights the presence or absence of the separate Value Network and memory overhead"
+        ]
+      },
+      "evaluation": {
+        "skill": "evaluate-web-deliverable",
+        "profile": "research-site-v1",
+        "rules": [
+          "Ground all mathematical equations in peer-reviewed literature (DeepSeekMath, DeepSeek-R1, ICLR 2026)",
+          "Explicitly distinguish empirical facts from illustrative browser simulation projections",
+          "Highlight failure modes including reward sparsity, verifier bugs, and cold-start exploration failure"
+        ]
+      },
+      "skill": "web"
+    }
+  ],
+  "input_fingerprint": "80fbbee4a587ae5ee8554067e4633b5bba6f8a88523c81c1b025b2aa01ea035b",
+  "objective": "Provide an in-depth technical analysis and interactive ablation simulator of Verifiable Reward Reinforcement Learning (RLVR) and Group Relative Policy Optimization (GRPO), demonstrating why programmatic verifiers and critic-free advantage estimation transformed reasoning models.",
+  "audience": "AI researchers, machine learning engineers, and system architects"
+}

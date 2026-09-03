@@ -51,10 +51,23 @@ Every deliverable needs a unique ID and output path, one implementation skill, a
 
 `graphify` accepts `detect`, `off`, or `required`. The default is `detect`: use it only when installed and helpful, never install it automatically. `semantic_retrieval` accepts `auto`, `off`, or `required` and describes retrieval over the distilled package, not graph construction.
 
+## Decision-Frontier Elicitation ("Grilling") for Contracts
+
+When resolving missing contract fields, follow the Decision-Frontier principle:
+
+1. **Investigate Environment Facts Autonomously:**
+   - Detect input paths, file existence, repo topology, paper format, and line counts directly via tools. Never ask the user questions that code can answer.
+2. **Walk the Contract Frontier ($F_t$):**
+   - Resolve **Objective & Audience** (Prerequisite) before asking for deliverable specifics.
+   - Resolve **Deliverable Type** before asking for required functions or evaluation profiles.
+   - Never ask premature questions about fine-grained CSS styles, thresholds, or interactive effects until the deliverable contract is grounded.
+3. **Cost-Aware Clarification:**
+   - Infer sane defaults from [`reference/deliverable-registry.json`](deliverable-registry.json). Only prompt the user for consequential missing choices.
+
 ## Production and evolution use
 
 - Production: create the smallest sufficient contract, build, evaluate, collect user feedback, and iterate within the agreed limit.
-- Skill evolution: freeze the task config and evaluator versions before comparing candidates. The baseline and candidate must receive the same input, deliverable contract, evaluator profile, model conditions, and budget.
+- Skill evolution: use the Guarded Skill Evolution (GSE) change contract schema specified in [`reference/guarded-skill-evolution.md`](guarded-skill-evolution.md). Freeze the task config and evaluator versions before comparing candidates. The baseline and candidate must receive the same input, deliverable contract, evaluator profile, model conditions, and budget.
 
 For controlled evolution, also record reproducibility conditions:
 

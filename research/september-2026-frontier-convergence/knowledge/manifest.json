@@ -1,0 +1,78 @@
+{
+  "schema_version": 2,
+  "project_name": "september-2026-frontier-convergence",
+  "entrypoint": "knowledge/big-picture.md",
+  "artifacts": [
+    {
+      "path": "knowledge/big-picture.md",
+      "title": "Big Picture: The September 2026 Frontier AI Convergence",
+      "approx_words": 273,
+      "citations": [],
+      "content_sha256": "592b8ddbf9b8ea0e7e187f21ed7b8ca37fa431e8d275a2e4d5cf44484a19903b"
+    },
+    {
+      "path": "knowledge/workflow-reference.md",
+      "title": "Workflow Reference: The 5-Stage Frontier Convergence",
+      "approx_words": 159,
+      "citations": [
+        "source-001",
+        "source-002",
+        "source-003",
+        "source-004",
+        "source-005"
+      ],
+      "content_sha256": "f03e19121bc4af31c05a183d25cc88dd80985930195d7f04336ae0e157a77e40"
+    }
+  ],
+  "sources": [
+    "source-001",
+    "source-002",
+    "source-003",
+    "source-004",
+    "source-005",
+    "source-index"
+  ],
+  "total_knowledge_files": 2,
+  "task_contract": "task-config.resolved.json",
+  "deliverables": [
+    {
+      "id": "frontier-convergence-study",
+      "type": "research-site",
+      "output_path": "../../ai-research-insights/september-2026-frontier-convergence.html",
+      "requirements": {
+        "claims": [
+          "Convergence on RLVR and programmatic verifiers replaced subjective RLHF",
+          "Dynamic test-time compute allows models to search and self-correct across up to 256K thinking tokens",
+          "Sparse MoE scaled to 2.4T-2.8T total parameters while keeping active compute sub-90B",
+          "Agent-native environment training optimized tool economy (Muse 1.3 20% fewer tool calls) alongside 75% cheaper prompt caching",
+          "Synthetic verification flywheels enable rapid distillation into high-speed workhorse models like Gemini 3.8 Flash in 3-week cycles"
+        ],
+        "functions": [
+          "Interactive Frontier Capability & Breakthrough Ablation Simulator",
+          "3-Column Input / Transformation / Output Contract Flow",
+          "5-Stage Pipeline Transformation Explorer",
+          "5-Model Deep Dive Matrix (Google, Meta, Alibaba, Anthropic, Moonshot AI)",
+          "Empirical Boundaries and Invalidation Criteria"
+        ],
+        "observable_effects": [
+          "Toggling individual breakthrough mechanisms dynamically updates projected reasoning capability, latency, and token cost in the simulator",
+          "Selecting individual models updates the architecture specs, context window, and pricing metrics",
+          "Step-by-step pipeline walkthrough visually traces the transition from pretraining to inference search and distillation"
+        ]
+      },
+      "evaluation": {
+        "skill": "evaluate-web-deliverable",
+        "profile": "research-site-v1",
+        "rules": [
+          "Ground all claims in verified September 2026 release data and research papers",
+          "Explicitly distinguish empirical facts from illustrative browser simulation projections",
+          "Expose invalidation conditions and boundary limitations"
+        ]
+      },
+      "skill": "web"
+    }
+  ],
+  "input_fingerprint": "90f87fd3ece97de10ee620365f9996bca7388b579b3d63dd0841a0a1662703fc",
+  "objective": "Explain why frontier AI models (Gemini 3.8, Muse Spark 1.3, Qwen3.8-Max 0902, Claude Fable 5.1, Kimi K3) leaped forward simultaneously in September 2026 by synthesizing the 5 technological breakthroughs driving cross-lab convergence.",
+  "audience": "Technical leaders, AI researchers, software architects, and engineering teams"
+}

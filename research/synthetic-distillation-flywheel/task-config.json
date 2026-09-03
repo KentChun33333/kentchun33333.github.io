@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "input_data": [
+    "data-raw/papers-and-sources.md",
+    "data-raw/distillation-mathematics.md",
+    "data-cooked/source-index.md",
+    "data-cooked/teacher-student-matrix.md",
+    "analysis/flow.md",
+    "analysis/dependency.md",
+    "analysis/ablation-dynamics.md",
+    "analysis/pytorch-synthetic-distillation.md",
+    "knowledge/big-picture.md",
+    "knowledge/workflow-reference.md"
+  ],
+  "knowledge_package": "knowledge/manifest.json",
+  "objective": "Provide an in-depth technical analysis and interactive ablation simulator of Synthetic Distillation Flywheels, demonstrating how verified teacher traces, automated filtering, and model collapse prevention power 3-week frontier release cycles.",
+  "audience": "AI researchers, machine learning engineers, and system architects",
+  "deliverables": [
+    {
+      "id": "synthetic-flywheel-demo",
+      "type": "research-site",
+      "output_path": "../../ai-research-insights/synthetic-distillation-flywheel-explained.html",
+      "requirements": {
+        "claims": [
+          "Automated synthetic distillation flywheels enable 3-week release cadences by eliminating human labeling bottlenecks",
+          "Deterministic programmatic verifiers act as external entropy anchors that prevent model collapse (The Curse of Recursion)",
+          "Rejection-Sampled Distillation (RSD) trains compact student models on verified teacher reasoning trajectories",
+          "Token de-noising compresses verbose teacher traces by 35% without degrading mathematical accuracy",
+          "Distilled dense models (e.g. DeepSeek-R1-Distill-32B) rival proprietary frontier teachers on competition math benchmarks"
+        ],
+        "functions": [
+          "Interactive Synthetic Flywheel Ablation Lab",
+          "Verification Filtering Mode Selector (Unfiltered to Verifier + Fluff Pruned)",
+          "Teacher-to-Student Scale Ratio Selector (2.4T to 7B/14B/32B/70B)",
+          "Flywheel Recursion Rounds Slider (1 to 5 Generations)",
+          "Real-World Anchor Ratio Slider (0% to 40%)",
+          "Interactive Animated Flywheel Cycle Diagram",
+          "3-Column Input / Model / Output Contract Flow",
+          "Interactive Tabbed PyTorch Code Architecture",
+          "The Model Collapse Frontier Analysis",
+          "Failure Modes & Real-World Boundaries"
+        ],
+        "observable_effects": [
+          "Simulating multiple generations under Unfiltered mode triggers rapid model collapse and variance shrinkage",
+          "Enabling Deterministic Verifier mode arrests collapse and maintains high student accuracy across generations",
+          "Adjusting teacher-to-student scale demonstrates the trade-off between student parameter capacity and distillation fidelity"
+        ]
+      },
+      "evaluation": {
+        "skill": "evaluate-web-deliverable",
+        "profile": "research-site-v1",
+        "rules": [
+          "Ground all distillation loss formulas in academic literature (Kim & Rush, Nature 2024, DeepSeek-R1)",
+          "Explicitly distinguish empirical facts from browser simulation models",
+          "Detail failure modes including mode collapse, synthetic bias amplification, and teacher capacity ceilings"
+        ]
+      }
+    }
+  ],
+  "preparation": {
+    "strategy": "native-distillation",
+    "graphify": "off",
+    "semantic_retrieval": "off"
+  },
+  "iteration": {
+    "use_user_feedback": true,
+    "max_rounds": 2
+  }
+}

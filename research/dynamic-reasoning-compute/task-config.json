@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "input_data": [
+    "data-raw/papers-and-sources.md",
+    "data-raw/scaling-laws-derivation.md",
+    "data-cooked/source-index.md",
+    "data-cooked/search-regimes-matrix.md",
+    "analysis/flow.md",
+    "analysis/dependency.md",
+    "analysis/ablation-dynamics.md",
+    "knowledge/big-picture.md",
+    "knowledge/workflow-reference.md"
+  ],
+  "knowledge_package": "knowledge/manifest.json",
+  "objective": "Deep-dive technical investigation and interactive ablation simulator of Dynamic Reasoning Compute Budgets, demonstrating how test-time scaling, thinking tokens, and self-correction backtracking transform reasoning performance.",
+  "audience": "AI researchers, machine learning engineers, and system architects",
+  "deliverables": [
+    {
+      "id": "dynamic-compute-demo",
+      "type": "research-site",
+      "output_path": "../../ai-research-insights/dynamic-reasoning-compute-explained.html",
+      "requirements": {
+        "claims": [
+          "Inference-time compute scaling can surpass models with 14x more pre-training parameters on hard reasoning tasks",
+          "Test-time compute spans three distinct operational regimes: Sequential CoT, Leaf-level Best-of-N, and Prefix-level Tree Search",
+          "Autonomous backtracking emerges naturally under binary verifiable rewards as models learn to detect and discard flawed hypotheses",
+          "Layer-wise token revision differentiates genuine deep-thinking tokens from superficial conversational padding",
+          "Frontier 2026 models deploy adaptive thinking budgets ranging from 0 to 256,000 tokens based on prompt difficulty"
+        ],
+        "functions": [
+          "Interactive Dynamic Reasoning Compute Ablation Lab",
+          "Search Strategy Selector (Sequential CoT vs Best-of-N vs Tree Search)",
+          "Dynamic Token Budget Slider (256 to 64,000 tokens)",
+          "Task Complexity Tier Selector (Easy to Frontier Repo Bug)",
+          "Interactive Trace Visualizer illustrating backtracking and branch pruning",
+          "3-Column Input / Model / Output Contract Flow",
+          "The 3 Inference Regimes Deep-Dive Matrix",
+          "Failure Modes & Real-World Boundaries"
+        ],
+        "observable_effects": [
+          "Increasing token budget on hard problems dramatically improves pass rate, while producing diminishing returns and wasted cost on elementary tasks",
+          "Switching between Sequential CoT and Best-of-N demonstrates the trade-off between single-thread latency and parallel GPU sample costs",
+          "Toggling task difficulty activates different optimal search regimes according to Snell et al. scaling laws"
+        ]
+      },
+      "evaluation": {
+        "skill": "evaluate-web-deliverable",
+        "profile": "research-site-v1",
+        "rules": [
+          "Ground all test-time compute equations in published academic literature",
+          "Differentiate empirical benchmarks from interactive browser simulation models",
+          "Detail failure modes including token inflation, latency overhead, and verifier score dilution"
+        ]
+      }
+    }
+  ],
+  "preparation": {
+    "strategy": "native-distillation",
+    "graphify": "off",
+    "semantic_retrieval": "off"
+  },
+  "iteration": {
+    "use_user_feedback": true,
+    "max_rounds": 2
+  }
+}

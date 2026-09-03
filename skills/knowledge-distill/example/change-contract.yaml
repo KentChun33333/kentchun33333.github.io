@@ -1,0 +1,22 @@
+version: 1
+skill_name: "knowledge-distill"
+failure_owner: "skill"
+intervention: "revise-skill"
+
+problem:
+  observed_behavior: "Summaries present citations but lack explicit evidence-to-decision causal links."
+  suspected_cause: "The skill specifies source indexing but lacks a structured reasoning step linking findings to actionable recommendations."
+
+objective:
+  target_behavior: "Synthesize findings into concise, causal conclusions linked to verified source IDs."
+  success_metric: "Decision usefulness increases without lowering factual citation density."
+
+invariants:
+  - "Preserve valid source IDs and provenance hashes"
+  - "Do not invent or extrapolate ungrounded claims"
+  - "Preserve output formatting and manifest export schema"
+  - "Do not exceed token budget (+15% maximum edit delta)"
+
+proposed_change:
+  hypothesis: "Adding a structured 'evidence -> reason -> recommendation' gate improves downstream decision utility."
+  minimal_scope: "Update synthesis instruction section in SKILL.md only."

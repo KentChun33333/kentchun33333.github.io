@@ -9,7 +9,7 @@ Turn a supplied knowledge package and task contract into an offline-capable web 
 
 ## Select one web category per deliverable
 
-- `research-site`: explain a thesis, evidence, mechanisms, limitations, and implications. Read [references/research-site.md](references/research-site.md).
+- `research-site`: explain a thesis, evidence, mechanisms, concrete code implementations when technical, limitations, and implications. Read [references/research-site.md](references/research-site.md).
 - `system-demo`: expose architecture, data/control flow, components, state changes, and observable effects. Read [references/system-demo.md](references/system-demo.md).
 - `agentic-demo`: demonstrate agents, queues, handoffs, tool evidence, human review, and asynchronous state. Use the sibling `build-async-agentic-web-demo` skill and read [references/agentic-demo.md](references/agentic-demo.md).
 

@@ -166,6 +166,82 @@ def route(contract: dict[str, Any], base: Path) -> dict[str, Any]:
     }
 
 
+VALID_FAILURE_OWNERS = {"skill", "routing", "tool", "data", "model", "evaluator", "spec", "noise"}
+VALID_INTERVENTIONS = {"clarify", "revise-skill", "repair-other", "retain"}
+
+
+def load_data(path: Path) -> dict[str, Any]:
+    text = path.read_text(encoding="utf-8")
+    if path.suffix.lower() in {".yaml", ".yml"}:
+        try:
+            import yaml  # type: ignore
+
+            value = yaml.safe_load(text)
+        except ImportError:
+            # Fallback if PyYAML unavailable
+            value = json.loads(text)
+    else:
+        value = json.loads(text)
+    if not isinstance(value, dict):
+        raise ValueError(f"{path} must contain a dictionary/object")
+    return value
+
+
+def validate_change_contract(contract: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    if not isinstance(contract, dict):
+        return ["change contract must be an object"]
+    if contract.get("version") != 1:
+        errors.append("version must be 1")
+    if not contract.get("skill_name") or not isinstance(contract.get("skill_name"), str):
+        errors.append("skill_name must be a non-empty string")
+
+    owner = contract.get("failure_owner")
+    if not owner or owner not in VALID_FAILURE_OWNERS:
+        errors.append(f"failure_owner must be one of {sorted(VALID_FAILURE_OWNERS)}; got {owner!r}")
+
+    intervention = contract.get("intervention")
+    if intervention and intervention not in VALID_INTERVENTIONS:
+        errors.append(f"intervention must be one of {sorted(VALID_INTERVENTIONS)}; got {intervention!r}")
+
+    if owner and owner != "skill" and intervention == "revise-skill":
+        errors.append(f"failure_owner is {owner!r}; non-skill defects must not use intervention 'revise-skill'")
+
+    problem = contract.get("problem")
+    if not isinstance(problem, dict):
+        errors.append("problem must be an object")
+    else:
+        for field in ("observed_behavior", "suspected_cause"):
+            if not problem.get(field) or not isinstance(problem.get(field), str):
+                errors.append(f"problem.{field} must be a non-empty string")
+
+    objective = contract.get("objective")
+    if not isinstance(objective, dict):
+        errors.append("objective must be an object")
+    else:
+        for field in ("target_behavior", "success_metric"):
+            if not objective.get(field) or not isinstance(objective.get(field), str):
+                errors.append(f"objective.{field} must be a non-empty string")
+
+    invariants = contract.get("invariants")
+    if not isinstance(invariants, list) or not invariants:
+        errors.append("invariants must be a non-empty list of constraint strings")
+    else:
+        for idx, inv in enumerate(invariants):
+            if not isinstance(inv, str) or not inv.strip():
+                errors.append(f"invariants[{idx}] must be a non-empty string")
+
+    proposed = contract.get("proposed_change")
+    if not isinstance(proposed, dict):
+        errors.append("proposed_change must be an object")
+    else:
+        for field in ("hypothesis", "minimal_scope"):
+            if not proposed.get(field) or not isinstance(proposed.get(field), str):
+                errors.append(f"proposed_change.{field} must be a non-empty string")
+
+    return errors
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="command", required=True)
@@ -178,6 +254,10 @@ def main() -> int:
     resolved.add_argument("--write", type=Path)
     routed = sub.add_parser("route")
     routed.add_argument("contract", type=Path)
+    check_change = sub.add_parser("validate-change-contract")
+    check_change.add_argument("contract", type=Path)
+    init_change = sub.add_parser("init-change-contract")
+    init_change.add_argument("output", type=Path)
     args = parser.parse_args()
 
     if args.command == "init":
@@ -188,6 +268,57 @@ def main() -> int:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(example.read_text(encoding="utf-8"), encoding="utf-8")
         print(args.output)
+        return 0
+
+    if args.command == "init-change-contract":
+        example = HERE.parent / "example" / "change-contract.yaml"
+        if args.output.exists():
+            print(f"refusing to overwrite {args.output}")
+            return 2
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        if example.exists():
+            content = example.read_text(encoding="utf-8")
+        else:
+            content = (
+                "version: 1\n"
+                "skill_name: knowledge-distill\n"
+                "failure_owner: skill\n"
+                "intervention: revise-skill\n\n"
+                "problem:\n"
+                "  observed_behavior: Evidence present but actionable synthesis is absent\n"
+                "  suspected_cause: Procedural synthesis rule missing in core loop\n\n"
+                "objective:\n"
+                "  target_behavior: Causal evidence-to-recommendation structure\n"
+                "  success_metric: Higher decision usefulness with zero hallucinated claims\n\n"
+                "invariants:\n"
+                "  - preserve valid source IDs and provenance hashes\n"
+                "  - do not exceed token budget\n\n"
+                "proposed_change:\n"
+                "  hypothesis: Adding explicit synthesis gate improves downstream utility\n"
+                "  minimal_scope: Synthesis instruction section only\n"
+            )
+        args.output.write_text(content, encoding="utf-8")
+        print(args.output)
+        return 0
+
+    if args.command == "validate-change-contract":
+        data = load_data(args.contract)
+        errors = validate_change_contract(data)
+        if errors:
+            print(json.dumps({"ok": False, "errors": errors}, indent=2))
+            return 1
+        print(
+            json.dumps(
+                {
+                    "ok": True,
+                    "skill_name": data.get("skill_name"),
+                    "failure_owner": data.get("failure_owner"),
+                    "intervention": data.get("intervention", "revise-skill"),
+                    "invariants_count": len(data.get("invariants", [])),
+                },
+                indent=2,
+            )
+        )
         return 0
 
     contract = attach_input_fingerprint(resolve(load_json(args.contract)), args.contract.resolve().parent)

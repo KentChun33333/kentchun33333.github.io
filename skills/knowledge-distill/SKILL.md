@@ -32,22 +32,37 @@ The prepared path is a hypothesis, not an assumed improvement. It is better only
 9. **Use feedback as versioned data.** User feedback can revise the next task contract and guide another build-evaluate iteration. Promote a skill change only when the failure generalizes and held-out tasks improve without regression.
 10. **Refine progressively.** Work from high-level topology to detailed mechanisms and then implementation-level evidence. Each pass should increase useful precision without duplicating canonical explanations.
 
-## Skill-modification intent hook
+## Guarded skill-evolution hook (GSE & Grilling)
 
-Trigger this hook when the user explicitly asks to modify, optimize, evolve, or add a reusable rule to a skill. Do not trigger it for an ordinary deliverable correction unless the user also asks to change the reusable skill.
+Trigger this hook when the user explicitly asks to modify, optimize, evolve, or add a reusable rule to a skill, or when deliverable critique reveals a reusable process defect. Never mutate a persistent skill file automatically. Follow the complete specification in [reference/guarded-skill-evolution.md](reference/guarded-skill-evolution.md).
 
-Before editing the skill:
+Before modifying any skill or rule:
 
-1. **Interrogate the intention.** Restate the desired future behavior, the problem it should prevent, the tasks it should apply to, and the tasks it should not affect. Challenge ambiguous universality, hidden exceptions, and whether the request is a personal preference or a generally useful rule. Ask pointed questions only for consequential gaps; do not ask the user to repeat settled intent.
-2. **Expose current practice.** Quote or summarize the exact active rule, routing behavior, evaluator expectation, and relevant implementation path. Say whether the requested behavior is absent, weaker, conflicting, or already partially implemented.
-3. **Map potential impacts.** Explain likely benefits and trade-offs across task routing, builder outputs, evaluator gates, scripts/tests, backward compatibility, token or execution cost, and unrelated task classes. Identify which files and contracts would change before changing them.
-4. **Classify the change.** Treat a change as substantial when it alters skill activation or routing, affects multiple skills or evaluators, changes schemas or automation, weakens a safety/quality gate, requires migration, or may change behavior for unrelated tasks. Everything else may use the bounded direct-patch path.
-
-For a bounded change, present the intention/current-practice/impact assessment, apply the narrow patch, validate the affected skill, and record the change in the evolution ledger.
-
-For a substantial change, read and adapt [the cross-evolve workflow](../cross-evolve-skill/skill.md). Create an isolated version-controlled candidate, freeze and record a baseline, run the same tests or evaluation cases against baseline and candidate, produce a diff and impact report, and request explicit user approval before promotion. Preserve a rollback point and verify the promoted version. Use the workflow's principles; do not copy project-specific paths or destructive backup steps blindly.
-
-The hook is a decision-quality gate, not permission to broaden scope. If the user has already supplied the intention, boundaries, and acceptable impacts, acknowledge those answers and proceed rather than manufacturing an interview.
+1. **Conduct Decision-Frontier Elicitation ("Grilling").**
+   - Walk the dependency design tree without premature questions. The next frontier $F_t$ contains only decisions whose prerequisites are settled.
+   - **Round 01 (Root Intent):** Establish the true objective, beneficiary, and downstream decision.
+   - **Round 02 (First Frontier):** Identify the observed gap, collect failure traces, and register non-negotiable hard invariants.
+   - **Round 03 (Derived Frontier):** Attribute the true failure owner, define the minimum meaningful gain $\delta$, and bound the permitted edit scope.
+   - **Round 04 (Confirmation Gate):** Synthesize the answers into a testable Change Contract and obtain explicit user confirmation before touching files.
+   - **Cost-aware stopping rule:** Stop asking when $\text{ExpectedDecisionValue}(F_t) \le \text{interaction cost}$. If the user already provided the required criteria, acknowledge them directly—never manufacture an unnecessary interview.
+2. **Strictly Separate Facts from Decisions.**
+   - **Agent-investigated facts:** The agent must inspect execution traces, logs, git history, tools, routing delivery fingerprints, and file structures directly. Never ask the user for facts the agent can ascertain from the environment.
+   - **User-owned decisions:** Elicit intended utility, trade-offs between competing metrics, acceptable risk tolerance, and hard invariants from the user.
+3. **Attribute the True Failure Owner.**
+   Diagnose the failure across the 8 candidate owners: `skill` (procedural gap), `routing` (delivery failure), `tool` (adapter/parser bug), `data` (malformed input), `model` (carrier capability limit), `evaluator` (scoring artifact), `spec` (unresolved user trade-off), or `noise` (non-reproducible run).
+   - If owner is `routing` or `tool`, repair that layer directly and **keep the skill intact** (do not bloat instructions to mask tool or routing bugs).
+   - If owner is `spec`, clarify via the decision frontier.
+   - If owner is `noise` or unproven, retain the incumbent and monitor.
+   - Proceed to skill revision **only** when the procedural instruction itself is causal.
+4. **Draft and Validate a Falsifiable Change Contract.**
+   Produce a structured contract (`problem`, `objective`, `invariants`, `proposed_change`, `minimal_scope`). Validate it with `python3 skills/knowledge-distill/scripts/task_contract.py validate-change-contract <change-contract.yaml>`.
+5. **Enforce Paired 4-Slice Evaluation Before Promotion.**
+   For substantial changes, generate a sandboxed candidate $s' = s_0 + \Delta$ following [the cross-evolve workflow](../cross-evolve-skill/skill.md). Evaluate incumbent and candidate under identical seeds, tools, and model conditions across:
+   - *Source repair* (triggering cases),
+   - *Target generalization* (unseen held-out tasks),
+   - *Regression preservation* (existing capabilities & hard invariants),
+   - *Challenge cases* (edge/boundary inputs).
+   Promote $s'$ only if lower confidence bound improvement exceeds $\delta$, critical regression rate $\le \rho$, and all hard invariants hold. Record the outcome in [reference/skill-evolution-ledger.md](reference/skill-evolution-ledger.md).
 
 ## Establish the task contract
 
@@ -82,6 +97,7 @@ Use the bundled Python engine in `scripts/engine.py` to accelerate execution and
 - `python3 skills/knowledge-distill/scripts/engine.py evaluate <project_dir> --write` — score output on 7 IQ dimensions and save `analysis/iq-training-evaluation.md`.
 - `python3 skills/knowledge-distill/scripts/engine.py audit-all <project_dir> --write` — execute full guardian, evaluation, and manifest pipeline.
 - `python3 skills/knowledge-distill/scripts/task_contract.py validate <task-config.json>` — validate deliverable-to-skill and deliverable-to-evaluator bindings.
+- `python3 skills/knowledge-distill/scripts/task_contract.py validate-change-contract <change-contract.json|yaml>` — validate Guarded Skill Evolution change contract, failure owner, and invariants.
 - `python3 skills/knowledge-distill/scripts/task_contract.py route <task-config.json>` — detect whether optional Graphify and semantic retrieval are useful without installing either.
 - `python3 skills/knowledge-distill/scripts/graphify_accelerator.py <task-config.json>` — print the optional Graphify execution plan; add `--execute` only after the resolved strategy selects it.
 
