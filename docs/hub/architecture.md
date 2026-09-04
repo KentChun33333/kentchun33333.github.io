@@ -6,7 +6,7 @@ One asset can serve several purposes without being copied into separate audience
 sites. Preserve the original file, assign it a stable identity, record its meaning
 and relationships, and compose a visitor experience from those records.
 
-The homepage is now the asset library, with a compact expandable introduction and experience section. Research, demos, skills, protocols, tools, and writing are asset types in one collection. Each asset has a contact action; configured available offers also expose a buy action.
+The homepage is now the asset library, with a compact expandable introduction and experience section. Research, demos, skills, protocols, tools, and writing are asset types in one collection. A top-bar Start a conversation action opens a right-side modal drawer. Asset pages preselect the current asset. Individual contact buttons and the left navigation panel are removed; configured available offers retain their buy actions. The knowledge graph remains in the asset layer, with its existing URL retained for direct access.
 
 This is a public discovery and inquiry system. It is not an authenticated personal
 task manager or a payment processor. GitHub Pages remains the hosting target.
@@ -118,7 +118,7 @@ still be public; private assets must live outside the deployed tree entirely.
 
 ## Audience and task behavior
 
-- Buyers explore assets and evidence, then prepare an asset-specific inquiry or follow a configured checkout link.
+- Buyers explore assets and evidence, then open the conversation drawer or follow a configured checkout link.
 - Researchers see proposals, protocols, limitations, source readers, and sharing.
 - Collaborators see concrete possible experiments and contribution discussions.
 - Employers see capabilities and selected artifacts; no résumé or role claims

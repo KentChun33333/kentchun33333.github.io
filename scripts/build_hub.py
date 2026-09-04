@@ -107,12 +107,11 @@ def validate():
 
 
 def asset_actions(a):
-    contact = f'<a class="asset-contact" href="/hub/contact/?asset={a["id"]}">Contact me</a>'
     available = [o for o in OFFERS if a['id'] in o['asset_ids'] and o['state']=='available']
     if available:
         offer=available[0]
-        return f'<div class="asset-actions"><a class="button" href="{E(offer["checkout_url"])}">Buy · {E(offer["price"])} {E(offer["currency"])}</a>{contact}</div>'
-    return '<div class="asset-actions">'+contact+'</div>'
+        return f'<div class="asset-actions"><a class="button" href="{E(offer["checkout_url"])}">Buy · {E(offer["price"])} {E(offer["currency"])}</a></div>'
+    return ''
 
 
 def card(a, compact=False):
@@ -127,11 +126,19 @@ def card(a, compact=False):
       <div class="card-bottom"><span class="status">{E(a['status'])}</span><a class="arrow" href="{detail(a)}" aria-label="Explore {E(a['title'])}">↗</a></div>{asset_actions(a)}</article>'''
 
 
-NAV = [('Asset library', '/'), ('Knowledge map', '/hub/graph/')]
+
+def conversation_form():
+    return '''<form id="brief-form" class="brief-form"><label>Your purpose<select id="brief-purpose"><option>Project inquiry</option><option>Research collaboration</option><option>Technical opportunity</option><option>Asset licensing</option></select></label><label>Related asset<select id="brief-asset"><option value="">General conversation</option>'''+''.join(f'<option value="{a["id"]}">{E(a["title"])}</option>' for a in ASSETS)+'''</select></label><label>Related engagement<select id="brief-offer"><option value="">General conversation</option>'''+''.join(f'<option value="{o["id"]}">{E(o["title"])}</option>' for o in OFFERS)+'''</select></label><label>What would you like to work on?<textarea id="brief-context" rows="6" required placeholder="The problem, your context, desired outcome, and timeline…"></textarea></label><div class="actions"><button class="button" type="submit">Copy inquiry brief</button><button class="text-button" id="download-brief" type="button">Download as text ↓</button></div><p id="brief-status" role="status"></p><p><a href="https://github.com/KentChun33333" target="_blank" rel="noopener">Open Kent’s GitHub profile ↗</a></p></form><noscript><p>The brief builder requires JavaScript. You can still use the GitHub profile link to find contact information.</p></noscript>'''
 
 
 def page(title, description, body, route='/', active=None, asset=None):
-    nav = ''.join('<a href="{}" {}>{}</a>'.format(url, 'aria-current="page"' if url == (active or route) else '', label) for label, url in NAV)
+    current_asset = asset['id'] if asset else ''
+    contact_url = '/hub/contact/' + ('?asset='+current_asset if current_asset else '')
+    trigger = f'<a class="conversation-trigger" id="conversation-trigger" href="{contact_url}" data-current-asset="{current_asset}" aria-haspopup="dialog" aria-controls="conversation-panel">Start a conversation <span aria-hidden="true">↗</span></a>'
+    drawer = '<dialog id="conversation-panel" class="conversation-panel" aria-labelledby="conversation-title"><div class="conversation-heading"><h2 id="conversation-title" tabindex="-1">Start a conversation</h2><button type="button" id="conversation-close" aria-label="Close conversation panel">×</button></div><p class="conversation-description">Tell me what you have in mind. Prepare a brief to copy or download; nothing is sent or stored by this site.</p>'+conversation_form()+'</dialog>'
+    if route == '/hub/contact/':
+        drawer = ''
+        trigger = '<a class="conversation-trigger" href="#brief-form">Start a conversation ↗</a>'
     image = '' if asset else f'<meta property="og:image" content="{ORIGIN}/img/autumn-memo-hub-social.png"><meta name="twitter:image" content="{ORIGIN}/img/autumn-memo-hub-social.png">'
     if asset and asset.get('images'):
         media = asset['images'][0]
@@ -141,10 +148,9 @@ def page(title, description, body, route='/', active=None, asset=None):
       <meta property="og:title" content="{E(title)} · Autumn Memo"><meta property="og:description" content="{E(description)}"><meta property="og:type" content="{'article' if asset else 'website'}"><meta property="og:url" content="{ORIGIN}{route}">{image}
       <meta name="twitter:card" content="{'summary' if asset else 'summary_large_image'}"><meta name="twitter:title" content="{E(title)} · Autumn Memo"><meta name="twitter:description" content="{E(description)}">
       <meta name="theme-color" content="#f5f4ec"><link rel="stylesheet" href="/css/command-center.css"><script src="/js/command-center.js" defer></script><link rel="alternate" type="application/rss+xml" title="Autumn Memo" href="/index.xml"></head>
-      <body><a class="skip" href="#main">Skip to content</a><div class="app-shell"><aside class="sidebar"><a class="brand" href="/"><span class="brand-mark">am<span>↗</span></span><span>AUTUMN MEMO<small>Kent Chiu’s work & ideas</small></span></a>
-      <p class="nav-label">EXPLORE THE COLLECTION</p><nav aria-label="Primary">{nav}</nav><div class="sidebar-bottom"><a href="/hub/design/">How this workspace connects ↗</a><a href="/post/">Original blog archive ↗</a><a href="/about/">About Kent ↗</a><span>Research. Build. Share.</span></div></aside>
-      <div class="workspace"><header class="topbar"><span>AUTUMN MEMO <span class="topbar-divider">/</span> ASSET LIBRARY</span><a href="/hub/contact/">Start a conversation ↗</a></header>
-      <main id="main">{body}</main><footer><span>Autumn Memo · Kent Chiu</span><div><a href="/archives/">Archives</a><a href="/index.xml">RSS</a><a href="https://github.com/KentChun33333">GitHub</a><a href="/index.legacy-hugo.html">Original homepage</a></div></footer></div></div><div id="announcement" class="sr-only" role="status" aria-live="polite"></div></body></html>'''
+      <body><a class="skip" href="#main">Skip to content</a><div class="app-shell"><div class="workspace"><header class="topbar library-topbar"><a class="brand" href="/"><span class="brand-mark">am<span>↗</span></span><span>AUTUMN MEMO<small>Kent Chiu’s work & ideas</small></span></a><div class="topbar-links"><a href="/#about">About Kent</a>{trigger}</div></header>
+      <main id="main">{body}</main><footer><span>Autumn Memo · Kent Chiu</span><div><a href="/archives/">Archives</a><a href="/index.xml">RSS</a><a href="https://github.com/KentChun33333">GitHub</a><a href="/index.legacy-hugo.html">Original homepage</a></div></footer></div></div>{drawer}<div id="announcement" class="sr-only" role="status" aria-live="polite"></div></body></html>'''
+
 
 
 def head(kicker, title, text):
@@ -264,7 +270,7 @@ def build_pages():
     write('hub/graph/index.html',page('Knowledge map','Explore evidence-backed and editorial relationships between public assets.',graph,'/hub/graph/'))
     design=head('DESIGN TREE','One durable asset layer. Multiple experiences.','Original files keep their existing homes. A curated catalogue adds meaning and relationships; the web layer offers different ways to use the same work.')+'''<div class="design-tree"><section><span>01 / ORIGINAL SOURCES</span><h2>Preserved content</h2><p>Blogs · Markdown · Research sites · Agentic demos · Skills · Supporting files</p><small>Existing paths remain the source destinations.</small></section><div class="tree-arrow" aria-hidden="true">↓</div><section><span>02 / PUBLIC ASSET MEMORY</span><h2>Catalogue + knowledge graph</h2><p>Stable asset IDs · Source hashes · Types · Topics · Audiences · Maturity · Relationships · Rights · Offers</p><small>Git-backed records → JSON for the web + SQLite for structured queries.</small></section><div class="tree-arrow" aria-hidden="true">↓</div><section><span>03 / WEB EXPERIENCES</span><h2>Choose a purpose</h2><div class="tree-branches"><a href="/">Asset library · research, demos, skills & writing</a><a href="/#about">About Kent & experience</a><a href="/hub/graph/">Follow relationships</a></div></section></div><section class="reading-path"><h2>Memory has different boundaries</h2><p><strong>Public knowledge memory:</strong> the durable catalogue, source fingerprints, and curated connections implemented here.</p><p><strong>Personal visitor memory:</strong> saved collections and cross-device reading progress would require authenticated storage. They are not silently stored in this public catalogue.</p><p><strong>Private operating memory:</strong> client notes, tasks, proposals, and payment entitlements belong in a separate authenticated backend. They must never be committed to this public repository.</p><p><strong>Commercial assets:</strong> selected engagements accept inquiries. Direct sales require approved price, license, delivery terms, and checkout; paid files require protected storage.</p><a href="/docs/hub/architecture.md">Read the architecture document ↗</a> · <a href="/data/hub/catalog.json">Public catalogue JSON ↗</a> · <a href="/data/hub/memory.sqlite" download>Public SQLite catalogue ↓</a></section>'''
     write('hub/design/index.html',page('Design tree','The asset, memory, graph, and web architecture of Autumn Memo.',design,'/hub/design/'))
-    contact=head('START A CONVERSATION','Bring a problem, question, or opportunity.','Prepare a brief you can copy or download, then use the contact details available on my GitHub profile. This page does not send or store your message.')+'''<form id="brief-form" class="brief-form"><label>Your purpose<select id="brief-purpose"><option>Project inquiry</option><option>Research collaboration</option><option>Technical opportunity</option><option>Asset licensing</option></select></label><label>Related asset<select id="brief-asset"><option value="">General conversation</option>'''+''.join(f'<option value="{a["id"]}">{E(a["title"])}</option>' for a in ASSETS)+'''</select></label><label>Related engagement<select id="brief-offer"><option value="">General conversation</option>'''+''.join(f'<option value="{o["id"]}">{E(o["title"])}</option>' for o in OFFERS)+'''</select></label><label>What would you like to work on?<textarea id="brief-context" rows="6" required placeholder="The problem, your context, desired outcome, and timeline…"></textarea></label><div class="actions"><button class="button" type="submit">Copy inquiry brief</button><button class="text-button" id="download-brief" type="button">Download as text ↓</button></div><p id="brief-status" role="status"></p><p><a href="https://github.com/KentChun33333" target="_blank" rel="noopener">Open Kent’s GitHub profile ↗</a></p></form><noscript><p>The brief builder requires JavaScript. You can still use the GitHub profile link to find contact information.</p></noscript>'''
+    contact=head('START A CONVERSATION','Bring a problem, question, or opportunity.','Prepare a brief you can copy or download, then use the contact details available on my GitHub profile. This page does not send or store your message.')+conversation_form()
     write('hub/contact/index.html',page('Start a conversation','Prepare a project, research, technical opportunity, or licensing inquiry.',contact,'/hub/contact/'))
     for a in ASSETS:
         rels=[r for r in RELATIONS if a['id'] in (r['source'],r['target'])]

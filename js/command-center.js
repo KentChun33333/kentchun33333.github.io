@@ -98,10 +98,30 @@
     }).catch(() => { $('graph-canvas').textContent = 'The interactive map could not load. All recorded relationships are available below.'; $('graph-context').textContent = 'Try reloading the page, or follow the links in the relationship list.'; });
   }
 
+  const panel = $('conversation-panel');
+  const trigger = $('conversation-trigger');
+  if (panel && trigger && typeof panel.showModal === 'function') {
+    let previousOverflow = '';
+    trigger.addEventListener('click', e => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      if (panel.open) return;
+      previousOverflow = document.body.style.overflow;
+      panel.showModal(); document.body.style.overflow = 'hidden';
+      $('conversation-title').focus();
+    });
+    $('conversation-close').addEventListener('click', () => panel.close());
+    panel.addEventListener('close', () => { document.body.style.overflow = previousOverflow; trigger.focus(); });
+    panel.addEventListener('click', e => {
+      const rect = panel.getBoundingClientRect();
+      if (e.target === panel && (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom)) panel.close();
+    });
+  }
+
   const form = $('brief-form');
   if (form) {
     for (const [id, key] of [['brief-purpose', 'purpose'], ['brief-offer', 'offer'], ['brief-asset', 'asset']]) {
-      const select = $(id), requested = params.get(key);
+      const select = $(id), requested = params.get(key) || (key === 'asset' && trigger ? trigger.dataset.currentAsset : null);
       if ([...select.options].some(o => o.value === requested)) select.value = requested;
     }
     const brief = () => `Autumn Memo inquiry\nPurpose: ${$('brief-purpose').value}\nAsset: ${$('brief-asset').selectedOptions[0].textContent}${$('brief-asset').value ? '\nAsset link: ' + location.origin + '/hub/assets/' + $('brief-asset').value + '/' : ''}\nEngagement: ${$('brief-offer').selectedOptions[0].textContent}\n\n${$('brief-context').value.trim()}\n\nPrepared from: ${location.origin}/hub/contact/\n`;

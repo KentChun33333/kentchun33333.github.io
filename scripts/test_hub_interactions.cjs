@@ -17,7 +17,7 @@ class Element {
 function run(url, elements, cards = [], options = {}) {
   elements.announcement = new Element();
   const location = new URL(url);
-  const document = { getElementById: id => elements[id] || null, querySelectorAll: selector => selector === '[data-asset]' ? cards : [], addEventListener() {}, createElement: () => new Element() };
+  const document = { body: new Element(), getElementById: id => elements[id] || null, querySelectorAll: selector => selector === '[data-asset]' ? cards : [], addEventListener() {}, createElement: () => new Element() };
   const context = { document, location, URL, URLSearchParams, history: { replaceState: (_, __, value) => { location.href = value.href; } }, navigator: options.navigator || {}, window: options.window || {}, setTimeout, fetch: async () => ({ ok: true, json: async () => data }) };
   vm.runInNewContext(source, context);
   return location;
@@ -61,6 +61,23 @@ async function main() {
   assert(copied.includes('Asset: Guarded Skill Evolution'));
   assert(copied.includes('https://example.org/hub/assets/gse/'));
   assert(copied.includes('Let us discuss evaluation.'));
-  console.log('Passed library filters, empty/recovery states, knowledge graph, and asset-specific contact brief.');
+  const panel = new Element(); panel.open = false;
+  panel.showModal = () => { panel.open = true; };
+  panel.close = () => { panel.open = false; panel.events.close(); };
+  const trigger = new Element(); trigger.dataset = { currentAsset: 'gse' };
+  briefElements['conversation-panel'] = panel; briefElements['conversation-trigger'] = trigger;
+  briefElements['conversation-close'] = new Element(); briefElements['conversation-title'] = new Element();
+  briefElements['brief-asset'].value = '';
+  run('https://example.org/hub/assets/gse/', briefElements);
+  assert.equal(briefElements['brief-asset'].value, 'gse');
+  let prevented = false;
+  trigger.events.click({ preventDefault() { prevented = true; } });
+  assert(prevented && panel.open && briefElements['conversation-title'].focused);
+  briefElements['conversation-close'].events.click();
+  assert(!panel.open && trigger.focused);
+  trigger.events.click({ preventDefault() {} });
+  assert.equal(briefElements['brief-context'].value, 'Let us discuss evaluation.');
+  panel.close();
+  console.log('Passed library filters, graph, contact brief, drawer open/close, asset preselection, focus restoration, and draft retention.');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });
