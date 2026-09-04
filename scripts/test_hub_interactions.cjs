@@ -97,8 +97,8 @@ async function main() {
     if(name==='filters') bits['filters-apply']=new Element();
     run('https://example.org/'+(name==='about'?'#about':''),bits);
     if(name==='about') assert(drawer.open && title.focused);
-    else {opener.events.click({preventDefault(){}});assert(drawer.open);bits['filters-apply'].events.click();assert(!drawer.open && opener.focused);}
+    else {opener.events.click({preventDefault(){}});assert.equal(drawer['aria-hidden'], 'false');assert.equal(opener['aria-expanded'], 'true');assert.equal(drawer.inert, false);bits['filters-apply'].events.click();assert.equal(drawer['aria-hidden'], 'true');assert(drawer.inert && opener.focused);opener.events.click({preventDefault(){}});drawer.events.keydown({key:'Escape',preventDefault(){}});assert.equal(opener['aria-expanded'],'false');}
   }
-  console.log('Passed type/workstream buttons, filter reset, URL restoration, all three drawers, contact context, focus restoration, and draft retention.');
+  console.log('Passed type/workstream buttons, filter reset, URL restoration, push sidebar and both right drawers, contact context, focus restoration, and draft retention.');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

@@ -125,7 +125,29 @@
     });
     return open;
   }
-  initDrawer('conversation'); initDrawer('filters');
+  initDrawer('conversation');
+  const filtersPanel = $('filters-panel'), filtersTrigger = $('filters-trigger');
+  if (filtersPanel && filtersTrigger) {
+    let expanded = false;
+    const toggleFilters = value => {
+      expanded = value;
+      filtersPanel.inert = !expanded;
+      filtersPanel.setAttribute('aria-hidden', String(!expanded));
+      filtersTrigger.setAttribute('aria-expanded', String(expanded));
+      document.body.setAttribute('data-filters-open', String(expanded));
+      if (expanded) $('filters-title').focus();
+      else filtersTrigger.focus();
+    };
+    filtersTrigger.addEventListener('click', e => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault(); toggleFilters(!expanded);
+    });
+    $('filters-close').addEventListener('click', () => toggleFilters(false));
+    $('filters-apply').addEventListener('click', () => { toggleFilters(false); if (search) search.focus(); });
+    filtersPanel.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { e.preventDefault(); toggleFilters(false); }
+    });
+  }
   const openAbout = initDrawer('about');
   if (openAbout && location.hash === '#about') openAbout();
   const trigger = $('conversation-trigger');
