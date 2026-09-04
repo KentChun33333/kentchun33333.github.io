@@ -101,7 +101,7 @@ async function main() {
       const handle=bits['filters-resizer'];
       assert.equal(handle['aria-valuenow'],'64');
       opener.events.click({preventDefault(){}});assert.equal(handle['aria-valuenow'],'240');
-      handle.events.keydown({key:'End',preventDefault(){}});assert.equal(handle['aria-valuenow'],'360');
+      handle.events.keydown({key:'End',preventDefault(){}});assert.equal(handle['aria-valuenow'],'240');
       handle.events.keydown({key:'Home',preventDefault(){}});assert.equal(handle['aria-valuenow'],'64');
       handle.events.pointerdown({button:0,clientX:64,pointerId:1,preventDefault(){}});
       handle.events.pointermove({clientX:270});handle.events.pointerup();assert.equal(handle['aria-valuenow'],'240');

@@ -131,11 +131,10 @@
     const handle = $('filters-resizer');
     let width = 64, dragging = false, dragStart = 0, startWidth = 64;
     const stops = () => {
-      const full = Math.min(360, Math.max(160, window.innerWidth - 160));
-      return [64, Math.min(240, Math.round(full * .72)), full];
+      return [64, Math.min(240, Math.max(160, window.innerWidth - 160))];
     };
     const applyWidth = value => {
-      const sizes = stops(); width = Math.max(64, Math.min(sizes[2], value));
+      const sizes = stops(); width = Math.max(64, Math.min(sizes[1], value));
       const rail = width < 112;
       document.body.style.setProperty('--filters-width', width + 'px');
       document.body.setAttribute('data-filter-layout', rail ? 'rail' : 'expanded');
@@ -145,10 +144,9 @@
       $('filters-close').setAttribute('aria-label', rail ? 'Expand filters' : 'Collapse to icons');
       if (handle) {
         handle.setAttribute('aria-valuenow', String(Math.round(width)));
-        handle.setAttribute('aria-valuemax', String(sizes[2]));
+        handle.setAttribute('aria-valuemax', String(sizes[1]));
         handle.setAttribute('aria-valuetext', rail ? 'Icons only' : Math.round(width) + ' pixels');
       }
-      document.querySelectorAll('[data-panel-stop]').forEach(button => button.setAttribute('aria-pressed', String(sizes[Number(button.dataset.panelStop)] === width)));
     };
     const snap = () => applyWidth(stops().reduce((a,b) => Math.abs(a-width) <= Math.abs(b-width) ? a : b));
     const toggle = () => applyWidth(width < 112 ? stops()[1] : 64);
@@ -158,7 +156,6 @@
     });
     $('filters-close').addEventListener('click', toggle);
     $('filters-apply').addEventListener('click', () => { applyWidth(64); if (search) search.focus(); });
-    document.querySelectorAll('[data-panel-stop]').forEach(button => button.addEventListener('click', () => applyWidth(stops()[Number(button.dataset.panelStop)])));
     filtersPanel.addEventListener('keydown', e => {
       if (e.key === 'Escape') { e.preventDefault(); applyWidth(64); $('filters-close').focus(); }
     });
@@ -174,10 +171,10 @@
       handle.addEventListener('dblclick', () => applyWidth(stops().find(x => x > width + 1) || 64));
       handle.addEventListener('keydown', e => {
         const sizes = stops(); let next;
-        if (e.key === 'ArrowRight') next = sizes.find(x => x > width + 1) || sizes[2];
+        if (e.key === 'ArrowRight') next = sizes.find(x => x > width + 1) || sizes[1];
         else if (e.key === 'ArrowLeft') next = [...sizes].reverse().find(x => x < width - 1) || 64;
         else if (e.key === 'Home') next = 64;
-        else if (e.key === 'End') next = sizes[2];
+        else if (e.key === 'End') next = sizes[1];
         else return;
         e.preventDefault(); applyWidth(next);
       });

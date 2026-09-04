@@ -183,6 +183,6 @@ Generated hub files are disposable views. Edit the catalogue, builder, styleshee
 or interaction module rather than individual generated HTML pages. Deploy the
 existing repository through its normal GitHub Pages process after review.
 
-The left asset panel defaults to a 64px icon rail. Drag its edge to resize; release snaps to icon, compact, or full width (64/240/360px on desktop, bounded on smaller viewports). Width presets and a keyboard-operable separator provide the same controls. The main collection reflows alongside it. Width is not persisted; reload starts with icons.
+The left asset panel defaults to a 64px icon rail. Drag its edge to resize; release snaps to icon or compact width (64/240px on desktop, bounded on smaller viewports). There are no width-preset buttons or full-width mode. The expand/collapse arrow and keyboard-operable separator provide the same controls. The main collection reflows alongside it. Width is not persisted; reload starts with icons.
 
 Interface hierarchy: Asset library occupies the top-bar title position, and Autumn Memo branding lives at the top of the asset rail. The content starts with search, without a duplicate heading or introductory paragraph. Supplemental hints use native tooltips and accessible labels; essential content remains visible.
