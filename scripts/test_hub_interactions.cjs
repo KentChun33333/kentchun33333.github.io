@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, '..');
 const data = JSON.parse(fs.readFileSync(path.join(root, 'data/hub/catalog.json')));
 const source = fs.readFileSync(path.join(root, 'js/command-center.js'), 'utf8');
 class Element {
-  constructor(value = '') { this.value = value; this.children = []; this.events = {}; this.options = []; this.hidden = false; this.style = {}; }
+  constructor(value = '') { this.value = value; this.children = []; this.events = {}; this.options = []; this.hidden = false; this.style = {setProperty(name,value) {this[name]=value;}}; }
   addEventListener(name, fn) { this.events[name] = fn; }
   append(...children) { this.children.push(...children); }
   replaceChildren() { this.children = []; }
@@ -19,7 +19,7 @@ function run(url, elements, cards = [], options = {}) {
   elements.announcement = new Element();
   const location = new URL(url);
   const document = { body: new Element(), getElementById: id => elements[id] || null, querySelectorAll: selector => selector === '[data-asset]' ? cards : (options.controls?.[selector] || []), addEventListener() {}, createElement: () => new Element() };
-  const context = { document, location, URL, URLSearchParams, history: { replaceState: (_, __, value) => { location.href = value.href; } }, navigator: options.navigator || {}, window: options.window || {}, setTimeout, fetch: async () => ({ ok: true, json: async () => data }) };
+  const context = { document, location, URL, URLSearchParams, history: { replaceState: (_, __, value) => { location.href = value.href; } }, navigator: options.navigator || {}, window: {innerWidth: 1280, addEventListener() {}, ...(options.window || {})}, setTimeout, fetch: async () => ({ ok: true, json: async () => data }) };
   vm.runInNewContext(source, context);
   return location;
 }
@@ -94,11 +94,21 @@ async function main() {
     const drawer = new Element(), opener = new Element(), title = new Element();
     drawer.showModal = () => {drawer.open=true;}; drawer.close = () => {drawer.open=false;drawer.events.close();};
     const bits = {[name+'-panel']:drawer,[name+'-trigger']:opener,[name+'-title']:title,[name+'-close']:new Element()};
-    if(name==='filters') bits['filters-apply']=new Element();
+    if(name==='filters') {bits['filters-apply']=new Element();bits['filters-resizer']=new Element();bits['filters-resizer'].setPointerCapture=()=>{};}
     run('https://example.org/'+(name==='about'?'#about':''),bits);
     if(name==='about') assert(drawer.open && title.focused);
-    else {opener.events.click({preventDefault(){}});assert.equal(drawer['aria-hidden'], 'false');assert.equal(opener['aria-expanded'], 'true');assert.equal(drawer.inert, false);bits['filters-apply'].events.click();assert.equal(drawer['aria-hidden'], 'true');assert(drawer.inert && opener.focused);opener.events.click({preventDefault(){}});drawer.events.keydown({key:'Escape',preventDefault(){}});assert.equal(opener['aria-expanded'],'false');}
+    else {
+      const handle=bits['filters-resizer'];
+      assert.equal(handle['aria-valuenow'],'64');
+      opener.events.click({preventDefault(){}});assert.equal(handle['aria-valuenow'],'240');
+      handle.events.keydown({key:'End',preventDefault(){}});assert.equal(handle['aria-valuenow'],'360');
+      handle.events.keydown({key:'Home',preventDefault(){}});assert.equal(handle['aria-valuenow'],'64');
+      handle.events.pointerdown({button:0,clientX:64,pointerId:1,preventDefault(){}});
+      handle.events.pointermove({clientX:270});handle.events.pointerup();assert.equal(handle['aria-valuenow'],'240');
+      bits['filters-apply'].events.click();assert.equal(handle['aria-valuenow'],'64');
+      opener.events.click({preventDefault(){}});drawer.events.keydown({key:'Escape',preventDefault(){}});assert.equal(opener['aria-expanded'],'false');
+    }
   }
-  console.log('Passed type/workstream buttons, filter reset, URL restoration, push sidebar and both right drawers, contact context, focus restoration, and draft retention.');
+  console.log('Passed type/workstream buttons, filter reset, URL restoration, resizable snap rail, keyboard/drag controls, and both right drawers, contact context, focus restoration, and draft retention.');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

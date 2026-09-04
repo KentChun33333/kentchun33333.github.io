@@ -128,25 +128,62 @@
   initDrawer('conversation');
   const filtersPanel = $('filters-panel'), filtersTrigger = $('filters-trigger');
   if (filtersPanel && filtersTrigger) {
-    let expanded = false;
-    const toggleFilters = value => {
-      expanded = value;
-      filtersPanel.inert = !expanded;
-      filtersPanel.setAttribute('aria-hidden', String(!expanded));
-      filtersTrigger.setAttribute('aria-expanded', String(expanded));
-      document.body.setAttribute('data-filters-open', String(expanded));
-      if (expanded) $('filters-title').focus();
-      else filtersTrigger.focus();
+    const handle = $('filters-resizer');
+    let width = 64, dragging = false, dragStart = 0, startWidth = 64;
+    const stops = () => {
+      const full = Math.min(360, Math.max(160, window.innerWidth - 160));
+      return [64, Math.min(240, Math.round(full * .72)), full];
     };
+    const applyWidth = value => {
+      const sizes = stops(); width = Math.max(64, Math.min(sizes[2], value));
+      const rail = width < 112;
+      document.body.style.setProperty('--filters-width', width + 'px');
+      document.body.setAttribute('data-filter-layout', rail ? 'rail' : 'expanded');
+      document.body.setAttribute('data-filter-dragging', String(dragging));
+      filtersTrigger.setAttribute('aria-expanded', String(!rail));
+      $('filters-close').textContent = rail ? '›' : '‹';
+      $('filters-close').setAttribute('aria-label', rail ? 'Expand filters' : 'Collapse to icons');
+      if (handle) {
+        handle.setAttribute('aria-valuenow', String(Math.round(width)));
+        handle.setAttribute('aria-valuemax', String(sizes[2]));
+        handle.setAttribute('aria-valuetext', rail ? 'Icons only' : Math.round(width) + ' pixels');
+      }
+      document.querySelectorAll('[data-panel-stop]').forEach(button => button.setAttribute('aria-pressed', String(sizes[Number(button.dataset.panelStop)] === width)));
+    };
+    const snap = () => applyWidth(stops().reduce((a,b) => Math.abs(a-width) <= Math.abs(b-width) ? a : b));
+    const toggle = () => applyWidth(width < 112 ? stops()[1] : 64);
     filtersTrigger.addEventListener('click', e => {
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      e.preventDefault(); toggleFilters(!expanded);
+      e.preventDefault(); toggle();
     });
-    $('filters-close').addEventListener('click', () => toggleFilters(false));
-    $('filters-apply').addEventListener('click', () => { toggleFilters(false); if (search) search.focus(); });
+    $('filters-close').addEventListener('click', toggle);
+    $('filters-apply').addEventListener('click', () => { applyWidth(64); if (search) search.focus(); });
+    document.querySelectorAll('[data-panel-stop]').forEach(button => button.addEventListener('click', () => applyWidth(stops()[Number(button.dataset.panelStop)])));
     filtersPanel.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { e.preventDefault(); toggleFilters(false); }
+      if (e.key === 'Escape') { e.preventDefault(); applyWidth(64); $('filters-close').focus(); }
     });
+    if (handle) {
+      handle.addEventListener('pointerdown', e => {
+        if (e.button !== 0) return;
+        e.preventDefault(); dragging = true; dragStart = e.clientX; startWidth = width;
+        handle.setPointerCapture(e.pointerId); handle.focus(); applyWidth(width);
+      });
+      handle.addEventListener('pointermove', e => { if (dragging) applyWidth(startWidth + e.clientX - dragStart); });
+      const finish = () => { if (dragging) { dragging = false; snap(); } };
+      handle.addEventListener('pointerup', finish); handle.addEventListener('pointercancel', finish); handle.addEventListener('lostpointercapture', finish);
+      handle.addEventListener('dblclick', () => applyWidth(stops().find(x => x > width + 1) || 64));
+      handle.addEventListener('keydown', e => {
+        const sizes = stops(); let next;
+        if (e.key === 'ArrowRight') next = sizes.find(x => x > width + 1) || sizes[2];
+        else if (e.key === 'ArrowLeft') next = [...sizes].reverse().find(x => x < width - 1) || 64;
+        else if (e.key === 'Home') next = 64;
+        else if (e.key === 'End') next = sizes[2];
+        else return;
+        e.preventDefault(); applyWidth(next);
+      });
+    }
+    window.addEventListener('resize', () => { applyWidth(width); snap(); });
+    applyWidth(64);
   }
   const openAbout = initDrawer('about');
   if (openAbout && location.hash === '#about') openAbout();

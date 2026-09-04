@@ -182,3 +182,5 @@ python3 -m http.server 8765 --bind 127.0.0.1
 Generated hub files are disposable views. Edit the catalogue, builder, stylesheet,
 or interaction module rather than individual generated HTML pages. Deploy the
 existing repository through its normal GitHub Pages process after review.
+
+The left asset panel defaults to a 64px icon rail. Drag its edge to resize; release snaps to icon, compact, or full width (64/240/360px on desktop, bounded on smaller viewports). Width presets and a keyboard-operable separator provide the same controls. The main collection reflows alongside it. Width is not persisted; reload starts with icons.
