@@ -27,8 +27,8 @@ Autumn Memo
 │   └── Commercial offers linked to one or more assets
 ├── Web layer
 │   ├── / — command center and task entry points
-│   ├── /hub/solutions/ — buyer / business problem / inquiry
-│   ├── /hub/collaborate/ — researcher / collaborator / reading paths
+│   ├── /hub/solutions/ — Work with me: projects, research, and collaboration
+│   ├── /hub/collaborate/ — preserved redirect to /hub/solutions/#research
 │   ├── /hub/experience/ — employer / capabilities / technical artifacts
 │   ├── /hub/stories/ — personal stories, original article photos, writing archive
 │   ├── /hub/library/ — learner / search / type and stream filters

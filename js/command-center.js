@@ -5,7 +5,7 @@
   const $ = id => document.getElementById(id);
   const announce = text => { $('announcement').textContent = text; };
   const params = new URLSearchParams(location.search);
-  const legacyEntries = { '#profile': '/hub/experience/', '#research': '/hub/collaborate/', '#demos': '/hub/library/?kind=Demo', '#skills': '/hub/library/?kind=Skill', '#vault': '/hub/library/?kind=Article', '#monitoring': '/hub/graph/' };
+  const legacyEntries = { '#profile': '/hub/experience/', '#research': '/hub/solutions/#research', '#demos': '/hub/library/?kind=Demo', '#skills': '/hub/library/?kind=Skill', '#vault': '/hub/library/?kind=Article', '#monitoring': '/hub/graph/' };
   if (location.pathname === '/' && legacyEntries[location.hash]) location.replace(legacyEntries[location.hash]);
   const setParams = fields => {
     const url = new URL(location.href);
