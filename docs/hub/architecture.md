@@ -190,3 +190,34 @@ Interface hierarchy: Asset library occupies the top-bar title position, and Autu
 ## In-place asset canvas
 
 Library links open assets inside the existing shell, with `?asset=<id>` URLs and browser history. The left rail, filter state, and conversation draft stay mounted. HTML articles, research, and demos run in an iframe at their unchanged source URL; Markdown uses generated escaped reader fragments. Closing the viewer unloads the frame and restores the library position. Original detail URLs remain usable without JavaScript, while the viewer toolbar now shares the top header row. The original-link toolbar action is removed; original URLs remain preserved. A chevron collapses the header to icon controls without unloading the asset. Embedded local HTML is trusted repository content and retains same-origin storage for existing demos; it must not be treated as a security boundary for untrusted uploads.
+
+
+## Durable asset dates and sorting
+
+`hub-src/catalog.json` owns optional `dates.published` and `dates.added` records.
+Each record has `at` (ISO 8601 UTC, including seconds and timezone) and `source`
+(provenance). Builders validate these records and export them unchanged to JSON,
+HTML data attributes, and the indexed SQLite `asset_dates` table. This additive
+table works with existing databases without discarding revision history.
+
+Publication dates were imported from explicit `article:published_time` metadata
+in 25 original pages. Missing dates stay absent. Added dates were seeded once
+from the author timestamp of the earliest available commit returned by Git's
+path-following history; their provenance includes the commit and path. This is
+repository history, not a claim about original publication. Imported repositories
+may have much newer added dates than their contents. Neither filesystem mtime,
+build time, nor revision observation time is a publication date.
+
+When adding an asset, record the real repository-added timestamp and its source;
+record publication only when supported by metadata or an editorial source.
+The build never guesses missing dates or refreshes existing dates. A correction
+is an explicit catalogue edit with updated provenance. Layout edits do not change
+these dates. Future date meanings require a named schema addition, not reuse of
+an existing field.
+
+The result toolbar provides Curated (default), Newest published, Oldest published,
+and Recently added. Unknown values sort last in either chronological direction;
+ties retain curated order. `?sort=newest|oldest|added` persists alongside search,
+filters, and asset-viewer URLs; unknown sort values fall back to curated. Filtering
+and opening/closing assets preserve sort state. Reset all restores curated order.
+Without JavaScript, the full curated static collection remains readable.

@@ -85,3 +85,9 @@ input,select,textarea{font-size:var(--type-body)}
 .graph-root p,.graph-context-item p,.relationship-list p,.evidence-links,.offer-card p,.offer-card li,.tree-branches a{font-size:var(--type-label);line-height:1.65}
 .graph-node small,.relationship-list span,.design-tree span{font-size:var(--type-caption)}
 @media(max-width:760px){.sidebar-brand .brand{font-size:1rem}.library-topbar .viewer-toolbar h2{font-size:1.125rem}}
+
+/* Sorting is collection state, alongside the result count. */
+.collection-order{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.collection-order label{display:flex;align-items:center;gap:8px;font-size:var(--type-label);color:var(--muted)}
+.collection-order select{font-size:var(--type-label);min-height:40px;background:var(--panel)}
+.collection-order #result-count{margin:0}.asset-card p.asset-date{font-size:var(--type-caption);margin:0 0 12px;font-variant-numeric:tabular-nums}

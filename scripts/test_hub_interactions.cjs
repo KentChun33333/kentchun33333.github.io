@@ -10,7 +10,7 @@ class Element {
   constructor(value = '') { this.value = value; this.children = []; this.events = {}; this.options = []; this.hidden = false; this.style = {setProperty(name,value) {this[name]=value;}}; }
   addEventListener(name, fn) { this.events[name] = fn; }
   append(...children) { this.children.push(...children); }
-  replaceChildren() { this.children = []; }
+  replaceChildren(...children) { this.children = children; }
   focus() { this.focused = true; }
   get selectedOptions() { return this.options.filter(o => o.value === this.value); }
   setAttribute(name, value) { this[name] = value; }
@@ -53,6 +53,22 @@ async function main() {
   els['filters-reset'].events.click();
   assert.equal(cards.filter(c=>!c.hidden).length,data.assets.length);
   assert.equal(protocol['aria-pressed'], 'false');
+  // Date sorting: unknown dates last in both directions, stable ties, URL restore.
+  const sort = new Element(), results = new Element();
+  const dateCards = [null, '2021-01-01T00:00:00+00:00', '2026-01-01T00:00:00+00:00', '2026-01-01T00:00:00+00:00'].map((date, i) => {
+    const card = new Element(); card.dataset = {search:'sample',kind:'Research',stream:'Research',published:date || '',added:`202${i}-01-01T00:00:00+00:00`}; return card;
+  });
+  const sortEls = {'asset-search':new Element(),'asset-kind':new Element(),'asset-stream':new Element(),'asset-sort':sort,'asset-results':results,'result-count':new Element(),'empty-results':new Element()};
+  sortEls['asset-search'].form = new Element();
+  const listeners = {};
+  const sortLocation = run('https://example.org/?sort=newest',sortEls,dateCards,{window:{addEventListener:(name,fn)=>{listeners[name]=fn;}}});
+  assert.deepEqual(results.children,[dateCards[2],dateCards[3],dateCards[1],dateCards[0]]);
+  sort.value='oldest';sort.events.change();assert.equal(sortLocation.searchParams.get('sort'),'oldest');
+  assert.deepEqual(results.children,[dateCards[1],dateCards[2],dateCards[3],dateCards[0]]);
+  sort.value='added';sort.events.change();assert.deepEqual(results.children,[...dateCards].reverse());
+  sortEls['asset-kind'].value='Skill';sortEls['asset-kind'].events.change();assert(dateCards.every(c=>c.hidden));assert.equal(sort.value,'added');
+  sortLocation.search='?sort=invalid';listeners.popstate();assert.equal(sort.value,'curated');assert.deepEqual(results.children,dateCards);
+  sortLocation.search='?sort=newest';listeners.popstate();assert.equal(results.children[0],dateCards[2]);
   const focus = new Element('gse'); const ids = new Set(data.relations.flatMap(r => [r.source, r.target]));
   focus.options = [...ids].map(value => ({ value }));
   const graph = { 'graph-focus': focus, 'graph-canvas': new Element(), 'graph-context': new Element() };

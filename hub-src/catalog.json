@@ -20,7 +20,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-09-03T01:57:50+00:00",
+          "source": "git:f55c50c57ceb7d3f19e534af6406c8c4273f2a3d:idea-paper/guarded-skill-evolution/guarded-skill-evolution-v2.html"
+        }
+      }
     },
     {
       "id": "ter",
@@ -42,7 +48,13 @@
         "learn"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-08-11T02:38:15+00:00",
+          "source": "git:825ac9d106205001c8d5c72ab9a371ec3d7971af:ter-agentic-demos/ter-bank-multi-agent-flow-v15.html"
+        }
+      }
     },
     {
       "id": "wealth",
@@ -64,7 +76,13 @@
         "learn"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-08-24T05:14:42+00:00",
+          "source": "git:da1f684f5578c7850fd942d7bb7965bc9d66b542:wealthy_data_insight/index.html"
+        }
+      }
     },
     {
       "id": "publisher",
@@ -85,7 +103,13 @@
         "learn"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-09-01T15:45:07+00:00",
+          "source": "git:e9e0870edd0f3846e0c1c51f1a8586ceee781df2:github-zip-upload/index.html"
+        }
+      }
     },
     {
       "id": "gse-paper",
@@ -106,7 +130,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-09-03T01:57:50+00:00",
+          "source": "git:f55c50c57ceb7d3f19e534af6406c8c4273f2a3d:idea-paper/guarded-skill-evolution/paper.md"
+        }
+      }
     },
     {
       "id": "gse-experiment-protocol",
@@ -127,7 +157,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-09-03T01:57:50+00:00",
+          "source": "git:f55c50c57ceb7d3f19e534af6406c8c4273f2a3d:idea-paper/guarded-skill-evolution/experiment-protocol.md"
+        }
+      }
     },
     {
       "id": "gse-benchmark-schema",
@@ -148,7 +184,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-09-03T01:57:50+00:00",
+          "source": "git:f55c50c57ceb7d3f19e534af6406c8c4273f2a3d:idea-paper/guarded-skill-evolution/benchmark-schema.md"
+        }
+      }
     },
     {
       "id": "deeptutor-agent-native-learning-architecture",
@@ -168,7 +210,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-09-01T15:31:12+00:00",
+          "source": "git:d80e14366b162ac9ea918b0edf0da5f5576d2fe4:ai-research-insights/deeptutor-agent-native-learning-architecture.html"
+        }
+      }
     },
     {
       "id": "dynamic-reasoning-compute-explained",
@@ -188,7 +236,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-09-03T14:55:51+00:00",
+          "source": "git:960a36adfc169832add8abe77ca51d1bc1d36e77:ai-research-insights/dynamic-reasoning-compute-explained.html"
+        }
+      }
     },
     {
       "id": "envharness-agent-learning",
@@ -208,7 +262,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-08-25T08:49:15+00:00",
+          "source": "git:608d50b517f1dbf3480a3dcccccc439b067983e3:ai-research-insights/envharness-agent-learning.html"
+        }
+      }
     },
     {
       "id": "llm-as-a-verifier",
@@ -228,7 +288,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-08-27T07:40:19+00:00",
+          "source": "git:3d5f3dbd9c26c36ab57e3cc09732be1e65cff0c4:ai-research-insights/llm-as-a-verifier.html"
+        }
+      }
     },
     {
       "id": "recuris-memory-evolution",
@@ -248,7 +314,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-08-31T06:19:34+00:00",
+          "source": "git:a9f2f097b2034cca72dd708f77581a16c69a60d6:ai-research-insights/recuris-memory-evolution.html"
+        }
+      }
     },
     {
       "id": "rlvr-grpo-explained",
@@ -268,7 +340,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-09-03T14:55:51+00:00",
+          "source": "git:960a36adfc169832add8abe77ca51d1bc1d36e77:ai-research-insights/rlvr-grpo-explained.html"
+        }
+      }
     },
     {
       "id": "synthetic-distillation-flywheel-explained",
@@ -288,7 +366,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-09-03T14:55:51+00:00",
+          "source": "git:960a36adfc169832add8abe77ca51d1bc1d36e77:ai-research-insights/synthetic-distillation-flywheel-explained.html"
+        }
+      }
     },
     {
       "id": "timesfm-3-explained",
@@ -308,7 +392,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-09-03T06:07:29+00:00",
+          "source": "git:90790fa0c884f53415eb52b7b5ff2a9ca25f87f8:ai-research-insights/timesfm-3-explained.html"
+        }
+      }
     },
     {
       "id": "writing-2023-0711-economicweather",
@@ -328,7 +418,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2023-06-26T16:00:00+00:00",
+          "source": "post/2023-0711-economicweather/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2021-08-01T12:53:27+00:00",
+          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/2023-0711-economicweather/index.html"
+        }
+      }
     },
     {
       "id": "writing-2023-feb-optionstrategy",
@@ -348,7 +448,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2023-04-04T16:00:00+00:00",
+          "source": "post/2023-feb-optionstrategy/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2021-08-03T15:55:08+00:00",
+          "source": "git:a8a839bfa636187fdd189db228afd6e10457011a:post/2023-feb-optionstrategy/index.html"
+        }
+      }
     },
     {
       "id": "writing-20230607-learntorank",
@@ -368,7 +478,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2021-08-01T12:53:27+00:00",
+          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/20230607-learntorank/index.html"
+        }
+      }
     },
     {
       "id": "writing-buyinghouse2021",
@@ -395,7 +511,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2021-06-27T16:00:00+00:00",
+          "source": "post/buyinghouse2021/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2021-08-02T00:33:27+00:00",
+          "source": "git:9415fc62ae21534a1d341fbbd046f45c5ec2522a:post/buyinghouse2021/index.html"
+        }
+      }
     },
     {
       "id": "writing-cblof",
@@ -415,7 +541,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2022-11-01T16:00:00+00:00",
+          "source": "post/cblof/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2021-08-01T12:53:27+00:00",
+          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/cblof/index.html"
+        }
+      }
     },
     {
       "id": "writing-clawdbot-memory-system-analysis",
@@ -435,7 +571,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2026-01-27T16:00:00+00:00",
+          "source": "post/clawdbot-memory-system-analysis/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2026-01-27T16:34:56+00:00",
+          "source": "git:020935727e0583a4f4b3f8649484aed186462a36:post/clawdbot-memory-system-analysis/index.html"
+        }
+      }
     },
     {
       "id": "writing-cloudpickle",
@@ -455,7 +601,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2023-04-26T16:00:00+00:00",
+          "source": "post/cloudpickle/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2021-08-01T12:53:27+00:00",
+          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/cloudpickle/index.html"
+        }
+      }
     },
     {
       "id": "writing-cubejs_tryout",
@@ -475,7 +631,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2021-08-01T12:53:27+00:00",
+          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/cubejs_tryout/index.html"
+        }
+      }
     },
     {
       "id": "writing-customized-lorenz-ann-classification",
@@ -495,7 +657,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2023-03-23T16:00:00+00:00",
+          "source": "post/customized-lorenz-ann-classification/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2023-03-26T12:23:54+00:00",
+          "source": "git:6b9d99fe05d933c60b5c7e1fb7dfc1764c815f03:post/customized-lorenz-ann-classification/index.html"
+        }
+      }
     },
     {
       "id": "writing-db-index-vs-silhouette-score",
@@ -515,7 +687,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2022-07-01T16:00:00+00:00",
+          "source": "post/db-index-vs-silhouette-score/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2021-08-01T12:53:27+00:00",
+          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/db-index-vs-silhouette-score/index.html"
+        }
+      }
     },
     {
       "id": "writing-hostpersonalgpt",
@@ -535,7 +717,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2021-07-31T16:00:00+00:00",
+          "source": "post/hostpersonalgpt/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2021-08-01T12:53:27+00:00",
+          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/hostpersonalgpt/index.html"
+        }
+      }
     },
     {
       "id": "writing-how-to-close-clawdbot-daemon",
@@ -555,7 +747,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2026-01-26T16:00:00+00:00",
+          "source": "post/how-to-close-clawdbot-daemon/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2026-01-27T12:52:38+00:00",
+          "source": "git:fccbf82275d4b59a7a4508c858f4b786fd270fdc:post/how-to-close-clawdbot-daemon/index.html"
+        }
+      }
     },
     {
       "id": "writing-memosystem",
@@ -575,7 +777,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2021-07-31T16:00:00+00:00",
+          "source": "post/memosystem/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2021-08-01T12:53:27+00:00",
+          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/memosystem/index.html"
+        }
+      }
     },
     {
       "id": "writing-metricf1score",
@@ -595,7 +807,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2020-01-26T16:00:00+00:00",
+          "source": "post/metricf1score/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2021-08-01T12:53:27+00:00",
+          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/metricf1score/index.html"
+        }
+      }
     },
     {
       "id": "writing-design_backtesting",
@@ -615,7 +837,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2023-03-13T06:52:39+00:00",
+          "source": "git:f659cdb44c57aa95ff7ab4aa0e9d701cb622bedb:post/quant/design_backtesting/index.html"
+        }
+      }
     },
     {
       "id": "writing-quant_metric_001",
@@ -635,7 +863,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2023-09-19T16:00:00+00:00",
+          "source": "post/quant/quant_metric_001/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2023-03-13T06:52:39+00:00",
+          "source": "git:f659cdb44c57aa95ff7ab4aa0e9d701cb622bedb:post/quant/quant_metric_001/index.html"
+        }
+      }
     },
     {
       "id": "writing-scedasticicity",
@@ -655,7 +893,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2021-04-26T16:00:00+00:00",
+          "source": "post/scedasticicity/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2021-08-01T12:53:27+00:00",
+          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/scedasticicity/index.html"
+        }
+      }
     },
     {
       "id": "writing-self-instruct-aligning-language-model-with-self-generated-instructions",
@@ -675,7 +923,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2023-03-19T16:00:00+00:00",
+          "source": "post/self-instruct-aligning-language-model-with-self-generated-instructions/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2021-08-01T12:53:27+00:00",
+          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/self-instruct-aligning-language-model-with-self-generated-instructions/index.html"
+        }
+      }
     },
     {
       "id": "writing-simplesearchsys",
@@ -695,7 +953,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2020-09-24T16:00:00+00:00",
+          "source": "post/simplesearchsys/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2021-08-03T15:55:08+00:00",
+          "source": "git:a8a839bfa636187fdd189db228afd6e10457011a:post/simplesearchsys/index.html"
+        }
+      }
     },
     {
       "id": "writing-small-capybara-video",
@@ -715,7 +983,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2025-06-30T16:00:00+00:00",
+          "source": "post/small-capybara-video/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2021-08-01T12:53:27+00:00",
+          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/small-capybara-video/index.html"
+        }
+      }
     },
     {
       "id": "writing-sshbitbuketonwinows",
@@ -735,7 +1013,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2022-04-01T16:00:00+00:00",
+          "source": "post/sshbitbuketonwinows/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2021-08-01T12:53:27+00:00",
+          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/sshbitbuketonwinows/index.html"
+        }
+      }
     },
     {
       "id": "writing-table-tennis-rating",
@@ -755,7 +1043,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-08-02T08:19:13+00:00",
+          "source": "git:049c97aaea108233e37142967f883a99eda1c1b6:post/table-tennis-rating/index.html"
+        }
+      }
     },
     {
       "id": "writing-taskmanagement",
@@ -775,7 +1069,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2022-09-26T16:00:00+00:00",
+          "source": "post/taskmanagement/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2021-08-02T00:33:27+00:00",
+          "source": "git:9415fc62ae21534a1d341fbbd046f45c5ec2522a:post/taskmanagement/index.html"
+        }
+      }
     },
     {
       "id": "writing-test_02",
@@ -795,7 +1099,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2022-09-26T16:00:00+00:00",
+          "source": "post/test_02/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2023-03-13T06:52:39+00:00",
+          "source": "git:f659cdb44c57aa95ff7ab4aa0e9d701cb622bedb:post/test_02/index.html"
+        }
+      }
     },
     {
       "id": "writing-timeseries",
@@ -815,7 +1129,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2023-03-30T14:52:18+00:00",
+          "source": "git:573a3802227a86561c625feff3b0fd3f145c0d8a:post/timeseries/index.html"
+        }
+      }
     },
     {
       "id": "writing-top-10-correlation-coeff",
@@ -835,7 +1155,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2023-08-30T16:00:00+00:00",
+          "source": "post/top-10-correlation-coeff/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2023-11-03T03:49:45+00:00",
+          "source": "git:96ecd384fe99624734569a02e92240ebf104f9e2:post/top-10-correlation-coeff/index.html"
+        }
+      }
     },
     {
       "id": "writing-track_memory",
@@ -855,7 +1185,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2023-05-21T16:09:58+00:00",
+          "source": "git:7547e5600d222a2fba05a36e395391ac9af2db5a:post/track_memory/index.html"
+        }
+      }
     },
     {
       "id": "writing-trackingmemo",
@@ -875,7 +1211,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2023-05-14T16:00:00+00:00",
+          "source": "post/trackingmemo/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2023-05-21T16:09:58+00:00",
+          "source": "git:7547e5600d222a2fba05a36e395391ac9af2db5a:post/trackingmemo/index.html"
+        }
+      }
     },
     {
       "id": "writing-tradingtactic",
@@ -895,7 +1241,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2023-03-10T16:00:00+00:00",
+          "source": "post/tradingtactic/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2021-08-01T12:53:27+00:00",
+          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/tradingtactic/index.html"
+        }
+      }
     },
     {
       "id": "writing-what-is-rouge-l",
@@ -915,7 +1271,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2023-02-10T16:00:00+00:00",
+          "source": "post/what-is-rouge-l/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2021-08-01T12:53:27+00:00",
+          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/what-is-rouge-l/index.html"
+        }
+      }
     },
     {
       "id": "skill-build-async-agentic-web-demo",
@@ -936,7 +1302,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-08-27T14:05:03+00:00",
+          "source": "git:76587168ef8d6c50e8ab6bb6debd24c39b06d42b:skills/build-async-agentic-web-demo/SKILL.md"
+        }
+      }
     },
     {
       "id": "skill-charting",
@@ -957,7 +1329,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-08-27T14:05:03+00:00",
+          "source": "git:76587168ef8d6c50e8ab6bb6debd24c39b06d42b:skills/charting/skill.md"
+        }
+      }
     },
     {
       "id": "skill-cross-evolve-skill",
@@ -978,7 +1356,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-09-02T13:12:50+00:00",
+          "source": "git:f31aa3781a0b789364095fbe2c0c0fdb8cce7c76:skills/cross-evolve-skill/skill.md"
+        }
+      }
     },
     {
       "id": "skill-evaluate-executive-resume",
@@ -999,7 +1383,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-08-27T14:05:03+00:00",
+          "source": "git:76587168ef8d6c50e8ab6bb6debd24c39b06d42b:skills/evaluate-executive-resume/SKILL.md"
+        }
+      }
     },
     {
       "id": "skill-evaluate-web-deliverable",
@@ -1020,7 +1410,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-09-03T06:07:29+00:00",
+          "source": "git:90790fa0c884f53415eb52b7b5ff2a9ca25f87f8:skills/evaluate-web-deliverable/SKILL.md"
+        }
+      }
     },
     {
       "id": "skill-ideogram-image-generation",
@@ -1041,7 +1437,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-08-27T14:05:03+00:00",
+          "source": "git:76587168ef8d6c50e8ab6bb6debd24c39b06d42b:skills/ideogram-image-generation/skill.md"
+        }
+      }
     },
     {
       "id": "skill-knowledge-distill",
@@ -1062,7 +1464,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-09-01T15:31:12+00:00",
+          "source": "git:d80e14366b162ac9ea918b0edf0da5f5576d2fe4:skills/knowledge-distill/SKILL.md"
+        }
+      }
     },
     {
       "id": "skill-markdown-to-pdf",
@@ -1083,7 +1491,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-08-27T14:05:03+00:00",
+          "source": "git:76587168ef8d6c50e8ab6bb6debd24c39b06d42b:skills/markdown-to-pdf/skill.md"
+        }
+      }
     },
     {
       "id": "skill-semantic-pattern-mining",
@@ -1104,7 +1518,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-08-27T14:05:03+00:00",
+          "source": "git:76587168ef8d6c50e8ab6bb6debd24c39b06d42b:skills/semantic-pattern-mining/SKILL.md"
+        }
+      }
     },
     {
       "id": "skill-web",
@@ -1125,7 +1545,13 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "added": {
+          "at": "2026-09-03T06:07:29+00:00",
+          "source": "git:90790fa0c884f53415eb52b7b5ff2a9ca25f87f8:skills/web/SKILL.md"
+        }
+      }
     },
     {
       "id": "story-autumn-memo",
@@ -1151,7 +1577,17 @@
         "evaluate"
       ],
       "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2016-08-31T16:00:00+00:00",
+          "source": "about/index.html#article:published_time"
+        },
+        "added": {
+          "at": "2021-08-01T12:53:27+00:00",
+          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:about/index.html"
+        }
+      }
     }
   ],
   "relations": [

@@ -89,6 +89,12 @@ def validate():
         assert path.is_relative_to(ROOT) and path.is_file(), a['path']
         assert not any(part.startswith('.') for part in Path(a['path']).parts)
         assert a['visibility'] == 'public', 'Private records cannot enter public exports'
+        for date_kind, record in a.get('dates', {}).items():
+            assert date_kind in {'published', 'added'}, 'Unknown asset date kind'
+            assert record.get('source', '').strip(), 'Dates require provenance'
+            parsed = datetime.fromisoformat(record['at'])
+            assert parsed.tzinfo is not None, 'Asset dates require a timezone'
+            assert record['at'] == parsed.astimezone(timezone.utc).isoformat(timespec='seconds'), 'Use canonical UTC asset dates'
         a['sha256'] = hashlib.sha256(path.read_bytes()).hexdigest()
         a['url'] = href(a['path'])
         a['detail_url'] = detail(a)
@@ -116,14 +122,20 @@ def asset_actions(a):
 
 def card(a, compact=False):
     search = E(' '.join([a['title'], a['summary'], *a['topics']]).lower())
-    thumbnail = ''
+    date_attrs = ' '.join(f'data-{key}="{E(a.get("dates", {}).get(key, {}).get("at", ""))}"' for key in ['published', 'added'])
+    dates = a.get('dates', {})
+    date_kind = 'published' if 'published' in dates else 'added'
+    stamp = dates.get(date_kind, {}).get('at', '')
+    date_label = 'Published' if date_kind == 'published' else 'Repository added'
+    date_html = f'<p class="asset-date">{date_label} <time datetime="{E(stamp)}">{E(stamp[:10])}</time></p>' if stamp else '<p class="asset-date">Date not recorded</p>'
+    thumbnail = '' 
     if a.get('images'):
         media = a['images'][0]
         thumbnail = f'<a class="card-photo" href="{detail(a)}" aria-label="Read {E(a["title"])}"><img src="{E(media["url"])}" alt="{E(media["alt"])}" loading="lazy" decoding="async"></a>'
-    return f'''<article class="asset-card {'compact' if compact else ''}" data-asset data-kind="{E(a['kind'])}" data-stream="{E(a['stream'])}" data-search="{search}">{thumbnail}
+    return f'''<article class="asset-card {'compact' if compact else ''}" data-asset data-kind="{E(a['kind'])}" data-stream="{E(a['stream'])}" data-search="{search}" {date_attrs}>{thumbnail}
       <div class="eyebrow"><span>{E(a['kind'])}</span><span>{E(a['stream'])}</span></div>
       <h3><a href="{detail(a)}">{E(a['title'])}</a></h3><p>{E(a['summary'])}</p>
-      <div class="card-bottom"><span class="status">{E(a['status'])}</span><a class="arrow" href="{detail(a)}" aria-label="Explore {E(a['title'])}">↗</a></div>{asset_actions(a)}</article>'''
+      {date_html}<div class="card-bottom"><span class="status">{E(a['status'])}</span><a class="arrow" href="{detail(a)}" aria-label="Explore {E(a['title'])}">↗</a></div>{asset_actions(a)}</article>'''
 
 
 
@@ -238,7 +250,7 @@ def build_memory():
     conn = sqlite3.connect(ROOT / 'data/hub/memory.sqlite')
     conn.executescript((ROOT / 'hub-src/schema.sql').read_text())
     with conn:
-        conn.execute('DELETE FROM offer_assets'); conn.execute('DELETE FROM offers'); conn.execute('DELETE FROM relations'); conn.execute('DELETE FROM asset_media')
+        conn.execute('DELETE FROM offer_assets'); conn.execute('DELETE FROM offers'); conn.execute('DELETE FROM relations'); conn.execute('DELETE FROM asset_media'); conn.execute('DELETE FROM asset_dates')
         ids = {a['id'] for a in ASSETS}
         for (old_id,) in conn.execute('SELECT id FROM assets').fetchall():
             if old_id not in ids:
@@ -247,6 +259,7 @@ def build_memory():
         for a in ASSETS:
             values = (a['id'], a['title'], a['kind'], a['stream'], a['path'], a['summary'], a['status'], 'public', json.dumps(a, ensure_ascii=False))
             conn.execute('INSERT INTO assets VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET title=excluded.title,kind=excluded.kind,stream=excluded.stream,path=excluded.path,summary=excluded.summary,status=excluded.status,metadata_json=excluded.metadata_json', values)
+            conn.executemany('INSERT INTO asset_dates VALUES (?,?,?,?)', [(a['id'], key, record['at'], record['source']) for key, record in a.get('dates', {}).items()])
             conn.execute('INSERT OR IGNORE INTO revisions VALUES (?,?,?)', (a['id'], a['sha256'], NOW))
             conn.executemany('INSERT INTO asset_media VALUES (?,?,?,?,?,?)', [(a['id'],m['url'],m['alt'],m['source_path'],m['sha256'],i) for i,m in enumerate(a['images'])])
         conn.executemany('INSERT INTO relations VALUES (?,?,?,?)', [(r['source'],r['type'],r['target'],r['basis']) for r in RELATIONS])
@@ -270,7 +283,7 @@ def build_pages():
     filters='<aside id="filters-panel" class="filters-panel" aria-labelledby="filters-title"><div class="conversation-heading"><h2 id="filters-title" class="sidebar-brand" tabindex="-1"><a class="brand" href="/" title="Autumn Memo · Kent Chiu"><span class="brand-name">AUTUMN MEMO<small>Kent Chiu’s work & ideas</small></span><span class="sr-only">Autumn Memo · asset filters</span></a></h2><button type="button" id="filters-close" aria-label="Expand filters" title="Expand or collapse filters">›</button></div><fieldset class="filter-group asset-type-group" id="asset-type-filters"><legend>Asset type</legend><div class="filter-options asset-type-options">'+types+'</div></fieldset><fieldset class="filter-group"><legend>Workstream</legend><div class="filter-options">'+streams+'</div></fieldset><p id="filter-results" role="status"></p><div class="filter-panel-actions"><button type="button" id="filters-apply" class="button">Show results</button><button type="button" id="filters-reset" class="text-button">Reset all</button></div><div id="filters-resizer" role="separator" tabindex="0" aria-label="Resize asset filters" aria-orientation="vertical" aria-valuemin="64" aria-valuemax="240" aria-valuenow="64" title="Drag to resize. Arrow keys change width; Home shows icons; End expands."></div></aside>'
     priority=['gse','ter','story-autumn-memo','wealth','writing-buyinghouse2021','publisher']
     ordered=[BY_ID[i] for i in priority]+[a for a in ASSETS if a['id'] not in priority]
-    library=intro+controls+filters+f'<p id="result-count" role="status">{len(ASSETS)} assets</p><div id="asset-results" class="card-grid">'+''.join(card(a,True) for a in ordered)+'</div><div id="empty-results" class="empty-state" hidden><h2>No matching assets</h2><p>Try a broader search or reset your filters.</p></div><noscript><p>All assets are listed here. Interactive filtering requires JavaScript.</p></noscript>'
+    library=intro+controls+filters+f'<div class="collection-order"><p id="result-count" role="status">{len(ASSETS)} assets</p><label for="asset-sort">Sort <select id="asset-sort" name="sort" form="library-search"><option value="curated">Curated</option><option value="newest">Newest published</option><option value="oldest">Oldest published</option><option value="added">Recently added</option></select></label></div><div id="asset-results" class="card-grid">'+''.join(card(a,True) for a in ordered)+'</div><div id="empty-results" class="empty-state" hidden><h2>No matching assets</h2><p>Try a broader search or reset your filters.</p></div><noscript><p>All assets are listed here. Interactive filtering requires JavaScript.</p></noscript>'
     viewer = '<section id="asset-view" hidden aria-labelledby="viewer-title"><p id="viewer-status" role="status"></p><div id="viewer-canvas"></div></section>' 
     library='<section id="library-view">'+library+'</section>'+viewer
     html=page('Kent Chiu · Asset library' ,'Research, demos, skills, personal stories and illustrated writing by Kent Chiu. Explore an asset or get in touch.',library,'/')

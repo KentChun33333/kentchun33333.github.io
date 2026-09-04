@@ -68,6 +68,8 @@ for a in data['assets']:
         assert conn.execute('SELECT sha256 FROM asset_media WHERE asset_id=? AND url=?',(a['id'],media['url'])).fetchone()[0]==media['sha256']
 assert conn.execute('SELECT COUNT(*) FROM offer_assets').fetchone()[0]==sum(len(o['asset_ids']) for o in data['offers'])
 assert conn.execute('SELECT COUNT(*) FROM asset_media').fetchone()[0]==sum(len(a.get('images',[])) for a in data['assets'])
+expected_dates = sorted((a['id'], kind, value['at'], value['source']) for a in data['assets'] for kind, value in a.get('dates', {}).items())
+assert conn.execute('SELECT asset_id,kind,at,source FROM asset_dates ORDER BY asset_id,kind').fetchall() == expected_dates
 conn.close()
 
 spec=importlib.util.spec_from_file_location('build_hub',ROOT/'scripts/build_hub.py')

@@ -32,3 +32,12 @@ CREATE TABLE IF NOT EXISTS asset_media (
  source_path TEXT NOT NULL, sha256 TEXT NOT NULL, position INTEGER NOT NULL,
  PRIMARY KEY(asset_id, url)
 );
+
+-- Explicit dates and provenance; observation timestamps remain in revisions.
+CREATE TABLE IF NOT EXISTS asset_dates (
+ asset_id TEXT NOT NULL REFERENCES assets(id) ON DELETE CASCADE,
+ kind TEXT NOT NULL CHECK(kind IN ('published','added')),
+ at TEXT NOT NULL, source TEXT NOT NULL,
+ PRIMARY KEY(asset_id,kind)
+);
+CREATE INDEX IF NOT EXISTS idx_asset_dates_kind_at ON asset_dates(kind,at,asset_id);

@@ -42,7 +42,9 @@
 
   const search = $('asset-search');
   if (search) {
-    const kind = $('asset-kind'), stream = $('asset-stream');
+    const kind = $('asset-kind'), stream = $('asset-stream'), sort = $('asset-sort');
+    const sortModes = ['curated', 'newest', 'oldest', 'added'];
+    if (sort) sort.value = sortModes.includes(params.get('sort')) ? params.get('sort') : 'curated';
     const cards = [...document.querySelectorAll('[data-asset]')];
     search.value = params.get('q') || '';
     for (const [select, key] of [[kind, 'kind'], [stream, 'stream']]) {
@@ -57,6 +59,17 @@
         const visible = terms.every(t => card.dataset.search.includes(t)) && (!kind.value || card.dataset.kind === kind.value) && (!stream.value || card.dataset.stream === stream.value);
         card.hidden = !visible; if (visible) count++;
       });
+      if (sort && $('asset-results')) {
+        const key = sort.value === 'added' ? 'added' : 'published';
+        const ordered = cards.map((card, index) => ({card, index}));
+        if (sort.value !== 'curated') ordered.sort((a, b) => {
+          const left = a.card.dataset[key] || '', right = b.card.dataset[key] || '';
+          if (!left || !right) return left ? -1 : right ? 1 : a.index - b.index;
+          const comparison = left < right ? -1 : left > right ? 1 : 0;
+          return comparison * (sort.value === 'oldest' ? 1 : -1) || a.index - b.index;
+        });
+        $('asset-results').replaceChildren(...ordered.map(item => item.card));
+      }
       $('result-count').textContent = `${count} of ${cards.length} assets`;
       $('empty-results').hidden = count !== 0;
       document.querySelectorAll('[data-kind-shortcut]').forEach(link => {
@@ -66,17 +79,18 @@
       if ($('filter-count')) $('filter-count').textContent = [kind.value, stream.value].filter(Boolean).length || '';
       if ($('filter-results')) $('filter-results').textContent = `${count} matching assets`;
       if (updateHistory !== false) {
-        setParams({ q: search.value.trim(), kind: kind.value, stream: stream.value });
+        setParams({ q: search.value.trim(), kind: kind.value, stream: stream.value, sort: sort && sort.value !== 'curated' ? sort.value : '' });
         if (document.dispatchEvent) document.dispatchEvent(new Event('hub:filters-changed'));
       }
     }
+    if (sort) sort.addEventListener('change', filter);
     search.addEventListener('input', filter); kind.addEventListener('change', filter); stream.addEventListener('change', filter);
     document.querySelectorAll('[data-kind-shortcut]').forEach(link => link.addEventListener('click', e => {
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       e.preventDefault(); kind.value = link.dataset.kindShortcut; filter();
     }));
     document.querySelectorAll('[data-stream-shortcut]').forEach(button => button.addEventListener('click', () => { stream.value = button.dataset.streamShortcut; filter(); }));
-    if ($('filters-reset')) $('filters-reset').addEventListener('click', () => { search.value = ''; kind.value = ''; stream.value = ''; filter(); });
+    if ($('filters-reset')) $('filters-reset').addEventListener('click', () => { search.value = ''; kind.value = ''; stream.value = ''; if (sort) sort.value = 'curated'; filter(); });
     search.form.addEventListener('submit', e => { e.preventDefault(); filter(); });
     search.form.addEventListener('reset', () => { setTimeout(filter, 0); });
     document.addEventListener('keydown', e => {
@@ -89,6 +103,7 @@
       search.value = query.get('q') || '';
       kind.value = ['', 'Article', 'Research', 'Demo', 'Skill', 'Tool', 'Protocol'].includes(query.get('kind')) ? query.get('kind') : '';
       stream.value = ['', 'Build', 'Research', 'Publish'].includes(query.get('stream')) ? query.get('stream') : '';
+      if (sort) sort.value = sortModes.includes(query.get('sort')) ? query.get('sort') : 'curated';
       filter(false);
     });
   }
