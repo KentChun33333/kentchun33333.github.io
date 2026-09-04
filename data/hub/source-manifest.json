@@ -13,8 +13,8 @@
     },
     {
       "path": "ai-research-insights/dynamic-reasoning-compute-explained.html",
-      "sha256": "8dab06745cba2c7d4cea2751b6e76e271bca99457a0dbefbf7b49c4f6b740928",
-      "bytes": 54405
+      "sha256": "f20f714eff43535e5bd76b7a02ad7af26c10c629f03f066ccb0fecc9c50bb0d8",
+      "bytes": 56208
     },
     {
       "path": "ai-research-insights/envharness-agent-learning.html",
@@ -33,23 +33,23 @@
     },
     {
       "path": "ai-research-insights/rlvr-grpo-explained.html",
-      "sha256": "5d8df7b07d8b573519efbf1268c5f0b8a5258771020aca77d32ff6ecbba35454",
-      "bytes": 57039
+      "sha256": "226e7e41dd972767357c72e66f61dfd9f69d89d2faaf3db57af9ab1812364f3c",
+      "bytes": 58842
     },
     {
       "path": "ai-research-insights/september-2026-frontier-convergence.html",
-      "sha256": "c26316146047dc411c4dfecf96cca5d503f3cfbab5ef790189181241ffc55c60",
-      "bytes": 55786
+      "sha256": "f96ed9408d91c820b8b1ca2cfce1a5925841f569d9ccbc0eb41e2a8198cde684",
+      "bytes": 57589
     },
     {
       "path": "ai-research-insights/synthetic-distillation-flywheel-explained.html",
-      "sha256": "aeca0a954205dc313b4910e09b07156abb8c693a8ee8ea1f6432b485a3b714a6",
-      "bytes": 54769
+      "sha256": "1db80c6e27807b25d6a3b31ee05bef49138b5c32874c02874932c2e9ee9f6250",
+      "bytes": 56572
     },
     {
       "path": "ai-research-insights/timesfm-3-explained.html",
-      "sha256": "d21af356752bf72c090ea2f93b95e1bd4d3f2cf2ffdef294208fc05d6d4cae7a",
-      "bytes": 45322
+      "sha256": "7bee7a99cd49759e062d4d8ad8d8f7e1b3f493fce7d3897dd337d0faa2ac35d7",
+      "bytes": 47125
     },
     {
       "path": "archives/index.html",
