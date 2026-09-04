@@ -5,8 +5,9 @@
   const $ = id => document.getElementById(id);
   const announce = text => { $('announcement').textContent = text; };
   const params = new URLSearchParams(location.search);
-  const legacyEntries = { '#profile': '/hub/experience/', '#research': '/hub/solutions/#research', '#demos': '/hub/library/?kind=Demo', '#skills': '/hub/library/?kind=Skill', '#vault': '/hub/library/?kind=Article', '#monitoring': '/hub/graph/' };
+  const legacyEntries = { '#profile': '/#about', '#research': '/?kind=Research', '#demos': '/?kind=Demo', '#skills': '/?kind=Skill', '#vault': '/?kind=Article', '#monitoring': '/hub/graph/' };
   if (location.pathname === '/' && legacyEntries[location.hash]) location.replace(legacyEntries[location.hash]);
+  if (location.hash === '#about' && $('about')) $('about').open = true;
   const setParams = fields => {
     const url = new URL(location.href);
     for (const [key, value] of Object.entries(fields)) value ? url.searchParams.set(key, value) : url.searchParams.delete(key);
@@ -46,9 +47,17 @@
       });
       $('result-count').textContent = `${count} of ${cards.length} assets`;
       $('empty-results').hidden = count !== 0;
+      document.querySelectorAll('[data-kind-shortcut]').forEach(link => {
+        if (link.dataset.kindShortcut === kind.value) link.setAttribute('aria-current', 'true');
+        else link.removeAttribute('aria-current');
+      });
       setParams({ q: search.value.trim(), kind: kind.value, stream: stream.value });
     }
     search.addEventListener('input', filter); kind.addEventListener('change', filter); stream.addEventListener('change', filter);
+    document.querySelectorAll('[data-kind-shortcut]').forEach(link => link.addEventListener('click', e => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault(); kind.value = link.dataset.kindShortcut; stream.value = ''; filter();
+    }));
     search.form.addEventListener('submit', e => { e.preventDefault(); filter(); });
     search.form.addEventListener('reset', () => { setTimeout(filter, 0); });
     document.addEventListener('keydown', e => {
@@ -91,11 +100,11 @@
 
   const form = $('brief-form');
   if (form) {
-    for (const [id, key] of [['brief-purpose', 'purpose'], ['brief-offer', 'offer']]) {
+    for (const [id, key] of [['brief-purpose', 'purpose'], ['brief-offer', 'offer'], ['brief-asset', 'asset']]) {
       const select = $(id), requested = params.get(key);
       if ([...select.options].some(o => o.value === requested)) select.value = requested;
     }
-    const brief = () => `Autumn Memo inquiry\nPurpose: ${$('brief-purpose').value}\nEngagement: ${$('brief-offer').selectedOptions[0].textContent}\n\n${$('brief-context').value.trim()}\n\nPrepared from: ${location.origin}/hub/contact/\n`;
+    const brief = () => `Autumn Memo inquiry\nPurpose: ${$('brief-purpose').value}\nAsset: ${$('brief-asset').selectedOptions[0].textContent}${$('brief-asset').value ? '\nAsset link: ' + location.origin + '/hub/assets/' + $('brief-asset').value + '/' : ''}\nEngagement: ${$('brief-offer').selectedOptions[0].textContent}\n\n${$('brief-context').value.trim()}\n\nPrepared from: ${location.origin}/hub/contact/\n`;
     form.addEventListener('submit', async e => {
       e.preventDefault();
       if (!form.reportValidity()) return;

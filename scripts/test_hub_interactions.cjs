@@ -12,12 +12,13 @@ class Element {
   append(...children) { this.children.push(...children); }
   replaceChildren() { this.children = []; }
   focus() { this.focused = true; }
+  get selectedOptions() { return this.options.filter(o => o.value === this.value); }
 }
-function run(url, elements, cards = []) {
+function run(url, elements, cards = [], options = {}) {
   elements.announcement = new Element();
   const location = new URL(url);
   const document = { getElementById: id => elements[id] || null, querySelectorAll: selector => selector === '[data-asset]' ? cards : [], addEventListener() {}, createElement: () => new Element() };
-  const context = { document, location, URL, URLSearchParams, history: { replaceState: (_, __, value) => { location.href = value.href; } }, navigator: {}, window: {}, setTimeout, fetch: async () => ({ ok: true, json: async () => data }) };
+  const context = { document, location, URL, URLSearchParams, history: { replaceState: (_, __, value) => { location.href = value.href; } }, navigator: options.navigator || {}, window: options.window || {}, setTimeout, fetch: async () => ({ ok: true, json: async () => data }) };
   vm.runInNewContext(source, context);
   return location;
 }
@@ -50,6 +51,16 @@ async function main() {
   focus.value = 'gse'; focus.events.change();
   assert.equal(graph['graph-canvas'].children[1].children.length, 5);
   assert.equal(graphLocation.searchParams.get('asset'), 'gse');
-  console.log('Passed URL-restored filters, multi-term search, empty/recovery states, focused graph links, and shareable graph state.');
+  const select = pairs => { const el = new Element(pairs[0][0]); el.options = pairs.map(([value,textContent]) => ({value,textContent})); return el; };
+  const form = new Element(); form.reportValidity = () => true;
+  const briefElements = { 'brief-form': form, 'brief-purpose': select([['Project inquiry','Project inquiry']]), 'brief-offer': select([['','General conversation']]), 'brief-asset': select([['','General conversation'],['gse','Guarded Skill Evolution']]), 'brief-context': new Element('Let us discuss evaluation.'), 'brief-status': new Element(), 'download-brief': new Element() };
+  let copied = '';
+  run('https://example.org/hub/contact/?asset=gse', briefElements, [], { window: { isSecureContext: true }, navigator: { clipboard: { writeText: async text => { copied = text; } } } });
+  assert.equal(briefElements['brief-asset'].value, 'gse');
+  await form.events.submit({ preventDefault() {} });
+  assert(copied.includes('Asset: Guarded Skill Evolution'));
+  assert(copied.includes('https://example.org/hub/assets/gse/'));
+  assert(copied.includes('Let us discuss evaluation.'));
+  console.log('Passed library filters, empty/recovery states, knowledge graph, and asset-specific contact brief.');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

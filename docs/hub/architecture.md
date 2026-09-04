@@ -6,6 +6,8 @@ One asset can serve several purposes without being copied into separate audience
 sites. Preserve the original file, assign it a stable identity, record its meaning
 and relationships, and compose a visitor experience from those records.
 
+The homepage is now the asset library, with a compact expandable introduction and experience section. Research, demos, skills, protocols, tools, and writing are asset types in one collection. Each asset has a contact action; configured available offers also expose a buy action.
+
 This is a public discovery and inquiry system. It is not an authenticated personal
 task manager or a payment processor. GitHub Pages remains the hosting target.
 
@@ -26,12 +28,12 @@ Autumn Memo
 │   ├── Directed relationships with an explicit basis
 │   └── Commercial offers linked to one or more assets
 ├── Web layer
-│   ├── / — command center and task entry points
-│   ├── /hub/solutions/ — Work with me: projects, research, and collaboration
-│   ├── /hub/collaborate/ — preserved redirect to /hub/solutions/#research
-│   ├── /hub/experience/ — employer / capabilities / technical artifacts
-│   ├── /hub/stories/ — personal stories, original article photos, writing archive
-│   ├── /hub/library/ — learner / search / type and stream filters
+│   ├── / — asset library, introduction, experience, and filters
+│   ├── /hub/solutions/ — compatibility redirect to the library
+│   ├── /hub/collaborate/ — compatibility redirect to /?kind=Research
+│   ├── /hub/experience/ — compatibility redirect to /#about
+│   ├── /hub/stories/ — compatibility redirect to /?kind=Article
+│   ├── /hub/library/ — library alias, canonical homepage, existing queries supported
 │   ├── /hub/graph/ — connected assets and relationship explanations
 │   ├── /hub/assets/{id}/ — stable share page and readable Markdown
 │   ├── /hub/contact/ — prepare and copy/download an inquiry
@@ -81,7 +83,7 @@ similarity into a factual dependency.
 The SQLite database is a durable generated catalogue, not a browser database.
 `asset_media` links original article images to their source pages with alt text,
 ordering, and content fingerprints. Images remain at their original paths. The
-homepage and Writing & photos entry surface personal material alongside technical
+homepage library and Writing & blogs filter surface personal material alongside technical
 work; article detail pages provide original-image galleries and contextual links.
 Source images also supply article-specific social previews. External images remain
 in their original articles rather than being copied or silently proxied.
@@ -116,7 +118,7 @@ still be public; private assets must live outside the deployed tree entirely.
 
 ## Audience and task behavior
 
-- Buyers see potential engagements and evidence, then prepare an inquiry.
+- Buyers explore assets and evidence, then prepare an asset-specific inquiry or follow a configured checkout link.
 - Researchers see proposals, protocols, limitations, source readers, and sharing.
 - Collaborators see concrete possible experiments and contribution discussions.
 - Employers see capabilities and selected artifacts; no résumé or role claims
@@ -132,7 +134,7 @@ code, and basic links; complex source formatting remains available in the origin
 ## Commerce model
 
 Current offers are **inquiry-only**, without invented prices, checkout, or delivery.
-The contact page copies/downloads a brief locally; it does not submit a message.
+The contact page carries the selected asset name and URL into a brief, then copies/downloads it locally; it does not submit a message.
 The GitHub profile is the existing verified outbound identity link.
 
 An `available` offer requires price, currency, reviewed HTTPS checkout URL,
