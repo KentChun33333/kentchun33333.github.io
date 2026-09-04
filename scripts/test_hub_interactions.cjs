@@ -13,11 +13,12 @@ class Element {
   replaceChildren() { this.children = []; }
   focus() { this.focused = true; }
   get selectedOptions() { return this.options.filter(o => o.value === this.value); }
+  setAttribute(name, value) { this[name] = value; }
 }
 function run(url, elements, cards = [], options = {}) {
   elements.announcement = new Element();
   const location = new URL(url);
-  const document = { body: new Element(), getElementById: id => elements[id] || null, querySelectorAll: selector => selector === '[data-asset]' ? cards : [], addEventListener() {}, createElement: () => new Element() };
+  const document = { body: new Element(), getElementById: id => elements[id] || null, querySelectorAll: selector => selector === '[data-asset]' ? cards : (options.controls?.[selector] || []), addEventListener() {}, createElement: () => new Element() };
   const context = { document, location, URL, URLSearchParams, history: { replaceState: (_, __, value) => { location.href = value.href; } }, navigator: options.navigator || {}, window: options.window || {}, setTimeout, fetch: async () => ({ ok: true, json: async () => data }) };
   vm.runInNewContext(source, context);
   return location;
@@ -41,6 +42,17 @@ async function main() {
   assert(cards.some((c,i) => !c.hidden && data.assets[i].id === 'story-autumn-memo'));
   search.value = 'buying home'; search.events.input();
   assert(cards.some((c,i) => !c.hidden && data.assets[i].id === 'writing-buyinghouse2021'));
+  const protocol = new Element(); protocol.dataset = {kindShortcut: 'Protocol'};
+  const researchStream = new Element(); researchStream.dataset = {streamShortcut: 'Research'};
+  els['filter-count'] = new Element(); els['filter-results'] = new Element(); els['filters-reset'] = new Element();
+  run('https://example.org/?kind=Protocol', els, cards, {controls: {'[data-kind-shortcut]':[protocol], '[data-stream-shortcut]':[researchStream]}});
+  assert.equal(protocol['aria-pressed'], 'true');
+  researchStream.events.click();
+  assert.equal(els['filter-count'].textContent, 2);
+  assert(cards.filter(c=>!c.hidden).every(c=>c.dataset.kind==='Protocol' && c.dataset.stream==='Research'));
+  els['filters-reset'].events.click();
+  assert.equal(cards.filter(c=>!c.hidden).length,data.assets.length);
+  assert.equal(protocol['aria-pressed'], 'false');
   const focus = new Element('gse'); const ids = new Set(data.relations.flatMap(r => [r.source, r.target]));
   focus.options = [...ids].map(value => ({ value }));
   const graph = { 'graph-focus': focus, 'graph-canvas': new Element(), 'graph-context': new Element() };
@@ -78,6 +90,15 @@ async function main() {
   trigger.events.click({ preventDefault() {} });
   assert.equal(briefElements['brief-context'].value, 'Let us discuss evaluation.');
   panel.close();
-  console.log('Passed library filters, graph, contact brief, drawer open/close, asset preselection, focus restoration, and draft retention.');
+  for (const name of ['about','filters']) {
+    const drawer = new Element(), opener = new Element(), title = new Element();
+    drawer.showModal = () => {drawer.open=true;}; drawer.close = () => {drawer.open=false;drawer.events.close();};
+    const bits = {[name+'-panel']:drawer,[name+'-trigger']:opener,[name+'-title']:title,[name+'-close']:new Element()};
+    if(name==='filters') bits['filters-apply']=new Element();
+    run('https://example.org/'+(name==='about'?'#about':''),bits);
+    if(name==='about') assert(drawer.open && title.focused);
+    else {opener.events.click({preventDefault(){}});assert(drawer.open);bits['filters-apply'].events.click();assert(!drawer.open && opener.focused);}
+  }
+  console.log('Passed type/workstream buttons, filter reset, URL restoration, all three drawers, contact context, focus restoration, and draft retention.');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

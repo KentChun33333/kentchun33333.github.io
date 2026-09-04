@@ -7,7 +7,6 @@
   const params = new URLSearchParams(location.search);
   const legacyEntries = { '#profile': '/#about', '#research': '/?kind=Research', '#demos': '/?kind=Demo', '#skills': '/?kind=Skill', '#vault': '/?kind=Article', '#monitoring': '/hub/graph/' };
   if (location.pathname === '/' && legacyEntries[location.hash]) location.replace(legacyEntries[location.hash]);
-  if (location.hash === '#about' && $('about')) $('about').open = true;
   const setParams = fields => {
     const url = new URL(location.href);
     for (const [key, value] of Object.entries(fields)) value ? url.searchParams.set(key, value) : url.searchParams.delete(key);
@@ -36,7 +35,8 @@
     search.value = params.get('q') || '';
     for (const [select, key] of [[kind, 'kind'], [stream, 'stream']]) {
       const value = params.get(key) || '';
-      select.value = [...select.options].some(o => o.value === value) ? value : '';
+      const allowed = key === 'kind' ? ['', 'Article', 'Research', 'Demo', 'Skill', 'Tool', 'Protocol'] : ['', 'Build', 'Research', 'Publish'];
+      select.value = allowed.includes(value) ? value : '';
     }
     function filter() {
       const terms = search.value.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
@@ -48,16 +48,20 @@
       $('result-count').textContent = `${count} of ${cards.length} assets`;
       $('empty-results').hidden = count !== 0;
       document.querySelectorAll('[data-kind-shortcut]').forEach(link => {
-        if (link.dataset.kindShortcut === kind.value) link.setAttribute('aria-current', 'true');
-        else link.removeAttribute('aria-current');
+        link.setAttribute('aria-pressed', String(link.dataset.kindShortcut === kind.value));
       });
+      document.querySelectorAll('[data-stream-shortcut]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.streamShortcut === stream.value)));
+      if ($('filter-count')) $('filter-count').textContent = [kind.value, stream.value].filter(Boolean).length || '';
+      if ($('filter-results')) $('filter-results').textContent = `${count} matching assets`;
       setParams({ q: search.value.trim(), kind: kind.value, stream: stream.value });
     }
     search.addEventListener('input', filter); kind.addEventListener('change', filter); stream.addEventListener('change', filter);
     document.querySelectorAll('[data-kind-shortcut]').forEach(link => link.addEventListener('click', e => {
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      e.preventDefault(); kind.value = link.dataset.kindShortcut; stream.value = ''; filter();
+      e.preventDefault(); kind.value = link.dataset.kindShortcut; filter();
     }));
+    document.querySelectorAll('[data-stream-shortcut]').forEach(button => button.addEventListener('click', () => { stream.value = button.dataset.streamShortcut; filter(); }));
+    if ($('filters-reset')) $('filters-reset').addEventListener('click', () => { search.value = ''; kind.value = ''; stream.value = ''; filter(); });
     search.form.addEventListener('submit', e => { e.preventDefault(); filter(); });
     search.form.addEventListener('reset', () => { setTimeout(filter, 0); });
     document.addEventListener('keydown', e => {
@@ -98,25 +102,33 @@
     }).catch(() => { $('graph-canvas').textContent = 'The interactive map could not load. All recorded relationships are available below.'; $('graph-context').textContent = 'Try reloading the page, or follow the links in the relationship list.'; });
   }
 
-  const panel = $('conversation-panel');
-  const trigger = $('conversation-trigger');
-  if (panel && trigger && typeof panel.showModal === 'function') {
+  function initDrawer(name) {
+    const panel = $(name + '-panel'), trigger = $(name + '-trigger');
+    if (!panel || !trigger || typeof panel.showModal !== 'function') return null;
     let previousOverflow = '';
-    trigger.addEventListener('click', e => {
-      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      e.preventDefault();
+    const open = () => {
       if (panel.open) return;
       previousOverflow = document.body.style.overflow;
       panel.showModal(); document.body.style.overflow = 'hidden';
-      $('conversation-title').focus();
+      $(name + '-title').focus();
+    };
+    trigger.addEventListener('click', e => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault(); open();
     });
-    $('conversation-close').addEventListener('click', () => panel.close());
+    $(name + '-close').addEventListener('click', () => panel.close());
+    if ($(name + '-apply')) $(name + '-apply').addEventListener('click', () => panel.close());
     panel.addEventListener('close', () => { document.body.style.overflow = previousOverflow; trigger.focus(); });
     panel.addEventListener('click', e => {
       const rect = panel.getBoundingClientRect();
       if (e.target === panel && (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom)) panel.close();
     });
+    return open;
   }
+  initDrawer('conversation'); initDrawer('filters');
+  const openAbout = initDrawer('about');
+  if (openAbout && location.hash === '#about') openAbout();
+  const trigger = $('conversation-trigger');
 
   const form = $('brief-form');
   if (form) {
