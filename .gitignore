@@ -1,0 +1,5 @@
+# Local operating-system metadata and generated Python bytecode
+.DS_Store
+Thumbs.db
+__pycache__/
+*.py[cod]
