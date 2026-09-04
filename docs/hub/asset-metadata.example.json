@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "id": "my-new-research",
+  "title": "My new research",
+  "summary": "A short description of what this artifact explains and lets readers explore.",
+  "kind": "Research",
+  "stream": "Research",
+  "topics": [
+    "Agent evaluation"
+  ],
+  "status": "Research prototype",
+  "visibility": "public",
+  "rights": "All rights reserved. Contact the author for reuse.",
+  "dates": {}
+}

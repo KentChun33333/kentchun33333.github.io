@@ -13,12 +13,14 @@ import hashlib
 import json
 import re
 import sqlite3
+from asset_discovery import discover_assets
 
 ROOT = Path(__file__).resolve().parents[1]
 ORIGIN = 'https://kentchun33333.github.io'
 NOW = datetime.now(timezone.utc).isoformat(timespec='seconds')
 E = lambda value: escape(str(value), quote=True)
 DATA = json.loads((ROOT / 'hub-src/catalog.json').read_text())
+DATA['assets'].extend(discover_assets(ROOT, DATA['assets']))
 ASSETS = DATA['assets']
 BY_ID = {a['id']: a for a in ASSETS}
 RELATIONS = DATA['relations']
@@ -126,8 +128,9 @@ def card(a, compact=False):
     dates = a.get('dates', {})
     date_kind = 'published' if 'published' in dates else 'added'
     stamp = dates.get(date_kind, {}).get('at', '')
-    date_label = 'Published' if date_kind == 'published' else 'Repository added'
-    date_html = f'<p class="asset-date">{date_label} <time datetime="{E(stamp)}">{E(stamp[:10])}</time></p>' if stamp else '<p class="asset-date">Date not recorded</p>'
+    date_label = 'Published' if date_kind == 'published' else 'Uploaded'
+    date_hint = 'Publication metadata (UTC)' if date_kind == 'published' else 'First repository commit (UTC); upload estimate'
+    date_html = f'<p class="asset-date" title="{E(date_hint)}">{date_label} <time datetime="{E(stamp)}">{E(stamp[:10])}</time></p>' if stamp else '<p class="asset-date">Date not recorded</p>'
     thumbnail = '' 
     if a.get('images'):
         media = a['images'][0]
@@ -283,7 +286,7 @@ def build_pages():
     filters='<aside id="filters-panel" class="filters-panel" aria-labelledby="filters-title"><div class="conversation-heading"><h2 id="filters-title" class="sidebar-brand" tabindex="-1"><a class="brand" href="/" title="Autumn Memo · Kent Chiu"><span class="brand-name">AUTUMN MEMO<small>Kent Chiu’s work & ideas</small></span><span class="sr-only">Autumn Memo · asset filters</span></a></h2><button type="button" id="filters-close" aria-label="Expand filters" title="Expand or collapse filters">›</button></div><fieldset class="filter-group asset-type-group" id="asset-type-filters"><legend>Asset type</legend><div class="filter-options asset-type-options">'+types+'</div></fieldset><fieldset class="filter-group"><legend>Workstream</legend><div class="filter-options">'+streams+'</div></fieldset><p id="filter-results" role="status"></p><div class="filter-panel-actions"><button type="button" id="filters-apply" class="button">Show results</button><button type="button" id="filters-reset" class="text-button">Reset all</button></div><div id="filters-resizer" role="separator" tabindex="0" aria-label="Resize asset filters" aria-orientation="vertical" aria-valuemin="64" aria-valuemax="240" aria-valuenow="64" title="Drag to resize. Arrow keys change width; Home shows icons; End expands."></div></aside>'
     priority=['gse','ter','story-autumn-memo','wealth','writing-buyinghouse2021','publisher']
     ordered=[BY_ID[i] for i in priority]+[a for a in ASSETS if a['id'] not in priority]
-    library=intro+controls+filters+f'<div class="collection-order"><p id="result-count" role="status">{len(ASSETS)} assets</p><label for="asset-sort">Sort <select id="asset-sort" name="sort" form="library-search"><option value="curated">Curated</option><option value="newest">Newest published</option><option value="oldest">Oldest published</option><option value="added">Recently added</option></select></label></div><div id="asset-results" class="card-grid">'+''.join(card(a,True) for a in ordered)+'</div><div id="empty-results" class="empty-state" hidden><h2>No matching assets</h2><p>Try a broader search or reset your filters.</p></div><noscript><p>All assets are listed here. Interactive filtering requires JavaScript.</p></noscript>'
+    library=intro+controls+filters+f'<div class="collection-order"><p id="result-count" role="status">{len(ASSETS)} assets</p><label for="asset-sort">Sort <select id="asset-sort" name="sort" form="library-search"><option value="curated">Curated</option><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="added">Recently uploaded</option></select></label></div><div id="asset-results" class="card-grid">'+''.join(card(a,True) for a in ordered)+'</div><div id="empty-results" class="empty-state" hidden><h2>No matching assets</h2><p>Try a broader search or reset your filters.</p></div><noscript><p>All assets are listed here. Interactive filtering requires JavaScript.</p></noscript>'
     viewer = '<section id="asset-view" hidden aria-labelledby="viewer-title"><p id="viewer-status" role="status"></p><div id="viewer-canvas"></div></section>' 
     library='<section id="library-view">'+library+'</section>'+viewer
     html=page('Kent Chiu · Asset library' ,'Research, demos, skills, personal stories and illustrated writing by Kent Chiu. Explore an asset or get in touch.',library,'/')

@@ -60,10 +60,10 @@
         card.hidden = !visible; if (visible) count++;
       });
       if (sort && $('asset-results')) {
-        const key = sort.value === 'added' ? 'added' : 'published';
+        const dateFor = card => sort.value === 'added' ? card.dataset.added || '' : card.dataset.published || card.dataset.added || '';
         const ordered = cards.map((card, index) => ({card, index}));
         if (sort.value !== 'curated') ordered.sort((a, b) => {
-          const left = a.card.dataset[key] || '', right = b.card.dataset[key] || '';
+          const left = dateFor(a.card), right = dateFor(b.card);
           if (!left || !right) return left ? -1 : right ? 1 : a.index - b.index;
           const comparison = left < right ? -1 : left > right ? 1 : 0;
           return comparison * (sort.value === 'oldest' ? 1 : -1) || a.index - b.index;

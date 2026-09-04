@@ -23,8 +23,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "dates": {
         "added": {
-          "at": "2026-09-03T01:57:50+00:00",
-          "source": "git:f55c50c57ceb7d3f19e534af6406c8c4273f2a3d:idea-paper/guarded-skill-evolution/guarded-skill-evolution-v2.html"
+          "at": "2026-09-03T14:55:51+00:00",
+          "source": "git-first-add:960a36adfc169832add8abe77ca51d1bc1d36e77:idea-paper/guarded-skill-evolution/guarded-skill-evolution-v2.html"
         }
       }
     },
@@ -51,8 +51,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "dates": {
         "added": {
-          "at": "2026-08-11T02:38:15+00:00",
-          "source": "git:825ac9d106205001c8d5c72ab9a371ec3d7971af:ter-agentic-demos/ter-bank-multi-agent-flow-v15.html"
+          "at": "2026-08-14T03:49:17+00:00",
+          "source": "git-first-add:2948088e2439e202aabd6d78b2c4c3acea4eea70:ter-agentic-demos/ter-bank-multi-agent-flow-v15.html"
         }
       }
     },
@@ -80,7 +80,7 @@
       "dates": {
         "added": {
           "at": "2026-08-24T05:14:42+00:00",
-          "source": "git:da1f684f5578c7850fd942d7bb7965bc9d66b542:wealthy_data_insight/index.html"
+          "source": "git-first-add:da1f684f5578c7850fd942d7bb7965bc9d66b542:wealthy_data_insight/index.html"
         }
       }
     },
@@ -107,7 +107,7 @@
       "dates": {
         "added": {
           "at": "2026-09-01T15:45:07+00:00",
-          "source": "git:e9e0870edd0f3846e0c1c51f1a8586ceee781df2:github-zip-upload/index.html"
+          "source": "git-first-add:e9e0870edd0f3846e0c1c51f1a8586ceee781df2:github-zip-upload/index.html"
         }
       }
     },
@@ -133,8 +133,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "dates": {
         "added": {
-          "at": "2026-09-03T01:57:50+00:00",
-          "source": "git:f55c50c57ceb7d3f19e534af6406c8c4273f2a3d:idea-paper/guarded-skill-evolution/paper.md"
+          "at": "2026-09-03T14:55:51+00:00",
+          "source": "git-first-add:960a36adfc169832add8abe77ca51d1bc1d36e77:idea-paper/guarded-skill-evolution/paper.md"
         }
       }
     },
@@ -160,8 +160,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "dates": {
         "added": {
-          "at": "2026-09-03T01:57:50+00:00",
-          "source": "git:f55c50c57ceb7d3f19e534af6406c8c4273f2a3d:idea-paper/guarded-skill-evolution/experiment-protocol.md"
+          "at": "2026-09-03T14:55:51+00:00",
+          "source": "git-first-add:960a36adfc169832add8abe77ca51d1bc1d36e77:idea-paper/guarded-skill-evolution/experiment-protocol.md"
         }
       }
     },
@@ -187,8 +187,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "dates": {
         "added": {
-          "at": "2026-09-03T01:57:50+00:00",
-          "source": "git:f55c50c57ceb7d3f19e534af6406c8c4273f2a3d:idea-paper/guarded-skill-evolution/benchmark-schema.md"
+          "at": "2026-09-03T14:55:51+00:00",
+          "source": "git-first-add:960a36adfc169832add8abe77ca51d1bc1d36e77:idea-paper/guarded-skill-evolution/benchmark-schema.md"
         }
       }
     },
@@ -214,7 +214,7 @@
       "dates": {
         "added": {
           "at": "2026-09-01T15:31:12+00:00",
-          "source": "git:d80e14366b162ac9ea918b0edf0da5f5576d2fe4:ai-research-insights/deeptutor-agent-native-learning-architecture.html"
+          "source": "git-first-add:d80e14366b162ac9ea918b0edf0da5f5576d2fe4:ai-research-insights/deeptutor-agent-native-learning-architecture.html"
         }
       }
     },
@@ -240,7 +240,7 @@
       "dates": {
         "added": {
           "at": "2026-09-03T14:55:51+00:00",
-          "source": "git:960a36adfc169832add8abe77ca51d1bc1d36e77:ai-research-insights/dynamic-reasoning-compute-explained.html"
+          "source": "git-first-add:960a36adfc169832add8abe77ca51d1bc1d36e77:ai-research-insights/dynamic-reasoning-compute-explained.html"
         }
       }
     },
@@ -266,7 +266,7 @@
       "dates": {
         "added": {
           "at": "2026-08-25T08:49:15+00:00",
-          "source": "git:608d50b517f1dbf3480a3dcccccc439b067983e3:ai-research-insights/envharness-agent-learning.html"
+          "source": "git-first-add:608d50b517f1dbf3480a3dcccccc439b067983e3:ai-research-insights/envharness-agent-learning.html"
         }
       }
     },
@@ -292,7 +292,7 @@
       "dates": {
         "added": {
           "at": "2026-08-27T07:40:19+00:00",
-          "source": "git:3d5f3dbd9c26c36ab57e3cc09732be1e65cff0c4:ai-research-insights/llm-as-a-verifier.html"
+          "source": "git-first-add:3d5f3dbd9c26c36ab57e3cc09732be1e65cff0c4:ai-research-insights/llm-as-a-verifier.html"
         }
       }
     },
@@ -318,7 +318,7 @@
       "dates": {
         "added": {
           "at": "2026-08-31T06:19:34+00:00",
-          "source": "git:a9f2f097b2034cca72dd708f77581a16c69a60d6:ai-research-insights/recuris-memory-evolution.html"
+          "source": "git-first-add:a9f2f097b2034cca72dd708f77581a16c69a60d6:ai-research-insights/recuris-memory-evolution.html"
         }
       }
     },
@@ -344,7 +344,7 @@
       "dates": {
         "added": {
           "at": "2026-09-03T14:55:51+00:00",
-          "source": "git:960a36adfc169832add8abe77ca51d1bc1d36e77:ai-research-insights/rlvr-grpo-explained.html"
+          "source": "git-first-add:960a36adfc169832add8abe77ca51d1bc1d36e77:ai-research-insights/rlvr-grpo-explained.html"
         }
       }
     },
@@ -370,7 +370,7 @@
       "dates": {
         "added": {
           "at": "2026-09-03T14:55:51+00:00",
-          "source": "git:960a36adfc169832add8abe77ca51d1bc1d36e77:ai-research-insights/synthetic-distillation-flywheel-explained.html"
+          "source": "git-first-add:960a36adfc169832add8abe77ca51d1bc1d36e77:ai-research-insights/synthetic-distillation-flywheel-explained.html"
         }
       }
     },
@@ -396,7 +396,7 @@
       "dates": {
         "added": {
           "at": "2026-09-03T06:07:29+00:00",
-          "source": "git:90790fa0c884f53415eb52b7b5ff2a9ca25f87f8:ai-research-insights/timesfm-3-explained.html"
+          "source": "git-first-add:90790fa0c884f53415eb52b7b5ff2a9ca25f87f8:ai-research-insights/timesfm-3-explained.html"
         }
       }
     },
@@ -425,8 +425,8 @@
           "source": "post/2023-0711-economicweather/index.html#article:published_time"
         },
         "added": {
-          "at": "2021-08-01T12:53:27+00:00",
-          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/2023-0711-economicweather/index.html"
+          "at": "2023-07-11T14:30:41+00:00",
+          "source": "git-first-add:d555906e3b0880128d8af57017aa45e12b2315e7:post/2023-0711-economicweather/index.html"
         }
       }
     },
@@ -455,8 +455,8 @@
           "source": "post/2023-feb-optionstrategy/index.html#article:published_time"
         },
         "added": {
-          "at": "2021-08-03T15:55:08+00:00",
-          "source": "git:a8a839bfa636187fdd189db228afd6e10457011a:post/2023-feb-optionstrategy/index.html"
+          "at": "2023-07-10T16:03:46+00:00",
+          "source": "git-first-add:d1debf2fd4d98473b1df5bad848acc9257a33ce5:post/2023-feb-optionstrategy/index.html"
         }
       }
     },
@@ -481,8 +481,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "dates": {
         "added": {
-          "at": "2021-08-01T12:53:27+00:00",
-          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/20230607-learntorank/index.html"
+          "at": "2023-07-10T15:59:01+00:00",
+          "source": "git-first-add:30903d7b241282c1cb22dd3f840d82053860d198:post/20230607-learntorank/index.html"
         }
       }
     },
@@ -519,7 +519,7 @@
         },
         "added": {
           "at": "2021-08-02T00:33:27+00:00",
-          "source": "git:9415fc62ae21534a1d341fbbd046f45c5ec2522a:post/buyinghouse2021/index.html"
+          "source": "git-first-add:9415fc62ae21534a1d341fbbd046f45c5ec2522a:post/buyinghouse2021/index.html"
         }
       }
     },
@@ -548,8 +548,8 @@
           "source": "post/cblof/index.html#article:published_time"
         },
         "added": {
-          "at": "2021-08-01T12:53:27+00:00",
-          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/cblof/index.html"
+          "at": "2023-03-25T14:11:55+00:00",
+          "source": "git-first-add:a97fca5806ce74737e0a2c52fe5320d82d656360:post/cblof/index.html"
         }
       }
     },
@@ -579,7 +579,7 @@
         },
         "added": {
           "at": "2026-01-27T16:34:56+00:00",
-          "source": "git:020935727e0583a4f4b3f8649484aed186462a36:post/clawdbot-memory-system-analysis/index.html"
+          "source": "git-first-add:020935727e0583a4f4b3f8649484aed186462a36:post/clawdbot-memory-system-analysis/index.html"
         }
       }
     },
@@ -608,8 +608,8 @@
           "source": "post/cloudpickle/index.html#article:published_time"
         },
         "added": {
-          "at": "2021-08-01T12:53:27+00:00",
-          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/cloudpickle/index.html"
+          "at": "2023-05-30T16:14:54+00:00",
+          "source": "git-first-add:158940c984a3b6bd85dfb9cc5d308f4c05b1a479:post/cloudpickle/index.html"
         }
       }
     },
@@ -634,8 +634,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "dates": {
         "added": {
-          "at": "2021-08-01T12:53:27+00:00",
-          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/cubejs_tryout/index.html"
+          "at": "2023-05-21T16:09:58+00:00",
+          "source": "git-first-add:7547e5600d222a2fba05a36e395391ac9af2db5a:post/cubejs_tryout/index.html"
         }
       }
     },
@@ -665,7 +665,7 @@
         },
         "added": {
           "at": "2023-03-26T12:23:54+00:00",
-          "source": "git:6b9d99fe05d933c60b5c7e1fb7dfc1764c815f03:post/customized-lorenz-ann-classification/index.html"
+          "source": "git-first-add:6b9d99fe05d933c60b5c7e1fb7dfc1764c815f03:post/customized-lorenz-ann-classification/index.html"
         }
       }
     },
@@ -694,8 +694,8 @@
           "source": "post/db-index-vs-silhouette-score/index.html#article:published_time"
         },
         "added": {
-          "at": "2021-08-01T12:53:27+00:00",
-          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/db-index-vs-silhouette-score/index.html"
+          "at": "2023-03-30T14:52:18+00:00",
+          "source": "git-first-add:573a3802227a86561c625feff3b0fd3f145c0d8a:post/db-index-vs-silhouette-score/index.html"
         }
       }
     },
@@ -724,8 +724,8 @@
           "source": "post/hostpersonalgpt/index.html#article:published_time"
         },
         "added": {
-          "at": "2021-08-01T12:53:27+00:00",
-          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/hostpersonalgpt/index.html"
+          "at": "2023-04-03T13:39:57+00:00",
+          "source": "git-first-add:5928c580a2b2932dd12f6cee1942b660e0524386:post/hostpersonalgpt/index.html"
         }
       }
     },
@@ -755,7 +755,7 @@
         },
         "added": {
           "at": "2026-01-27T12:52:38+00:00",
-          "source": "git:fccbf82275d4b59a7a4508c858f4b786fd270fdc:post/how-to-close-clawdbot-daemon/index.html"
+          "source": "git-first-add:fccbf82275d4b59a7a4508c858f4b786fd270fdc:post/how-to-close-clawdbot-daemon/index.html"
         }
       }
     },
@@ -784,8 +784,8 @@
           "source": "post/memosystem/index.html#article:published_time"
         },
         "added": {
-          "at": "2021-08-01T12:53:27+00:00",
-          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/memosystem/index.html"
+          "at": "2021-08-02T00:33:27+00:00",
+          "source": "git-first-add:9415fc62ae21534a1d341fbbd046f45c5ec2522a:post/memosystem/index.html"
         }
       }
     },
@@ -814,8 +814,8 @@
           "source": "post/metricf1score/index.html#article:published_time"
         },
         "added": {
-          "at": "2021-08-01T12:53:27+00:00",
-          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/metricf1score/index.html"
+          "at": "2021-08-02T07:34:53+00:00",
+          "source": "git-first-add:c77854463ad1a618463ddebad191ab6671ee7cac:post/metricf1score/index.html"
         }
       }
     },
@@ -840,8 +840,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "dates": {
         "added": {
-          "at": "2023-03-13T06:52:39+00:00",
-          "source": "git:f659cdb44c57aa95ff7ab4aa0e9d701cb622bedb:post/quant/design_backtesting/index.html"
+          "at": "2023-11-03T03:49:45+00:00",
+          "source": "git-first-add:96ecd384fe99624734569a02e92240ebf104f9e2:post/quant/design_backtesting/index.html"
         }
       }
     },
@@ -870,8 +870,8 @@
           "source": "post/quant/quant_metric_001/index.html#article:published_time"
         },
         "added": {
-          "at": "2023-03-13T06:52:39+00:00",
-          "source": "git:f659cdb44c57aa95ff7ab4aa0e9d701cb622bedb:post/quant/quant_metric_001/index.html"
+          "at": "2023-11-03T03:49:45+00:00",
+          "source": "git-first-add:96ecd384fe99624734569a02e92240ebf104f9e2:post/quant/quant_metric_001/index.html"
         }
       }
     },
@@ -900,8 +900,8 @@
           "source": "post/scedasticicity/index.html#article:published_time"
         },
         "added": {
-          "at": "2021-08-01T12:53:27+00:00",
-          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/scedasticicity/index.html"
+          "at": "2021-08-04T14:12:40+00:00",
+          "source": "git-first-add:1b3b638aac3aa20dda81b464391790f4c386b275:post/scedasticicity/index.html"
         }
       }
     },
@@ -930,8 +930,8 @@
           "source": "post/self-instruct-aligning-language-model-with-self-generated-instructions/index.html#article:published_time"
         },
         "added": {
-          "at": "2021-08-01T12:53:27+00:00",
-          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/self-instruct-aligning-language-model-with-self-generated-instructions/index.html"
+          "at": "2023-03-25T14:11:55+00:00",
+          "source": "git-first-add:a97fca5806ce74737e0a2c52fe5320d82d656360:post/self-instruct-aligning-language-model-with-self-generated-instructions/index.html"
         }
       }
     },
@@ -961,7 +961,7 @@
         },
         "added": {
           "at": "2021-08-03T15:55:08+00:00",
-          "source": "git:a8a839bfa636187fdd189db228afd6e10457011a:post/simplesearchsys/index.html"
+          "source": "git-first-add:a8a839bfa636187fdd189db228afd6e10457011a:post/simplesearchsys/index.html"
         }
       }
     },
@@ -990,8 +990,8 @@
           "source": "post/small-capybara-video/index.html#article:published_time"
         },
         "added": {
-          "at": "2021-08-01T12:53:27+00:00",
-          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/small-capybara-video/index.html"
+          "at": "2025-09-09T07:05:22+00:00",
+          "source": "git-first-add:7aab05ca12dcafa5d4546edbbf72db38af970e2d:post/small-capybara-video/index.html"
         }
       }
     },
@@ -1020,8 +1020,8 @@
           "source": "post/sshbitbuketonwinows/index.html#article:published_time"
         },
         "added": {
-          "at": "2021-08-01T12:53:27+00:00",
-          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/sshbitbuketonwinows/index.html"
+          "at": "2022-04-04T15:22:12+00:00",
+          "source": "git-first-add:cecbec52aa9e7673023d60c78d9d64549fdfd490:post/sshbitbuketonwinows/index.html"
         }
       }
     },
@@ -1047,7 +1047,7 @@
       "dates": {
         "added": {
           "at": "2026-08-02T08:19:13+00:00",
-          "source": "git:049c97aaea108233e37142967f883a99eda1c1b6:post/table-tennis-rating/index.html"
+          "source": "git-first-add:049c97aaea108233e37142967f883a99eda1c1b6:post/table-tennis-rating/index.html"
         }
       }
     },
@@ -1076,8 +1076,8 @@
           "source": "post/taskmanagement/index.html#article:published_time"
         },
         "added": {
-          "at": "2021-08-02T00:33:27+00:00",
-          "source": "git:9415fc62ae21534a1d341fbbd046f45c5ec2522a:post/taskmanagement/index.html"
+          "at": "2022-09-28T17:00:24+00:00",
+          "source": "git-first-add:7edd232d56c8ac024610318730e7e62bafafb4ee:post/taskmanagement/index.html"
         }
       }
     },
@@ -1106,8 +1106,8 @@
           "source": "post/test_02/index.html#article:published_time"
         },
         "added": {
-          "at": "2023-03-13T06:52:39+00:00",
-          "source": "git:f659cdb44c57aa95ff7ab4aa0e9d701cb622bedb:post/test_02/index.html"
+          "at": "2023-05-21T16:27:03+00:00",
+          "source": "git-first-add:5e5d42bd281807f3c89eaa4520921ccfd095be99:post/test_02/index.html"
         }
       }
     },
@@ -1133,7 +1133,7 @@
       "dates": {
         "added": {
           "at": "2023-03-30T14:52:18+00:00",
-          "source": "git:573a3802227a86561c625feff3b0fd3f145c0d8a:post/timeseries/index.html"
+          "source": "git-first-add:573a3802227a86561c625feff3b0fd3f145c0d8a:post/timeseries/index.html"
         }
       }
     },
@@ -1163,7 +1163,7 @@
         },
         "added": {
           "at": "2023-11-03T03:49:45+00:00",
-          "source": "git:96ecd384fe99624734569a02e92240ebf104f9e2:post/top-10-correlation-coeff/index.html"
+          "source": "git-first-add:96ecd384fe99624734569a02e92240ebf104f9e2:post/top-10-correlation-coeff/index.html"
         }
       }
     },
@@ -1189,7 +1189,7 @@
       "dates": {
         "added": {
           "at": "2023-05-21T16:09:58+00:00",
-          "source": "git:7547e5600d222a2fba05a36e395391ac9af2db5a:post/track_memory/index.html"
+          "source": "git-first-add:7547e5600d222a2fba05a36e395391ac9af2db5a:post/track_memory/index.html"
         }
       }
     },
@@ -1218,8 +1218,8 @@
           "source": "post/trackingmemo/index.html#article:published_time"
         },
         "added": {
-          "at": "2023-05-21T16:09:58+00:00",
-          "source": "git:7547e5600d222a2fba05a36e395391ac9af2db5a:post/trackingmemo/index.html"
+          "at": "2023-05-21T16:27:03+00:00",
+          "source": "git-first-add:5e5d42bd281807f3c89eaa4520921ccfd095be99:post/trackingmemo/index.html"
         }
       }
     },
@@ -1248,8 +1248,8 @@
           "source": "post/tradingtactic/index.html#article:published_time"
         },
         "added": {
-          "at": "2021-08-01T12:53:27+00:00",
-          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/tradingtactic/index.html"
+          "at": "2023-03-13T07:40:57+00:00",
+          "source": "git-first-add:87c17d223778d55fbda42f4507913509b8e75ab9:post/tradingtactic/index.html"
         }
       }
     },
@@ -1278,8 +1278,8 @@
           "source": "post/what-is-rouge-l/index.html#article:published_time"
         },
         "added": {
-          "at": "2021-08-01T12:53:27+00:00",
-          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:post/what-is-rouge-l/index.html"
+          "at": "2023-03-25T01:34:11+00:00",
+          "source": "git-first-add:b2be52e482fb9158ae42a0add385d43dedb24144:post/what-is-rouge-l/index.html"
         }
       }
     },
@@ -1306,7 +1306,7 @@
       "dates": {
         "added": {
           "at": "2026-08-27T14:05:03+00:00",
-          "source": "git:76587168ef8d6c50e8ab6bb6debd24c39b06d42b:skills/build-async-agentic-web-demo/SKILL.md"
+          "source": "git-first-add:76587168ef8d6c50e8ab6bb6debd24c39b06d42b:skills/build-async-agentic-web-demo/SKILL.md"
         }
       }
     },
@@ -1333,7 +1333,7 @@
       "dates": {
         "added": {
           "at": "2026-08-27T14:05:03+00:00",
-          "source": "git:76587168ef8d6c50e8ab6bb6debd24c39b06d42b:skills/charting/skill.md"
+          "source": "git-first-add:76587168ef8d6c50e8ab6bb6debd24c39b06d42b:skills/charting/skill.md"
         }
       }
     },
@@ -1360,7 +1360,7 @@
       "dates": {
         "added": {
           "at": "2026-09-02T13:12:50+00:00",
-          "source": "git:f31aa3781a0b789364095fbe2c0c0fdb8cce7c76:skills/cross-evolve-skill/skill.md"
+          "source": "git-first-add:f31aa3781a0b789364095fbe2c0c0fdb8cce7c76:skills/cross-evolve-skill/skill.md"
         }
       }
     },
@@ -1387,7 +1387,7 @@
       "dates": {
         "added": {
           "at": "2026-08-27T14:05:03+00:00",
-          "source": "git:76587168ef8d6c50e8ab6bb6debd24c39b06d42b:skills/evaluate-executive-resume/SKILL.md"
+          "source": "git-first-add:76587168ef8d6c50e8ab6bb6debd24c39b06d42b:skills/evaluate-executive-resume/SKILL.md"
         }
       }
     },
@@ -1414,7 +1414,7 @@
       "dates": {
         "added": {
           "at": "2026-09-03T06:07:29+00:00",
-          "source": "git:90790fa0c884f53415eb52b7b5ff2a9ca25f87f8:skills/evaluate-web-deliverable/SKILL.md"
+          "source": "git-first-add:90790fa0c884f53415eb52b7b5ff2a9ca25f87f8:skills/evaluate-web-deliverable/SKILL.md"
         }
       }
     },
@@ -1441,7 +1441,7 @@
       "dates": {
         "added": {
           "at": "2026-08-27T14:05:03+00:00",
-          "source": "git:76587168ef8d6c50e8ab6bb6debd24c39b06d42b:skills/ideogram-image-generation/skill.md"
+          "source": "git-first-add:76587168ef8d6c50e8ab6bb6debd24c39b06d42b:skills/ideogram-image-generation/skill.md"
         }
       }
     },
@@ -1468,7 +1468,7 @@
       "dates": {
         "added": {
           "at": "2026-09-01T15:31:12+00:00",
-          "source": "git:d80e14366b162ac9ea918b0edf0da5f5576d2fe4:skills/knowledge-distill/SKILL.md"
+          "source": "git-first-add:d80e14366b162ac9ea918b0edf0da5f5576d2fe4:skills/knowledge-distill/SKILL.md"
         }
       }
     },
@@ -1495,7 +1495,7 @@
       "dates": {
         "added": {
           "at": "2026-08-27T14:05:03+00:00",
-          "source": "git:76587168ef8d6c50e8ab6bb6debd24c39b06d42b:skills/markdown-to-pdf/skill.md"
+          "source": "git-first-add:76587168ef8d6c50e8ab6bb6debd24c39b06d42b:skills/markdown-to-pdf/skill.md"
         }
       }
     },
@@ -1549,7 +1549,7 @@
       "dates": {
         "added": {
           "at": "2026-09-03T06:07:29+00:00",
-          "source": "git:90790fa0c884f53415eb52b7b5ff2a9ca25f87f8:skills/web/SKILL.md"
+          "source": "git-first-add:90790fa0c884f53415eb52b7b5ff2a9ca25f87f8:skills/web/SKILL.md"
         }
       }
     },
@@ -1585,7 +1585,7 @@
         },
         "added": {
           "at": "2021-08-01T12:53:27+00:00",
-          "source": "git:4b057f11b615ef815c7f3dcfc153c8321d90d454:about/index.html"
+          "source": "git-first-add:4b057f11b615ef815c7f3dcfc153c8321d90d454:about/index.html"
         }
       }
     }

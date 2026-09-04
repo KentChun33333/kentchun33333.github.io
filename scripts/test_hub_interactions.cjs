@@ -64,7 +64,12 @@ async function main() {
   const sortLocation = run('https://example.org/?sort=newest',sortEls,dateCards,{window:{addEventListener:(name,fn)=>{listeners[name]=fn;}}});
   assert.deepEqual(results.children,[dateCards[2],dateCards[3],dateCards[1],dateCards[0]]);
   sort.value='oldest';sort.events.change();assert.equal(sortLocation.searchParams.get('sort'),'oldest');
-  assert.deepEqual(results.children,[dateCards[1],dateCards[2],dateCards[3],dateCards[0]]);
+  assert.deepEqual(results.children,[dateCards[0],dateCards[1],dateCards[2],dateCards[3]]);
+  dateCards[0].dataset.added='';sort.events.change();
+  assert.equal(results.children.at(-1),dateCards[0]);
+  dateCards[0].dataset.added='2027-01-01T00:00:00+00:00';sort.value='newest';sort.events.change();
+  assert.equal(results.children[0],dateCards[0]);
+  dateCards[0].dataset.added='2020-01-01T00:00:00+00:00';
   sort.value='added';sort.events.change();assert.deepEqual(results.children,[...dateCards].reverse());
   sortEls['asset-kind'].value='Skill';sortEls['asset-kind'].events.change();assert(dateCards.every(c=>c.hidden));assert.equal(sort.value,'added');
   sortLocation.search='?sort=invalid';listeners.popstate();assert.equal(sort.value,'curated');assert.deepEqual(results.children,dateCards);
@@ -77,7 +82,7 @@ async function main() {
   assert.equal(focus.value, 'ter');
   assert.equal(graph['graph-canvas'].children[1].children.length, 2);
   focus.value = 'gse'; focus.events.change();
-  assert.equal(graph['graph-canvas'].children[1].children.length, 5);
+  assert.equal(graph['graph-canvas'].children[1].children.length, data.relations.filter(r => r.source === 'gse' || r.target === 'gse').length);
   assert.equal(graphLocation.searchParams.get('asset'), 'gse');
   const select = pairs => { const el = new Element(pairs[0][0]); el.options = pairs.map(([value,textContent]) => ({value,textContent})); return el; };
   const form = new Element(); form.reportValidity = () => true;

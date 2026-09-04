@@ -200,24 +200,23 @@ Each record has `at` (ISO 8601 UTC, including seconds and timezone) and `source`
 HTML data attributes, and the indexed SQLite `asset_dates` table. This additive
 table works with existing databases without discarding revision history.
 
-Publication dates were imported from explicit `article:published_time` metadata
-in 25 original pages. Missing dates stay absent. Added dates were seeded once
-from the author timestamp of the earliest available commit returned by Git's
-path-following history; their provenance includes the commit and path. This is
-repository history, not a claim about original publication. Imported repositories
-may have much newer added dates than their contents. Neither filesystem mtime,
-build time, nor revision observation time is a publication date.
+Publication dates are imported from explicit `article:published_time` metadata;
+missing publication dates stay absent. `dates.added` records the committer time of
+the earliest first-add commit for the exact current asset path. It does not follow
+renames into older versions or use author dates. Provenance uses
+`git-first-add:<commit>:<path>`. Historical remote push/deployment times are not
+available from Git: this is an upload estimate, disclosed in the card tooltip.
 
-When adding an asset, record the real repository-added timestamp and its source;
-record publication only when supported by metadata or an editorial source.
-The build never guesses missing dates or refreshes existing dates. A correction
-is an explicit catalogue edit with updated provenance. Layout edits do not change
-these dates. Future date meanings require a named schema addition, not reuse of
-an existing field.
+Run `python3 scripts/record_asset_upload_dates.py` to preview date imports, or add
+`--write` to persist them before running the builder. The importer leaves explicit
+non-Git editorial timestamps intact and retains existing dates when no first-add
+commit is available. Dates never derive from filesystem mtime or build time.
+Repeated imports and layout edits do not advance the first upload timestamp.
 
-The result toolbar provides Curated (default), Newest published, Oldest published,
-and Recently added. Unknown values sort last in either chronological direction;
-ties retain curated order. `?sort=newest|oldest|added` persists alongside search,
-filters, and asset-viewer URLs; unknown sort values fall back to curated. Filtering
-and opening/closing assets preserve sort state. Reset all restores curated order.
+The result toolbar provides Curated (default), Newest, Oldest, and Recently
+uploaded. Newest/Oldest use publication when known, otherwise upload time; the
+card labels the source as Published or Uploaded. Recently uploaded uses upload
+time for every asset. Missing dates sort last in either direction, and ties retain
+curated order. Existing `?sort=newest|oldest|added` URLs remain compatible, including
+search, filters, and asset-viewer navigation. Reset all restores curated order.
 Without JavaScript, the full curated static collection remains readable.
