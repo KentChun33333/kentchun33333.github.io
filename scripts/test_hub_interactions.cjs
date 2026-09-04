@@ -109,6 +109,9 @@ async function main() {
       opener.events.click({preventDefault(){}});drawer.events.keydown({key:'Escape',preventDefault(){}});assert.equal(opener['aria-expanded'],'false');
     }
   }
-  console.log('Passed type/workstream buttons, filter reset, URL restoration, resizable snap rail, keyboard/drag controls, and both right drawers, contact context, focus restoration, and draft retention.');
+  const collapse = new Element(); run('https://example.org/', {'header-collapse':collapse});
+  collapse.events.click(); assert.equal(collapse['aria-expanded'],'false'); assert.equal(collapse.textContent,'⌄');
+  collapse.events.click(); assert.equal(collapse['aria-expanded'],'true'); assert.equal(collapse.textContent,'⌃');
+  console.log('Passed filters, resizable rail, drawers, contact context, focus restoration, draft retention, and icon-header toggle.');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

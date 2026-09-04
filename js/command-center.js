@@ -5,6 +5,18 @@
   const $ = id => document.getElementById(id);
   const announce = text => { $('announcement').textContent = text; };
   const params = new URLSearchParams(location.search);
+  const headerToggle = $('header-collapse');
+  if (headerToggle) {
+    let compactHeader = false;
+    headerToggle.addEventListener('click', () => {
+      compactHeader = !compactHeader;
+      document.body.setAttribute('data-header-compact', String(compactHeader));
+      headerToggle.setAttribute('aria-expanded', String(!compactHeader));
+      headerToggle.textContent = compactHeader ? '⌄' : '⌃';
+      const label = compactHeader ? 'Expand header' : 'Collapse header to icons';
+      headerToggle.setAttribute('aria-label', label); headerToggle.title = label;
+    });
+  }
   const legacyEntries = { '#profile': '/#about', '#research': '/?kind=Research', '#demos': '/?kind=Demo', '#skills': '/?kind=Skill', '#vault': '/?kind=Article', '#monitoring': '/hub/graph/' };
   if (location.pathname === '/' && legacyEntries[location.hash]) location.replace(legacyEntries[location.hash]);
   const setParams = fields => {

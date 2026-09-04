@@ -12,7 +12,7 @@ class El {
   focus() {this.focused=true;}
 }
 function setup(url) {
-  const els=Object.fromEntries(['library-view','asset-view','viewer-canvas','viewer-title','viewer-status','viewer-original','viewer-back','viewer-share','brief-asset','conversation-trigger'].map(k=>[k,new El()]));
+  const els=Object.fromEntries(['library-view','asset-view','viewer-canvas','viewer-title','viewer-status','viewer-toolbar','viewer-back','viewer-share','brief-asset','conversation-trigger'].map(k=>[k,new El()]));
   els['asset-view'].hidden=true;
   const events={}, winEvents={}, location=new URL(url);
   const history={state:null,entries:[],pushState(state,_,url){this.state=state;location.href=url;this.entries.push(location.href);},replaceState(state,_,url){this.state=state;location.href=url;}};
@@ -27,11 +27,11 @@ const flush=()=>new Promise(resolve=>setImmediate(resolve));
 (async()=>{
   const app=setup('https://example.org/?kind=Research');app.open('gse');await flush();
   assert.equal(app.location.pathname,'/');assert.equal(app.location.searchParams.get('asset'),'gse');
-  assert(app.els['library-view'].hidden && !app.els['asset-view'].hidden);
+  assert(app.els['library-view'].hidden && !app.els['asset-view'].hidden && !app.els['viewer-toolbar'].hidden);
   assert.equal(app.els['viewer-canvas'].children[0].src,catalogue.assets.find(a=>a.id==='gse').url);
   assert.equal(app.els['brief-asset'].value,'gse');
   app.els['viewer-canvas'].children[0].events.load();assert.equal(app.els['viewer-status'].textContent,'');
-  app.els['viewer-back'].events.click();assert(!app.els['library-view'].hidden);
+  app.els['viewer-back'].events.click();assert(!app.els['library-view'].hidden && app.els['viewer-toolbar'].hidden);
   assert.equal(app.window.scrollY,620);assert.equal(app.els['viewer-canvas'].children.length,0);
   assert.equal(app.location.searchParams.get('kind'),'Research');assert(!app.location.searchParams.has('asset'));
   app.open('gse-paper');await flush();assert(app.els['viewer-canvas'].innerHTML.includes('Source reader'));

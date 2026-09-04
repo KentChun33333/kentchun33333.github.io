@@ -6,7 +6,7 @@
   const library = $('library-view'), viewer = $('asset-view');
   if (!library || !viewer) return;
   const canvas = $('viewer-canvas'), title = $('viewer-title'), status = $('viewer-status');
-  const original = $('viewer-original');
+  const toolbar = $('viewer-toolbar');
   let request = 0, current = null, libraryScroll = 0, returnFocus = null, catalogue;
   const sourceAssets = new Map();
   const baseTitle = document.title;
@@ -32,7 +32,7 @@
   function showLibrary(push = true) {
     request++;
     if (push && new URLSearchParams(location.search).has('asset')) setRoute(null);
-    current = null; canvas.replaceChildren(); viewer.hidden = true; library.hidden = false;
+    current = null; canvas.replaceChildren(); viewer.hidden = true; toolbar.hidden = true; library.hidden = false;
     document.body.removeAttribute('data-asset-open'); document.title = baseTitle; setContext(null);
     window.scrollTo(0, libraryScroll);
     if (returnFocus && returnFocus.isConnected) returnFocus.focus({ preventScroll: true });
@@ -52,7 +52,7 @@
     }
     if (push) setRoute(id);
     const ticket = ++request;
-    library.hidden = true; viewer.hidden = false; canvas.replaceChildren(); original.hidden = true;
+    library.hidden = true; viewer.hidden = false; toolbar.hidden = false; canvas.replaceChildren();
     title.textContent = 'Opening asset…'; status.textContent = 'Loading…';
     document.body.setAttribute('data-asset-open', 'true');
     window.scrollTo(0, 0);
@@ -62,7 +62,7 @@
       const asset = data.assets.find(a => a.id === id);
       if (!asset) { title.textContent = 'Asset not found'; status.textContent = 'Return to the library to choose an asset.'; return; }
       current = asset; title.textContent = asset.title; document.title = asset.title + ' · Autumn Memo';
-      original.href = asset.url; original.hidden = false; setContext(asset.id); title.focus({ preventScroll: true });
+      title.title = asset.title; if ($('viewer-asset-mark')) $('viewer-asset-mark').title = asset.title; setContext(asset.id); title.focus({ preventScroll: true });
       if (asset.path.endsWith('.md')) {
         const response = await fetch('/data/hub/readers/' + asset.id + '.html');
         if (!response.ok) throw new Error('Reader unavailable');
@@ -76,7 +76,7 @@
         // is withheld; external popups/downloads remain user-initiated capabilities.
         frame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox');
         frame.addEventListener('load', () => { if (ticket === request) status.textContent = ''; });
-        frame.addEventListener('error', () => { if (ticket === request) fail('The embedded page could not load. Try Open original.'); });
+        frame.addEventListener('error', () => { if (ticket === request) fail('The embedded page could not load.', () => showAsset(asset.id, false)); });
         frame.src = asset.url; canvas.append(frame);
       }
     } catch (_) {
