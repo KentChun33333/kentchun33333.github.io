@@ -94,19 +94,19 @@ async function main() {
     const drawer = new Element(), opener = new Element(), title = new Element();
     drawer.showModal = () => {drawer.open=true;}; drawer.close = () => {drawer.open=false;drawer.events.close();};
     const bits = {[name+'-panel']:drawer,[name+'-trigger']:opener,[name+'-title']:title,[name+'-close']:new Element()};
-    if(name==='filters') {bits['filters-apply']=new Element();bits['filters-resizer']=new Element();bits['filters-resizer'].setPointerCapture=()=>{};}
+    if(name==='filters') {delete bits['filters-trigger'];bits['filters-apply']=new Element();bits['filters-resizer']=new Element();bits['filters-resizer'].setPointerCapture=()=>{};}
     run('https://example.org/'+(name==='about'?'#about':''),bits);
     if(name==='about') assert(drawer.open && title.focused);
     else {
       const handle=bits['filters-resizer'];
       assert.equal(handle['aria-valuenow'],'64');
-      opener.events.click({preventDefault(){}});assert.equal(handle['aria-valuenow'],'240');
+      bits['filters-close'].events.click();assert.equal(handle['aria-valuenow'],'240');
       handle.events.keydown({key:'End',preventDefault(){}});assert.equal(handle['aria-valuenow'],'240');
       handle.events.keydown({key:'Home',preventDefault(){}});assert.equal(handle['aria-valuenow'],'64');
       handle.events.pointerdown({button:0,clientX:64,pointerId:1,preventDefault(){}});
       handle.events.pointermove({clientX:270});handle.events.pointerup();assert.equal(handle['aria-valuenow'],'240');
       bits['filters-apply'].events.click();assert.equal(handle['aria-valuenow'],'64');
-      opener.events.click({preventDefault(){}});drawer.events.keydown({key:'Escape',preventDefault(){}});assert.equal(opener['aria-expanded'],'false');
+      bits['filters-close'].events.click();drawer.events.keydown({key:'Escape',preventDefault(){}});assert.equal(bits['filters-close']['aria-expanded'],'false');
     }
   }
   const collapse = new Element(); run('https://example.org/', {'header-collapse':collapse});

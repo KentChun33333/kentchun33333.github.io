@@ -148,8 +148,8 @@
     return open;
   }
   initDrawer('conversation');
-  const filtersPanel = $('filters-panel'), filtersTrigger = $('filters-trigger');
-  if (filtersPanel && filtersTrigger) {
+  const filtersPanel = $('filters-panel');
+  if (filtersPanel) {
     const handle = $('filters-resizer');
     let width = 64, dragging = false, dragStart = 0, startWidth = 64;
     const stops = () => {
@@ -161,7 +161,7 @@
       document.body.style.setProperty('--filters-width', width + 'px');
       document.body.setAttribute('data-filter-layout', rail ? 'rail' : 'expanded');
       document.body.setAttribute('data-filter-dragging', String(dragging));
-      filtersTrigger.setAttribute('aria-expanded', String(!rail));
+      $('filters-close').setAttribute('aria-expanded', String(!rail));
       $('filters-close').textContent = rail ? '›' : '‹';
       $('filters-close').setAttribute('aria-label', rail ? 'Expand filters' : 'Collapse to icons');
       if (handle) {
@@ -172,10 +172,6 @@
     };
     const snap = () => applyWidth(stops().reduce((a,b) => Math.abs(a-width) <= Math.abs(b-width) ? a : b));
     const toggle = () => applyWidth(width < 112 ? stops()[1] : 64);
-    filtersTrigger.addEventListener('click', e => {
-      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      e.preventDefault(); toggle();
-    });
     $('filters-close').addEventListener('click', toggle);
     $('filters-apply').addEventListener('click', () => { applyWidth(64); if (search) search.focus(); });
     filtersPanel.addEventListener('keydown', e => {
