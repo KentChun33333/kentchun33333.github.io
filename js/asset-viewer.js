@@ -95,10 +95,6 @@
     else if (link.classList.contains('header-library-link') && !viewer.hidden) { e.preventDefault(); showLibrary(); }
   });
   $('viewer-back').addEventListener('click', () => showLibrary());
-  $('viewer-share').addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(location.href); status.textContent = 'Link copied.'; }
-    catch (_) { status.textContent = 'Copy the address from your browser to share this asset.'; }
-  });
   document.addEventListener('hub:filters-changed', () => { if (!viewer.hidden) showLibrary(); });
   window.addEventListener('popstate', e => {
     const id = new URLSearchParams(location.search).get('asset');

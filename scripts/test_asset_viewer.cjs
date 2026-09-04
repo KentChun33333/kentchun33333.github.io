@@ -12,7 +12,7 @@ class El {
   focus() {this.focused=true;}
 }
 function setup(url) {
-  const els=Object.fromEntries(['library-view','asset-view','viewer-canvas','viewer-title','viewer-status','viewer-toolbar','viewer-back','viewer-share','brief-asset','conversation-trigger'].map(k=>[k,new El()]));
+  const els=Object.fromEntries(['library-view','asset-view','viewer-canvas','viewer-title','viewer-status','viewer-toolbar','viewer-back','brief-asset','conversation-trigger'].map(k=>[k,new El()]));
   els['asset-view'].hidden=true;
   const events={}, winEvents={}, location=new URL(url);
   const history={state:null,entries:[],pushState(state,_,url){this.state=state;location.href=url;this.entries.push(location.href);},replaceState(state,_,url){this.state=state;location.href=url;}};
