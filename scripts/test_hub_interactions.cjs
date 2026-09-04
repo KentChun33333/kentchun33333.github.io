@@ -35,7 +35,11 @@ async function main() {
   search.value = 'guarded evolution'; kind.value = ''; stream.value = ''; search.events.input();
   assert(cards.filter(c => !c.hidden).length >= 4);
   search.value = ''; search.events.input();
-  assert.equal(cards.filter(c => !c.hidden).length, 55);
+  assert.equal(cards.filter(c => !c.hidden).length, data.assets.length);
+  search.value = 'MIT CSAIL'; search.events.input();
+  assert(cards.some((c,i) => !c.hidden && data.assets[i].id === 'story-autumn-memo'));
+  search.value = 'buying home'; search.events.input();
+  assert(cards.some((c,i) => !c.hidden && data.assets[i].id === 'writing-buyinghouse2021'));
   const focus = new Element('gse'); const ids = new Set(data.relations.flatMap(r => [r.source, r.target]));
   focus.options = [...ids].map(value => ({ value }));
   const graph = { 'graph-focus': focus, 'graph-canvas': new Element(), 'graph-context': new Element() };

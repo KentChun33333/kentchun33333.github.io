@@ -23,7 +23,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "b0a36694e75be1d49f9da530a5615a1921e5cbe085ac740a9bfc995268e26b72",
       "url": "/idea-paper/guarded-skill-evolution/guarded-skill-evolution-v2.html",
-      "detail_url": "/hub/assets/gse/"
+      "detail_url": "/hub/assets/gse/",
+      "images": []
     },
     {
       "id": "ter",
@@ -48,7 +49,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "49c0e01916e9e33eacf9c3cbbe42440c55c7496cdfe70c19440b402bcf6793a2",
       "url": "/ter-agentic-demos/ter-bank-multi-agent-flow-v15.html",
-      "detail_url": "/hub/assets/ter/"
+      "detail_url": "/hub/assets/ter/",
+      "images": []
     },
     {
       "id": "wealth",
@@ -73,7 +75,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "4d2e3b7d17218895c54131e1c0a2e8b060d396bb105af79e8d838ffca25543b0",
       "url": "/wealthy_data_insight/index.html",
-      "detail_url": "/hub/assets/wealth/"
+      "detail_url": "/hub/assets/wealth/",
+      "images": []
     },
     {
       "id": "publisher",
@@ -97,7 +100,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "efec842c8e224cb376badfc8c0ca2f2e629cec0362765ed7431a25c641235e11",
       "url": "/github-zip-upload/index.html",
-      "detail_url": "/hub/assets/publisher/"
+      "detail_url": "/hub/assets/publisher/",
+      "images": []
     },
     {
       "id": "gse-paper",
@@ -121,7 +125,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "91c97a2614de140d1b6a01f685e9ffc5a2591b3b2dc2d0c45d5c3391f8a52d17",
       "url": "/idea-paper/guarded-skill-evolution/paper.md",
-      "detail_url": "/hub/assets/gse-paper/"
+      "detail_url": "/hub/assets/gse-paper/",
+      "images": []
     },
     {
       "id": "gse-experiment-protocol",
@@ -145,7 +150,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "62fc7785fc907d91154ebec001defbad7bd67fa271294eccbd177d799be1aa3a",
       "url": "/idea-paper/guarded-skill-evolution/experiment-protocol.md",
-      "detail_url": "/hub/assets/gse-experiment-protocol/"
+      "detail_url": "/hub/assets/gse-experiment-protocol/",
+      "images": []
     },
     {
       "id": "gse-benchmark-schema",
@@ -169,7 +175,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "eba3837dc88a30103dafee4f4ba1670cf71b71a6cd5ccbef27a8d092643c53a1",
       "url": "/idea-paper/guarded-skill-evolution/benchmark-schema.md",
-      "detail_url": "/hub/assets/gse-benchmark-schema/"
+      "detail_url": "/hub/assets/gse-benchmark-schema/",
+      "images": []
     },
     {
       "id": "deeptutor-agent-native-learning-architecture",
@@ -192,7 +199,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "58cd15ce12fc517591026004ef437f998b67bf1eddfea1f8c44929f58ee65962",
       "url": "/ai-research-insights/deeptutor-agent-native-learning-architecture.html",
-      "detail_url": "/hub/assets/deeptutor-agent-native-learning-architecture/"
+      "detail_url": "/hub/assets/deeptutor-agent-native-learning-architecture/",
+      "images": []
     },
     {
       "id": "dynamic-reasoning-compute-explained",
@@ -215,7 +223,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "8dab06745cba2c7d4cea2751b6e76e271bca99457a0dbefbf7b49c4f6b740928",
       "url": "/ai-research-insights/dynamic-reasoning-compute-explained.html",
-      "detail_url": "/hub/assets/dynamic-reasoning-compute-explained/"
+      "detail_url": "/hub/assets/dynamic-reasoning-compute-explained/",
+      "images": []
     },
     {
       "id": "envharness-agent-learning",
@@ -238,7 +247,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "089903582c27ddecd7a372587722bfee70ca7693506929e9fbccee0cc25c0be6",
       "url": "/ai-research-insights/envharness-agent-learning.html",
-      "detail_url": "/hub/assets/envharness-agent-learning/"
+      "detail_url": "/hub/assets/envharness-agent-learning/",
+      "images": []
     },
     {
       "id": "llm-as-a-verifier",
@@ -261,7 +271,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "0951e200facf8e5953d14a056785b82833035d228efbc36c4ab927ca938ad4b1",
       "url": "/ai-research-insights/llm-as-a-verifier.html",
-      "detail_url": "/hub/assets/llm-as-a-verifier/"
+      "detail_url": "/hub/assets/llm-as-a-verifier/",
+      "images": []
     },
     {
       "id": "recuris-memory-evolution",
@@ -284,7 +295,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "99f5977cb914954b21cce2dec93327c039cd9a6c67d594a25a10e7fd3736042e",
       "url": "/ai-research-insights/recuris-memory-evolution.html",
-      "detail_url": "/hub/assets/recuris-memory-evolution/"
+      "detail_url": "/hub/assets/recuris-memory-evolution/",
+      "images": []
     },
     {
       "id": "rlvr-grpo-explained",
@@ -307,7 +319,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "5d8df7b07d8b573519efbf1268c5f0b8a5258771020aca77d32ff6ecbba35454",
       "url": "/ai-research-insights/rlvr-grpo-explained.html",
-      "detail_url": "/hub/assets/rlvr-grpo-explained/"
+      "detail_url": "/hub/assets/rlvr-grpo-explained/",
+      "images": []
     },
     {
       "id": "synthetic-distillation-flywheel-explained",
@@ -330,7 +343,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "aeca0a954205dc313b4910e09b07156abb8c693a8ee8ea1f6432b485a3b714a6",
       "url": "/ai-research-insights/synthetic-distillation-flywheel-explained.html",
-      "detail_url": "/hub/assets/synthetic-distillation-flywheel-explained/"
+      "detail_url": "/hub/assets/synthetic-distillation-flywheel-explained/",
+      "images": []
     },
     {
       "id": "timesfm-3-explained",
@@ -353,7 +367,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "d21af356752bf72c090ea2f93b95e1bd4d3f2cf2ffdef294208fc05d6d4cae7a",
       "url": "/ai-research-insights/timesfm-3-explained.html",
-      "detail_url": "/hub/assets/timesfm-3-explained/"
+      "detail_url": "/hub/assets/timesfm-3-explained/",
+      "images": []
     },
     {
       "id": "writing-2023-0711-economicweather",
@@ -376,7 +391,21 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "8bafe8056fa9c84f793eb34dc0e12e94b2530d9f5a88b20af6d17579b389dfaf",
       "url": "/post/2023-0711-economicweather/index.html",
-      "detail_url": "/hub/assets/writing-2023-0711-economicweather/"
+      "detail_url": "/hub/assets/writing-2023-0711-economicweather/",
+      "images": [
+        {
+          "url": "/img/2023-07-11-21-41-25-image.png",
+          "alt": "Image from “Economic Weather x All Weather Portfolio”",
+          "source_path": "post/2023-0711-economicweather/index.html",
+          "sha256": "1de9d7575098063e0fe9746c9277fb0b45a3aba68f885b2a44d2e8b458a368a4"
+        },
+        {
+          "url": "/img/2023-07-11-22-38-23-image.png",
+          "alt": "Image from “Economic Weather x All Weather Portfolio”",
+          "source_path": "post/2023-0711-economicweather/index.html",
+          "sha256": "767343de2eae7c3cbce2a0c0e54b6292545de6c96d568f8e945112ccec107734"
+        }
+      ]
     },
     {
       "id": "writing-2023-feb-optionstrategy",
@@ -399,7 +428,33 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "272749cc42209d8c9c1263043714e4990cdd5d9d03948f33431580703b0dda74",
       "url": "/post/2023-feb-optionstrategy/index.html",
-      "detail_url": "/hub/assets/writing-2023-feb-optionstrategy/"
+      "detail_url": "/hub/assets/writing-2023-feb-optionstrategy/",
+      "images": [
+        {
+          "url": "/img/2023-07-10-23-29-31-image.png",
+          "alt": "Image from “Top 5 Option Strategies”",
+          "source_path": "post/2023-feb-optionstrategy/index.html",
+          "sha256": "a90b69caaf268b0fba8495f0b731a5a7dd49c42bab8836555d0b29e9018a7e06"
+        },
+        {
+          "url": "/img/2023-07-10-23-48-30-image.png",
+          "alt": "Image from “Top 5 Option Strategies”",
+          "source_path": "post/2023-feb-optionstrategy/index.html",
+          "sha256": "4c4d27a5d9b65acd1552ae4631cee8ab8b44193bbb280c611c00b3f4ccece264"
+        },
+        {
+          "url": "/img/2023-07-10-23-55-35-image.png",
+          "alt": "Image from “Top 5 Option Strategies”",
+          "source_path": "post/2023-feb-optionstrategy/index.html",
+          "sha256": "dd3ad92b191ff42e555920c93ac0bea0acfbf50a2aedc17e1df2ebc1c3096bd8"
+        },
+        {
+          "url": "/img/2023-07-10-23-56-42-image.png",
+          "alt": "Image from “Top 5 Option Strategies”",
+          "source_path": "post/2023-feb-optionstrategy/index.html",
+          "sha256": "10ec178cb8c18245a720bf778c6df11c15b42661a76a049416dcf735c4ea682e"
+        }
+      ]
     },
     {
       "id": "writing-20230607-learntorank",
@@ -422,7 +477,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "b93719208770956bb1adf0c65b755e9538315e61906b4064cb7c3e9db7b88a1b",
       "url": "/post/20230607-learntorank/index.html",
-      "detail_url": "/hub/assets/writing-20230607-learntorank/"
+      "detail_url": "/hub/assets/writing-20230607-learntorank/",
+      "images": []
     },
     {
       "id": "writing-buyinghouse2021",
@@ -430,11 +486,18 @@
       "path": "post/buyinghouse2021/index.html",
       "kind": "Article",
       "stream": "Publish",
-      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "summary": "Why my wife and I chose a home at The Woodleigh Residences in Singapore: location, layout, budget, and the comparisons behind our decision, with the original pictures and price-location chart.",
       "topics": [
-        "Engineering notes"
+        "Personal stories",
+        "Buying a home",
+        "Buying a house",
+        "Singapore",
+        "Condo",
+        "Property",
+        "Woodleigh Residences",
+        "Photography"
       ],
-      "status": "Archived writing",
+      "status": "Personal story · 2021",
       "featured": false,
       "audiences": [
         "learn",
@@ -445,7 +508,21 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "2b616e0b4e7ee6caa5fcd1f39e34a250401e5d1406c86155817ab969661556dc",
       "url": "/post/buyinghouse2021/index.html",
-      "detail_url": "/hub/assets/writing-buyinghouse2021/"
+      "detail_url": "/hub/assets/writing-buyinghouse2021/",
+      "images": [
+        {
+          "url": "/img/BuyingHouse2021/image-20210802073610105.png",
+          "alt": "Residential towers and landscaped grounds pictured in the home-buying story.",
+          "source_path": "post/buyinghouse2021/index.html",
+          "sha256": "405898eb497f62dfaf274b259e970c062e09eb30f3be9de868e1a45c92e6da30"
+        },
+        {
+          "url": "/img/BuyingHouse2021/image-20210802083702087.png",
+          "alt": "Price and location comparison chart from the original home-buying story.",
+          "source_path": "post/buyinghouse2021/index.html",
+          "sha256": "618337a561b576767d5c8775a4295c99fd5a318ca58075d78c9c584399e8f414"
+        }
+      ]
     },
     {
       "id": "writing-cblof",
@@ -468,7 +545,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "1547b21180e79d713551506f2ae3eb882c18862926a394113838f916d8c00c36",
       "url": "/post/cblof/index.html",
-      "detail_url": "/hub/assets/writing-cblof/"
+      "detail_url": "/hub/assets/writing-cblof/",
+      "images": []
     },
     {
       "id": "writing-clawdbot-memory-system-analysis",
@@ -491,7 +569,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "23fe8d89f7d6133ca131e640c8d067fa3033abf5f4893468da99c44e07b17a6d",
       "url": "/post/clawdbot-memory-system-analysis/index.html",
-      "detail_url": "/hub/assets/writing-clawdbot-memory-system-analysis/"
+      "detail_url": "/hub/assets/writing-clawdbot-memory-system-analysis/",
+      "images": []
     },
     {
       "id": "writing-cloudpickle",
@@ -514,7 +593,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "583f0a12304dcca163db4d3553873207246131e7673a1652b2c2f0f5629b0d12",
       "url": "/post/cloudpickle/index.html",
-      "detail_url": "/hub/assets/writing-cloudpickle/"
+      "detail_url": "/hub/assets/writing-cloudpickle/",
+      "images": []
     },
     {
       "id": "writing-cubejs_tryout",
@@ -537,7 +617,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "f33a166861d5aba6604a340d88508701fc8fa6e1640ea9f9d8c010b0c8ef70aa",
       "url": "/post/cubejs_tryout/index.html",
-      "detail_url": "/hub/assets/writing-cubejs_tryout/"
+      "detail_url": "/hub/assets/writing-cubejs_tryout/",
+      "images": []
     },
     {
       "id": "writing-customized-lorenz-ann-classification",
@@ -560,7 +641,21 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "419d5e93170232d130cd02262e81376e5e6a1d8fe59466fad4db4a83ebe2ec5b",
       "url": "/post/customized-lorenz-ann-classification/index.html",
-      "detail_url": "/hub/assets/writing-customized-lorenz-ann-classification/"
+      "detail_url": "/hub/assets/writing-customized-lorenz-ann-classification/",
+      "images": [
+        {
+          "url": "/img/2023-03-26-20-12-40-image.png",
+          "alt": "Image from “Stock Prediction with LorenzANN”",
+          "source_path": "post/customized-lorenz-ann-classification/index.html",
+          "sha256": "9fcee87412e8e9ed22087e09b68d4aaf39ae13d35f38e1228827d0551b9dade4"
+        },
+        {
+          "url": "/img/2023-03-26-20-48-45-image.png",
+          "alt": "Image from “Stock Prediction with LorenzANN”",
+          "source_path": "post/customized-lorenz-ann-classification/index.html",
+          "sha256": "2e7d1ffcfcb4ecbc8fa2c197f5af22427dc6ff4c9cf7eeadf7c0d09c580f8574"
+        }
+      ]
     },
     {
       "id": "writing-db-index-vs-silhouette-score",
@@ -583,7 +678,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "789d98e23a64d1d005869a0c5cb5d3bcef75fde4a6783279ec03fa92626903e5",
       "url": "/post/db-index-vs-silhouette-score/index.html",
-      "detail_url": "/hub/assets/writing-db-index-vs-silhouette-score/"
+      "detail_url": "/hub/assets/writing-db-index-vs-silhouette-score/",
+      "images": []
     },
     {
       "id": "writing-hostpersonalgpt",
@@ -606,7 +702,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "00229ce7a3e176e707337eb575603b0fc29b9b59de961098349922ad99db710a",
       "url": "/post/hostpersonalgpt/index.html",
-      "detail_url": "/hub/assets/writing-hostpersonalgpt/"
+      "detail_url": "/hub/assets/writing-hostpersonalgpt/",
+      "images": []
     },
     {
       "id": "writing-how-to-close-clawdbot-daemon",
@@ -629,7 +726,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "35d8ae47d2e6bcd7a14c35468f62cfc115c96930d75549f10689c6322b9f7c3c",
       "url": "/post/how-to-close-clawdbot-daemon/index.html",
-      "detail_url": "/hub/assets/writing-how-to-close-clawdbot-daemon/"
+      "detail_url": "/hub/assets/writing-how-to-close-clawdbot-daemon/",
+      "images": []
     },
     {
       "id": "writing-memosystem",
@@ -652,7 +750,15 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "b0cfaa5e0fcc36831bf8d01383d298b66dbfc9ee20c80ba7ff4d639becd398e3",
       "url": "/post/memosystem/index.html",
-      "detail_url": "/hub/assets/writing-memosystem/"
+      "detail_url": "/hub/assets/writing-memosystem/",
+      "images": [
+        {
+          "url": "/img/MemoSystem/image-20210802211340404.png",
+          "alt": "Image from “Blog Memo by Hugo with Typora”",
+          "source_path": "post/memosystem/index.html",
+          "sha256": "4868f2c220fce8e3e8cbb32c8d4f2f1008e51dd6ca56c0e027d0210084a1af77"
+        }
+      ]
     },
     {
       "id": "writing-metricf1score",
@@ -675,7 +781,15 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "e6c70c28b6c318d23c46d5d47b839b20db427b6c94941420b48c423c80d0934f",
       "url": "/post/metricf1score/index.html",
-      "detail_url": "/hub/assets/writing-metricf1score/"
+      "detail_url": "/hub/assets/writing-metricf1score/",
+      "images": [
+        {
+          "url": "/img/algo_ref.png",
+          "alt": "Image from “F1 Score on Multi Classes”",
+          "source_path": "post/metricf1score/index.html",
+          "sha256": "85e80531464872d18d164a95c2a09fdb018e80777df255e30ad43d2aa1c0b860"
+        }
+      ]
     },
     {
       "id": "writing-design_backtesting",
@@ -698,7 +812,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "5e0abe9ac586d7fe8afc1d6bf85f5da2ad302744fb2aa6c30dcc5d1fca1a9f83",
       "url": "/post/quant/design_backtesting/index.html",
-      "detail_url": "/hub/assets/writing-design_backtesting/"
+      "detail_url": "/hub/assets/writing-design_backtesting/",
+      "images": []
     },
     {
       "id": "writing-quant_metric_001",
@@ -721,7 +836,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "327554bc3629d7b394b1de07d32184528bba8cda9c3736506d408bc0f87a2baf",
       "url": "/post/quant/quant_metric_001/index.html",
-      "detail_url": "/hub/assets/writing-quant_metric_001/"
+      "detail_url": "/hub/assets/writing-quant_metric_001/",
+      "images": []
     },
     {
       "id": "writing-scedasticicity",
@@ -744,7 +860,15 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "4772d94b716b6d0b72969e8b4bb66196f682779f78dae8ced1fdb64add6a66f3",
       "url": "/post/scedasticicity/index.html",
-      "detail_url": "/hub/assets/writing-scedasticicity/"
+      "detail_url": "/hub/assets/writing-scedasticicity/",
+      "images": [
+        {
+          "url": "/img/Scedasticicity/image-20210804220752837.png",
+          "alt": "Image from “Modeling Uncertainty of ML Systems (01)”",
+          "source_path": "post/scedasticicity/index.html",
+          "sha256": "b7d1aaccf8601b72934d33e6ce82c3eb3f45591c513b092ea6bb6e6855c08aae"
+        }
+      ]
     },
     {
       "id": "writing-self-instruct-aligning-language-model-with-self-generated-instructions",
@@ -767,7 +891,15 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "a6788c1961585442ac5bc35337cb29ef7a11b24011a9d2561cfab69501cd0cd9",
       "url": "/post/self-instruct-aligning-language-model-with-self-generated-instructions/index.html",
-      "detail_url": "/hub/assets/writing-self-instruct-aligning-language-model-with-self-generated-instructions/"
+      "detail_url": "/hub/assets/writing-self-instruct-aligning-language-model-with-self-generated-instructions/",
+      "images": [
+        {
+          "url": "/img/2023-03-25-09-48-42-image.png",
+          "alt": "Image from “Paper Summay on Aligning LLM with Self-Instruct”",
+          "source_path": "post/self-instruct-aligning-language-model-with-self-generated-instructions/index.html",
+          "sha256": "87cbd2ab36372df965687dffe8376510b9ec2de18b5f63abe51daebb164c1cbb"
+        }
+      ]
     },
     {
       "id": "writing-simplesearchsys",
@@ -790,7 +922,39 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "b8eaeb8132ea9a6a3a1278c9fcd9909116e419ffe1d5a0e1342bc1343f6ce8ca",
       "url": "/post/simplesearchsys/index.html",
-      "detail_url": "/hub/assets/writing-simplesearchsys/"
+      "detail_url": "/hub/assets/writing-simplesearchsys/",
+      "images": [
+        {
+          "url": "/img/SimpleSearchSys/demo.gif",
+          "alt": "Image from “Build a Simple Search System”",
+          "source_path": "post/simplesearchsys/index.html",
+          "sha256": "531bb3f4a533aa857f069697d125b4bac954d0ddd1d3d044545309b94e46e633"
+        },
+        {
+          "url": "/img/SimpleSearchSys/system_flow.png",
+          "alt": "Image from “Build a Simple Search System”",
+          "source_path": "post/simplesearchsys/index.html",
+          "sha256": "dcaaa5bb6b313ac5f67e2948886f111fe2d9d457f86e443ea99b10a31a34957b"
+        },
+        {
+          "url": "/img/SimpleSearchSys/forward_db.png",
+          "alt": "Image from “Build a Simple Search System”",
+          "source_path": "post/simplesearchsys/index.html",
+          "sha256": "afb69ef0c58e20bbb2180b0eacdfba3f7d20c5d700113faee57fe9f6f4ba1109"
+        },
+        {
+          "url": "/img/SimpleSearchSys/image_2.png",
+          "alt": "Image from “Build a Simple Search System”",
+          "source_path": "post/simplesearchsys/index.html",
+          "sha256": "03f5a71036c8536f81932e36e601f4b670fca35c747e9a465b5f51ad6e0f5f51"
+        },
+        {
+          "url": "/img/SimpleSearchSys/image.png",
+          "alt": "Image from “Build a Simple Search System”",
+          "source_path": "post/simplesearchsys/index.html",
+          "sha256": "d278fc9dcda22304481fee090c7e436592c6239eee48fb2ab4116b860519c518"
+        }
+      ]
     },
     {
       "id": "writing-small-capybara-video",
@@ -813,7 +977,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "81cc3c623b439e299479e26d4c8ec8e948a53fd967b26af0bb8d21e8de85d9d9",
       "url": "/post/small-capybara-video/index.html",
-      "detail_url": "/hub/assets/writing-small-capybara-video/"
+      "detail_url": "/hub/assets/writing-small-capybara-video/",
+      "images": []
     },
     {
       "id": "writing-sshbitbuketonwinows",
@@ -836,7 +1001,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "5f5c22db4c201b930a0e80f59329db050574bc794e148594b57d251057412999",
       "url": "/post/sshbitbuketonwinows/index.html",
-      "detail_url": "/hub/assets/writing-sshbitbuketonwinows/"
+      "detail_url": "/hub/assets/writing-sshbitbuketonwinows/",
+      "images": []
     },
     {
       "id": "writing-table-tennis-rating",
@@ -859,7 +1025,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "ce45e1f6df8915d8063c677b29effdf794c76334a1e9a2354952af4b6290be83",
       "url": "/post/table-tennis-rating/index.html",
-      "detail_url": "/hub/assets/writing-table-tennis-rating/"
+      "detail_url": "/hub/assets/writing-table-tennis-rating/",
+      "images": []
     },
     {
       "id": "writing-taskmanagement",
@@ -882,7 +1049,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "e10cb5b5f579a1c44236d54172424fdafb8b43fac1b7a70e7d705eb41c1f9f17",
       "url": "/post/taskmanagement/index.html",
-      "detail_url": "/hub/assets/writing-taskmanagement/"
+      "detail_url": "/hub/assets/writing-taskmanagement/",
+      "images": []
     },
     {
       "id": "writing-test_02",
@@ -905,7 +1073,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "9219c93494fba880c3a8d90608d0277e82242ccec57e61cbbd9bd19dc02de69b",
       "url": "/post/test_02/index.html",
-      "detail_url": "/hub/assets/writing-test_02/"
+      "detail_url": "/hub/assets/writing-test_02/",
+      "images": []
     },
     {
       "id": "writing-timeseries",
@@ -928,7 +1097,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "90c734a11816484a82120d9051a6733096e6f3bb77f6e208896bfc248d57bf50",
       "url": "/post/timeseries/index.html",
-      "detail_url": "/hub/assets/writing-timeseries/"
+      "detail_url": "/hub/assets/writing-timeseries/",
+      "images": []
     },
     {
       "id": "writing-top-10-correlation-coeff",
@@ -951,7 +1121,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "d0765c8b14ddfe4bb999f42250ecd6e633b7e73be61c477244899f693eba3b0c",
       "url": "/post/top-10-correlation-coeff/index.html",
-      "detail_url": "/hub/assets/writing-top-10-correlation-coeff/"
+      "detail_url": "/hub/assets/writing-top-10-correlation-coeff/",
+      "images": []
     },
     {
       "id": "writing-track_memory",
@@ -974,7 +1145,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "cac9f26e1c6322dc59f358f025c1e358523bffbf29f50c17b885f160bf6b9c50",
       "url": "/post/track_memory/index.html",
-      "detail_url": "/hub/assets/writing-track_memory/"
+      "detail_url": "/hub/assets/writing-track_memory/",
+      "images": []
     },
     {
       "id": "writing-trackingmemo",
@@ -997,7 +1169,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "f761609aeb3547637fd94ad115e1ead9237a800220df92edb13a5ee5b4a185d1",
       "url": "/post/trackingmemo/index.html",
-      "detail_url": "/hub/assets/writing-trackingmemo/"
+      "detail_url": "/hub/assets/writing-trackingmemo/",
+      "images": []
     },
     {
       "id": "writing-tradingtactic",
@@ -1020,7 +1193,15 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "aca852420534b8db785be4db48221b8bdcb91e2e8d2172aecd628da382f9e263",
       "url": "/post/tradingtactic/index.html",
-      "detail_url": "/hub/assets/writing-tradingtactic/"
+      "detail_url": "/hub/assets/writing-tradingtactic/",
+      "images": [
+        {
+          "url": "/img/2023-03-13-14-10-31-image.png",
+          "alt": "Image from “Trading Strategy”",
+          "source_path": "post/tradingtactic/index.html",
+          "sha256": "1c8ebd476d4deae16b93d2a00f988f1a98a34227c99d05ffd8afcaf0466ed251"
+        }
+      ]
     },
     {
       "id": "writing-what-is-rouge-l",
@@ -1043,7 +1224,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "256c7341357bd52755eca2ce614a7ed09991069a22decfeb539a2ed1127ecc09",
       "url": "/post/what-is-rouge-l/index.html",
-      "detail_url": "/hub/assets/writing-what-is-rouge-l/"
+      "detail_url": "/hub/assets/writing-what-is-rouge-l/",
+      "images": []
     },
     {
       "id": "skill-build-async-agentic-web-demo",
@@ -1067,7 +1249,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "270811f5902948bc5ded6285cfe26dbebc15cd6de9d61dbcdc0bcf1fcb2556c6",
       "url": "/skills/build-async-agentic-web-demo/SKILL.md",
-      "detail_url": "/hub/assets/skill-build-async-agentic-web-demo/"
+      "detail_url": "/hub/assets/skill-build-async-agentic-web-demo/",
+      "images": []
     },
     {
       "id": "skill-charting",
@@ -1091,7 +1274,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "0bce4aaf2cc47985b9cfdc9adc27310a24ba8db209c0b460ed0716b6545d7ff3",
       "url": "/skills/charting/skill.md",
-      "detail_url": "/hub/assets/skill-charting/"
+      "detail_url": "/hub/assets/skill-charting/",
+      "images": []
     },
     {
       "id": "skill-cross-evolve-skill",
@@ -1115,7 +1299,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "30edeceb014d129c8e767208b2ab6af0b3b0045773947af43e966fe5b4a94cf4",
       "url": "/skills/cross-evolve-skill/skill.md",
-      "detail_url": "/hub/assets/skill-cross-evolve-skill/"
+      "detail_url": "/hub/assets/skill-cross-evolve-skill/",
+      "images": []
     },
     {
       "id": "skill-evaluate-executive-resume",
@@ -1139,7 +1324,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "ec6940557b2f868b596167023062dad7142e521de13e320dbee0d6e2e0725540",
       "url": "/skills/evaluate-executive-resume/SKILL.md",
-      "detail_url": "/hub/assets/skill-evaluate-executive-resume/"
+      "detail_url": "/hub/assets/skill-evaluate-executive-resume/",
+      "images": []
     },
     {
       "id": "skill-evaluate-web-deliverable",
@@ -1163,7 +1349,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "31c7a9df95d823a77c810c64430b0f021e81910d2161d02903764add25f21b94",
       "url": "/skills/evaluate-web-deliverable/SKILL.md",
-      "detail_url": "/hub/assets/skill-evaluate-web-deliverable/"
+      "detail_url": "/hub/assets/skill-evaluate-web-deliverable/",
+      "images": []
     },
     {
       "id": "skill-ideogram-image-generation",
@@ -1187,7 +1374,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "4d33e3f802169567e1026b6e8eef397b7b424828c5053463cecd4e0307d07285",
       "url": "/skills/ideogram-image-generation/skill.md",
-      "detail_url": "/hub/assets/skill-ideogram-image-generation/"
+      "detail_url": "/hub/assets/skill-ideogram-image-generation/",
+      "images": []
     },
     {
       "id": "skill-knowledge-distill",
@@ -1211,7 +1399,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "3338c6c1dbf95b0fe10a7e053c21803a98e15b84e04d3ae5968ff79c5391f778",
       "url": "/skills/knowledge-distill/SKILL.md",
-      "detail_url": "/hub/assets/skill-knowledge-distill/"
+      "detail_url": "/hub/assets/skill-knowledge-distill/",
+      "images": []
     },
     {
       "id": "skill-markdown-to-pdf",
@@ -1235,7 +1424,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "8d3896559af77e71116d35d8d6fb64c7bf3ab6b15ad1f339e359573f2bdf6006",
       "url": "/skills/markdown-to-pdf/skill.md",
-      "detail_url": "/hub/assets/skill-markdown-to-pdf/"
+      "detail_url": "/hub/assets/skill-markdown-to-pdf/",
+      "images": []
     },
     {
       "id": "skill-semantic-pattern-mining",
@@ -1259,7 +1449,8 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "9bbe954927e04f0d69bee1bfbe9ab3ad4563772f417f5257ad07f516e7f5c18d",
       "url": "/skills/semantic-pattern-mining/SKILL.md",
-      "detail_url": "/hub/assets/skill-semantic-pattern-mining/"
+      "detail_url": "/hub/assets/skill-semantic-pattern-mining/",
+      "images": []
     },
     {
       "id": "skill-web",
@@ -1283,7 +1474,45 @@
       "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
       "sha256": "ef0a0866131229df29f3df5b69d3386524eba139395ec827a565d4e42fa66740",
       "url": "/skills/web/SKILL.md",
-      "detail_url": "/hub/assets/skill-web/"
+      "detail_url": "/hub/assets/skill-web/",
+      "images": []
+    },
+    {
+      "id": "story-autumn-memo",
+      "title": "Where Autumn Memo began · MIT-CSAIL",
+      "path": "about/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "The story behind Autumn Memo, which began during my research exchange in Randall Davis’s MIT-CSAIL lab in 2016. Read the original introduction with its campus photograph.",
+      "topics": [
+        "MIT",
+        "MIT-CSAIL",
+        "CSAIL",
+        "Research exchange",
+        "Personal stories",
+        "Photography",
+        "About Kent"
+      ],
+      "status": "Personal background",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "collaborate",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "sha256": "e3234c463abfb8c730dd59a3baea22234bcc4580f58c1558bf5445c8d722be1c",
+      "url": "/about/index.html",
+      "detail_url": "/hub/assets/story-autumn-memo/",
+      "images": [
+        {
+          "url": "/img/about/image-20210802080500753.png",
+          "alt": "Campus architecture pictured in Kent’s original MIT-CSAIL introduction.",
+          "source_path": "about/index.html",
+          "sha256": "78598e22fa400960fb395cdd6c91d0046b1157c404386c4d795496f9a445272c"
+        }
+      ]
     }
   ],
   "relations": [

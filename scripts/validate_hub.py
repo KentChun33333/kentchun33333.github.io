@@ -10,6 +10,7 @@ import sqlite3
 
 ROOT = Path(__file__).resolve().parents[1]
 data = json.loads((ROOT/'data/hub/catalog.json').read_text())
+builder_origin = 'https://kentchun33333.github.io'
 
 
 class Page(HTMLParser):
@@ -46,7 +47,10 @@ for p in pages:
         asset=next(a for a in data['assets'] if a['id']==p.parent.name)
         assert parsed.meta['og:description']==asset['summary'], p
         assert parsed.meta['og:title']==asset['title']+' · Autumn Memo', p
-        assert 'og:image' not in parsed.meta, 'Detail page must not inherit unrelated homepage image'
+        if asset.get('images'):
+            assert parsed.meta.get('og:image')==builder_origin+asset['images'][0]['url'], 'Use the original article image for sharing'
+        else:
+            assert 'og:image' not in parsed.meta, 'Detail page must not inherit unrelated homepage image'
 
 conn=sqlite3.connect(ROOT/'data/hub/memory.sqlite')
 assert conn.execute('PRAGMA integrity_check').fetchone()[0]=='ok'
@@ -55,7 +59,12 @@ assert conn.execute('SELECT COUNT(*) FROM assets').fetchone()[0]==len(data['asse
 for a in data['assets']:
     assert hashlib.sha256((ROOT/a['path']).read_bytes()).hexdigest()==a['sha256'], a['path']
     assert conn.execute('SELECT 1 FROM revisions WHERE asset_id=? AND sha256=?',(a['id'],a['sha256'])).fetchone()
+    for media in a.get('images', []):
+        path=ROOT/unquote(media['url']).lstrip('/')
+        assert path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest()==media['sha256']
+        assert conn.execute('SELECT sha256 FROM asset_media WHERE asset_id=? AND url=?',(a['id'],media['url'])).fetchone()[0]==media['sha256']
 assert conn.execute('SELECT COUNT(*) FROM offer_assets').fetchone()[0]==sum(len(o['asset_ids']) for o in data['offers'])
+assert conn.execute('SELECT COUNT(*) FROM asset_media').fetchone()[0]==sum(len(a.get('images',[])) for a in data['assets'])
 conn.close()
 
 spec=importlib.util.spec_from_file_location('build_hub',ROOT/'scripts/build_hub.py')

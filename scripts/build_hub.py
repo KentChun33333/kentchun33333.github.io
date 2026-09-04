@@ -6,7 +6,8 @@ contain only the explicitly public catalogue. No credentials or visitor memory.
 """
 from pathlib import Path
 from html import escape
-from urllib.parse import quote, urljoin, urlsplit
+from html.parser import HTMLParser
+from urllib.parse import quote, unquote, urljoin, urlsplit
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -22,6 +23,46 @@ ASSETS = DATA['assets']
 BY_ID = {a['id']: a for a in ASSETS}
 RELATIONS = DATA['relations']
 OFFERS = DATA['offers']
+
+
+class ArticleMedia(HTMLParser):
+    """Read only article-body images; exclude badges, tracking and site chrome."""
+    def __init__(self):
+        super().__init__(); self.depth = 0; self.images = []
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if tag == 'div':
+            if self.depth: self.depth += 1
+            elif 'post-content' in attrs.get('class', '').split(): self.depth = 1
+        if self.depth and tag == 'img' and attrs.get('src'):
+            self.images.append((attrs['src'], attrs.get('alt', '')))
+
+    def handle_endtag(self, tag):
+        if tag == 'div' and self.depth: self.depth -= 1
+
+
+def source_images(a):
+    if a['kind'] != 'Article' or not a['path'].endswith('.html'): return []
+    parser = ArticleMedia(); parser.feed((ROOT / a['path']).read_text(errors='replace'))
+    media, seen = [], set()
+    descriptions = {
+        '/img/about/image-20210802080500753.png': 'Campus architecture pictured in Kent’s original MIT-CSAIL introduction.',
+        '/img/BuyingHouse2021/image-20210802073610105.png': 'Residential towers and landscaped grounds pictured in the home-buying story.',
+        '/img/BuyingHouse2021/image-20210802083702087.png': 'Price and location comparison chart from the original home-buying story.'
+    }
+    for src, alt in parser.images:
+        url = urlsplit(urljoin(href(a['path']), src))
+        if url.scheme or url.netloc: continue  # External originals stay in the source article.
+        p = (ROOT / unquote(url.path).lstrip('/')).resolve()
+        if not p.is_relative_to(ROOT) or not p.is_file(): continue
+        rel = str(p.relative_to(ROOT)); image_url = href(rel)
+        if image_url in seen: continue
+        seen.add(image_url)
+        if not alt.strip() or re.match(r'^(image[-_]|img[-_]|[0-9])', alt, re.I):
+            alt = 'Image from “' + a['title'] + '”'
+        media.append({'url':image_url, 'alt':descriptions.get(image_url,alt), 'source_path':a['path'], 'sha256':hashlib.sha256(p.read_bytes()).hexdigest()})
+    return media
 
 
 def href(path):
@@ -51,6 +92,7 @@ def validate():
         a['sha256'] = hashlib.sha256(path.read_bytes()).hexdigest()
         a['url'] = href(a['path'])
         a['detail_url'] = detail(a)
+        a['images'] = source_images(a)
     for r in RELATIONS:
         assert r['source'] in BY_ID and r['target'] in BY_ID and r['basis']
         assert r['source'] != r['target']
@@ -66,18 +108,25 @@ def validate():
 
 def card(a, compact=False):
     search = E(' '.join([a['title'], a['summary'], *a['topics']]).lower())
-    return f'''<article class="asset-card {'compact' if compact else ''}" data-asset data-kind="{E(a['kind'])}" data-stream="{E(a['stream'])}" data-search="{search}">
+    thumbnail = ''
+    if a.get('images'):
+        media = a['images'][0]
+        thumbnail = f'<a class="card-photo" href="{detail(a)}" aria-label="Read {E(a["title"])}"><img src="{E(media["url"])}" alt="{E(media["alt"])}" loading="lazy" decoding="async"></a>'
+    return f'''<article class="asset-card {'compact' if compact else ''}" data-asset data-kind="{E(a['kind'])}" data-stream="{E(a['stream'])}" data-search="{search}">{thumbnail}
       <div class="eyebrow"><span>{E(a['kind'])}</span><span>{E(a['stream'])}</span></div>
       <h3><a href="{detail(a)}">{E(a['title'])}</a></h3><p>{E(a['summary'])}</p>
       <div class="card-bottom"><span class="status">{E(a['status'])}</span><a class="arrow" href="{detail(a)}" aria-label="Explore {E(a['title'])}">↗</a></div></article>'''
 
 
-NAV = [('Overview', '/'), ('Work with me', '/hub/solutions/'), ('Research & collaborate', '/hub/collaborate/'), ('Experience', '/hub/experience/'), ('Asset library', '/hub/library/'), ('Knowledge map', '/hub/graph/')]
+NAV = [('Overview', '/'), ('Work with me', '/hub/solutions/'), ('Research & collaborate', '/hub/collaborate/'), ('Experience', '/hub/experience/'), ('Writing & photos', '/hub/stories/'), ('Asset library', '/hub/library/'), ('Knowledge map', '/hub/graph/')]
 
 
 def page(title, description, body, route='/', active=None, asset=None):
     nav = ''.join('<a href="{}" {}>{}</a>'.format(url, 'aria-current="page"' if url == (active or route) else '', label) for label, url in NAV)
     image = '' if asset else f'<meta property="og:image" content="{ORIGIN}/img/autumn-memo-hub-social.png"><meta name="twitter:image" content="{ORIGIN}/img/autumn-memo-hub-social.png">'
+    if asset and asset.get('images'):
+        media = asset['images'][0]
+        image = f'<meta property="og:image" content="{ORIGIN}{E(media["url"])}"><meta property="og:image:alt" content="{E(media["alt"])}"><meta name="twitter:image" content="{ORIGIN}{E(media["url"])}">'
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
       <title>{E(title)} · Autumn Memo</title><meta name="description" content="{E(description)}"><link rel="canonical" href="{ORIGIN}{route}">
       <meta property="og:title" content="{E(title)} · Autumn Memo"><meta property="og:description" content="{E(description)}"><meta property="og:type" content="{'article' if asset else 'website'}"><meta property="og:url" content="{ORIGIN}{route}">{image}
@@ -161,7 +210,7 @@ def build_memory():
     conn = sqlite3.connect(ROOT / 'data/hub/memory.sqlite')
     conn.executescript((ROOT / 'hub-src/schema.sql').read_text())
     with conn:
-        conn.execute('DELETE FROM offer_assets'); conn.execute('DELETE FROM offers'); conn.execute('DELETE FROM relations')
+        conn.execute('DELETE FROM offer_assets'); conn.execute('DELETE FROM offers'); conn.execute('DELETE FROM relations'); conn.execute('DELETE FROM asset_media')
         ids = {a['id'] for a in ASSETS}
         for (old_id,) in conn.execute('SELECT id FROM assets').fetchall():
             if old_id not in ids:
@@ -171,6 +220,7 @@ def build_memory():
             values = (a['id'], a['title'], a['kind'], a['stream'], a['path'], a['summary'], a['status'], 'public', json.dumps(a, ensure_ascii=False))
             conn.execute('INSERT INTO assets VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET title=excluded.title,kind=excluded.kind,stream=excluded.stream,path=excluded.path,summary=excluded.summary,status=excluded.status,metadata_json=excluded.metadata_json', values)
             conn.execute('INSERT OR IGNORE INTO revisions VALUES (?,?,?)', (a['id'], a['sha256'], NOW))
+            conn.executemany('INSERT INTO asset_media VALUES (?,?,?,?,?,?)', [(a['id'],m['url'],m['alt'],m['source_path'],m['sha256'],i) for i,m in enumerate(a['images'])])
         conn.executemany('INSERT INTO relations VALUES (?,?,?,?)', [(r['source'],r['type'],r['target'],r['basis']) for r in RELATIONS])
         for o in OFFERS:
             conn.execute('INSERT INTO offers VALUES (?,?,?,?)', (o['id'],o['title'],o['state'],json.dumps(o)))
@@ -190,7 +240,10 @@ def build_pages():
     featured = section('Selected work', ''.join(card(BY_ID[i]) for i in ['gse','ter','wealth']), '<a href="/hub/library/">Explore all assets ↗</a>')
     streams = section('Follow a workstream', ''.join(f'<a class="stream-card" href="/hub/library/?stream={name}"><span class="eyebrow">{n:02d} / WORKSTREAM</span><h3>{name} <span>↗</span></h3><p>{desc}</p><small>{sum(a["stream"]==name for a in ASSETS)} curated assets</small></a>' for n,(name,desc) in enumerate([('Build','Agent workflows, tools, and reusable skill definitions.'),('Research','Proposals, protocols, and interactive explainers.'),('Publish','Engineering notes and the original writing archive.')],1)))
     connective = '''<section class="connection-banner"><div><p class="eyebrow">THE THREAD BETWEEN THE WORK</p><h2>Read the idea. Explore the system.<br>Inspect the evidence.</h2><p>Every asset has a stable home. The knowledge map connects related work and explains each relationship.</p></div><a class="button" href="/hub/graph/">Explore the knowledge map ↗</a></section>'''
-    write('index.html', page('Kent Chiu · Research, systems & knowledge', 'Explore Kent Chiu’s research, interactive systems, writing, and opportunities to work together.', hero+entries+featured+connective+streams))
+    stories = '<section class="section"><div class="section-heading"><div><p class="eyebrow">LIFE BEHIND THE WORK</p><h2>Stories, places & personal notes</h2></div><a href="/hub/stories/">All writing & photos ↗</a></div><div class="story-grid">'+''.join(card(BY_ID[i]) for i in ['story-autumn-memo','writing-buyinghouse2021'])+'</div></section>'
+    write('index.html', page('Kent Chiu · Research, systems & knowledge', 'Explore Kent Chiu’s research, interactive systems, writing, and opportunities to work together.', hero+entries+featured+stories+connective+streams))
+    writing = head('WRITING & PHOTOS', 'The stories behind the systems.', 'Research beginnings, a home in Singapore, personal experiences, and years of engineering notes. Original articles, pictures, and charts stay together.')+'<div class="story-grid">'+''.join(card(BY_ID[i]) for i in ['story-autumn-memo','writing-buyinghouse2021'])+'</div>'+section('From the writing archive', ''.join(card(a, True) for a in ASSETS if a['kind']=='Article' and a['id'] not in ['story-autumn-memo','writing-buyinghouse2021']), '<a href="/hub/library/?kind=Article">Search all writing ↗</a>')
+    write('hub/stories/index.html',page('Writing & photos','Personal stories, MIT-CSAIL beginnings, home-buying experiences, and illustrated engineering notes.',writing,'/hub/stories/'))
     # Build all static entry points; search is a progressive enhancement.
     controls = f'''<form class="library-controls" role="search" action="/hub/library/"><label class="search-label">Search the collection<input id="asset-search" name="q" type="search" placeholder="Try memory, evaluation, or finance…" autocomplete="off"></label><label>Asset type<select id="asset-kind" name="kind"><option value="">All types</option>{''.join(f'<option>{E(k)}</option>' for k in sorted({a['kind'] for a in ASSETS}))}</select></label><label>Workstream<select id="asset-stream" name="stream"><option value="">All streams</option><option>Build</option><option>Research</option><option>Publish</option></select></label><button type="reset" class="text-button">Reset</button></form>'''
     library = head('ASSET LIBRARY', 'One collection. Many directions.', 'Search research, demos, skills, and writing. Every entry connects to the preserved original source.')+controls+f'<p id="result-count" role="status">{len(ASSETS)} assets</p><div id="asset-results" class="card-grid">'+''.join(card(a,True) for a in ASSETS)+'</div><div id="empty-results" class="empty-state" hidden><h2>No matching assets</h2><p>Try a broader search or reset your filters.</p></div><noscript><p>All assets are listed below. Interactive filtering requires JavaScript.</p></noscript>'
@@ -227,6 +280,8 @@ def build_pages():
         if a['path'].endswith('.md'):
             body+='<article class="reader">'+markdown((ROOT/a['path']).read_text(),a['path'])+'</article>'
         else:
+            if a.get('images'):
+                body+='<section class="article-gallery" aria-label="Pictures from the original article">'+''.join(f'<figure><a href="{a["url"]}"><img src="{E(m["url"])}" alt="{E(m["alt"])}" loading="lazy" decoding="async"></a><figcaption>Original article image · <a href="{a["url"]}">Read with its full context ↗</a> · <a href="{E(m["url"])}">View full-size image ↗</a></figcaption></figure>' for m in a['images'])+'</section>'
             body+=f'''<section class="reading-path"><h2>{'Explore the interactive artifact' if a['kind'] in ['Demo','Research','Tool'] else 'Read the original article'}</h2><p>The original page retains its layout and interactions. Open it directly for the full experience.</p><a href="{a['url']}">Continue to the original asset ↗</a></section>'''
         if related: body+='<section class="section"><h2>Connected knowledge</h2><ul class="related-list">'+related+'</ul></section>'
         body+=f'<details class="source-details"><summary>Source & reuse information</summary><p>{E(a["rights"])}</p><p>Source: <a href="{a["url"]}">{E(a["path"])}</a></p><p>Asset ID: <code>{a["id"]}</code></p><p>Content fingerprint: <code class="fingerprint">{a["sha256"]}</code></p><p>The fingerprint records source identity, not the date of publication or independent verification of its claims.</p></details>'

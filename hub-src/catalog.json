@@ -376,11 +376,18 @@
       "path": "post/buyinghouse2021/index.html",
       "kind": "Article",
       "stream": "Publish",
-      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "summary": "Why my wife and I chose a home at The Woodleigh Residences in Singapore: location, layout, budget, and the comparisons behind our decision, with the original pictures and price-location chart.",
       "topics": [
-        "Engineering notes"
+        "Personal stories",
+        "Buying a home",
+        "Buying a house",
+        "Singapore",
+        "Condo",
+        "Property",
+        "Woodleigh Residences",
+        "Photography"
       ],
-      "status": "Archived writing",
+      "status": "Personal story · 2021",
       "featured": false,
       "audiences": [
         "learn",
@@ -1115,6 +1122,32 @@
       "audiences": [
         "learn",
         "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "story-autumn-memo",
+      "title": "Where Autumn Memo began · MIT-CSAIL",
+      "path": "about/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "The story behind Autumn Memo, which began during my research exchange in Randall Davis’s MIT-CSAIL lab in 2016. Read the original introduction with its campus photograph.",
+      "topics": [
+        "MIT",
+        "MIT-CSAIL",
+        "CSAIL",
+        "Research exchange",
+        "Personal stories",
+        "Photography",
+        "About Kent"
+      ],
+      "status": "Personal background",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "collaborate",
         "evaluate"
       ],
       "visibility": "public",

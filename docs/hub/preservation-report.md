@@ -5,7 +5,8 @@
 - Authorized replacement: root `index.html`. Its exact prior bytes are retained as `index.previous-nexus.html`.
 - Files removed by this refactor: 0.
 - Existing nested HTML/Markdown sources inventoried: 740.
-- Public catalogue: 55 assets; 8 explicitly described relationships; 3 inquiry-stage offers.
+- Public catalogue: 56 assets; 8 explicitly described relationships; 3 inquiry-stage offers.
+- Image discoverability follow-up: 21 original local images linked from 11 articles, with homepage features for MIT-CSAIL beginnings and the Singapore home-buying story. All original image bytes and paths remain unchanged.
 - SQLite rebuild preserved all existing revision observations.
 - Original blog, research, demo, skill and Markdown contents were not rewritten.
 

@@ -27,3 +27,8 @@ CREATE TABLE IF NOT EXISTS source_inventory (
 );
 CREATE INDEX IF NOT EXISTS idx_assets_kind_stream ON assets(kind, stream);
 CREATE INDEX IF NOT EXISTS idx_relations_target ON relations(target);
+CREATE TABLE IF NOT EXISTS asset_media (
+ asset_id TEXT NOT NULL REFERENCES assets(id), url TEXT NOT NULL, alt TEXT NOT NULL,
+ source_path TEXT NOT NULL, sha256 TEXT NOT NULL, position INTEGER NOT NULL,
+ PRIMARY KEY(asset_id, url)
+);

@@ -30,6 +30,7 @@ Autumn Memo
 │   ├── /hub/solutions/ — buyer / business problem / inquiry
 │   ├── /hub/collaborate/ — researcher / collaborator / reading paths
 │   ├── /hub/experience/ — employer / capabilities / technical artifacts
+│   ├── /hub/stories/ — personal stories, original article photos, writing archive
 │   ├── /hub/library/ — learner / search / type and stream filters
 │   ├── /hub/graph/ — connected assets and relationship explanations
 │   ├── /hub/assets/{id}/ — stable share page and readable Markdown
@@ -78,6 +79,13 @@ similarity into a factual dependency.
 | Git history | Full committed content and metadata history | Repository access rules |
 
 The SQLite database is a durable generated catalogue, not a browser database.
+`asset_media` links original article images to their source pages with alt text,
+ordering, and content fingerprints. Images remain at their original paths. The
+homepage and Writing & photos entry surface personal material alongside technical
+work; article detail pages provide original-image galleries and contextual links.
+Source images also supply article-specific social previews. External images remain
+in their original articles rather than being copied or silently proxied.
+
 `assets` stores metadata; `revisions` stores first-observed timestamps per source
 fingerprint; `relations` stores typed edges; `offers` and `offer_assets` describe
 commercial options; `source_inventory` records source identity. Foreign keys and
