@@ -52,3 +52,6 @@ body[data-filter-layout=rail],body[data-filter-layout=expanded]{--filters-width:
 .library-topbar .compact-search{flex:1;min-width:100px;max-width:520px;margin:0;gap:0;flex-wrap:nowrap}.library-topbar .compact-search input[type=search]{width:100%;min-width:0;min-height:40px;flex:1;font-size:13px;letter-spacing:0}body[data-asset-open=true] .library-topbar .compact-search{display:none}
 @container(max-width:1000px){.library-topbar .topbar-links .control-label{display:none}.library-topbar .topbar-links .control-icon{display:inline-block;font-size:18px}.library-topbar .topbar-links #about-trigger,.library-topbar .topbar-links .conversation-trigger{padding:7px 9px}}
 @container(max-width:540px){.library-topbar .header-library-link .control-label{display:none}.library-topbar .header-library-link .control-icon{display:inline-block;font-size:22px}.library-topbar{padding-left:10px;padding-right:10px;gap:6px}.library-topbar .topbar-links{gap:4px}.library-topbar .compact-search input[type=search]{padding:8px;font-size:12px}.library-topbar .topbar-links #about-trigger,.library-topbar .topbar-links .conversation-trigger{padding:6px}.library-topbar .header-collapse{width:26px}}
+
+/* The expanded rail uses the wordmark alone. */
+body[data-filter-layout=rail] .filters-panel .conversation-heading .sidebar-brand{display:none}
