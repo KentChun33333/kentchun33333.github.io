@@ -1,0 +1,1227 @@
+{
+  "schema_version": 1,
+  "assets": [
+    {
+      "id": "gse",
+      "title": "Guarded Skill Evolution",
+      "path": "idea-paper/guarded-skill-evolution/guarded-skill-evolution-v2.html",
+      "kind": "Research",
+      "stream": "Research",
+      "summary": "When should an agent change its skills? Explore a research proposal on regression controls, failure attribution, and selective intervention.",
+      "topics": [
+        "Agent evaluation",
+        "Skill evolution"
+      ],
+      "status": "Research proposal",
+      "featured": true,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "ter",
+      "title": "Financial crime operations studio",
+      "path": "ter-agentic-demos/ter-bank-multi-agent-flow-v15.html",
+      "kind": "Demo",
+      "stream": "Build",
+      "summary": "Explore a simulated document-to-review workflow for financial crime operations, with agent coordination and human review.",
+      "topics": [
+        "Agent workflows",
+        "Financial intelligence"
+      ],
+      "status": "Interactive prototype",
+      "featured": true,
+      "audiences": [
+        "buy",
+        "collaborate",
+        "evaluate",
+        "learn"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "wealth",
+      "title": "Wealth Intelligence Agent",
+      "path": "wealthy_data_insight/index.html",
+      "kind": "Demo",
+      "stream": "Build",
+      "summary": "An interactive portfolio and governed knowledge workflow. Explore the concept and discuss how it could fit a real operating environment.",
+      "topics": [
+        "Financial intelligence",
+        "Knowledge systems"
+      ],
+      "status": "Interactive prototype",
+      "featured": true,
+      "audiences": [
+        "buy",
+        "collaborate",
+        "evaluate",
+        "learn"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "publisher",
+      "title": "GitHub ZIP Publisher",
+      "path": "github-zip-upload/index.html",
+      "kind": "Tool",
+      "stream": "Build",
+      "summary": "A browser utility for publishing ZIP contents to GitHub. Review its requirements and permissions before use.",
+      "topics": [
+        "Developer tools"
+      ],
+      "status": "Browser utility",
+      "featured": true,
+      "audiences": [
+        "buy",
+        "collaborate",
+        "evaluate",
+        "learn"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "gse-paper",
+      "title": "Guarded Skill Evolution · Research manuscript",
+      "path": "idea-paper/guarded-skill-evolution/paper.md",
+      "kind": "Protocol",
+      "stream": "Research",
+      "summary": "Read the source research manuscript for the Guarded Skill Evolution research proposal.",
+      "topics": [
+        "Agent evaluation",
+        "Skill evolution"
+      ],
+      "status": "Research proposal",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "gse-experiment-protocol",
+      "title": "Guarded Skill Evolution · Experiment protocol",
+      "path": "idea-paper/guarded-skill-evolution/experiment-protocol.md",
+      "kind": "Protocol",
+      "stream": "Research",
+      "summary": "Read the source experiment protocol for the Guarded Skill Evolution research proposal.",
+      "topics": [
+        "Agent evaluation",
+        "Skill evolution"
+      ],
+      "status": "Research proposal",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "gse-benchmark-schema",
+      "title": "Guarded Skill Evolution · Benchmark schema",
+      "path": "idea-paper/guarded-skill-evolution/benchmark-schema.md",
+      "kind": "Protocol",
+      "stream": "Research",
+      "summary": "Read the source benchmark schema for the Guarded Skill Evolution research proposal.",
+      "topics": [
+        "Agent evaluation",
+        "Skill evolution"
+      ],
+      "status": "Research proposal",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "deeptutor-agent-native-learning-architecture",
+      "title": "DeepTutor — One Learning Runtime, Many Ways to Think",
+      "path": "ai-research-insights/deeptutor-agent-native-learning-architecture.html",
+      "kind": "Research",
+      "stream": "Research",
+      "summary": "Explore the original interactive explainer and its source references. Publication in this catalogue does not independently validate model or benchmark claims.",
+      "topics": [
+        "Agent reasoning"
+      ],
+      "status": "Explainer",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "dynamic-reasoning-compute-explained",
+      "title": "Inside Dynamic Reasoning Compute Budgets — Test-Time Scaling & Ablation Lab",
+      "path": "ai-research-insights/dynamic-reasoning-compute-explained.html",
+      "kind": "Research",
+      "stream": "Research",
+      "summary": "Explore the original interactive explainer and its source references. Publication in this catalogue does not independently validate model or benchmark claims.",
+      "topics": [
+        "Agent reasoning"
+      ],
+      "status": "Explainer",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "envharness-agent-learning",
+      "title": "EnvHarness — Adaptive Environments for Agent Learning",
+      "path": "ai-research-insights/envharness-agent-learning.html",
+      "kind": "Research",
+      "stream": "Research",
+      "summary": "Explore the original interactive explainer and its source references. Publication in this catalogue does not independently validate model or benchmark claims.",
+      "topics": [
+        "Agent reasoning"
+      ],
+      "status": "Explainer",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "llm-as-a-verifier",
+      "title": "LLM-as-a-Verifier — Verification as a Scaling Axis",
+      "path": "ai-research-insights/llm-as-a-verifier.html",
+      "kind": "Research",
+      "stream": "Research",
+      "summary": "Explore the original interactive explainer and its source references. Publication in this catalogue does not independently validate model or benchmark claims.",
+      "topics": [
+        "Agent reasoning"
+      ],
+      "status": "Explainer",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "recuris-memory-evolution",
+      "title": "Recuris — Memory That Learns Where It Failed",
+      "path": "ai-research-insights/recuris-memory-evolution.html",
+      "kind": "Research",
+      "stream": "Research",
+      "summary": "Explore the original interactive explainer and its source references. Publication in this catalogue does not independently validate model or benchmark claims.",
+      "topics": [
+        "Knowledge systems"
+      ],
+      "status": "Explainer",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "rlvr-grpo-explained",
+      "title": "Inside RLVR & GRPO — Mathematical Mechanics & Interactive Ablation Lab",
+      "path": "ai-research-insights/rlvr-grpo-explained.html",
+      "kind": "Research",
+      "stream": "Research",
+      "summary": "Explore the original interactive explainer and its source references. Publication in this catalogue does not independently validate model or benchmark claims.",
+      "topics": [
+        "Agent reasoning"
+      ],
+      "status": "Explainer",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "synthetic-distillation-flywheel-explained",
+      "title": "Inside Synthetic Distillation Flywheels — Reasoning Transfer & Ablation Lab",
+      "path": "ai-research-insights/synthetic-distillation-flywheel-explained.html",
+      "kind": "Research",
+      "stream": "Research",
+      "summary": "Explore the original interactive explainer and its source references. Publication in this catalogue does not independently validate model or benchmark claims.",
+      "topics": [
+        "Agent reasoning"
+      ],
+      "status": "Explainer",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "timesfm-3-explained",
+      "title": "Inside TimesFM-3 — Input → Model → Output",
+      "path": "ai-research-insights/timesfm-3-explained.html",
+      "kind": "Research",
+      "stream": "Research",
+      "summary": "Explore the original interactive explainer and its source references. Publication in this catalogue does not independently validate model or benchmark claims.",
+      "topics": [
+        "Agent reasoning"
+      ],
+      "status": "Explainer",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-2023-0711-economicweather",
+      "title": "Economic Weather x All Weather Portfolio",
+      "path": "post/2023-0711-economicweather/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-2023-feb-optionstrategy",
+      "title": "Top 5 Option Strategies",
+      "path": "post/2023-feb-optionstrategy/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-20230607-learntorank",
+      "title": "Learn-to-Rank Architecture",
+      "path": "post/20230607-learntorank/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-buyinghouse2021",
+      "title": "Buy a Condo in Singapore",
+      "path": "post/buyinghouse2021/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-cblof",
+      "title": "Cluster-Based Local Outlier Factor",
+      "path": "post/cblof/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-clawdbot-memory-system-analysis",
+      "title": "Clawdbot Memory System Analysis",
+      "path": "post/clawdbot-memory-system-analysis/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-cloudpickle",
+      "title": "cloudpickle for distributing serializing",
+      "path": "post/cloudpickle/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-cubejs_tryout",
+      "title": "Trying Cube.js",
+      "path": "post/cubejs_tryout/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-customized-lorenz-ann-classification",
+      "title": "Stock Prediction with LorenzANN",
+      "path": "post/customized-lorenz-ann-classification/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-db-index-vs-silhouette-score",
+      "title": "Metric for hyperparamter search in Unsupervise Learning",
+      "path": "post/db-index-vs-silhouette-score/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-hostpersonalgpt",
+      "title": "Host Personal Chatgpt-ish Service on AWS",
+      "path": "post/hostpersonalgpt/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-how-to-close-clawdbot-daemon",
+      "title": "How to Properly Close Clawdbot Daemon",
+      "path": "post/how-to-close-clawdbot-daemon/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-memosystem",
+      "title": "Blog Memo by Hugo with Typora",
+      "path": "post/memosystem/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-metricf1score",
+      "title": "F1 Score on Multi Classes",
+      "path": "post/metricf1score/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-design_backtesting",
+      "title": "Designing a Backtesting System",
+      "path": "post/quant/design_backtesting/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-quant_metric_001",
+      "title": "Metric for trading",
+      "path": "post/quant/quant_metric_001/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-scedasticicity",
+      "title": "Modeling Uncertainty of ML Systems (01)",
+      "path": "post/scedasticicity/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-self-instruct-aligning-language-model-with-self-generated-instructions",
+      "title": "Paper Summay on Aligning LLM with Self-Instruct",
+      "path": "post/self-instruct-aligning-language-model-with-self-generated-instructions/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-simplesearchsys",
+      "title": "Build a Simple Search System",
+      "path": "post/simplesearchsys/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-small-capybara-video",
+      "title": "Small Capybara July 2025",
+      "path": "post/small-capybara-video/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-sshbitbuketonwinows",
+      "title": "Setting Bitbucket on Windows",
+      "path": "post/sshbitbuketonwinows/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-table-tennis-rating",
+      "title": "Kent Chiu｜OTH 桌球戰績與台灣積分評估",
+      "path": "post/table-tennis-rating/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-taskmanagement",
+      "title": "Collaborative Task Management",
+      "path": "post/taskmanagement/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-test_02",
+      "title": "Memory Usage Tracking in python",
+      "path": "post/test_02/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-timeseries",
+      "title": "Time Series and Stationarity",
+      "path": "post/timeseries/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-top-10-correlation-coeff",
+      "title": "Top 10 Correlation Coefficient",
+      "path": "post/top-10-correlation-coeff/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-track_memory",
+      "title": "Tracking Memory Usage",
+      "path": "post/track_memory/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-trackingmemo",
+      "title": "Time and Memory Profile Tracking in python",
+      "path": "post/trackingmemo/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-tradingtactic",
+      "title": "Trading Strategy",
+      "path": "post/tradingtactic/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "writing-what-is-rouge-l",
+      "title": "Recall-Oriented Understudy for Gisting Evaluation (ROUGE)",
+      "path": "post/what-is-rouge-l/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "From the Autumn Memo writing archive. Read the original article in its preserved layout.",
+      "topics": [
+        "Engineering notes"
+      ],
+      "status": "Archived writing",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "skill-build-async-agentic-web-demo",
+      "title": "Build Async Agentic Web Demo",
+      "path": "skills/build-async-agentic-web-demo/SKILL.md",
+      "kind": "Skill",
+      "stream": "Build",
+      "summary": "Read the actual skill instructions, usage conditions, and source definitions.",
+      "topics": [
+        "Agent workflows",
+        "Reusable skills"
+      ],
+      "status": "Source available",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "skill-charting",
+      "title": "Charting",
+      "path": "skills/charting/skill.md",
+      "kind": "Skill",
+      "stream": "Build",
+      "summary": "Read the actual skill instructions, usage conditions, and source definitions.",
+      "topics": [
+        "Agent workflows",
+        "Reusable skills"
+      ],
+      "status": "Source available",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "skill-cross-evolve-skill",
+      "title": "Cross Evolve Skill",
+      "path": "skills/cross-evolve-skill/skill.md",
+      "kind": "Skill",
+      "stream": "Build",
+      "summary": "Read the actual skill instructions, usage conditions, and source definitions.",
+      "topics": [
+        "Agent workflows",
+        "Reusable skills"
+      ],
+      "status": "Source available",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "skill-evaluate-executive-resume",
+      "title": "Evaluate Executive Resume",
+      "path": "skills/evaluate-executive-resume/SKILL.md",
+      "kind": "Skill",
+      "stream": "Build",
+      "summary": "Read the actual skill instructions, usage conditions, and source definitions.",
+      "topics": [
+        "Agent workflows",
+        "Reusable skills"
+      ],
+      "status": "Source available",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "skill-evaluate-web-deliverable",
+      "title": "Evaluate Web Deliverable",
+      "path": "skills/evaluate-web-deliverable/SKILL.md",
+      "kind": "Skill",
+      "stream": "Build",
+      "summary": "Read the actual skill instructions, usage conditions, and source definitions.",
+      "topics": [
+        "Agent workflows",
+        "Reusable skills"
+      ],
+      "status": "Source available",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "skill-ideogram-image-generation",
+      "title": "Ideogram Image Generation",
+      "path": "skills/ideogram-image-generation/skill.md",
+      "kind": "Skill",
+      "stream": "Build",
+      "summary": "Read the actual skill instructions, usage conditions, and source definitions.",
+      "topics": [
+        "Agent workflows",
+        "Reusable skills"
+      ],
+      "status": "Source available",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "skill-knowledge-distill",
+      "title": "Knowledge Distill",
+      "path": "skills/knowledge-distill/SKILL.md",
+      "kind": "Skill",
+      "stream": "Build",
+      "summary": "Read the actual skill instructions, usage conditions, and source definitions.",
+      "topics": [
+        "Agent workflows",
+        "Reusable skills"
+      ],
+      "status": "Source available",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "skill-markdown-to-pdf",
+      "title": "Markdown To Pdf",
+      "path": "skills/markdown-to-pdf/skill.md",
+      "kind": "Skill",
+      "stream": "Build",
+      "summary": "Read the actual skill instructions, usage conditions, and source definitions.",
+      "topics": [
+        "Agent workflows",
+        "Reusable skills"
+      ],
+      "status": "Source available",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "skill-semantic-pattern-mining",
+      "title": "Semantic Pattern Mining",
+      "path": "skills/semantic-pattern-mining/SKILL.md",
+      "kind": "Skill",
+      "stream": "Build",
+      "summary": "Read the actual skill instructions, usage conditions, and source definitions.",
+      "topics": [
+        "Agent workflows",
+        "Reusable skills"
+      ],
+      "status": "Source available",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    },
+    {
+      "id": "skill-web",
+      "title": "Web",
+      "path": "skills/web/SKILL.md",
+      "kind": "Skill",
+      "stream": "Build",
+      "summary": "Read the actual skill instructions, usage conditions, and source definitions.",
+      "topics": [
+        "Agent workflows",
+        "Reusable skills"
+      ],
+      "status": "Source available",
+      "featured": false,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission."
+    }
+  ],
+  "relations": [
+    {
+      "source": "gse",
+      "type": "documented_by",
+      "target": "gse-paper",
+      "basis": "The project README identifies this manuscript."
+    },
+    {
+      "source": "gse",
+      "type": "evaluated_with",
+      "target": "gse-experiment-protocol",
+      "basis": "The project README identifies the experiment protocol; experiments are proposed."
+    },
+    {
+      "source": "gse-experiment-protocol",
+      "type": "uses_schema",
+      "target": "gse-benchmark-schema",
+      "basis": "The proposal contains a benchmark schema and experiment protocol."
+    },
+    {
+      "source": "gse",
+      "type": "related_topic",
+      "target": "skill-cross-evolve-skill",
+      "basis": "Editorial topic connection; does not assert implementation or measured results."
+    },
+    {
+      "source": "gse",
+      "type": "related_topic",
+      "target": "skill-knowledge-distill",
+      "basis": "Editorial topic connection; does not assert implementation or measured results."
+    },
+    {
+      "source": "gse",
+      "type": "related_topic",
+      "target": "skill-semantic-pattern-mining",
+      "basis": "Editorial topic connection; does not assert implementation or measured results."
+    },
+    {
+      "source": "ter",
+      "type": "related_topic",
+      "target": "skill-build-async-agentic-web-demo",
+      "basis": "Both cover asynchronous agentic web demos; editorial connection."
+    },
+    {
+      "source": "ter",
+      "type": "related_topic",
+      "target": "wealth",
+      "basis": "Both explore financial intelligence workflows; editorial connection."
+    }
+  ],
+  "offers": [
+    {
+      "id": "agent-workflow",
+      "title": "Agent workflow prototype",
+      "asset_ids": [
+        "ter",
+        "wealth"
+      ],
+      "summary": "Discuss adapting an agent workflow to your documents, review process, and operational constraints.",
+      "deliverables": [
+        "Discovery and workflow scope",
+        "Prototype requirements",
+        "Evaluation and handoff scope"
+      ],
+      "state": "inquiry",
+      "price": null,
+      "checkout_url": null
+    },
+    {
+      "id": "evaluation-package",
+      "title": "Agent evaluation research package",
+      "asset_ids": [
+        "gse",
+        "gse-experiment-protocol",
+        "gse-benchmark-schema"
+      ],
+      "summary": "Discuss a scoped research or evaluation engagement using the published proposal as a starting point.",
+      "deliverables": [
+        "Research question and boundaries",
+        "Agreed evaluation design",
+        "Documentation and knowledge transfer scope"
+      ],
+      "state": "inquiry",
+      "price": null,
+      "checkout_url": null
+    },
+    {
+      "id": "knowledge-workshop",
+      "title": "Knowledge systems workshop",
+      "asset_ids": [
+        "skill-knowledge-distill"
+      ],
+      "summary": "Discuss a workshop or architecture review for organizing source material into traceable knowledge assets.",
+      "deliverables": [
+        "Source and audience mapping",
+        "Knowledge architecture review",
+        "Prioritized implementation plan"
+      ],
+      "state": "inquiry",
+      "price": null,
+      "checkout_url": null
+    }
+  ]
+}

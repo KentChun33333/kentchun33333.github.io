@@ -1,0 +1,1231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#06090e">
+
+  <title>Autumn Memo // Intelligence Nexus — Autonomous Agents, Frontier AI & Quantitative Systems</title>
+  <meta name="description" content="Personal intelligence nexus, frontier AI research papers, interactive agentic demos, and self-evolving skills by Kent Chiu (ex-MIT CSAIL Randall Davis Lab).">
+  
+  <!-- OpenGraph -->
+  <meta property="og:title" content="Autumn Memo // Intelligence Nexus — Kent Chiu">
+  <meta property="og:description" content="Autonomous Agent Architectures, Frontier AI Research Studies, Interactive Systems Demos & Evolving Skills Library.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://kentchun33333.github.io/">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/css/modern-hub.css">
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="alternate" type="application/rss+xml" href="https://kentchun33333.github.io/index.xml" title="Autumn Memo RSS">
+
+  <!-- Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PZF7WLJRQL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-PZF7WLJRQL');
+  </script>
+</head>
+
+<body>
+
+  <!-- ==========================================================================
+       TOP NAVIGATION BAR
+       ========================================================================== -->
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand">
+        <div class="brand-icon">AM</div>
+        <div class="brand-text">
+          <b>AUTUMN MEMO</b>
+          <span><i class="pulse-dot"></i> INTELLIGENCE NEXUS // KENT CHIU</span>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <a href="#profile" class="nav-link">Profile</a>
+        <a href="#research" class="nav-link">Frontier Papers</a>
+        <a href="#demos" class="nav-link">Live Demos</a>
+        <a href="#monitoring" class="nav-link">Telemetry</a>
+        <a href="#skills" class="nav-link">Skills Engine</a>
+        <a href="#vault" class="nav-link">Engineering Vault</a>
+        <a href="/post/" class="nav-link" style="color: var(--emerald);">Legacy Archive ↗</a>
+      </nav>
+
+      <div class="topbar-actions">
+        <button class="search-trigger" onclick="document.getElementById('globalSearchInput').focus(); document.getElementById('globalSearchInput').scrollIntoView({behavior: 'smooth', block: 'center'});" aria-label="Search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span>Search</span>
+          <kbd>/</kbd>
+        </button>
+        <a href="#demos" class="btn-primary">Explore Demos ↓</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       HERO SECTION
+       ========================================================================== -->
+  <section class="hero">
+    <div class="shell hero-grid">
+      <div>
+        <div class="hero-badge">
+          <i class="pulse-dot"></i> FRONTIER AI & QUANTITATIVE SYSTEMS LAB
+        </div>
+        <h1 class="hero-title">
+          Autonomous Agent Architectures, <br>
+          <span class="gradient-text">Frontier AI Studies & Quant Systems.</span>
+        </h1>
+        <p class="hero-desc">
+          Curated research studies, reproducible idea papers, production-grade agentic demos, and self-evolving LLM skills by <b>Kent Chiu</b> (ex-MIT CSAIL Randall Davis Lab). An organized intelligence hub built for evidence-grounded AI engineering.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#demos" class="btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            Launch Banking STR Studio
+          </a>
+          <a href="#research" class="btn-ghost">
+            Explore 10 Frontier Studies →
+          </a>
+          <a href="#skills" class="btn-ghost">
+            Inspect Skills Library
+          </a>
+        </div>
+      </div>
+
+      <!-- Live Stats & System Telemetry Widget -->
+      <div class="hero-card">
+        <div class="hero-card-header">
+          <h3>Ecosystem Health & Status</h3>
+          <div class="card-status-badge">
+            <i class="pulse-dot"></i> ALL SYSTEMS OPERATIONAL
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-num">10</div>
+            <div class="stat-label">Frontier Research Studies</div>
+            <div class="stat-trend">↑ RLVR & GSE Grounded</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">4</div>
+            <div class="stat-label">Production & Concept Demos</div>
+            <div class="stat-trend" style="color: var(--cyan);">★ Zero-Dependency Web</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">11</div>
+            <div class="stat-label">Self-Evolving Agent Skills</div>
+            <div class="stat-trend" style="color: var(--amber);">⚡ Contract Governed</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">24+</div>
+            <div class="stat-label">Engineering & Quant Papers</div>
+            <div class="stat-trend" style="color: var(--purple);">☍ Hybrid RAG & Algorithms</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       INTERACTIVE SEARCH & CATEGORY FILTER STRIP
+       ========================================================================== -->
+  <div class="filter-strip">
+    <div class="shell filter-strip-inner">
+      <div class="filter-pills">
+        <button class="filter-pill active" data-filter="all">
+          <span>All Assets</span>
+          <span class="pill-count" id="countAll">0</span>
+        </button>
+        <button class="filter-pill" data-filter="research">
+          <span>Frontier AI Papers</span>
+          <span class="pill-count" id="countResearch">0</span>
+        </button>
+        <button class="filter-pill" data-filter="demos">
+          <span>Interactive Demos</span>
+          <span class="pill-count" id="countDemos">0</span>
+        </button>
+        <button class="filter-pill" data-filter="skills">
+          <span>Agentic Skills</span>
+          <span class="pill-count" id="countSkills">0</span>
+        </button>
+        <button class="filter-pill" data-filter="blogs">
+          <span>Engineering Vault</span>
+          <span class="pill-count" id="countBlogs">0</span>
+        </button>
+        <button class="filter-pill" data-filter="monitoring">
+          <span>Telemetry</span>
+          <span class="pill-count" id="countMonitoring">0</span>
+        </button>
+      </div>
+
+      <div class="search-box-wrap">
+        <svg class="search-icon-inside" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="globalSearchInput" class="search-box" placeholder="Filter by keyword, topic, or model (e.g. RAG, RLVR, STR)..." autocomplete="off">
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       LAYER 1: AUTHOR & INTELLIGENCE PROFILE
+       ========================================================================== -->
+  <section class="section" id="profile" data-search-item data-category="all">
+    <div class="shell">
+      <div class="section-head">
+        <div>
+          <div class="section-tag">01 // AUTHOR & INTELLIGENCE PROFILE</div>
+          <h2 class="section-title">About Kent Chiu</h2>
+          <p class="section-desc">Pioneering algorithmic systems, autonomous multi-agent orchestration, and frontier LLM reasoning.</p>
+        </div>
+      </div>
+
+      <div class="profile-card">
+        <div class="profile-grid">
+          <div class="profile-avatar-wrap">
+            <div class="profile-avatar">
+              <span class="profile-initials">KC</span>
+            </div>
+            <h3 class="profile-name">Kent Chiu</h3>
+            <div class="profile-title">AI & Quant Systems Architect</div>
+
+            <div class="profile-badges">
+              <span class="badge-tag">MIT-CSAIL Alum</span>
+              <span class="badge-tag">Multi-Agent Systems</span>
+              <span class="badge-tag">Algorithmic Trading</span>
+              <span class="badge-tag">RLVR / GRPO</span>
+            </div>
+
+            <div class="profile-socials">
+              <a href="https://github.com/KentChun33333" target="_blank" rel="noopener" class="social-btn" title="GitHub">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              </a>
+              <a href="https://kentchun33333.github.io/about/" class="social-btn" title="About Page">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              </a>
+              <a href="/index.xml" class="social-btn" title="RSS Feed">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+              </a>
+              <a href="/post/" class="social-btn" title="Articles Archive">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+              </a>
+            </div>
+          </div>
+
+          <div class="profile-bio">
+            <p>
+              I am <b>Kent Chiu</b>. Autumn Memo was founded in 2016 during my research exchange in <b>Prof. Randall Davis's Laboratory at MIT-CSAIL</b>. What started as algorithmic inquiry into machine intelligence and mathematical models has evolved into an engineering nexus spanning autonomous multi-agent systems, test-time compute scaling, and quantitative finance.
+            </p>
+            <p>
+              Today, this platform serves as an evidence-grounded research workshop and production-ready demo hub. Every research study published here is accompanied by reproducible test contracts, interactive decision frontier simulators, or live offline-capable web deliverables.
+            </p>
+
+            <div class="focus-pillars">
+              <div class="pillar-card">
+                <span class="pillar-icon">⚡</span>
+                <h4>Autonomous Agentic Networks</h4>
+                <p>Multi-agent collaboration, asynchronous task queues, and human-in-the-loop review for high-stakes domains (financial crime, AML/CFT, wealth intelligence).</p>
+              </div>
+              <div class="pillar-card">
+                <span class="pillar-icon">🧠</span>
+                <h4>Test-Time Compute & RLVR</h4>
+                <p>Reinforcement Learning with Verifiable Rewards, dynamic reasoning budgets, self-verification protocols, and regression-controlled skill evolution.</p>
+              </div>
+              <div class="pillar-card">
+                <span class="pillar-icon">📈</span>
+                <h4>Quantitative & Microstructure Systems</h4>
+                <p>Order book dynamics, continuous memory RAG architectures, clustering validation metrics, and macroeconomic factor regimes.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       LAYER 3: AI RESEARCH & IDEA PAPERS
+       ========================================================================== -->
+  <section class="section" id="research">
+    <div class="shell">
+      <div class="section-head">
+        <div>
+          <div class="section-tag">02 // AI RESEARCH & IDEA PAPERS</div>
+          <h2 class="section-title">Frontier AI Studies & Research Proposals</h2>
+          <p class="section-desc">Evidence-grounded papers exploring test-time search, reasoning budgets, RLVR, and guarded agent evolution.</p>
+        </div>
+      </div>
+
+      <div class="card-grid-3">
+        <!-- Paper 1 -->
+        <article class="hub-card" data-search-item data-category="research">
+          <div>
+            <div class="hub-card-top">
+              <span class="card-category-badge cat-research">RESEARCH STUDY</span>
+              <span class="card-date">SEP 2026</span>
+            </div>
+            <h3 class="hub-card-title">The September 2026 Frontier AI Convergence</h3>
+            <p class="hub-card-desc">
+              Why Gemini 3.8, Muse Spark 1.3, Qwen3.8-Max, Claude Fable 5.1, and Kimi K3 leaped forward simultaneously. Inside RLVR, test-time search, sparse MoE, and environment harnesses.
+            </p>
+            <div class="hub-card-tags">
+              <span class="tag-item">RLVR</span>
+              <span class="tag-item">Test-Time Compute</span>
+              <span class="tag-item">Sparse MoE</span>
+              <span class="tag-item">Gemini 3.8</span>
+            </div>
+          </div>
+          <div class="hub-card-actions">
+            <a href="/ai-research-insights/september-2026-frontier-convergence.html" class="btn-card-launch">Read Study ↗</a>
+            <button class="btn-card-preview" data-preview-url="/ai-research-insights/september-2026-frontier-convergence.html" data-preview-title="The September 2026 Frontier AI Convergence" data-preview-subtitle="Frontier Research Study">Quick Preview</button>
+          </div>
+        </article>
+
+        <!-- Paper 2 -->
+        <article class="hub-card" data-search-item data-category="research">
+          <div>
+            <div class="hub-card-top">
+              <span class="card-category-badge cat-research">RESEARCH PROPOSAL</span>
+              <span class="card-date">AUG 2026</span>
+            </div>
+            <h3 class="hub-card-title">Guarded Skill Evolution (GSE)</h3>
+            <p class="hub-card-desc">
+              Requirement-aware, regression-controlled approach to modifying persistent LLM-agent skills. Uses Pareto frontiers, failure attribution, and interactive decision elicitation.
+            </p>
+            <div class="hub-card-tags">
+              <span class="tag-item">Agent Safety</span>
+              <span class="tag-item">Skill Mutation</span>
+              <span class="tag-item">Regression Guards</span>
+              <span class="tag-item">Simulator</span>
+            </div>
+          </div>
+          <div class="hub-card-actions">
+            <a href="/idea-paper/guarded-skill-evolution/guarded-skill-evolution-v2.html" class="btn-card-launch">Open Paper ↗</a>
+            <button class="btn-card-preview" data-preview-url="/idea-paper/guarded-skill-evolution/guarded-skill-evolution-v2.html" data-preview-title="Guarded Skill Evolution (GSE)" data-preview-subtitle="Research Proposal & Interactive Simulator">Quick Preview</button>
+          </div>
+        </article>
+
+        <!-- Paper 3 -->
+        <article class="hub-card" data-search-item data-category="research">
+          <div>
+            <div class="hub-card-top">
+              <span class="card-category-badge cat-research">SYSTEM EXPLAINER</span>
+              <span class="card-date">2026</span>
+            </div>
+            <h3 class="hub-card-title">Dynamic Reasoning Compute Explained</h3>
+            <p class="hub-card-desc">
+              Adaptive test-time compute allocation: how modern models dynamically expand reasoning steps, branch exploration, and self-verification based on problem difficulty.
+            </p>
+            <div class="hub-card-tags">
+              <span class="tag-item">Dynamic Compute</span>
+              <span class="tag-item">Search Budgets</span>
+              <span class="tag-item">Verification</span>
+            </div>
+          </div>
+          <div class="hub-card-actions">
+            <a href="/ai-research-insights/dynamic-reasoning-compute-explained.html" class="btn-card-launch">Read Study ↗</a>
+            <button class="btn-card-preview" data-preview-url="/ai-research-insights/dynamic-reasoning-compute-explained.html" data-preview-title="Dynamic Reasoning Compute Explained" data-preview-subtitle="Test-Time Search & Verification Budgets">Quick Preview</button>
+          </div>
+        </article>
+
+        <!-- Paper 4 -->
+        <article class="hub-card" data-search-item data-category="research">
+          <div>
+            <div class="hub-card-top">
+              <span class="card-category-badge cat-research">ARCHITECTURE</span>
+              <span class="card-date">2026</span>
+            </div>
+            <h3 class="hub-card-title">Recursive Memory Evolution</h3>
+            <p class="hub-card-desc">
+              Continuous state refinement in multi-turn autonomous agents. Resolves memory degradation, context fragmentation, and long-horizon catastrophic forgetting.
+            </p>
+            <div class="hub-card-tags">
+              <span class="tag-item">Long Context</span>
+              <span class="tag-item">Agent Memory</span>
+              <span class="tag-item">Recursive Graphs</span>
+            </div>
+          </div>
+          <div class="hub-card-actions">
+            <a href="/ai-research-insights/recuris-memory-evolution.html" class="btn-card-launch">Read Study ↗</a>
+            <button class="btn-card-preview" data-preview-url="/ai-research-insights/recuris-memory-evolution.html" data-preview-title="Recursive Memory Evolution" data-preview-subtitle="Multi-Turn Agent State Retention">Quick Preview</button>
+          </div>
+        </article>
+
+        <!-- Paper 5 -->
+        <article class="hub-card" data-search-item data-category="research">
+          <div>
+            <div class="hub-card-top">
+              <span class="card-category-badge cat-research">DEEP DIVE</span>
+              <span class="card-date">2026</span>
+            </div>
+            <h3 class="hub-card-title">RLVR & GRPO Deep Dive</h3>
+            <p class="hub-card-desc">
+              Reinforcement Learning with Verifiable Rewards and Group Relative Policy Optimization. How mathematical proofs, compilers, and sandboxes replace noisy reward models.
+            </p>
+            <div class="hub-card-tags">
+              <span class="tag-item">RLVR</span>
+              <span class="tag-item">GRPO</span>
+              <span class="tag-item">Policy Optimization</span>
+            </div>
+          </div>
+          <div class="hub-card-actions">
+            <a href="/ai-research-insights/rlvr-grpo-explained.html" class="btn-card-launch">Read Study ↗</a>
+            <button class="btn-card-preview" data-preview-url="/ai-research-insights/rlvr-grpo-explained.html" data-preview-title="RLVR & GRPO Deep Dive" data-preview-subtitle="Verifiable Reward Signals in Frontier Reasoning">Quick Preview</button>
+          </div>
+        </article>
+
+        <!-- Paper 6 -->
+        <article class="hub-card" data-search-item data-category="research">
+          <div>
+            <div class="hub-card-top">
+              <span class="card-category-badge cat-research">REASONING STUDY</span>
+              <span class="card-date">2026</span>
+            </div>
+            <h3 class="hub-card-title">LLM as a Verifier</h3>
+            <p class="hub-card-desc">
+              Process supervision versus outcome supervision. How secondary critic networks detect reasoning halluncinations before execution, reducing downstream task failure rates.
+            </p>
+            <div class="hub-card-tags">
+              <span class="tag-item">Critic Models</span>
+              <span class="tag-item">Process Supervision</span>
+              <span class="tag-item">Self-Correction</span>
+            </div>
+          </div>
+          <div class="hub-card-actions">
+            <a href="/ai-research-insights/llm-as-a-verifier.html" class="btn-card-launch">Read Study ↗</a>
+            <button class="btn-card-preview" data-preview-url="/ai-research-insights/llm-as-a-verifier.html" data-preview-title="LLM as a Verifier" data-preview-subtitle="Self-Correction & Critic Networks">Quick Preview</button>
+          </div>
+        </article>
+
+        <!-- Paper 7 -->
+        <article class="hub-card" data-search-item data-category="research">
+          <div>
+            <div class="hub-card-top">
+              <span class="card-category-badge cat-research">FOUNDATION MODEL</span>
+              <span class="card-date">2026</span>
+            </div>
+            <h3 class="hub-card-title">TimesFM 3 Explained</h3>
+            <p class="hub-card-desc">
+              Google Research's zero-shot foundation model for time series forecasting. Patch-based transformer architectures applied to macroeconomic and financial signals.
+            </p>
+            <div class="hub-card-tags">
+              <span class="tag-item">Time Series</span>
+              <span class="tag-item">Google Research</span>
+              <span class="tag-item">Zero-Shot Forecasting</span>
+            </div>
+          </div>
+          <div class="hub-card-actions">
+            <a href="/ai-research-insights/timesfm-3-explained.html" class="btn-card-launch">Read Study ↗</a>
+            <button class="btn-card-preview" data-preview-url="/ai-research-insights/timesfm-3-explained.html" data-preview-title="TimesFM 3 Explained" data-preview-subtitle="Time-Series Foundation Modeling">Quick Preview</button>
+          </div>
+        </article>
+
+        <!-- Paper 8 -->
+        <article class="hub-card" data-search-item data-category="research">
+          <div>
+            <div class="hub-card-top">
+              <span class="card-category-badge cat-research">AGENT-NATIVE</span>
+              <span class="card-date">2026</span>
+            </div>
+            <h3 class="hub-card-title">DeepTutor: Agent-Native Learning</h3>
+            <p class="hub-card-desc">
+              Adaptive knowledge graphs and student cognitive state tracking. A formal model for agents that teach and self-correct across heterogeneous curricula.
+            </p>
+            <div class="hub-card-tags">
+              <span class="tag-item">Adaptive Learning</span>
+              <span class="tag-item">Cognitive Maps</span>
+              <span class="tag-item">EdTech AI</span>
+            </div>
+          </div>
+          <div class="hub-card-actions">
+            <a href="/ai-research-insights/deeptutor-agent-native-learning-architecture.html" class="btn-card-launch">Read Study ↗</a>
+            <button class="btn-card-preview" data-preview-url="/ai-research-insights/deeptutor-agent-native-learning-architecture.html" data-preview-title="DeepTutor Learning Architecture" data-preview-subtitle="Agent-Native Cognitive Modeling">Quick Preview</button>
+          </div>
+        </article>
+
+        <!-- Paper 9 -->
+        <article class="hub-card" data-search-item data-category="research">
+          <div>
+            <div class="hub-card-top">
+              <span class="card-category-badge cat-research">DISTILLATION</span>
+              <span class="card-date">2026</span>
+            </div>
+            <h3 class="hub-card-title">Synthetic Distillation Flywheel</h3>
+            <p class="hub-card-desc">
+              Closing the student-teacher knowledge distillation loop with verifiable execution feedback. Compacting frontier reasoning models into agile local edge agents.
+            </p>
+            <div class="hub-card-tags">
+              <span class="tag-item">Distillation</span>
+              <span class="tag-item">Edge AI</span>
+              <span class="tag-item">Synthetic Data</span>
+            </div>
+          </div>
+          <div class="hub-card-actions">
+            <a href="/ai-research-insights/synthetic-distillation-flywheel-explained.html" class="btn-card-launch">Read Study ↗</a>
+            <button class="btn-card-preview" data-preview-url="/ai-research-insights/synthetic-distillation-flywheel-explained.html" data-preview-title="Synthetic Distillation Flywheel" data-preview-subtitle="Knowledge Compaction & Feedback Loops">Quick Preview</button>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       LAYER 5: PRODUCTION & CONCEPT DEMO HUB
+       ========================================================================== -->
+  <section class="section" id="demos">
+    <div class="shell">
+      <div class="section-head">
+        <div>
+          <div class="section-tag">03 // PRODUCTION & CONCEPT DEMO HUB</div>
+          <h2 class="section-title">Interactive Systems & Agent Demos</h2>
+          <p class="section-desc">Production-grade client-side applications demonstrating multi-agent workflows, governed RAG, and automated publishing.</p>
+        </div>
+      </div>
+
+      <div class="card-grid-2">
+        <!-- Demo 1 -->
+        <article class="hub-card" data-search-item data-category="demos" style="border-top: 3px solid var(--rose);">
+          <div>
+            <div class="hub-card-top">
+              <span class="card-category-badge cat-demo">AGENTIC MULTI-STAGE DEMO</span>
+              <span class="card-date">v15 STABLE</span>
+            </div>
+            <h3 class="hub-card-title">BANK Multi-Agent TER / STR Operations Studio</h3>
+            <p class="hub-card-desc">
+              Comprehensive financial crime intelligence suite. Features a 3-page analyst workflow: compact case intake, original document OCR/VLM reasoning with confidence calibration, and automated Suspicious Transaction Report (STR) drafting with human refinement loops.
+            </p>
+            <div class="hub-card-tags">
+              <span class="tag-item">Financial Crime</span>
+              <span class="tag-item">OCR / VLM Reasoning</span>
+              <span class="tag-item">STR Drafting</span>
+              <span class="tag-item">6-Node Agent Network</span>
+              <span class="tag-item">Human-in-the-Loop</span>
+            </div>
+          </div>
+          <div class="hub-card-actions">
+            <a href="/ter-agentic-demos/index.html" class="btn-primary" style="background: linear-gradient(135deg, var(--rose), #be123c);">Launch Studio ↗</a>
+            <button class="btn-card-preview" data-preview-url="/ter-agentic-demos/index.html" data-preview-title="BANK Multi-Agent TER / STR Studio" data-preview-subtitle="Production Concept Demo">Quick Preview</button>
+          </div>
+        </article>
+
+        <!-- Demo 2 -->
+        <article class="hub-card" data-search-item data-category="demos" style="border-top: 3px solid var(--blue);">
+          <div>
+            <div class="hub-card-top">
+              <span class="card-category-badge cat-demo">WEALTH INTELLIGENCE</span>
+              <span class="card-date">v2 INTERACTIVE</span>
+            </div>
+            <h3 class="hub-card-title">Wealth Intelligence Agent & Portfolio Dashboard</h3>
+            <p class="hub-card-desc">
+              Private wealth portfolio analytics powered by a governed 2,340-document knowledge graph. Resolves hidden sanctions exposure, monitors market intelligence cases asynchronously, and generates advisory portfolio rebalancing briefs.
+            </p>
+            <div class="hub-card-tags">
+              <span class="tag-item">Private Wealth</span>
+              <span class="tag-item">Governed RAG</span>
+              <span class="tag-item">Sanctions Resolution</span>
+              <span class="tag-item">Portfolio Analytics</span>
+            </div>
+          </div>
+          <div class="hub-card-actions">
+            <a href="/wealthy_data_insight/index.html" class="btn-primary" style="background: linear-gradient(135deg, var(--blue), #0284c7);">Launch Wealth Agent ↗</a>
+            <button class="btn-card-preview" data-preview-url="/wealthy_data_insight/index.html" data-preview-title="Wealth Data Intelligence Agent" data-preview-subtitle="Private Wealth Portfolio Analytics">Quick Preview</button>
+          </div>
+        </article>
+
+        <!-- Demo 3 -->
+        <article class="hub-card" data-search-item data-category="demos" style="border-top: 3px solid var(--cyan);">
+          <div>
+            <div class="hub-card-top">
+              <span class="card-category-badge cat-demo">DEVELOPER TOOLING</span>
+              <span class="card-date">CLIENT-SIDE TOOL</span>
+            </div>
+            <h3 class="hub-card-title">In-Browser GitHub ZIP Publisher</h3>
+            <p class="hub-card-desc">
+              Zero-backend deployment utility. Unpacks ZIP archives entirely in browser memory using JSZip, inspects files for safety, and commits them directly to GitHub branches via the GitHub REST API without external servers.
+            </p>
+            <div class="hub-card-tags">
+              <span class="tag-item">JSZip</span>
+              <span class="tag-item">GitHub REST API</span>
+              <span class="tag-item">Zero Backend</span>
+              <span class="tag-item">Web Crypto</span>
+            </div>
+          </div>
+          <div class="hub-card-actions">
+            <a href="/github-zip-upload/index.html" class="btn-primary" style="background: linear-gradient(135deg, var(--cyan), #0891b2);">Open Publisher ↗</a>
+            <button class="btn-card-preview" data-preview-url="/github-zip-upload/index.html" data-preview-title="In-Browser GitHub ZIP Publisher" data-preview-subtitle="Client-Side Tool">Quick Preview</button>
+          </div>
+        </article>
+
+        <!-- Demo 4 -->
+        <article class="hub-card" data-search-item data-category="demos" style="border-top: 3px solid var(--amber);">
+          <div>
+            <div class="hub-card-top">
+              <span class="card-category-badge cat-demo">SIMULATOR</span>
+              <span class="card-date">v2 PROPOSAL</span>
+            </div>
+            <h3 class="hub-card-title">GSE Decision Frontier & Regression Simulator</h3>
+            <p class="hub-card-desc">
+              Interactive experimental simulator for Guarded Skill Evolution. Lets researchers adjust decision boundaries, simulate task invalidation cascades, and verify non-regression guarantees across frozen agent test suites.
+            </p>
+            <div class="hub-card-tags">
+              <span class="tag-item">Pareto Solver</span>
+              <span class="tag-item">Regression Testing</span>
+              <span class="tag-item">Skill Mutation</span>
+              <span class="tag-item">Interactive Sim</span>
+            </div>
+          </div>
+          <div class="hub-card-actions">
+            <a href="/idea-paper/guarded-skill-evolution/guarded-skill-evolution-v2.html" class="btn-primary" style="background: linear-gradient(135deg, var(--amber), #d97706);">Open Simulator ↗</a>
+            <button class="btn-card-preview" data-preview-url="/idea-paper/guarded-skill-evolution/guarded-skill-evolution-v2.html" data-preview-title="Guarded Skill Evolution Simulator" data-preview-subtitle="Interactive Frontier Solver">Quick Preview</button>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       LAYER 4: REAL-TIME TELEMETRY & MONITORING
+       ========================================================================== -->
+  <section class="section" id="monitoring" data-search-item data-category="monitoring">
+    <div class="shell">
+      <div class="section-head">
+        <div>
+          <div class="section-tag">04 // REAL-TIME TELEMETRY & MONITORING</div>
+          <h2 class="section-title">Frontier Model Matrix & Telemetry</h2>
+          <p class="section-desc">Live performance benchmarks, multi-agent message routing telemetry, and governed knowledge synchronization.</p>
+        </div>
+      </div>
+
+      <div class="telemetry-board">
+        <div class="telemetry-header">
+          <div class="telemetry-title-wrap">
+            <b>Frontier Convergence Matrix & Live Telemetry Stream</b>
+            <span>SYNCHRONIZED WITH AGENT ORCHESTRATION PIPELINE · LATENCY: 14MS</span>
+          </div>
+
+          <div class="telemetry-controls">
+            <button class="telemetry-btn active" id="telemetryPlayPause">⏸ Pause Stream</button>
+            <button class="telemetry-btn" id="telemetryStep">↷ Step Frame</button>
+            <button class="telemetry-btn" id="telemetryClear">⌫ Clear Log</button>
+          </div>
+        </div>
+
+        <div class="telemetry-layout">
+          <!-- Left: Model Comparison Matrix -->
+          <div class="matrix-card">
+            <h4>
+              <span>FRONTIER MODEL CAPABILITY MATRIX (SEP 2026)</span>
+              <span class="badge-tag" style="color: var(--emerald);">LIVE BENCHMARK</span>
+            </h4>
+
+            <table class="telemetry-table">
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th>Reasoning Type</th>
+                  <th>SWE-Bench</th>
+                  <th>Math / Proof</th>
+                  <th>Latency</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="model-name">Gemini 3.8 Flash</div>
+                    <span class="model-vendor">Google DeepMind</span>
+                  </td>
+                  <td>Adaptive Test-Time Search</td>
+                  <td class="score-cell">84.2%</td>
+                  <td class="score-cell">95.4%</td>
+                  <td class="latency-cell dynamic-latency" data-base="145">145ms</td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="model-name">Claude Fable 5.1</div>
+                    <span class="model-vendor">Anthropic</span>
+                  </td>
+                  <td>Process-Supervised Critic</td>
+                  <td class="score-cell">85.6%</td>
+                  <td class="score-cell">94.8%</td>
+                  <td class="latency-cell dynamic-latency" data-base="280">280ms</td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="model-name">Qwen3.8-Max (0902)</div>
+                    <span class="model-vendor">Alibaba Cloud</span>
+                  </td>
+                  <td>Sparse MoE + Dynamic Compute</td>
+                  <td class="score-cell">82.9%</td>
+                  <td class="score-cell">93.7%</td>
+                  <td class="latency-cell dynamic-latency" data-base="195">195ms</td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="model-name">Muse Spark 1.3</div>
+                    <span class="model-vendor">Meta AI</span>
+                  </td>
+                  <td>RLVR Environment Harness</td>
+                  <td class="score-cell">81.4%</td>
+                  <td class="score-cell">92.9%</td>
+                  <td class="latency-cell dynamic-latency" data-base="160">160ms</td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="model-name">Kimi K3</div>
+                    <span class="model-vendor">Moonshot AI</span>
+                  </td>
+                  <td>Recursive Memory Rollout</td>
+                  <td class="score-cell">80.8%</td>
+                  <td class="score-cell">91.5%</td>
+                  <td class="latency-cell dynamic-latency" data-base="220">220ms</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Right: Live Event Stream -->
+          <div class="matrix-card">
+            <h4>
+              <span>LIVE AGENT STREAM & EVENT LOG</span>
+              <span class="pulse-dot"></span>
+            </h4>
+            <div class="stream-log" id="streamLog">
+              <!-- Dynamically populated by modern-hub.js -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       LAYER 6: AGENTIC SKILLS & SELF-ALIGNMENT ENGINE
+       ========================================================================== -->
+  <section class="section" id="skills">
+    <div class="shell">
+      <div class="section-head">
+        <div>
+          <div class="section-tag">05 // AGENTIC SKILLS & SELF-ALIGNMENT ENGINE</div>
+          <h2 class="section-title">Self-Evolving Agent Skills Repository</h2>
+          <p class="section-desc">Reusable, contract-governed skill packages designed for agent workflows, deliverable auditing, and regression-free skill evolution.</p>
+        </div>
+      </div>
+
+      <div class="skills-grid">
+        <!-- Skill 1 -->
+        <div class="skill-card" data-skill-id="guarded-skill-evolution" data-search-item data-category="skills">
+          <div>
+            <div class="skill-header">
+              <div class="skill-icon-badge">🛡️</div>
+              <span class="badge-tag" style="color: var(--amber);">FRONTIER</span>
+            </div>
+            <div class="skill-name">guarded-skill-evolution</div>
+            <p class="skill-desc">
+              Requirement-aware, regression-controlled approach to modifying persistent LLM-agent skills.
+            </p>
+          </div>
+          <div class="skill-meta-strip">
+            <span>CONTRACT: INPUT / SUITE</span>
+            <span class="skill-action-inspect">Inspect Contract →</span>
+          </div>
+        </div>
+
+        <!-- Skill 2 -->
+        <div class="skill-card" data-skill-id="build-async-agentic-web-demo" data-search-item data-category="skills">
+          <div>
+            <div class="skill-header">
+              <div class="skill-icon-badge">⚡</div>
+              <span class="badge-tag" style="color: var(--emerald);">CORE SYSTEM</span>
+            </div>
+            <div class="skill-name">build-async-agentic-web-demo</div>
+            <p class="skill-desc">
+              Build asynchronous agentic web demos with human-in-the-loop review, intake forms, and animated network stages.
+            </p>
+          </div>
+          <div class="skill-meta-strip">
+            <span>CONTRACT: HTML5 / AGENTS</span>
+            <span class="skill-action-inspect">Inspect Contract →</span>
+          </div>
+        </div>
+
+        <!-- Skill 3 -->
+        <div class="skill-card" data-skill-id="knowledge-distill" data-search-item data-category="skills">
+          <div>
+            <div class="skill-header">
+              <div class="skill-icon-badge">🧬</div>
+              <span class="badge-tag" style="color: var(--cyan);">REASONING</span>
+            </div>
+            <div class="skill-name">knowledge-distill</div>
+            <p class="skill-desc">
+              Distill code repositories, papers, and mixed corpora into an evidence-grounded knowledge package.
+            </p>
+          </div>
+          <div class="skill-meta-strip">
+            <span>CONTRACT: CORPUS / MANIFEST</span>
+            <span class="skill-action-inspect">Inspect Contract →</span>
+          </div>
+        </div>
+
+        <!-- Skill 4 -->
+        <div class="skill-card" data-skill-id="semantic-pattern-mining" data-search-item data-category="skills">
+          <div>
+            <div class="skill-header">
+              <div class="skill-icon-badge">🔍</div>
+              <span class="badge-tag" style="color: var(--purple);">ALGORITHMIC</span>
+            </div>
+            <div class="skill-name">semantic-pattern-mining</div>
+            <p class="skill-desc">
+              Extract recurring semantic, causal, and sequential patterns from heterogeneous raw text and logs.
+            </p>
+          </div>
+          <div class="skill-meta-strip">
+            <span>CONTRACT: EMBED / AUDIT</span>
+            <span class="skill-action-inspect">Inspect Contract →</span>
+          </div>
+        </div>
+
+        <!-- Skill 5 -->
+        <div class="skill-card" data-skill-id="evaluate-web-deliverable" data-search-item data-category="skills">
+          <div>
+            <div class="skill-header">
+              <div class="skill-icon-badge">📋</div>
+              <span class="badge-tag" style="color: var(--emerald);">EVALUATION</span>
+            </div>
+            <div class="skill-name">evaluate-web-deliverable</div>
+            <p class="skill-desc">
+              Automated profile-based grading and verification of research sites and system demos against strict rubrics.
+            </p>
+          </div>
+          <div class="skill-meta-strip">
+            <span>CONTRACT: PROFILE / SCORE</span>
+            <span class="skill-action-inspect">Inspect Contract →</span>
+          </div>
+        </div>
+
+        <!-- Skill 6 -->
+        <div class="skill-card" data-skill-id="evaluate-executive-resume" data-search-item data-category="skills">
+          <div>
+            <div class="skill-header">
+              <div class="skill-icon-badge">👔</div>
+              <span class="badge-tag">ASSESSMENT</span>
+            </div>
+            <div class="skill-name">evaluate-executive-resume</div>
+            <p class="skill-desc">
+              Multi-factor assessment evaluating strategic scope, leadership footprint, and execution rigor.
+            </p>
+          </div>
+          <div class="skill-meta-strip">
+            <span>CONTRACT: RESUME / RUBRIC</span>
+            <span class="skill-action-inspect">Inspect Contract →</span>
+          </div>
+        </div>
+
+        <!-- Skill 7 -->
+        <div class="skill-card" data-skill-id="markdown-to-pdf" data-search-item data-category="skills">
+          <div>
+            <div class="skill-header">
+              <div class="skill-icon-badge">📄</div>
+              <span class="badge-tag">TOOLING</span>
+            </div>
+            <div class="skill-name">markdown-to-pdf</div>
+            <p class="skill-desc">
+              Convert Markdown documents into clean, print-ready PDF files with automated Playwright page-break safety.
+            </p>
+          </div>
+          <div class="skill-meta-strip">
+            <span>CONTRACT: MD / A4 PDF</span>
+            <span class="skill-action-inspect">Inspect Contract →</span>
+          </div>
+        </div>
+
+        <!-- Skill 8 -->
+        <div class="skill-card" data-skill-id="ideogram-image-generation" data-search-item data-category="skills">
+          <div>
+            <div class="skill-header">
+              <div class="skill-icon-badge">🎨</div>
+              <span class="badge-tag" style="color: var(--rose);">GENERATIVE</span>
+            </div>
+            <div class="skill-name">ideogram-image-generation</div>
+            <p class="skill-desc">
+              Generate local images with Ideogram 4 FP8 for visual concepts, hero images, and portfolio assets.
+            </p>
+          </div>
+          <div class="skill-meta-strip">
+            <span>CONTRACT: PROMPT / IMAGE</span>
+            <span class="skill-action-inspect">Inspect Contract →</span>
+          </div>
+        </div>
+
+        <!-- Skill 9 -->
+        <div class="skill-card" data-skill-id="charting" data-search-item data-category="skills">
+          <div>
+            <div class="skill-header">
+              <div class="skill-icon-badge">📊</div>
+              <span class="badge-tag" style="color: var(--blue);">QUANT</span>
+            </div>
+            <div class="skill-name">charting</div>
+            <p class="skill-desc">
+              Quantitative charting recipes for order books, cluster validation, and macroeconomic radars.
+            </p>
+          </div>
+          <div class="skill-meta-strip">
+            <span>CONTRACT: TIME SERIES / SVG</span>
+            <span class="skill-action-inspect">Inspect Contract →</span>
+          </div>
+        </div>
+
+        <!-- Skill 10 -->
+        <div class="skill-card" data-skill-id="cross-evolve-skill" data-search-item data-category="skills">
+          <div>
+            <div class="skill-header">
+              <div class="skill-icon-badge">🔄</div>
+              <span class="badge-tag" style="color: var(--amber);">CROSS-AGENT</span>
+            </div>
+            <div class="skill-name">cross-evolve-skill</div>
+            <p class="skill-desc">
+              Cross-model skill evolution and capability synthesis across disparate LLM agents.
+            </p>
+          </div>
+          <div class="skill-meta-strip">
+            <span>CONTRACT: AGENT / TRANSLATE</span>
+            <span class="skill-action-inspect">Inspect Contract →</span>
+          </div>
+        </div>
+
+        <!-- Skill 11 -->
+        <div class="skill-card" data-skill-id="web" data-search-item data-category="skills">
+          <div>
+            <div class="skill-header">
+              <div class="skill-icon-badge">🌐</div>
+              <span class="badge-tag" style="color: var(--emerald);">CORE SYSTEM</span>
+            </div>
+            <div class="skill-name">web</div>
+            <p class="skill-desc">
+              Build source-grounded interactive HTML deliverables: research sites, system demos, and agentic explainers.
+            </p>
+          </div>
+          <div class="skill-meta-strip">
+            <span>CONTRACT: SPEC / HTML5</span>
+            <span class="skill-action-inspect">Inspect Contract →</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       LAYER 2: LEARNING BLOGS & ENGINEERING VAULT
+       ========================================================================== -->
+  <section class="section" id="vault">
+    <div class="shell">
+      <div class="section-head">
+        <div>
+          <div class="section-tag">06 // LEARNING BLOGS & ENGINEERING VAULT</div>
+          <h2 class="section-title">Algorithmic & Systems Engineering Archive</h2>
+          <p class="section-desc">Over 20 peer writeups exploring Hybrid RAG memory, quantitative market microstructure, LLM instruction alignment, and econometric theory.</p>
+        </div>
+      </div>
+
+      <div class="blogs-table">
+        <!-- Post 1 -->
+        <a href="/post/clawdbot-memory-system-analysis/" class="blog-row" data-search-item data-category="blogs">
+          <div class="blog-date">2026-01-28</div>
+          <div class="blog-title-wrap">
+            <b>Clawdbot Memory System Analysis</b>
+            <span>Architecture and implementation of Clawdbot's Hybrid RAG combining Vector Search with BM25 precision.</span>
+          </div>
+          <div class="blog-cat">Memory & Systems</div>
+          <div class="blog-read">Read →</div>
+        </a>
+
+        <!-- Post 2 -->
+        <a href="/post/how-to-close-clawdbot-daemon/" class="blog-row" data-search-item data-category="blogs">
+          <div class="blog-date">2026-01-27</div>
+          <div class="blog-title-wrap">
+            <b>How to Properly Close Clawdbot Daemon</b>
+            <span>Safe termination lifecycle and process socket management for persistent background agent daemons.</span>
+          </div>
+          <div class="blog-cat">Systems & Ops</div>
+          <div class="blog-read">Read →</div>
+        </a>
+
+        <!-- Post 3 -->
+        <a href="/post/self-instruct-aligning-language-model-with-self-generated-instructions/" class="blog-row" data-search-item data-category="blogs">
+          <div class="blog-date">2023-11-15</div>
+          <div class="blog-title-wrap">
+            <b>Self-Instruct: Aligning Language Model with Self-Generated Instructions</b>
+            <span>Bootstrapping instructional datasets using teacher models and iterative self-filtering loops.</span>
+          </div>
+          <div class="blog-cat">LLM Alignment</div>
+          <div class="blog-read">Read →</div>
+        </a>
+
+        <!-- Post 4 -->
+        <a href="/post/2023-feb-optionstrategy/" class="blog-row" data-search-item data-category="blogs">
+          <div class="blog-date">2023-02-18</div>
+          <div class="blog-title-wrap">
+            <b>Option Strategy Analysis & Payoff Dynamics</b>
+            <span>Quantitative modeling of multi-leg option strategies, volatility skew, and Greeks risk attribution.</span>
+          </div>
+          <div class="blog-cat">Quant Finance</div>
+          <div class="blog-read">Read →</div>
+        </a>
+
+        <!-- Post 5 -->
+        <a href="/post/tradingtactic/" class="blog-row" data-search-item data-category="blogs">
+          <div class="blog-date">2023-03-11</div>
+          <div class="blog-title-wrap">
+            <b>Quantitative Trading Tactics & Strategy Dynamics</b>
+            <span>Continuous auction matching, volatility breakout algorithms, and order execution tactical regimes.</span>
+          </div>
+          <div class="blog-cat">Quant Trading</div>
+          <div class="blog-read">Read →</div>
+        </a>
+
+        <!-- Post 6 -->
+        <a href="/post/customized-lorenz-ann-classification/" class="blog-row" data-search-item data-category="blogs">
+          <div class="blog-date">2022-09-04</div>
+          <div class="blog-title-wrap">
+            <b>Customized Lorenz System ANN Classification</b>
+            <span>Chaotic attractor time series classification using customized artificial neural network topologies.</span>
+          </div>
+          <div class="blog-cat">Algorithms & ML</div>
+          <div class="blog-read">Read →</div>
+        </a>
+
+        <!-- Post 7 -->
+        <a href="/post/20230607-learntorank/" class="blog-row" data-search-item data-category="blogs">
+          <div class="blog-date">2023-06-07</div>
+          <div class="blog-title-wrap">
+            <b>Learn to Rank: Algorithms, Loss Functions & Evaluation</b>
+            <span>Pointwise, pairwise (RankNet/LambdaMART), and listwise learning to rank architectures.</span>
+          </div>
+          <div class="blog-cat">Information Retrieval</div>
+          <div class="blog-read">Read →</div>
+        </a>
+
+        <!-- Post 8 -->
+        <a href="/post/db-index-vs-silhouette-score/" class="blog-row" data-search-item data-category="blogs">
+          <div class="blog-date">2022-04-12</div>
+          <div class="blog-title-wrap">
+            <b>Davies-Bouldin Index vs Silhouette Score</b>
+            <span>Mathematical trade-offs and computational complexity in unsupervised clustering validation.</span>
+          </div>
+          <div class="blog-cat">Algorithms & ML</div>
+          <div class="blog-read">Read →</div>
+        </a>
+
+        <!-- Post 9 -->
+        <a href="/post/top-10-correlation-coeff/" class="blog-row" data-search-item data-category="blogs">
+          <div class="blog-date">2022-03-25</div>
+          <div class="blog-title-wrap">
+            <b>Top 10 Correlation Coefficients in Data Science</b>
+            <span>Comparative survey of Pearson, Spearman, Kendall, Distance Correlation, and Maximal Information.</span>
+          </div>
+          <div class="blog-cat">Statistics & Math</div>
+          <div class="blog-read">Read →</div>
+        </a>
+
+        <!-- Post 10 -->
+        <a href="/post/metricf1score/" class="blog-row" data-search-item data-category="blogs">
+          <div class="blog-date">2021-11-08</div>
+          <div class="blog-title-wrap">
+            <b>Understanding F1-Score in Imbalanced Datasets</b>
+            <span>Precision-recall dynamics, micro vs macro vs weighted F1, and threshold optimization.</span>
+          </div>
+          <div class="blog-cat">ML Metrics</div>
+          <div class="blog-read">Read →</div>
+        </a>
+
+        <!-- Post 11 -->
+        <a href="/post/what-is-rouge-l/" class="blog-row" data-search-item data-category="blogs">
+          <div class="blog-date">2021-08-14</div>
+          <div class="blog-title-wrap">
+            <b>What is ROUGE-L and How Does It Evaluate Text Summarization?</b>
+            <span>Longest Common Subsequence (LCS) scoring for automated evaluation of generative text models.</span>
+          </div>
+          <div class="blog-cat">NLP & Metrics</div>
+          <div class="blog-read">Read →</div>
+        </a>
+
+        <!-- Post 12 -->
+        <a href="/post/2023-0711-economicweather/" class="blog-row" data-search-item data-category="blogs">
+          <div class="blog-date">2023-07-11</div>
+          <div class="blog-title-wrap">
+            <b>Economic Weather Radar and Factor Regimes</b>
+            <span>Multi-factor economic indicators and regime-switching models for macro allocation.</span>
+          </div>
+          <div class="blog-cat">Quant Finance</div>
+          <div class="blog-read">Read →</div>
+        </a>
+
+        <!-- Post 13 -->
+        <a href="/post/scedasticicity/" class="blog-row" data-search-item data-category="blogs">
+          <div class="blog-date">2021-06-20</div>
+          <div class="blog-title-wrap">
+            <b>Homoscedasticity vs Heteroscedasticity in Econometrics</b>
+            <span>Testing and correcting for non-constant error variance in financial regression models.</span>
+          </div>
+          <div class="blog-cat">Econometrics</div>
+          <div class="blog-read">Read →</div>
+        </a>
+
+        <!-- Post 14 -->
+        <a href="/post/cblof/" class="blog-row" data-search-item data-category="blogs">
+          <div class="blog-date">2021-04-10</div>
+          <div class="blog-title-wrap">
+            <b>CBLOF: Cluster-Based Local Outlier Factor</b>
+            <span>Anomaly detection across large multidimensional datasets using local clustering densities.</span>
+          </div>
+          <div class="blog-cat">Anomaly Detection</div>
+          <div class="blog-read">Read →</div>
+        </a>
+
+        <!-- Post 15 -->
+        <a href="/post/cloudpickle/" class="blog-row" data-search-item data-category="blogs">
+          <div class="blog-date">2021-02-15</div>
+          <div class="blog-title-wrap">
+            <b>Cloudpickle: Serializing Dynamic Python Constructs</b>
+            <span>Overcoming standard pickle limits for lambdas, closures, and distributed execution graphs.</span>
+          </div>
+          <div class="blog-cat">Infrastructure</div>
+          <div class="blog-read">Read →</div>
+        </a>
+
+        <!-- Post 16 -->
+        <a href="/post/hostpersonalgpt/" class="blog-row" data-search-item data-category="blogs">
+          <div class="blog-date">2023-03-30</div>
+          <div class="blog-title-wrap">
+            <b>Host Personal GPT with Local Infrastructure</b>
+            <span>Self-hosting open-weights LLMs with private document retrieval and low-latency inference.</span>
+          </div>
+          <div class="blog-cat">Local LLM</div>
+          <div class="blog-read">Read →</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       FOOTER
+       ========================================================================== -->
+  <footer class="footer">
+    <div class="shell">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <b>AUTUMN MEMO // INTELLIGENCE NEXUS</b>
+          <p>
+            Autonomous Agent Architectures, Frontier AI Research Studies, and Quantitative Systems by Kent Chiu. Originally established at MIT-CSAIL Randall Davis Lab in 2016.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h5>Core Layers</h5>
+          <ul class="footer-links">
+            <li><a href="#profile">Author Profile</a></li>
+            <li><a href="#research">Frontier AI Studies</a></li>
+            <li><a href="#demos">Interactive Demos</a></li>
+            <li><a href="#monitoring">Real-Time Telemetry</a></li>
+            <li><a href="#skills">Skills Repository</a></li>
+            <li><a href="#vault">Engineering Vault</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>Interactive Demos</h5>
+          <ul class="footer-links">
+            <li><a href="/ter-agentic-demos/index.html">AML / STR Operations Studio</a></li>
+            <li><a href="/wealthy_data_insight/index.html">Wealth Intelligence Agent</a></li>
+            <li><a href="/github-zip-upload/index.html">In-Browser ZIP Publisher</a></li>
+            <li><a href="/idea-paper/guarded-skill-evolution/guarded-skill-evolution-v2.html">GSE Skill Simulator</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>Archives & Feeds</h5>
+          <ul class="footer-links">
+            <li><a href="/post/">Hugo Blog Index</a></li>
+            <li><a href="/archives/">Full Archives</a></li>
+            <li><a href="/categories/">Topic Categories</a></li>
+            <li><a href="/index.xml">RSS Feed</a></li>
+            <li><a href="/index.legacy-hugo.html">Legacy Portal (Hugo)</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2016–2026 Autumn Memo by Kent Chiu. All rights reserved.</div>
+        <div>Built with Vanilla CSS, Modern Typography & Zero-Bloat Client-Side JavaScript.</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==========================================================================
+       SLIDE-IN LIVE PREVIEW DRAWER
+       ========================================================================== -->
+  <div class="preview-backdrop" id="previewBackdrop"></div>
+  <aside class="preview-drawer" id="previewDrawer" aria-label="Interactive Asset Preview">
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <h3 id="drawerTitle">Asset Preview</h3>
+        <span id="drawerSubtitle">Interactive Live Demo</span>
+      </div>
+      <div class="drawer-actions">
+        <a id="drawerFullscreen" href="#" target="_blank" rel="noopener" class="drawer-btn">Open Fullscreen ↗</a>
+        <button class="drawer-btn" id="drawerClose" style="color: #ffffff; background: rgba(255,255,255,0.1);">✕ Close</button>
+      </div>
+    </div>
+    <div class="drawer-body">
+      <iframe id="drawerIframe" class="drawer-iframe" src="about:blank" title="Live Preview" loading="lazy"></iframe>
+    </div>
+  </aside>
+
+  <!-- ==========================================================================
+       SKILL INSPECTOR MODAL
+       ========================================================================== -->
+  <div class="modal-backdrop" id="skillModalBackdrop">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div>
+          <h3 id="skillModalTitle">Skill Title</h3>
+          <span id="skillModalSubtitle" style="font-family: var(--font-mono); font-size: 11px; color: var(--amber);">CATEGORY: SKILL EVOLUTION</span>
+        </div>
+        <button id="skillModalClose" style="color: #94a3b8; font-size: 18px; padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.05);">✕</button>
+      </div>
+
+      <div class="modal-content">
+        <div class="modal-tabs">
+          <button class="modal-tab active" data-tab="overview">Overview & Contract</button>
+          <button class="modal-tab" data-tab="prompt">Alignment Harness</button>
+          <button class="modal-tab" data-tab="snippet">Execution Recipe</button>
+        </div>
+
+        <div class="modal-tab-content" id="tabContent-overview">
+          <div id="skillModalOverview"></div>
+        </div>
+
+        <div class="modal-tab-content" id="tabContent-prompt" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">PROMPT HARNESS SPECIFICATION</span>
+            <button id="skillCopyPrompt" style="font-family: var(--font-mono); font-size: 11px; color: var(--amber); background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); padding: 3px 8px; border-radius: 4px;">Copy Prompt</button>
+          </div>
+          <pre class="modal-code-block" id="skillModalPrompt"></pre>
+        </div>
+
+        <div class="modal-tab-content" id="tabContent-snippet" style="display: none;">
+          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 8px;">TEST / RUNNER EXECUTION COMMAND</span>
+          <pre class="modal-code-block" id="skillModalSnippet"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive JavaScript Engine -->
+  <script src="/js/modern-hub.js"></script>
+
+</body>
+</html>

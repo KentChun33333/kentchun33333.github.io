@@ -1,0 +1,51 @@
+// Non-browser interaction checks against the shipped script.
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
+const assert = require('node:assert/strict');
+const root = path.resolve(__dirname, '..');
+const data = JSON.parse(fs.readFileSync(path.join(root, 'data/hub/catalog.json')));
+const source = fs.readFileSync(path.join(root, 'js/command-center.js'), 'utf8');
+class Element {
+  constructor(value = '') { this.value = value; this.children = []; this.events = {}; this.options = []; this.hidden = false; this.style = {}; }
+  addEventListener(name, fn) { this.events[name] = fn; }
+  append(...children) { this.children.push(...children); }
+  replaceChildren() { this.children = []; }
+  focus() { this.focused = true; }
+}
+function run(url, elements, cards = []) {
+  elements.announcement = new Element();
+  const location = new URL(url);
+  const document = { getElementById: id => elements[id] || null, querySelectorAll: selector => selector === '[data-asset]' ? cards : [], addEventListener() {}, createElement: () => new Element() };
+  const context = { document, location, URL, URLSearchParams, history: { replaceState: (_, __, value) => { location.href = value.href; } }, navigator: {}, window: {}, setTimeout, fetch: async () => ({ ok: true, json: async () => data }) };
+  vm.runInNewContext(source, context);
+  return location;
+}
+async function main() {
+  const search = new Element(); search.form = new Element();
+  const kind = new Element(); kind.options = ['', ...new Set(data.assets.map(a => a.kind))].map(value => ({ value }));
+  const stream = new Element(); stream.options = ['', 'Build', 'Research', 'Publish'].map(value => ({ value }));
+  const cards = data.assets.map(a => { const el = new Element(); el.dataset = { kind: a.kind, stream: a.stream, search: [a.title, a.summary, ...a.topics].join(' ').toLowerCase() }; return el; });
+  const els = { 'asset-search': search, 'asset-kind': kind, 'asset-stream': stream, 'result-count': new Element(), 'empty-results': new Element() };
+  const location = run('https://example.org/hub/library/?kind=Skill&stream=Build', els, cards);
+  assert.equal(cards.filter(c => !c.hidden).length, data.assets.filter(a => a.kind === 'Skill' && a.stream === 'Build').length);
+  search.value = 'no-such-unfindable-asset'; search.events.input();
+  assert.equal(cards.filter(c => !c.hidden).length, 0); assert.equal(els['empty-results'].hidden, false);
+  assert.equal(location.searchParams.get('q'), search.value);
+  search.value = 'guarded evolution'; kind.value = ''; stream.value = ''; search.events.input();
+  assert(cards.filter(c => !c.hidden).length >= 4);
+  search.value = ''; search.events.input();
+  assert.equal(cards.filter(c => !c.hidden).length, 55);
+  const focus = new Element('gse'); const ids = new Set(data.relations.flatMap(r => [r.source, r.target]));
+  focus.options = [...ids].map(value => ({ value }));
+  const graph = { 'graph-focus': focus, 'graph-canvas': new Element(), 'graph-context': new Element() };
+  const graphLocation = run('https://example.org/hub/graph/?asset=ter', graph);
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(focus.value, 'ter');
+  assert.equal(graph['graph-canvas'].children[1].children.length, 2);
+  focus.value = 'gse'; focus.events.change();
+  assert.equal(graph['graph-canvas'].children[1].children.length, 5);
+  assert.equal(graphLocation.searchParams.get('asset'), 'gse');
+  console.log('Passed URL-restored filters, multi-term search, empty/recovery states, focused graph links, and shareable graph state.');
+}
+main().catch(error => { console.error(error); process.exitCode = 1; });
