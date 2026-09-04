@@ -186,3 +186,7 @@ existing repository through its normal GitHub Pages process after review.
 The left asset panel defaults to a 64px icon rail. Drag its edge to resize; release snaps to icon or compact width (64/240px on desktop, bounded on smaller viewports). There are no width-preset buttons or full-width mode. The expand/collapse arrow and keyboard-operable separator provide the same controls. The main collection reflows alongside it. Width is not persisted; reload starts with icons.
 
 Interface hierarchy: Asset library occupies the top-bar title position, and Autumn Memo branding lives at the top of the asset rail. The content starts with search, without a duplicate heading or introductory paragraph. Supplemental hints use native tooltips and accessible labels; essential content remains visible.
+
+## In-place asset canvas
+
+Library links open assets inside the existing shell, with `?asset=<id>` URLs and browser history. The left rail, filter state, and conversation draft stay mounted. HTML articles, research, and demos run in an iframe at their unchanged source URL; Markdown uses generated escaped reader fragments. Closing the viewer unloads the frame and restores the library position. Original detail URLs remain usable without JavaScript, and Open original is an explicit new-tab action. Embedded local HTML is trusted repository content and retains same-origin storage for existing demos; it must not be treated as a security boundary for untrusted uploads.

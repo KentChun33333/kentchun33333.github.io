@@ -58,6 +58,9 @@ assert not conn.execute('PRAGMA foreign_key_check').fetchall()
 assert conn.execute('SELECT COUNT(*) FROM assets').fetchone()[0]==len(data['assets'])
 for a in data['assets']:
     assert hashlib.sha256((ROOT/a['path']).read_bytes()).hexdigest()==a['sha256'], a['path']
+    if a['path'].endswith('.md'):
+        reader = ROOT/'data/hub/readers'/(a['id']+'.html')
+        assert reader.is_file() and '<article class="reader">' in reader.read_text(), a['id']
     assert conn.execute('SELECT 1 FROM revisions WHERE asset_id=? AND sha256=?',(a['id'],a['sha256'])).fetchone()
     for media in a.get('images', []):
         path=ROOT/unquote(media['url']).lstrip('/')

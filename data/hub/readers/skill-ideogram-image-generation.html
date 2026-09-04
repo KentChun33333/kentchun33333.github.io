@@ -1,0 +1,17 @@
+<article class="reader"><h2>Ideogram Image Generation Skill</h2><p>&gt; <strong>Audience</strong>: Designers, resume builders, portfolio writers, and career-storytelling workflows in <code>breeze-man</code>. &gt; <strong>Purpose</strong>: Generate local images with Ideogram 4 FP8 for visual concepts, hero images, portfolio graphics, and document assets.</p><p>This skill uses the official <code>ideogram4</code> inference package and the gated Hugging Face model <code>ideogram-ai/ideogram-4-fp8</code>.</p><h3>Local Paths</h3><ul><li>Model snapshot: <code>breeze-man/model/ideogram-4-fp8</code></li><li>Hugging Face cache: <code>breeze-man/model/.hf-cache</code></li><li>Generated images: prefer <code>breeze-man/output/&lt;project&gt;/images/</code></li><li>Helper scripts: <code>breeze-man/skillset/ideogram-image-generation/scripts/</code></li></ul><p>The workspace <code>.gitignore</code> already excludes <code>model/</code> directories and <code>*.safetensors</code>, so downloaded weights should stay out of source control.</p><h3>One-Time Setup</h3><ul><li>Accept the Hugging Face gate for <code>ideogram-ai/ideogram-4-fp8</code>.</li><li>Authenticate with Hugging Face:</li></ul><pre><code>hf auth login</code></pre><p>or:</p><pre><code>export HF_TOKEN=&quot;hf_...&quot;</code></pre><ul><li>Create a Python 3.11 environment and install the official inference package:</li></ul><pre><code>cd breeze-man/skillset/ideogram-image-generation
+uv venv --python python3.11 .venv
+. .venv/bin/activate
+uv pip install -r requirements.txt</code></pre><ul><li>Download the model into <code>breeze-man/model/</code>:</li></ul><pre><code>python scripts/download_model.py</code></pre><h3>Generate An Image</h3><p>Basic local generation:</p><pre><code>cd breeze-man/skillset/ideogram-image-generation
+. .venv/bin/activate
+python scripts/generate_image.py \
+  --prompt &quot;editorial portrait of a senior AI product leader, cinematic lighting, confident but approachable&quot; \
+  --output ../../output/job-hup/images/ai_leader_portrait.png \
+  --width 1024 \
+  --height 1024 \
+  --seed 42</code></pre><p>Higher-quality official prompt expansion, when <code>IDEOGRAM_API_KEY</code> is available:</p><pre><code>IDEOGRAM_API_KEY=&quot;...&quot; \
+python scripts/generate_image.py \
+  --magic-prompt \
+  --prompt &quot;premium executive resume cover image for responsible AI leadership&quot; \
+  --output ../../output/job-hup/images/responsible_ai_cover.png \
+  --width 1536 \
+  --height 1024</code></pre><h3>Operating Notes</h3><ul><li>FP8 is the right local choice for Apple Silicon, CPU, and CUDA. NF4 is CUDA-only.</li><li>Supported dimensions are multiples of 16 from 256 to 2048, with aspect ratios up to 6:1.</li><li><code>V4_QUALITY_48</code> gives best quality, <code>V4_DEFAULT_20</code> is a faster default, and <code>V4_TURBO_12</code> is for drafts.</li><li>Without Hive moderation keys, the helper will not run external safety screening. Use conservative, professional prompts for career and public-facing assets.</li><li>The Ideogram 4 license is non-commercial. Confirm usage rights before using generated assets in commercial materials.</li></ul></article>

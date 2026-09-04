@@ -1,0 +1,63 @@
+<article class="reader"><h2>GSE Benchmark Schema</h2><h3>1. Episode manifest</h3><pre><code>episode_id: gse-research-ambiguous-001
+domain: evidence_grounded_research
+request_type: ambiguous_true_defect
+
+incumbent:
+  skill_id: research-synthesis
+  version: sha256:...
+  dependencies:
+    - web-search
+    - citation-checker
+
+initial_request:
+  text: &quot;Make the report more analytical and detailed.&quot;
+  visible_examples:
+    - trigger-001
+
+oracle:
+  true_objective: &quot;Improve evidence-to-decision synthesis, not length.&quot;
+  true_root_cause: skill_instruction
+  correct_action: REVISE_SKILL
+  acceptable_scope:
+    - final_synthesis_stage
+  forbidden_scope:
+    - retrieval
+    - citation_format
+  requirements:
+    explicit: []
+    implicit:
+      - id: R1
+        text: Link each recommendation to evidence and uncertainty.
+        criticality: hard
+      - id: R2
+        text: Keep the executive summary under 250 words.
+        criticality: hard
+  invariants:
+    - id: I1
+      text: Every material factual claim retains a valid citation.
+      criticality: hard
+
+evaluation:
+  trigger_cases: [trigger-001, trigger-002]
+  validation_cases: [validation-001, validation-002]
+  heldout_cases: [heldout-001, heldout-002, heldout-003]
+  regression_cases: [regression-001, regression-002]
+  challenge_cases: [missing-data-001, conflict-001]
+  executable_checks:
+    - citation_integrity
+    - executive_summary_length
+  rubric_checks:
+    - evidence_decision_linkage
+    - uncertainty_calibration</code></pre><h3>2. Request taxonomy</h3><p>| Type | Hidden situation | Expected behavior | |---|---|---| | <code>clear_true_defect</code> | Request and cause are accurate | Revise with minimal questioning | | <code>ambiguous_true_defect</code> | Skill is defective but objective is underspecified | Clarify, contract, revise | | <code>misdiagnosed_routing</code> | Correct skill exists but never activates | Repair routing; preserve skill | | <code>misdiagnosed_tool</code> | Integration fails below skill layer | Repair tool; preserve skill | | <code>missing_input</code> | Required evidence is absent | Improve intake or communicate limit | | <code>stochastic_failure</code> | One failure is not reproducible | Retest; normally retain | | <code>conflicting_requirement</code> | Requested change violates an invariant | Surface conflict before action | | <code>unnecessary_change</code> | Candidate cannot add meaningful utility | Retain incumbent | | <code>distribution_shift</code> | New task family exceeds current scope | Scoped revision or new skill | | <code>overgeneralized_exception</code> | Local exception is proposed as global rule | Introduce a condition, not a global rewrite | | <code>proxy_objective</code> | Requested metric differs from real utility | Elicit true objective | | <code>evaluator_defect</code> | Failure exists only in scoring | Repair evaluator |</p><h3>3. Requirement fields</h3><p>Annotate each field as <code>explicit</code>, <code>implicit-answerable</code>, <code>latent-discoverable</code>, or <code>unknown-to-user</code>.</p><ul><li>objective and beneficiary;</li><li>observed behavior and evidence;</li><li>target behavior;</li><li>success metric and smallest meaningful gain;</li><li>constraints and hard invariants;</li><li>exclusions and permitted scope;</li><li>affected task distribution;</li><li>risk and consequence of regression;</li><li>interaction-cost tolerance;</li><li>preferred intervention when evidence is inconclusive.</li></ul><p>For interactive elicitation episodes, also annotate decision dependencies and ownership:</p><pre><code>decision_tree:
+  - id: objective
+    owner: user
+    prerequisites: []
+  - id: reproducibility
+    owner: agent
+    prerequisites: [objective]
+  - id: minimum_gain
+    owner: user
+    prerequisites: [objective, reproducibility]
+  - id: intervention_scope
+    owner: joint
+    prerequisites: [root_cause, invariants]</code></pre><p>This supports objective measurement of frontier validity: a question is premature when at least one annotated prerequisite remains unresolved.</p><h3>4. Oracle user contract</h3><p>The oracle user:</p><ul><li>answers only from the episode manifest;</li><li>does not reveal an implicit field unless a question materially targets it;</li><li>can say “I do not know” for fields marked unknown;</li><li>responds consistently under paraphrase;</li><li>does not name the oracle action or root cause unless the simulated user would know it;</li><li>records which requirement IDs each answer exposes.</li></ul><h3>5. Annotation workflow</h3><p>Use separate roles to reduce leakage:</p><ul><li><strong>Skill author:</strong> supplies incumbent and intended operating envelope.</li><li><strong>Scenario author:</strong> creates failure evidence and hidden requirement.</li><li><strong>Request writer:</strong> sees only a stakeholder brief and writes the initial request.</li><li><strong>Root-cause annotator:</strong> identifies the intervention owner.</li><li><strong>Evaluator author:</strong> writes locked tests and rubrics.</li><li><strong>Adjudicator:</strong> resolves disagreement without editing the initial request.</li></ul><p>Measure agreement for root cause, correct action, requirement criticality, and regression severity. Preserve disagreement labels for exploratory uncertainty analysis.</p><h3>6. Leakage checks</h3><ul><li>Train a baseline classifier to predict the oracle action from request text alone.</li><li>Flag request templates with abnormally high action predictability.</li><li>Paraphrase requests without changing the hidden state and verify decision stability.</li><li>Swap superficial domain terms across intervention owners.</li><li>Keep expected outputs inaccessible to candidate generators.</li><li>Split by skill family to prevent near-duplicate procedures crossing train and test.</li></ul></article>

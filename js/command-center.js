@@ -38,7 +38,7 @@
       const allowed = key === 'kind' ? ['', 'Article', 'Research', 'Demo', 'Skill', 'Tool', 'Protocol'] : ['', 'Build', 'Research', 'Publish'];
       select.value = allowed.includes(value) ? value : '';
     }
-    function filter() {
+    function filter(updateHistory = true) {
       const terms = search.value.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
       let count = 0;
       cards.forEach(card => {
@@ -53,7 +53,10 @@
       document.querySelectorAll('[data-stream-shortcut]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.streamShortcut === stream.value)));
       if ($('filter-count')) $('filter-count').textContent = [kind.value, stream.value].filter(Boolean).length || '';
       if ($('filter-results')) $('filter-results').textContent = `${count} matching assets`;
-      setParams({ q: search.value.trim(), kind: kind.value, stream: stream.value });
+      if (updateHistory !== false) {
+        setParams({ q: search.value.trim(), kind: kind.value, stream: stream.value });
+        if (document.dispatchEvent) document.dispatchEvent(new Event('hub:filters-changed'));
+      }
     }
     search.addEventListener('input', filter); kind.addEventListener('change', filter); stream.addEventListener('change', filter);
     document.querySelectorAll('[data-kind-shortcut]').forEach(link => link.addEventListener('click', e => {
@@ -69,6 +72,13 @@
       if (!editing && (e.key === '/' || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k'))) { e.preventDefault(); search.focus(); }
     });
     filter();
+    window.addEventListener('popstate', () => {
+      const query = new URLSearchParams(location.search);
+      search.value = query.get('q') || '';
+      kind.value = ['', 'Article', 'Research', 'Demo', 'Skill', 'Tool', 'Protocol'].includes(query.get('kind')) ? query.get('kind') : '';
+      stream.value = ['', 'Build', 'Research', 'Publish'].includes(query.get('stream')) ? query.get('stream') : '';
+      filter(false);
+    });
   }
 
   const graphFocus = $('graph-focus');

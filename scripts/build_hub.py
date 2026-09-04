@@ -154,7 +154,7 @@ def page(title, description, body, route='/', active=None, asset=None):
       <title>{E(title)} · Autumn Memo</title><meta name="description" content="{E(description)}"><link rel="canonical" href="{ORIGIN}{route}">
       <meta property="og:title" content="{E(title)} · Autumn Memo"><meta property="og:description" content="{E(description)}"><meta property="og:type" content="{'article' if asset else 'website'}"><meta property="og:url" content="{ORIGIN}{route}">{image}
       <meta name="twitter:card" content="{'summary' if asset else 'summary_large_image'}"><meta name="twitter:title" content="{E(title)} · Autumn Memo"><meta name="twitter:description" content="{E(description)}">
-      <meta name="theme-color" content="#f5f4ec"><link rel="stylesheet" href="/css/command-center.css"><script src="/js/command-center.js" defer></script><link rel="alternate" type="application/rss+xml" title="Autumn Memo" href="/index.xml"></head>
+      <meta name="theme-color" content="#f5f4ec"><link rel="stylesheet" href="/css/command-center.css"><script src="/js/command-center.js" defer></script><script src="/js/asset-viewer.js" defer></script><link rel="alternate" type="application/rss+xml" title="Autumn Memo" href="/index.xml"></head>
       <body data-filter-layout="{'rail' if filter_sidebar else 'none'}"><a class="skip" href="#main">Skip to content</a><div class="app-shell"><div class="workspace"><header class="topbar library-topbar">{library_heading}<div class="topbar-links"><a id="about-trigger" class="about-trigger" href="/about/" aria-haspopup="dialog" aria-controls="about-panel">About & experience</a>{trigger}</div></header>
       <main id="main" class="{'collection-main' if route == '/' else ''}">{body}</main><footer><span>Autumn Memo · Kent Chiu</span><div><a href="/archives/">Archives</a><a href="/index.xml">RSS</a><a href="https://github.com/KentChun33333">GitHub</a><a href="/index.legacy-hugo.html">Original homepage</a></div></footer></div></div>{filter_sidebar}{drawer}{about_drawer}<div id="announcement" class="sr-only" role="status" aria-live="polite"></div></body></html>'''
 
@@ -222,6 +222,8 @@ def build_memory():
         if old['id'] not in BY_ID and re.fullmatch(r'[a-z0-9_-]+', old['id']):
             obsolete = ROOT / 'hub/assets' / old['id'] / 'index.html'
             if obsolete.exists(): obsolete.unlink()
+            reader = ROOT / 'data/hub/readers' / (old['id'] + '.html')
+            if reader.exists(): reader.unlink()
     inventory = []
     for path in sorted(ROOT.rglob('*')):
         rel = path.relative_to(ROOT)
@@ -265,7 +267,9 @@ def build_pages():
     priority=['gse','ter','story-autumn-memo','wealth','writing-buyinghouse2021','publisher']
     ordered=[BY_ID[i] for i in priority]+[a for a in ASSETS if a['id'] not in priority]
     library=intro+controls+filters+f'<p id="result-count" role="status">{len(ASSETS)} assets</p><div id="asset-results" class="card-grid">'+''.join(card(a,True) for a in ordered)+'</div><div id="empty-results" class="empty-state" hidden><h2>No matching assets</h2><p>Try a broader search or reset your filters.</p></div><noscript><p>All assets are listed here. Interactive filtering requires JavaScript.</p></noscript>'
-    html=page('Kent Chiu · Asset library','Research, demos, skills, personal stories and illustrated writing by Kent Chiu. Explore an asset or get in touch.',library,'/')
+    viewer = '<section id="asset-view" hidden aria-labelledby="viewer-title"><div class="viewer-toolbar"><button type="button" id="viewer-back" class="text-button">← Library</button><h2 id="viewer-title" tabindex="-1"></h2><div class="viewer-actions"><button type="button" id="viewer-share" class="text-button">Share</button><a id="viewer-original" target="_blank" rel="noopener">Open original ↗</a></div></div><p id="viewer-status" role="status"></p><div id="viewer-canvas"></div></section>'
+    library='<section id="library-view">'+library+'</section>'+viewer
+    html=page('Kent Chiu · Asset library' ,'Research, demos, skills, personal stories and illustrated writing by Kent Chiu. Explore an asset or get in touch.',library,'/')
     write('index.html',html)
     write('hub/library/index.html',html)
     # Legacy entry URLs retain a useful destination; source asset URLs are untouched.
@@ -288,7 +292,9 @@ def build_pages():
             related+=f'<li><a href="{detail(other)}">{E(other["title"])}</a><small>{E(r["type"].replace("_"," "))} · {E(r["basis"])}</small></li>'
         body=f'<a class="back-link" href="/hub/library/">← Asset library</a>'+head(a['kind']+' / '+a['stream'],a['title'],a['summary'])+f'''<div class="asset-toolbar"><span class="status">{E(a['status'])}</span><a class="button" href="{a['url']}">{'Open source' if a['path'].endswith('.md') else 'Open original '+a['kind'].lower()} ↗</a><button class="text-button" data-share>Copy share link</button>{asset_actions(a)}</div>'''
         if a['path'].endswith('.md'):
-            body+='<article class="reader">'+markdown((ROOT/a['path']).read_text(),a['path'])+'</article>'
+            reader_html='<article class="reader">'+markdown((ROOT/a['path']).read_text(),a['path'])+'</article>'
+            write('data/hub/readers/'+a['id']+'.html', reader_html)
+            body+=reader_html
         else:
             if a.get('images'):
                 body+='<section class="article-gallery" aria-label="Pictures from the original article">'+''.join(f'<figure><a href="{a["url"]}"><img src="{E(m["url"])}" alt="{E(m["alt"])}" loading="lazy" decoding="async"></a><figcaption>Original article image · <a href="{a["url"]}">Read with its full context ↗</a> · <a href="{E(m["url"])}">View full-size image ↗</a></figcaption></figure>' for m in a['images'])+'</section>'
