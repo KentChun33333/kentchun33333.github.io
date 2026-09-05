@@ -4,130 +4,112 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script type="application/json" id="asset-metadata">
-{
-  "schema_version": 1,
-  "id": "table-tennis-backhand-receive",
-  "title": "乒乓 Note｜樊振東式反手接發球",
-  "summary": "參考樊振東近台反手的五階段人體動畫：低重心、身前高肘、緊湊引拍，以及快擰與快撕的前臂和手腕加速路徑。",
-  "kind": "Demo",
-  "stream": "Build",
-  "topics": ["Table tennis", "Movement notes", "Sports training"],
-  "status": "Interactive animation note",
-  "visibility": "public",
-  "rights": "All rights reserved. Contact the author for reuse.",
-  "dates": {}
-}
+{"schema_version":1,"id":"table-tennis-backhand-receive","title":"乒乓 Note｜樊振東式反手接發球 3D","summary":"以 Three.js 程序化 3D 骨架分析樊振東式近台反手：低重心、身前高肘、緊湊引拍，以及快擰與快撕的動力鏈。","kind":"Demo","stream":"Build","topics":["Table tennis","Movement notes","Sports training","3D biomechanics"],"status":"Interactive 3D movement note","visibility":"public","rights":"All rights reserved. Contact the author for reuse.","dates":{}}
 </script>
-<title>乒乓 Note｜樊振東式反手接發球</title>
+<title>乒乓 Note｜樊振東式反手接發球 3D</title>
 <style>
-  :root{color-scheme:dark;--bg:#071018;--panel:#101d28;--panel2:#152632;--ink:#edf8fb;--muted:#9fb6bf;--cyan:#37e6cf;--orange:#ffb657;--red:#ff6f6f;--blue:#62aef7;--line:#29404c}
-  *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 70% 0,#12313a 0,#071018 44%);color:var(--ink);font-family:Inter,"PingFang TC","Noto Sans TC",system-ui,sans-serif;min-height:100vh}
-  .app{max-width:1120px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:18px}.eyebrow{color:var(--cyan);letter-spacing:.18em;font-size:12px;font-weight:700}.title{font-size:clamp(26px,4vw,44px);line-height:1.08;margin:8px 0}.sub{color:var(--muted);max-width:680px;line-height:1.6}.tag{white-space:nowrap;border:1px solid #2a655f;background:#102c2c;color:#b9fff3;border-radius:999px;padding:8px 12px;font-size:13px}
-  .grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(260px,.72fr);gap:16px}.stage,.note{background:linear-gradient(145deg,rgba(17,34,45,.96),rgba(9,23,31,.96));border:1px solid var(--line);border-radius:20px;box-shadow:0 20px 70px #0007}.stage{overflow:hidden}.canvas{position:relative;aspect-ratio:16/10;min-height:410px;background:linear-gradient(180deg,#102735 0 54%,#0b171f 54%)}svg{width:100%;height:100%;display:block}.phase-label{position:absolute;left:18px;top:16px;background:#071018d9;border:1px solid #35505c;border-radius:12px;padding:10px 12px}.phase-label strong{display:block;font-size:16px}.phase-label span{color:var(--muted);font-size:12px}.legend{position:absolute;right:16px;top:16px;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;font-size:12px;color:var(--muted)}.legend i{display:inline-block;width:18px;height:3px;border-radius:4px;margin:0 5px 3px 0}.controls{display:flex;align-items:center;gap:10px;padding:14px 16px;background:#0a1821;border-top:1px solid var(--line);flex-wrap:wrap}button{appearance:none;border:1px solid #36515d;background:#152b37;color:var(--ink);min-height:42px;padding:9px 13px;border-radius:11px;font-weight:650;cursor:pointer}button:hover{border-color:var(--cyan)}button:focus-visible{outline:3px solid #37e6cf55;outline-offset:2px}.primary{background:var(--cyan);color:#05201d;border-color:var(--cyan)}.modes{display:flex;gap:6px;margin-left:auto}.mode[aria-pressed="true"]{background:#213f46;border-color:var(--cyan);color:#bafff6}.timeline{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:0 16px 16px;background:#0a1821}.step{height:6px;padding:0;min-height:6px;border:0;border-radius:4px;background:#29404c}.step.active{background:var(--cyan)}
-  .note{padding:18px;display:flex;flex-direction:column;gap:14px}.kicker{font-size:12px;color:var(--cyan);letter-spacing:.12em}.note h2{margin:0;font-size:23px}.cue{border-left:3px solid var(--cyan);padding:4px 0 4px 13px;font-size:18px;line-height:1.55}.readout{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{background:#102631;border:1px solid #274451;border-radius:13px;padding:12px}.metric small{color:var(--muted);display:block;margin-bottom:4px}.metric b{font-size:18px}.why{color:var(--muted);line-height:1.55;font-size:14px}.checks{display:grid;gap:8px}.check{display:flex;gap:9px;align-items:flex-start;padding:9px 10px;background:#0c1b24;border-radius:10px;font-size:14px;line-height:1.4}.dot{width:8px;height:8px;margin-top:6px;flex:none;border-radius:50%;background:var(--cyan)}.warn .dot{background:var(--orange)}.footer-note{margin-top:auto;color:#7f9aa5;font-size:12px;border-top:1px solid var(--line);padding-top:12px}.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-  .body{stroke:#dcebf0;stroke-width:12;stroke-linecap:round;fill:none}.joint{fill:#dcebf0}.shirt{fill:#e63342;stroke:#ff7a84;stroke-width:2}.shorts{fill:#16212b;stroke:#536573;stroke-width:2}.skin{fill:#e6b38d;stroke:#f4ceb0;stroke-width:2}.hair{fill:#172029}.leg{stroke:#dcebf0;stroke-width:15;stroke-linecap:round;fill:none}.shoe{stroke:#61adc9;stroke-width:10;stroke-linecap:round}.arm-active{stroke:var(--cyan);stroke-width:14;stroke-linecap:round}.arm-passive{stroke:#e6b38d;stroke-width:12;stroke-linecap:round}.arm-guide{stroke:var(--cyan);stroke-width:3;stroke-dasharray:8 7;fill:none}.elbow-ring{fill:#37e6cf24;stroke:var(--cyan);stroke-width:2}.racket{fill:#ff6674;stroke:#ffe2e5;stroke-width:3}.ball{fill:#fff7cc;filter:drop-shadow(0 0 8px #fff9)}.contact-zone{fill:#37e6cf20;stroke:var(--cyan);stroke-width:2;stroke-dasharray:6 5}.measure{stroke:var(--orange);stroke-width:2}.measureText{fill:var(--orange);font-size:14px;font-weight:700}.ghost{opacity:.18}.net{stroke:#dde7eb;stroke-width:4}.tabletop{fill:#154d62;stroke:#5ca2b9;stroke-width:3}.tableline{stroke:#bfdbe3;stroke-width:2;opacity:.8}.path-fast{fill:none;stroke:var(--blue);stroke-width:4;stroke-dasharray:10 7}.path-spin{fill:none;stroke:var(--orange);stroke-width:4;stroke-dasharray:8 7}.svgLabel{fill:#dcebf0;font-size:13px}.svgMuted{fill:#91a9b3;font-size:12px}.reference{color:#7f9aa5;font-size:12px;line-height:1.45}.reference a{color:#9bd9ec}
-  @media(max-width:780px){.app{padding:14px}.top{display:block}.tag{display:inline-block;margin-top:8px}.grid{grid-template-columns:1fr}.canvas{min-height:350px}.modes{margin-left:0;width:100%}.mode{flex:1}.readout{grid-template-columns:1fr 1fr}}
+:root{color-scheme:dark;--bg:#071018;--panel:#0d1b24;--ink:#edf8fb;--muted:#9fb6bf;--cyan:#37e6cf;--orange:#ffb657;--blue:#62aef7;--line:#29404c}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 68% 0,#12333b 0,#071018 46%);color:var(--ink);font-family:Inter,"PingFang TC","Noto Sans TC",system-ui,sans-serif;min-height:100vh}.app{max-width:1180px;margin:auto;padding:22px}.top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:16px}.eyebrow{color:var(--cyan);letter-spacing:.16em;font-size:12px;font-weight:700}.title{font-size:clamp(25px,4vw,43px);line-height:1.08;margin:7px 0}.sub{color:var(--muted);max-width:760px;line-height:1.55}.tag{white-space:nowrap;border:1px solid #2a655f;background:#102c2c;color:#b9fff3;border-radius:999px;padding:8px 12px;font-size:13px}
+.grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(275px,.68fr);gap:15px}.stage,.note{background:linear-gradient(145deg,rgba(17,34,45,.97),rgba(8,21,29,.97));border:1px solid var(--line);border-radius:19px;box-shadow:0 20px 65px #0007}.stage{overflow:hidden}.viewport{height:min(64vw,580px);min-height:430px;position:relative;background:#08131b}.viewport canvas{width:100%;height:100%;display:block}.hud{position:absolute;left:14px;top:14px;display:flex;gap:7px;flex-wrap:wrap;max-width:70%}.hud span{background:#071018d9;border:1px solid #35505c;border-radius:9px;padding:7px 9px;font-size:12px}.hud b{color:var(--cyan)}.loading{position:absolute;inset:0;display:grid;place-items:center;background:#08131b;color:var(--muted);z-index:3}.loading[hidden]{display:none}.axis{position:absolute;right:14px;bottom:12px;color:#88a3ad;font-size:11px;background:#071018bb;padding:5px 7px;border-radius:7px}
+.toolbar{padding:12px 14px;border-top:1px solid var(--line);background:#091821;display:grid;gap:10px}.row{display:flex;align-items:center;gap:7px;flex-wrap:wrap}button{appearance:none;border:1px solid #36515d;background:#142a36;color:var(--ink);min-height:40px;padding:8px 11px;border-radius:10px;font-weight:650;cursor:pointer}button:hover{border-color:var(--cyan)}button:focus-visible,input:focus-visible{outline:3px solid #37e6cf55;outline-offset:2px}.primary{background:var(--cyan);color:#05201d;border-color:var(--cyan)}button[aria-pressed="true"]{background:#213f46;border-color:var(--cyan);color:#bafff6}.spacer{margin-left:auto}.scrub{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;color:var(--muted);font-size:12px}.scrub input{width:100%;accent-color:var(--cyan)}
+.note{padding:17px;display:flex;flex-direction:column;gap:13px}.kicker{font-size:11px;color:var(--cyan);letter-spacing:.12em}.note h2{margin:0;font-size:22px}.cue{border-left:3px solid var(--cyan);padding:3px 0 3px 12px;font-size:17px;line-height:1.5}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{background:#102630;border:1px solid #274451;border-radius:12px;padding:10px}.metric small{color:var(--muted);display:block;margin-bottom:4px}.metric b{font-size:17px}.chain{display:grid;gap:6px}.chain div{display:flex;gap:8px;align-items:center;padding:8px 9px;background:#0a1922;border-radius:9px;font-size:13px}.chain i{height:7px;width:7px;border-radius:50%;background:#38515c}.chain .on i{background:var(--cyan);box-shadow:0 0 10px var(--cyan)}.why{color:var(--muted);line-height:1.5;font-size:13px}.reference{margin-top:auto;color:#78939e;font-size:11px;line-height:1.45;border-top:1px solid var(--line);padding-top:10px}.reference a{color:#9bd9ec}.fallback{padding:24px;line-height:1.6}
+@media(max-width:820px){.app{padding:12px}.top{display:block}.tag{display:inline-block;margin-top:8px}.grid{grid-template-columns:1fr}.viewport{height:520px;min-height:400px}.spacer{margin-left:0}.note{min-height:420px}}@media(max-width:470px){.viewport{height:450px}.camera-label{display:none}.metrics{grid-template-columns:1fr 1fr}.row button{flex:1}.row .icon{flex:0 0 43px}}
 </style>
 </head>
 <body>
 <main class="app">
-  <header class="top"><div><div class="eyebrow">TABLE TENNIS · 動作筆記 01</div><h1 class="title">樊振東式反手：肘穩、前臂快</h1><div class="sub">參考樊振東的近台反手與台內擰拉：低重心、軀幹前傾，肘在身前偏高作支點；Z03 在球的後方／後上方接觸，以短促的前臂旋轉和手腕加速完成快撕或快擰。</div></div><div class="tag">樊振東動作參考 · 非動作捕捉</div></header>
-  <section class="grid">
-    <div class="stage">
-      <div class="canvas">
-        <div class="phase-label" aria-live="polite"><strong id="phaseName">1｜準備</strong><span id="phaseHint">肘部先進桌，手腕保留空間</span></div>
-        <div class="legend"><span><i style="background:var(--cyan)"></i>持拍臂</span><span><i style="background:var(--orange)"></i>上旋／擰</span><span><i style="background:var(--blue)"></i>向前／撕</span></div>
-        <svg id="scene" viewBox="0 0 760 480" role="img" aria-labelledby="svgTitle svgDesc">
-          <title id="svgTitle">反手接發球動作動畫</title><desc id="svgDesc">球員在球桌前以反手準備，手肘深入桌內十至二十公分，依模式示範快撕或快擰。</desc>
-          <defs><marker id="arrowB" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#62aef7"/></marker><marker id="arrowO" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#ffb657"/></marker></defs>
-          <polygon class="tabletop" points="32,176 595,176 738,323 144,323"/><line class="tableline" x1="313" y1="176" x2="434" y2="323"/><line class="net" x1="86" y1="231" x2="672" y2="231"/><line class="tableline" x1="86" y1="238" x2="672" y2="238" opacity=".35"/>
-          <ellipse id="zone" class="contact-zone" cx="430" cy="291" rx="62" ry="30"/><text id="zoneText" class="svgLabel" x="377" y="339">有效接觸區</text>
-          <g id="measureG"><line class="measure" x1="382" y1="314" x2="433" y2="314"/><line class="measure" x1="382" y1="306" x2="382" y2="322"/><line class="measure" x1="433" y1="306" x2="433" y2="322"/><text class="measureText" x="385" y="302">10–20 cm</text></g>
-          <g id="ghostArm" class="ghost"><line class="arm-active" x1="382" y1="343" x2="421" y2="304"/><line class="arm-active" x1="421" y1="304" x2="426" y2="329"/></g>
-          <g id="player">
-            <path id="legL" class="leg" d="M349 405 L315 435 L284 466"/><path id="legR" class="leg" d="M378 405 L416 434 L450 461"/>
-            <line id="shoeL" class="shoe" x1="274" y1="468" x2="294" y2="468"/><line id="shoeR" class="shoe" x1="441" y1="463" x2="463" y2="463"/>
-            <path id="shorts" class="shorts" d="M344 392 L381 392 L390 417 L338 417 Z"/>
-            <polygon id="torsoShape" class="shirt" points="329,346 382,341 384,398 344,401"/>
-            <circle id="head" class="skin" cx="350" cy="310" r="24"/><path id="hair" class="hair" d="M329 306 Q333 278 361 286 Q375 290 373 307 Q357 294 329 306Z"/>
-            <line id="armL" class="arm-passive" x1="331" y1="351" x2="303" y2="373"/>
-            <line id="upper" class="arm-active" x1="382" y1="343" x2="421" y2="304"/><line id="fore" class="arm-active" x1="421" y1="304" x2="426" y2="329"/>
-            <circle id="elbowHalo" class="elbow-ring" cx="421" cy="304" r="14"/><circle id="elbow" cx="421" cy="304" r="7" fill="#37e6cf"/>
-            <line id="handle" x1="426" y1="329" x2="432" y2="338" stroke="#e8d5b6" stroke-width="7" stroke-linecap="round"/><ellipse id="racket" class="racket" cx="438" cy="347" rx="16" ry="22" transform="rotate(-72 438 347)"/>
-          </g>
-          <path id="motionPath" class="path-spin" d="M430 329 Q451 293 492 260" marker-end="url(#arrowO)"/><text id="motionText" class="measureText" x="487" y="249">前臂外旋＋手腕加速</text>
-          <path id="ballPath" class="arm-guide" d="M130 211 Q275 250 441 282"/><circle id="ball" class="ball" cx="130" cy="211" r="7"/>
-          <g id="ballAxes" opacity="0"><line x1="438" y1="281" x2="487" y2="281" stroke="#62aef7" stroke-width="3" marker-end="url(#arrowB)"/><path d="M450 297 Q425 276 451 258" fill="none" stroke="#ffb657" stroke-width="3" marker-end="url(#arrowO)"/><text class="svgMuted" x="480" y="300">後方 → 前方</text><text class="svgMuted" x="408" y="249">後上方摩擦</text></g>
-        </svg>
-      </div>
-      <div class="controls"><button id="prev" aria-label="上一格">←</button><button id="play" class="primary">▶ 播放</button><button id="next" aria-label="下一格">→</button><div class="modes" role="group" aria-label="回球模式"><button class="mode" data-mode="flick" aria-pressed="true">快擰</button><button class="mode" data-mode="drive" aria-pressed="false">快撕</button></div></div>
-      <div class="timeline" aria-label="五個動作階段"><button class="step active" data-step="0" aria-label="準備"></button><button class="step" data-step="1" aria-label="判斷"></button><button class="step" data-step="2" aria-label="引拍"></button><button class="step" data-step="3" aria-label="接觸"></button><button class="step" data-step="4" aria-label="還原"></button></div>
-    </div>
-    <aside class="note">
-      <div class="kicker">FAN ZHENDONG REFERENCE</div><h2 id="noteTitle">高肘是支點，不是抬肩</h2><div id="cue" class="cue">降低重心、胸口微向桌面；右肘在身前偏高穩住，手腕收在肘的內下方。</div>
-      <div class="readout"><div class="metric"><small>桌內預留</small><b>10–20 cm</b></div><div class="metric"><small>主要接觸</small><b id="contact">球的後上方</b></div></div>
-      <div id="why" class="why">樊振東的反手不是整條手臂一起推。肩部安定、肘的位置變化小，前臂和手腕在最後一段突然加速，因此動作緊湊但球質仍然很重。</div>
-      <div class="checks"><div class="check"><span class="dot"></span><span id="check1">重心微前，肘領先手腕進桌。</span></div><div class="check"><span class="dot"></span><span id="check2">接觸球的後上方，薄摩擦後向前上方送出。</span></div><div class="check warn"><span class="dot"></span><span id="check3">避免：手先伸、肘留在身旁，造成只剩手腕硬擰。</span></div></div>
-      <div class="footer-note">自我檢查：引拍時手腕是否低於肘？觸球前肘是否仍穩定？收拍是否短，能立即銜接下一板？</div>
-      <div class="reference">姿勢參考：<a href="https://www.youtube.com/watch?v=MO2GnsPbA-A" target="_blank" rel="noopener">樊振東反手擰拉慢動作</a> · <a href="https://www.youtube.com/watch?v=kbTWaJZRQ54" target="_blank" rel="noopener">反手慢動作合集</a>。動畫是教學化簡，不是逐幀動作捕捉。</div>
-    </aside>
-  </section>
+<header class="top"><div><div class="eyebrow">TABLE TENNIS · 3D BIOMECHANICS NOTE</div><h1 class="title">樊振東式反手：從腳底到拍頭</h1><div class="sub">這一版不再搬動平面關節點，而是用固定骨長、兩骨 IK 與 3D 球拍方向重建近台反手。觀察重點：低重心、身前高肘、手腕先收後放，以及接觸前的前臂加速。</div></div><div class="tag">技術重建 · 非逐幀動作捕捉</div></header>
+<section class="grid">
+<div class="stage">
+<div class="viewport" id="viewport">
+<div class="loading" id="loading">正在載入 3D 動作…</div>
+<div class="hud"><span id="phase"><b>01</b> 低姿準備</span><span id="modeHud">快擰</span><span id="speedHud">0.5× 慢動作</span></div>
+<div class="axis">拖曳旋轉 · 滾輪縮放</div>
+</div>
+<div class="toolbar">
+<div class="row"><button class="icon primary" id="play">Ⅱ</button><button class="icon" id="restart">↺</button><button data-mode="flick" aria-pressed="true">快擰</button><button data-mode="drive" aria-pressed="false">快撕</button><button id="ghostToggle" aria-pressed="true">接觸殘影</button><span class="spacer"></span><button data-camera="coach" aria-pressed="true"><span class="camera-label">教練</span>斜視</button><button data-camera="front" aria-pressed="false">正面</button><button data-camera="side" aria-pressed="false">側面</button><button data-camera="top" aria-pressed="false">俯視</button></div>
+<div class="scrub"><span id="timeNow">0.0s</span><input id="scrubber" type="range" min="0" max="1000" value="0" aria-label="動作時間軸"><button id="speed">0.5×</button></div>
+</div>
+</div>
+<aside class="note">
+<div class="kicker">CURRENT PHASE</div><h2 id="noteTitle">低，不是蹲死</h2><div class="cue" id="cue">腳距略寬於肩，膝蓋有彈性；胸口向桌面，重心留在前腳掌。</div>
+<div class="metrics"><div class="metric"><small>肘部夾角</small><b id="elbowMetric">≈ 104°</b></div><div class="metric"><small>肘進桌深度</small><b id="depthMetric">≈ 12 cm</b></div><div class="metric"><small>球拍閉合</small><b id="racketMetric">≈ 18°</b></div><div class="metric"><small>動力主體</small><b id="powerMetric">腿／軀幹</b></div></div>
+<div class="chain"><div id="chainLegs" class="on"><i></i>腳底與重心</div><div id="chainCore"><i></i>骨盆與軀幹</div><div id="chainElbow"><i></i>肩胛與肘支點</div><div id="chainForearm"><i></i>前臂與手腕</div><div id="chainRacket"><i></i>拍頭與球</div></div>
+<div class="why" id="why">腳和骨盆先建立穩定平台。上半身前傾，但頭部不應上下彈跳。</div>
+<div class="reference">參考：<a href="https://www.youtube.com/watch?v=MO2GnsPbA-A" target="_blank" rel="noopener">樊振東反手擰拉慢動作</a> · <a href="https://www.youtube.com/watch?v=kbTWaJZRQ54" target="_blank" rel="noopener">反手慢動作合集</a>。本頁是教學化的結構重建，不代表精確生物力學測量。</div>
+</aside>
+</section>
 </main>
-<script>
-(()=>{
- const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
- const phases=[
-  {name:'1｜低姿準備',hint:'寬站位、屈膝，胸口向桌面',cue:'像樊振東一樣先降低重心；右肘放在身前，不用聳肩把肘硬抬起。'},
-  {name:'2｜進桌判斷',hint:'身體靠腿進，手肘保持在前',cue:'來球短時由腳和重心靠近，肘／前臂探入桌內約 10–20 cm。'},
-  {name:'3｜緊湊引拍',hint:'肘穩定，手腕收到內下方',cue:'前臂折回腹前，拍頭低於球；手腕低於肘，留下外旋加速空間。'},
-  {name:'4｜爆發接觸',hint:'前臂先轉，手腕最後加速',cue:'肘幾乎不跑：快擰向前上摩擦，快撕則更早、更直接向前穿。'},
-  {name:'5｜短收還原',hint:'拍不甩遠，重心仍壓在前腳掌',cue:'收拍停在身體前方；不抬高肩膀，迅速回到可連續反手的中性位。'}
- ];
- const flickPoses=[
-  {hx:350,hy:310,sx:382,sy:343,ex:418,ey:309,wx:439,wy:315,rx:451,ry:314,rot:-55,bx:130,by:211},
-  {hx:353,hy:307,sx:385,sy:340,ex:423,ey:301,wx:439,wy:313,rx:448,ry:323,rot:-68,bx:245,by:239},
-  {hx:356,hy:304,sx:388,sy:338,ex:424,ey:299,wx:423,wy:327,rx:429,ry:345,rot:-82,bx:354,by:268},
-  {hx:356,hy:303,sx:389,sy:337,ex:426,ey:298,wx:456,wy:279,rx:476,ry:267,rot:-25,bx:446,by:281},
-  {hx:352,hy:307,sx:385,sy:340,ex:421,ey:304,wx:447,wy:298,rx:465,ry:292,rot:-38,bx:570,by:224}
- ];
- const drivePoses=[
-  {...flickPoses[0]}, {...flickPoses[1]},
-  {hx:355,hy:305,sx:387,sy:339,ex:422,ey:305,wx:436,wy:316,rx:446,ry:320,rot:-58,bx:354,by:268},
-  {hx:354,hy:304,sx:389,sy:338,ex:424,ey:303,wx:463,wy:290,rx:484,ry:287,rot:-18,bx:446,by:281},
-  {hx:351,hy:307,sx:385,sy:340,ex:419,ey:307,wx:452,wy:301,rx:471,ry:299,rot:-28,bx:570,by:224}
- ];
- let step=0,mode='flick',playing=false,timer=null;
- function setLine(id,x1,y1,x2,y2){const e=$(id);e.setAttribute('x1',x1);e.setAttribute('y1',y1);e.setAttribute('x2',x2);e.setAttribute('y2',y2)}
- let lastPose=null,raf=0;
- function drawPose(p){
-  $('#head').setAttribute('cx',p.hx);$('#head').setAttribute('cy',p.hy);$('#hair').setAttribute('transform',`translate(${p.hx-350} ${p.hy-310})`);
-  $('#torsoShape').setAttribute('points',`${p.sx-53},${p.sy+3} ${p.sx},${p.sy} ${p.sx-1},398 ${p.sx-41},401`);setLine('#armL',p.sx-51,p.sy+8,p.sx-79,p.sy+30);
-  setLine('#upper',p.sx,p.sy,p.ex,p.ey);setLine('#fore',p.ex,p.ey,p.wx,p.wy);['#elbow','#elbowHalo'].forEach(id=>{$(id).setAttribute('cx',p.ex);$(id).setAttribute('cy',p.ey)});
-  setLine('#handle',p.wx,p.wy,p.rx-8,p.ry+7);const r=$('#racket');r.setAttribute('cx',p.rx);r.setAttribute('cy',p.ry);r.setAttribute('transform',`rotate(${p.rot} ${p.rx} ${p.ry})`);
-  $('#ball').setAttribute('cx',p.bx);$('#ball').setAttribute('cy',p.by);
- }
- function movePose(target){
-  cancelAnimationFrame(raf);if(!lastPose){lastPose={...target};drawPose(target);return}
-  const from={...lastPose},start=performance.now(),duration=420;
-  function frame(now){const raw=Math.min(1,(now-start)/duration),t=1-Math.pow(1-raw,3),p={};for(const k in target)p[k]=from[k]+(target[k]-from[k])*t;drawPose(p);if(raw<1)raf=requestAnimationFrame(frame);else lastPose={...target}}
-  raf=requestAnimationFrame(frame);
- }
- function render(){
-  const p=(mode==='flick'?flickPoses:drivePoses)[step], ph=phases[step]; $('#phaseName').textContent=ph.name;$('#phaseHint').textContent=ph.hint;$('#cue').textContent=ph.cue;
-  movePose(p);$('#ballAxes').setAttribute('opacity',step===3?'1':'0');
-  $$('.step').forEach((e,i)=>e.classList.toggle('active',i<=step));
-  const flick=mode==='flick';$('#contact').textContent=flick?'球的後上方':'球的正後方偏上';$('#noteTitle').textContent=flick?'高肘穩住，前臂甩出去':'肘不後縮，迎球向前穿';
-  $('#why').textContent=flick?'樊振東式台內擰拉的視覺重點是「肘相對穩、手腕先收後放」：前臂外旋建立速度，手腕只在接觸前後完成最後加速。':'快撕沿用相同低重心和身前高肘，但引拍更小、接觸更早；力量方向以向前為主，不把球往上托。';
-  $('#check1').textContent=flick?'重心微前，肘領先手腕進桌。':'重心微前，肘穩定，迎球點不要掉到身旁。';
-  $('#check2').textContent=flick?'接觸球的後上方，薄摩擦後向前上方送出。':'接觸球的正後方略上，前臂短促向前穿出。';
-  $('#check3').textContent=flick?'避免：手先伸、肘留在身旁，造成只剩手腕硬擰。':'避免：拉長揮拍或退肘，讓擊球點落到身體側後方。';
-  const mp=$('#motionPath'),mt=$('#motionText');if(flick){mp.setAttribute('class','path-spin');mp.setAttribute('d','M428 335 Q452 292 497 255');mp.setAttribute('marker-end','url(#arrowO)');mt.setAttribute('x','487');mt.setAttribute('y','244');mt.setAttribute('fill','#ffb657');mt.textContent='前臂外旋＋手腕加速'}else{mp.setAttribute('class','path-fast');mp.setAttribute('d','M436 316 Q494 300 556 278');mp.setAttribute('marker-end','url(#arrowB)');mt.setAttribute('x','532');mt.setAttribute('y','266');mt.setAttribute('fill','#62aef7');mt.textContent='更早、更直接向前'}
- }
- function stop(){playing=false;clearInterval(timer);$('#play').textContent='▶ 播放'}
- function play(){if(playing){stop();return}playing=true;$('#play').textContent='Ⅱ 暫停';if(step===4)step=0;render();timer=setInterval(()=>{if(step===4){stop();return}step++;render()},900)}
- $('#play').onclick=play;$('#prev').onclick=()=>{stop();step=(step+4)%5;render()};$('#next').onclick=()=>{stop();step=(step+1)%5;render()};
- $$('.step').forEach(e=>e.onclick=()=>{stop();step=+e.dataset.step;render()});$$('.mode').forEach(e=>e.onclick=()=>{mode=e.dataset.mode;$$('.mode').forEach(x=>x.setAttribute('aria-pressed',x===e));render()});
- render();setTimeout(play,450);
-})();
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const viewport=$('#viewport'), loading=$('#loading');
+let renderer;
+try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'})}catch(e){loading.innerHTML='<div class="fallback">此瀏覽器無法建立 WebGL。請以 Safari、Chrome 或 Edge 開啟。</div>';throw e}
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;viewport.prepend(renderer.domElement);
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x08131b);scene.fog=new THREE.Fog(0x08131b,6,10);
+const camera=new THREE.PerspectiveCamera(34,1,.05,30);const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.target.set(0,1.05,.75);controls.minDistance=2.4;controls.maxDistance=8;controls.maxPolarAngle=Math.PI*.49;
+scene.add(new THREE.HemisphereLight(0xbfefff,0x13202a,2.2));const key=new THREE.DirectionalLight(0xffffff,4);key.position.set(-2,5,3);key.castShadow=true;key.shadow.mapSize.set(1024,1024);scene.add(key);const rim=new THREE.DirectionalLight(0x35e6cf,2);rim.position.set(3,2,-2);scene.add(rim);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(12,12),new THREE.MeshStandardMaterial({color:0x0b1820,roughness:.9}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);const grid=new THREE.GridHelper(8,16,0x27434d,0x162932);grid.position.y=.003;scene.add(grid);
+function box(size,pos,color){const m=new THREE.Mesh(new THREE.BoxGeometry(...size),new THREE.MeshStandardMaterial({color,roughness:.58,metalness:.08}));m.position.set(...pos);m.castShadow=m.receiveShadow=true;scene.add(m);return m}
+box([1.525,.07,2.74],[0,.76,0],0x155a72);box([1.55,.015,.025],[0,.82,0],0xdde9ec);for(const x of [-.62,.62])for(const z of [-1.08,1.08])box([.06,.74,.06],[x,.38,z],0x1d2d35);
+const lineMat=new THREE.LineBasicMaterial({color:0xbadbe3});for(const pts of [[[-.762,.798,-1.37],[.762,.798,-1.37]],[[0,.798,-1.37],[0,.798,1.37]]]){const g=new THREE.BufferGeometry().setFromPoints(pts.map(p=>new THREE.Vector3(...p)));scene.add(new THREE.Line(g,lineMat))}
+const C={shirt:0xe73946,skin:0xe2ad83,shorts:0x18232d,active:0x37e6cf,shoe:0x57aeca,joint:0xd8e8ed,ghost:0x4b776f};
+function material(color,opacity=1){return new THREE.MeshStandardMaterial({color,roughness:.56,transparent:opacity<1,opacity,depthWrite:opacity>.5})}
+function sphere(r,color,opacity=1){const m=new THREE.Mesh(new THREE.SphereGeometry(r,18,12),material(color,opacity));m.castShadow=opacity>.5;scene.add(m);return m}
+function segment(radius,color,opacity=1){const m=new THREE.Mesh(new THREE.CylinderGeometry(radius,radius,1,14),material(color,opacity));m.castShadow=opacity>.5;scene.add(m);return m}
+const rig={head:sphere(.125,C.skin),pelvis:sphere(.12,C.shorts),neck:sphere(.055,C.skin),handR:sphere(.055,C.skin),handL:sphere(.05,C.skin),elbowR:sphere(.065,C.active),elbowL:sphere(.052,C.skin),kneeL:sphere(.065,C.joint),kneeR:sphere(.065,C.joint)};
+for(const n of ['spine','hipL','hipR','thighL','thighR','shinL','shinR','shoulderL','upperL','foreL'])rig[n]=segment(n==='spine'?.17:n.startsWith('thigh')?.085:n.startsWith('shin')?.07:.06,n==='spine'?C.shirt:n.startsWith('hip')||n.startsWith('thigh')?C.shorts:n.startsWith('shin')?C.joint:n==='shoulderL'?C.shirt:C.skin);
+rig.upperR=segment(.067,C.active);rig.foreR=segment(.058,C.active);
+const shoeMat=material(C.shoe);for(const n of ['shoeL','shoeR']){rig[n]=new THREE.Mesh(new THREE.BoxGeometry(.23,.07,.34),shoeMat);rig[n].castShadow=true;scene.add(rig[n])}
+const racket=new THREE.Group();const blade=new THREE.Mesh(new THREE.CylinderGeometry(.115,.115,.018,24),material(0xef4050));blade.rotation.x=Math.PI/2;racket.add(blade);const handle=new THREE.Mesh(new THREE.BoxGeometry(.055,.19,.045),material(0xd7a46c));handle.position.y=-.16;racket.add(handle);racket.scale.set(.88,.88,.88);scene.add(racket);
+const ball=sphere(.02,0xfff6c8);const trailGeo=new THREE.BufferGeometry().setFromPoints(Array.from({length:28},()=>new THREE.Vector3()));const trail=new THREE.Line(trailGeo,new THREE.LineBasicMaterial({color:0xffb657,transparent:true,opacity:.72}));scene.add(trail);
+const ghostParts=[];for(let i=0;i<6;i++){const g=segment(.025,C.ghost,.24);ghostParts.push(g)}
+const V=a=>new THREE.Vector3(...a),mix=(a,b,t)=>a.map((v,i)=>THREE.MathUtils.lerp(v,b[i],t));
+function setSeg(mesh,a,b){const A=V(a),B=V(b),d=B.clone().sub(A);mesh.position.copy(A).add(B).multiplyScalar(.5);mesh.scale.set(1,d.length(),1);mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize())}
+function twoBone(s,t,h,l1,l2){const S=V(s),T=V(t),H=V(h),dir=T.clone().sub(S),d=Math.min(Math.max(dir.length(),Math.abs(l1-l2)+.001),l1+l2-.001);dir.normalize();let perp=H.clone().sub(S).addScaledVector(dir,-H.clone().sub(S).dot(dir));if(perp.lengthSq()<1e-6)perp.set(0,1,0);perp.normalize();const x=(l1*l1-l2*l2+d*d)/(2*d),y=Math.sqrt(Math.max(0,l1*l1-x*x));return S.clone().addScaledVector(dir,x).addScaledVector(perp,y).toArray()}
+const common=[
+{p:[0,.78,1.78],n:[0,1.34,1.60],h:[0,1.57,1.54],wr:[-.05,1.15,1.37],er:[.12,1.34,1.26],wl:[-.42,1.08,1.54],rot:[-1.18,.12,.12],ball:[-.32,.88,-.72]},
+{p:[0,.77,1.70],n:[0,1.33,1.51],h:[0,1.56,1.45],wr:[-.08,1.13,1.24],er:[.10,1.35,1.18],wl:[-.43,1.07,1.45],rot:[-1.25,.18,.18],ball:[-.20,.84,.05]},
+{p:[-.015,.76,1.66],n:[-.01,1.32,1.47],h:[-.01,1.55,1.41],wr:[-.24,1.03,1.25],er:[.10,1.38,1.17],wl:[-.42,1.06,1.41],rot:[-1.52,.42,-.22],ball:[-.10,.88,.72]},
+{p:[-.02,.77,1.63],n:[-.015,1.33,1.44],h:[-.015,1.56,1.38],wr:[.02,1.24,1.08],er:[.12,1.37,1.15],wl:[-.40,1.08,1.39],rot:[-.88,-.12,.58],ball:[.01,1.22,1.04]},
+{p:[.01,.78,1.70],n:[0,1.34,1.52],h:[0,1.57,1.46],wr:[.28,1.30,1.17],er:[.13,1.35,1.20],wl:[-.40,1.10,1.46],rot:[-.72,-.18,.72],ball:[.24,1.12,.18]}
+];
+const drive=common.map((p,i)=>({...p,wr:i===2?[-.12,1.10,1.23]:i===3?[.11,1.21,1.06]:i===4?[.34,1.23,1.10]:p.wr,rot:i===2?[-1.24,.24,-.04]:i===3?[-.82,-.06,.35]:i===4?[-.70,-.12,.48]:p.rot}));
+const phaseData=[
+['01','低姿準備','低，不是蹲死','腳距略寬於肩，膝蓋有彈性；胸口向桌面，重心留在前腳掌。','≈ 104°','≈ 0 cm','≈ 18°','腿／軀幹','腳和骨盆先建立穩定平台。上半身前傾，但頭部不應上下彈跳。',0],
+['02','進桌判斷','腳先到，肘再進','利用右腳和重心靠近短球；肘進入桌內，而不是只把手掌伸出去。','≈ 96°','≈ 10 cm','≈ 20°','腳／肘', '肘位於身前偏高，但肩膀仍放鬆；這會保留前臂的旋轉半徑。',1],
+['03','緊湊引拍','手腕收到肘內下方','肘的位置變化很小；前臂折回腹前，拍頭低於來球，形成 lag。','≈ 72°','≈ 15 cm','≈ 32°','前臂蓄力','這一幀最能區分專業動作和「整條手臂往後拉」：肘是支點，不是一起後退。',2],
+['04','爆發接觸','肘穩，前臂與手腕突然快','在上升早期接觸；快擰向前上摩擦，快撕更直接向前穿。','≈ 118°','≈ 18 cm','≈ 15°','前臂／手腕','速度峰值集中在接觸前後；肩膀不主動上抬，拍頭也不繞出很大的圓。',3],
+['05','短收還原','收拍仍在身體前面','擊球後不把拍甩到身側；重心保持低，立即回到下一板反手位置。','≈ 126°','≈ 8 cm','≈ 12°','拍頭／還原','短收能保留連續反手與正反手轉換能力。',4]
+];
+const times=[0,.2,.43,.66,1];
+function sample(arr,u){let i=0;while(i<times.length-2&&u>times[i+1])i++;const t=THREE.MathUtils.smoothstep((u-times[i])/(times[i+1]-times[i]),0,1),a=arr[i],b=arr[i+1],o={};for(const k of ['p','n','h','wr','er','wl','rot','ball'])o[k]=mix(a[k],b[k],t);return o}
+function drawPose(q){
+ const pelvis=q.p,neck=q.n,head=q.h,shoulderL=[neck[0]-.24,neck[1]-.04,neck[2]],shoulderR=[neck[0]+.24,neck[1]-.04,neck[2]],hipL=[pelvis[0]-.15,pelvis[1],pelvis[2]],hipR=[pelvis[0]+.15,pelvis[1],pelvis[2]];
+ const ankleL=[-.48,.08,1.86],ankleR=[.48,.08,1.61],kneeL=twoBone(hipL,ankleL,[-.58,.48,1.70],.48,.48),kneeR=twoBone(hipR,ankleR,[.58,.46,1.42],.48,.48);
+ const elbowR=twoBone(shoulderR,q.wr,q.er,.34,.31),elbowL=twoBone(shoulderL,q.wl,[-.38,1.18,1.42],.31,.28);
+ setSeg(rig.spine,pelvis,neck);setSeg(rig.shoulderL,shoulderL,shoulderR);setSeg(rig.hipL,pelvis,hipL);setSeg(rig.hipR,pelvis,hipR);setSeg(rig.thighL,hipL,kneeL);setSeg(rig.shinL,kneeL,ankleL);setSeg(rig.thighR,hipR,kneeR);setSeg(rig.shinR,kneeR,ankleR);setSeg(rig.upperR,shoulderR,elbowR);setSeg(rig.foreR,elbowR,q.wr);setSeg(rig.upperL,shoulderL,elbowL);setSeg(rig.foreL,elbowL,q.wl);
+ for(const [m,p] of [[rig.head,head],[rig.neck,neck],[rig.pelvis,pelvis],[rig.handR,q.wr],[rig.handL,q.wl],[rig.elbowR,elbowR],[rig.elbowL,elbowL],[rig.kneeL,kneeL],[rig.kneeR,kneeR]])m.position.fromArray(p);
+ rig.shoeL.position.fromArray(ankleL);rig.shoeR.position.fromArray(ankleR);rig.shoeL.rotation.y=-.08;rig.shoeR.rotation.y=.08;
+ racket.position.fromArray(q.wr);racket.rotation.set(...q.rot);ball.position.fromArray(q.ball);
+ const upper=V(shoulderR).sub(V(elbowR)),fore=V(q.wr).sub(V(elbowR));$('#elbowMetric').textContent=Math.round(THREE.MathUtils.radToDeg(upper.angleTo(fore)))+'°';$('#depthMetric').textContent='≈ '+Math.max(0,Math.round((1.37-elbowR[2])*100))+' cm';
+ const g=common[3],gn=g.n,gp=g.p,gsL=[gn[0]-.24,gn[1]-.04,gn[2]],gsR=[gn[0]+.24,gn[1]-.04,gn[2]],geR=twoBone(gsR,g.wr,g.er,.34,.31),geL=twoBone(gsL,g.wl,[-.38,1.18,1.42],.31,.28),pairs=[[gsR,geR],[geR,g.wr],[gsL,geL],[geL,g.wl],[gp,gn],[[gp[0]-.15,gp[1],gp[2]],[-.48,.08,1.86]]];for(let i=0;i<ghostParts.length;i++){ghostParts[i].visible=showGhost;if(showGhost)setSeg(ghostParts[i],pairs[i][0],pairs[i][1])}
+}
+const cameras={coach:[[3.6,2.35,4.35],[0,1.02,.68]],front:[[0,1.82,-4.3],[0,1.02,.65]],side:[[4.5,1.85,1.15],[0,1.05,1.05]],top:[[0,5.4,1.0],[0,0.75,.72]]};
+function setCamera(name){const [p,t]=cameras[name];camera.position.fromArray(p);controls.target.fromArray(t);controls.update();$$('[data-camera]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.camera===name))}
+setCamera('coach');
+let mode='flick',playing=true,speed=.5,u=0,last=performance.now(),trailPts=[],showGhost=true;
+function updateUI(u){let idx=0;for(let i=0;i<times.length;i++)if(u>=times[i]-.025)idx=i;const d=phaseData[idx];$('#phase').innerHTML='<b>'+d[0]+'</b> '+d[1];$('#noteTitle').textContent=d[2];$('#cue').textContent=d[3];$('#elbowMetric').textContent=d[4];$('#depthMetric').textContent=d[5];$('#racketMetric').textContent=d[6];$('#powerMetric').textContent=d[7];$('#why').textContent=d[8];$$('.chain div').forEach((e,i)=>e.classList.toggle('on',i<=d[9]));$('#timeNow').textContent=(u*4).toFixed(1)+'s';$('#scrubber').value=Math.round(u*1000)}
+function animate(now){requestAnimationFrame(animate);const dt=Math.min(.05,(now-last)/1000);last=now;if(playing){u+=dt*speed/4;if(u>=1){u=1;playing=false;$('#play').textContent='▶'}}const pose=sample(mode==='flick'?common:drive,u);updateUI(u);drawPose(pose);trailPts.push(V(pose.ball));if(trailPts.length>28)trailPts.shift();const attr=trail.geometry.attributes.position;for(let i=0;i<28;i++){const p=trailPts[Math.max(0,trailPts.length-1-i)]||V(pose.ball);attr.setXYZ(27-i,p.x,p.y,p.z)}attr.needsUpdate=true;controls.update();renderer.render(scene,camera)}
+function resize(){const w=viewport.clientWidth,h=viewport.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}new ResizeObserver(resize).observe(viewport);resize();loading.hidden=true;requestAnimationFrame(animate);
+$('#play').onclick=()=>{if(u>=1)u=0;playing=!playing;$('#play').textContent=playing?'Ⅱ':'▶'};$('#restart').onclick=()=>{u=0;playing=true;$('#play').textContent='Ⅱ'};$('#scrubber').oninput=e=>{u=e.target.value/1000;playing=false;$('#play').textContent='▶'};
+$('#speed').onclick=()=>{speed=speed===.5?1:.5;$('#speed').textContent=speed+'×';$('#speedHud').textContent=speed+'× '+(speed===.5?'慢動作':'原速')};
+$$('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;$$('[data-mode]').forEach(x=>x.setAttribute('aria-pressed',x===b));$('#modeHud').textContent=mode==='flick'?'快擰':'快撕';u=0;playing=true;$('#play').textContent='Ⅱ'});
+$('#ghostToggle').onclick=()=>{showGhost=!showGhost;$('#ghostToggle').setAttribute('aria-pressed',showGhost)};
+$$('[data-camera]').forEach(b=>b.onclick=()=>setCamera(b.dataset.camera));
 </script>
+<script>setTimeout(()=>{const e=document.getElementById('loading');if(e&&!e.hidden)e.innerHTML='<div class="fallback">3D 元件載入較慢。請確認網路連線，或重新整理頁面。</div>'},9000)</script>
 </body></html>
