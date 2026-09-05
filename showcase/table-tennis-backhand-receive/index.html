@@ -18,7 +18,7 @@
 </head>
 <body>
 <main class="app">
-<header class="top"><div><div class="eyebrow">TABLE TENNIS · 3D BIOMECHANICS NOTE</div><h1 class="title">樊振東式反手：從腳底到拍頭</h1><div class="sub">固定骨長的 3D 關節鏈包含手腕、手掌、握柄與拍面。觀察重點：低重心、螃蟹式外展高肘、穩定腕形，以及由前臂帶動反手拍面迎球。</div></div><div class="tag">技術重建 · 非逐幀動作捕捉</div></header>
+<header class="top"><div><div class="eyebrow">TABLE TENNIS · 3D BIOMECHANICS NOTE</div><h1 class="title">樊振東式反手：從腳底到拍頭</h1><div class="sub">固定骨長的 3D 關節鏈包含手腕、手掌、握柄與拍面。觀察重點：低重心、螃蟹式外展高肘、穩定腕形，以及更完整的引拍、前臂伸展與向前上隨揮。</div></div><div class="tag">技術重建 · 非逐幀動作捕捉</div></header>
 <section class="grid">
 <div class="stage">
 <div class="viewport" id="viewport">
@@ -81,20 +81,38 @@ function drawFallback(ctx,w,h,q){
 const common=[
 {p:[0,.78,1.78],n:[0,1.34,1.60],h:[0,1.57,1.54],wr:[.14,1.13,1.33],gr:[.021,1.120,1.314],er:[.80,1.30,1.60],wl:[-.39,1.12,1.48],roll:[.04],ball:[-.32,.88,-.72]},
 {p:[0,.77,1.70],n:[0,1.33,1.51],h:[0,1.56,1.45],wr:[.14,1.16,1.26],gr:[.02,1.156,1.256],er:[.80,1.30,1.51],wl:[-.40,1.10,1.42],roll:[.06],ball:[-.20,.84,.05]},
-{p:[-.015,.76,1.66],n:[-.01,1.32,1.47],h:[-.01,1.55,1.41],wr:[.13,1.12,1.18],gr:[.012,1.106,1.162],er:[.80,1.30,1.47],wl:[-.40,1.08,1.38],roll:[.08],ball:[-.10,.88,.72]},
-{p:[-.02,.77,1.63],n:[-.015,1.33,1.44],h:[-.015,1.56,1.38],wr:[.12,1.16,1.12],gr:[.003,1.147,1.097],er:[.80,1.31,1.44],wl:[-.38,1.10,1.37],roll:[-.02],ball:[-.197,1.117,1.027]},
-{p:[.01,.78,1.70],n:[0,1.34,1.52],h:[0,1.57,1.46],wr:[.18,1.23,1.22],gr:[.063,1.224,1.194],er:[.75,1.30,1.52],wl:[-.38,1.12,1.43],roll:[-.05],ball:[.24,1.12,.18]}
+{p:[-.015,.76,1.66],n:[-.01,1.32,1.47],h:[-.01,1.55,1.41],wr:[.08,1.08,1.38],gr:[.012,1.106,1.162],er:[.80,1.30,1.47],wl:[-.40,1.08,1.38],roll:[.08],ball:[-.10,.88,.72]},
+{p:[-.02,.77,1.63],n:[-.015,1.33,1.44],h:[-.015,1.56,1.38],wr:[.15,1.21,1.01],gr:[.003,1.147,1.097],er:[.80,1.31,1.44],wl:[-.38,1.10,1.37],roll:[-.02],ball:[-.197,1.117,1.027]},
+{p:[.01,.78,1.70],n:[0,1.34,1.52],h:[0,1.57,1.46],wr:[.30,1.34,.98],gr:[.063,1.224,1.194],er:[.75,1.30,1.52],wl:[-.38,1.12,1.43],roll:[-.05],ball:[.24,1.12,.18]}
 ];
-const drive=common.map((p,i)=>({...p,wr:i===3?[.13,1.15,1.10]:i===4?[.22,1.22,1.18]:p.wr,gr:i===3?[.013,1.14,1.077]:i===4?[.103,1.215,1.165]:p.gr,roll:i===3?[0]:i===4?[-.03]:p.roll}));
+// Keep the hand length and wrist alignment stable at every interpolated frame.
+function alignHand(q){
+ const shoulder=[q.n[0]+.24,q.n[1]-.04,q.n[2]];
+ const elbow=twoBone(shoulder,q.wr,q.er,.34,.31);
+ q.gr=V(q.wr).addScaledVector(V(q.wr).sub(V(elbow)).normalize(),.12).toArray();
+ return q;
+}
+function racketOrientation(q){
+ const axis=V(q.gr).sub(V(q.wr)).normalize();
+ return new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),axis)
+ .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),q.roll[0]));
+}
+const drive=common.map((p,i)=>({...p,wr:i===2?[.08,1.12,1.36]:i===3?[.16,1.20,1.00]:i===4?[.32,1.26,.93]:p.wr,roll:i===3?[0]:i===4?[-.03]:p.roll}));
+for(const poses of [common,drive]){
+ poses.forEach(alignHand);
+ // Place the ball against the backhand rubber, including its radius.
+ const contact=poses[3],orientation=racketOrientation(contact);
+ contact.ball=V(contact.gr).add(new THREE.Vector3(0,.235*.9,-(.010*.9+.02)).applyQuaternion(orientation)).toArray();
+}
 const phaseData=[
 ['01','低姿準備','肘向外撐，前臂向內收','腳距略寬於肩；大臂與軀幹接近 90°，持拍手留在腹前。','≈ 86°','≈ 0 cm','≈ 3°','腿／肘架','外展不是聳肩：肩膀放鬆、肘架高，為反手預留身前操作空間。',0],
 ['02','進桌判斷','腳先到，肘架跟進','利用右腳和重心靠近短球；肘架整體進桌，腕形保持穩定。','≈ 88°','≈ 9 cm','≈ 3°','腳／肘', '像參考影格一樣，大臂向外打開，肘不貼住身體，也不向下掉。',1],
 ['03','緊湊引拍','腕形穩定，不刻意折腕','肘保持外展；手腕接近中立，手掌與前臂幾乎成一直線，由前臂把拍頭帶到來球後方。','≈ 90°','≈ 14 cm','≈ 2°','前臂蓄力','橘色手腕只保留很小的自然角度；不要把「內旋」誤做成大幅屈腕或扭腕。',2],
 ['04','爆發接觸','反手拍面迎球','前臂由肘架向前伸展，腕形只作極小微調；紅色反手面對準球的後方。','≈ 90°','≈ 18 cm','≈ 3°','前臂／拍面','六幀顯示肘架沒有塌下；拍頭位移主要來自前臂伸展，而不是手腕先甩。',3],
-['05','短收還原','收拍仍在身體前面','擊球後不把拍甩到身側；腕形維持完整，立即回到下一板反手位置。','≈ 88°','≈ 8 cm','≈ 4°','拍頭／還原','短收能保留連續反手與正反手轉換能力。',4]
+['05','向前隨揮','把前臂送出去','接觸後前臂繼續向前上送，讓引拍、擊球和隨揮的行程清楚可見；腕形保持穩定。','≈ 88°','≈ 8 cm','≈ 4°','拍頭／還原','此處停在隨揮末端方便比較；按重播回到準備位置。',4]
 ];
 const times=[0,.2,.43,.66,1];
-function sample(arr,u){let i=0;while(i<times.length-2&&u>times[i+1])i++;const t=THREE.MathUtils.smoothstep((u-times[i])/(times[i+1]-times[i]),0,1),a=arr[i],b=arr[i+1],o={};for(const k of ['p','n','h','wr','gr','er','wl','roll','ball'])o[k]=mix(a[k],b[k],t);return o}
+function sample(arr,u){let i=0;while(i<times.length-2&&u>times[i+1])i++;const t=THREE.MathUtils.smoothstep((u-times[i])/(times[i+1]-times[i]),0,1),a=arr[i],b=arr[i+1],o={};for(const k of ['p','n','h','wr','gr','er','wl','roll','ball'])o[k]=mix(a[k],b[k],t);return alignHand(o)}
 function drawPose(q){
  fallbackPose=q;
  const pelvis=q.p,neck=q.n,head=q.h,shoulderL=[neck[0]-.24,neck[1]-.04,neck[2]],shoulderR=[neck[0]+.24,neck[1]-.04,neck[2]],hipL=[pelvis[0]-.15,pelvis[1],pelvis[2]],hipR=[pelvis[0]+.15,pelvis[1],pelvis[2]];
@@ -105,7 +123,7 @@ function drawPose(q){
  rig.shoeL.position.fromArray(ankleL);rig.shoeR.position.fromArray(ankleR);rig.shoeL.rotation.y=-.08;rig.shoeR.rotation.y=.08;
  const gripAxis=V(q.gr).sub(V(q.wr)).normalize(),baseQ=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),gripAxis),twistQ=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),q.roll[0]);racket.position.fromArray(q.gr);racket.quaternion.copy(baseQ).multiply(twistQ);ball.position.fromArray(q.ball);
  const upper=V(elbowR).sub(V(shoulderR)),torsoDown=V(pelvis).sub(V(neck)),fore=V(q.wr).sub(V(elbowR)),hand=V(q.gr).sub(V(q.wr));$('#elbowMetric').textContent=Math.round(THREE.MathUtils.radToDeg(upper.angleTo(torsoDown)))+'°';$('#depthMetric').textContent='≈ '+Math.max(0,Math.round((1.37-elbowR[2])*100))+' cm';$('#racketMetric').textContent='≈ '+Math.round(THREE.MathUtils.radToDeg(fore.angleTo(hand)))+'°';
- const g=common[3],gn=g.n,gp=g.p,gsL=[gn[0]-.24,gn[1]-.04,gn[2]],gsR=[gn[0]+.24,gn[1]-.04,gn[2]],geR=twoBone(gsR,g.wr,g.er,.34,.31),geL=twoBone(gsL,g.wl,[-.38,1.18,1.42],.31,.28),pairs=[[gsR,geR],[geR,g.wr],[g.wr,g.gr],[gsL,geL],[geL,g.wl],[gp,gn]];for(let i=0;i<ghostParts.length;i++){ghostParts[i].visible=showGhost;if(showGhost)setSeg(ghostParts[i],pairs[i][0],pairs[i][1])}
+ const g=(mode==='flick'?common:drive)[3],gn=g.n,gp=g.p,gsL=[gn[0]-.24,gn[1]-.04,gn[2]],gsR=[gn[0]+.24,gn[1]-.04,gn[2]],geR=twoBone(gsR,g.wr,g.er,.34,.31),geL=twoBone(gsL,g.wl,[-.38,1.18,1.42],.31,.28),pairs=[[gsR,geR],[geR,g.wr],[g.wr,g.gr],[gsL,geL],[geL,g.wl],[gp,gn]];for(let i=0;i<ghostParts.length;i++){ghostParts[i].visible=showGhost;if(showGhost)setSeg(ghostParts[i],pairs[i][0],pairs[i][1])}
 }
 const cameras={coach:[[-3.55,2.65,-4.25],[0,1.04,.78]],front:[[0,1.82,-4.3],[0,1.02,.65]],side:[[4.5,1.85,1.15],[0,1.05,1.05]],top:[[0,5.4,1.0],[0,0.75,.72]]};
 function setCamera(name){fallbackView=name;const [p,t]=cameras[name];camera.position.fromArray(p);controls.target.fromArray(t);controls.update();$$('[data-camera]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.camera===name))}
