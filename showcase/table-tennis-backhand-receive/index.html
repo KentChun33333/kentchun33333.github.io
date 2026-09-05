@@ -46,8 +46,9 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const viewport=$('#viewport'), loading=$('#loading');
-let renderer;
-try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'})}catch(e){loading.innerHTML='<div class="fallback">此瀏覽器無法建立 WebGL。請以 Safari、Chrome 或 Edge 開啟。</div>';throw e}
+let renderer,use2D=false,fallbackPose=null,fallbackView='coach';
+function fallbackRenderer(){use2D=true;const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');return{domElement:canvas,shadowMap:{},setPixelRatio(){},setSize(w,h){canvas.width=Math.max(1,w*devicePixelRatio);canvas.height=Math.max(1,h*devicePixelRatio);canvas.style.width=w+'px';canvas.style.height=h+'px';ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)},render(){if(fallbackPose)drawFallback(ctx,canvas.width/devicePixelRatio,canvas.height/devicePixelRatio,fallbackPose)}}}
+try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'})}catch(e){renderer=fallbackRenderer()}
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;viewport.prepend(renderer.domElement);
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x08131b);scene.fog=new THREE.Fog(0x08131b,6,10);
 const camera=new THREE.PerspectiveCamera(34,1,.05,30);const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.target.set(0,1.05,.75);controls.minDistance=2.4;controls.maxDistance=8;controls.maxPolarAngle=Math.PI*.49;
@@ -70,6 +71,13 @@ const ghostParts=[];for(let i=0;i<6;i++){const g=segment(.025,C.ghost,.24);ghost
 const V=a=>new THREE.Vector3(...a),mix=(a,b,t)=>a.map((v,i)=>THREE.MathUtils.lerp(v,b[i],t));
 function setSeg(mesh,a,b){const A=V(a),B=V(b),d=B.clone().sub(A);mesh.position.copy(A).add(B).multiplyScalar(.5);mesh.scale.set(1,d.length(),1);mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize())}
 function twoBone(s,t,h,l1,l2){const S=V(s),T=V(t),H=V(h),dir=T.clone().sub(S),d=Math.min(Math.max(dir.length(),Math.abs(l1-l2)+.001),l1+l2-.001);dir.normalize();let perp=H.clone().sub(S).addScaledVector(dir,-H.clone().sub(S).dot(dir));if(perp.lengthSq()<1e-6)perp.set(0,1,0);perp.normalize();const x=(l1*l1-l2*l2+d*d)/(2*d),y=Math.sqrt(Math.max(0,l1*l1-x*x));return S.clone().addScaledVector(dir,x).addScaledVector(perp,y).toArray()}
+function drawFallback(ctx,w,h,q){
+ const scale=Math.min(w/3.9,h/2.35),cx=w*.5,base=h*.95,project=p=>{if(fallbackView==='front')return[cx+p[0]*scale,base-p[1]*scale];if(fallbackView==='side')return[cx+(1.25-p[2])*scale,base-p[1]*scale];if(fallbackView==='top')return[cx+p[0]*scale,h*.16+(p[2]+1.37)*scale*.62];return[cx+p[0]*scale+(p[2]-.45)*scale*.24,base-p[1]*scale+(p[2]-.45)*scale*.10]};
+ ctx.clearRect(0,0,w,h);ctx.fillStyle='#08131b';ctx.fillRect(0,0,w,h);const poly=pts=>{ctx.beginPath();pts.map(project).forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.closePath();ctx.fill()};ctx.fillStyle='#155a72';poly([[-.762,.76,-1.37],[.762,.76,-1.37],[.762,.76,1.37],[-.762,.76,1.37]]);
+ const pelvis=q.p,neck=q.n,head=q.h,sL=[neck[0]-.24,neck[1]-.04,neck[2]],sR=[neck[0]+.24,neck[1]-.04,neck[2]],hL=[pelvis[0]-.15,pelvis[1],pelvis[2]],hR=[pelvis[0]+.15,pelvis[1],pelvis[2]],aL=[-.48,.08,1.86],aR=[.48,.08,1.61],kL=twoBone(hL,aL,[-.58,.48,1.70],.48,.48),kR=twoBone(hR,aR,[.58,.46,1.42],.48,.48),eR=twoBone(sR,q.wr,q.er,.34,.31),eL=twoBone(sL,q.wl,[-.38,1.18,1.42],.31,.28);
+ const line=(a,b,color,width)=>{const A=project(a),B=project(b);ctx.beginPath();ctx.moveTo(...A);ctx.lineTo(...B);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.stroke()},joint=(p,r,c)=>{const P=project(p);ctx.beginPath();ctx.arc(P[0],P[1],r,0,Math.PI*2);ctx.fillStyle=c;ctx.fill()};
+ line(pelvis,neck,'#e73946',22);line(sL,sR,'#e73946',16);line(hL,kL,'#18232d',15);line(kL,aL,'#d8e8ed',13);line(hR,kR,'#18232d',15);line(kR,aR,'#d8e8ed',13);line(sL,eL,'#e2ad83',12);line(eL,q.wl,'#e2ad83',10);line(sR,eR,'#37e6cf',14);line(eR,q.wr,'#37e6cf',12);joint(head,12,'#e2ad83');joint(eR,6,'#37e6cf');joint(q.wr,5,'#e2ad83');joint(q.ball,4,'#fff6c8');const W=project(q.wr);ctx.save();ctx.translate(...W);ctx.rotate(q.rot[2]);ctx.fillStyle='#ef4050';ctx.beginPath();ctx.ellipse(0,-10,10,14,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#d7a46c';ctx.fillRect(-3,2,6,14);ctx.restore();ctx.fillStyle='#90abb5';ctx.font='12px system-ui';ctx.fillText('Canvas 2D 相容模式',12,h-14)
+}
 const common=[
 {p:[0,.78,1.78],n:[0,1.34,1.60],h:[0,1.57,1.54],wr:[-.05,1.15,1.37],er:[.12,1.34,1.26],wl:[-.42,1.08,1.54],rot:[-1.18,.12,.12],ball:[-.32,.88,-.72]},
 {p:[0,.77,1.70],n:[0,1.33,1.51],h:[0,1.56,1.45],wr:[-.08,1.13,1.24],er:[.10,1.35,1.18],wl:[-.43,1.07,1.45],rot:[-1.25,.18,.18],ball:[-.20,.84,.05]},
@@ -88,6 +96,7 @@ const phaseData=[
 const times=[0,.2,.43,.66,1];
 function sample(arr,u){let i=0;while(i<times.length-2&&u>times[i+1])i++;const t=THREE.MathUtils.smoothstep((u-times[i])/(times[i+1]-times[i]),0,1),a=arr[i],b=arr[i+1],o={};for(const k of ['p','n','h','wr','er','wl','rot','ball'])o[k]=mix(a[k],b[k],t);return o}
 function drawPose(q){
+ fallbackPose=q;
  const pelvis=q.p,neck=q.n,head=q.h,shoulderL=[neck[0]-.24,neck[1]-.04,neck[2]],shoulderR=[neck[0]+.24,neck[1]-.04,neck[2]],hipL=[pelvis[0]-.15,pelvis[1],pelvis[2]],hipR=[pelvis[0]+.15,pelvis[1],pelvis[2]];
  const ankleL=[-.48,.08,1.86],ankleR=[.48,.08,1.61],kneeL=twoBone(hipL,ankleL,[-.58,.48,1.70],.48,.48),kneeR=twoBone(hipR,ankleR,[.58,.46,1.42],.48,.48);
  const elbowR=twoBone(shoulderR,q.wr,q.er,.34,.31),elbowL=twoBone(shoulderL,q.wl,[-.38,1.18,1.42],.31,.28);
@@ -99,7 +108,7 @@ function drawPose(q){
  const g=common[3],gn=g.n,gp=g.p,gsL=[gn[0]-.24,gn[1]-.04,gn[2]],gsR=[gn[0]+.24,gn[1]-.04,gn[2]],geR=twoBone(gsR,g.wr,g.er,.34,.31),geL=twoBone(gsL,g.wl,[-.38,1.18,1.42],.31,.28),pairs=[[gsR,geR],[geR,g.wr],[gsL,geL],[geL,g.wl],[gp,gn],[[gp[0]-.15,gp[1],gp[2]],[-.48,.08,1.86]]];for(let i=0;i<ghostParts.length;i++){ghostParts[i].visible=showGhost;if(showGhost)setSeg(ghostParts[i],pairs[i][0],pairs[i][1])}
 }
 const cameras={coach:[[3.6,2.35,4.35],[0,1.02,.68]],front:[[0,1.82,-4.3],[0,1.02,.65]],side:[[4.5,1.85,1.15],[0,1.05,1.05]],top:[[0,5.4,1.0],[0,0.75,.72]]};
-function setCamera(name){const [p,t]=cameras[name];camera.position.fromArray(p);controls.target.fromArray(t);controls.update();$$('[data-camera]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.camera===name))}
+function setCamera(name){fallbackView=name;const [p,t]=cameras[name];camera.position.fromArray(p);controls.target.fromArray(t);controls.update();$$('[data-camera]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.camera===name))}
 setCamera('coach');
 let mode='flick',playing=true,speed=.5,u=0,last=performance.now(),trailPts=[],showGhost=true;
 function updateUI(u){let idx=0;for(let i=0;i<times.length;i++)if(u>=times[i]-.025)idx=i;const d=phaseData[idx];$('#phase').innerHTML='<b>'+d[0]+'</b> '+d[1];$('#noteTitle').textContent=d[2];$('#cue').textContent=d[3];$('#elbowMetric').textContent=d[4];$('#depthMetric').textContent=d[5];$('#racketMetric').textContent=d[6];$('#powerMetric').textContent=d[7];$('#why').textContent=d[8];$$('.chain div').forEach((e,i)=>e.classList.toggle('on',i<=d[9]));$('#timeNow').textContent=(u*4).toFixed(1)+'s';$('#scrubber').value=Math.round(u*1000)}
