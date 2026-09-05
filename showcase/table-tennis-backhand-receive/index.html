@@ -18,7 +18,7 @@
 </head>
 <body>
 <main class="app">
-<header class="top"><div><div class="eyebrow">TABLE TENNIS · 3D BIOMECHANICS NOTE</div><h1 class="title">樊振東式反手：從腳底到拍頭</h1><div class="sub">這一版不再搬動平面關節點，而是用固定骨長、兩骨 IK 與 3D 球拍方向重建近台反手。觀察重點：低重心、身前高肘、手腕先收後放，以及接觸前的前臂加速。</div></div><div class="tag">技術重建 · 非逐幀動作捕捉</div></header>
+<header class="top"><div><div class="eyebrow">TABLE TENNIS · 3D BIOMECHANICS NOTE</div><h1 class="title">樊振東式反手：從腳底到拍頭</h1><div class="sub">固定骨長的 3D 關節鏈現在完整包含手腕、手掌、握柄與拍面。觀察重點：低重心、螃蟹式外展高肘、手腕先內收後釋放，以及接觸前的前臂加速。</div></div><div class="tag">技術重建 · 非逐幀動作捕捉</div></header>
 <section class="grid">
 <div class="stage">
 <div class="viewport" id="viewport">
@@ -36,7 +36,7 @@
 <div class="metrics"><div class="metric"><small>肘部夾角</small><b id="elbowMetric">≈ 104°</b></div><div class="metric"><small>肘進桌深度</small><b id="depthMetric">≈ 12 cm</b></div><div class="metric"><small>球拍閉合</small><b id="racketMetric">≈ 18°</b></div><div class="metric"><small>動力主體</small><b id="powerMetric">腿／軀幹</b></div></div>
 <div class="chain"><div id="chainLegs" class="on"><i></i>腳底與重心</div><div id="chainCore"><i></i>骨盆與軀幹</div><div id="chainElbow"><i></i>肩胛與肘支點</div><div id="chainForearm"><i></i>前臂與手腕</div><div id="chainRacket"><i></i>拍頭與球</div></div>
 <div class="why" id="why">腳和骨盆先建立穩定平台。上半身前傾，但頭部不應上下彈跳。</div>
-<div class="reference">參考：<a href="https://www.youtube.com/watch?v=MO2GnsPbA-A" target="_blank" rel="noopener">樊振東反手擰拉慢動作</a> · <a href="https://www.youtube.com/watch?v=kbTWaJZRQ54" target="_blank" rel="noopener">反手慢動作合集</a>。本頁是教學化的結構重建，不代表精確生物力學測量。</div>
+<div class="reference">參考：<a href="https://www.youtube.com/watch?v=jzi0DXDHRHU" target="_blank" rel="noopener">樊振東反手擰拉慢動作解析</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8706454/" target="_blank" rel="noopener">上肢關節運動學研究</a>。本頁是教學化的結構重建，不代表精確動作捕捉。</div>
 </aside>
 </section>
 </main>
@@ -57,15 +57,15 @@ const floor=new THREE.Mesh(new THREE.PlaneGeometry(12,12),new THREE.MeshStandard
 function box(size,pos,color){const m=new THREE.Mesh(new THREE.BoxGeometry(...size),new THREE.MeshStandardMaterial({color,roughness:.58,metalness:.08}));m.position.set(...pos);m.castShadow=m.receiveShadow=true;scene.add(m);return m}
 box([1.525,.07,2.74],[0,.76,0],0x155a72);box([1.55,.015,.025],[0,.82,0],0xdde9ec);for(const x of [-.62,.62])for(const z of [-1.08,1.08])box([.06,.74,.06],[x,.38,z],0x1d2d35);
 const lineMat=new THREE.LineBasicMaterial({color:0xbadbe3});for(const pts of [[[-.762,.798,-1.37],[.762,.798,-1.37]],[[0,.798,-1.37],[0,.798,1.37]]]){const g=new THREE.BufferGeometry().setFromPoints(pts.map(p=>new THREE.Vector3(...p)));scene.add(new THREE.Line(g,lineMat))}
-const C={shirt:0xe73946,skin:0xe2ad83,shorts:0x18232d,active:0x37e6cf,shoe:0x57aeca,joint:0xd8e8ed,ghost:0x4b776f};
+const C={shirt:0xe73946,skin:0xe2ad83,shorts:0x18232d,active:0x37e6cf,wrist:0xffb657,shoe:0x57aeca,joint:0xd8e8ed,ghost:0x4b776f};
 function material(color,opacity=1){return new THREE.MeshStandardMaterial({color,roughness:.56,transparent:opacity<1,opacity,depthWrite:opacity>.5})}
 function sphere(r,color,opacity=1){const m=new THREE.Mesh(new THREE.SphereGeometry(r,18,12),material(color,opacity));m.castShadow=opacity>.5;scene.add(m);return m}
 function segment(radius,color,opacity=1){const m=new THREE.Mesh(new THREE.CylinderGeometry(radius,radius,1,14),material(color,opacity));m.castShadow=opacity>.5;scene.add(m);return m}
-const rig={head:sphere(.125,C.skin),pelvis:sphere(.12,C.shorts),neck:sphere(.055,C.skin),handR:sphere(.055,C.skin),handL:sphere(.05,C.skin),elbowR:sphere(.065,C.active),elbowL:sphere(.052,C.skin),kneeL:sphere(.065,C.joint),kneeR:sphere(.065,C.joint)};
+const rig={head:sphere(.125,C.skin),pelvis:sphere(.12,C.shorts),neck:sphere(.055,C.skin),wristR:sphere(.052,C.wrist),handR:sphere(.058,C.skin),handL:sphere(.05,C.skin),elbowR:sphere(.065,C.active),elbowL:sphere(.052,C.skin),kneeL:sphere(.065,C.joint),kneeR:sphere(.065,C.joint)};
 for(const n of ['spine','hipL','hipR','thighL','thighR','shinL','shinR','shoulderL','upperL','foreL'])rig[n]=segment(n==='spine'?.17:n.startsWith('thigh')?.085:n.startsWith('shin')?.07:.06,n==='spine'?C.shirt:n.startsWith('hip')||n.startsWith('thigh')?C.shorts:n.startsWith('shin')?C.joint:n==='shoulderL'?C.shirt:C.skin);
-rig.upperR=segment(.067,C.active);rig.foreR=segment(.058,C.active);
+rig.upperR=segment(.067,C.active);rig.foreR=segment(.058,C.active);rig.palmR=segment(.048,C.skin);
 const shoeMat=material(C.shoe);for(const n of ['shoeL','shoeR']){rig[n]=new THREE.Mesh(new THREE.BoxGeometry(.23,.07,.34),shoeMat);rig[n].castShadow=true;scene.add(rig[n])}
-const racket=new THREE.Group();const blade=new THREE.Mesh(new THREE.CylinderGeometry(.115,.115,.018,24),material(0xef4050));blade.rotation.x=Math.PI/2;racket.add(blade);const handle=new THREE.Mesh(new THREE.BoxGeometry(.055,.19,.045),material(0xd7a46c));handle.position.y=-.16;racket.add(handle);racket.scale.set(.88,.88,.88);scene.add(racket);
+const racket=new THREE.Group();const edge=new THREE.Mesh(new THREE.CylinderGeometry(.115,.115,.018,32),material(0x151a1e));edge.rotation.x=Math.PI/2;edge.position.y=.235;racket.add(edge);const foreFace=new THREE.Mesh(new THREE.CircleGeometry(.112,32),material(0xef4050));foreFace.position.set(0,.235,.010);racket.add(foreFace);const backFace=new THREE.Mesh(new THREE.CircleGeometry(.112,32),material(0x161b20));backFace.rotation.y=Math.PI;backFace.position.set(0,.235,-.010);racket.add(backFace);const handle=new THREE.Mesh(new THREE.BoxGeometry(.055,.19,.045),material(0xd7a46c));handle.position.y=.085;racket.add(handle);racket.scale.set(.9,.9,.9);scene.add(racket);
 const ball=sphere(.02,0xfff6c8);const trailGeo=new THREE.BufferGeometry().setFromPoints(Array.from({length:28},()=>new THREE.Vector3()));const trail=new THREE.Line(trailGeo,new THREE.LineBasicMaterial({color:0xffb657,transparent:true,opacity:.72}));scene.add(trail);
 const ghostParts=[];for(let i=0;i<6;i++){const g=segment(.025,C.ghost,.24);ghostParts.push(g)}
 const V=a=>new THREE.Vector3(...a),mix=(a,b,t)=>a.map((v,i)=>THREE.MathUtils.lerp(v,b[i],t));
@@ -76,36 +76,36 @@ function drawFallback(ctx,w,h,q){
  ctx.clearRect(0,0,w,h);ctx.fillStyle='#08131b';ctx.fillRect(0,0,w,h);const poly=pts=>{ctx.beginPath();pts.map(project).forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.closePath();ctx.fill()};ctx.fillStyle='#155a72';poly([[-.762,.76,-1.37],[.762,.76,-1.37],[.762,.76,1.37],[-.762,.76,1.37]]);
  const pelvis=q.p,neck=q.n,head=q.h,sL=[neck[0]-.24,neck[1]-.04,neck[2]],sR=[neck[0]+.24,neck[1]-.04,neck[2]],hL=[pelvis[0]-.15,pelvis[1],pelvis[2]],hR=[pelvis[0]+.15,pelvis[1],pelvis[2]],aL=[-.48,.08,1.86],aR=[.48,.08,1.61],kL=twoBone(hL,aL,[-.58,.48,1.70],.48,.48),kR=twoBone(hR,aR,[.58,.46,1.42],.48,.48),eR=twoBone(sR,q.wr,q.er,.34,.31),eL=twoBone(sL,q.wl,[-.38,1.18,1.42],.31,.28);
  const line=(a,b,color,width)=>{const A=project(a),B=project(b);ctx.beginPath();ctx.moveTo(...A);ctx.lineTo(...B);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.stroke()},joint=(p,r,c)=>{const P=project(p);ctx.beginPath();ctx.arc(P[0],P[1],r,0,Math.PI*2);ctx.fillStyle=c;ctx.fill()};
- line(pelvis,neck,'#e73946',22);line(sL,sR,'#e73946',16);line(hL,kL,'#18232d',15);line(kL,aL,'#d8e8ed',13);line(hR,kR,'#18232d',15);line(kR,aR,'#d8e8ed',13);line(sL,eL,'#e2ad83',12);line(eL,q.wl,'#e2ad83',10);line(sR,eR,'#37e6cf',14);line(eR,q.wr,'#37e6cf',12);joint(head,12,'#e2ad83');joint(eR,6,'#37e6cf');joint(q.wr,5,'#e2ad83');joint(q.ball,4,'#fff6c8');const W=project(q.wr);ctx.save();ctx.translate(...W);ctx.rotate(q.rot[2]);ctx.fillStyle='#ef4050';ctx.beginPath();ctx.ellipse(0,-10,10,14,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#d7a46c';ctx.fillRect(-3,2,6,14);ctx.restore();ctx.fillStyle='#90abb5';ctx.font='12px system-ui';ctx.fillText('Canvas 2D 相容模式',12,h-14)
+ line(pelvis,neck,'#e73946',22);line(sL,sR,'#e73946',16);line(hL,kL,'#18232d',15);line(kL,aL,'#d8e8ed',13);line(hR,kR,'#18232d',15);line(kR,aR,'#d8e8ed',13);line(sL,eL,'#e2ad83',12);line(eL,q.wl,'#e2ad83',10);line(sR,eR,'#37e6cf',14);line(eR,q.wr,'#37e6cf',12);line(q.wr,q.gr,'#e2ad83',9);joint(head,12,'#e2ad83');joint(eR,6,'#37e6cf');joint(q.wr,6,'#ffb657');joint(q.gr,5,'#e2ad83');joint(q.ball,4,'#fff6c8');const W=project(q.wr),G=project(q.gr),dx=G[0]-W[0],dy=G[1]-W[1],len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len,px=-uy,py=ux,B=[G[0]+ux*28,G[1]+uy*28];ctx.strokeStyle='#d7a46c';ctx.lineWidth=7;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(G[0]-ux*4,G[1]-uy*4);ctx.lineTo(G[0]+ux*16,G[1]+uy*16);ctx.stroke();ctx.save();ctx.translate(...B);ctx.rotate(Math.atan2(uy,ux)+Math.PI/2+q.roll[0]);ctx.fillStyle='#ef4050';ctx.beginPath();ctx.ellipse(0,0,12,16,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#161b20';ctx.lineWidth=2;ctx.stroke();ctx.restore();ctx.fillStyle='#90abb5';ctx.font='12px system-ui';ctx.fillText('Canvas 2D 相容模式',12,h-14)
 }
 const common=[
-{p:[0,.78,1.78],n:[0,1.34,1.60],h:[0,1.57,1.54],wr:[-.05,1.15,1.37],er:[.12,1.34,1.26],wl:[-.42,1.08,1.54],rot:[-1.18,.12,.12],ball:[-.32,.88,-.72]},
-{p:[0,.77,1.70],n:[0,1.33,1.51],h:[0,1.56,1.45],wr:[-.08,1.13,1.24],er:[.10,1.35,1.18],wl:[-.43,1.07,1.45],rot:[-1.25,.18,.18],ball:[-.20,.84,.05]},
-{p:[-.015,.76,1.66],n:[-.01,1.32,1.47],h:[-.01,1.55,1.41],wr:[-.24,1.03,1.25],er:[.10,1.38,1.17],wl:[-.42,1.06,1.41],rot:[-1.52,.42,-.22],ball:[-.10,.88,.72]},
-{p:[-.02,.77,1.63],n:[-.015,1.33,1.44],h:[-.015,1.56,1.38],wr:[.02,1.24,1.08],er:[.12,1.37,1.15],wl:[-.40,1.08,1.39],rot:[-.88,-.12,.58],ball:[.01,1.22,1.04]},
-{p:[.01,.78,1.70],n:[0,1.34,1.52],h:[0,1.57,1.46],wr:[.28,1.30,1.17],er:[.13,1.35,1.20],wl:[-.40,1.10,1.46],rot:[-.72,-.18,.72],ball:[.24,1.12,.18]}
+{p:[0,.78,1.78],n:[0,1.34,1.60],h:[0,1.57,1.54],wr:[.14,1.20,1.43],gr:[.05,1.13,1.35],er:[.80,1.30,1.60],wl:[-.39,1.12,1.48],roll:[.34],ball:[-.32,.88,-.72]},
+{p:[0,.77,1.70],n:[0,1.33,1.51],h:[0,1.56,1.45],wr:[.15,1.20,1.33],gr:[.05,1.11,1.24],er:[.80,1.30,1.51],wl:[-.40,1.10,1.42],roll:[.48],ball:[-.20,.84,.05]},
+{p:[-.015,.76,1.66],n:[-.01,1.32,1.47],h:[-.01,1.55,1.41],wr:[.16,1.18,1.26],gr:[.04,1.06,1.18],er:[.80,1.30,1.47],wl:[-.40,1.08,1.38],roll:[.72],ball:[-.10,.88,.72]},
+{p:[-.02,.77,1.63],n:[-.015,1.33,1.44],h:[-.015,1.56,1.38],wr:[.10,1.20,1.29],gr:[.02,1.19,1.15],er:[.80,1.31,1.44],wl:[-.38,1.10,1.37],roll:[-.08],ball:[-.04,1.20,1.04]},
+{p:[.01,.78,1.70],n:[0,1.34,1.52],h:[0,1.57,1.46],wr:[.17,1.26,1.32],gr:[.27,1.31,1.22],er:[.75,1.30,1.52],wl:[-.38,1.12,1.43],roll:[-.20],ball:[.24,1.12,.18]}
 ];
-const drive=common.map((p,i)=>({...p,wr:i===2?[-.12,1.10,1.23]:i===3?[.11,1.21,1.06]:i===4?[.34,1.23,1.10]:p.wr,rot:i===2?[-1.24,.24,-.04]:i===3?[-.82,-.06,.35]:i===4?[-.70,-.12,.48]:p.rot}));
+const drive=common.map((p,i)=>({...p,wr:i===2?[.15,1.18,1.26]:i===3?[.11,1.20,1.29]:i===4?[.24,1.23,1.31]:p.wr,gr:i===2?[.06,1.09,1.17]:i===3?[.05,1.19,1.14]:i===4?[.34,1.25,1.20]:p.gr,roll:i===2?[.50]:i===3?[.02]:i===4?[-.08]:p.roll}));
 const phaseData=[
-['01','低姿準備','低，不是蹲死','腳距略寬於肩，膝蓋有彈性；胸口向桌面，重心留在前腳掌。','≈ 104°','≈ 0 cm','≈ 18°','腿／軀幹','腳和骨盆先建立穩定平台。上半身前傾，但頭部不應上下彈跳。',0],
-['02','進桌判斷','腳先到，肘再進','利用右腳和重心靠近短球；肘進入桌內，而不是只把手掌伸出去。','≈ 96°','≈ 10 cm','≈ 20°','腳／肘', '肘位於身前偏高，但肩膀仍放鬆；這會保留前臂的旋轉半徑。',1],
-['03','緊湊引拍','手腕收到肘內下方','肘的位置變化很小；前臂折回腹前，拍頭低於來球，形成 lag。','≈ 72°','≈ 15 cm','≈ 32°','前臂蓄力','這一幀最能區分專業動作和「整條手臂往後拉」：肘是支點，不是一起後退。',2],
+['01','低姿準備','肘向外撐，前臂向內收','腳距略寬於肩；雙肘像螃蟹鉗般在身體兩側打開，持拍手留在腹前。','≈ 92°','≈ 0 cm','≈ 18°','腿／肘架','外展不是聳肩：肩膀放鬆、肘尖朝外，先為反手保留操作空間。',0],
+['02','進桌判斷','腳先到，肘架跟進','利用右腳和重心靠近短球；肘架整體進桌，手腕仍保持在肘的內側。','≈ 88°','≈ 9 cm','≈ 22°','腳／肘', '肘位於身前偏高且明顯外展，前臂可以在桌面上方折疊。',1],
+['03','緊湊引拍','看橘色手腕：先內收','肘幾乎停住；手腕向腹前內收，握柄與前臂形成折角，拍頭降到來球後下方。','≈ 66°','≈ 14 cm','≈ 34°','手腕蓄力','現在手腕、手掌、握柄和拍面是四個獨立節點；拍面不再黏在前臂末端。',2],
 ['04','爆發接觸','肘穩，前臂與手腕突然快','在上升早期接觸；快擰向前上摩擦，快撕更直接向前穿。','≈ 118°','≈ 18 cm','≈ 15°','前臂／手腕','速度峰值集中在接觸前後；肩膀不主動上抬，拍頭也不繞出很大的圓。',3],
 ['05','短收還原','收拍仍在身體前面','擊球後不把拍甩到身側；重心保持低，立即回到下一板反手位置。','≈ 126°','≈ 8 cm','≈ 12°','拍頭／還原','短收能保留連續反手與正反手轉換能力。',4]
 ];
 const times=[0,.2,.43,.66,1];
-function sample(arr,u){let i=0;while(i<times.length-2&&u>times[i+1])i++;const t=THREE.MathUtils.smoothstep((u-times[i])/(times[i+1]-times[i]),0,1),a=arr[i],b=arr[i+1],o={};for(const k of ['p','n','h','wr','er','wl','rot','ball'])o[k]=mix(a[k],b[k],t);return o}
+function sample(arr,u){let i=0;while(i<times.length-2&&u>times[i+1])i++;const t=THREE.MathUtils.smoothstep((u-times[i])/(times[i+1]-times[i]),0,1),a=arr[i],b=arr[i+1],o={};for(const k of ['p','n','h','wr','gr','er','wl','roll','ball'])o[k]=mix(a[k],b[k],t);return o}
 function drawPose(q){
  fallbackPose=q;
  const pelvis=q.p,neck=q.n,head=q.h,shoulderL=[neck[0]-.24,neck[1]-.04,neck[2]],shoulderR=[neck[0]+.24,neck[1]-.04,neck[2]],hipL=[pelvis[0]-.15,pelvis[1],pelvis[2]],hipR=[pelvis[0]+.15,pelvis[1],pelvis[2]];
  const ankleL=[-.48,.08,1.86],ankleR=[.48,.08,1.61],kneeL=twoBone(hipL,ankleL,[-.58,.48,1.70],.48,.48),kneeR=twoBone(hipR,ankleR,[.58,.46,1.42],.48,.48);
  const elbowR=twoBone(shoulderR,q.wr,q.er,.34,.31),elbowL=twoBone(shoulderL,q.wl,[-.38,1.18,1.42],.31,.28);
- setSeg(rig.spine,pelvis,neck);setSeg(rig.shoulderL,shoulderL,shoulderR);setSeg(rig.hipL,pelvis,hipL);setSeg(rig.hipR,pelvis,hipR);setSeg(rig.thighL,hipL,kneeL);setSeg(rig.shinL,kneeL,ankleL);setSeg(rig.thighR,hipR,kneeR);setSeg(rig.shinR,kneeR,ankleR);setSeg(rig.upperR,shoulderR,elbowR);setSeg(rig.foreR,elbowR,q.wr);setSeg(rig.upperL,shoulderL,elbowL);setSeg(rig.foreL,elbowL,q.wl);
- for(const [m,p] of [[rig.head,head],[rig.neck,neck],[rig.pelvis,pelvis],[rig.handR,q.wr],[rig.handL,q.wl],[rig.elbowR,elbowR],[rig.elbowL,elbowL],[rig.kneeL,kneeL],[rig.kneeR,kneeR]])m.position.fromArray(p);
+ setSeg(rig.spine,pelvis,neck);setSeg(rig.shoulderL,shoulderL,shoulderR);setSeg(rig.hipL,pelvis,hipL);setSeg(rig.hipR,pelvis,hipR);setSeg(rig.thighL,hipL,kneeL);setSeg(rig.shinL,kneeL,ankleL);setSeg(rig.thighR,hipR,kneeR);setSeg(rig.shinR,kneeR,ankleR);setSeg(rig.upperR,shoulderR,elbowR);setSeg(rig.foreR,elbowR,q.wr);setSeg(rig.palmR,q.wr,q.gr);setSeg(rig.upperL,shoulderL,elbowL);setSeg(rig.foreL,elbowL,q.wl);
+ for(const [m,p] of [[rig.head,head],[rig.neck,neck],[rig.pelvis,pelvis],[rig.wristR,q.wr],[rig.handR,q.gr],[rig.handL,q.wl],[rig.elbowR,elbowR],[rig.elbowL,elbowL],[rig.kneeL,kneeL],[rig.kneeR,kneeR]])m.position.fromArray(p);
  rig.shoeL.position.fromArray(ankleL);rig.shoeR.position.fromArray(ankleR);rig.shoeL.rotation.y=-.08;rig.shoeR.rotation.y=.08;
- racket.position.fromArray(q.wr);racket.rotation.set(...q.rot);ball.position.fromArray(q.ball);
+ const gripAxis=V(q.gr).sub(V(q.wr)).normalize(),baseQ=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),gripAxis),twistQ=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),q.roll[0]);racket.position.fromArray(q.gr);racket.quaternion.copy(baseQ).multiply(twistQ);ball.position.fromArray(q.ball);
  const upper=V(shoulderR).sub(V(elbowR)),fore=V(q.wr).sub(V(elbowR));$('#elbowMetric').textContent=Math.round(THREE.MathUtils.radToDeg(upper.angleTo(fore)))+'°';$('#depthMetric').textContent='≈ '+Math.max(0,Math.round((1.37-elbowR[2])*100))+' cm';
- const g=common[3],gn=g.n,gp=g.p,gsL=[gn[0]-.24,gn[1]-.04,gn[2]],gsR=[gn[0]+.24,gn[1]-.04,gn[2]],geR=twoBone(gsR,g.wr,g.er,.34,.31),geL=twoBone(gsL,g.wl,[-.38,1.18,1.42],.31,.28),pairs=[[gsR,geR],[geR,g.wr],[gsL,geL],[geL,g.wl],[gp,gn],[[gp[0]-.15,gp[1],gp[2]],[-.48,.08,1.86]]];for(let i=0;i<ghostParts.length;i++){ghostParts[i].visible=showGhost;if(showGhost)setSeg(ghostParts[i],pairs[i][0],pairs[i][1])}
+ const g=common[3],gn=g.n,gp=g.p,gsL=[gn[0]-.24,gn[1]-.04,gn[2]],gsR=[gn[0]+.24,gn[1]-.04,gn[2]],geR=twoBone(gsR,g.wr,g.er,.34,.31),geL=twoBone(gsL,g.wl,[-.38,1.18,1.42],.31,.28),pairs=[[gsR,geR],[geR,g.wr],[g.wr,g.gr],[gsL,geL],[geL,g.wl],[gp,gn]];for(let i=0;i<ghostParts.length;i++){ghostParts[i].visible=showGhost;if(showGhost)setSeg(ghostParts[i],pairs[i][0],pairs[i][1])}
 }
 const cameras={coach:[[3.6,2.35,4.35],[0,1.02,.68]],front:[[0,1.82,-4.3],[0,1.02,.65]],side:[[4.5,1.85,1.15],[0,1.05,1.05]],top:[[0,5.4,1.0],[0,0.75,.72]]};
 function setCamera(name){fallbackView=name;const [p,t]=cameras[name];camera.position.fromArray(p);controls.target.fromArray(t);controls.update();$$('[data-camera]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.camera===name))}
