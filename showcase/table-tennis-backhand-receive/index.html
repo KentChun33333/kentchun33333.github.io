@@ -33,10 +33,10 @@
 </div>
 <aside class="note">
 <div class="kicker">CURRENT PHASE</div><h2 id="noteTitle">低，不是蹲死</h2><div class="cue" id="cue">腳距略寬於肩，膝蓋有彈性；胸口向桌面，重心留在前腳掌。</div>
-<div class="metrics"><div class="metric"><small>肘部夾角</small><b id="elbowMetric">≈ 104°</b></div><div class="metric"><small>肘進桌深度</small><b id="depthMetric">≈ 12 cm</b></div><div class="metric"><small>球拍閉合</small><b id="racketMetric">≈ 18°</b></div><div class="metric"><small>動力主體</small><b id="powerMetric">腿／軀幹</b></div></div>
+<div class="metrics"><div class="metric"><small>大臂／軀幹角</small><b id="elbowMetric">≈ 90°</b></div><div class="metric"><small>肘進桌深度</small><b id="depthMetric">≈ 12 cm</b></div><div class="metric"><small>腕部偏折</small><b id="racketMetric">≈ 3°</b></div><div class="metric"><small>動力主體</small><b id="powerMetric">腿／軀幹</b></div></div>
 <div class="chain"><div id="chainLegs" class="on"><i></i>腳底與重心</div><div id="chainCore"><i></i>骨盆與軀幹</div><div id="chainElbow"><i></i>肩胛與肘支點</div><div id="chainForearm"><i></i>前臂與手腕</div><div id="chainRacket"><i></i>拍頭與球</div></div>
 <div class="why" id="why">腳和骨盆先建立穩定平台。上半身前傾，但頭部不應上下彈跳。</div>
-<div class="reference">參考：<a href="https://www.youtube.com/watch?v=jzi0DXDHRHU" target="_blank" rel="noopener">樊振東反手擰拉慢動作解析</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8706454/" target="_blank" rel="noopener">上肢關節運動學研究</a>。本頁是教學化的結構重建，不代表精確動作捕捉。</div>
+<div class="reference">六幀影格校正：大臂與軀幹約 90°、肘架高、腕形穩定。另參考：<a href="https://youtube.com/shorts/ahBFJo8SNHQ" target="_blank" rel="noopener">樊振東反手撥球解析</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8706454/" target="_blank" rel="noopener">上肢關節運動學研究</a>。本頁是教學化結構重建。</div>
 </aside>
 </section>
 </main>
@@ -79,7 +79,7 @@ function drawFallback(ctx,w,h,q){
  line(pelvis,neck,'#e73946',22);line(sL,sR,'#e73946',16);line(hL,kL,'#18232d',15);line(kL,aL,'#d8e8ed',13);line(hR,kR,'#18232d',15);line(kR,aR,'#d8e8ed',13);line(sL,eL,'#e2ad83',12);line(eL,q.wl,'#e2ad83',10);line(sR,eR,'#37e6cf',14);line(eR,q.wr,'#37e6cf',12);line(q.wr,q.gr,'#e2ad83',9);joint(head,12,'#e2ad83');joint(eR,6,'#37e6cf');joint(q.wr,6,'#ffb657');joint(q.gr,5,'#e2ad83');joint(q.ball,4,'#fff6c8');const W=project(q.wr),G=project(q.gr),dx=G[0]-W[0],dy=G[1]-W[1],len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len,px=-uy,py=ux,B=[G[0]+ux*28,G[1]+uy*28];ctx.strokeStyle='#d7a46c';ctx.lineWidth=7;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(G[0]-ux*4,G[1]-uy*4);ctx.lineTo(G[0]+ux*16,G[1]+uy*16);ctx.stroke();ctx.save();ctx.translate(...B);ctx.rotate(Math.atan2(uy,ux)+Math.PI/2+q.roll[0]);ctx.fillStyle='#ef4050';ctx.beginPath();ctx.ellipse(0,0,12,16,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#161b20';ctx.lineWidth=2;ctx.stroke();ctx.restore();ctx.fillStyle='#90abb5';ctx.font='12px system-ui';ctx.fillText('Canvas 2D 相容模式',12,h-14)
 }
 const common=[
-{p:[0,.78,1.78],n:[0,1.34,1.60],h:[0,1.57,1.54],wr:[.14,1.20,1.38],gr:[.02,1.204,1.389],er:[.80,1.30,1.60],wl:[-.39,1.12,1.48],roll:[.04],ball:[-.32,.88,-.72]},
+{p:[0,.78,1.78],n:[0,1.34,1.60],h:[0,1.57,1.54],wr:[.14,1.13,1.33],gr:[.021,1.120,1.314],er:[.80,1.30,1.60],wl:[-.39,1.12,1.48],roll:[.04],ball:[-.32,.88,-.72]},
 {p:[0,.77,1.70],n:[0,1.33,1.51],h:[0,1.56,1.45],wr:[.14,1.16,1.26],gr:[.02,1.156,1.256],er:[.80,1.30,1.51],wl:[-.40,1.10,1.42],roll:[.06],ball:[-.20,.84,.05]},
 {p:[-.015,.76,1.66],n:[-.01,1.32,1.47],h:[-.01,1.55,1.41],wr:[.13,1.12,1.18],gr:[.012,1.106,1.162],er:[.80,1.30,1.47],wl:[-.40,1.08,1.38],roll:[.08],ball:[-.10,.88,.72]},
 {p:[-.02,.77,1.63],n:[-.015,1.33,1.44],h:[-.015,1.56,1.38],wr:[.12,1.16,1.12],gr:[.003,1.147,1.097],er:[.80,1.31,1.44],wl:[-.38,1.10,1.37],roll:[-.02],ball:[-.197,1.117,1.027]},
@@ -87,11 +87,11 @@ const common=[
 ];
 const drive=common.map((p,i)=>({...p,wr:i===3?[.13,1.15,1.10]:i===4?[.22,1.22,1.18]:p.wr,gr:i===3?[.013,1.14,1.077]:i===4?[.103,1.215,1.165]:p.gr,roll:i===3?[0]:i===4?[-.03]:p.roll}));
 const phaseData=[
-['01','低姿準備','肘向外撐，前臂向內收','腳距略寬於肩；雙肘像螃蟹鉗般在身體兩側打開，持拍手留在腹前。','≈ 92°','≈ 0 cm','≈ 18°','腿／肘架','外展不是聳肩：肩膀放鬆、肘尖朝外，先為反手保留操作空間。',0],
-['02','進桌判斷','腳先到，肘架跟進','利用右腳和重心靠近短球；肘架整體進桌，手腕仍保持在肘的內側。','≈ 88°','≈ 9 cm','≈ 22°','腳／肘', '肘位於身前偏高且明顯外展，前臂可以在桌面上方折疊。',1],
-['03','緊湊引拍','腕形穩定，不刻意折腕','肘保持外展；手腕接近中立，手掌與前臂幾乎成一直線，由前臂把拍頭帶到來球後方。','≈ 66°','≈ 14 cm','≈ 18°','前臂蓄力','橘色手腕只保留很小的自然角度；不要把「內旋」誤做成大幅屈腕或扭腕。',2],
-['04','爆發接觸','反手拍面迎球','前臂向前轉送，腕形只在接觸前後微調；紅色反手面對準球的後方。','≈ 118°','≈ 18 cm','≈ 12°','前臂／拍面','加速主要來自肘支點與前臂，手腕不先甩；接觸點已對準反手膠面中心。',3],
-['05','短收還原','收拍仍在身體前面','擊球後不把拍甩到身側；重心保持低，立即回到下一板反手位置。','≈ 126°','≈ 8 cm','≈ 12°','拍頭／還原','短收能保留連續反手與正反手轉換能力。',4]
+['01','低姿準備','肘向外撐，前臂向內收','腳距略寬於肩；大臂與軀幹接近 90°，持拍手留在腹前。','≈ 86°','≈ 0 cm','≈ 3°','腿／肘架','外展不是聳肩：肩膀放鬆、肘架高，為反手預留身前操作空間。',0],
+['02','進桌判斷','腳先到，肘架跟進','利用右腳和重心靠近短球；肘架整體進桌，腕形保持穩定。','≈ 88°','≈ 9 cm','≈ 3°','腳／肘', '像參考影格一樣，大臂向外打開，肘不貼住身體，也不向下掉。',1],
+['03','緊湊引拍','腕形穩定，不刻意折腕','肘保持外展；手腕接近中立，手掌與前臂幾乎成一直線，由前臂把拍頭帶到來球後方。','≈ 90°','≈ 14 cm','≈ 2°','前臂蓄力','橘色手腕只保留很小的自然角度；不要把「內旋」誤做成大幅屈腕或扭腕。',2],
+['04','爆發接觸','反手拍面迎球','前臂由肘架向前伸展，腕形只作極小微調；紅色反手面對準球的後方。','≈ 90°','≈ 18 cm','≈ 3°','前臂／拍面','六幀顯示肘架沒有塌下；拍頭位移主要來自前臂伸展，而不是手腕先甩。',3],
+['05','短收還原','收拍仍在身體前面','擊球後不把拍甩到身側；腕形維持完整，立即回到下一板反手位置。','≈ 88°','≈ 8 cm','≈ 4°','拍頭／還原','短收能保留連續反手與正反手轉換能力。',4]
 ];
 const times=[0,.2,.43,.66,1];
 function sample(arr,u){let i=0;while(i<times.length-2&&u>times[i+1])i++;const t=THREE.MathUtils.smoothstep((u-times[i])/(times[i+1]-times[i]),0,1),a=arr[i],b=arr[i+1],o={};for(const k of ['p','n','h','wr','gr','er','wl','roll','ball'])o[k]=mix(a[k],b[k],t);return o}
@@ -104,10 +104,10 @@ function drawPose(q){
  for(const [m,p] of [[rig.head,head],[rig.neck,neck],[rig.pelvis,pelvis],[rig.wristR,q.wr],[rig.handR,q.gr],[rig.handL,q.wl],[rig.elbowR,elbowR],[rig.elbowL,elbowL],[rig.kneeL,kneeL],[rig.kneeR,kneeR]])m.position.fromArray(p);
  rig.shoeL.position.fromArray(ankleL);rig.shoeR.position.fromArray(ankleR);rig.shoeL.rotation.y=-.08;rig.shoeR.rotation.y=.08;
  const gripAxis=V(q.gr).sub(V(q.wr)).normalize(),baseQ=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),gripAxis),twistQ=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),q.roll[0]);racket.position.fromArray(q.gr);racket.quaternion.copy(baseQ).multiply(twistQ);ball.position.fromArray(q.ball);
- const upper=V(shoulderR).sub(V(elbowR)),fore=V(q.wr).sub(V(elbowR));$('#elbowMetric').textContent=Math.round(THREE.MathUtils.radToDeg(upper.angleTo(fore)))+'°';$('#depthMetric').textContent='≈ '+Math.max(0,Math.round((1.37-elbowR[2])*100))+' cm';
+ const upper=V(elbowR).sub(V(shoulderR)),torsoDown=V(pelvis).sub(V(neck)),fore=V(q.wr).sub(V(elbowR)),hand=V(q.gr).sub(V(q.wr));$('#elbowMetric').textContent=Math.round(THREE.MathUtils.radToDeg(upper.angleTo(torsoDown)))+'°';$('#depthMetric').textContent='≈ '+Math.max(0,Math.round((1.37-elbowR[2])*100))+' cm';$('#racketMetric').textContent='≈ '+Math.round(THREE.MathUtils.radToDeg(fore.angleTo(hand)))+'°';
  const g=common[3],gn=g.n,gp=g.p,gsL=[gn[0]-.24,gn[1]-.04,gn[2]],gsR=[gn[0]+.24,gn[1]-.04,gn[2]],geR=twoBone(gsR,g.wr,g.er,.34,.31),geL=twoBone(gsL,g.wl,[-.38,1.18,1.42],.31,.28),pairs=[[gsR,geR],[geR,g.wr],[g.wr,g.gr],[gsL,geL],[geL,g.wl],[gp,gn]];for(let i=0;i<ghostParts.length;i++){ghostParts[i].visible=showGhost;if(showGhost)setSeg(ghostParts[i],pairs[i][0],pairs[i][1])}
 }
-const cameras={coach:[[3.6,2.35,4.35],[0,1.02,.68]],front:[[0,1.82,-4.3],[0,1.02,.65]],side:[[4.5,1.85,1.15],[0,1.05,1.05]],top:[[0,5.4,1.0],[0,0.75,.72]]};
+const cameras={coach:[[-3.55,2.65,-4.25],[0,1.04,.78]],front:[[0,1.82,-4.3],[0,1.02,.65]],side:[[4.5,1.85,1.15],[0,1.05,1.05]],top:[[0,5.4,1.0],[0,0.75,.72]]};
 function setCamera(name){fallbackView=name;const [p,t]=cameras[name];camera.position.fromArray(p);controls.target.fromArray(t);controls.update();$$('[data-camera]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.camera===name))}
 setCamera('coach');
 let mode='flick',playing=true,speed=.5,u=0,last=performance.now(),trailPts=[],showGhost=true;
