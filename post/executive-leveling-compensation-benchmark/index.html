@@ -341,7 +341,7 @@
     .view-btn:last-child { border-right: 0; }
     .view-btn.active { background: var(--lux); color: #ffffff; }
 
-    /* Levels-style stacked bands: responsibility rises upward; overlaps use lanes. */
+    /* Continuous mono-stacks: every company fills the scale with native grades. */
     .stack-chart-wrap {
       overflow: auto;
       max-height: 78vh;
@@ -352,78 +352,85 @@
     }
     .stack-chart-wrap[hidden], .table-wrap[hidden] { display: none; }
     .stack-chart {
-      --stack-row-height: 124px;
       display: grid;
-      grid-template-columns: 170px repeat(var(--company-count), minmax(225px, 1fr));
-      min-width: calc(170px + var(--company-count) * 225px);
+      grid-template-columns: repeat(var(--company-count), minmax(235px, 1fr));
+      min-width: calc(var(--company-count) * 235px);
       align-items: start;
+      background: #171717;
     }
-    .stack-axis-head, .stack-company-head {
+    .stack-company-head {
       position: sticky;
       top: 0;
       z-index: 20;
-      min-height: 54px;
-      padding: 10px 11px;
-      background: #f7f5f0;
-      border-right: 1px solid var(--line);
-      border-bottom: 2px solid var(--line);
+      min-height: 66px;
+      padding: 14px 12px;
+      background: #171717;
+      border-right: 1px solid #3d3d3d;
+      border-bottom: 3px solid var(--stack-color);
       font: 700 10px/1.35 'IBM Plex Mono', monospace;
       text-transform: uppercase;
-      color: #4a4e54;
+      color: #d7d7d7;
     }
     .stack-company-head.primary {
-      background: #eee6d4;
-      color: var(--lux);
-      border-bottom-color: var(--gold);
+      color: #ffffff;
+      box-shadow: inset 0 0 0 1px var(--stack-color);
     }
-    .stack-scale {
-      position: relative;
-      height: calc(var(--primary-count) * var(--stack-row-height));
-      border-right: 1px solid var(--line);
-      background: #faf8f3;
+    .stack-company-head small {
+      display: block;
+      margin-top: 5px;
+      color: #969696;
+      font-size: 8px;
     }
-    .stack-scale-row {
-      position: absolute;
-      inset-inline: 0;
-      height: var(--stack-row-height);
-      padding: 9px 10px;
-      border-bottom: 1px solid #e9e3d7;
-      box-sizing: border-box;
-    }
-    .stack-scale-row .scale-grade { display: block; font-weight: 800; color: var(--lux); }
-    .stack-scale-row .scale-title { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; line-height: 1.3; }
     .stack-company-lane {
       position: relative;
-      height: calc(var(--primary-count) * var(--stack-row-height));
-      border-right: 1px solid var(--line);
-      background: repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--stack-row-height) - 1px), #eee8dc calc(var(--stack-row-height) - 1px), #eee8dc var(--stack-row-height));
+      height: var(--stack-height);
+      border-right: 1px solid #4a4a4a;
+      background: #171717;
     }
-    .stack-company-lane.primary { background-color: #fffdf7; }
     .stack-level-card {
       position: absolute;
       box-sizing: border-box;
-      padding: 7px;
-      border: 1px solid #d7d0c1;
-      border-left: 3px solid #9a8350;
-      border-radius: 5px;
-      background: rgba(255, 255, 255, 0.97);
-      box-shadow: 0 2px 5px rgba(17, 24, 39, 0.07);
+      inset-inline: 2px;
+      padding: 8px 9px;
+      border: 1px solid rgba(255, 255, 255, 0.52);
+      border-radius: 7px;
+      background: var(--stack-color);
+      color: #ffffff;
+      box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.24);
       overflow: auto;
+      text-align: center;
+      transition: filter 0.12s ease, transform 0.12s ease;
     }
     .stack-level-card.primary {
-      border-left-color: var(--gold);
-      background: #fffaf0;
+      border-width: 2px;
+      border-color: #ffffff;
     }
-    .stack-level-card.overlap { border-right-color: #c69d44; }
-    .stack-level-card.selected { outline: 2px solid var(--gold); z-index: 5; }
-    .stack-level-card .cell-title { font-size: 10.5px; }
-    .stack-level-card .cell-salary { font-size: 9px; white-space: normal; }
-    .stack-level-card .cell-detail { font-size: 9px; }
-    .stack-level-card .anchor-badge { font-size: 7.5px; }
+    .stack-level-card:hover { filter: brightness(1.1); z-index: 5; }
+    .stack-level-card.selected { outline: 3px solid #ffffff; z-index: 6; }
+    .stack-level-card .cell-title { color: #ffffff; font-size: 11px; }
+    .stack-level-card .cell-salary {
+      color: #ffffff;
+      background: rgba(0, 0, 0, 0.18);
+      border-color: rgba(255, 255, 255, 0.38);
+      font-size: 9px;
+      white-space: normal;
+    }
+    .stack-level-card .cell-detail {
+      color: #f4f4f4;
+      background: rgba(0, 0, 0, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+      font-size: 9px;
+    }
+    .stack-level-card .anchor-badge {
+      color: #ffffff;
+      background: rgba(0, 0, 0, 0.2);
+      border-color: rgba(255, 255, 255, 0.3);
+      font-size: 7.5px;
+    }
     .stack-range {
       display: block;
       margin-bottom: 4px;
-      color: #806a37;
+      color: rgba(255, 255, 255, 0.78);
       font: 700 8px 'IBM Plex Mono', monospace;
       text-transform: uppercase;
     }
@@ -1841,73 +1848,54 @@
         return { start: index, end: index, anchored: false };
       }
 
-      function assignStackLanes(items) {
-        items.sort((a, b) => a.displayStart - b.displayStart || a.displayEnd - b.displayEnd);
-        let cluster = [];
-        let clusterEnd = -1;
-        const finishCluster = () => {
-          if (!cluster.length) return;
-          const laneEnds = [];
-          cluster.forEach(item => {
-            let lane = laneEnds.findIndex(end => end < item.displayStart);
-            if (lane < 0) lane = laneEnds.length;
-            laneEnds[lane] = item.displayEnd;
-            item.lane = lane;
-          });
-          cluster.forEach(item => { item.laneCount = Math.max(1, laneEnds.length); });
-          cluster = [];
-          clusterEnd = -1;
-        };
-        items.forEach(item => {
-          if (cluster.length && item.displayStart > clusterEnd) finishCluster();
-          cluster.push(item);
-          clusterEnd = Math.max(clusterEnd, item.displayEnd);
-        });
-        finishCluster();
-        return items;
-      }
-
       function renderStackChart() {
         if (!stackChart) return;
         const primaryNodes = institutions[primaryAxis].nodes;
         const columnIds = [primaryAxis, ...institutionIds.filter(id => id !== primaryAxis)];
-        const rowHeight = 124;
-        const headers = [
-          '<div class="stack-axis-head">Primary responsibility scale<br/>Apex ↑</div>',
-          ...columnIds.map((id, index) => `<div class="stack-company-head${index === 0 ? ' primary' : ''}">${index === 0 ? 'Primary · ' : ''}${escapeHtml(institutions[id].label)}</div>`)
-        ];
-        const scale = `<div class="stack-scale" style="--primary-count:${primaryNodes.length}">${[...primaryNodes].reverse().map((node, displayIndex) =>
-          `<div class="stack-scale-row" style="top:${displayIndex * rowHeight}px" data-tier="${escapeHtml(node.tier)}">
-            <span class="scale-grade">${escapeHtml(node.grade)}</span>
-            <span class="scale-title">${escapeHtml(node.title)}</span>
-          </div>`
-        ).join('')}</div>`;
+        const chartHeight = Math.max(1800, primaryNodes.length * 130);
+        const colors = {
+          sg_gov: '#77531d', uob: '#253f77', ocbc: '#a03621', tsmc: '#ad1828',
+          asml: '#126b68', tw_gov: '#5d457f', astar: '#3c568f'
+        };
+        const headers = columnIds.map((id, index) => `<div class="stack-company-head${index === 0 ? ' primary' : ''}" style="--stack-color:${colors[id] || '#555555'}">
+          ${index === 0 ? 'Primary · ' : ''}${escapeHtml(institutions[id].label)}
+          <small>Entry → Apex · block height = responsibility span</small>
+        </div>`);
 
         const lanes = columnIds.map((institutionId, columnIndex) => {
-          const items = institutions[institutionId].nodes.map(node => {
+          const nodes = institutions[institutionId].nodes;
+          let previousCenter = -0.25;
+          const centers = nodes.map(node => {
+            const rawCenter = institutionId === primaryAxis
+              ? Number(node.level)
+              : projectedLevel(institutionId, node, primaryAxis);
+            const center = Math.min(99.75, Math.max(previousCenter + 0.25, rawCenter));
+            previousCenter = center;
+            return center;
+          });
+          const items = nodes.map((node, nodePosition) => {
             const interval = nodeInterval(institutionId, node, primaryNodes);
+            const lowerBoundary = nodePosition === 0 ? 0 : (centers[nodePosition - 1] + centers[nodePosition]) / 2;
+            const upperBoundary = nodePosition === nodes.length - 1 ? 100 : (centers[nodePosition] + centers[nodePosition + 1]) / 2;
             return {
               node,
               anchored: interval.anchored,
-              displayStart: primaryNodes.length - 1 - interval.end,
-              displayEnd: primaryNodes.length - 1 - interval.start,
+              lowerBoundary,
+              upperBoundary,
               primaryStart: interval.start,
               primaryEnd: interval.end
             };
           });
-          assignStackLanes(items);
           const cards = items.map(item => {
-            const top = item.displayStart * rowHeight + 4;
-            const height = (item.displayEnd - item.displayStart + 1) * rowHeight - 8;
-            const width = 100 / item.laneCount;
-            const left = item.lane * width;
+            const top = item.lowerBoundary / 100 * chartHeight;
+            const height = Math.max(2, (item.upperBoundary - item.lowerBoundary) / 100 * chartHeight);
             const startGrade = primaryNodes[item.primaryStart]?.grade || '';
             const endGrade = primaryNodes[item.primaryEnd]?.grade || '';
             const range = startGrade === endGrade ? startGrade : `${startGrade} → ${endGrade}`;
             const note = institutionId === primaryAxis ? '' : anchorNote(institutionId, item.node);
             const searchText = `${item.node.grade} ${item.node.title} ${item.node.compensation} ${item.node.detail} ${note}`.toLowerCase();
-            return `<article class="stack-level-card${columnIndex === 0 ? ' primary' : ''}${item.laneCount > 1 ? ' overlap' : ''}"
-              style="top:${top}px;height:${height}px;left:calc(${left}% + 4px);width:calc(${width}% - 8px)"
+            return `<article class="stack-level-card${columnIndex === 0 ? ' primary' : ''}"
+              style="top:${top}px;height:${height}px"
               data-tier="${escapeHtml(item.node.tier)}" data-search="${escapeHtml(searchText)}" tabindex="0">
               <span class="stack-range">${escapeHtml(range)}${item.anchored ? ' · anchored' : ' · projected'}</span>
               <span class="cell-title">${escapeHtml(item.node.grade)} · ${escapeHtml(item.node.title)}</span>
@@ -1916,11 +1904,10 @@
               ${note ? `<span class="anchor-badge">${escapeHtml(note)}</span>` : ''}
             </article>`;
           }).join('');
-          return `<div class="stack-company-lane${columnIndex === 0 ? ' primary' : ''}" style="--primary-count:${primaryNodes.length}">${cards}</div>`;
+          return `<div class="stack-company-lane${columnIndex === 0 ? ' primary' : ''}" style="--stack-height:${chartHeight}px;--stack-color:${colors[institutionId] || '#555555'}">${cards}</div>`;
         });
         stackChart.style.setProperty('--company-count', columnIds.length);
-        stackChart.style.setProperty('--primary-count', primaryNodes.length);
-        stackChart.innerHTML = [...headers, scale, ...lanes].join('');
+        stackChart.innerHTML = [...headers, ...lanes].join('');
         stackChart.querySelectorAll('.stack-level-card').forEach(card => {
           card.addEventListener('click', () => card.classList.toggle('selected'));
         });
@@ -1952,7 +1939,7 @@
         axisTierBadge.textContent = `${primaryNodes.length} ${primaryInstitution.short_label.toUpperCase()} GRADES`;
         const allLevelsButton = pillButtons.find(button => button.dataset.filter === 'all');
         if (allLevelsButton) allLevelsButton.textContent = `All Levels (${primaryNodes.length})`;
-        axisStatus.textContent = `${primaryInstitution.label} is the primary axis: ${primaryNodes.length} native grades, one row each. Other grades appear once and fold into their nearest anchored level.`;
+        axisStatus.textContent = `${primaryInstitution.label} is the primary axis: all company ladders are continuous with no vacant bands. Each native grade appears once; block boundaries stretch or compress through responsibility anchors.`;
         renderStackChart();
         bindTableInteractions();
         runMasterFilter();
