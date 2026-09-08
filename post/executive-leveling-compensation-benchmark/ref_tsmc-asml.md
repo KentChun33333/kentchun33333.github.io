@@ -19,3 +19,24 @@ EVP	JG16	未公開
 
 台積電 Grade 34–40 比較明顯綁管理職稱。
 ASML JG8–11 是技術與管理雙軌。
+
+
+修正版跨公司对照
+TSMC	TSMC定位	ASML责任层级约当	说明
+31	Engineer／MSc fresh	JG6左右	入职层级相近
+32	Senior Engineer	JG7–8	ASML不同职系跨度较大
+33	Principal／PhD fresh	JG7–9	入职对标约JG7–8；成熟责任对标可达JG8–9
+34	副理	JG8–9	初阶主管或资深IC
+35	经理	JG9–10	Manager／Principal
+36	部经理	JG10–11	Manager／Senior Manager
+37	副处长／副厂长	JG11	Senior Manager
+38–39	处长／厂长	JG12	Director
+40	资深处长／资深厂长	JG13	Senior Director
+约50	VP	JG14	VP
+
+最终应该拆成两种比较：
+
+按新人学历入口：TSMC 33 ≈ ASML JG7–8。
+按成熟的职位责任：TSMC 33 ≈ ASML JG8–9。
+
+所以不能再简单断言“33就是JG7”。更准确是：JG7是TSMC 33可能的新人入口对应，但不是唯一或固定对标；美国高端研发中心的fresh PhD甚至可能直接JG8。

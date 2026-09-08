@@ -29,20 +29,20 @@ To resolve cross-border currency disparities, institutional pay constraints, and
   (MX9-8: Director / Superscale)                                           (簡任11-12 副司長/司長/參事)
   (PermSec: Top Civil Servant)                                             (簡任14頂 常務次長)
 
-[Axis 3: Tech-to-Banking Job Grade Bridging (+26 Rule & Dual-Track Alignment)]
-  ASML (Global JG)               <=== +26 Rule ===>  TSMC (TW Grade & Title)                 <=== Grade Mapping ===>  UOB & OCBC Titles
-  JG5  (Junior Eng)                                  31 (工程師)                                                      Analyst / Officer
-  JG6  (Senior Eng)                                  32 (資深工程師)                                                  UOB AVP1 (32 mapping) | OCBC AM
-  JG7  (Experienced Eng / 主任)                      33 (主任工程師 / Principal Eng)                                 UOB VP1 (33 mapping)  | OCBC AM / AVP lower
-  JG8  (Lead Eng / 初階主管)                          34 (副理 / Technical Manager)                                   UOB VP2 (34 mapping)  | OCBC AVP (Core S$120-160k)
-  JG9  (Manager / 經理)                              35 (經理 / Manager)                                             UOB FVP (35 mapping)  | OCBC VP (Junior/Core S$170-210k)
-  JG10 (Dept Manager / 部門經理)                     36 (部經理 / Department Manager)                                UOB SVP entry         | OCBC VP (Core/Senior S$200-300k)
-  JG11 (Senior Mgr / 副總監)                        37 (副處長 / 副廠長)                                            UOB SVP               | OCBC ED (Executive Dir S$260-380k)
-  JG12 (Director / 處長級)                           38-39 (處長 / 廠長 / Fab Director)                              UOB ED                | OCBC MD (Managing Dir S$350-520k+)
-  JG13 (Senior Director)                            40 (資深處長 / 資深廠長)                                        UOB MD                | OCBC MD1 (Cluster Head S$450-700k+)
-  JG14 (Vice President VP)                          約50 (副總經理 VP · 報告CEO/董事長)                             UOB Senior MD / ExCo  | OCBC GMD (CTO/COO Scope S$650k-1.2M+)
-  JG15 (Senior VP SVP)                              約51 (資深副總經理 SVP)                                         UOB Top Senior MD     | OCBC GMD (Group Managing Dir S$1.5-4.5M+)
-  JG16 (EVP / BoM Member)                           約52 (執行副總經理 EVP / 共同營運長)                            UOB Group C-Suite/CEO | OCBC Group C-Suite / CEO
+[Axis 3: Tech-to-Banking Job Grade Bridging (+26 Rule & Dual-Track Calibration)]
+  ASML (責任層級約當跨度)       <=== +26 規則與責任對標 ===>  TSMC (TW Grade & Title)                 <=== 組織層級對齊 ===>  UOB & OCBC Titles
+  JG5–6 (Junior / MSc fresh)                           31 (工程師 / 碩士新人)                                          Analyst / Officer
+  JG7–8 (Senior Eng / 跨職系)                         32 (資深工程師)                                                  UOB AVP1 (32 mapping) | OCBC AM
+  JG7–9 (新人JG7-8 · 成熟JG8-9)                        33 (主任工程師 / Principal Eng)                                 UOB VP1 (33 mapping)  | OCBC AM / AVP lower
+  JG8–9 (初階主管 / 資深IC雙軌)                        34 (副理 / Technical Manager)                                   UOB VP2 (34 mapping)  | OCBC AVP (Core S$120-160k)
+  JG9–10 (Manager / Principal)                         35 (經理 / 模組經理 Manager)                                    UOB FVP (35 mapping)  | OCBC VP (Junior/Core S$170-210k)
+  JG10–11 (Manager / Sr Manager)                       36 (部經理 / Department Manager)                                UOB SVP entry         | OCBC VP (Core/Senior S$200-300k)
+  JG11 (Senior Mgr / 副總監)                           37 (副處長 / 副廠長)                                            UOB SVP               | OCBC ED (Executive Dir S$260-380k)
+  JG12 (Director / 處長級)                              38-39 (處長 / 廠長 / Fab Director)                              UOB ED                | OCBC MD (Managing Dir S$350-520k+)
+  JG13 (Senior Director)                               40 (資深處長 / 資深廠長)                                        UOB MD                | OCBC MD1 (Cluster Head S$450-700k+)
+  JG14 (Vice President VP)                             約50 (副總經理 VP · 報告CEO/董事長)                             UOB Senior MD / ExCo  | OCBC GMD (CTO/COO Scope S$650k-1.2M+)
+  JG15 (Senior VP SVP)                                 約51 (資深副總經理 SVP)                                         UOB Top Senior MD     | OCBC GMD (Group Managing Dir S$1.5-4.5M+)
+  JG16 (EVP / BoM Member)                              約52 (執行副總經理 EVP / 共同營運長)                            UOB Group C-Suite/CEO | OCBC Group C-Suite / CEO
 ```
 
 ---
@@ -130,25 +130,27 @@ Because Taiwan public sector salaries are strictly bounded by statutory civil se
 
 ## 5. Tech-to-Banking Job Grade Bridging (ASML $\rightarrow$ TSMC $\rightarrow$ UOB & OCBC)
 
-Tech companies price technical competence through individual contributor (IC) and managerial ladders. Aligning ASML Job Grades (JG) to TSMC Grades (G) provides the universal baseline to cross-map executive titles in UOB and OCBC, independent of individual currency or domestic salary differences:
+Tech companies price technical competence through individual contributor (IC) and managerial ladders. Aligning ASML Job Grades (JG) to TSMC Grades provides the universal baseline to cross-map executive titles in UOB and OCBC, calibrated through both academic entry and mature organizational responsibility:
 
-| ASML Global Grade | TSMC Equivalent Grade | TSMC 中文職稱與製造/晶圓廠對應 | UOB Title (Ladders) | OCBC Title (Ladders) |
-| :--- | :--- | :--- | :--- | :--- |
-| **JG 5** | **31** | 新進工程師 (碩士新人起點) | Analyst | Officer / Analyst |
-| **JG 6** | **32** | 資深工程師 (Senior Engineer) | **AM (32 mapping) / AVP1** | **AM (Assistant Manager)** |
-| **JG 7** | **33** | 主任工程師 (Principal Engineer / 博士新人起點) | **AVP1 (32/33) / VP1 entry** | **AM / AVP lower band** |
-| **JG 8** | **34** | 副理 (Technical Manager / 正式管理職起點) | **AVP2 / VP2 (34 mapping)** | **AVP (Core Band: S$120k–160k)** |
-| **JG 9** | **35** | 經理 / 模組經理 (Manager) | **VP2 / FVP (35 mapping)** | **VP (Junior Band: S$170k–210k · ≈ TSMC 35)** |
-| **JG 10** | **36** | 部經理 / 資深經理 (Department Manager) | **FVP / SVP entry** | **VP (Core/Senior: S$200k–300k · Senior IC)** |
-| **JG 11** | **37** | 副處長 / 副廠長 (Deputy Director) | **SVP (Senior VP)** | **ED (Executive Director: S$260k–380k)** |
-| **JG 12** | **38–39** | 處長 / 廠長 / 大型處長 (Fab Director) | **ED (Executive Director)** | **MD (Managing Director: S$350k–520k+)** |
-| **JG 13** | **40** | 資深處長 / 資深廠長 (Senior Director · 張忠謀40職等) | **MD (Managing Director)** | **MD1 (Cluster Head: S$450k–700k+)** |
-| **JG 14** | **約50** | 副總經理 VP (Vice President · 報告CEO/董事長) | **Senior MD / ExCo** | **MD1 / GMD (CTO/COO Scope: S$650k–1.2M+)** |
-| **JG 15** | **約51** | 資深副總經理 SVP (Senior Vice President) | **Top Senior MD (CTO/COO)** | **GMD (Group Managing Dir: 2.8M–4.5M+ SGD)** |
-| **JG 16** | **約52** | 執行副總經理 EVP / 共同營運長 (Co-COO / BoM) | **Group C-Suite / CEO** | **Group C-Suite / CEO Economics** |
+| TSMC Grade | TSMC 定位與職稱 | ASML 責任層級約當跨度 | 對標說明與軌道定位 | UOB Title (Ladders) | OCBC Title (Ladders) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **31** | Engineer / MSc fresh (碩士新人) | **JG6 左右** (JG5–6) | 入職層級相近 (荷/台碩士起點) | Analyst | Officer / Analyst |
+| **32** | Senior Engineer (資深工程師) | **JG7–8** | ASML 不同職系跨度較大 | **AM (32 mapping) / AVP1** | **AM (Assistant Manager)** |
+| **33** | Principal / PhD fresh (主任工程師) | **JG7–9** | 入職對標約 JG7–8；成熟責任可達 JG8–9 | **AVP1 (32/33) / VP1 entry** | **AM / AVP lower band** |
+| **34** | 副理 (Technical Manager) | **JG8–9** | 初階主管或資深 IC (管理起點) | **AVP2 / VP2 (34 mapping)** | **AVP (Core Band: S$120k–160k)** |
+| **35** | 經理 / 模組經理 (Manager) | **JG9–10** | Manager / Principal Engineer | **VP2 / FVP (35 mapping)** | **VP (Junior Band: S$170k–210k · ≈ TSMC 35)** |
+| **36** | 部經理 / 資深經理 (Dept Manager) | **JG10–11** | Manager / Senior Manager | **FVP / SVP entry** | **VP (Core/Senior: S$200k–300k · Senior IC)** |
+| **37** | 副處長 / 副廠長 (Deputy Director) | **JG11** | Senior Manager / 副總監 (雙軌頂層) | **SVP (Senior VP)** | **ED (Executive Director: S$260k–380k)** |
+| **38–39** | 處長 / 廠長 / 大型處長 (Fab Director) | **JG12** | Director / Fellow (處長 / 院士) | **ED (Executive Director)** | **MD (Managing Director: S$350k–520k+)** |
+| **40** | 資深處長 / 資深廠長 (張忠謀40職等) | **JG13** | Senior Director (資深總監) | **MD (Managing Director)** | **MD1 (Cluster Head: S$450k–700k+)** |
+| **約50** | 副總經理 VP (報告CEO/董事長) | **JG14** | Vice President (全球副總裁) | **Senior MD / ExCo** | **MD1 / GMD (CTO/COO Scope: S$650k–1.2M+)** |
+| **約51** | 資深副總經理 SVP | **JG15** | Senior Vice President (資深副總) | **Top Senior MD (CTO/COO)** | **GMD (Group Managing Dir: 2.8M–4.5M+ SGD)** |
+| **約52** | 執行副總經理 EVP / 共同營運長 | **JG16 / BoM** | Executive VP / 執行董事會成員 | **Group C-Suite / CEO** | **Group C-Suite / CEO Economics** |
 
-> **Structural Differentiation Note (Management vs. Dual Track):**  
-> TSMC Grade 34–40 is clearly tied to organizational management hierarchy (副理 34 $\rightarrow$ 經理 35 $\rightarrow$ 部經理 36 $\rightarrow$ 副處長 37 $\rightarrow$ 處長 38/39 $\rightarrow$ 資深處長 40). In contrast, ASML JG8–11 operates as a dual track balancing technical IC mastery with managerial authority. Bank VP titles (OCBC & UOB) frequently perform as senior individual contributors equivalent to TSMC 35/36 engineering leads.
+> **兩種比較維度的關鍵分流（學歷入口 vs. 成熟職位責任）：**  
+> 1. **按新人學歷入口**：TSMC 33 ≈ ASML JG7–8（入職門檻相近；美國高階研發中心的 fresh PhD 甚至可能直接給到 JG8）。  
+> 2. **按成熟職位責任**：TSMC 33 成熟主任責任對標可達 ASML JG8–9；TSMC 34 副理 ≈ JG8–9；TSMC 35 經理 ≈ JG9–10；TSMC 36 部經理 ≈ JG10–11。  
+> **結論：** 不能再簡單斷言「33 就是 JG7」。JG7 是 TSMC 33 可能的新人入口對應，但成熟職責具備寬帶彈性；且台積電 34–40 明確綁定管理階層，而 ASML JG8–11 採技術 IC 與管理雙軌。銀行端 VP 很多屬於資深高階 IC，在層級與責任上等同 TSMC 35/36 核心主力。
 
 ---
 
