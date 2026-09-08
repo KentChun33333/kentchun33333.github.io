@@ -1942,6 +1942,7 @@
         const columnIds = visibleColumns();
         const minimumCardHeight = 82;
         const chartHeight = Math.max(2300, primaryNodes.length * 145);
+        const globalCardHeight = Math.max(minimumCardHeight, chartHeight * 4 / 100);
         // All lanes share one invariant global responsibility coordinate (0–100).
         // Keeping the full domain prevents mappings from shifting when the primary axis changes.
         const scaleLower = 0;
@@ -1999,8 +2000,12 @@
             };
           });
           const cards = items.map(item => {
-            const top = (item.lowerBoundary - scaleLower) / scaleSpan * chartHeight;
-            const height = Math.max(2, (item.upperBoundary - item.lowerBoundary) / scaleSpan * chartHeight);
+            // Canonical global geometry: a card is centered on its own 0–100
+            // level and uses a fixed four-row visual height, independent of
+            // neighboring nodes or the selected primary axis.
+            const center = Math.max(scaleLower, Math.min(scaleUpper, Number(item.node.level)));
+            const height = globalCardHeight;
+            const top = Math.max(0, Math.min(chartHeight - height, (center / scaleSpan) * chartHeight - height / 2));
             const startGrade = primaryNodes[item.primaryStart]?.grade || '';
             const endGrade = primaryNodes[item.primaryEnd]?.grade || '';
             const range = item.span
