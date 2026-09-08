@@ -134,9 +134,15 @@ institutions:
       - {id: distinguished, grade: "Distinguished Scientist", title: "Distinguished Scientist", compensation: "S$600–900k", detail: "Apex scientific track within the public research ladder", tier: superscale, level: 73}
       - {id: executive_vp, grade: "Executive VP / Director", title: "Executive VP", compensation: "S$800k–1.2M", detail: "Agency executive leadership on a parallel public-service track", tier: superscale, level: 76}
       - {id: leadership, grade: "A*STAR Leadership", title: "Board / Agency Leadership", compensation: "S$1.0–2.8M est.", detail: "Parallel SG public-research ceiling; anchored to Deputy Secretary scope", tier: superscale, level: 78}
+      - {id: shared_senior_perm_sec, grade: "Senior Permanent Secretary", title: "Whole-of-Government Leader", compensation: "S$850k–1.4M+", detail: "Shared SG Government spine above the A*STAR-specific ladder · Head-of-service scope", tier: superscale, level: 89}
+      - {id: shared_ministers, grade: "MR4–MR1", title: "Cabinet Ministers", compensation: "S$1.1M–2.8M ref.", detail: "Shared SG Government spine · Minister through Deputy Prime Minister", tier: political, level: 95}
+      - {id: shared_pm, grade: "Prime Minister", title: "Head of Government", compensation: "S$3.6M ref.", detail: "Shared SG Government spine · National executive chief", tier: political, level: 100}
 
 anchors:
   - {from: "sg_gov.deputy_sec", to: "astar.leadership", relation: parallel_track, weight: 1.0, note: "A*STAR ceiling aligns to Deputy Secretary scope on a separate public-research track"}
+  - {from: "sg_gov.senior_perm_sec", to: "astar.shared_senior_perm_sec", relation: shared_public_spine, weight: 1.0, note: "Above A*STAR leadership, use the common SG head-of-service level"}
+  - {from: "sg_gov.ministers", to: "astar.shared_ministers", relation: shared_public_spine, weight: 1.0, note: "Common SG political leadership level"}
+  - {from: "sg_gov.pm", to: "astar.shared_pm", relation: shared_public_spine, weight: 1.0, note: "Common SG head-of-government level"}
   - {from: "sg_gov.mx14", to: "uob.officer", relation: equivalent, weight: 1.0, note: "Entry support anchor"}
   - {from: "sg_gov.mx13i", to: "ocbc.am", relation: compensation_overlap, weight: 0.8, note: "AM salary window"}
   - {from: "sg_gov.mx13", to: "ocbc.manager", relation: compensation_overlap, weight: 0.9, note: "Manager window"}
