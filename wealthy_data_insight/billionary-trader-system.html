@@ -3,1386 +3,718 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Billionary Trader system design, responsibilities, guardrails, and review flow.">
-  <title>Billionary Trader · System Design &amp; R&amp;R</title>
+  <meta name="description" content="Developer workflow explorer for the Billionary Trader system.">
+  <title>Billionary Trader · Workflow Explorer</title>
   <style>
     :root {
       color-scheme: dark;
       --bg: #07100d;
-      --surface: #0d1915;
-      --surface-raised: #13231d;
-      --line: #284036;
-      --line-soft: rgba(146, 180, 165, 0.16);
-      --text: #edf7f1;
-      --muted: #9eb4a9;
-      --green: #80e7a9;
-      --green-deep: #173e2a;
-      --amber: #f4c66a;
-      --amber-deep: #4a3515;
-      --red: #ff8d83;
-      --red-deep: #4d2220;
-      --blue: #88c7ff;
-      --blue-deep: #16334d;
-      --radius: 18px;
-      --shadow: 0 22px 70px rgba(0, 0, 0, 0.28);
+      --panel: #0b1713;
+      --panel-2: #0e1d18;
+      --panel-3: #12251d;
+      --line: #294238;
+      --line-soft: rgba(132, 166, 150, 0.16);
+      --text: #eaf5ef;
+      --muted: #91aa9e;
+      --green: #79e6a2;
+      --green-bg: #153a27;
+      --blue: #82c6ff;
+      --blue-bg: #12314a;
+      --amber: #f3c969;
+      --amber-bg: #443313;
+      --red: #ff8b82;
+      --red-bg: #48211f;
       --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
       --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      min-width: 320px;
-      background:
-        radial-gradient(circle at 82% 8%, rgba(44, 125, 85, 0.16), transparent 28rem),
-        linear-gradient(180deg, #07100d 0%, #09130f 60%, #07100d 100%);
-      color: var(--text);
-      font-family: var(--sans);
-      font-size: 16px;
-      line-height: 1.55;
-    }
-
-    a { color: inherit; }
-    button { font: inherit; }
-    code { font-family: var(--mono); }
+    html, body { min-width: 320px; min-height: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.45; }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    code, pre { font-family: var(--mono); }
     [hidden] { display: none !important; }
 
-    .skip-link {
-      position: fixed;
-      z-index: 99;
-      top: 0.75rem;
-      left: 0.75rem;
-      transform: translateY(-180%);
-      padding: 0.7rem 1rem;
-      border-radius: 10px;
-      background: var(--text);
-      color: var(--bg);
-      font-weight: 750;
-    }
-    .skip-link:focus { transform: translateY(0); }
+    .skip { position: fixed; z-index: 100; top: 0.7rem; left: 0.7rem; transform: translateY(-160%); padding: 0.6rem 0.8rem; border-radius: 7px; background: var(--text); color: var(--bg); }
+    .skip:focus { transform: translateY(0); }
 
-    .topbar {
-      position: sticky;
-      z-index: 20;
-      top: 0;
-      border-bottom: 1px solid var(--line-soft);
-      background: rgba(7, 16, 13, 0.86);
-      backdrop-filter: blur(18px);
+    .app {
+      display: grid;
+      grid-template-rows: 58px minmax(0, 1fr) 28px;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(51, 123, 85, 0.11), transparent 34rem),
+        var(--bg);
     }
-    .topbar-inner {
+
+    header {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: min(1180px, calc(100% - 2rem));
-      min-height: 64px;
-      margin: 0 auto;
-      gap: 1.5rem;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.72rem;
-      font-weight: 780;
-      letter-spacing: -0.02em;
-      text-decoration: none;
-    }
-    .brand-mark {
-      display: grid;
-      width: 30px;
-      height: 30px;
-      place-items: center;
-      border: 1px solid rgba(128, 231, 169, 0.5);
-      border-radius: 9px;
-      background: var(--green-deep);
-      color: var(--green);
-      font-family: var(--mono);
-      font-size: 0.78rem;
-    }
-    nav { display: flex; gap: 0.35rem; }
-    nav a {
-      padding: 0.5rem 0.7rem;
-      border-radius: 8px;
-      color: var(--muted);
-      font-size: 0.88rem;
-      font-weight: 650;
-      text-decoration: none;
-    }
-    nav a:hover, nav a:focus-visible { background: var(--surface-raised); color: var(--text); }
-
-    main, footer {
-      width: min(1180px, calc(100% - 2rem));
-      margin: 0 auto;
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1.24fr) minmax(280px, 0.76fr);
-      gap: 2.6rem;
-      align-items: end;
-      min-height: 470px;
-      padding: 5.2rem 0 4rem;
-      border-bottom: 1px solid var(--line-soft);
-    }
-    .eyebrow, .kicker {
-      margin: 0 0 0.9rem;
-      color: var(--green);
-      font-family: var(--mono);
-      font-size: 0.76rem;
-      font-weight: 750;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-    h1, h2, h3, p { margin-top: 0; }
-    h1 {
-      max-width: 780px;
-      margin-bottom: 1.35rem;
-      font-size: clamp(3rem, 7vw, 6.7rem);
-      font-weight: 760;
-      letter-spacing: -0.075em;
-      line-height: 0.91;
-    }
-    h1 span { color: var(--green); }
-    .lede {
-      max-width: 680px;
-      margin-bottom: 0;
-      color: #c2d4cb;
-      font-size: clamp(1.05rem, 1.8vw, 1.3rem);
-      line-height: 1.55;
-    }
-    .creed-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.45rem;
-      margin: 1.2rem 0 0;
-      padding: 0;
-      list-style: none;
-    }
-    .creed-list li {
-      padding: 0.36rem 0.56rem;
-      border: 1px solid var(--line-soft);
-      border-radius: 8px;
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 0.7rem;
-    }
-    .hero-card {
-      position: relative;
-      overflow: hidden;
-      padding: 1.4rem;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: linear-gradient(145deg, rgba(20, 39, 31, 0.96), rgba(9, 22, 17, 0.96));
-      box-shadow: var(--shadow);
-    }
-    .hero-card::after {
-      position: absolute;
-      right: -35px;
-      bottom: -70px;
-      width: 190px;
-      height: 190px;
-      border: 32px solid rgba(128, 231, 169, 0.07);
-      border-radius: 50%;
-      content: "";
-    }
-    .principle {
-      display: grid;
-      grid-template-columns: 38px 1fr;
-      gap: 0.8rem;
-      padding: 1rem 0;
-      border-bottom: 1px solid var(--line-soft);
-    }
-    .principle:last-child { border: 0; }
-    .principle-index {
-      color: var(--green);
-      font-family: var(--mono);
-      font-size: 0.82rem;
-    }
-    .principle strong { display: block; margin-bottom: 0.16rem; font-size: 0.98rem; }
-    .principle span:last-child { color: var(--muted); font-size: 0.87rem; }
-
-    section { padding: 5rem 0; border-bottom: 1px solid var(--line-soft); }
-    .section-head {
-      display: grid;
-      grid-template-columns: minmax(0, 0.72fr) minmax(280px, 1.28fr);
-      gap: 2rem;
-      align-items: start;
-      margin-bottom: 2.2rem;
-    }
-    h2 {
-      margin-bottom: 0;
-      font-size: clamp(2rem, 4vw, 3.4rem);
-      letter-spacing: -0.05em;
-      line-height: 1;
-    }
-    .section-intro { max-width: 680px; margin-bottom: 0; color: var(--muted); font-size: 1.05rem; }
-
-    .legend { display: flex; flex-wrap: wrap; gap: 0.55rem; margin: 0 0 1.2rem; }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      width: fit-content;
-      min-height: 26px;
-      padding: 0.22rem 0.58rem;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-    .badge.current { border-color: rgba(128, 231, 169, 0.35); background: rgba(23, 62, 42, 0.52); color: var(--green); }
-    .badge.available { border-color: rgba(244, 198, 106, 0.35); background: rgba(74, 53, 21, 0.45); color: var(--amber); }
-    .badge.target { border-color: rgba(136, 199, 255, 0.35); background: rgba(22, 51, 77, 0.52); color: var(--blue); }
-
-    .pipeline-shell {
-      padding: 1.15rem;
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      background: rgba(9, 23, 18, 0.68);
-      box-shadow: var(--shadow);
-    }
-    .system-workbench {
-      display: grid;
-      grid-template-columns: 230px minmax(420px, 1fr) 300px;
-      min-height: 650px;
-      overflow: hidden;
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      background: rgba(7, 18, 14, 0.84);
-      box-shadow: var(--shadow);
-    }
-    .workbench-panel { min-width: 0; }
-    .function-rail, .dependency-rail { background: rgba(11, 25, 20, 0.92); }
-    .function-rail { border-right: 1px solid var(--line); }
-    .dependency-rail { border-left: 1px solid var(--line); }
-    .panel-head {
-      display: flex;
-      min-height: 67px;
-      padding: 0.9rem 1rem;
-      border-bottom: 1px solid var(--line-soft);
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.7rem;
-    }
-    .panel-head strong { font-size: 0.86rem; }
-    .panel-head small { color: var(--muted); font-family: var(--mono); font-size: 0.64rem; text-transform: uppercase; }
-    .function-list { display: grid; gap: 0.38rem; max-height: 580px; padding: 0.75rem; overflow-y: auto; }
-    .function-button {
-      display: grid;
-      grid-template-columns: 27px 1fr;
-      gap: 0.58rem;
-      min-height: 68px;
-      padding: 0.68rem;
-      border: 1px solid transparent;
-      border-radius: 11px;
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      text-align: left;
-    }
-    .function-button:hover { background: rgba(128, 231, 169, 0.05); color: var(--text); }
-    .function-button[aria-pressed="true"] { border-color: rgba(128, 231, 169, 0.45); background: var(--green-deep); color: var(--text); }
-    .function-index { color: var(--green); font-family: var(--mono); font-size: 0.67rem; }
-    .function-name { display: block; font-size: 0.8rem; font-weight: 720; line-height: 1.25; }
-    .function-state { display: block; margin-top: 0.25rem; color: var(--muted); font-family: var(--mono); font-size: 0.6rem; text-transform: uppercase; }
-    .diagram-pane { display: flex; min-width: 0; background: radial-gradient(circle at 50% 42%, rgba(38, 90, 64, 0.13), transparent 55%); flex-direction: column; }
-    .diagram-title { min-width: 0; }
-    .diagram-title strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .diagram-title small { color: var(--green); }
-    .canvas-controls { display: flex; flex-wrap: wrap; gap: 0.38rem; justify-content: flex-end; }
-    .canvas-controls .scenario-button { min-height: 34px; padding: 0.38rem 0.58rem; font-size: 0.7rem; }
-    .scenario-strip {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      padding: 0.65rem 0.85rem;
-      border-bottom: 1px solid var(--line-soft);
-      align-items: center;
-    }
-    .scenario-strip > span { margin-right: auto; color: var(--muted); font-family: var(--mono); font-size: 0.65rem; text-transform: uppercase; }
-    .scenario-strip .scenario-button { min-height: 34px; padding: 0.38rem 0.58rem; font-size: 0.7rem; }
-    .diagram-wrap { min-height: 430px; padding: 0.7rem; }
-    #system-diagram { display: block; width: 100%; height: auto; min-height: 410px; }
-    .svg-column-label { fill: #779185; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 1.5px; }
-    .svg-box { fill: #10231b; stroke: #355246; stroke-width: 1.3; }
-    .svg-box.process { fill: #173e2a; stroke: #80e7a9; }
-    .svg-box.output { fill: #10251f; stroke: #4f7463; }
-    .svg-box.output.warning { fill: #4a3515; stroke: #f4c66a; }
-    .svg-box.output.alert { fill: #4d2220; stroke: #ff8d83; }
-    .svg-text { fill: #edf7f1; font-family: var(--sans); font-size: 13px; font-weight: 680; }
-    .svg-subtext { fill: #9eb4a9; font-family: var(--mono); font-size: 10px; }
-    .svg-arrow { fill: none; stroke: #527365; stroke-width: 1.5; marker-end: url(#arrowhead); }
-    .svg-pulse { fill: #80e7a9; }
-    .canvas-caption {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 1rem;
-      margin-top: auto;
-      padding: 1rem;
-      border-top: 1px solid var(--line-soft);
-      background: rgba(5, 15, 11, 0.7);
-      align-items: center;
-    }
-    .canvas-caption h3 { margin-bottom: 0.25rem; font-size: 0.92rem; }
-    .canvas-caption p { max-width: 680px; margin-bottom: 0; color: var(--muted); font-size: 0.8rem; }
-    .dependency-tree { max-height: 580px; padding: 0.9rem 0.8rem 1.2rem; overflow: auto; }
-    .tree, .tree ul { margin: 0; padding: 0; list-style: none; }
-    .tree ul { position: relative; margin-left: 0.7rem; padding-left: 0.88rem; }
-    .tree ul::before { position: absolute; top: 0; bottom: 0.75rem; left: 0; width: 1px; background: #2f4c3f; content: ""; }
-    .tree li { position: relative; padding: 0.18rem 0; }
-    .tree ul > li::before { position: absolute; top: 0.82rem; left: -0.88rem; width: 0.7rem; height: 1px; background: #2f4c3f; content: ""; }
-    .tree-node { display: flex; gap: 0.42rem; min-width: 0; padding: 0.28rem 0.34rem; border-radius: 6px; align-items: flex-start; }
-    .tree-node:hover { background: rgba(128, 231, 169, 0.06); }
-    .tree-icon { width: 16px; flex: 0 0 16px; color: var(--amber); font-family: var(--mono); font-size: 0.66rem; }
-    .tree-file .tree-icon { color: var(--blue); }
-    .tree-label { min-width: 0; color: #c8d8d0; font-family: var(--mono); font-size: 0.68rem; overflow-wrap: anywhere; }
-    .tree-role { display: block; margin-top: 0.12rem; color: #6f887c; font-family: var(--sans); font-size: 0.65rem; }
-    .tree a { color: inherit; text-decoration: none; }
-    .tree a:hover .tree-label { color: var(--green); }
-    .scenario-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.55rem;
-      align-items: center;
-      margin-bottom: 1.15rem;
-    }
-    .scenario-bar > span { margin-right: 0.2rem; color: var(--muted); font-size: 0.82rem; font-weight: 700; }
-    .scenario-button {
-      min-height: 42px;
-      padding: 0.6rem 0.84rem;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      background: var(--surface);
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 0.84rem;
-      font-weight: 680;
-    }
-    .scenario-button:hover { border-color: #466457; color: var(--text); }
-    .scenario-button[aria-pressed="true"] { border-color: var(--green); background: var(--green-deep); color: var(--green); }
-    .scenario-button:focus-visible, .node:focus-visible { outline: 3px solid rgba(136, 199, 255, 0.5); outline-offset: 2px; }
-
-    .pipeline {
-      display: grid;
-      grid-template-columns: repeat(11, minmax(0, 1fr));
-      gap: 0.45rem;
-      align-items: stretch;
-    }
-    .node {
-      position: relative;
-      display: flex;
-      min-height: 152px;
-      padding: 0.88rem 0.72rem;
-      border: 1px solid var(--line);
-      border-radius: 13px;
-      background: var(--surface);
-      color: var(--text);
-      cursor: pointer;
-      flex-direction: column;
-      text-align: left;
-      transition: border-color 180ms ease, background 180ms ease, transform 180ms ease, opacity 180ms ease;
-    }
-    .node:not(:last-child)::after {
-      position: absolute;
-      z-index: 2;
-      top: 50%;
-      right: -0.52rem;
-      width: 0.52rem;
-      height: 1px;
-      background: #466457;
-      content: "";
-    }
-    .node:hover { transform: translateY(-2px); border-color: #526f62; }
-    .node.active { border-color: var(--green); background: linear-gradient(150deg, rgba(23, 62, 42, 0.86), rgba(13, 25, 21, 0.96)); }
-    .node.blocked { opacity: 0.34; }
-    .node.alert { border-color: var(--red); background: rgba(77, 34, 32, 0.55); }
-    .node.warn { border-color: var(--amber); background: rgba(74, 53, 21, 0.5); }
-    .node-num { margin-bottom: 0.62rem; color: var(--muted); font-family: var(--mono); font-size: 0.68rem; }
-    .node strong { font-size: 0.8rem; line-height: 1.2; }
-    .node small { margin-top: auto; padding-top: 0.65rem; color: var(--muted); font-size: 0.68rem; line-height: 1.35; }
-    .node .mini-status { margin-top: 0.55rem; color: var(--green); font-family: var(--mono); font-size: 0.64rem; text-transform: uppercase; }
-    .node.status-available .mini-status { color: var(--amber); }
-    .node.status-target .mini-status { color: var(--blue); }
-    .node.warn .mini-status { color: var(--amber); }
-    .node.alert .mini-status { color: var(--red); }
-
-    .trace-panel {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-    .trace-copy, .gate-result {
-      min-height: 132px;
-      padding: 1.15rem;
-      border: 1px solid var(--line-soft);
-      border-radius: 14px;
-      background: rgba(5, 15, 11, 0.56);
-    }
-    .trace-copy h3, .gate-result h3 { margin-bottom: 0.45rem; font-size: 1rem; }
-    .trace-copy p, .gate-result p { margin-bottom: 0; color: var(--muted); font-size: 0.88rem; }
-    .gate-result { display: flex; flex-direction: column; justify-content: space-between; }
-    .gate-pill {
-      display: inline-flex;
-      width: fit-content;
-      margin-top: 0.8rem;
-      padding: 0.55rem 0.72rem;
-      border: 1px solid rgba(128, 231, 169, 0.45);
-      border-radius: 9px;
-      background: var(--green-deep);
-      color: var(--green);
-      font-family: var(--mono);
-      font-size: 0.76rem;
-      font-weight: 760;
-    }
-    .gate-pill.warn { border-color: rgba(244, 198, 106, 0.5); background: var(--amber-deep); color: var(--amber); }
-    .gate-pill.alert { border-color: rgba(255, 141, 131, 0.5); background: var(--red-deep); color: var(--red); }
-
-    .rr-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
-    .rr-card {
-      display: grid;
-      grid-template-columns: 52px 1fr;
-      gap: 1rem;
-      padding: 1.3rem;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: linear-gradient(145deg, rgba(16, 32, 26, 0.92), rgba(10, 21, 17, 0.92));
-    }
-    .rr-icon {
-      display: grid;
-      width: 52px;
-      height: 52px;
-      place-items: center;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: #0a1712;
-      color: var(--green);
-      font-family: var(--mono);
-      font-size: 0.78rem;
-      font-weight: 760;
-    }
-    .rr-card h3 { margin-bottom: 0.28rem; font-size: 1.08rem; }
-    .rr-card p { margin-bottom: 0.85rem; color: var(--muted); font-size: 0.9rem; }
-    .owns { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-    .owns span {
-      padding: 0.28rem 0.48rem;
-      border-radius: 7px;
-      background: rgba(128, 231, 169, 0.07);
-      color: #b9cec3;
-      font-family: var(--mono);
-      font-size: 0.68rem;
-    }
-
-    .filter-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-    .filter-button {
-      min-height: 40px;
-      padding: 0.52rem 0.78rem;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 0.82rem;
-      font-weight: 680;
-    }
-    .filter-button[aria-pressed="true"] { border-color: var(--green); background: var(--green-deep); color: var(--green); }
-
-    .boundary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-    .boundary-card {
-      padding: 1.3rem;
-      border-top: 3px solid var(--green);
-      border-right: 1px solid var(--line);
+      min-width: 0;
+      padding: 0 1rem;
       border-bottom: 1px solid var(--line);
-      border-left: 1px solid var(--line);
-      border-radius: 4px 4px var(--radius) var(--radius);
-      background: var(--surface);
-    }
-    .boundary-card:nth-child(2) { border-top-color: var(--amber); }
-    .boundary-card:nth-child(3) { border-top-color: var(--red); }
-    .boundary-card h3 { margin-bottom: 0.5rem; font-size: 1.12rem; }
-    .boundary-card p { color: var(--muted); font-size: 0.9rem; }
-    .boundary-card ul { margin: 0; padding-left: 1.15rem; color: #c4d4cc; font-size: 0.87rem; }
-    .boundary-card li + li { margin-top: 0.35rem; }
-
-    .gate-table { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
-    table { width: 100%; min-width: 700px; border-collapse: collapse; background: rgba(10, 23, 18, 0.72); }
-    th, td { padding: 1rem; border-bottom: 1px solid var(--line-soft); text-align: left; vertical-align: top; }
-    th { color: var(--muted); font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; }
-    td { font-size: 0.88rem; }
-    tbody tr:last-child td { border-bottom: 0; }
-    .state-label { font-family: var(--mono); font-size: 0.75rem; font-weight: 760; }
-    .state-label.normal { color: var(--green); }
-    .state-label.reduce { color: var(--amber); }
-    .state-label.defensive { color: var(--red); }
-    .state-label.internal { color: var(--blue); }
-
-    .maintenance {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 1rem;
-    }
-    .maintenance-card {
-      padding: 1.4rem;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: var(--surface);
-    }
-    .maintenance-card h3 { margin-bottom: 0.45rem; }
-    .maintenance-card p { margin-bottom: 0; color: var(--muted); }
-    .mapping {
-      display: grid;
-      grid-template-columns: auto 32px 1fr;
-      gap: 0.55rem;
+      background: rgba(7, 16, 13, 0.96);
       align-items: center;
-      margin-top: 1rem;
-      font-family: var(--mono);
-      font-size: 0.78rem;
-    }
-    .mapping code { padding: 0.42rem 0.5rem; border: 1px solid var(--line-soft); border-radius: 7px; background: #07110d; }
-    .mapping span { color: var(--green); text-align: center; }
-
-    .chain-explorer {
-      padding: 1.15rem;
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      background: rgba(9, 23, 18, 0.68);
-      box-shadow: var(--shadow);
-    }
-    .chain-controls { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
-    .chain-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.7rem;
-    }
-    .chain-step {
-      position: relative;
-      min-height: 178px;
-      padding: 1rem;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: var(--surface);
-    }
-    .chain-step:not(:last-child)::after {
-      position: absolute;
-      z-index: 2;
-      top: 50%;
-      right: -0.72rem;
-      width: 0.72rem;
-      height: 1px;
-      background: var(--green);
-      content: "";
-    }
-    .chain-step small { color: var(--green); font-family: var(--mono); font-size: 0.68rem; text-transform: uppercase; }
-    .chain-step h3 { margin: 0.65rem 0 0.45rem; font-size: 1rem; }
-    .chain-step p { margin-bottom: 0.8rem; color: var(--muted); font-size: 0.83rem; }
-    .chain-step a { color: var(--blue); font-family: var(--mono); font-size: 0.72rem; overflow-wrap: anywhere; }
-
-    .coverage-panel {
-      display: grid;
-      grid-template-columns: 0.7fr 1.3fr;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-    .coverage-score, .coverage-items {
-      padding: 1.2rem;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: var(--surface);
-    }
-    .coverage-number { display: block; color: var(--green); font-size: clamp(2.8rem, 6vw, 5rem); font-weight: 760; letter-spacing: -0.06em; line-height: 1; }
-    .coverage-score p { margin: 0.5rem 0 0; color: var(--muted); font-size: 0.86rem; }
-    .coverage-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
-    .coverage-link {
-      display: flex;
-      align-items: center;
-      gap: 0.55rem;
-      padding: 0.62rem;
-      border-radius: 9px;
-      color: #cadbd2;
-      font-size: 0.82rem;
-      text-decoration: none;
-    }
-    .coverage-link:hover { background: rgba(128, 231, 169, 0.07); color: var(--green); }
-    .coverage-check { color: var(--green); font-family: var(--mono); }
-
-    .source-list { display: grid; gap: 0.7rem; }
-    .source-link {
-      display: flex;
       justify-content: space-between;
       gap: 1rem;
-      padding: 0.92rem 1rem;
-      border: 1px solid var(--line-soft);
-      border-radius: 12px;
-      color: #cadbd2;
-      text-decoration: none;
     }
-    .source-link:hover { border-color: var(--green); color: var(--green); }
-    .source-link span:last-child { color: var(--muted); font-family: var(--mono); font-size: 0.73rem; }
+    .brand { display: flex; min-width: 0; align-items: center; gap: 0.7rem; }
+    .mark { display: grid; width: 30px; height: 30px; border: 1px solid rgba(121, 230, 162, 0.5); border-radius: 8px; background: var(--green-bg); color: var(--green); font-family: var(--mono); font-size: 0.7rem; font-weight: 800; place-items: center; }
+    .brand-copy { min-width: 0; }
+    .brand-copy strong { display: block; overflow: hidden; font-size: 0.88rem; text-overflow: ellipsis; white-space: nowrap; }
+    .brand-copy small { display: block; color: var(--muted); font-family: var(--mono); font-size: 0.62rem; text-transform: uppercase; }
+    .header-status { display: flex; gap: 0.45rem; align-items: center; color: var(--muted); font-family: var(--mono); font-size: 0.68rem; }
+    .header-status::before { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px rgba(121, 230, 162, 0.7); content: ""; }
 
-    footer {
-      display: flex;
-      justify-content: space-between;
-      gap: 2rem;
-      padding: 2rem 0 3.5rem;
+    main {
+      display: grid;
+      grid-template-columns: 248px minmax(520px, 1fr) 340px;
+      min-height: 0;
+    }
+    aside, .workspace { min-width: 0; min-height: 0; }
+    .left { border-right: 1px solid var(--line); background: rgba(10, 23, 18, 0.96); }
+    .right { border-left: 1px solid var(--line); background: rgba(10, 23, 18, 0.96); }
+    .panel-title { display: flex; min-height: 54px; padding: 0.7rem 0.85rem; border-bottom: 1px solid var(--line-soft); align-items: center; justify-content: space-between; gap: 0.5rem; }
+    .panel-title strong { font-size: 0.8rem; }
+    .panel-title small { color: var(--muted); font-family: var(--mono); font-size: 0.58rem; text-transform: uppercase; }
+
+    .workflow-list { display: grid; gap: 0.45rem; padding: 0.75rem; }
+    .workflow-button {
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      gap: 0.6rem;
+      min-height: 88px;
+      padding: 0.72rem;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+    }
+    .workflow-button:hover { background: rgba(121, 230, 162, 0.05); }
+    .workflow-button[aria-pressed="true"] { border-color: rgba(121, 230, 162, 0.45); background: var(--green-bg); }
+    .workflow-index { color: var(--green); font-family: var(--mono); font-size: 0.65rem; }
+    .workflow-name { display: block; margin-bottom: 0.25rem; font-family: var(--mono); font-size: 0.75rem; font-weight: 760; }
+    .workflow-summary { display: block; color: var(--muted); font-size: 0.72rem; line-height: 1.35; }
+    .workflow-badge { display: inline-flex; margin-top: 0.45rem; padding: 0.16rem 0.38rem; border-radius: 5px; background: rgba(130, 198, 255, 0.09); color: var(--blue); font-family: var(--mono); font-size: 0.56rem; text-transform: uppercase; }
+    .workflow-badge.implemented { background: rgba(121, 230, 162, 0.1); color: var(--green); }
+    .workflow-badge.partial { background: rgba(243, 201, 105, 0.1); color: var(--amber); }
+
+    .left-note { margin: 0.25rem 0.75rem; padding: 0.75rem; border: 1px solid var(--line-soft); border-radius: 9px; color: var(--muted); font-family: var(--mono); font-size: 0.62rem; }
+    .left-note strong { display: block; margin-bottom: 0.35rem; color: var(--text); font-size: 0.64rem; }
+
+    .workspace { display: grid; grid-template-rows: auto auto minmax(430px, 1fr) auto; background: radial-gradient(circle at 50% 44%, rgba(28, 82, 55, 0.13), transparent 44%); }
+    .toolbar { display: flex; min-height: 54px; padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--line-soft); align-items: center; justify-content: space-between; gap: 0.7rem; }
+    .workflow-heading { min-width: 0; }
+    .workflow-heading strong { display: block; overflow: hidden; font-size: 0.86rem; text-overflow: ellipsis; white-space: nowrap; }
+    .workflow-heading code { color: var(--green); font-size: 0.65rem; }
+    .controls { display: flex; flex-wrap: wrap; gap: 0.35rem; justify-content: flex-end; }
+    .control {
+      min-height: 34px;
+      padding: 0.38rem 0.58rem;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--panel-2);
       color: var(--muted);
-      font-size: 0.78rem;
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 0.62rem;
     }
-    footer strong { color: var(--text); }
+    .control:hover, .control[aria-pressed="true"] { border-color: var(--green); color: var(--green); }
+    .control.primary { border-color: rgba(121, 230, 162, 0.55); background: var(--green-bg); color: var(--green); }
+    .control:focus-visible, .workflow-button:focus-visible, .tab:focus-visible { outline: 3px solid rgba(130, 198, 255, 0.45); outline-offset: 2px; }
 
-    @media (max-width: 980px) {
-      .system-workbench { grid-template-columns: 190px minmax(400px, 1fr); }
-      .dependency-rail { grid-column: 1 / -1; border-top: 1px solid var(--line); border-left: 0; }
-      .dependency-tree { max-height: none; }
-      .pipeline { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-      .node:not(:last-child)::after { display: none; }
-      .rr-grid { grid-template-columns: 1fr; }
-      .chain-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .chain-step:not(:last-child)::after { display: none; }
+    .scenario-bar { display: flex; flex-wrap: wrap; gap: 0.35rem; min-height: 43px; padding: 0.42rem 0.8rem; border-bottom: 1px solid var(--line-soft); align-items: center; }
+    .scenario-bar > span { margin-right: auto; color: var(--muted); font-family: var(--mono); font-size: 0.6rem; text-transform: uppercase; }
+    .scenario-bar .control { min-height: 29px; padding: 0.26rem 0.48rem; }
+
+    .graph-shell { position: relative; min-width: 0; min-height: 0; overflow: auto; }
+    #workflow-graph { display: block; width: 100%; height: 100%; min-width: 720px; min-height: 500px; }
+    .lane-label { fill: #718a7e; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 1.2px; }
+    .edge { fill: none; stroke: #3d5b4d; stroke-width: 1.5; marker-end: url(#arrow); }
+    .edge.active { stroke: var(--green); stroke-width: 2; }
+    .edge.blocked { stroke: #56302d; stroke-dasharray: 5 5; }
+    .node-box { fill: #10211b; stroke: #365247; stroke-width: 1.3; transition: fill 150ms ease, stroke 150ms ease; }
+    .node-group { cursor: pointer; }
+    .node-group:hover .node-box { stroke: #6ca187; }
+    .node-group.selected .node-box { fill: #173e2a; stroke: var(--green); stroke-width: 2; }
+    .node-group.running .node-box { fill: #173e2a; stroke: var(--green); stroke-width: 2.5; }
+    .node-group.complete .node-box { fill: #102b1e; stroke: #4e9670; }
+    .node-group.blocked .node-box { fill: #211716; stroke: #673734; stroke-dasharray: 5 4; }
+    .node-group.warning .node-box { fill: var(--amber-bg); stroke: var(--amber); }
+    .node-label { fill: var(--text); font-family: var(--mono); font-size: 11px; font-weight: 760; pointer-events: none; }
+    .node-kind { fill: var(--muted); font-family: var(--mono); font-size: 8px; letter-spacing: 0.7px; pointer-events: none; }
+    .node-status { fill: var(--green); font-family: var(--mono); font-size: 8px; pointer-events: none; }
+    .io-box { fill: #0c1915; stroke: #2f4b3f; }
+    .io-label { fill: #a8bbb2; font-family: var(--mono); font-size: 9px; }
+    .io-value { fill: var(--blue); font-family: var(--mono); font-size: 9px; }
+    .packet-box { fill: #10241b; stroke: #4c7d64; }
+    .packet-box.warning { fill: var(--amber-bg); stroke: var(--amber); }
+    .packet-box.alert { fill: var(--red-bg); stroke: var(--red); }
+
+    .trace-panel { display: grid; grid-template-columns: minmax(0, 1fr) 245px; min-height: 118px; border-top: 1px solid var(--line-soft); background: rgba(7, 16, 13, 0.82); }
+    .trace-stream { display: flex; gap: 0.45rem; padding: 0.72rem; overflow-x: auto; align-items: stretch; }
+    .trace-item { flex: 0 0 150px; padding: 0.55rem; border: 1px solid var(--line-soft); border-radius: 7px; background: var(--panel); }
+    .trace-item small { display: block; margin-bottom: 0.3rem; color: var(--muted); font-family: var(--mono); font-size: 0.53rem; }
+    .trace-item strong { display: block; font-family: var(--mono); font-size: 0.65rem; }
+    .trace-item span { display: block; margin-top: 0.28rem; color: var(--muted); font-size: 0.63rem; }
+    .run-output { padding: 0.7rem; border-left: 1px solid var(--line-soft); }
+    .run-output small { color: var(--muted); font-family: var(--mono); font-size: 0.55rem; text-transform: uppercase; }
+    .gate { display: inline-flex; margin-top: 0.5rem; padding: 0.32rem 0.48rem; border: 1px solid rgba(121, 230, 162, 0.45); border-radius: 6px; background: var(--green-bg); color: var(--green); font-family: var(--mono); font-size: 0.62rem; font-weight: 760; }
+    .gate.warn { border-color: var(--amber); background: var(--amber-bg); color: var(--amber); }
+    .gate.alert { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+    .run-output p { margin: 0.42rem 0 0; color: var(--muted); font-size: 0.64rem; }
+
+    .inspector-head { padding: 0.8rem; border-bottom: 1px solid var(--line-soft); }
+    .inspector-head small { display: block; margin-bottom: 0.25rem; color: var(--green); font-family: var(--mono); font-size: 0.56rem; text-transform: uppercase; }
+    .inspector-head h2 { margin: 0; font-size: 1rem; letter-spacing: -0.02em; }
+    .inspector-head p { margin: 0.45rem 0 0; color: var(--muted); font-size: 0.72rem; }
+    .tabs { display: grid; grid-template-columns: repeat(2, 1fr); border-bottom: 1px solid var(--line-soft); }
+    .tab { min-height: 38px; border: 0; border-right: 1px solid var(--line-soft); background: transparent; color: var(--muted); cursor: pointer; font-family: var(--mono); font-size: 0.61rem; }
+    .tab:last-child { border-right: 0; }
+    .tab[aria-selected="true"] { background: var(--panel-3); color: var(--green); box-shadow: inset 0 -2px var(--green); }
+    .inspector-body { height: calc(100vh - 226px); min-height: 480px; overflow: auto; padding: 0.8rem; }
+
+    .tree, .tree ul { margin: 0; padding: 0; list-style: none; }
+    .tree ul { position: relative; margin-left: 0.7rem; padding-left: 0.85rem; }
+    .tree ul::before { position: absolute; top: 0; bottom: 0.7rem; left: 0; width: 1px; background: #315044; content: ""; }
+    .tree li { position: relative; padding: 0.12rem 0; }
+    .tree ul > li::before { position: absolute; top: 0.72rem; left: -0.85rem; width: 0.68rem; height: 1px; background: #315044; content: ""; }
+    .tree-row { display: flex; gap: 0.38rem; padding: 0.26rem 0.3rem; border-radius: 5px; align-items: flex-start; }
+    .tree-row:hover { background: rgba(121, 230, 162, 0.05); }
+    .tree-icon { flex: 0 0 14px; color: var(--amber); font-family: var(--mono); font-size: 0.6rem; }
+    .file .tree-icon { color: var(--blue); }
+    .tree-label { min-width: 0; color: #cad9d1; font-family: var(--mono); font-size: 0.64rem; overflow-wrap: anywhere; }
+    .tree-role { display: block; margin-top: 0.12rem; color: #6d877a; font-family: var(--sans); font-size: 0.6rem; }
+    .tree a { color: inherit; text-decoration: none; }
+
+    .contract-block + .contract-block { margin-top: 0.9rem; }
+    .contract-block h3 { margin: 0 0 0.35rem; color: var(--muted); font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    .contract-block pre { margin: 0; padding: 0.7rem; overflow-x: auto; border: 1px solid var(--line-soft); border-radius: 7px; background: #07110e; color: #b8d4c6; font-size: 0.62rem; line-height: 1.55; white-space: pre-wrap; }
+    .command { color: var(--blue) !important; }
+
+    footer { display: flex; padding: 0 0.75rem; border-top: 1px solid var(--line); background: #07100d; color: #60796d; align-items: center; justify-content: space-between; font-family: var(--mono); font-size: 0.55rem; }
+
+    @media (max-width: 1080px) {
+      main { grid-template-columns: 220px minmax(520px, 1fr); }
+      .right { grid-column: 1 / -1; border-top: 1px solid var(--line); border-left: 0; }
+      .inspector-body { height: auto; min-height: 300px; }
     }
-
     @media (max-width: 760px) {
-      .system-workbench { grid-template-columns: 1fr; }
-      .function-rail { border-right: 0; border-bottom: 1px solid var(--line); }
-      .function-list { grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: none; }
-      .diagram-pane, .dependency-rail { grid-column: 1; }
-      .dependency-rail { border-left: 0; }
-      .diagram-wrap { min-height: 360px; overflow-x: auto; }
-      #system-diagram { min-width: 650px; min-height: 350px; }
-      nav { display: none; }
-      .hero, .section-head, .trace-panel, .maintenance, .coverage-panel { grid-template-columns: 1fr; }
-      .hero { min-height: auto; padding: 4rem 0 3rem; }
-      .hero-card { max-width: 520px; }
-      section { padding: 3.6rem 0; }
-      .pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .boundary-grid { grid-template-columns: 1fr; }
-      .coverage-list { grid-template-columns: 1fr; }
-      footer { flex-direction: column; gap: 0.4rem; }
+      .app { grid-template-rows: 58px auto 28px; }
+      main { grid-template-columns: 1fr; }
+      .left { border-right: 0; border-bottom: 1px solid var(--line); }
+      .workflow-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .workspace, .right { grid-column: 1; }
+      .toolbar { align-items: flex-start; flex-direction: column; }
+      .controls { justify-content: flex-start; }
+      .trace-panel { grid-template-columns: 1fr; }
+      .run-output { border-top: 1px solid var(--line-soft); border-left: 0; }
+      footer span:last-child { display: none; }
     }
-
     @media (max-width: 440px) {
-      .function-list { grid-template-columns: 1fr; }
-      .canvas-caption { grid-template-columns: 1fr; }
-      .pipeline { grid-template-columns: 1fr; }
-      .chain-grid { grid-template-columns: 1fr; }
-      .node { min-height: 118px; }
-      .rr-card { grid-template-columns: 1fr; }
-      h1 { font-size: clamp(2.65rem, 16vw, 4rem); }
+      .workflow-list { grid-template-columns: 1fr; }
+      .header-status { display: none; }
     }
-
     @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
     }
   </style>
   <script type="application/json" id="asset-metadata">
-  {
-    "schema_version": 1,
-    "id": "billionary-trader-system-design",
-    "title": "Billionary Trader System Design & R&R",
-    "summary": "Explore the evidence flow, responsibilities, risk gates, and execution boundaries of a read-first trading review system.",
-    "kind": "Demo",
-    "stream": "Build",
-    "topics": ["Financial intelligence", "System design", "Risk management"],
-    "status": "Interactive system explainer",
-    "visibility": "public",
-    "rights": "All rights reserved. Contact the author for reuse.",
-    "dates": {}
-  }
-  </script>
+{
+  "schema_version": 1,
+  "id": "billionary-trader-system-design",
+  "title": "Billionary Trader Workflow Explorer",
+  "summary": "Explore implementation-backed trading workflows, their composed functions, runtime states, I/O contracts, and exact repository dependencies.",
+  "kind": "Demo",
+  "stream": "Build",
+  "topics": ["Financial intelligence", "Developer tools", "Workflow design"],
+  "status": "Interactive developer workflow explorer",
+  "visibility": "public",
+  "rights": "All rights reserved. Contact the author for reuse.",
+  "dates": {}
+}
+</script>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <a class="brand" href="#top" aria-label="Billionary Trader system overview">
-        <span class="brand-mark" aria-hidden="true">BT</span>
-        <span>Billionary Trader</span>
-      </a>
-      <nav aria-label="Page sections">
-        <a href="#flow">System flow</a>
-        <a href="#roles">R&amp;R</a>
-        <a href="#guardrails">Guardrails</a>
-        <a href="#maintenance">Source chain</a>
-      </nav>
-    </div>
-  </header>
+  <a class="skip" href="#flow">Skip to workflow canvas</a>
+  <div class="app">
+    <header>
+      <div class="brand"><span class="mark" aria-hidden="true">BT</span><span class="brand-copy"><strong>Billionary Trader</strong><small>workflow explorer / developer view</small></span></div>
+      <span class="header-status">source-aligned model</span>
+    </header>
 
-  <main id="main">
-    <section class="hero" id="top" aria-labelledby="page-title">
-      <div>
-        <p class="eyebrow">System design · responsibilities · boundaries</p>
-        <h1 id="page-title">Evidence in.<br><span>Guardrails first.</span><br>Decisions out.</h1>
-        <p class="lede">Billionary Trader is a read-first decision system for account review, position risk, research, and recommendation generation. Its core promise is traceable evidence—not autonomous execution.</p>
-        <ul class="creed-list" aria-label="Core creed">
-          <li>no unsupported assumptions</li>
-          <li>periodic data cleanup</li>
-          <li>account risk first</li>
-          <li>stale data = wait</li>
-          <li>execution stays separate</li>
-        </ul>
-      </div>
-      <aside class="hero-card" aria-label="Three design pillars">
-        <p class="kicker">Three design pillars</p>
-        <div class="principle">
-          <span class="principle-index">01</span>
-          <span><strong>Continuous self-learning</strong><span>Replay misses, measure drift, and reduce exposure when quality decays.</span></span>
+    <main id="flow">
+      <aside class="left" aria-label="Workflow types">
+        <div class="panel-title"><strong>Workflow types</strong><small>4 canonical</small></div>
+        <div class="workflow-list" id="workflow-list"></div>
+        <div class="left-note"><strong>Composition rule</strong>Select a workflow, then select any function node to inspect its callable surface, contracts, and exact repository dependencies.</div>
+      </aside>
+
+      <section class="workspace" aria-labelledby="workflow-title">
+        <div class="toolbar">
+          <div class="workflow-heading"><strong id="workflow-title">account-review</strong><code id="workflow-command"></code></div>
+          <div class="controls" aria-label="Workflow controls">
+            <button class="control" id="reset" type="button">Reset</button>
+            <button class="control" id="next" type="button">Step</button>
+            <button class="control primary" id="run" type="button">Run trace</button>
+          </div>
         </div>
-        <div class="principle">
-          <span class="principle-index">02</span>
-          <span><strong>Walk-forward validation</strong><span>Ground directional views in out-of-sample evidence and regime context.</span></span>
+
+        <div class="scenario-bar" aria-label="Runtime conditions">
+          <span>Runtime condition</span>
+          <button class="control" type="button" data-scenario="normal" aria-pressed="true">baseline</button>
+          <button class="control" id="failure" type="button" data-scenario="stale" aria-pressed="false">stale evidence</button>
+          <button class="control" type="button" data-scenario="risk" aria-pressed="false">risk breach</button>
         </div>
-        <div class="principle">
-          <span class="principle-index">03</span>
-          <span><strong>Deterministic guardrails</strong><span>Data freshness, account risk, and human review can stop the flow.</span></span>
+
+        <div class="graph-shell">
+          <svg id="workflow-graph" viewBox="0 0 1000 570" role="img" aria-labelledby="graph-title graph-desc">
+            <title id="graph-title">Account review workflow graph</title>
+            <desc id="graph-desc">A directed graph of implementation-backed functions, their input contracts, data edges, and bounded output.</desc>
+            <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#547567"></path></marker></defs>
+            <g id="graph-content"></g>
+          </svg>
+        </div>
+
+        <div class="trace-panel" id="status" aria-live="polite">
+          <div class="trace-stream" id="trace-stream"></div>
+          <div class="run-output"><small>Workflow output</small><br><span class="gate" id="gate">READY</span><p id="output-copy">Select Run trace to replay the implemented path.</p></div>
+        </div>
+      </section>
+
+      <aside class="right" aria-label="Function inspector">
+        <div class="inspector-head"><small id="function-kind">function / current</small><h2 id="function-title">Evaluation gate</h2><p id="function-detail"></p></div>
+        <div class="tabs" role="tablist" aria-label="Inspector view">
+          <button class="tab" type="button" role="tab" data-tab="files" aria-selected="true">Dependencies</button>
+          <button class="tab" type="button" role="tab" data-tab="contract" aria-selected="false">I/O contract</button>
+        </div>
+        <div class="inspector-body">
+          <div id="files-panel" role="tabpanel"><div id="dependency-tree"></div></div>
+          <div id="contract-panel" role="tabpanel" hidden>
+            <div class="contract-block"><h3>Callable</h3><pre class="command" id="function-call"></pre></div>
+            <div class="contract-block"><h3>Consumes</h3><pre id="function-input"></pre></div>
+            <div class="contract-block"><h3>Produces</h3><pre id="function-output"></pre></div>
+            <div class="contract-block"><h3>Failure behavior</h3><pre id="function-failure"></pre></div>
+          </div>
         </div>
       </aside>
-    </section>
+    </main>
 
-    <section id="flow" aria-labelledby="flow-title">
-      <div class="section-head">
-        <div>
-          <p class="kicker">01 · System flow</p>
-          <h2 id="flow-title">Trace the review pipeline</h2>
-        </div>
-        <p class="section-intro">Choose an operating condition to see which parts proceed, which guardrail owns the stop, and what output is permitted. Select any stage for its responsibility.</p>
-      </div>
-
-      <div class="legend" aria-label="Implementation legend">
-        <span class="badge current">Current core</span>
-        <span class="badge available">Available outside review</span>
-        <span class="badge target">Contracted / target</span>
-      </div>
-
-      <div class="system-workbench">
-        <aside class="workbench-panel function-rail" aria-label="System functions">
-          <div class="panel-head"><strong>Functions</strong><small id="function-count">8 modules</small></div>
-          <div class="function-list" id="function-list"></div>
-        </aside>
-
-        <section class="workbench-panel diagram-pane" aria-labelledby="selected-function">
-          <div class="panel-head">
-            <div class="diagram-title"><strong id="selected-function">Evaluation gate</strong><small id="selected-state">current core</small></div>
-            <div class="canvas-controls" aria-label="Canvas controls">
-              <button class="scenario-button" id="reset" type="button" data-scenario="normal" aria-pressed="true">Reset</button>
-              <button class="scenario-button" id="next" type="button">Next →</button>
-              <button class="scenario-button" id="play" type="button" aria-pressed="false">Auto trace</button>
-            </div>
-          </div>
-
-          <div class="scenario-strip" aria-label="Operating condition">
-            <span>Guardrail overlay</span>
-            <button class="scenario-button" type="button" data-scenario="normal" aria-pressed="true">Fresh data</button>
-            <button class="scenario-button" id="failure" type="button" data-scenario="stale" aria-pressed="false">Stale data</button>
-            <button class="scenario-button" type="button" data-scenario="drawdown" aria-pressed="false">12% drawdown</button>
-            <button class="scenario-button" type="button" data-scenario="broker" aria-pressed="false">Broker risk call</button>
-          </div>
-
-          <div class="diagram-wrap">
-            <svg id="system-diagram" viewBox="0 0 760 430" role="img" aria-labelledby="diagram-svg-title diagram-svg-desc">
-              <title id="diagram-svg-title">Selected function data and control flow</title>
-              <desc id="diagram-svg-desc">Inputs enter the selected function, pass through ordered processing steps, and produce bounded outputs.</desc>
-              <defs>
-                <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#527365"></path></marker>
-              </defs>
-              <g id="diagram-content"></g>
-            </svg>
-          </div>
-
-          <div class="canvas-caption" id="status" aria-live="polite">
-            <div><h3 id="detail-title">Evaluation gate</h3><p id="detail-copy">Scores prior recommendations before new directional advice.</p></div>
-            <div><span class="gate-pill" id="gate-pill">NORMAL</span><p id="gate-copy" style="margin-top: 0.4rem; max-width: 230px;">Review may proceed; execution remains separate.</p></div>
-          </div>
-        </section>
-
-        <aside class="workbench-panel dependency-rail" aria-label="Related repository hierarchy">
-          <div class="panel-head"><strong>Related files</strong><small id="dependency-count">3 paths</small></div>
-          <div class="dependency-tree" id="dependency-tree"></div>
-        </aside>
-      </div>
-    </section>
-
-    <section id="roles" aria-labelledby="roles-title">
-      <div class="section-head">
-        <div>
-          <p class="kicker">02 · R&amp;R</p>
-          <h2 id="roles-title">One owner per concern</h2>
-        </div>
-        <p class="section-intro">Each top-level area owns a distinct responsibility. Shared contracts connect the areas; decision logic stays out of data adapters, and execution stays outside analysis.</p>
-      </div>
-
-      <div class="filter-bar" aria-label="Filter responsibilities">
-        <button class="filter-button" type="button" data-filter="all" aria-pressed="true">All responsibilities</button>
-        <button class="filter-button" type="button" data-filter="runtime" aria-pressed="false">Runtime</button>
-        <button class="filter-button" type="button" data-filter="evidence" aria-pressed="false">Evidence</button>
-        <button class="filter-button" type="button" data-filter="governance" aria-pressed="false">Governance</button>
-      </div>
-
-      <div class="rr-grid" id="responsibility-grid" aria-live="polite">
-        <article class="rr-card" data-group="governance">
-          <span class="rr-icon" aria-hidden="true">CFG</span>
-          <div><h3><code>config/</code></h3><p>Reserved configuration surface. The directory currently has no active files; new configuration needs a real consumer and owner.</p><div class="owns"><span>reserved</span><span>currently empty</span></div></div>
-        </article>
-        <article class="rr-card" data-group="evidence">
-          <span class="rr-icon" aria-hidden="true">DAT</span>
-          <div><h3><code>data/</code></h3><p>Stores market, account, lesson, backtest, optimization, and report evidence with enough provenance to reproduce a decision.</p><div class="owns"><span>snapshots</span><span>market history</span><span>generated artifacts</span></div></div>
-        </article>
-        <article class="rr-card" data-group="evidence">
-          <span class="rr-icon" aria-hidden="true">LOG</span>
-          <div><h3><code>log/</code></h3><p>Records observable behavior, scans, evaluations, and recommendation events. Every log family maps to its source module or skill.</p><div class="owns"><span>singular path</span><span>run history</span><span>source owner</span></div></div>
-        </article>
-        <article class="rr-card" data-group="runtime">
-          <span class="rr-icon" aria-hidden="true">TSK</span>
-          <div><h3><code>src/task/</code></h3><p>Reserved task surface. It currently contains no implementation, and there is no top-level <code>task/</code> directory.</p><div class="owns"><span>reserved</span><span>currently empty</span></div></div>
-        </article>
-        <article class="rr-card" data-group="runtime">
-          <span class="rr-icon" aria-hidden="true">SKL</span>
-          <div><h3><code>skillset/</code></h3><p>Holds LLM-facing contracts for review, risk, broker access, playbooks, optimization, data management, and explanation.</p><div class="owns"><span>renamed from skill_component</span><span>domain policy</span><span>playbooks</span></div></div>
-        </article>
-        <article class="rr-card" data-group="runtime">
-          <span class="rr-icon" aria-hidden="true">SRC</span>
-          <div><h3><code>src/billionary_trader/</code></h3><p>Owns the native account-review runtime, cross-skill contracts, orchestration, and deterministic guardrails.</p><div class="owns"><span>review runtime</span><span>guardrails</span><span>human-reviewed changes</span></div></div>
-        </article>
-        <article class="rr-card" data-group="runtime">
-          <span class="rr-icon" aria-hidden="true">QNT</span>
-          <div><h3>Quant engine packages</h3><p><code>src/backtesting/</code>, <code>market_data/</code>, <code>playbook/</code>, and support packages own research, simulation, evaluation, features, and charting.</p><div class="owns"><span>walk-forward</span><span>data quality</span><span>simulation</span></div></div>
-        </article>
-        <article class="rr-card" data-group="governance">
-          <span class="rr-icon" aria-hidden="true">DOC</span>
-          <div><h3><code>docs/</code></h3><p>Owns the canonical system map and web view. <code>docs/plan/</code> is planning context, not proof of implementation.</p><div class="owns"><span>current design</span><span>provenance</span><span>target plans</span></div></div>
-        </article>
-        <article class="rr-card" data-group="governance">
-          <span class="rr-icon" aria-hidden="true">HUM</span>
-          <div><h3>Human reviewer</h3><p>Approves guardrail-layer changes and owns the explicit decision to move from review, to ticket generation, to execution.</p><div class="owns"><span>approval</span><span>exceptions</span><span>execution authority</span></div></div>
-        </article>
-      </div>
-    </section>
-
-    <section id="guardrails" aria-labelledby="guardrails-title">
-      <div class="section-head">
-        <div>
-          <p class="kicker">03 · Safety boundaries</p>
-          <h2 id="guardrails-title">Review is not execution</h2>
-        </div>
-        <p class="section-intro">The system can collect evidence, assess risk, and prepare advice. A recommendation does not grant authority to unlock or submit broker orders.</p>
-      </div>
-
-      <div class="boundary-grid">
-        <article class="boundary-card">
-          <h3>1. Review</h3>
-          <p>Read-only evidence collection and analysis.</p>
-          <ul><li>Account, positions, orders, quotes</li><li>Data quality and freshness</li><li>Risk, lessons, and playbook evidence</li></ul>
-        </article>
-        <article class="boundary-card">
-          <h3>2. Ticket generation</h3>
-          <p>A structured, reviewable action proposal.</p>
-          <ul><li>Action and rationale</li><li>Invalidation and risk budget</li><li>Evidence gaps and no-trade reasons</li></ul>
-        </article>
-        <article class="boundary-card">
-          <h3>3. Execution</h3>
-          <p>A separate phase requiring explicit authority.</p>
-          <ul><li>No implied broker unlock</li><li>No order from analysis alone</li><li>Human review remains the boundary</li></ul>
-        </article>
-      </div>
-
-      <div class="gate-table" style="margin-top: 1rem;">
-        <table>
-          <thead><tr><th>Gate</th><th>Trigger examples</th><th>System bias</th><th>What remains allowed</th></tr></thead>
-          <tbody>
-            <tr><td><span class="state-label normal">NORMAL</span></td><td>Fresh evidence; no account-level defensive trigger.</td><td>Standard position review.</td><td>Hold, roll, trim, or wait recommendations with evidence.</td></tr>
-            <tr><td><span class="state-label reduce">REDUCE_RISK_BIAS</span></td><td>Drawdown at or below −10%; three comparable declining snapshots.</td><td>Prioritize risk reduction and explicit invalidation.</td><td>Defensive trimming and tightly bounded recommendations.</td></tr>
-            <tr><td><span class="state-label defensive">DEFENSIVE_ONLY</span></td><td>Drawdown at or below −20%; broker call, liquidation, or deficit status.</td><td>No new unhedged directional exposure.</td><td>Portfolio defense and human-reviewed risk actions.</td></tr>
-            <tr><td><span class="state-label defensive">WAIT / UNCONFIRMED</span></td><td>Missing or stale broker, quote, or option-chain evidence.</td><td>Stop the affected recommendation path.</td><td>Request fresh data; describe the evidence gap.</td></tr>
-            <tr><td><span class="state-label internal">RESTRICT_DIRECTIONAL</span></td><td>Evaluation finds at least one failed or two malformed recommendations.</td><td>Intermediate evaluation-only restriction.</td><td>The native final-gate aggregator raises this to <code>DEFENSIVE_ONLY</code>.</td></tr>
-            <tr><td><span class="state-label internal">REQUIRE_HUMAN_REVIEW</span></td><td>Evaluation finds at least three failed or five malformed recommendations.</td><td>Intermediate evaluation-only stop.</td><td>The native final-gate aggregator raises this to <code>DEFENSIVE_ONLY</code>.</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="section-intro" style="margin-top: 1rem;">Option positions are evaluated as grouped operations. A short front leg, a long back leg, or any single contract cannot establish the safety of the whole spread by itself.</p>
-    </section>
-
-    <section id="maintenance" aria-labelledby="maintenance-title">
-      <div class="section-head">
-        <div>
-          <p class="kicker">04 · Source chain</p>
-          <h2 id="maintenance-title">Trace every claim</h2>
-        </div>
-        <p class="section-intro">Choose a concern to follow it from real implementation or evidence, through canonical documentation and the README, into this web view.</p>
-      </div>
-
-      <div class="chain-explorer">
-        <div class="chain-controls" aria-label="Choose a source chain concern" id="chain-controls"></div>
-        <div class="chain-grid" id="chain-grid" aria-live="polite"></div>
-      </div>
-
-      <div class="coverage-panel">
-        <article class="coverage-score">
-          <p class="kicker">README coverage</p>
-          <span class="coverage-number">100%</span>
-          <p>Every responsibility, pillar, gate, safety boundary, and maintenance rule in the aligned README has a web destination.</p>
-        </article>
-        <article class="coverage-items">
-          <div class="coverage-list">
-            <a class="coverage-link" href="#top"><span class="coverage-check">✓</span>Core creed</a>
-            <a class="coverage-link" href="#flow"><span class="coverage-check">✓</span>Implemented review flow</a>
-            <a class="coverage-link" href="#roles"><span class="coverage-check">✓</span>Repository R&amp;R</a>
-            <a class="coverage-link" href="#top"><span class="coverage-check">✓</span>Three design pillars</a>
-            <a class="coverage-link" href="#guardrails"><span class="coverage-check">✓</span>Final + evaluation gates</a>
-            <a class="coverage-link" href="#guardrails"><span class="coverage-check">✓</span>Grouped option rule</a>
-            <a class="coverage-link" href="#guardrails"><span class="coverage-check">✓</span>Execution boundary</a>
-            <a class="coverage-link" href="#maintenance"><span class="coverage-check">✓</span>Documentation chain</a>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section id="sources" aria-labelledby="sources-title">
-      <div class="section-head">
-        <div>
-          <p class="kicker">05 · Sources</p>
-          <h2 id="sources-title">Grounded in the repository</h2>
-        </div>
-        <p class="section-intro">Claims on this page are summarized from the current README, skill contracts, native implementation, and target architecture plan.</p>
-      </div>
-      <div class="source-list">
-        <a class="source-link" href="system-design.md"><span>Canonical current-state design and provenance map</span><span>docs/system-design.md</span></a>
-        <a class="source-link" href="../readme.md"><span>Core philosophy, top-level R&amp;R, design pillars</span><span>readme.md</span></a>
-        <a class="source-link" href="../skillset/review-orchestrator/skill.md"><span>Review pipeline contract and current implementation scope</span><span>review-orchestrator</span></a>
-        <a class="source-link" href="../skillset/risk_management/account-risk/skill.md"><span>Account gate states and thresholds</span><span>account-risk</span></a>
-        <a class="source-link" href="../skillset/risk_management/option-risk/skill.md"><span>Grouped option-operation risk responsibilities</span><span>option-risk</span></a>
-        <a class="source-link" href="../skillset/external_service/moomoo/skill.md"><span>Broker adapter responsibilities and non-responsibilities</span><span>broker-runtime</span></a>
-        <a class="source-link" href="plan/world-class-quant-engine-deployment-plan.md"><span>Target architecture, output artifacts, and execution boundaries</span><span>deployment plan</span></a>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <span><strong>Billionary Trader</strong> · System Design &amp; R&amp;R</span>
-    <span>Documentation surface · No live broker actions</span>
-  </footer>
+    <footer><span>real code/assets → docs/system-design.md → readme.md → this view</span><span>review-only system · no broker execution</span></footer>
+  </div>
 
   <script>
-    const stages = [
-      {
-        id: "evaluation",
-        label: "Evaluation gate",
-        status: "current",
-        detail: "Scores prior recommendations before new directional advice. Failures and malformed records tighten the permitted decision state.",
-        inputs: ["Recommendation events", "Outcome price bars"],
-        steps: ["Load + validate ledger", "Score direction + geometry", "Derive evaluation gate"],
-        outputs: ["Scored events", "Failure evidence", "Gate state"],
-        deps: [
-          { path: "src/billionary_trader/evaluation.py", role: "deterministic scoring" },
-          { path: "src/billionary_trader/recommendations.py", role: "event contract + ledger" },
-          { path: "skillset/optimization/evaluation-gate/skill.md", role: "LLM-facing contract" },
-          { path: "log/evaluation_gate/latest.json", role: "observable output" },
-          { path: "log/recommendations/recommendation_events.jsonl", role: "input ledger" }
+    const functions = {
+      evaluation: {
+        label: "Evaluation gate", kind: "current", layer: "guardrail", x: 120, y: 175,
+        detail: "Scores prior recommendation outcomes before new directional advice.",
+        call: "evaluate_recommendations(ledger_path, ticker=None, limit=50)",
+        consumes: { RecommendationEvent: "jsonl[]", OHLCV: "daily bars" },
+        produces: { gate: "NORMAL | RESTRICT_DIRECTIONAL | REQUIRE_HUMAN_REVIEW", scored_events: "object[]" },
+        failure: "Missing price bars produce DATA_ERROR or NO_BARS evidence; malformed records raise the gate.",
+        files: [
+          ["src/billionary_trader/evaluation.py", "implementation"],
+          ["src/billionary_trader/recommendations.py", "ledger contract"],
+          ["skillset/optimization/evaluation-gate/skill.md", "skill contract"],
+          ["log/evaluation_gate/latest.json", "latest output"],
+          ["log/recommendations/recommendation_events.jsonl", "input ledger"]
         ]
       },
-      {
-        id: "broker",
-        label: "Broker runtime",
-        status: "current",
-        detail: "Collects broker and market state and normalizes it into shared records. Collection is read-only; this module does not advise or submit orders.",
-        inputs: ["Host + port", "Reporting currency", "Requested symbols"],
-        steps: ["Connect to OpenD / Futu", "Query broker contexts", "Normalize shared records"],
-        outputs: ["AccountSnapshot", "PositionRow[]", "Orders / fills / quotes"],
-        deps: [
-          { path: "src/billionary_trader/broker.py", role: "native adapter" },
-          { path: "src/billionary_trader/common.py", role: "normalization helpers" },
-          { path: "skillset/external_service/moomoo/skill.md", role: "adapter boundary" },
-          { path: "skillset/external_service/moomoo/scripts/broker_cli.py", role: "command entry point" },
-          { path: "skillset/contracts/data_schemas.md", role: "shared schemas" }
+      broker: {
+        label: "Broker runtime", kind: "current", layer: "adapter", x: 120, y: 315,
+        detail: "Reads account, position, order, fill, and quote state from OpenD/Futu and normalizes shared records.",
+        call: "NativeBroker(host, port).account(currency) / positions() / orders() / fills() / quotes()",
+        consumes: { connection: "host + port", reporting_currency: "SGD | USD | HKD", symbols: "string[]" },
+        produces: { AccountSnapshot: "object", PositionRow: "object[]", Order_Fill_Quote: "object[]" },
+        failure: "Connection or account-query errors stop collection. The adapter never converts missing state into advice.",
+        files: [
+          ["src/billionary_trader/broker.py", "native adapter"],
+          ["src/billionary_trader/common.py", "normalizers"],
+          ["skillset/external_service/moomoo/skill.md", "boundary contract"],
+          ["skillset/external_service/moomoo/scripts/broker_cli.py", "CLI wrapper"],
+          ["skillset/contracts/data_schemas.md", "shared schemas"]
         ]
       },
-      {
-        id: "account",
-        label: "Account risk",
-        status: "current",
-        detail: "Evaluates the portfolio before any position opinion. Comparable-currency history, drawdown, concentration, cash, and margin determine the directive.",
-        inputs: ["Current account", "PositionRow[]", "Prior snapshots", "Manual override"],
-        steps: ["Align comparable history", "Measure trend + drawdown", "Check concentration + margin", "Raise directive"],
-        outputs: ["Account report", "Risk flags", "Final directive input"],
-        deps: [
-          { path: "src/billionary_trader/account_risk.py", role: "risk engine" },
-          { path: "src/billionary_trader/common.py", role: "snapshot path + I/O" },
-          { path: "skillset/risk_management/account-risk/skill.md", role: "threshold contract" },
-          { path: "skillset/risk_management/account-risk/scripts/account_risk.py", role: "command entry point" },
-          { path: "data/account/account_snapshots.jsonl", role: "historical evidence" }
+      accountRisk: {
+        label: "Account risk", kind: "current", layer: "guardrail", x: 390, y: 245,
+        detail: "Computes comparable-currency trend, drawdown, concentration, cash, and margin before position opinions.",
+        call: "evaluate_account(account, positions, snapshots, days, manual_drawdown_pct)",
+        consumes: { AccountSnapshot: "object", PositionRow: "object[]", prior_snapshots: "object[]", manual_override: "float?" },
+        produces: { recommendation_gate: "NORMAL | REDUCE_RISK_BIAS | DEFENSIVE_ONLY", risk_flags: "string[]" },
+        failure: "A broker call, liquidation, or deficit forces DEFENSIVE_ONLY; insufficient comparable history remains visible.",
+        files: [
+          ["src/billionary_trader/account_risk.py", "implementation"],
+          ["src/billionary_trader/common.py", "snapshot I/O"],
+          ["skillset/risk_management/account-risk/skill.md", "threshold contract"],
+          ["skillset/risk_management/account-risk/scripts/account_risk.py", "CLI wrapper"],
+          ["data/account/account_snapshots.jsonl", "historical evidence"]
         ]
       },
-      {
-        id: "lessons",
-        label: "Lesson replay",
-        status: "current",
-        detail: "Matches stored lessons against live positions and technical context, then returns risk signals and a gate hint before advice is formed.",
-        inputs: ["Saved lessons", "Current positions", "Technical context"],
-        steps: ["Match ticker + exposure", "Apply lesson checks", "Score repeated risk"],
-        outputs: ["Matched lessons", "Action bias", "Gate hint"],
-        deps: [
-          { path: "src/billionary_trader/lessons.py", role: "native replay logic" },
-          { path: "skillset/optimization/lesson-replay/skill.md", role: "lesson contract" },
-          { path: "skillset/optimization/lesson-replay/scripts/lesson_replay.py", role: "command entry point" },
-          { path: "data/lessons/trading_misses.json", role: "lesson source" },
-          { path: "data/lesson_replays/latest.json", role: "latest replay output" }
+      lessons: {
+        label: "Lesson replay", kind: "current", layer: "guardrail", x: 390, y: 385,
+        detail: "Matches stored trading misses against current exposure and contributes a risk-reduction hint.",
+        call: "replay_lessons(lessons_path, positions, technical=None, ticker=None)",
+        consumes: { lessons: "object[]", positions: "PositionRow[]", technical: "object?" },
+        produces: { lesson_results: "object[]", max_risk_score: "number", gate_hint: "NORMAL | REDUCE_RISK_BIAS" },
+        failure: "Missing technical context is emitted as evidence instead of being silently inferred.",
+        files: [
+          ["src/billionary_trader/lessons.py", "implementation"],
+          ["skillset/optimization/lesson-replay/skill.md", "skill contract"],
+          ["data/lessons/trading_misses.json", "lesson source"],
+          ["data/lesson_replays/latest.json", "latest output"]
         ]
       },
-      {
-        id: "positions",
-        label: "Position operations",
-        status: "current",
-        detail: "Groups stock and option legs by underlying and strategy so risk is assessed at the operation level instead of contract by contract.",
-        inputs: ["Normalized positions", "Option metadata"],
-        steps: ["Group by underlying", "Pair strategy legs", "Classify urgency"],
-        outputs: ["Operation[]", "Spread identity", "Urgent operations"],
-        deps: [
-          { path: "src/billionary_trader/positions.py", role: "grouping implementation" },
-          { path: "skillset/risk_management/position-operations/skill.md", role: "operation contract" },
-          { path: "skillset/risk_management/position-operations/scripts/position_operations.py", role: "command entry point" },
-          { path: "skillset/contracts/data_schemas.md", role: "Operation schema" }
+      positions: {
+        label: "Position operations", kind: "current", layer: "transform", x: 655, y: 315,
+        detail: "Groups related stock and option legs by underlying and strategy before risk or action logic.",
+        call: "build_operations(positions: list[dict]) -> list[dict]",
+        consumes: { positions: "PositionRow[]" },
+        produces: { operations: "Operation[]", supported_groups: "stock | vertical | calendar | diagonal | straddle | covered_call | complex" },
+        failure: "Ambiguous multi-leg groups become complex operations requiring manual review; they are not split into assumed strategies.",
+        files: [
+          ["src/billionary_trader/positions.py", "implementation"],
+          ["skillset/risk_management/position-operations/skill.md", "skill contract"],
+          ["skillset/risk_management/position-operations/scripts/position_operations.py", "CLI wrapper"],
+          ["skillset/contracts/data_schemas.md", "Operation schema"]
         ]
       },
-      {
-        id: "options",
-        label: "Option risk",
-        status: "target",
-        detail: "Defines whole-spread checks for DTE, Greeks, liquidity, assignment, IV, and event payoff. The full report is contracted but not called by build_review().",
-        inputs: ["Operation[]", "Option chain", "Greeks + IV", "Account directive"],
-        steps: ["Price whole operation", "Check time + assignment", "Test event scenarios"],
-        outputs: ["Risk score", "Action bias", "Evidence gaps"],
-        deps: [
-          { path: "skillset/risk_management/option-risk/skill.md", role: "target contract" },
-          { path: "src/billionary_trader/positions.py", role: "implemented grouping" },
-          { path: "src/billionary_trader/calendar_spread.py", role: "calendar analysis" },
-          { path: "skillset/playbook/calendar-spread-setups/skill.md", role: "entry setup contract" }
+      optionRisk: {
+        label: "Option risk", kind: "contracted", layer: "guardrail", x: 655, y: 445,
+        detail: "Defines whole-spread DTE, Greeks, liquidity, assignment, IV, and event-scenario checks.",
+        call: "contract only; not called by build_review()",
+        consumes: { operations: "Operation[]", option_chain: "quotes + Greeks", account_gate: "directive" },
+        produces: { operation_risk: "risk score + urgency + action bias + evidence gaps" },
+        failure: "Missing option-chain evidence yields WAIT / UNCONFIRMED. Single-leg economics never stand in for the whole spread.",
+        files: [
+          ["skillset/risk_management/option-risk/skill.md", "contracted behavior"],
+          ["src/billionary_trader/positions.py", "implemented grouping"],
+          ["src/billionary_trader/calendar_spread.py", "calendar analysis"],
+          ["skillset/playbook/calendar-spread-setups/skill.md", "setup contract"]
         ]
       },
-      {
-        id: "research",
-        label: "Research + playbooks",
-        status: "available",
-        detail: "Independent market-data, backtesting, regime, scanner, and playbook packages produce reproducible research. They are not all wired into native account review.",
-        inputs: ["Market history", "Playbook rules", "Run configuration"],
-        steps: ["Validate data quality", "Simulate execution", "Walk-forward evaluate", "Promote or reject"],
-        outputs: ["Metrics + trades", "Validation evidence", "Qualified signals"],
-        deps: [
-          { path: "src/market_data/quality.py", role: "data-quality checks" },
-          { path: "src/backtesting/engine.py", role: "simulation engine" },
-          { path: "src/evaluation/walk_forward.py", role: "out-of-sample validation" },
-          { path: "src/playbook/registry.py", role: "playbook registry" },
-          { path: "skillset/playbook/top-trader-playbooks/skill.md", role: "playbook contract" },
-          { path: "data/backtests/tqqq_dca_20190101_20221231_20260702_231147/summary.json", role: "representative research artifact" }
+      fvg: {
+        label: "FVG analysis", kind: "available", layer: "feature", x: 360, y: 210,
+        detail: "Builds multi-timeframe trend and nearest bullish/bearish fair-value-gap context for a ticker.",
+        call: "analyze_fvg(ticker, timeframes)",
+        consumes: { ticker: "string", timeframes: "15m | 1h | 1d" },
+        produces: { trend_by_timeframe: "object", nearest_fvg: "bullish + bearish zones" },
+        failure: "Unavailable bars or empty zones remain explicit; the function does not manufacture a directional setup.",
+        files: [
+          ["src/billionary_trader/technical.py", "implementation"],
+          ["skillset/playbook/fvg-engine/skill.md", "skill contract"],
+          ["skillset/playbook/fvg-engine/scripts/fvg_cli.py", "CLI wrapper"]
         ]
       },
-      {
-        id: "review",
-        label: "Review orchestrator",
-        status: "current",
-        detail: "Coordinates the implemented review path, raises the strictest gate, and returns a decision packet. It never crosses into broker execution.",
-        inputs: ["Evaluation report", "Broker state", "Account + lesson gates", "Grouped operations"],
-        steps: ["Call native modules", "Raise strictest gate", "Assemble review packet"],
-        outputs: ["Final gate", "Urgent checklist", "Review-only packet"],
-        deps: [
-          { path: "src/billionary_trader/review.py", role: "top-level runtime" },
-          { path: "skillset/review-orchestrator/skill.md", role: "broader pipeline contract" },
-          { path: "skillset/review-orchestrator/scripts/review_cli.py", role: "command entry point" },
-          { path: "src/billionary_trader/engine_contracts.py", role: "shared output contract" }
+      top100: {
+        label: "Top-100 scanner", kind: "available", layer: "scanner", x: 110, y: 245,
+        detail: "Ranks gap-up leaders and expands a calendar-test universe using volume and supply-chain relationships.",
+        call: "build_top100_report(universe_path, thresholds..., include_news)",
+        consumes: { universe: "CSV", market_bars: "daily OHLCV", news: "RSS?" },
+        produces: { top_gap_up_stocks: "object[]", calendar_test_universe: "string[]", failures: "object[]" },
+        failure: "Per-symbol and news failures are recorded. The CLI returns non-zero when no gap leaders qualify.",
+        files: [
+          ["src/billionary_trader/top100_scanner.py", "implementation"],
+          ["skillset/playbook/top-100-scanner/skill.md", "skill contract"],
+          ["skillset/playbook/top-100-scanner/scripts/top100_scan.py", "CLI wrapper"],
+          ["skillset/playbook/top-100-scanner/dataset/top_100_universe.csv", "universe asset"],
+          ["log/top_100_scanner/latest_top100_scan.json", "latest output"]
         ]
+      },
+      regime: {
+        label: "Regime estimator", kind: "available", layer: "model", x: 360, y: 350,
+        detail: "Builds labeled market-relative features and estimates or walk-forward-tests the current ticker regime.",
+        call: "market_regime_estimator_cli: estimate | dataset | backtest",
+        consumes: { ticker_bars: "daily OHLCV", market_bars: "SPY daily OHLCV", horizon: "days" },
+        produces: { decision: "label + confidence + probabilities + reason", validation: "walk-forward report" },
+        failure: "Minimum training rows and contract validation bound the estimate; failures stay in the output record.",
+        files: [
+          ["src/billionary_trader/market_regime_estimator.py", "implementation"],
+          ["src/billionary_trader/engine_contracts.py", "output contract"],
+          ["skillset/playbook/market-regime-estimator/skill.md", "skill contract"],
+          ["log/market_regime_estimator/latest_estimate.json", "latest output"]
+        ]
+      },
+      calendar: {
+        label: "Calendar setup scan", kind: "available", layer: "playbook", x: 610, y: 285,
+        detail: "Classifies daily price patterns and selects bull, bear, or neutral calendar structures with explicit reject reasons.",
+        call: "build_scan_report(tickers, bars_dir?, option_flow?, fundamentals?, market_symbol)",
+        consumes: { tickers: "string[]", daily_bars: "OHLCV", optional_context: "flow + fundamentals" },
+        produces: { results: "setup decisions[]", failures: "object[]", reject_reasons: "string[]" },
+        failure: "Insufficient history, data errors, or unmet setup requirements produce explicit rejection instead of a forced trade.",
+        files: [
+          ["src/billionary_trader/calendar_spread.py", "implementation"],
+          ["skillset/playbook/calendar-spread-setups/skill.md", "skill contract"],
+          ["skillset/playbook/calendar-spread-setups/scripts/calendar_spread_scan.py", "CLI wrapper"],
+          ["log/calendar_spread_setups/latest_calendar_spread_scan.json", "latest output"]
+        ]
+      },
+      ledger: {
+        label: "Recommendation ledger", kind: "available", layer: "persistence", x: 820, y: 315,
+        detail: "Normalizes, validates, appends, and retrieves recommendation events used by evaluation and entry trace evolution.",
+        call: "append_recommendation(event, ledger_path) / list_recommendations(...) ",
+        consumes: { recommendation: "action + direction + levels + risk + evidence" },
+        produces: { RecommendationEvent: "normalized + validation_issues", persistence: "jsonl append" },
+        failure: "Invalid fields are retained with machine-readable validation issues so later evaluation can penalize them.",
+        files: [
+          ["src/billionary_trader/recommendations.py", "implementation"],
+          ["skillset/playbook/recommendation-ledger/skill.md", "skill contract"],
+          ["skillset/playbook/recommendation-ledger/scripts/recommendation_ledger.py", "CLI wrapper"],
+          ["log/recommendations/recommendation_events.jsonl", "persistent ledger"]
+        ]
+      },
+      review: {
+        label: "Review orchestrator", kind: "current", layer: "orchestrator", x: 825, y: 275,
+        detail: "Calls the implemented account-review functions, raises the strictest gate, and assembles a review-only packet.",
+        call: "build_review(host, port, currency, days, manual_drawdown_pct)",
+        consumes: { evaluation_report: "object", broker_state: "account + positions + orders", gate_inputs: "account + lessons" },
+        produces: { final_gate: "NORMAL | REDUCE_RISK_BIAS | DEFENSIVE_ONLY", review_packet: "object" },
+        failure: "Broker collection failures stop the run. Evaluation restrictions are intentionally raised to DEFENSIVE_ONLY.",
+        files: [
+          ["src/billionary_trader/review.py", "implemented orchestration"],
+          ["skillset/review-orchestrator/skill.md", "broader contract"],
+          ["skillset/review-orchestrator/scripts/review_cli.py", "CLI wrapper"],
+          ["src/billionary_trader/engine_contracts.py", "shared output contract"]
+        ]
+      },
+      workflowEvolution: {
+        label: "Workflow evolution", kind: "available", layer: "meta", x: 760, y: 445,
+        detail: "Loads traces for the four canonical workflow types, scores failures, and proposes policy or tuning changes.",
+        call: "load_traces(workflow, limit) → score_workflow(...) → evolve_workflow(...) ",
+        consumes: { workflow: "scanner | entry | position-review | account-review", traces: "saved JSON/JSONL" },
+        produces: { score: "WorkflowScore", proposal: "policy + tunables", promotion_decision: "reviewed result" },
+        failure: "Missing workflow configuration blocks evolution; proposals do not directly mutate guardrail code or execute trades.",
+        files: [
+          ["src/billionary_trader/workflow_evolution.py", "implementation"],
+          ["skillset/optimization/workflow-evolution/skill.md", "skill contract"],
+          ["skillset/optimization/workflow-evolution/scripts/workflow_evolution_cli.py", "CLI wrapper"]
+        ]
+      }
+    };
+
+    const workflows = [
+      {
+        id: "account-review", status: "implemented", summary: "Live account evidence → strictest gate → review packet",
+        command: "python skillset/review-orchestrator/scripts/review_cli.py --currency SGD --days 30 --output table",
+        inputs: ["broker connection", "recommendation ledger", "account history", "lessons"],
+        nodes: ["evaluation", "broker", "accountRisk", "lessons", "positions", "review"],
+        edges: [["evaluation", "accountRisk"], ["broker", "accountRisk"], ["broker", "lessons"], ["broker", "positions"], ["accountRisk", "review"], ["lessons", "review"], ["positions", "review"]],
+        output: "Account report + operations + urgent list + final gate",
+        blockAt: { stale: "broker", risk: "accountRisk" }
+      },
+      {
+        id: "position-review", status: "partial", summary: "Broker positions → grouped operations → risk evidence",
+        command: "python skillset/risk_management/position-operations/scripts/position_operations.py --positions-file positions.json --output json",
+        inputs: ["PositionRow[]", "lessons", "option quotes + Greeks"],
+        nodes: ["broker", "lessons", "positions", "optionRisk", "review"],
+        edges: [["broker", "lessons"], ["broker", "positions"], ["positions", "optionRisk"], ["lessons", "review"], ["positions", "review"], ["optionRisk", "review"]],
+        output: "Grouped operations + urgency; full option-risk report remains contracted",
+        blockAt: { stale: "broker", risk: "optionRisk" }
+      },
+      {
+        id: "scanner", status: "available", summary: "Market universe → technical/regime evidence → candidates",
+        command: "python skillset/playbook/top-100-scanner/scripts/top100_scan.py --output summary",
+        inputs: ["universe CSV", "daily/intraday bars", "optional news"],
+        nodes: ["top100", "fvg", "regime", "workflowEvolution"],
+        edges: [["top100", "fvg"], ["top100", "regime"], ["fvg", "workflowEvolution"], ["regime", "workflowEvolution"]],
+        output: "Ranked candidates + evidence + recorded failures",
+        blockAt: { stale: "top100", risk: "workflowEvolution" }
+      },
+      {
+        id: "entry", status: "available", summary: "Qualified candidates → setup selection → recommendation event",
+        command: "python skillset/playbook/calendar-spread-setups/scripts/calendar_spread_scan.py --tickers NVDA --output summary",
+        inputs: ["candidate tickers", "daily bars", "optional flow/fundamentals", "account gate"],
+        nodes: ["top100", "fvg", "regime", "calendar", "ledger", "workflowEvolution"],
+        edges: [["top100", "fvg"], ["top100", "regime"], ["fvg", "calendar"], ["regime", "calendar"], ["calendar", "ledger"], ["ledger", "workflowEvolution"]],
+        output: "Setup result or explicit rejection; ledger persistence is a separate call",
+        blockAt: { stale: "top100", risk: "calendar" }
       }
     ];
 
     const scenarios = {
-      normal: {
-        gate: "NORMAL",
-        className: "",
-        copy: "A reviewable recommendation packet may be produced. Execution remains a separate, explicitly authorized phase.",
-        diagramClass: ""
-      },
-      stale: {
-        gate: "WAIT / UNCONFIRMED",
-        className: "alert",
-        copy: "Required evidence is stale. The affected recommendation path stops until fresh broker, quote, or option-chain data is available.",
-        diagramClass: "alert"
-      },
-      drawdown: {
-        gate: "REDUCE_RISK_BIAS",
-        className: "warn",
-        copy: "A 12% drawdown crosses the −10% threshold. Advice must prioritize risk reduction and include explicit invalidation levels.",
-        diagramClass: "warning"
-      },
-      broker: {
-        gate: "DEFENSIVE_ONLY",
-        className: "alert",
-        copy: "A broker call, liquidation, or deficit state forces portfolio defense. No new long or directional exposure is permitted without explicit hedging and review.",
-        diagramClass: "alert"
-      }
+      normal: { label: "baseline", gate: "READY", className: "", copy: "All required inputs are available; trace can reach its bounded output." },
+      stale: { label: "stale evidence", gate: "WAIT / UNCONFIRMED", className: "alert", copy: "The first data-dependent function stops the downstream path." },
+      risk: { label: "risk breach", gate: "DEFENSIVE / REJECT", className: "warn", copy: "The guardrail function converts evidence into a defensive or rejected output." }
     };
 
-    const chains = {
-      review: {
-        label: "Native review",
-        steps: [
-          ["Real code", "Runtime orchestration", "Calls evaluation, broker, account risk, lessons, and positions.", "../src/billionary_trader/review.py"],
-          ["Canonical doc", "Current native review path", "Records the actual call order and outputs.", "system-design.md#current-native-review-path"],
-          ["README", "Implemented review flow", "Provides the concise repository entry point.", "../readme.md#implemented-review-flow"],
-          ["Web", "Interactive pipeline", "Simulates normal and defensive review paths.", "#flow"]
-        ]
-      },
-      broker: {
-        label: "Broker boundary",
-        steps: [
-          ["Real code", "Native broker adapter", "Normalizes account, positions, orders, fills, and quotes.", "../src/billionary_trader/broker.py"],
-          ["Canonical doc", "Implemented path + boundary", "Marks collection as implemented and execution as out of scope.", "system-design.md#current-native-review-path"],
-          ["README", "Safety boundary", "Separates review, ticket generation, and execution.", "../readme.md#safety-boundary"],
-          ["Web", "Review is not execution", "Shows the three explicit phases.", "#guardrails"]
-        ]
-      },
-      risk: {
-        label: "Account risk",
-        steps: [
-          ["Real code", "Account risk engine", "Computes drawdown, concentration, margin, and directive.", "../src/billionary_trader/account_risk.py"],
-          ["Canonical doc", "Decision and safety states", "Documents triggers and final effects.", "system-design.md#decision-and-safety-states"],
-          ["README", "Deterministic guardrails", "Summarizes final and evaluation-only gates.", "../readme.md#3-deterministic-guardrails"],
-          ["Web", "Scenario simulator", "Makes drawdown and broker-risk effects observable.", "#flow"]
-        ]
-      },
-      research: {
-        label: "Quant research",
-        steps: [
-          ["Real code/assets", "Research engine", "Market data, backtests, playbooks, and saved artifacts.", "../src/backtesting/engine.py"],
-          ["Canonical doc", "Available extensions", "Separates available research from live review integration.", "system-design.md#available-and-contracted-extensions"],
-          ["README", "Walk-forward validation", "States the evidence standard for directional claims.", "../readme.md#2-walk-forward-validation"],
-          ["Web", "Pipeline status", "Labels playbook research as available, not current review.", "#flow"]
-        ]
-      },
-      evidence: {
-        label: "Data + logs",
-        steps: [
-          ["Real assets", "Evidence stores", "Account snapshots, market history, reports, and run outputs.", "../data/account/account_snapshots.jsonl"],
-          ["Canonical doc", "Responsibility map", "Defines data as evidence and log as observable output.", "system-design.md#top-level-responsibility-map"],
-          ["README", "Repository structure", "Uses the real data/ and singular log/ names.", "../readme.md#repository-structure-and-responsibilities"],
-          ["Web", "R&R explorer", "Filters runtime, evidence, and governance owners.", "#roles"]
-        ]
-      }
-    };
+    const state = { workflowIndex: 0, selectedNode: "evaluation", scenario: "normal", step: -1, timer: null };
+    const workflowList = document.querySelector("#workflow-list");
+    const graphContent = document.querySelector("#graph-content");
 
-    const functionList = document.querySelector("#function-list");
-    const diagramContent = document.querySelector("#diagram-content");
-    const dependencyTree = document.querySelector("#dependency-tree");
-    const detailTitle = document.querySelector("#detail-title");
-    const detailCopy = document.querySelector("#detail-copy");
-    const gatePill = document.querySelector("#gate-pill");
-    const gateCopy = document.querySelector("#gate-copy");
-    const selectedFunction = document.querySelector("#selected-function");
-    const selectedState = document.querySelector("#selected-state");
+    function esc(value) { return String(value).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[c])); }
+    function statusLabel(status) { return status === "implemented" ? "implemented orchestrator" : status === "partial" ? "implemented core + contracted extension" : "available composed tools"; }
 
-    stages.forEach((stage, index) => {
+    workflows.forEach((workflow, index) => {
       const button = document.createElement("button");
       button.type = "button";
-      button.className = "function-button";
-      button.dataset.index = String(index);
-      const statusLabel = stage.status === "current" ? "current core" : stage.status === "available" ? "available" : "contracted";
+      button.className = "workflow-button";
+      button.dataset.index = index;
       button.setAttribute("aria-pressed", String(index === 0));
-      button.innerHTML = `<span class="function-index">${String(index + 1).padStart(2, "0")}</span><span><span class="function-name">${stage.label}</span><span class="function-state">${statusLabel}</span></span>`;
-      button.addEventListener("click", () => showStage(index));
-      functionList.appendChild(button);
+      button.innerHTML = `<span class="workflow-index">0${index + 1}</span><span><span class="workflow-name">${workflow.id}</span><span class="workflow-summary">${workflow.summary}</span><span class="workflow-badge ${workflow.status}">${statusLabel(workflow.status)}</span></span>`;
+      button.addEventListener("click", () => selectWorkflow(index));
+      workflowList.appendChild(button);
     });
 
-    let currentStage = 0;
-    let currentScenario = "normal";
-    let traceTimer = null;
-
-    function escapeHtml(value) {
-      return String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[character]));
-    }
-
-    function svgLines(label, x, y, maxChars = 22) {
-      const words = label.split(" ");
-      const lines = [];
-      words.forEach((word) => {
-        const last = lines[lines.length - 1];
-        if (!last || `${last} ${word}`.length > maxChars) lines.push(word);
-        else lines[lines.length - 1] = `${last} ${word}`;
+    function layoutNodes(workflow) {
+      const count = workflow.nodes.length;
+      const columns = count <= 4 ? 4 : count <= 5 ? 3 : 3;
+      const rows = Math.ceil(count / columns);
+      const positions = {};
+      workflow.nodes.forEach((id, index) => {
+        const row = Math.floor(index / columns);
+        const col = index % columns;
+        const rowCount = Math.min(columns, count - row * columns);
+        const gapX = rowCount === 1 ? 0 : 700 / (rowCount - 1);
+        positions[id] = { x: rowCount === 1 ? 410 : 60 + col * gapX, y: rows === 1 ? 245 : 135 + row * 230 };
       });
-      return lines.slice(0, 2).map((line, index) => `<tspan x="${x}" y="${y + index * 15}">${escapeHtml(line)}</tspan>`).join("");
+      return positions;
     }
 
-    function renderDiagram(stage) {
-      const scenario = scenarios[currentScenario];
-      const columns = [
-        { title: "INPUTS", items: stage.inputs, x: 24, kind: "" },
-        { title: "FUNCTION", items: stage.steps, x: 286, kind: "process" },
-        { title: "OUTPUTS", items: stage.outputs, x: 548, kind: `output ${scenario.diagramClass}`.trim() }
+    function renderGraph() {
+      const workflow = workflows[state.workflowIndex];
+      const positions = layoutNodes(workflow);
+      const blockedId = workflow.blockAt[state.scenario];
+      const blockedIndex = blockedId ? workflow.nodes.indexOf(blockedId) : -1;
+      const parts = [
+        `<text class="lane-label" x="44" y="34">INPUT CONTRACT</text>`,
+        `<rect class="io-box" x="40" y="48" width="920" height="54" rx="10"></rect>`,
+        ...workflow.inputs.map((input, index) => `<text class="io-value" x="${60 + (index % 4) * 225}" y="${78 + Math.floor(index / 4) * 14}">${esc(input)}</text>`),
+        `<text class="lane-label" x="44" y="126">FUNCTION COMPOSITION</text>`
       ];
-      const boxWidth = 188;
-      const availableHeight = 255;
-      const top = 68;
-      const boxes = [];
-      columns.forEach((column) => {
-        boxes.push(`<text class="svg-column-label" x="${column.x}" y="30">${column.title}</text>`);
-        const gap = Math.min(18, Math.max(8, (availableHeight - column.items.length * 52) / Math.max(1, column.items.length - 1)));
-        column.items.forEach((item, index) => {
-          const y = top + index * (52 + gap);
-          boxes.push(`<rect class="svg-box ${column.kind}" x="${column.x}" y="${y}" width="${boxWidth}" height="52" rx="10"></rect>`);
-          boxes.push(`<text class="svg-text" text-anchor="middle">${svgLines(item, column.x + boxWidth / 2, y + 24)}</text>`);
-        });
+
+      workflow.edges.forEach(([from, to]) => {
+        const a = positions[from]; const b = positions[to];
+        const fromIndex = workflow.nodes.indexOf(from); const toIndex = workflow.nodes.indexOf(to);
+        const edgeClass = blockedIndex >= 0 && toIndex > blockedIndex ? "edge blocked" : state.step >= toIndex ? "edge active" : "edge";
+        parts.push(`<path class="${edgeClass}" d="M${a.x + 150} ${a.y + 42} C${(a.x + b.x) / 2 + 150} ${a.y + 42}, ${(a.x + b.x) / 2} ${b.y + 42}, ${b.x} ${b.y + 42}"></path>`);
       });
-      const functionCenterY = top + ((stage.steps.length - 1) * 65) / 2 + 26;
-      stage.inputs.forEach((_, index) => {
-        const y = top + index * (52 + Math.min(18, Math.max(8, (availableHeight - stage.inputs.length * 52) / Math.max(1, stage.inputs.length - 1)))) + 26;
-        boxes.push(`<path class="svg-arrow" d="M212 ${y} C248 ${y}, 250 ${functionCenterY}, 286 ${functionCenterY}"></path>`);
+
+      workflow.nodes.forEach((id, index) => {
+        const fn = functions[id]; const p = positions[id];
+        let className = "node-group";
+        if (state.selectedNode === id) className += " selected";
+        if (state.step === index) className += " running";
+        if (state.step > index) className += " complete";
+        if (blockedIndex >= 0 && index > blockedIndex) className += " blocked";
+        if (blockedIndex === index && state.scenario === "risk") className += " warning";
+        const runtimeState = blockedIndex === index ? (state.scenario === "stale" ? "STOP: STALE" : "GATE RAISED") : state.step > index ? "COMPLETE" : state.step === index ? "RUNNING" : fn.kind.toUpperCase();
+        parts.push(`<g class="${className}" data-node="${id}" tabindex="0" role="button" aria-label="Inspect ${esc(fn.label)}"><rect class="node-box" x="${p.x}" y="${p.y}" width="150" height="84" rx="11"></rect><text class="node-kind" x="${p.x + 13}" y="${p.y + 19}">${esc(fn.layer.toUpperCase())}</text><text class="node-label" x="${p.x + 13}" y="${p.y + 45}">${esc(fn.label)}</text><text class="node-status" x="${p.x + 13}" y="${p.y + 67}">${esc(runtimeState)}</text></g>`);
       });
-      stage.outputs.forEach((_, index) => {
-        const y = top + index * (52 + Math.min(18, Math.max(8, (availableHeight - stage.outputs.length * 52) / Math.max(1, stage.outputs.length - 1)))) + 26;
-        boxes.push(`<path class="svg-arrow" d="M474 ${functionCenterY} C512 ${functionCenterY}, 510 ${y}, 548 ${y}"></path>`);
+
+      const scenario = scenarios[state.scenario];
+      parts.push(`<text class="lane-label" x="44" y="506">BOUNDED OUTPUT</text><rect class="packet-box ${scenario.className}" x="40" y="520" width="920" height="34" rx="8"></rect><text class="io-label" x="58" y="541">${esc(workflow.output)}</text><text class="io-value" text-anchor="end" x="940" y="541">${esc(scenario.gate)}</text>`);
+      graphContent.innerHTML = parts.join("");
+      document.querySelectorAll("[data-node]").forEach(group => {
+        const choose = () => selectFunction(group.dataset.node);
+        group.addEventListener("click", choose);
+        group.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); choose(); } });
       });
-      const gateClass = scenario.diagramClass ? `output ${scenario.diagramClass}` : "output";
-      boxes.push(`<rect class="svg-box ${gateClass}" x="286" y="370" width="188" height="38" rx="19"></rect>`);
-      boxes.push(`<circle class="svg-pulse" cx="306" cy="389" r="4"></circle>`);
-      boxes.push(`<text class="svg-subtext" x="319" y="393">GUARDRAIL: ${escapeHtml(scenario.gate)}</text>`);
-      diagramContent.innerHTML = boxes.join("");
-      document.querySelector("#diagram-svg-title").textContent = `${stage.label} data and control flow`;
-      document.querySelector("#diagram-svg-desc").textContent = `${stage.inputs.join(", ")} enter ${stage.label}, pass through ${stage.steps.join(", ")}, and produce ${stage.outputs.join(", ")}.`;
+      document.querySelector("#graph-title").textContent = `${workflow.id} workflow graph`;
+      document.querySelector("#graph-desc").textContent = `${workflow.id} composes ${workflow.nodes.map(id => functions[id].label).join(", ")}.`;
     }
 
-    function buildDependencyTree(dependencies) {
+    function buildTree(files) {
       const root = {};
-      dependencies.forEach((dependency) => {
+      files.forEach(([path, role]) => {
         let branch = root;
-        dependency.path.split("/").forEach((part, index, parts) => {
+        path.split("/").forEach((part, index, parts) => {
           branch[part] = branch[part] || { children: {} };
-          if (index === parts.length - 1) {
-            branch[part].role = dependency.role;
-            branch[part].path = dependency.path;
-          }
+          if (index === parts.length - 1) { branch[part].path = path; branch[part].role = role; }
           branch = branch[part].children;
         });
       });
       return root;
     }
 
-    function renderTreeBranch(branch) {
+    function treeHtml(branch) {
       return `<ul class="tree">${Object.entries(branch).map(([name, node]) => {
-        const isFile = Boolean(node.path);
-        const content = `<span class="tree-node ${isFile ? "tree-file" : "tree-folder"}"><span class="tree-icon">${isFile ? "·" : "+"}</span><span class="tree-label">${escapeHtml(name)}${node.role ? `<span class="tree-role">${escapeHtml(node.role)}</span>` : ""}</span></span>`;
-        return `<li>${isFile ? `<a href="../${node.path}">${content}</a>` : content}${Object.keys(node.children).length ? renderTreeBranch(node.children) : ""}</li>`;
+        const file = Boolean(node.path);
+        const row = `<span class="tree-row ${file ? "file" : "folder"}"><span class="tree-icon">${file ? "·" : "+"}</span><span class="tree-label">${esc(name)}${node.role ? `<span class="tree-role">${esc(node.role)}</span>` : ""}</span></span>`;
+        return `<li>${file ? `<a href="../${node.path}">${row}</a>` : row}${Object.keys(node.children).length ? treeHtml(node.children) : ""}</li>`;
       }).join("")}</ul>`;
     }
 
-    function showStage(index) {
-      const stage = stages[index];
-      currentStage = index;
-      document.querySelectorAll(".function-button").forEach((button, buttonIndex) => button.setAttribute("aria-pressed", String(buttonIndex === index)));
-      const statusLabel = stage.status === "current" ? "current core" : stage.status === "available" ? "available outside review" : "contracted / target";
-      selectedFunction.textContent = stage.label;
-      selectedState.textContent = statusLabel;
-      detailTitle.textContent = stage.label;
-      detailCopy.textContent = stage.detail;
-      dependencyTree.innerHTML = renderTreeBranch(buildDependencyTree(stage.deps));
-      document.querySelector("#dependency-count").textContent = `${stage.deps.length} related paths`;
-      renderDiagram(stage);
+    function selectFunction(id) {
+      state.selectedNode = id;
+      const fn = functions[id];
+      document.querySelector("#function-kind").textContent = `${fn.layer} / ${fn.kind}`;
+      document.querySelector("#function-title").textContent = fn.label;
+      document.querySelector("#function-detail").textContent = fn.detail;
+      document.querySelector("#dependency-tree").innerHTML = treeHtml(buildTree(fn.files));
+      document.querySelector("#function-call").textContent = fn.call;
+      document.querySelector("#function-input").textContent = JSON.stringify(fn.consumes, null, 2);
+      document.querySelector("#function-output").textContent = JSON.stringify(fn.produces, null, 2);
+      document.querySelector("#function-failure").textContent = fn.failure;
+      renderGraph();
     }
 
-    function setScenario(name) {
-      stopTrace();
-      const scenario = scenarios[name];
-      currentScenario = name;
-      document.querySelectorAll(".scenario-button").forEach((button) => {
-        if (button.dataset.scenario) button.setAttribute("aria-pressed", String(button.dataset.scenario === name));
+    function selectWorkflow(index) {
+      stopRun();
+      state.workflowIndex = index; state.step = -1; state.scenario = "normal";
+      const workflow = workflows[index]; state.selectedNode = workflow.nodes[0];
+      document.querySelectorAll(".workflow-button").forEach((button, buttonIndex) => button.setAttribute("aria-pressed", String(buttonIndex === index)));
+      document.querySelectorAll("[data-scenario]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.scenario === "normal")));
+      document.querySelector("#workflow-title").textContent = workflow.id;
+      document.querySelector("#workflow-command").textContent = workflow.command;
+      resetTrace(); selectFunction(state.selectedNode);
+    }
+
+    function resetTrace() {
+      const workflow = workflows[state.workflowIndex];
+      document.querySelector("#trace-stream").innerHTML = workflow.nodes.map((id, index) => `<article class="trace-item"><small>${String(index + 1).padStart(2, "0")} / ${esc(functions[id].layer)}</small><strong>${esc(functions[id].label)}</strong><span>pending</span></article>`).join("");
+      updateOutput(); renderGraph();
+    }
+
+    function updateOutput() {
+      const scenario = scenarios[state.scenario];
+      const gate = document.querySelector("#gate");
+      gate.textContent = scenario.gate;
+      gate.className = `gate ${scenario.className}`.trim();
+      document.querySelector("#output-copy").textContent = scenario.copy;
+    }
+
+    function stepRun() {
+      const workflow = workflows[state.workflowIndex];
+      const blockedId = workflow.blockAt[state.scenario];
+      const blockedIndex = blockedId ? workflow.nodes.indexOf(blockedId) : -1;
+      if (state.step >= workflow.nodes.length - 1 || (blockedIndex >= 0 && state.step >= blockedIndex)) { stopRun(); return false; }
+      state.step += 1;
+      state.selectedNode = workflow.nodes[state.step];
+      const items = document.querySelectorAll(".trace-item");
+      items.forEach((item, index) => {
+        const label = item.querySelector("span");
+        label.textContent = index < state.step ? "complete" : index === state.step ? (blockedIndex === index ? scenarios[state.scenario].gate : "running") : "pending";
+        label.style.color = index <= state.step ? "var(--green)" : "";
       });
-      gatePill.textContent = scenario.gate;
-      gatePill.className = `gate-pill ${scenario.className}`.trim();
-      gateCopy.textContent = scenario.copy;
-      renderDiagram(stages[currentStage]);
+      selectFunction(state.selectedNode); updateOutput();
+      if (blockedIndex === state.step) { stopRun(); return false; }
+      return true;
     }
 
-    function stopTrace() {
-      if (traceTimer) window.clearInterval(traceTimer);
-      traceTimer = null;
-      const play = document.querySelector("#play");
-      play.textContent = "Auto trace";
-      play.setAttribute("aria-pressed", "false");
+    function startRun() {
+      stopRun(); state.step = -1; resetTrace();
+      const run = document.querySelector("#run"); run.textContent = "Stop";
+      stepRun();
+      state.timer = window.setInterval(() => { if (!stepRun()) stopRun(); }, 850);
     }
 
-    function startTrace() {
-      stopTrace();
-      setScenario("normal");
-      currentStage = 0;
-      showStage(0);
-      const play = document.querySelector("#play");
-      play.textContent = "Stop trace";
-      play.setAttribute("aria-pressed", "true");
-      traceTimer = window.setInterval(() => {
-        if (currentStage >= stages.length - 1) {
-          stopTrace();
-          return;
-        }
-        showStage(currentStage + 1);
-      }, 1050);
+    function stopRun() {
+      if (state.timer) window.clearInterval(state.timer);
+      state.timer = null;
+      const run = document.querySelector("#run"); if (run) run.textContent = "Run trace";
     }
 
-    function renderChain(name) {
-      const chain = chains[name];
-      document.querySelectorAll("[data-chain]").forEach((button) => {
-        button.setAttribute("aria-pressed", String(button.dataset.chain === name));
-      });
-      document.querySelector("#chain-grid").innerHTML = chain.steps.map((step, index) => `
-        <article class="chain-step">
-          <small>0${index + 1} · ${step[0]}</small>
-          <h3>${step[1]}</h3>
-          <p>${step[2]}</p>
-          <a href="${step[3]}">${step[3]}</a>
-        </article>
-      `).join("");
-    }
+    document.querySelector("#run").addEventListener("click", () => state.timer ? stopRun() : startRun());
+    document.querySelector("#next").addEventListener("click", () => { stopRun(); stepRun(); });
+    document.querySelector("#reset").addEventListener("click", () => { stopRun(); state.step = -1; state.scenario = "normal"; document.querySelectorAll("[data-scenario]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.scenario === "normal"))); resetTrace(); });
+    document.querySelectorAll("[data-scenario]").forEach(button => button.addEventListener("click", () => { stopRun(); state.scenario = button.dataset.scenario; state.step = -1; document.querySelectorAll("[data-scenario]").forEach(item => item.setAttribute("aria-pressed", String(item === button))); resetTrace(); }));
+    document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(item => item.setAttribute("aria-selected", String(item === tab)));
+      document.querySelector("#files-panel").hidden = tab.dataset.tab !== "files";
+      document.querySelector("#contract-panel").hidden = tab.dataset.tab !== "contract";
+    }));
 
-    document.querySelectorAll(".scenario-button").forEach((button) => {
-      if (button.dataset.scenario) button.addEventListener("click", () => setScenario(button.dataset.scenario));
-    });
-
-    document.querySelector("#next").addEventListener("click", () => {
-      stopTrace();
-      const nextStage = (currentStage + 1) % stages.length;
-      showStage(nextStage);
-      document.querySelectorAll(".function-button")[nextStage].focus();
-    });
-
-    document.querySelector("#play").addEventListener("click", () => {
-      if (traceTimer) stopTrace(); else startTrace();
-    });
-
-    document.querySelectorAll(".filter-button").forEach((button) => {
-      button.addEventListener("click", () => {
-        const filter = button.dataset.filter;
-        document.querySelectorAll(".filter-button").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
-        document.querySelectorAll(".rr-card").forEach((card) => {
-          card.hidden = filter !== "all" && card.dataset.group !== filter;
-        });
-      });
-    });
-
-    const chainControls = document.querySelector("#chain-controls");
-    Object.entries(chains).forEach(([key, chain], index) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "filter-button";
-      button.dataset.chain = key;
-      button.setAttribute("aria-pressed", String(index === 0));
-      button.textContent = chain.label;
-      button.addEventListener("click", () => renderChain(key));
-      chainControls.appendChild(button);
-    });
-
-    showStage(0);
-    setScenario("normal");
-    renderChain("review");
+    selectWorkflow(0);
   </script>
 </body>
 </html>
