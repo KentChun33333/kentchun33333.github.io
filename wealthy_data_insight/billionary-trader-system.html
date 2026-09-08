@@ -1,0 +1,1063 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Billionary Trader system design, responsibilities, guardrails, and review flow.">
+  <title>Billionary Trader · System Design &amp; R&amp;R</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07100d;
+      --surface: #0d1915;
+      --surface-raised: #13231d;
+      --line: #284036;
+      --line-soft: rgba(146, 180, 165, 0.16);
+      --text: #edf7f1;
+      --muted: #9eb4a9;
+      --green: #80e7a9;
+      --green-deep: #173e2a;
+      --amber: #f4c66a;
+      --amber-deep: #4a3515;
+      --red: #ff8d83;
+      --red-deep: #4d2220;
+      --blue: #88c7ff;
+      --blue-deep: #16334d;
+      --radius: 18px;
+      --shadow: 0 22px 70px rgba(0, 0, 0, 0.28);
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background:
+        radial-gradient(circle at 82% 8%, rgba(44, 125, 85, 0.16), transparent 28rem),
+        linear-gradient(180deg, #07100d 0%, #09130f 60%, #07100d 100%);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    a { color: inherit; }
+    button { font: inherit; }
+    code { font-family: var(--mono); }
+    [hidden] { display: none !important; }
+
+    .skip-link {
+      position: fixed;
+      z-index: 99;
+      top: 0.75rem;
+      left: 0.75rem;
+      transform: translateY(-180%);
+      padding: 0.7rem 1rem;
+      border-radius: 10px;
+      background: var(--text);
+      color: var(--bg);
+      font-weight: 750;
+    }
+    .skip-link:focus { transform: translateY(0); }
+
+    .topbar {
+      position: sticky;
+      z-index: 20;
+      top: 0;
+      border-bottom: 1px solid var(--line-soft);
+      background: rgba(7, 16, 13, 0.86);
+      backdrop-filter: blur(18px);
+    }
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: min(1180px, calc(100% - 2rem));
+      min-height: 64px;
+      margin: 0 auto;
+      gap: 1.5rem;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.72rem;
+      font-weight: 780;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+    }
+    .brand-mark {
+      display: grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      border: 1px solid rgba(128, 231, 169, 0.5);
+      border-radius: 9px;
+      background: var(--green-deep);
+      color: var(--green);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+    }
+    nav { display: flex; gap: 0.35rem; }
+    nav a {
+      padding: 0.5rem 0.7rem;
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 650;
+      text-decoration: none;
+    }
+    nav a:hover, nav a:focus-visible { background: var(--surface-raised); color: var(--text); }
+
+    main, footer {
+      width: min(1180px, calc(100% - 2rem));
+      margin: 0 auto;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.24fr) minmax(280px, 0.76fr);
+      gap: 2.6rem;
+      align-items: end;
+      min-height: 470px;
+      padding: 5.2rem 0 4rem;
+      border-bottom: 1px solid var(--line-soft);
+    }
+    .eyebrow, .kicker {
+      margin: 0 0 0.9rem;
+      color: var(--green);
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      font-weight: 750;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      max-width: 780px;
+      margin-bottom: 1.35rem;
+      font-size: clamp(3rem, 7vw, 6.7rem);
+      font-weight: 760;
+      letter-spacing: -0.075em;
+      line-height: 0.91;
+    }
+    h1 span { color: var(--green); }
+    .lede {
+      max-width: 680px;
+      margin-bottom: 0;
+      color: #c2d4cb;
+      font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+      line-height: 1.55;
+    }
+    .creed-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin: 1.2rem 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .creed-list li {
+      padding: 0.36rem 0.56rem;
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.7rem;
+    }
+    .hero-card {
+      position: relative;
+      overflow: hidden;
+      padding: 1.4rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(20, 39, 31, 0.96), rgba(9, 22, 17, 0.96));
+      box-shadow: var(--shadow);
+    }
+    .hero-card::after {
+      position: absolute;
+      right: -35px;
+      bottom: -70px;
+      width: 190px;
+      height: 190px;
+      border: 32px solid rgba(128, 231, 169, 0.07);
+      border-radius: 50%;
+      content: "";
+    }
+    .principle {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 0.8rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--line-soft);
+    }
+    .principle:last-child { border: 0; }
+    .principle-index {
+      color: var(--green);
+      font-family: var(--mono);
+      font-size: 0.82rem;
+    }
+    .principle strong { display: block; margin-bottom: 0.16rem; font-size: 0.98rem; }
+    .principle span:last-child { color: var(--muted); font-size: 0.87rem; }
+
+    section { padding: 5rem 0; border-bottom: 1px solid var(--line-soft); }
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 0.72fr) minmax(280px, 1.28fr);
+      gap: 2rem;
+      align-items: start;
+      margin-bottom: 2.2rem;
+    }
+    h2 {
+      margin-bottom: 0;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      letter-spacing: -0.05em;
+      line-height: 1;
+    }
+    .section-intro { max-width: 680px; margin-bottom: 0; color: var(--muted); font-size: 1.05rem; }
+
+    .legend { display: flex; flex-wrap: wrap; gap: 0.55rem; margin: 0 0 1.2rem; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      min-height: 26px;
+      padding: 0.22rem 0.58rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .badge.current { border-color: rgba(128, 231, 169, 0.35); background: rgba(23, 62, 42, 0.52); color: var(--green); }
+    .badge.available { border-color: rgba(244, 198, 106, 0.35); background: rgba(74, 53, 21, 0.45); color: var(--amber); }
+    .badge.target { border-color: rgba(136, 199, 255, 0.35); background: rgba(22, 51, 77, 0.52); color: var(--blue); }
+
+    .pipeline-shell {
+      padding: 1.15rem;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(9, 23, 18, 0.68);
+      box-shadow: var(--shadow);
+    }
+    .scenario-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      align-items: center;
+      margin-bottom: 1.15rem;
+    }
+    .scenario-bar > span { margin-right: 0.2rem; color: var(--muted); font-size: 0.82rem; font-weight: 700; }
+    .scenario-button {
+      min-height: 42px;
+      padding: 0.6rem 0.84rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.84rem;
+      font-weight: 680;
+    }
+    .scenario-button:hover { border-color: #466457; color: var(--text); }
+    .scenario-button[aria-pressed="true"] { border-color: var(--green); background: var(--green-deep); color: var(--green); }
+    .scenario-button:focus-visible, .node:focus-visible { outline: 3px solid rgba(136, 199, 255, 0.5); outline-offset: 2px; }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(11, minmax(0, 1fr));
+      gap: 0.45rem;
+      align-items: stretch;
+    }
+    .node {
+      position: relative;
+      display: flex;
+      min-height: 152px;
+      padding: 0.88rem 0.72rem;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      flex-direction: column;
+      text-align: left;
+      transition: border-color 180ms ease, background 180ms ease, transform 180ms ease, opacity 180ms ease;
+    }
+    .node:not(:last-child)::after {
+      position: absolute;
+      z-index: 2;
+      top: 50%;
+      right: -0.52rem;
+      width: 0.52rem;
+      height: 1px;
+      background: #466457;
+      content: "";
+    }
+    .node:hover { transform: translateY(-2px); border-color: #526f62; }
+    .node.active { border-color: var(--green); background: linear-gradient(150deg, rgba(23, 62, 42, 0.86), rgba(13, 25, 21, 0.96)); }
+    .node.blocked { opacity: 0.34; }
+    .node.alert { border-color: var(--red); background: rgba(77, 34, 32, 0.55); }
+    .node.warn { border-color: var(--amber); background: rgba(74, 53, 21, 0.5); }
+    .node-num { margin-bottom: 0.62rem; color: var(--muted); font-family: var(--mono); font-size: 0.68rem; }
+    .node strong { font-size: 0.8rem; line-height: 1.2; }
+    .node small { margin-top: auto; padding-top: 0.65rem; color: var(--muted); font-size: 0.68rem; line-height: 1.35; }
+    .node .mini-status { margin-top: 0.55rem; color: var(--green); font-family: var(--mono); font-size: 0.64rem; text-transform: uppercase; }
+    .node.status-available .mini-status { color: var(--amber); }
+    .node.status-target .mini-status { color: var(--blue); }
+    .node.warn .mini-status { color: var(--amber); }
+    .node.alert .mini-status { color: var(--red); }
+
+    .trace-panel {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .trace-copy, .gate-result {
+      min-height: 132px;
+      padding: 1.15rem;
+      border: 1px solid var(--line-soft);
+      border-radius: 14px;
+      background: rgba(5, 15, 11, 0.56);
+    }
+    .trace-copy h3, .gate-result h3 { margin-bottom: 0.45rem; font-size: 1rem; }
+    .trace-copy p, .gate-result p { margin-bottom: 0; color: var(--muted); font-size: 0.88rem; }
+    .gate-result { display: flex; flex-direction: column; justify-content: space-between; }
+    .gate-pill {
+      display: inline-flex;
+      width: fit-content;
+      margin-top: 0.8rem;
+      padding: 0.55rem 0.72rem;
+      border: 1px solid rgba(128, 231, 169, 0.45);
+      border-radius: 9px;
+      background: var(--green-deep);
+      color: var(--green);
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      font-weight: 760;
+    }
+    .gate-pill.warn { border-color: rgba(244, 198, 106, 0.5); background: var(--amber-deep); color: var(--amber); }
+    .gate-pill.alert { border-color: rgba(255, 141, 131, 0.5); background: var(--red-deep); color: var(--red); }
+
+    .rr-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .rr-card {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 1rem;
+      padding: 1.3rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(16, 32, 26, 0.92), rgba(10, 21, 17, 0.92));
+    }
+    .rr-icon {
+      display: grid;
+      width: 52px;
+      height: 52px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #0a1712;
+      color: var(--green);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 760;
+    }
+    .rr-card h3 { margin-bottom: 0.28rem; font-size: 1.08rem; }
+    .rr-card p { margin-bottom: 0.85rem; color: var(--muted); font-size: 0.9rem; }
+    .owns { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .owns span {
+      padding: 0.28rem 0.48rem;
+      border-radius: 7px;
+      background: rgba(128, 231, 169, 0.07);
+      color: #b9cec3;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+    }
+
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .filter-button {
+      min-height: 40px;
+      padding: 0.52rem 0.78rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 680;
+    }
+    .filter-button[aria-pressed="true"] { border-color: var(--green); background: var(--green-deep); color: var(--green); }
+
+    .boundary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+    .boundary-card {
+      padding: 1.3rem;
+      border-top: 3px solid var(--green);
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      border-left: 1px solid var(--line);
+      border-radius: 4px 4px var(--radius) var(--radius);
+      background: var(--surface);
+    }
+    .boundary-card:nth-child(2) { border-top-color: var(--amber); }
+    .boundary-card:nth-child(3) { border-top-color: var(--red); }
+    .boundary-card h3 { margin-bottom: 0.5rem; font-size: 1.12rem; }
+    .boundary-card p { color: var(--muted); font-size: 0.9rem; }
+    .boundary-card ul { margin: 0; padding-left: 1.15rem; color: #c4d4cc; font-size: 0.87rem; }
+    .boundary-card li + li { margin-top: 0.35rem; }
+
+    .gate-table { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+    table { width: 100%; min-width: 700px; border-collapse: collapse; background: rgba(10, 23, 18, 0.72); }
+    th, td { padding: 1rem; border-bottom: 1px solid var(--line-soft); text-align: left; vertical-align: top; }
+    th { color: var(--muted); font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    td { font-size: 0.88rem; }
+    tbody tr:last-child td { border-bottom: 0; }
+    .state-label { font-family: var(--mono); font-size: 0.75rem; font-weight: 760; }
+    .state-label.normal { color: var(--green); }
+    .state-label.reduce { color: var(--amber); }
+    .state-label.defensive { color: var(--red); }
+    .state-label.internal { color: var(--blue); }
+
+    .maintenance {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 1rem;
+    }
+    .maintenance-card {
+      padding: 1.4rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    .maintenance-card h3 { margin-bottom: 0.45rem; }
+    .maintenance-card p { margin-bottom: 0; color: var(--muted); }
+    .mapping {
+      display: grid;
+      grid-template-columns: auto 32px 1fr;
+      gap: 0.55rem;
+      align-items: center;
+      margin-top: 1rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+    }
+    .mapping code { padding: 0.42rem 0.5rem; border: 1px solid var(--line-soft); border-radius: 7px; background: #07110d; }
+    .mapping span { color: var(--green); text-align: center; }
+
+    .chain-explorer {
+      padding: 1.15rem;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(9, 23, 18, 0.68);
+      box-shadow: var(--shadow);
+    }
+    .chain-controls { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+    .chain-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.7rem;
+    }
+    .chain-step {
+      position: relative;
+      min-height: 178px;
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+    .chain-step:not(:last-child)::after {
+      position: absolute;
+      z-index: 2;
+      top: 50%;
+      right: -0.72rem;
+      width: 0.72rem;
+      height: 1px;
+      background: var(--green);
+      content: "";
+    }
+    .chain-step small { color: var(--green); font-family: var(--mono); font-size: 0.68rem; text-transform: uppercase; }
+    .chain-step h3 { margin: 0.65rem 0 0.45rem; font-size: 1rem; }
+    .chain-step p { margin-bottom: 0.8rem; color: var(--muted); font-size: 0.83rem; }
+    .chain-step a { color: var(--blue); font-family: var(--mono); font-size: 0.72rem; overflow-wrap: anywhere; }
+
+    .coverage-panel {
+      display: grid;
+      grid-template-columns: 0.7fr 1.3fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .coverage-score, .coverage-items {
+      padding: 1.2rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    .coverage-number { display: block; color: var(--green); font-size: clamp(2.8rem, 6vw, 5rem); font-weight: 760; letter-spacing: -0.06em; line-height: 1; }
+    .coverage-score p { margin: 0.5rem 0 0; color: var(--muted); font-size: 0.86rem; }
+    .coverage-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
+    .coverage-link {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.62rem;
+      border-radius: 9px;
+      color: #cadbd2;
+      font-size: 0.82rem;
+      text-decoration: none;
+    }
+    .coverage-link:hover { background: rgba(128, 231, 169, 0.07); color: var(--green); }
+    .coverage-check { color: var(--green); font-family: var(--mono); }
+
+    .source-list { display: grid; gap: 0.7rem; }
+    .source-link {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.92rem 1rem;
+      border: 1px solid var(--line-soft);
+      border-radius: 12px;
+      color: #cadbd2;
+      text-decoration: none;
+    }
+    .source-link:hover { border-color: var(--green); color: var(--green); }
+    .source-link span:last-child { color: var(--muted); font-family: var(--mono); font-size: 0.73rem; }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 2rem;
+      padding: 2rem 0 3.5rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+    footer strong { color: var(--text); }
+
+    @media (max-width: 980px) {
+      .pipeline { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .node:not(:last-child)::after { display: none; }
+      .rr-grid { grid-template-columns: 1fr; }
+      .chain-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .chain-step:not(:last-child)::after { display: none; }
+    }
+
+    @media (max-width: 760px) {
+      nav { display: none; }
+      .hero, .section-head, .trace-panel, .maintenance, .coverage-panel { grid-template-columns: 1fr; }
+      .hero { min-height: auto; padding: 4rem 0 3rem; }
+      .hero-card { max-width: 520px; }
+      section { padding: 3.6rem 0; }
+      .pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .boundary-grid { grid-template-columns: 1fr; }
+      .coverage-list { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 0.4rem; }
+    }
+
+    @media (max-width: 440px) {
+      .pipeline { grid-template-columns: 1fr; }
+      .chain-grid { grid-template-columns: 1fr; }
+      .node { min-height: 118px; }
+      .rr-card { grid-template-columns: 1fr; }
+      h1 { font-size: clamp(2.65rem, 16vw, 4rem); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    }
+  </style>
+  <script type="application/json" id="asset-metadata">
+  {
+    "schema_version": 1,
+    "id": "billionary-trader-system-design",
+    "title": "Billionary Trader System Design & R&R",
+    "summary": "Explore the evidence flow, responsibilities, risk gates, and execution boundaries of a read-first trading review system.",
+    "kind": "Demo",
+    "stream": "Build",
+    "topics": ["Financial intelligence", "System design", "Risk management"],
+    "status": "Interactive system explainer",
+    "visibility": "public",
+    "rights": "All rights reserved. Contact the author for reuse.",
+    "dates": {}
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top" aria-label="Billionary Trader system overview">
+        <span class="brand-mark" aria-hidden="true">BT</span>
+        <span>Billionary Trader</span>
+      </a>
+      <nav aria-label="Page sections">
+        <a href="#flow">System flow</a>
+        <a href="#roles">R&amp;R</a>
+        <a href="#guardrails">Guardrails</a>
+        <a href="#maintenance">Source chain</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">System design · responsibilities · boundaries</p>
+        <h1 id="page-title">Evidence in.<br><span>Guardrails first.</span><br>Decisions out.</h1>
+        <p class="lede">Billionary Trader is a read-first decision system for account review, position risk, research, and recommendation generation. Its core promise is traceable evidence—not autonomous execution.</p>
+        <ul class="creed-list" aria-label="Core creed">
+          <li>no unsupported assumptions</li>
+          <li>periodic data cleanup</li>
+          <li>account risk first</li>
+          <li>stale data = wait</li>
+          <li>execution stays separate</li>
+        </ul>
+      </div>
+      <aside class="hero-card" aria-label="Three design pillars">
+        <p class="kicker">Three design pillars</p>
+        <div class="principle">
+          <span class="principle-index">01</span>
+          <span><strong>Continuous self-learning</strong><span>Replay misses, measure drift, and reduce exposure when quality decays.</span></span>
+        </div>
+        <div class="principle">
+          <span class="principle-index">02</span>
+          <span><strong>Walk-forward validation</strong><span>Ground directional views in out-of-sample evidence and regime context.</span></span>
+        </div>
+        <div class="principle">
+          <span class="principle-index">03</span>
+          <span><strong>Deterministic guardrails</strong><span>Data freshness, account risk, and human review can stop the flow.</span></span>
+        </div>
+      </aside>
+    </section>
+
+    <section id="flow" aria-labelledby="flow-title">
+      <div class="section-head">
+        <div>
+          <p class="kicker">01 · System flow</p>
+          <h2 id="flow-title">Trace the review pipeline</h2>
+        </div>
+        <p class="section-intro">Choose an operating condition to see which parts proceed, which guardrail owns the stop, and what output is permitted. Select any stage for its responsibility.</p>
+      </div>
+
+      <div class="legend" aria-label="Implementation legend">
+        <span class="badge current">Current core</span>
+        <span class="badge available">Available outside review</span>
+        <span class="badge target">Contracted / target</span>
+      </div>
+
+      <div class="pipeline-shell">
+        <div class="scenario-bar" aria-label="Operating condition">
+          <span>Trace condition</span>
+          <button class="scenario-button" id="reset" type="button" data-scenario="normal" aria-pressed="true">Fresh data / reset</button>
+          <button class="scenario-button" id="failure" type="button" data-scenario="stale" aria-pressed="false">Stale data</button>
+          <button class="scenario-button" type="button" data-scenario="drawdown" aria-pressed="false">12% drawdown</button>
+          <button class="scenario-button" type="button" data-scenario="broker" aria-pressed="false">Broker risk call</button>
+          <button class="scenario-button" id="next" type="button">Next stage →</button>
+          <button class="scenario-button" id="play" type="button" aria-pressed="false">Auto trace</button>
+        </div>
+
+        <div class="pipeline" id="pipeline" aria-label="Ordered system stages"></div>
+
+        <div class="trace-panel" id="status" aria-live="polite">
+          <article class="trace-copy">
+            <h3 id="detail-title">Broker runtime</h3>
+            <p id="detail-copy">Retrieves account, positions, orders, fills, and quotes, then normalizes them into shared contracts. It does not give advice or place live orders.</p>
+          </article>
+          <article class="gate-result">
+            <div>
+              <h3>Permitted output</h3>
+              <p id="gate-copy">A reviewable recommendation packet may be produced. Execution remains a separate, explicitly authorized phase.</p>
+            </div>
+            <span class="gate-pill" id="gate-pill">NORMAL</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="roles" aria-labelledby="roles-title">
+      <div class="section-head">
+        <div>
+          <p class="kicker">02 · R&amp;R</p>
+          <h2 id="roles-title">One owner per concern</h2>
+        </div>
+        <p class="section-intro">Each top-level area owns a distinct responsibility. Shared contracts connect the areas; decision logic stays out of data adapters, and execution stays outside analysis.</p>
+      </div>
+
+      <div class="filter-bar" aria-label="Filter responsibilities">
+        <button class="filter-button" type="button" data-filter="all" aria-pressed="true">All responsibilities</button>
+        <button class="filter-button" type="button" data-filter="runtime" aria-pressed="false">Runtime</button>
+        <button class="filter-button" type="button" data-filter="evidence" aria-pressed="false">Evidence</button>
+        <button class="filter-button" type="button" data-filter="governance" aria-pressed="false">Governance</button>
+      </div>
+
+      <div class="rr-grid" id="responsibility-grid" aria-live="polite">
+        <article class="rr-card" data-group="governance">
+          <span class="rr-icon" aria-hidden="true">CFG</span>
+          <div><h3><code>config/</code></h3><p>Reserved configuration surface. The directory currently has no active files; new configuration needs a real consumer and owner.</p><div class="owns"><span>reserved</span><span>currently empty</span></div></div>
+        </article>
+        <article class="rr-card" data-group="evidence">
+          <span class="rr-icon" aria-hidden="true">DAT</span>
+          <div><h3><code>data/</code></h3><p>Stores market, account, lesson, backtest, optimization, and report evidence with enough provenance to reproduce a decision.</p><div class="owns"><span>snapshots</span><span>market history</span><span>generated artifacts</span></div></div>
+        </article>
+        <article class="rr-card" data-group="evidence">
+          <span class="rr-icon" aria-hidden="true">LOG</span>
+          <div><h3><code>log/</code></h3><p>Records observable behavior, scans, evaluations, and recommendation events. Every log family maps to its source module or skill.</p><div class="owns"><span>singular path</span><span>run history</span><span>source owner</span></div></div>
+        </article>
+        <article class="rr-card" data-group="runtime">
+          <span class="rr-icon" aria-hidden="true">TSK</span>
+          <div><h3><code>src/task/</code></h3><p>Reserved task surface. It currently contains no implementation, and there is no top-level <code>task/</code> directory.</p><div class="owns"><span>reserved</span><span>currently empty</span></div></div>
+        </article>
+        <article class="rr-card" data-group="runtime">
+          <span class="rr-icon" aria-hidden="true">SKL</span>
+          <div><h3><code>skillset/</code></h3><p>Holds LLM-facing contracts for review, risk, broker access, playbooks, optimization, data management, and explanation.</p><div class="owns"><span>renamed from skill_component</span><span>domain policy</span><span>playbooks</span></div></div>
+        </article>
+        <article class="rr-card" data-group="runtime">
+          <span class="rr-icon" aria-hidden="true">SRC</span>
+          <div><h3><code>src/billionary_trader/</code></h3><p>Owns the native account-review runtime, cross-skill contracts, orchestration, and deterministic guardrails.</p><div class="owns"><span>review runtime</span><span>guardrails</span><span>human-reviewed changes</span></div></div>
+        </article>
+        <article class="rr-card" data-group="runtime">
+          <span class="rr-icon" aria-hidden="true">QNT</span>
+          <div><h3>Quant engine packages</h3><p><code>src/backtesting/</code>, <code>market_data/</code>, <code>playbook/</code>, and support packages own research, simulation, evaluation, features, and charting.</p><div class="owns"><span>walk-forward</span><span>data quality</span><span>simulation</span></div></div>
+        </article>
+        <article class="rr-card" data-group="governance">
+          <span class="rr-icon" aria-hidden="true">DOC</span>
+          <div><h3><code>docs/</code></h3><p>Owns the canonical system map and web view. <code>docs/plan/</code> is planning context, not proof of implementation.</p><div class="owns"><span>current design</span><span>provenance</span><span>target plans</span></div></div>
+        </article>
+        <article class="rr-card" data-group="governance">
+          <span class="rr-icon" aria-hidden="true">HUM</span>
+          <div><h3>Human reviewer</h3><p>Approves guardrail-layer changes and owns the explicit decision to move from review, to ticket generation, to execution.</p><div class="owns"><span>approval</span><span>exceptions</span><span>execution authority</span></div></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="guardrails" aria-labelledby="guardrails-title">
+      <div class="section-head">
+        <div>
+          <p class="kicker">03 · Safety boundaries</p>
+          <h2 id="guardrails-title">Review is not execution</h2>
+        </div>
+        <p class="section-intro">The system can collect evidence, assess risk, and prepare advice. A recommendation does not grant authority to unlock or submit broker orders.</p>
+      </div>
+
+      <div class="boundary-grid">
+        <article class="boundary-card">
+          <h3>1. Review</h3>
+          <p>Read-only evidence collection and analysis.</p>
+          <ul><li>Account, positions, orders, quotes</li><li>Data quality and freshness</li><li>Risk, lessons, and playbook evidence</li></ul>
+        </article>
+        <article class="boundary-card">
+          <h3>2. Ticket generation</h3>
+          <p>A structured, reviewable action proposal.</p>
+          <ul><li>Action and rationale</li><li>Invalidation and risk budget</li><li>Evidence gaps and no-trade reasons</li></ul>
+        </article>
+        <article class="boundary-card">
+          <h3>3. Execution</h3>
+          <p>A separate phase requiring explicit authority.</p>
+          <ul><li>No implied broker unlock</li><li>No order from analysis alone</li><li>Human review remains the boundary</li></ul>
+        </article>
+      </div>
+
+      <div class="gate-table" style="margin-top: 1rem;">
+        <table>
+          <thead><tr><th>Gate</th><th>Trigger examples</th><th>System bias</th><th>What remains allowed</th></tr></thead>
+          <tbody>
+            <tr><td><span class="state-label normal">NORMAL</span></td><td>Fresh evidence; no account-level defensive trigger.</td><td>Standard position review.</td><td>Hold, roll, trim, or wait recommendations with evidence.</td></tr>
+            <tr><td><span class="state-label reduce">REDUCE_RISK_BIAS</span></td><td>Drawdown at or below −10%; three comparable declining snapshots.</td><td>Prioritize risk reduction and explicit invalidation.</td><td>Defensive trimming and tightly bounded recommendations.</td></tr>
+            <tr><td><span class="state-label defensive">DEFENSIVE_ONLY</span></td><td>Drawdown at or below −20%; broker call, liquidation, or deficit status.</td><td>No new unhedged directional exposure.</td><td>Portfolio defense and human-reviewed risk actions.</td></tr>
+            <tr><td><span class="state-label defensive">WAIT / UNCONFIRMED</span></td><td>Missing or stale broker, quote, or option-chain evidence.</td><td>Stop the affected recommendation path.</td><td>Request fresh data; describe the evidence gap.</td></tr>
+            <tr><td><span class="state-label internal">RESTRICT_DIRECTIONAL</span></td><td>Evaluation finds at least one failed or two malformed recommendations.</td><td>Intermediate evaluation-only restriction.</td><td>The native final-gate aggregator raises this to <code>DEFENSIVE_ONLY</code>.</td></tr>
+            <tr><td><span class="state-label internal">REQUIRE_HUMAN_REVIEW</span></td><td>Evaluation finds at least three failed or five malformed recommendations.</td><td>Intermediate evaluation-only stop.</td><td>The native final-gate aggregator raises this to <code>DEFENSIVE_ONLY</code>.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="section-intro" style="margin-top: 1rem;">Option positions are evaluated as grouped operations. A short front leg, a long back leg, or any single contract cannot establish the safety of the whole spread by itself.</p>
+    </section>
+
+    <section id="maintenance" aria-labelledby="maintenance-title">
+      <div class="section-head">
+        <div>
+          <p class="kicker">04 · Source chain</p>
+          <h2 id="maintenance-title">Trace every claim</h2>
+        </div>
+        <p class="section-intro">Choose a concern to follow it from real implementation or evidence, through canonical documentation and the README, into this web view.</p>
+      </div>
+
+      <div class="chain-explorer">
+        <div class="chain-controls" aria-label="Choose a source chain concern" id="chain-controls"></div>
+        <div class="chain-grid" id="chain-grid" aria-live="polite"></div>
+      </div>
+
+      <div class="coverage-panel">
+        <article class="coverage-score">
+          <p class="kicker">README coverage</p>
+          <span class="coverage-number">100%</span>
+          <p>Every responsibility, pillar, gate, safety boundary, and maintenance rule in the aligned README has a web destination.</p>
+        </article>
+        <article class="coverage-items">
+          <div class="coverage-list">
+            <a class="coverage-link" href="#top"><span class="coverage-check">✓</span>Core creed</a>
+            <a class="coverage-link" href="#flow"><span class="coverage-check">✓</span>Implemented review flow</a>
+            <a class="coverage-link" href="#roles"><span class="coverage-check">✓</span>Repository R&amp;R</a>
+            <a class="coverage-link" href="#top"><span class="coverage-check">✓</span>Three design pillars</a>
+            <a class="coverage-link" href="#guardrails"><span class="coverage-check">✓</span>Final + evaluation gates</a>
+            <a class="coverage-link" href="#guardrails"><span class="coverage-check">✓</span>Grouped option rule</a>
+            <a class="coverage-link" href="#guardrails"><span class="coverage-check">✓</span>Execution boundary</a>
+            <a class="coverage-link" href="#maintenance"><span class="coverage-check">✓</span>Documentation chain</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="sources" aria-labelledby="sources-title">
+      <div class="section-head">
+        <div>
+          <p class="kicker">05 · Sources</p>
+          <h2 id="sources-title">Grounded in the repository</h2>
+        </div>
+        <p class="section-intro">Claims on this page are summarized from the current README, skill contracts, native implementation, and target architecture plan.</p>
+      </div>
+      <div class="source-list">
+        <a class="source-link" href="system-design.md"><span>Canonical current-state design and provenance map</span><span>docs/system-design.md</span></a>
+        <a class="source-link" href="../readme.md"><span>Core philosophy, top-level R&amp;R, design pillars</span><span>readme.md</span></a>
+        <a class="source-link" href="../skillset/review-orchestrator/skill.md"><span>Review pipeline contract and current implementation scope</span><span>review-orchestrator</span></a>
+        <a class="source-link" href="../skillset/risk_management/account-risk/skill.md"><span>Account gate states and thresholds</span><span>account-risk</span></a>
+        <a class="source-link" href="../skillset/risk_management/option-risk/skill.md"><span>Grouped option-operation risk responsibilities</span><span>option-risk</span></a>
+        <a class="source-link" href="../skillset/external_service/moomoo/skill.md"><span>Broker adapter responsibilities and non-responsibilities</span><span>broker-runtime</span></a>
+        <a class="source-link" href="plan/world-class-quant-engine-deployment-plan.md"><span>Target architecture, output artifacts, and execution boundaries</span><span>deployment plan</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span><strong>Billionary Trader</strong> · System Design &amp; R&amp;R</span>
+    <span>Documentation surface · No live broker actions</span>
+  </footer>
+
+  <script>
+    const stages = [
+      { id: "contracts", label: "Contracts & knowledge", short: "schemas + policy", status: "available", detail: "Shared schemas, policy, and historical context define the evidence boundary used by native modules and LLM-facing skill contracts." },
+      { id: "evaluation", label: "Evaluation gate", short: "quality history", status: "current", detail: "The current review path scores prior recommendations first. Failures or malformed records can restrict directional advice or require human review." },
+      { id: "broker", label: "Broker runtime", short: "account + market", status: "current", detail: "The current review path retrieves account, positions, and open orders. The adapter also exposes fills and quotes, but never advice or live order submission." },
+      { id: "account", label: "Snapshot + account risk", short: "portfolio gate", status: "current", detail: "The current review path saves an account snapshot, then evaluates trend, drawdown, concentration, cash, margin, and broker risk status." },
+      { id: "lessons", label: "Lesson replay", short: "misses + drift", status: "current", detail: "The current review path matches saved lessons against positions, calculates risk signals, and contributes a reduction hint to the final gate." },
+      { id: "positions", label: "Position operations", short: "grouped exposure", status: "current", detail: "The current review path groups stock and option legs into operations so advice addresses the whole position rather than isolated contracts." },
+      { id: "options", label: "Option risk", short: "greeks + spread", status: "target", detail: "The contract requires DTE, Greeks, liquidity, assignment, IV, and whole-spread economics. Full option-risk reporting is not currently called by build_review()." },
+      { id: "market", label: "Market context", short: "regime + levels", status: "available", detail: "FVG, technical, regime, and scanner implementations exist as independent paths, but the current native review does not call them." },
+      { id: "playbooks", label: "Playbook research", short: "strategy evidence", status: "available", detail: "Playbook and backtesting packages exist for research and validation. A playbook must carry reproducible out-of-sample evidence before forward use." },
+      { id: "optimizer", label: "Portfolio optimizer", short: "size + conflicts", status: "target", detail: "A partial account-play optimizer exists outside the native review. Portfolio optimization remains a contracted integration rather than a build_review() stage." },
+      { id: "output", label: "Review packet", short: "review only", status: "current", detail: "The current path returns account evidence, evaluation and lesson reports, orders, grouped operations, urgent items, and a final gate. It does not append an order or authorize execution." }
+    ];
+
+    const scenarios = {
+      normal: {
+        gate: "NORMAL",
+        className: "",
+        copy: "A reviewable recommendation packet may be produced. Execution remains a separate, explicitly authorized phase.",
+        activeThrough: 10,
+        emphasis: null
+      },
+      stale: {
+        gate: "WAIT / UNCONFIRMED",
+        className: "alert",
+        copy: "Required evidence is stale. The affected recommendation path stops until fresh broker, quote, or option-chain data is available.",
+        activeThrough: 2,
+        emphasis: 2
+      },
+      drawdown: {
+        gate: "REDUCE_RISK_BIAS",
+        className: "warn",
+        copy: "A 12% drawdown crosses the −10% threshold. Advice must prioritize risk reduction and include explicit invalidation levels.",
+        activeThrough: 10,
+        emphasis: 3
+      },
+      broker: {
+        gate: "DEFENSIVE_ONLY",
+        className: "alert",
+        copy: "A broker call, liquidation, or deficit state forces portfolio defense. No new long or directional exposure is permitted without explicit hedging and review.",
+        activeThrough: 10,
+        emphasis: 3
+      }
+    };
+
+    const chains = {
+      review: {
+        label: "Native review",
+        steps: [
+          ["Real code", "Runtime orchestration", "Calls evaluation, broker, account risk, lessons, and positions.", "../src/billionary_trader/review.py"],
+          ["Canonical doc", "Current native review path", "Records the actual call order and outputs.", "system-design.md#current-native-review-path"],
+          ["README", "Implemented review flow", "Provides the concise repository entry point.", "../readme.md#implemented-review-flow"],
+          ["Web", "Interactive pipeline", "Simulates normal and defensive review paths.", "#flow"]
+        ]
+      },
+      broker: {
+        label: "Broker boundary",
+        steps: [
+          ["Real code", "Native broker adapter", "Normalizes account, positions, orders, fills, and quotes.", "../src/billionary_trader/broker.py"],
+          ["Canonical doc", "Implemented path + boundary", "Marks collection as implemented and execution as out of scope.", "system-design.md#current-native-review-path"],
+          ["README", "Safety boundary", "Separates review, ticket generation, and execution.", "../readme.md#safety-boundary"],
+          ["Web", "Review is not execution", "Shows the three explicit phases.", "#guardrails"]
+        ]
+      },
+      risk: {
+        label: "Account risk",
+        steps: [
+          ["Real code", "Account risk engine", "Computes drawdown, concentration, margin, and directive.", "../src/billionary_trader/account_risk.py"],
+          ["Canonical doc", "Decision and safety states", "Documents triggers and final effects.", "system-design.md#decision-and-safety-states"],
+          ["README", "Deterministic guardrails", "Summarizes final and evaluation-only gates.", "../readme.md#3-deterministic-guardrails"],
+          ["Web", "Scenario simulator", "Makes drawdown and broker-risk effects observable.", "#flow"]
+        ]
+      },
+      research: {
+        label: "Quant research",
+        steps: [
+          ["Real code/assets", "Research engine", "Market data, backtests, playbooks, and saved artifacts.", "../src/backtesting/engine.py"],
+          ["Canonical doc", "Available extensions", "Separates available research from live review integration.", "system-design.md#available-and-contracted-extensions"],
+          ["README", "Walk-forward validation", "States the evidence standard for directional claims.", "../readme.md#2-walk-forward-validation"],
+          ["Web", "Pipeline status", "Labels playbook research as available, not current review.", "#flow"]
+        ]
+      },
+      evidence: {
+        label: "Data + logs",
+        steps: [
+          ["Real assets", "Evidence stores", "Account snapshots, market history, reports, and run outputs.", "../data/account/account_snapshots.jsonl"],
+          ["Canonical doc", "Responsibility map", "Defines data as evidence and log as observable output.", "system-design.md#top-level-responsibility-map"],
+          ["README", "Repository structure", "Uses the real data/ and singular log/ names.", "../readme.md#repository-structure-and-responsibilities"],
+          ["Web", "R&R explorer", "Filters runtime, evidence, and governance owners.", "#roles"]
+        ]
+      }
+    };
+
+    const pipeline = document.querySelector("#pipeline");
+    const detailTitle = document.querySelector("#detail-title");
+    const detailCopy = document.querySelector("#detail-copy");
+    const gatePill = document.querySelector("#gate-pill");
+    const gateCopy = document.querySelector("#gate-copy");
+
+    stages.forEach((stage, index) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `node status-${stage.status}`;
+      button.dataset.index = String(index);
+      const statusLabel = stage.status === "current" ? "current core" : stage.status === "available" ? "available" : "contracted";
+      button.innerHTML = `<span class="node-num">${String(index + 1).padStart(2, "0")}</span><strong>${stage.label}</strong><span class="mini-status">${statusLabel}</span><small>${stage.short}</small>`;
+      button.addEventListener("click", () => showStage(index));
+      pipeline.appendChild(button);
+    });
+
+    let currentStage = 2;
+    let traceTimer = null;
+
+    function showStage(index) {
+      const stage = stages[index];
+      currentStage = index;
+      document.querySelectorAll(".node").forEach((node, nodeIndex) => node.classList.toggle("active", nodeIndex === index));
+      detailTitle.textContent = stage.label;
+      detailCopy.textContent = stage.detail;
+    }
+
+    function setScenario(name) {
+      stopTrace();
+      const scenario = scenarios[name];
+      document.querySelectorAll(".scenario-button").forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.scenario === name));
+      });
+      document.querySelectorAll(".node").forEach((node, index) => {
+        node.classList.remove("blocked", "alert", "warn");
+        if (index > scenario.activeThrough) node.classList.add("blocked");
+        if (index === scenario.emphasis) node.classList.add(scenario.className);
+      });
+      gatePill.textContent = scenario.gate;
+      gatePill.className = `gate-pill ${scenario.className}`.trim();
+      gateCopy.textContent = scenario.copy;
+      showStage(scenario.emphasis ?? 2);
+    }
+
+    function stopTrace() {
+      if (traceTimer) window.clearInterval(traceTimer);
+      traceTimer = null;
+      const play = document.querySelector("#play");
+      play.textContent = "Auto trace";
+      play.setAttribute("aria-pressed", "false");
+    }
+
+    function startTrace() {
+      stopTrace();
+      setScenario("normal");
+      currentStage = 0;
+      showStage(0);
+      const play = document.querySelector("#play");
+      play.textContent = "Stop trace";
+      play.setAttribute("aria-pressed", "true");
+      traceTimer = window.setInterval(() => {
+        if (currentStage >= stages.length - 1) {
+          stopTrace();
+          return;
+        }
+        showStage(currentStage + 1);
+      }, 1050);
+    }
+
+    function renderChain(name) {
+      const chain = chains[name];
+      document.querySelectorAll("[data-chain]").forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.chain === name));
+      });
+      document.querySelector("#chain-grid").innerHTML = chain.steps.map((step, index) => `
+        <article class="chain-step">
+          <small>0${index + 1} · ${step[0]}</small>
+          <h3>${step[1]}</h3>
+          <p>${step[2]}</p>
+          <a href="${step[3]}">${step[3]}</a>
+        </article>
+      `).join("");
+    }
+
+    document.querySelectorAll(".scenario-button").forEach((button) => {
+      if (button.dataset.scenario) button.addEventListener("click", () => setScenario(button.dataset.scenario));
+    });
+
+    document.querySelector("#next").addEventListener("click", () => {
+      stopTrace();
+      const nextStage = (currentStage + 1) % stages.length;
+      showStage(nextStage);
+      document.querySelectorAll(".node")[nextStage].focus();
+    });
+
+    document.querySelector("#play").addEventListener("click", () => {
+      if (traceTimer) stopTrace(); else startTrace();
+    });
+
+    document.querySelectorAll(".filter-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        const filter = button.dataset.filter;
+        document.querySelectorAll(".filter-button").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+        document.querySelectorAll(".rr-card").forEach((card) => {
+          card.hidden = filter !== "all" && card.dataset.group !== filter;
+        });
+      });
+    });
+
+    const chainControls = document.querySelector("#chain-controls");
+    Object.entries(chains).forEach(([key, chain], index) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "filter-button";
+      button.dataset.chain = key;
+      button.setAttribute("aria-pressed", String(index === 0));
+      button.textContent = chain.label;
+      button.addEventListener("click", () => renderChain(key));
+      chainControls.appendChild(button);
+    });
+
+    setScenario("normal");
+    renderChain("review");
+  </script>
+</body>
+</html>
+
