@@ -393,13 +393,18 @@
     },
     {
       "path": "post/executive-leveling-compensation-benchmark/index.html",
-      "sha256": "4bed155440cd7cfac98d7d79b58b96c00e0c0b2dfd3f225d82e1236d7240f060",
-      "bytes": 57744
+      "sha256": "ff1bb7691830134d600061f462a99fbcf1d667a8d14d54c0920f2c590b603b33",
+      "bytes": 61112
     },
     {
       "path": "post/executive-leveling-compensation-benchmark/ref-knowledge.md",
-      "sha256": "aac9dca26b2c893bb9086ba9d0e8afc0ccfcd15e1abaea5b3aa0b50aa4d1b0f4",
-      "bytes": 12932
+      "sha256": "08287914c41ddacaebe985c1636aa872ebe50acc0ae8638fe30e0ef6bcc8201a",
+      "bytes": 13704
+    },
+    {
+      "path": "post/executive-leveling-compensation-benchmark/ref-tsmc-grade.md",
+      "sha256": "d3be2d08783df7f05d476a187d6ba02af1a5cc7519cf8c54f4f6c61c448a5fca",
+      "bytes": 1324
     },
     {
       "path": "post/executive-leveling-compensation-benchmark/sg_government_bank_taiwan_tsmc_asml_crosswalk.html",

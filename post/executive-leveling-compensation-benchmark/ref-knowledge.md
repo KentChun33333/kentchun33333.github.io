@@ -6,7 +6,9 @@ This reference knowledge document establishes the verified structural facts, lev
 - notice OCBC VP is about TSMC manager (G35)
 - UOB AVP1 is 32, VP1 is 33, VP2 is 34 , FVP is 35 in grade mapping to TSMC
 - using salary mapping for SG gov to UOB to OCBC
-- where OCBC senior AVP (also called AVP) will start to lead people like G33/G34 in TSMC
+- where OCBC senior AVP (also called AVP) will start to lead people like G33/G34 in TSMC, but still have AVP, VP is actly like G34/G35/G36 as senior IC. 
+
+- in TSMC G34 is technical manager, G35 is manager G36 is department manager 
 
 ---
 
@@ -28,15 +30,16 @@ To resolve cross-border currency disparities, institutional pay constraints, and
   (PermSec: Top Civil Servant)                                             (簡任14頂 常務次長)
 
 [Axis 3: Tech-to-Banking Job Grade Bridging]
-  ASML (Global JG)  <=== Job Grade ===>  TSMC (TW Grade)  <=== Job Grade ===>  UOB & OCBC Titles
-  JG6  (Junior Eng)                      G31 (工程師)                          Analyst / Officer
-  JG7/8 (Senior Eng)                     G32/33 (資深/主任工程師)               AM / Manager
-  JG9  (Lead Eng)                        G34 (副理)                            UOB AVP1/2 | OCBC AVP
-  JG10 (Principal / GL)                  G35 (部理)                            UOB VP1/2  | OCBC VP
-  JG11/12 (Director / Fellow)            G36 (處長)                            UOB FVP/SVP | OCBC ED
-  JG13 (Senior Director)                 G37 (資深處長)                        UOB ED      | OCBC MD
-  JG14 (Vice President)                  G38 (副總裁)                          UOB Senior MD | OCBC MD1
-  JG15/16 (SVP / EVP / BoM)              G39 (資深副總/執行副總)                UOB Top SMD | OCBC GMD
+  ASML (Global JG)  <=== Job Grade ===>  TSMC (TW Grade & Title)              <=== Grade Mapping ===>  UOB & OCBC Titles
+  JG6  (Junior Eng)                      G31 (工程師)                                                  Analyst / Officer
+  JG7/8 (Senior Eng)                     G32/33 (資深/主任工程師)                                      UOB AVP1 (G32) / VP1 (G33) | OCBC AM
+  JG9  (Lead Eng)                        G34 (Technical Manager 技術副理/課長)                         UOB VP2 (G34) | OCBC Senior AVP (People Lead)
+  JG10 (Principal / GL)                  G35 (Manager 部理/經理)                                       UOB FVP (G35) | OCBC VP (≈ TSMC G35 / Senior IC)
+  JG11/12 (Director / Fellow)            G36 (Department Manager 部經理/處長/廠長)                      UOB SVP | OCBC VP (Core/Senior) / ED edge
+  JG13 (Senior Director)                 G37 (Senior Director 資深處長/晶圓廠長)                       UOB SVP / ED | OCBC ED (S$260k–380k)
+  JG14 (Vice President)                  G37/38 (Senior Dir Top / VP Candidate)                        UOB ED / MD | OCBC MD (S$350k–520k+)
+  JG15 (Senior VP)                       G38 (Vice President 副總裁 VP)                                UOB Senior MD | OCBC MD1 / GMD
+  JG16 / BoM (Executive Board)           G39 (Senior VP / EVP 資深副總/執行副總)                       UOB Top Senior MD | OCBC GMD (CTO/COO)
 ```
 
 ---
@@ -129,14 +132,14 @@ Tech companies price technical competence through individual contributor (IC) an
 | ASML Global Grade | TSMC Equivalent Grade | TSMC 中文職稱與組織範疇 | UOB Title (Ladders) | OCBC Title (Ladders) |
 | :--- | :--- | :--- | :--- | :--- |
 | **JG 6** | **G31** | 工程師 / 主任助理 (Associate / Eng) | Analyst / Officer | Analyst / Officer |
-| **JG 7 / 8** | **G32 / G33** | 資深工程師 / 主任工程師 (Senior Eng / Tech Lead) | Senior Officer / AM / Manager | Assistant Manager (AM) |
-| **JG 9** | **G34** | 副理 / 課長 (Section Manager / Deputy Mgr) | **AVP1 / AVP2** | **AVP** |
-| **JG 10** | **G35** | 部理 / 部門經理 (Department Manager) | **VP1 / VP2** | **VP (Junior / Core)** |
-| **JG 11 / 12** | **G36** | 處長 / 廠長 (Director / Plant Manager) | **FVP / SVP entry** | **VP (Core / Senior) / ED edge** |
-| **JG 13** | **G37** | 資深處長 / 晶圓廠長 (Senior Director / Fab Director) | **SVP / ED** | **ED (Executive Director)** |
-| **JG 14** | **G37/38** | 資深處長頂層 / 副總裁候選 (Senior Dir / VP Candidate) | **ED / MD** | **MD / MD1 (Cluster Head)** |
-| **JG 14 / 15** | **G38** | 副總裁 (Vice President / VP) | **Senior MD / ExCo** | **MD1 / GMD (CTO/COO Scope)** |
-| **JG 15 / 16** | **G39** | 資深副總裁 / 執行副總 (SVP / EVP) | **Top Senior MD / Group CTO/COO** | **GMD (Group Managing Director / Group CTO/COO)** |
+| **JG 7 / 8** | **G32 / G33** | 資深工程師 / 主任工程師 (Senior Eng / Tech Lead) | **AVP1 (G32) / VP1 (G33)** | **AM / AVP lower band** |
+| **JG 9** | **G34** | Technical Manager (技術副理 / 課長) | **AVP2 / VP2 (G34 mapping)** | **AVP (Core / Senior People Lead)** |
+| **JG 10** | **G35** | Manager (部理 / 經理) | **VP2 / FVP (G35 mapping)** | **VP (≈ TSMC G35 Manager / Senior IC)** |
+| **JG 11 / 12** | **G36** | Department Manager (部經理 / 處長 / 廠長) | **FVP / SVP entry** | **VP (Core/Senior: S$200k–300k) / ED edge** |
+| **JG 13** | **G37** | Senior Director (資深處長 / 晶圓廠長) | **SVP / ED** | **ED (Executive Director: S$260k–380k)** |
+| **JG 14** | **G37/38** | Senior Director Top / VP Candidate (資深處長 / 副總裁候選) | **ED / MD** | **MD (Managing Director: S$350k–520k+)** |
+| **JG 14 / 15** | **G38** | Vice President (副總裁 VP · 報告CEO/董事長) | **Senior MD / ExCo** | **MD1 / GMD (CTO/COO Scope)** |
+| **JG 15 / 16** | **G39** | Senior VP / Executive VP (資深副總裁 / 執行副總) | **Top Senior MD / Group CTO/COO** | **GMD (Group Managing Director / CTO / COO)** |
 
 ---
 
