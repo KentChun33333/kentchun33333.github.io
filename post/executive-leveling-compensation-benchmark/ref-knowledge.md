@@ -4,113 +4,134 @@ This reference knowledge document establishes the verified structural facts, lev
 
 ---
 
-## 1. Verified Institutional Hierarchies (As of January 2026)
+## 1. The Tri-Fold Mapping Methodology
 
-### 1.1 Singapore Banking: United Overseas Bank (UOB) Ladder
-UOB uses an 8-stage executive hierarchy from Assistant Vice President to Managing Director:
+To resolve cross-border currency disparities, institutional pay constraints, and varying corporate titles, this benchmark employs a rigorous **Three-Axis Alignment Architecture**:
+
 ```text
-Analyst → Senior Analyst → Assistant Manager → Manager →
-AVP1 (Assistant Vice President 1) →
-AVP2 (Assistant Vice President 2) →
-VP1 (Vice President 1) →
-VP2 (Vice President 2) →
-FVP (First Vice President) →
-SVP (Senior Vice President) →
-ED (Executive Director) →
-MD (Managing Director) →
-Senior MD / Group ExCo / C-Suite
+[Axis 1: Singapore Domestic TC Matching]
+  OCBC Bank  <====== Total Comp ======>  UOB Bank  <====== Total Comp ======>  SG Gov (MX Scheme)
+  (AVP: S$120-190k)                      (AVP2 & VP1)                           (MX11 & MX11A)
+  (VP:  S$200-300k)                      (VP2, FVP, lower SVP)                  (MX9 Superscale Entry)
+
+[Axis 2: Institutional Scope Alignment]
+  SG Gov (MX / Superscale / Political)  <====== Job Grade & Scope ======>  Taiwan Gov (委任 / 薦任 / 簡任)
+  (MX14-13: ICs)                                                           (委任4-5, 薦任6-7 科員)
+  (MX11-10: AD / DD)                                                       (薦任8-9 股長/科長, 簡任10 專委)
+  (MX9-8: Director / Superscale)                                           (簡任11-12 副司長/司長/參事)
+  (PermSec: Top Civil Servant)                                             (簡任14頂 常務次長)
+
+[Axis 3: Tech-to-Banking Job Grade Bridging]
+  ASML (Global JG)  <=== Job Grade ===>  TSMC (TW Grade)  <=== Job Grade ===>  UOB & OCBC Titles
+  JG6  (Junior Eng)                      G31 (工程師)                          Analyst / Officer
+  JG7/8 (Senior Eng)                     G32/33 (資深/主任工程師)               AM / Manager
+  JG9  (Lead Eng)                        G34 (副理)                            UOB AVP1/2 | OCBC AVP
+  JG10 (Principal / GL)                  G35 (部理)                            UOB VP1/2  | OCBC VP
+  JG11/12 (Director / Fellow)            G36 (處長)                            UOB FVP/SVP | OCBC ED
+  JG13 (Senior Director)                 G37 (資深處長)                        UOB ED      | OCBC MD
+  JG14 (Vice President)                  G38 (副總裁)                          UOB Senior MD | OCBC MD1
+  JG15/16 (SVP / EVP / BoM)              G39 (資深副總/執行副總)                UOB Top SMD | OCBC GMD
 ```
 
-- **AVP1 & AVP2**: Independent functional specialists and junior team supervisors.
-- **VP1 & VP2**: Departmental managers and quantitative/functional unit leads.
-- **FVP (First Vice President)**: Upper-middle management, equivalent to Singapore Civil Service MX9 (Superscale entry) or TSMC Grade 36 Director scope.
-- **SVP (Senior Vice President)**: Division/Cluster heads; equivalent to MX8 Director.
-- **ED (Executive Director)**: Business head or principal architect overseeing significant P&L.
-- **MD (Managing Director)**: Institutional leadership overseeing multi-country or multi-business verticals.
+---
+
+## 2. Singapore Banking & Civil Service Compensation Windows (Post-2025/2026 Verification)
+
+### 2.1 OCBC AVP vs. UOB (AVP2 & VP1) Compensation Parity
+Verified empirical data from post-June 2025 Singapore banking market benchmarks:
+- **OCBC AVP Structure:**
+  - Monthly Base Salary: **S$7,500 – S$13,500/month** (Median: ~S$9,500 – S$10,500/mo).
+  - Annual Performance Bonus + AWS: 2.5 to 4.5 months.
+  - **Annual Total Compensation (TC): S$120,000 – S$190,000+ SGD**.
+- **UOB Fine-Grained Ladders:**
+  - `AVP1`: Base S$7,000 – S$9,200/mo $\rightarrow$ Annual TC ~S$110k – S$140k (Entry AVP scope).
+  - `AVP2`: Base S$8,500 – S$11,200/mo $\rightarrow$ Annual TC ~S$130k – S$170k (Core OCBC AVP parity).
+  - `VP1`: Base S$9,800 – S$13,200/mo $\rightarrow$ Annual TC ~S$150k – S$195k (Senior OCBC AVP parity).
+- **Conclusion:** Because OCBC utilizes a consolidated `AVP` title without public numeral subdivisions, **an OCBC AVP structurally spans across both UOB AVP2 and UOB VP1**.
+
+### 2.2 OCBC VP vs. Singapore Civil Service MX9 (Superscale)
+- **OCBC Vice President (VP) Structure:**
+  - Monthly Base Salary: **S$11,500 – S$16,500+/month** (Median: ~S$13,500 – S$15,000/mo).
+  - Annual Bonus: 3.0 to 5.5 months in corporate, risk, technology, and wealth units.
+  - **Annual Total Compensation (TC): S$200,000 – S$300,000 SGD**.
+- **Singapore Civil Service MX9 (Superscale Entry / Director):**
+  - Monthly Base: **S$11,500 – S$16,500/month**.
+  - Total Annual Bonus (AWS + AVC + Performance Bonus): 3.5 to 5.0 months.
+  - **Annual Total Compensation (TC): S$200,000 – S$280,000/300k SGD**.
+- **Conclusion:** From an annual cash-flow and total compensation perspective, **OCBC VP (S$200k–S$300k) aligns directly with SG Gov MX9 (Superscale entry)** and UOB VP2 / FVP / entry SVP.
 
 ---
 
-### 1.2 Singapore Banking: Oversea-Chinese Banking Corporation (OCBC) Ladder
-OCBC utilizes a consolidated executive hierarchy with dedicated MD1 and Group Managing Director (GMD) tiers:
-```text
-Officer / Analyst → Assistant Manager → Manager →
-AVP (Assistant Vice President) →
-VP (Vice President) →
-ED (Executive Director) →
-MD (Managing Director) →
-MD1 (Senior Managing Director / Cluster Head) →
-GMD (Group Managing Director / Group ExCo)
-```
+## 3. Singapore Civil Service (MX Scheme) Verified Total Compensation Windows
 
-- **AVP to VP**: Middle management running operational and domain teams.
-- **ED to MD**: Enterprise leadership managing trading books, institutional credit, or technology infrastructure.
-- **MD1 & GMD**: Executive positions representing functional chiefs such as **Group Chief Technology Officer (CTO)**, **Group Chief Operating Officer (COO)**, Head of Global Treasury, and Head of Global Corporate Banking.
+Singapore Civil Service total compensation comprises 12 months base salary, 1 month Annual Wage Supplement (AWS / 13th month), Annual Variable Component (AVC, paid in mid-year and year-end tranches ~0.5–1.5 months), and individual Performance Bonus (PB, typically 1.5–4.0+ months depending on CEP ranking). Total annual package ranges from 14.5 to 17.5 months.
 
----
-
-### 1.3 TSMC vs. Singapore Banking Apex Equivalence
-A key structural discovery in cross-border tech and banking leveling is the pricing of apex executive authority:
-
-> **Core Parity Axiom (2026):**  
-> **TSMC Vice President (VP / Grade 38–39)** is structurally and economically equivalent to:
-> - **OCBC Group Managing Director (GMD)** or **OCBC Group CTO / COO**
-> - **UOB Top Senior Managing Director (SMD)** or **UOB Group CTO / COO**
-
-#### Economic Rationale:
-1. **P&L and Scale Under Management:**  
-   A TSMC VP typically oversees entire gigafabs (10,000+ staff) or mission-critical R&D clusters (advanced node 2nm/A16 lithography integration), commanding annual budgets in the hundreds of millions to billions of dollars.
-2. **Total Compensation Parity:**  
-   - A TSMC VP receives compensation scaling from **NT$20M to NT$100M+** (approx. S$1.0M–S$4.5M+), driven heavily by profit sharing and restricted stock units (RSUs).
-   - An OCBC GMD or UOB Top Senior MD / C-Suite Chief commands **S$2.5M to S$5.0M+** (approx. NT$60M–NT$120M) in base, performance incentives, and deferred bank shares.
-
----
-
-## 2. ASML Global Job Architecture (JG) & Compensation (Levels.fyi Benchmark)
-
-ASML operates a standardized Global Job Grade (JG) system governing engineering, product, and global executive tracks:
-
-| ASML Grade | Corporate Title / Scope | Responsibility Scope | US Levels.fyi TC (Annual) | Europe / NL Reference TC |
+| SG Gov Grade | Indicative Title / Scope | Monthly Base Range | Annual TC Window (SGD) | UOB & OCBC Parity (Salary-Matched) |
 | :--- | :--- | :--- | :--- | :--- |
-| **JG 6** | Associate Engineer / Engineer | Foundational IC; module testing & tool validation | $105k – $130k USD | €65k – €85k EUR |
-| **JG 7** | Engineer / Design Engineer | Independent engineer; subsystem integration | $125k – $155k USD | €75k – €95k EUR |
-| **JG 8** | Senior Engineer | Senior specialist; leads complex engineering modules | $145k – $190k USD | €90k – €120k EUR |
-| **JG 9** | Senior / Lead Engineer | Lead technical authority; cross-module architecture | $175k – $230k USD | €105k – €145k EUR |
-| **JG 10** | Principal Engineer / Group Lead | Principal level; oversees engineering group or program | $210k – $280k USD | €130k – €180k EUR |
-| **JG 11** | Senior Manager / Sr Project Mgr | Department head; personnel & roadmap ownership | $260k – $350k USD | €160k – €230k EUR |
-| **JG 12** | Director / ASML Fellow | Strategic division director; top technical fellow | $320k – $480k USD | €210k – €320k EUR |
-| **JG 13** | Senior Director | Multi-department head / functional cluster lead | $420k – $650k USD | €300k – €480k EUR |
-| **JG 14** | Vice President (VP) | Corporate VP; major product line (e.g. High-NA EUV) | $650k – $1.0M+ USD | €450k – €800k+ EUR |
-| **JG 15** | Senior Vice President (SVP) | Global executive leader; business unit lead | $1.0M – $1.8M+ USD | €800k – €1.5M+ EUR |
-| **JG 16 / BoM** | Executive VP / Board of Mgmt | Executive Board member (EVP, CTO, President, CEO) | $2.5M – $8.0M+ USD | €2.0M – €7.0M+ EUR |
-
-### Compensation Structure Characteristics at ASML:
-- **Base vs. Variable Shift at JG 10:**  
-  Transitioning from JG 9 to JG 10 is an institutional gate. Employees move off standard hourly/overtime overtime calculations into exempt executive status, with substantial increases in Short-Term Incentives (STI) and inclusion in the Long-Term Incentive (LTI) share grant pool.
-- **High-NA EUV Moat Premium:**  
-  Because ASML holds an effective global monopoly on extreme ultraviolet lithography (EUV), retention bonuses and equity vesting cycles are calibrated directly against US Silicon Valley tier-1 firms (NVIDIA, Apple, Intel) and TSMC.
+| **MX14** | Junior Executive | S$3,200 – S$4,200 | **S$45k – S$65k** | UOB Analyst / OCBC Officer |
+| **MX13(I)** | Graduate Executive | S$3,800 – S$4,800 | **S$55k – S$75k** | UOB Analyst / Senior Officer |
+| **MX13** | Senior Executive | S$4,500 – S$6,200 | **S$65k – S$95k** | UOB AM / OCBC Assistant Manager |
+| **MX12** | Manager / Policy Officer | S$5,200 – S$7,500 | **S$75k – S$115k** | UOB AVP1 / OCBC AVP (lower) |
+| **MX11** | Assistant Director (AD) | S$6,500 – S$9,800 | **S$95k – S$150k** | UOB AVP2 / OCBC AVP (core) |
+| **MX11A** | Senior AD / Junior DD | S$8,000 – S$11,800 | **S$120k – S$180k** | UOB VP1 / OCBC AVP (senior) |
+| **MX10** | Deputy Director (DD) | S$9,500 – S$14,500 | **S$145k – S$225k** | UOB VP2 / OCBC VP (junior) |
+| **MX9 (Superscale)**| Director (Entry Superscale) | S$11,500 – S$16,800 | **S$200k – S$300k** | **UOB FVP / SVP entry · OCBC VP (S$200-300k)** |
+| **MX8 (Superscale)**| Senior Director | S$15,000 – S$22,000 | **S$260k – S$380k** | UOB SVP / OCBC ED |
+| **MX7 (Superscale)**| Group Director | S$20,000 – S$28,000 | **S$350k – S$520k+** | UOB ED / OCBC MD |
+| **Deputy Secretary**| Ministry Leadership | S$26,000 – S$38,000 | **S$450k – S$700k+** | UOB MD / OCBC MD1 (Cluster Head) |
+| **Permanent Sec**   | Top Career Civil Servant | S$38,000 – S$65,000 | **S$650k – S$1.2M+** | UOB Senior MD / OCBC GMD (CTO/COO) |
+| **Senior Perm Sec** | Whole-of-Gov Head (HCS)  | S$50,000 – S$75,000 | **S$850k – S$1.4M+** | UOB Top Senior MD / OCBC GMD ExCo |
+| **MR4 Minister**    | Cabinet Minister         | Statutory Benchmark | **S$1.1M – S$1.8M ref.**| UOB / OCBC Group C-Suite Economics |
+| **Prime Minister**  | National Head of Gov     | Statutory Benchmark | **~S$3.6M ref.**       | UOB / OCBC Group CEO Economics |
 
 ---
 
-## 3. Comprehensive Cross-System Matrix (Quick Reference)
+## 4. Taiwan Civil Service: Scope-Based Alignment with Singapore Civil Service
 
-| Career Tier | SG Civil Service | UOB (Singapore) | OCBC (Singapore) | TSMC (Taiwan) | ASML (Global) | Taiwan Civil Svcs |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **National / Board** | PM / Senior Ministers | Group CEO | Group CEO | Chairman / CEO | Board of Mgmt (JG16) | President / Premier (Ref) |
-| **Apex Executive** | MR4 Cabinet Minister | Group ExCo / Top SMD | Group Managing Dir (GMD) / CTO / COO | Vice President (G38/39) | Vice President (JG14/15) | Political Minister (政務官) |
-| **Top Leadership** | Perm Sec / Deputy Sec | Managing Director (MD) | MD / MD1 | Senior Director (G37) | Senior Director (JG13) | 常務次長 / 簡任14 |
-| **Senior Executive** | MX7 / MX8 (Director) | Senior VP (SVP) / ED | Executive Director (ED) | Director (G36) | Director / Fellow (JG12) | 司長 / 參事 / 簡任12–13 |
-| **Upper Management** | MX9 (Entry Superscale) | First VP (FVP) | VP (Senior Band) | Section Dir / Dep Dir (G35) | Senior Manager (JG11) | 副司長 / 專門委員 (簡任11–12) |
-| **Mid Management** | MX10 / MX11A | VP1 / VP2 | Vice President (VP) | Manager (G34/35) | Principal / Group Lead (JG10) | 科長 / 薦任9 |
-| **Team Lead / Junior Lead** | MX11 / MX12 | AVP1 / AVP2 | Assistant VP (AVP) | Technical Manager (G34) | Senior Specialist (JG8/9) | 專員 / 薦任7–8 |
-| **Professional IC** | MX13 / MX13(I) | Analyst / AM | Analyst / AM | Engineer (G31–33) | Engineer (JG6/7) | 科員 / 薦任6 |
+Because Taiwan public sector salaries are strictly bounded by statutory civil service pay tables (公務人員俸給表) with rigid legal ceilings, **compensation figures cannot be matched by numerical parity**. Instead, institutional hierarchy and administrative scope provide the true correspondence:
+
+| SG Gov Grade | Administrative Scope in Singapore | Taiwan Gov 官等職等 | Taiwan 常見官銜與職務對應 |
+| :--- | :--- | :--- | :--- |
+| **MX14** | Junior Executive (基層承辦) | 委任第4–5職等 | 書記、辦事員、委任初階科員 |
+| **MX13(I)** | Graduate Executive (初任薦任) | 薦任第6職等 | 科員、技士 |
+| **MX13** | Senior Executive (資深承辦) | 薦任第6–7職等 | 資深科員、初任專員、幫工程司 |
+| **MX12** | Manager / Junior Policy (主辦專員) | 薦任第7–8職等 | 專員、股長、工務所主任 |
+| **MX11** | Assistant Director / AD (副科長/專員) | 薦任第8–9職等 | 專員、分隊長、薦任秘書 |
+| **MX11A** | Senior AD / Junior DD (基層主管) | 薦任第9職等 | **主管科長**、副組長 |
+| **MX10** | Deputy Director / DD (副處長/專委) | 薦任9～簡任10職等 | **簡任專門委員**、大科科長、副處長 |
+| **MX9** | Director / Entry Superscale (首長/司副) | 簡任第10–11職等 | **簡任副司長**、簡任專委、分局長 |
+| **MX8** | Senior Director (核心司長級) | 簡任第11–12職等 | **副司長、司長、參事、處長** |
+| **MX7** | Group Director (大司司長/局處長) | 簡任第12–13職等 | **重要司司長、常任主秘、局長** |
+| **Deputy Sec**| Ministry Leadership (副次長層級) | 簡任第13–14職等 | **常任主任秘書、署長、常任次長邊緣** |
+| **Perm Sec**  | Top Career Civil Servant (事務官最高階) | **簡任第14職等頂層** | **常務次長 (公務員體系常任文官頂點)** |
+| **Senior Perm**| Whole-of-Government Leader (文官長) | 特任常任文官首長 | **銓敘部/人事行政總處常任首長** |
+| **MR4 Minister**| Cabinet Minister (政治首長) | **政務官** | **內閣部長 (部會政務首長)** |
+| **Prime Minister**| Head of Government (國家領導) | 院長 / 國家元首 | **行政院院長 / 國家領導人** |
 
 ---
 
-## 4. Key Takeaways for Career & Balance Sheet Planning
+## 5. Tech-to-Banking Job Grade Bridging (ASML $\rightarrow$ TSMC $\rightarrow$ UOB & OCBC)
 
-1. **The SG Banking Dual-Track Granularity:**  
-   UOB maintains finer gradation between AVP and VP (`AVP1 → AVP2 → VP1 → VP2 → FVP`), allowing progressive title promotion without necessarily triggering multiplicative compensation jumps. Conversely, OCBC clusters these under fewer titles with internal salary bandwidths leading into the elite `MD1 / GMD` bracket.
-2. **The Tech Monopoly Dividend:**  
-   TSMC and ASML reward technical contributors (Principal, Fellow, Technical Director) on par with mid-to-senior organizational managers, a mobility path virtually absent in public sector hierarchies.
-3. **Geo-Tax Arbitrage:**  
-   A S$350,000 SGD package in Singapore incurs an effective income tax of ~15–18%, whereas an equivalent package in Taiwan or the United States incurs top marginal brackets of 40–50%. Factoring in Singapore's lack of capital gains tax, net wealth accumulation speed is more than doubled.
+Tech companies price technical competence through individual contributor (IC) and managerial ladders. Aligning ASML Job Grades (JG) to TSMC Grades (G) provides the universal baseline to cross-map executive titles in UOB and OCBC, independent of individual currency or domestic salary differences:
+
+| ASML Global Grade | TSMC Equivalent Grade | TSMC 中文職稱與組織範疇 | UOB Title (Ladders) | OCBC Title (Ladders) |
+| :--- | :--- | :--- | :--- | :--- |
+| **JG 6** | **G31** | 工程師 / 主任助理 (Associate / Eng) | Analyst / Officer | Analyst / Officer |
+| **JG 7 / 8** | **G32 / G33** | 資深工程師 / 主任工程師 (Senior Eng / Tech Lead) | Senior Officer / AM / Manager | Assistant Manager (AM) |
+| **JG 9** | **G34** | 副理 / 課長 (Section Manager / Deputy Mgr) | **AVP1 / AVP2** | **AVP** |
+| **JG 10** | **G35** | 部理 / 部門經理 (Department Manager) | **VP1 / VP2** | **VP** |
+| **JG 11 / 12** | **G36** | 處長 / 廠長 (Director / Plant Manager) | **FVP / SVP** | **ED (Executive Director)** |
+| **JG 13** | **G37** | 資深處長 / 晶圓廠長 (Senior Director / Fab Director) | **ED (Executive Director)** | **MD (Managing Director)** |
+| **JG 14** | **G38** | 副總裁 (Vice President / VP) | **Senior MD** | **MD1 (Cluster Head)** |
+| **JG 15 / 16** | **G39** | 資深副總裁 / 執行副總 (SVP / EVP) | **Top Senior MD / ExCo** | **GMD (Group Managing Director)** |
+
+---
+
+## 6. Synthesis: How to Interpret Cross-System Benchmark Data
+
+1. **Within Singapore (OCBC, UOB, SG Gov): Use Compensation Windows.**  
+   A VP at OCBC making S$200k–S$300k is the financial equivalent of a Civil Service Director entering Superscale (MX9). It reflects what Singapore's market pays for seasoned leadership at age 35–45.
+2. **Between Singapore Gov & Taiwan Gov: Use Job Grade & Scope.**  
+   Do not compare a Singapore Permanent Secretary (S$1M+ ≈ NT$24M) to a Taiwan 常務次長 (NT$2.2M) purely on money. In institutional power, statutory oversight, and departmental command, they occupy the exact same apex civil service seat.
+3. **From Semiconductor Giants to Banking: Use Organizational Seniority.**  
+   ASML JG10 (Principal / Group Lead) and TSMC G35 (部理) govern complex engineering roadmaps equivalent to a Banking VP (UOB VP1/2 or OCBC VP). TSMC G38/39 (副總裁) and ASML JG14/15 (VP/SVP) shoulder multi-billion dollar stakes equivalent to Bank Group Managing Directors (GMD) and C-Suite Chiefs.
