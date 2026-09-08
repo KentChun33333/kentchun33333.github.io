@@ -85,9 +85,9 @@ institutions:
       - {id: grade2, grade: "二職等", title: "專員", compensation: "Not provided", detail: "Entry officer / AM band; referenced to CTBC 7 職等", tier: junior, level: 10, mapping: {to: "ctbc", start: 10, end: 10, label: "CTBC 7 職等"}}
       - {id: grade3, grade: "三職等", title: "資深專員 / 襄理", compensation: "Not provided", detail: "Senior officer through assistant-manager band; referenced to CTBC 8 職等", tier: junior, level: 22, mapping: {to: "ctbc", start: 22, end: 22, label: "CTBC 8 職等"}}
       - {id: grade4, grade: "四職等", title: "副理 / 經理", compensation: "Not provided", detail: "Manager track; referenced to CTBC 9–10 職等", tier: middle, level: 34, mapping: {to: "ctbc", start: 29, end: 34, label: "CTBC 9 → 10 職等"}}
-      - {id: grade5, grade: "五職等", title: "資深經理 / 組長", compensation: "Not provided", detail: "Senior manager / senior operator ceiling; referenced to CTBC 11–12 職等", tier: middle, level: 46, mapping: {to: "ctbc", start: 41, end: 51, label: "CTBC 11 → 12 職等"}}
-      - {id: grade6, grade: "六職等", title: "協理", compensation: "Not provided", detail: "Associate director threshold; referenced to CTBC 12 top–13 initial", tier: middle, level: 56, mapping: {to: "ctbc", start: 51, end: 60, label: "CTBC 12 頂 → 13 初"}}
-      - {id: grade7, grade: "七職等", title: "資深協理（部主管）", compensation: "Not provided", detail: "Department-head band; referenced to CTBC 13–14 職等", tier: superscale, level: 64, mapping: {to: "ctbc", start: 60, end: 64, label: "CTBC 13 → 14 職等"}}
+      - {id: grade5, grade: "五職等", title: "資深經理 / 組長", compensation: "Not provided", detail: "Senior manager / senior operator ceiling; referenced from the latter half of CTBC 11 through full CTBC 12", tier: middle, level: 46, mapping: {to: "ctbc", start: 37.5, end: 55.5, label: "0.5×CTBC 11 → full 12 職等"}}
+      - {id: grade6, grade: "六職等", title: "協理", compensation: "Not provided", detail: "Associate director threshold; referenced to CTBC 13 職等", tier: middle, level: 56, mapping: {to: "ctbc", start: 60, end: 60, label: "CTBC 13 職等"}}
+      - {id: grade7, grade: "七職等", title: "資深協理（部主管）", compensation: "Not provided", detail: "Department-head band; referenced to CTBC 14 職等", tier: superscale, level: 64, mapping: {to: "ctbc", start: 64, end: 64, label: "CTBC 14 職等"}}
       - {id: grade8, grade: "八職等", title: "副總經理 / 資深副總", compensation: "Not provided", detail: "Managing Director / plant or division head; referenced to CTBC 15 職等", tier: superscale, level: 72, mapping: {to: "ctbc", start: 72, end: 72, label: "CTBC 15 職等"}}
       - {id: grade9, grade: "九職等", title: "執行副總 / 功能長", compensation: "Not provided", detail: "EVP / functional-head band; referenced to CTBC 16 職等", tier: superscale, level: 82, mapping: {to: "ctbc", start: 82, end: 82, label: "CTBC 16 職等"}}
       - {id: grade10, grade: "十職等", title: "執行副總 / 功能長", compensation: "Not provided", detail: "Group C-suite decision layer; referenced to CTBC 16+ 職等", tier: superscale, level: 94, mapping: {to: "ctbc", start: 94, end: 94, label: "CTBC 16+ 職等"}}
@@ -210,10 +210,8 @@ anchors:
   - {from: "ctbc.grade10", to: "fubon.grade4", relation: upper_edge, weight: 0.8, note: "Fubon 4 職等 extends through CTBC 10"}
   - {from: "ctbc.grade11", to: "fubon.grade5", relation: lower_edge, weight: 0.8, note: "Fubon 5 職等 begins across CTBC 11–12"}
   - {from: "ctbc.grade12", to: "fubon.grade5", relation: upper_edge, weight: 0.8, note: "Fubon 5 職等 extends through CTBC 12"}
-  - {from: "ctbc.grade12", to: "fubon.grade6", relation: lower_edge, weight: 0.8, note: "Fubon 6 職等 begins at CTBC 12 top"}
-  - {from: "ctbc.grade13", to: "fubon.grade6", relation: upper_edge, weight: 0.8, note: "Fubon 6 職等 reaches CTBC 13 initial"}
-  - {from: "ctbc.grade13", to: "fubon.grade7", relation: lower_edge, weight: 0.8, note: "Fubon 7 職等 begins across CTBC 13–14"}
-  - {from: "ctbc.grade14", to: "fubon.grade7", relation: upper_edge, weight: 0.8, note: "Fubon 7 職等 extends through CTBC 14"}
+  - {from: "ctbc.grade13", to: "fubon.grade6", relation: equivalent, weight: 0.9, note: "Fubon 6 職等 maps to CTBC 13 職等"}
+  - {from: "ctbc.grade14", to: "fubon.grade7", relation: equivalent, weight: 0.9, note: "Fubon 7 職等 maps to CTBC 14 職等"}
   - {from: "ctbc.grade15", to: "fubon.grade8", relation: equivalent, weight: 0.9, note: "Fubon 8 職等 references CTBC 15 職等"}
   - {from: "ctbc.grade16", to: "fubon.grade9", relation: equivalent, weight: 0.9, note: "Fubon 9 職等 references CTBC 16 職等"}
   - {from: "ctbc.grade16plus", to: "fubon.grade10", relation: equivalent, weight: 0.9, note: "Fubon 10 職等 references CTBC 16+ 職等"}
