@@ -74,7 +74,7 @@ institutions:
       - {id: grade14, grade: "14 職等", title: "協理（部室主管）", compensation: "Not provided", detail: "Senior department leadership; broad SVP responsibility at the G36–G37 band", tier: superscale, level: 64}
       - {id: grade15, grade: "15 職等", title: "資深協理 / 副總經理", compensation: "Not provided", detail: "UOB SVP / senior executive; division or regional business owner at TSMC G38", tier: superscale, level: 72}
       - {id: grade16, grade: "16 職等", title: "資深副總 / 執行副總", compensation: "Not provided", detail: "UOB MD and OCBC MD1 equivalent; whole-bank business-group responsibility across TSMC G39–G50", tier: superscale, level: 82}
-      - {id: grade16plus, grade: "16+ 職等", title: "資深副總 / 執行副總（EVP）", compensation: "Not provided", detail: "Senior MD / ExCo and functional C-suite scope; TSMC G39–G50 upper band", tier: superscale, level: 94}
+      - {id: grade16plus, grade: "16+ 職等", title: "資深副總 / 執行副總（EVP）", compensation: "Not provided", detail: "OCBC GMD and UOB Senior MD / ExCo equivalent; senior functional C-suite scope", tier: superscale, level: 94}
       - {id: evp, grade: "EVP / 各功能長", title: "金控核心決策層首長", compensation: "Not provided", detail: "Group C-suite (CFO, CIO, CRO, CTO) / functional-head track; anchored to UOB Senior MD", tier: superscale, level: 94}
       - {id: ceo, grade: "CEO / 總經理", title: "金控 / 銀行總經理（President）", compensation: "Not provided", detail: "CTBC enterprise apex; separate CEO track above EVP / functional heads", tier: political, level: 100}
 
@@ -187,6 +187,7 @@ anchors:
   - {from: "ocbc.md1", to: "ctbc.grade16", relation: equivalent, weight: 0.9, note: "CTBC 16 職等 maps to OCBC MD1"}
   - {from: "tsmc.g50", to: "ctbc.grade16plus", relation: equivalent, weight: 0.9, note: "CTBC 16+ 職等 maps to TSMC G50 enterprise VP scope"}
   - {from: "uob.senior_md", to: "ctbc.grade16plus", relation: equivalent, weight: 0.9, note: "CTBC 16+ 職等 maps to UOB Senior MD / ExCo"}
+  - {from: "ocbc.gmd", to: "ctbc.grade16plus", relation: equivalent, weight: 0.9, note: "CTBC 16+ 職等 maps to OCBC GMD"}
   - {from: "uob.senior_md", to: "ctbc.evp", relation: equivalent, weight: 1.0, note: "CTBC EVP / functional heads map specifically to UOB Senior MD"}
   - {from: "uob.group_ceo", to: "ctbc.ceo", relation: equivalent, weight: 0.9, note: "CTBC CEO / President maps to UOB Group CEO apex"}
   - {from: "asml.jg7", to: "astar.senior_research_scientist", relation: equivalent, weight: 1.0, note: "A*STAR Senior Research Engineer / Research Scientist aligns to ASML L7"}
