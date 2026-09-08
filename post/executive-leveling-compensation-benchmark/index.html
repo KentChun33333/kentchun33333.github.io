@@ -29,31 +29,32 @@
       --navy: #202b3a;
       --gold: #b79a61;
       --gold2: #d8c08b;
-      --gold-soft: rgba(216, 192, 139, 0.12);
-      --gold-border: rgba(183, 154, 97, 0.35);
+      --gold-soft: rgba(216, 192, 139, 0.14);
+      --gold-border: rgba(183, 154, 97, 0.4);
       
       --ivory: #f7f4ed;
-      --bg: #f4f4f1;
+      --bg: #f5f4f0;
       --paper: #ffffff;
       --line: #ded8cc;
-      --line-light: #eeeae2;
+      --line-light: #ece7dc;
       
-      --ink: #202124;
-      --muted: #6d7278;
+      --ink: #1f2328;
+      --muted: #5e646b;
       --dim: #8b8f94;
       
       --green: #087f5b;
       --sage: #63877a;
       --sage-soft: #edf8f4;
       --amber: #b76b00;
-      --blue: #3569c8;
-      --blue-soft: #edf3f8;
-      --red: #d71920;
+      --blue: #2b6cb0;
+      --blue-soft: #edf4fa;
+      --red: #c53030;
       --wine: #8a3f47;
       --wine-soft: #fff5f5;
       
-      --shadow: 0 12px 34px rgba(25, 25, 25, 0.08);
-      --shadow-sm: 0 4px 16px rgba(25, 25, 25, 0.04);
+      --shadow: 0 10px 30px rgba(16, 27, 39, 0.06);
+      --shadow-sm: 0 2px 10px rgba(16, 27, 39, 0.04);
+      --highlight-row: #fff9ed;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -62,238 +63,150 @@
       background-color: var(--bg);
       color: var(--ink);
       font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Noto Sans TC", sans-serif;
-      line-height: 1.65;
-      padding: 0 0 80px;
+      line-height: 1.68;
+      padding: 24px 16px 80px;
     }
 
     .mono { font-family: 'IBM Plex Mono', monospace; }
     .serif { font-family: Georgia, serif; }
 
-    /* Topbar Header matching Wealth Intelligence Agent */
-    .topbar {
-      height: 64px;
-      background: #ffffff;
-      border-bottom: 3px solid var(--gold);
-      padding: 0 28px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 30;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    /* Editorial Blog Container */
+    .blog-container {
+      max-width: 1260px;
+      margin: 0 auto;
     }
-    .brand-wrap {
+
+    /* Minimalist Blog Nav */
+    .blog-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+    .blog-nav a.back-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.15s;
+    }
+    .blog-nav a.back-link:hover {
+      color: var(--lux);
+    }
+    .blog-nav .nav-meta {
       display: flex;
       align-items: center;
       gap: 14px;
     }
-    .brand-logo {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--lux);
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      text-decoration: none;
-    }
-    .brand-logo i {
-      font-style: normal;
-      width: 30px;
-      height: 30px;
-      border: 2px solid var(--gold);
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-size: 13px;
+    .blog-nav a.doc-link {
       color: var(--gold);
-      font-family: 'IBM Plex Mono', monospace;
-      font-weight: 700;
-    }
-    .brand-sub {
-      border-left: 1px solid var(--line);
-      padding-left: 14px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .mode-pill {
-      font: 10px 'IBM Plex Mono', monospace;
-      padding: 5px 9px;
-      border-radius: 4px;
-      background: #f0f0ed;
-      color: var(--muted);
-      border: 1px solid var(--line);
-    }
-    .nav-btn {
-      font-size: 12px;
+      text-decoration: none;
       font-weight: 600;
-      color: var(--lux);
-      background: #ffffff;
-      border: 1px solid var(--line);
-      padding: 6px 12px;
+      font-size: 12px;
+      border: 1px solid var(--gold-border);
+      background: var(--paper);
+      padding: 4px 10px;
       border-radius: 4px;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.15s ease;
+      transition: all 0.15s;
     }
-    .nav-btn:hover {
-      border-color: var(--gold);
+    .blog-nav a.doc-link:hover {
+      background: var(--gold-soft);
+    }
+
+    /* Clean Blog Post Header (No heavy chrome/logo) */
+    .blog-header {
+      margin-bottom: 30px;
+    }
+    .blog-kicker {
+      font: 700 10px 'IBM Plex Mono', monospace;
+      letter-spacing: 0.16em;
       color: var(--gold);
-    }
-    .nav-btn.primary {
-      background: var(--lux);
-      color: #ffffff;
-      border-color: var(--lux);
-    }
-    .nav-btn.primary:hover {
-      background: var(--lux2);
-      border-color: var(--lux2);
-      color: var(--gold2);
-    }
-
-    /* Main Container */
-    .app-container {
-      max-width: 1280px;
-      margin: 28px auto 0;
-      padding: 0 20px;
-    }
-
-    /* Luxury Wealth Hero */
-    .wealth-hero {
-      background: linear-gradient(135deg, #0d1823 0%, #172a3a 62%, #243747 100%);
-      color: #ffffff;
-      padding: 36px 38px 28px;
-      border-radius: 8px;
-      border: 1px solid rgba(216, 192, 139, 0.25);
-      box-shadow: 0 20px 48px rgba(16, 27, 39, 0.18);
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 24px;
-    }
-    .wealth-hero::after {
-      content: '';
-      position: absolute;
-      right: -60px;
-      top: -90px;
-      width: 280px;
-      height: 280px;
-      border: 1px solid rgba(216, 192, 139, 0.22);
-      border-radius: 50%;
-      box-shadow: 0 0 0 35px rgba(216, 192, 139, 0.035), 0 0 0 75px rgba(216, 192, 139, 0.02);
-      pointer-events: none;
-    }
-    .wealth-kicker {
-      font: 9.5px 'IBM Plex Mono', monospace;
-      letter-spacing: 0.18em;
-      color: var(--gold2);
       text-transform: uppercase;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .wealth-kicker::before {
-      content: '';
+      margin-bottom: 10px;
       display: inline-block;
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--gold2);
     }
-    .wealth-client-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 20px;
-      position: relative;
-      z-index: 1;
-    }
-    .client-profile {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-    }
-    .client-monogram {
-      width: 54px;
-      height: 54px;
-      border: 1.5px solid rgba(216, 192, 139, 0.75);
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      color: var(--gold2);
-      font: 16px 'IBM Plex Mono', monospace;
-      font-weight: 700;
-      background: rgba(16, 27, 39, 0.6);
-      flex-shrink: 0;
-    }
-    .wealth-hero h1 {
+    .blog-header h1 {
       font-family: Georgia, serif;
+      font-size: 34px;
       font-weight: 400;
-      font-size: 32px;
-      line-height: 1.25;
+      color: var(--lux);
+      line-height: 1.28;
       letter-spacing: -0.02em;
-      color: #ffffff;
-      margin: 0 0 6px;
+      margin-bottom: 14px;
     }
-    .wealth-hero p.subtitle {
-      margin: 0;
-      font-size: 13.5px;
-      color: #bdc7cf;
-      line-height: 1.55;
-      max-width: 820px;
+    .blog-byline {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--muted);
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 18px;
     }
-    .wealth-meta {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      margin-top: 28px;
-      border-top: 1px solid rgba(255, 255, 255, 0.14);
-      position: relative;
-      z-index: 1;
+    .blog-byline span strong {
+      color: var(--ink);
     }
-    .wealth-meta div {
-      padding: 14px 16px 0;
-      border-left: 1px solid rgba(255, 255, 255, 0.12);
-    }
-    .wealth-meta div:first-child {
-      border-left: 0;
-      padding-left: 0;
-    }
-    .wealth-meta span {
-      display: block;
-      font-size: 9px;
-      color: #9faeba;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-    .wealth-meta b {
-      display: block;
-      font: 16px 'IBM Plex Mono', monospace;
-      color: #ffffff;
-      margin-top: 4px;
-    }
-    .wealth-meta small {
-      font-size: 9.5px;
-      color: var(--gold2);
+    .blog-lead {
+      font-size: 15.5px;
+      color: #34383d;
+      line-height: 1.75;
+      max-width: 1040px;
     }
 
-    /* Cards */
-    .lux-card {
+    /* Interactive Instruction Pill */
+    .interact-hint {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: #faf8f4;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px 16px;
+      margin: 20px 0 24px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .interact-hint span.tip {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .interact-hint strong {
+      color: var(--lux);
+    }
+    .reset-btn {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .reset-btn:hover {
+      background: #ffffff;
+      color: var(--lux);
+    }
+
+    /* Section Cards */
+    .section-card {
       background: var(--paper);
       border: 1px solid var(--line);
       border-radius: 8px;
       box-shadow: var(--shadow-sm);
-      padding: 24px 28px;
-      margin-bottom: 22px;
+      padding: 24px 26px;
+      margin-bottom: 30px;
     }
-    .lux-card-head {
+    .section-card-head {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
@@ -302,126 +215,178 @@
       padding-bottom: 12px;
       border-bottom: 1px solid var(--line);
     }
-    .lux-card-head h2 {
+    .section-card-head h2 {
       font-family: Georgia, serif;
-      font-size: 21px;
+      font-size: 22px;
       font-weight: 400;
-      margin: 0;
       color: var(--lux);
+      margin: 0;
     }
-    .lux-card-head p {
+    .section-card-head p {
       font-size: 13px;
       color: var(--muted);
       margin: 4px 0 0;
     }
-    .lux-tag {
+    .tag-badge {
       border: 1px solid #d8cfbd;
       background: #faf7f0;
       color: #7e6a41;
       padding: 4px 8px;
-      font: 9.5px 'IBM Plex Mono', monospace;
+      font: 700 9.5px 'IBM Plex Mono', monospace;
       white-space: nowrap;
       border-radius: 4px;
-      font-weight: 600;
     }
 
-    /* Verified Institutional Fact Grid */
-    .facts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    /* Table Toolbar */
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       gap: 12px;
-      margin-top: 14px;
-    }
-    .fact-tile {
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+      padding: 10px 14px;
+      background: #faf9f6;
       border: 1px solid var(--line);
-      border-left: 3px solid var(--gold);
-      background: #fafaf8;
-      border-radius: 5px;
-      padding: 14px 16px;
+      border-radius: 6px;
     }
-    .fact-tile strong {
-      display: block;
-      font-size: 13px;
-      color: var(--lux);
-      margin-bottom: 4px;
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 6px 10px;
+      min-width: 280px;
     }
-    .fact-tile p {
-      font-size: 12px;
+    .search-box input {
+      border: 0;
+      outline: none;
+      font-size: 12.5px;
+      width: 100%;
+      background: transparent;
+      font-family: inherit;
+    }
+    .pill-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .pill-btn {
+      border: 1px solid var(--line);
+      background: #ffffff;
       color: var(--muted);
-      line-height: 1.55;
-      margin: 0;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 11px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
     }
-    .fact-tile code {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 10.5px;
-      background: #eeeae2;
-      padding: 2px 5px;
-      border-radius: 3px;
+    .pill-btn:hover {
+      border-color: var(--lux);
       color: var(--lux);
-      word-break: break-word;
+    }
+    .pill-btn.active {
+      background: var(--lux);
+      color: #ffffff;
+      border-color: var(--lux);
     }
 
-    /* Clear Table Design */
-    .table-responsive {
+    /* Interactive Clear Table */
+    .table-wrap {
       overflow-x: auto;
       border: 1px solid var(--line);
       border-radius: 6px;
       background: #ffffff;
-      margin-top: 14px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
     }
-    table.clear-table {
+    table.data-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 12.5px;
       text-align: left;
       white-space: nowrap;
     }
-    table.clear-table thead th {
+    table.data-table thead th {
       background: #f7f5f0;
-      color: #55585b;
+      color: #4a4e54;
       padding: 12px 14px;
-      font: 700 9.5px 'IBM Plex Mono', monospace;
-      letter-spacing: 0.06em;
+      font: 700 10px 'IBM Plex Mono', monospace;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
       border-bottom: 2px solid var(--line);
       position: sticky;
       top: 0;
       z-index: 10;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
     }
-    table.clear-table tbody td {
+    table.data-table thead th:hover {
+      background: #ede9df;
+      color: var(--lux);
+    }
+    table.data-table thead th.col-active {
+      background: #e8e2d4;
+      color: var(--lux);
+      border-bottom-color: var(--gold);
+    }
+    table.data-table thead th.col-active::after {
+      content: ' •';
+      color: var(--gold);
+    }
+
+    table.data-table tbody tr {
+      cursor: pointer;
+      transition: background 0.12s ease;
+    }
+    table.data-table tbody td {
       padding: 11px 14px;
       border-bottom: 1px solid var(--line-light);
-      color: #2b2e32;
+      color: #24272a;
       vertical-align: middle;
     }
-    table.clear-table tbody tr:nth-child(even) {
-      background: #fcfbf9;
+    table.data-table tbody tr:nth-child(even) {
+      background: #fdfcf9;
     }
-    table.clear-table tbody tr:hover {
-      background: #f5f0e4;
+    table.data-table tbody tr:hover {
+      background: #f6efe0 !important;
     }
-    table.clear-table tbody tr:last-child td {
+    table.data-table tbody tr.row-selected {
+      background: var(--highlight-row) !important;
+      box-shadow: inset 3px 0 0 var(--gold);
+    }
+    table.data-table tbody tr.row-selected td {
+      border-bottom-color: #e5dccb;
+    }
+    table.data-table tbody tr:last-child td {
       border-bottom: 0;
     }
 
-    /* Sub-text labels in tables */
-    .role-primary {
+    /* Column active highlighting */
+    td.col-highlight {
+      background-color: rgba(216, 192, 139, 0.1) !important;
+    }
+
+    /* Role Elements */
+    .role-main {
       font-weight: 600;
       color: var(--lux);
       display: block;
       font-size: 12.5px;
     }
-    .role-chinese {
+    .role-zh {
       display: inline-block;
       font-size: 11.5px;
       font-weight: 500;
-      color: #2c3e50;
+      color: #203348;
       background: #edf2f7;
       padding: 1px 6px;
       border-radius: 3px;
       margin-top: 3px;
-      border: 1px solid #dbe2ea;
+      border: 1px solid #d5dfeb;
     }
     .role-sub {
       display: block;
@@ -431,48 +396,28 @@
       font-family: 'IBM Plex Mono', monospace;
     }
 
-    /* Badges */
-    .kpi-badge {
+    /* KPI Badges */
+    .tier-badge {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       padding: 3px 8px;
       border-radius: 99px;
       font: 700 9.5px 'IBM Plex Mono', monospace;
       white-space: nowrap;
     }
-    .kpi-badge.top {
-      background: var(--wine-soft);
-      color: var(--wine);
-      border: 1px solid #f1c4c6;
-    }
-    .kpi-badge.csuite {
-      background: #f5f1e8;
-      color: #8c7441;
-      border: 1px solid #d8c08b;
-    }
-    .kpi-badge.senior {
-      background: var(--sage-soft);
-      color: var(--green);
-      border: 1px solid #b7dfd2;
-    }
-    .kpi-badge.mid {
-      background: var(--blue-soft);
-      color: var(--blue);
-      border: 1px solid #b9d3eb;
-    }
-    .kpi-badge.junior {
-      background: #f0f0ed;
-      color: var(--muted);
-      border: 1px solid var(--line);
-    }
+    .tier-badge.top { background: var(--wine-soft); color: var(--wine); border: 1px solid #f1c4c6; }
+    .tier-badge.csuite { background: #fbf7ee; color: #8c7441; border: 1px solid #d8c08b; }
+    .tier-badge.senior { background: var(--sage-soft); color: var(--green); border: 1px solid #b7dfd2; }
+    .tier-badge.mid { background: var(--blue-soft); color: var(--blue); border: 1px solid #b9d3eb; }
+    .tier-badge.junior { background: #f0f0ed; color: var(--muted); border: 1px solid var(--line); }
 
-    .tc-figure {
+    .tc-val {
       font-family: 'IBM Plex Mono', monospace;
       font-weight: 600;
       color: var(--lux);
     }
-    .tc-highlight {
+    .tc-peak {
       font-family: 'IBM Plex Mono', monospace;
       font-weight: 700;
       color: #a80f16;
@@ -482,71 +427,28 @@
       border: 1px solid #f8c8c8;
     }
 
-    /* Filter Toolbar for Master Table */
-    .table-toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-      padding: 12px 14px;
-      background: #f8f7f4;
+    /* Note Banner */
+    .note-banner {
       border: 1px solid var(--line);
-      border-radius: 6px;
-    }
-    .search-input-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: #ffffff;
-      border: 1px solid var(--line);
-      border-radius: 5px;
-      padding: 6px 10px;
-      min-width: 280px;
-    }
-    .search-input-wrap input {
-      border: 0;
-      outline: none;
-      font-size: 12px;
-      width: 100%;
-      background: transparent;
-      font-family: inherit;
-    }
-    .pill-tabs {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    .pill-tab {
-      border: 1px solid var(--line);
-      background: #ffffff;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 600;
-      padding: 6px 11px;
+      border-left: 4px solid var(--gold);
+      background: #fffdf9;
+      padding: 14px 18px;
       border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.15s ease;
+      font-size: 12px;
+      line-height: 1.65;
+      color: #4a4d52;
+      margin-top: 16px;
     }
-    .pill-tab:hover {
-      border-color: var(--lux);
-      color: var(--lux);
-    }
-    .pill-tab.active {
-      background: var(--lux);
-      color: #ffffff;
-      border-color: var(--lux);
-    }
+    .note-banner strong { color: var(--lux); }
 
     /* Insights Grid */
-    .insight-grid {
+    .insights-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
+      gap: 16px;
       margin-top: 14px;
     }
-    .insight-box {
+    .insight-card {
       border: 1px solid var(--line);
       background: #fafaf8;
       border-radius: 6px;
@@ -555,14 +457,14 @@
       flex-direction: column;
       justify-content: space-between;
     }
-    .insight-box .num {
-      font: 700 9.5px 'IBM Plex Mono', monospace;
+    .insight-card .index-num {
+      font: 700 10px 'IBM Plex Mono', monospace;
       letter-spacing: 0.14em;
       color: var(--gold);
       text-transform: uppercase;
       margin-bottom: 6px;
     }
-    .insight-box h3 {
+    .insight-card h3 {
       font-family: Georgia, serif;
       font-size: 17px;
       font-weight: 600;
@@ -570,27 +472,25 @@
       margin: 0 0 8px;
       line-height: 1.35;
     }
-    .insight-box p {
+    .insight-card p {
       font-size: 12.5px;
       color: var(--muted);
       line-height: 1.6;
       margin-bottom: 12px;
     }
-    .insight-box .takeaway {
+    .insight-card .card-footer {
       border-top: 1px solid var(--line);
       padding-top: 10px;
       font-size: 11.5px;
       color: #333;
     }
-    .insight-box .takeaway strong {
-      color: var(--lux);
-    }
+    .insight-card .card-footer strong { color: var(--lux); }
 
-    /* Roadmap Steps */
+    /* Roadmap */
     .roadmap-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
+      gap: 16px;
       margin-top: 14px;
     }
     .roadmap-card {
@@ -598,9 +498,8 @@
       background: #ffffff;
       border-radius: 6px;
       padding: 18px 20px;
-      position: relative;
     }
-    .roadmap-card .step-index {
+    .roadmap-card .step-num {
       font: 700 24px 'IBM Plex Mono', monospace;
       color: #d8c08b;
       line-height: 1;
@@ -619,26 +518,63 @@
       margin: 0;
     }
 
-    /* Note Banner */
-    .lux-banner {
+    /* Verified Institutional Rules Section (At Bottom) */
+    .methodology-box {
       border: 1px solid var(--line);
-      border-left: 4px solid var(--gold);
-      background: #fffdf9;
-      padding: 14px 18px;
-      border-radius: 4px;
-      font-size: 12px;
-      line-height: 1.65;
-      color: #4a4d52;
-      margin-top: 16px;
+      border-top: 3px solid var(--lux);
+      background: #fafaf8;
+      border-radius: 6px;
+      padding: 24px 28px;
+      margin-top: 40px;
     }
-    .lux-banner strong {
+    .methodology-head h3 {
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: var(--lux);
+      margin-bottom: 6px;
+    }
+    .methodology-head p {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .rules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+    }
+    .rule-tile {
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--gold);
+      background: #ffffff;
+      border-radius: 4px;
+      padding: 14px 16px;
+    }
+    .rule-tile strong {
+      display: block;
+      font-size: 13px;
+      color: var(--lux);
+      margin-bottom: 4px;
+    }
+    .rule-tile p {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.55;
+      margin: 0;
+    }
+    .rule-tile code {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10.5px;
+      background: #eeeae2;
+      padding: 1px 4px;
+      border-radius: 3px;
       color: var(--lux);
     }
 
     /* Footer */
-    footer.app-foot {
+    footer.blog-foot {
       margin-top: 48px;
-      padding-top: 24px;
+      padding-top: 20px;
       border-top: 1px solid var(--line);
       text-align: center;
       font-size: 12px;
@@ -646,388 +582,285 @@
     }
 
     @media (max-width: 900px) {
-      .wealth-meta { grid-template-columns: repeat(2, 1fr); }
-      .wealth-meta div { border-left: 0; padding-left: 0; }
-      .insight-grid, .roadmap-grid { grid-template-columns: 1fr; }
-      .wealth-client-row { flex-direction: column; }
+      .insights-grid, .roadmap-grid { grid-template-columns: 1fr; }
+      .blog-header h1 { font-size: 26px; }
+      body { padding: 16px 10px 60px; }
+      .section-card { padding: 18px 16px; }
+      .search-box { min-width: 0; width: 100%; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Navigation Bar -->
-  <header class="topbar">
-    <div class="brand-wrap">
-      <a href="/" class="brand-logo">
-        <i>W</i>
-        <span>AUTUMN MEMO</span>
-      </a>
-      <div class="brand-sub">Executive Leveling & Compensation Benchmark</div>
-    </div>
-    <div class="topbar-right">
-      <span class="mode-pill">BENCHMARK INTELLIGENCE · 2026-09-08</span>
-      <a href="/hub/library/" class="nav-btn">← Asset Library</a>
-      <a href="ref-knowledge.md" class="nav-btn primary">📄 Knowledge Doc (ref-knowledge.md)</a>
-    </div>
-  </header>
+  <div class="blog-container">
 
-  <div class="app-container">
-    <!-- Wealth Hero Section -->
-    <header class="wealth-hero">
-      <div class="wealth-kicker">EXECUTIVE INTELLIGENCE · GLOBAL LEVELING & SALARY MATRIX</div>
-      <div class="wealth-client-row">
-        <div class="client-profile">
-          <div class="client-monogram">KC</div>
-          <div>
-            <h1>Global Executive Leveling & Compensation Benchmark: The Road past 7-Figures</h1>
-            <p class="subtitle">
-              An exclusive decoded matrix aligning job leveling and total compensation across Taiwan Civil Service (台灣公務員), TSMC (台積電), ASML (艾司摩爾), Singapore Banking (OCBC & UOB 新加坡銀行業), and A*STAR (新加坡科技局).
-            </p>
-          </div>
-        </div>
+    <!-- Minimalist Nav -->
+    <nav class="blog-nav">
+      <a href="/hub/library/" class="back-link">← Return to Asset Library</a>
+      <div class="nav-meta">
+        <a href="ref-knowledge.md" class="doc-link">📄 Reference Knowledge (ref-knowledge.md)</a>
+        <span class="mono" style="font-size: 11px; color: var(--dim);">Autumn Memo</span>
+      </div>
+    </nav>
+
+    <!-- Clean Blog Post Header -->
+    <header class="blog-header">
+      <div class="blog-kicker">EXECUTIVE INTELLIGENCE · CROSS-BORDER BENCHMARK</div>
+      <h1>Global Executive Leveling & Compensation Benchmark: The Road past 7-Figures</h1>
+      
+      <div class="blog-byline">
+        <span>Author: <strong>Kent Chiu</strong></span>
+        <span>Release Date: <strong>2026-09-08</strong></span>
+        <span>Category: <strong>Salary & Executive Strategy</strong></span>
+        <span>Systems: <strong>Taiwan (Gov & TSMC) · Singapore (Gov & Banking) · Global (ASML)</strong></span>
       </div>
 
-      <!-- Telemetry Strip -->
-      <div class="wealth-meta">
-        <div>
-          <span>Author / Lead</span>
-          <b>Kent Chiu</b>
-          <small>Autumn Memo Executive Series</small>
-        </div>
-        <div>
-          <span>Release Date</span>
-          <b>2026-09-08</b>
-          <small>Verified Active Benchmark</small>
-        </div>
-        <div>
-          <span>Cross-Border Systems</span>
-          <b>5 Pillars</b>
-          <small>TW · SG · US Tech · EU Semi</small>
-        </div>
-        <div>
-          <span>Max Spread Multiplier</span>
-          <b>&gt; 45x</b>
-          <small>NT$2.2M Cap vs. NT$100M+ Apex</small>
-        </div>
-        <div>
-          <span>FX Calibration Base</span>
-          <b>SGD & USD Arbitrage</b>
-          <small>1 SGD ≈ 23.5 NTD · 1 USD ≈ 31.5 NTD</small>
-        </div>
+      <p class="blog-lead">
+        During the golden decade of career progression, the greatest blind spot for most professionals is the lack of cross-industry, cross-border awareness of <strong>Leveling & Compensation</strong>. When you climb the ladder within a single system, the ceiling you hit may essentially be the starting floor in another. Below are the decoded cross-system matrix and 16-tier government-to-corporate benchmarks.
+      </p>
+
+      <div class="interact-hint">
+        <span class="tip">
+          <span>💡</span>
+          <span><strong>Interactive Table Controls:</strong> Click any table row to <strong>highlight & track</strong> across all systems. Click column headers to <strong>scan vertically</strong>.</span>
+        </span>
+        <button type="button" class="reset-btn" id="clearSelectionBtn">Clear Selection</button>
       </div>
     </header>
 
-    <!-- Verified Institutional Axioms (2026 Fact Base) -->
-    <section class="lux-card">
-      <div class="lux-card-head">
-        <div>
-          <h2>Verified Institutional Leveling Rules & 3-Axis Methodology</h2>
-          <p>Structural equivalence derived from real-world corporate ladders, regulatory filings, post-2025 compensation data, and verified cross-border hires.</p>
-        </div>
-        <span class="lux-tag">METHODOLOGY & FACT BASE</span>
-      </div>
-
-      <div class="facts-grid">
-        <div class="fact-tile">
-          <strong>1. Axis 1: Singapore Triad (Salary-Based Matching)</strong>
-          <p>Within Singapore's domestic labor market, <strong>OCBC</strong>, <strong>UOB</strong>, and <strong>SG Gov (MX Scheme)</strong> are calibrated by annual Total Compensation (post-June 2025 data):<br/>
-          • <strong>OCBC AVP</strong> (TC S$120k–$190k) spans across <strong>UOB AVP2 and VP1</strong> (matching SG Gov MX11/MX11A).<br/>
-          • <strong>OCBC VP</strong> (TC S$200k–$300k) aligns directly with <strong>SG Gov MX9 (Superscale entry)</strong> and UOB VP2 / FVP / entry SVP.</p>
-        </div>
-        <div class="fact-tile">
-          <strong>2. Axis 2: SG Gov ↔ Taiwan Gov (Scope-Based Matching)</strong>
-          <p>Because Taiwan Civil Service operates under statutory salary caps (Rank 14 is legally capped at NT$2.2M ≈ S$95k), parity is determined strictly by <strong>Job Grade & Administrative Scope</strong>: e.g. MX14/13 ≡ 委任/薦任基層; MX11A ≡ 薦任9科長; MX9 ≡ 簡任11副司長; MX8 ≡ 簡任12司長/參事; PermSec ≡ 簡任14頂常務次長; Minister ≡ 內閣政務部長.</p>
-        </div>
-        <div class="fact-tile">
-          <strong>3. Axis 3: Tech-to-Banking Bridging (ASML → TSMC → Banking)</strong>
-          <p>We leverage <strong>ASML Job Grades (JG6–JG16)</strong> to first anchor <strong>TSMC Job Grades (G31–G39)</strong>, then use that organizational ladder to match <strong>UOB and OCBC Grade Titles</strong> (regardless of domestic currency and pay differences): e.g., JG9/G34 副理 ≡ UOB AVP1/2 & OCBC AVP; JG10/G35 部理 ≡ UOB VP1/2 & OCBC VP; JG11-12/G36 處長 ≡ UOB FVP/SVP & OCBC ED; JG14/G38 副總裁 ≡ UOB Senior MD & OCBC MD1.</p>
-        </div>
-        <div class="fact-tile">
-          <strong>4. Apex Equivalence: TSMC VP ≡ OCBC GMD ≡ UOB Top Senior MD</strong>
-          <p>TSMC Vice President (G38/39 副總裁/資深副總, NT$20M–100M+) is structurally and economically equivalent to <strong>OCBC Group Managing Director (GMD) / Group CTO/COO</strong> or <strong>UOB Top Senior MD / Group CTO/COO</strong> (S$1.5M–4.5M+ ≈ NT$35M–105M+).</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Table 1: Cross-System Executive Leveling Matrix (7 Tiers) -->
-    <section class="lux-card">
-      <div class="lux-card-head">
+    <!-- SECTION 1: Cross-System Executive Leveling Matrix (7 Tiers) -->
+    <section class="section-card" id="tierMatrixSection">
+      <div class="section-card-head">
         <div>
           <h2>Cross-System Executive Leveling Matrix (7 Tiers)</h2>
-          <p>Side-by-side executive tiering illustrating public sector ceilings against market-driven equity and compensation curves.</p>
+          <p>Side-by-side tier alignment comparing public sector caps against market-driven capital rewards. Click rows to inspect.</p>
         </div>
-        <span class="lux-tag">7 TIERS BENCHMARK</span>
+        <span class="tag-badge">7 TIERS</span>
       </div>
 
-      <div class="table-responsive">
-        <table class="clear-table">
+      <div class="table-wrap">
+        <table class="data-table" id="matrixTable">
           <thead>
             <tr>
-              <th>Tier</th>
-              <th>Taiwan Civil Service (NTD)</th>
-              <th>TSMC 台積電 (NTD)</th>
-              <th>ASML 艾司摩爾 (USD)</th>
-              <th>OCBC & UOB Banking (SGD)</th>
-              <th>A*STAR 新加坡科技局 (SGD)</th>
+              <th data-col="0">Tier</th>
+              <th data-col="1">Taiwan Civil Service (NTD)</th>
+              <th data-col="2">TSMC 台積電 (NTD)</th>
+              <th data-col="3">ASML 艾司摩爾 (USD)</th>
+              <th data-col="4">OCBC & UOB Banking (SGD)</th>
+              <th data-col="5">A*STAR 新加坡科技局 (SGD)</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td><span class="kpi-badge top">Top Leadership</span></td>
+            <tr data-tier="top">
+              <td><span class="tier-badge top">Top Leadership</span></td>
               <td>
-                <span class="role-primary">Rank 14 : <span class="tc-figure">2.2M+ NTD</span></span>
-                <span class="role-chinese">簡任第14職等 (常務次長 / 署長)</span>
+                <span class="role-main">Rank 14 : <span class="tc-val">2.2M+ NTD</span></span>
+                <span class="role-zh">簡任第14職等 (常務次長 / 署長)</span>
               </td>
               <td>
-                <span class="role-primary">G39 VP/SVP : <span class="tc-highlight">100M+ NTD</span></span>
-                <span class="role-chinese">台積電資深副總裁 / 執行副總</span>
+                <span class="role-main">G39 VP/SVP : <span class="tc-peak">100M+ NTD</span></span>
+                <span class="role-zh">台積電資深副總裁 / 執行副總</span>
                 <span class="role-sub">≡ OCBC GMD / UOB Senior MD</span>
               </td>
               <td>
-                <span class="role-primary">JG15/14 : <span class="tc-highlight">$600k–1.8M+ USD</span></span>
-                <span class="role-chinese">全球副總裁 / 資深副總裁</span>
+                <span class="role-main">JG15 (SVP) : <span class="tc-peak">$800k–1.8M+ USD</span></span>
+                <span class="role-zh">全球資深副總裁 (SVP / BU Head)</span>
               </td>
               <td>
-                <span class="role-primary">GMD / Sub-Group CEO : <span class="tc-highlight">2.8M–4.5M+ SGD</span></span>
-                <span class="role-chinese">集團董事總經理 / UOB Top SMD</span>
+                <span class="role-main">GMD / Sub-Group CEO : <span class="tc-peak">2.8M–4.5M+ SGD</span></span>
+                <span class="role-zh">集團董事總經理 / UOB Top SMD</span>
               </td>
               <td>
-                <span class="role-primary">A*STAR CEO : <span class="tc-figure">500k+ SGD</span></span>
-                <span class="role-chinese">局長 / 總裁層級</span>
-              </td>
-            </tr>
-            <tr>
-              <td><span class="kpi-badge csuite">C-Suite Strategy</span></td>
-              <td>
-                <span class="role-primary">Rank 13 : <span class="tc-figure">2.0M+ NTD</span></span>
-                <span class="role-chinese">簡任第13職等 (司長 / 主任秘書)</span>
-              </td>
-              <td>
-                <span class="role-primary">G37/38 Dir/VP : <span class="tc-highlight">20M–80M NTD</span></span>
-                <span class="role-chinese">台積電副總裁 / 資深處長 / 廠長</span>
-              </td>
-              <td>
-                <span class="role-primary">JG13 : <span class="tc-figure">$300k–600k USD</span></span>
-                <span class="role-chinese">資深處長 (Senior Director)</span>
-              </td>
-              <td>
-                <span class="role-primary">MD1 / MD : <span class="tc-figure">350k–1.5M+ SGD</span></span>
-                <span class="role-chinese">董事總經理 / UOB MD</span>
-              </td>
-              <td>
-                <span class="role-primary">ED+ : <span class="tc-figure">350k–500k SGD</span></span>
-                <span class="role-chinese">資深執行總監</span>
+                <span class="role-main">A*STAR CEO : <span class="tc-val">500k+ SGD</span></span>
+                <span class="role-zh">局長 / 總裁層級</span>
               </td>
             </tr>
-            <tr>
-              <td><span class="kpi-badge senior">Core Management</span></td>
+            <tr data-tier="csuite">
+              <td><span class="tier-badge csuite">C-Suite Strategy</span></td>
               <td>
-                <span class="role-primary">Rank 12/11 : <span class="tc-figure">1.6M–1.85M+ NTD</span></span>
-                <span class="role-chinese">簡任第11–12職等 (司長 / 副司長 / 參事)</span>
+                <span class="role-main">Rank 13 : <span class="tc-val">2.0M+ NTD</span></span>
+                <span class="role-zh">簡任第13職等 (司長 / 主任秘書)</span>
               </td>
               <td>
-                <span class="role-primary">G36 Director : <span class="tc-figure">8M–20M NTD</span></span>
-                <span class="role-chinese">台積電處長 / 廠長 (Div Head / Director)</span>
+                <span class="role-main">G37/38 Dir/VP : <span class="tc-peak">20M–80M NTD</span></span>
+                <span class="role-zh">台積電副總裁 / 資深處長 / 廠長</span>
               </td>
               <td>
-                <span class="role-primary">JG12 : <span class="tc-figure">$280k–500k USD</span></span>
-                <span class="role-chinese">處長 / ASML Fellow</span>
+                <span class="role-main">JG14 (VP) : <span class="tc-val">$500k–850k+ USD</span></span>
+                <span class="role-zh">全球副總裁 (Vice President)</span>
               </td>
               <td>
-                <span class="role-primary">OCBC VP (Senior) / ED : <span class="tc-figure">200k–350k+ SGD</span></span>
-                <span class="role-chinese">UOB FVP / SVP Scope (MX9 Superscale Entry)</span>
+                <span class="role-main">MD1 / MD : <span class="tc-val">350k–1.5M+ SGD</span></span>
+                <span class="role-zh">董事總經理 / UOB MD</span>
               </td>
               <td>
-                <span class="role-primary">ED : <span class="tc-figure">250k–450k SGD</span></span>
-                <span class="role-chinese">執行總監 (Executive Director)</span>
-              </td>
-            </tr>
-            <tr>
-              <td><span class="kpi-badge mid">Mid-Level Lead</span></td>
-              <td>
-                <span class="role-primary">Rank 10 : <span class="tc-figure">1.45M+ NTD</span></span>
-                <span class="role-chinese">簡任第10職等 (專門委員 / 簡任科長)</span>
-              </td>
-              <td>
-                <span class="role-primary">G35 Manager : <span class="tc-figure">6M–8M NTD</span></span>
-                <span class="role-chinese">台積電部理 / 部門經理 (Dept Manager)</span>
-              </td>
-              <td>
-                <span class="role-primary">JG11/10 : <span class="tc-figure">$200k–400k USD</span></span>
-                <span class="role-chinese">資深經理 / Group Lead / Principal</span>
-              </td>
-              <td>
-                <span class="role-primary">OCBC AVP (Senior) / VP : <span class="tc-figure">150k–260k SGD</span></span>
-                <span class="role-chinese">UOB VP1 / VP2 (MX11A–MX10 Parity)</span>
-              </td>
-              <td>
-                <span class="role-primary">Principal Scientist : <span class="tc-figure">150k–300k SGD</span></span>
-                <span class="role-chinese">首席科學家</span>
+                <span class="role-main">ED+ : <span class="tc-val">350k–500k SGD</span></span>
+                <span class="role-zh">資深執行總監</span>
               </td>
             </tr>
-            <tr>
-              <td><span class="kpi-badge mid">Expert / Junior Lead</span></td>
+            <tr data-tier="senior">
+              <td><span class="tier-badge senior">Core Management</span></td>
               <td>
-                <span class="role-primary">Rank 9 : <span class="tc-figure">1.3M+ NTD</span></span>
-                <span class="role-chinese">薦任第9職等 (科長 / 專員)</span>
+                <span class="role-main">Rank 12/11 : <span class="tc-val">1.6M–1.85M+ NTD</span></span>
+                <span class="role-zh">簡任第11–12職等 (司長 / 副司長 / 參事)</span>
               </td>
               <td>
-                <span class="role-primary">G34 Deputy Mgr : <span class="tc-figure">5M–6M NTD</span></span>
-                <span class="role-chinese">台積電副理 / 課長 (Section Manager)</span>
+                <span class="role-main">G36 Director : <span class="tc-val">8M–20M NTD</span></span>
+                <span class="role-zh">台積電處長 / 廠長 (Div Head / Director)</span>
               </td>
               <td>
-                <span class="role-primary">JG9 : <span class="tc-figure">$180k–250k USD</span></span>
-                <span class="role-chinese">Lead Engineer / 副經理</span>
+                <span class="role-main">JG12/13 : <span class="tc-val">$280k–550k USD</span></span>
+                <span class="role-zh">處長 / 資深處長 / ASML Fellow</span>
               </td>
               <td>
-                <span class="role-primary">OCBC AVP (Core) : <span class="tc-figure">120k–180k SGD</span></span>
-                <span class="role-chinese">UOB AVP1 / AVP2 (MX11–MX12 Parity)</span>
+                <span class="role-main">OCBC VP (Senior) / ED : <span class="tc-val">200k–350k+ SGD</span></span>
+                <span class="role-zh">UOB FVP / SVP (MX9 Superscale Entry)</span>
               </td>
               <td>
-                <span class="role-primary">Lead Res Eng : <span class="tc-figure">100k–180k SGD</span></span>
-                <span class="role-chinese">資深帶頭研究員</span>
-              </td>
-            </tr>
-            <tr>
-              <td><span class="kpi-badge junior">Senior Specialist</span></td>
-              <td>
-                <span class="role-primary">Rank 8 : <span class="tc-figure">1.1M+ NTD</span></span>
-                <span class="role-chinese">薦任第8職等 (專員 / 股長)</span>
-              </td>
-              <td>
-                <span class="role-primary">G32/33 Engineer : <span class="tc-figure">2.5M–5M NTD</span></span>
-                <span class="role-chinese">台積電主任工程師 / 資深工程師</span>
-              </td>
-              <td>
-                <span class="role-primary">JG7/8 : <span class="tc-figure">$130k–220k USD</span></span>
-                <span class="role-chinese">資深工程師 (Senior Engineer)</span>
-              </td>
-              <td>
-                <span class="role-primary">Manager : <span class="tc-figure">85k–110k SGD</span></span>
-                <span class="role-chinese">經理層 / UOB Manager</span>
-              </td>
-              <td>
-                <span class="role-primary">Sr Research Eng : <span class="tc-figure">85k–120k SGD</span></span>
-                <span class="role-chinese">高級研究工程師</span>
+                <span class="role-main">ED : <span class="tc-val">250k–450k SGD</span></span>
+                <span class="role-zh">執行總監 (Executive Director)</span>
               </td>
             </tr>
-            <tr>
-              <td><span class="kpi-badge junior">Junior Specialist</span></td>
+            <tr data-tier="mid">
+              <td><span class="tier-badge mid">Mid-Level Lead</span></td>
               <td>
-                <span class="role-primary">Rank 5–7 : <span class="tc-figure">&lt; 1.2M NTD</span></span>
-                <span class="role-chinese">委任5–薦任7 (科員 / 辦事員)</span>
+                <span class="role-main">Rank 10 : <span class="tc-val">1.45M+ NTD</span></span>
+                <span class="role-zh">簡任第10職等 (專門委員 / 簡任科長)</span>
               </td>
               <td>
-                <span class="role-primary">G31 Engineer : <span class="tc-figure">&lt; 3M NTD</span></span>
-                <span class="role-chinese">台積電工程師 (Engineer)</span>
+                <span class="role-main">G35 Manager : <span class="tc-val">6M–8M NTD</span></span>
+                <span class="role-zh">台積電部理 / 部門經理 (Dept Manager)</span>
               </td>
               <td>
-                <span class="role-primary">JG6 : <span class="tc-figure">&lt; $130k USD</span></span>
-                <span class="role-chinese">初階工程師 (Engineer)</span>
+                <span class="role-main">JG10/11 : <span class="tc-val">$200k–380k USD</span></span>
+                <span class="role-zh">資深經理 / Group Lead / Principal</span>
               </td>
               <td>
-                <span class="role-primary">Asst Manager : <span class="tc-figure">&lt; 90k SGD</span></span>
-                <span class="role-chinese">助理經理 / UOB Analyst</span>
+                <span class="role-main">OCBC AVP (Senior) / VP : <span class="tc-val">150k–260k SGD</span></span>
+                <span class="role-zh">UOB VP1 / VP2 (MX11A–MX10 Parity)</span>
               </td>
               <td>
-                <span class="role-primary">Research Eng : <span class="tc-figure">&lt; 90k SGD</span></span>
-                <span class="role-chinese">研究工程師</span>
+                <span class="role-main">Principal Scientist : <span class="tc-val">150k–300k SGD</span></span>
+                <span class="role-zh">首席科學家</span>
+              </td>
+            </tr>
+            <tr data-tier="mid">
+              <td><span class="tier-badge mid">Expert / Junior Lead</span></td>
+              <td>
+                <span class="role-main">Rank 9 : <span class="tc-val">1.3M+ NTD</span></span>
+                <span class="role-zh">薦任第9職等 (科長 / 專員)</span>
+              </td>
+              <td>
+                <span class="role-main">G34 Deputy Mgr : <span class="tc-val">5M–6M NTD</span></span>
+                <span class="role-zh">台積電副理 / 課長 (Section Manager)</span>
+              </td>
+              <td>
+                <span class="role-main">JG9 : <span class="tc-val">$175k–240k USD</span></span>
+                <span class="role-zh">Lead Engineer / 副經理級</span>
+              </td>
+              <td>
+                <span class="role-main">OCBC AVP (Core) : <span class="tc-val">120k–180k SGD</span></span>
+                <span class="role-zh">UOB AVP1 / AVP2 (MX11–MX12 Parity)</span>
+              </td>
+              <td>
+                <span class="role-main">Lead Res Eng : <span class="tc-val">100k–180k SGD</span></span>
+                <span class="role-zh">資深帶頭研究員</span>
+              </td>
+            </tr>
+            <tr data-tier="junior">
+              <td><span class="tier-badge junior">Senior Specialist</span></td>
+              <td>
+                <span class="role-main">Rank 8 : <span class="tc-val">1.1M+ NTD</span></span>
+                <span class="role-zh">薦任第8職等 (專員 / 股長)</span>
+              </td>
+              <td>
+                <span class="role-main">G32/33 Engineer : <span class="tc-val">2.5M–5M NTD</span></span>
+                <span class="role-zh">台積電主任工程師 / 資深工程師</span>
+              </td>
+              <td>
+                <span class="role-main">JG7/8 : <span class="tc-val">$130k–190k USD</span></span>
+                <span class="role-zh">資深工程師 (Senior Engineer)</span>
+              </td>
+              <td>
+                <span class="role-main">Manager : <span class="tc-val">85k–110k SGD</span></span>
+                <span class="role-zh">經理層 / UOB Manager</span>
+              </td>
+              <td>
+                <span class="role-main">Sr Research Eng : <span class="tc-val">85k–120k SGD</span></span>
+                <span class="role-zh">高級研究工程師</span>
+              </td>
+            </tr>
+            <tr data-tier="junior">
+              <td><span class="tier-badge junior">Junior Specialist</span></td>
+              <td>
+                <span class="role-main">Rank 5–7 : <span class="tc-val">&lt; 1.2M NTD</span></span>
+                <span class="role-zh">委任5–薦任7 (科員 / 辦事員)</span>
+              </td>
+              <td>
+                <span class="role-main">G31 Engineer : <span class="tc-val">&lt; 3M NTD</span></span>
+                <span class="role-zh">台積電工程師 (Engineer)</span>
+              </td>
+              <td>
+                <span class="role-main">JG6 : <span class="tc-val">$105k–135k USD</span></span>
+                <span class="role-zh">初階工程師 (Engineer)</span>
+              </td>
+              <td>
+                <span class="role-main">Asst Manager : <span class="tc-val">&lt; 90k SGD</span></span>
+                <span class="role-zh">助理經理 / UOB Analyst</span>
+              </td>
+              <td>
+                <span class="role-main">Research Eng : <span class="tc-val">&lt; 90k SGD</span></span>
+                <span class="role-zh">研究工程師</span>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div class="lux-banner">
-        <strong>📌 Baseline Assumptions & Methodology:</strong> Compensation figures denote Total Compensation (TC = Base Salary + Performance Bonus + Profit Sharing / Equity Vesting). Exchange rates calibrated at <strong>1 SGD ≈ 23.5 NTD</strong> and <strong>1 USD ≈ 31.5 NTD</strong>. Figures reflect verified mid-to-upper band actual distributions. Detailed institutional ladders available in <a href="ref-knowledge.md" style="color: var(--gold); font-weight: 600;">ref-knowledge.md</a>.
+      <div class="note-banner">
+        <strong>📌 FX & Methodology Note:</strong> Calibrated at <strong>1 SGD ≈ 23.5 NTD</strong> and <strong>1 USD ≈ 31.5 NTD</strong>. Total Compensation (TC) includes base salary, annual performance bonus, and stock grants/profit sharing. Figures represent verified market distributions.
       </div>
     </section>
 
-    <!-- Consultant Analysis: 3 Core Insights -->
-    <section class="lux-card">
-      <div class="lux-card-head">
-        <div>
-          <h2>Consultant's Strategic Analysis: Three Economic Insights</h2>
-          <p>Deconstructing structural incentives, compensation ceilings, and institutional scale factors.</p>
-        </div>
-        <span class="lux-tag">MACRO ANALYSIS</span>
-      </div>
-
-      <div class="insight-grid">
-        <div class="insight-box">
-          <div>
-            <div class="num">Insight 01</div>
-            <h3>Job Security vs. Market Premium: Public Sector Caps</h3>
-            <p>The Taiwan Civil Service ladder is linear and highly compressed. Even at the apex <strong>Rank 14 (常務次長/署長)</strong>, TC is capped around NT$2.2M. In global tech or banking, this is reached at the junior-to-mid engineering tier (TSMC G32 or Singapore Banking Manager).</p>
-          </div>
-          <div class="takeaway">
-            <strong>Key Takeaway:</strong> Public institutions trade financial alpha for stability; remaining long-term carries high opportunity cost against capital-backed industries.
-          </div>
-        </div>
-
-        <div class="insight-box">
-          <div>
-            <div class="num">Insight 02</div>
-            <h3>Tech Giant Leverage: TSMC & ASML Exponential Scale</h3>
-            <p>TSMC features an exponential scaling curve: crossing Grade 33 (capped ~5M NTD) into Grade 34–36 elevates compensation to NT$8M–20M+. At C-suite levels (G38/39 VP/SVP), TC scales to NT$20M–100M+. ASML similarly yields massive packages in USD at JG13+.</p>
-          </div>
-          <div class="takeaway">
-            <strong>Key Takeaway:</strong> Global semiconductor leaders convert gross margin moats into asymmetric compensation pools for core technical & management executives.
-          </div>
-        </div>
-
-        <div class="insight-box">
-          <div>
-            <div class="num">Insight 03</div>
-            <h3>Singapore Gravity: OCBC, UOB & A*STAR Arbitrage</h3>
-            <p>Singapore acts as an apex liquidity sponge. A Banking VP reaches S$150k–350k (NT$3.5M–8M), while an ED/MD commands S$280k–1.5M+. Even statutory research bodies like A*STAR pay commercial market rates (Principal Scientists earn S$150k–300k).</p>
-          </div>
-          <div class="takeaway">
-            <strong>Key Takeaway:</strong> Low progressive income tax (capped at 22–24%) combined with strong currency creates superior personal balance-sheet compounding.
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Master Benchmark Table: Singapore Gov MX-to-PM System vs. Global Ladders -->
-    <section class="lux-card">
-      <div class="lux-card-head">
+    <!-- SECTION 2: Master Singapore Government Grade Benchmark (MX14 → PM) -->
+    <section class="section-card" id="masterTableSection">
+      <div class="section-card-head">
         <div>
           <h2>Master Singapore Government Grade Benchmark (MX14 → PM)</h2>
-          <p>Granular calibration cross-referencing Singapore Civil Service MX/Superscale/Political grades with Banking ladders, Taiwan Gov ranks, TSMC, and ASML.</p>
+          <p>Exhaustive 16-tier calibration cross-referencing Singapore Civil Service with Banking, Taiwan Gov ranks, TSMC, and ASML.</p>
         </div>
-        <span class="lux-tag">16-TIER DEEP DIVE</span>
+        <span class="tag-badge">16 TIERS MASTER</span>
       </div>
 
-      <!-- Toolbar: Filter Pills & Instant Search -->
+      <!-- Toolbar -->
       <div class="table-toolbar">
-        <div class="search-input-wrap">
-          <span style="color: var(--dim); font-size: 13px;">🔍</span>
-          <input type="text" id="bigTableSearch" placeholder="Search grades, titles, TSMC levels, Chinese positions..." autocomplete="off"/>
+        <div class="search-box">
+          <span style="color: var(--dim);">🔍</span>
+          <input type="text" id="masterSearchInput" placeholder="Filter grades, TSMC level, Chinese title, or salary..." autocomplete="off"/>
         </div>
-        <div class="pill-tabs">
-          <button type="button" class="pill-tab active" data-filter="all">All Grades (16)</button>
-          <button type="button" class="pill-tab" data-filter="political">Political / Apex (MR4–PM)</button>
-          <button type="button" class="pill-tab" data-filter="superscale">Superscale / Ministry (MX9–PermSec)</button>
-          <button type="button" class="pill-tab" data-filter="middle">Management (MX10–MX12)</button>
-          <button type="button" class="pill-tab" data-filter="junior">Professional IC (MX13–MX14)</button>
+        <div class="pill-group">
+          <button type="button" class="pill-btn active" data-filter="all">All Grades (16)</button>
+          <button type="button" class="pill-btn" data-filter="political">Political / Apex (MR4–PM)</button>
+          <button type="button" class="pill-btn" data-filter="superscale">Superscale (MX9–PermSec)</button>
+          <button type="button" class="pill-btn" data-filter="middle">Management (MX10–MX12)</button>
+          <button type="button" class="pill-btn" data-filter="junior">Professional IC (MX13–MX14)</button>
         </div>
       </div>
 
-      <div class="table-responsive">
-        <table class="clear-table" id="bigBenchmarkTable">
+      <div class="table-wrap">
+        <table class="data-table" id="masterBenchmarkTable">
           <thead>
             <tr>
-              <th>SG Gov Grade</th>
-              <th>SG Scope / Role</th>
-              <th>SG Banking (UOB & OCBC Track)</th>
-              <th>台灣公務員官職等</th>
-              <th>台灣常見公職中文職稱</th>
-              <th>TSMC 台積電職等與職稱</th>
-              <th>ASML 艾司摩爾 (Levels.fyi)</th>
-              <th>SG Typical TC</th>
-              <th>SG 預估人數</th>
-              <th>Positioning</th>
+              <th data-col="0">SG Gov Grade</th>
+              <th data-col="1">SG Scope / Role</th>
+              <th data-col="2">SG Banking (UOB & OCBC Track)</th>
+              <th data-col="3">台灣公務員官職等</th>
+              <th data-col="4">台灣常見公職中文職稱</th>
+              <th data-col="5">TSMC 台積電職等與職稱</th>
+              <th data-col="6">ASML 艾司摩爾 (Levels.fyi)</th>
+              <th data-col="7">SG Typical TC</th>
+              <th data-col="8">SG 預估人數</th>
+              <th data-col="9">Positioning</th>
             </tr>
           </thead>
           <tbody>
@@ -1036,19 +869,19 @@
               <td><strong>MX14</strong></td>
               <td>Junior Executive</td>
               <td>
-                <span class="role-primary">UOB: Analyst</span>
+                <span class="role-main">UOB: Analyst</span>
                 <span class="role-sub">OCBC: Officer / Analyst</span>
               </td>
               <td>委任4–5 / 薦任初階</td>
-              <td><span class="role-chinese">辦事員、初階科員</span></td>
+              <td><span class="role-zh">辦事員、初階科員</span></td>
               <td>
-                <span class="role-primary">G31 Engineer</span>
-                <span class="role-chinese">工程師 / 主任助理</span>
+                <span class="role-main">G31 Engineer</span>
+                <span class="role-zh">工程師 / 主任助理</span>
               </td>
-              <td>JG6 : Junior Eng ($105k–$130k USD)</td>
-              <td><span class="tc-figure">S$45–65k</span></td>
+              <td>JG6 : Junior Eng ($105k–$135k USD)</td>
+              <td><span class="tc-val">S$45–65k</span></td>
               <td><span class="role-sub">大量基層</span></td>
-              <td><span class="kpi-badge junior">Professional</span></td>
+              <td><span class="tier-badge junior">Professional</span></td>
             </tr>
 
             <!-- Row 2: MX13(I) -->
@@ -1056,19 +889,19 @@
               <td><strong>MX13(I)</strong></td>
               <td>Graduate / Executive</td>
               <td>
-                <span class="role-primary">UOB: Analyst / AM</span>
+                <span class="role-main">UOB: Analyst / AM</span>
                 <span class="role-sub">OCBC: Analyst / AM</span>
               </td>
               <td>薦任6</td>
-              <td><span class="role-chinese">科員、技士</span></td>
+              <td><span class="role-zh">科員、技士</span></td>
               <td>
-                <span class="role-primary">G31/32 Engineer</span>
-                <span class="role-chinese">工程師 (2–3年資歷)</span>
+                <span class="role-main">G31/32 Engineer</span>
+                <span class="role-zh">工程師 (2–3年資歷)</span>
               </td>
               <td>JG6/7 : Professional ($125k–$155k USD)</td>
-              <td><span class="tc-figure">S$55–75k</span></td>
+              <td><span class="tc-val">S$55–75k</span></td>
               <td><span class="role-sub">~10k+</span></td>
-              <td><span class="kpi-badge junior">Professional</span></td>
+              <td><span class="tier-badge junior">Professional</span></td>
             </tr>
 
             <!-- Row 3: MX13 -->
@@ -1076,19 +909,19 @@
               <td><strong>MX13</strong></td>
               <td>Senior Executive</td>
               <td>
-                <span class="role-primary">UOB: AM / AVP1 edge</span>
-                <span class="role-sub">OCBC: Assistant Manager / AVP</span>
+                <span class="role-main">UOB: AM (Assistant Mgr)</span>
+                <span class="role-sub">OCBC: Assistant Manager (AM)</span>
               </td>
               <td>薦任6–7</td>
-              <td><span class="role-chinese">資深科員、專員</span></td>
+              <td><span class="role-zh">資深科員、專員</span></td>
               <td>
-                <span class="role-primary">G32/33 Senior Engineer</span>
-                <span class="role-chinese">資深工程師</span>
+                <span class="role-main">G32/33 Senior Engineer</span>
+                <span class="role-zh">資深工程師</span>
               </td>
-              <td>JG7/8 : Senior Eng ($145k–$190k USD)</td>
-              <td><span class="tc-figure">S$65–90k</span></td>
+              <td>JG7/8 : Senior Eng ($130k–$190k USD)</td>
+              <td><span class="tc-val">S$65–95k</span></td>
               <td><span class="role-sub">~10k</span></td>
-              <td><span class="kpi-badge junior">Senior IC</span></td>
+              <td><span class="tier-badge junior">Senior IC</span></td>
             </tr>
 
             <!-- Row 4: MX12 -->
@@ -1096,19 +929,19 @@
               <td><strong>MX12</strong></td>
               <td>Manager / Policy Officer</td>
               <td>
-                <span class="role-primary">UOB: AVP1 / Manager</span>
-                <span class="role-sub">OCBC: Assistant Vice President</span>
+                <span class="role-main">UOB: AVP1 / Manager</span>
+                <span class="role-sub">OCBC: AVP (Lower Band)</span>
               </td>
               <td>薦任6–7</td>
-              <td><span class="role-chinese">專員、股長</span></td>
+              <td><span class="role-zh">專員、股長</span></td>
               <td>
-                <span class="role-primary">G33 Technical Manager</span>
-                <span class="role-chinese">主任工程師 (Tech Lead)</span>
+                <span class="role-main">G33 Technical Manager</span>
+                <span class="role-zh">主任工程師 (Tech Lead)</span>
               </td>
               <td>JG8 : Senior Engineer / Lead ($145k–$190k)</td>
-              <td><span class="tc-figure">S$75–115k</span></td>
+              <td><span class="tc-val">S$75–115k</span></td>
               <td><span class="role-sub">~8–12k</span></td>
-              <td><span class="kpi-badge mid">Lower Mgmt</span></td>
+              <td><span class="tier-badge mid">Lower Mgmt</span></td>
             </tr>
 
             <!-- Row 5: MX11 -->
@@ -1116,19 +949,19 @@
               <td><strong>MX11</strong></td>
               <td>Assistant Director (AD)</td>
               <td>
-                <span class="role-primary">UOB: AVP2</span>
+                <span class="role-main">UOB: AVP2</span>
                 <span class="role-sub">OCBC: AVP (Core Band: S$120k–$160k)</span>
               </td>
               <td>薦任7–8</td>
-              <td><span class="role-chinese">專員 / 股長 / 秘書</span></td>
+              <td><span class="role-zh">專員 / 股長 / 秘書</span></td>
               <td>
-                <span class="role-primary">G34 Deputy Manager</span>
-                <span class="role-chinese">台積電副理 / 課長</span>
+                <span class="role-main">G34 Deputy Manager</span>
+                <span class="role-zh">台積電副理 / 課長</span>
               </td>
-              <td>JG9 : Lead Eng / Group Lead ($175k–$230k)</td>
-              <td><span class="tc-figure">S$95–150k</span></td>
+              <td>JG9 : Lead Eng / Group Lead ($175k–$240k)</td>
+              <td><span class="tc-val">S$95–150k</span></td>
               <td><span class="role-sub">~5–8k</span></td>
-              <td><span class="kpi-badge mid">Middle Mgmt</span></td>
+              <td><span class="tier-badge mid">Middle Mgmt</span></td>
             </tr>
 
             <!-- Row 6: MX11A -->
@@ -1136,19 +969,19 @@
               <td><strong>MX11A</strong></td>
               <td>Senior AD / Junior DD</td>
               <td>
-                <span class="role-primary">UOB: VP1</span>
+                <span class="role-main">UOB: VP1</span>
                 <span class="role-sub">OCBC: AVP (Senior Band: S$150k–$190k)</span>
               </td>
               <td>薦任8–9</td>
-              <td><span class="role-chinese">科長 (薦任9主管職)</span></td>
+              <td><span class="role-zh">科長 (薦任9主管職)</span></td>
               <td>
-                <span class="role-primary">G34/35 Deputy Mgr / Mgr</span>
-                <span class="role-chinese">資深副理 / 部理主管</span>
+                <span class="role-main">G34/35 Deputy Mgr / Mgr</span>
+                <span class="role-zh">資深副理 / 部理主管</span>
               </td>
-              <td>JG10 : Principal Eng ($210k–$280k USD)</td>
-              <td><span class="tc-figure">S$120–180k</span></td>
+              <td>JG10 : Principal Eng ($200k–$280k USD)</td>
+              <td><span class="tc-val">S$120–180k</span></td>
               <td><span class="role-sub">~3–5k</span></td>
-              <td><span class="kpi-badge mid">Mid-High Mgmt</span></td>
+              <td><span class="tier-badge mid">Mid-High Mgmt</span></td>
             </tr>
 
             <!-- Row 7: MX10 -->
@@ -1156,19 +989,19 @@
               <td><strong>MX10</strong></td>
               <td>Deputy Director (DD)</td>
               <td>
-                <span class="role-primary">UOB: VP2</span>
+                <span class="role-main">UOB: VP2</span>
                 <span class="role-sub">OCBC: VP (Junior Band: S$170k–$210k)</span>
               </td>
               <td>薦任9～簡任10</td>
-              <td><span class="role-chinese">大科科長 / 簡任專門委員</span></td>
+              <td><span class="role-zh">大科科長 / 簡任專門委員</span></td>
               <td>
-                <span class="role-primary">G35/36 Manager / Jr Dir</span>
-                <span class="role-chinese">台積電部理 / 準處長級</span>
+                <span class="role-main">G35/36 Manager / Jr Dir</span>
+                <span class="role-zh">台積電部理 / 準處長級</span>
               </td>
-              <td>JG11 : Senior Manager ($260k–$350k USD)</td>
-              <td><span class="tc-figure">S$145–225k</span></td>
+              <td>JG11 : Senior Manager ($240k–$350k USD)</td>
+              <td><span class="tc-val">S$145–225k</span></td>
               <td><span class="role-sub">~2–4k</span></td>
-              <td><span class="kpi-badge senior">Upper Mid</span></td>
+              <td><span class="tier-badge senior">Upper Mid</span></td>
             </tr>
 
             <!-- Row 8: MX9 -->
@@ -1176,19 +1009,19 @@
               <td><strong>MX9</strong> <span style="font-size: 10px; color: var(--gold);">(Superscale)</span></td>
               <td>Director (Entry Superscale)</td>
               <td>
-                <span class="role-primary">UOB: FVP / SVP entry</span>
+                <span class="role-main">UOB: FVP / SVP entry</span>
                 <span class="role-sub">OCBC: VP (Core / Senior: S$200k–$300k)</span>
               </td>
               <td>簡任10–11</td>
-              <td><span class="role-chinese">簡任專門委員 / 副司長</span></td>
+              <td><span class="role-zh">簡任專門委員 / 副司長</span></td>
               <td>
-                <span class="role-primary">G36 Director</span>
-                <span class="role-chinese">台積電處長 / 廠長</span>
+                <span class="role-main">G36 Director</span>
+                <span class="role-zh">台積電處長 / 廠長</span>
               </td>
-              <td>JG12 : Director / Fellow ($320k–$480k USD)</td>
-              <td><span class="tc-figure">S$200–300k</span></td>
+              <td>JG12 : Director / Fellow ($280k–$480k USD)</td>
+              <td><span class="tc-val">S$200–300k</span></td>
               <td><span class="role-sub">~1.5–1.9k</span></td>
-              <td><span class="kpi-badge senior">Senior Mgmt</span></td>
+              <td><span class="tier-badge senior">Senior Mgmt</span></td>
             </tr>
 
             <!-- Row 9: MX8 -->
@@ -1196,19 +1029,19 @@
               <td><strong>MX8</strong></td>
               <td>Senior Director</td>
               <td>
-                <span class="role-primary">UOB: SVP (Senior VP)</span>
+                <span class="role-main">UOB: SVP (Senior VP)</span>
                 <span class="role-sub">OCBC: Executive Director (ED)</span>
               </td>
               <td>簡任11–12</td>
-              <td><span class="role-chinese">副司長 ～ 司長 / 參事</span></td>
+              <td><span class="role-zh">副司長 ～ 司長 / 參事</span></td>
               <td>
-                <span class="role-primary">G37 Senior Director</span>
-                <span class="role-chinese">台積電資深處長 / 廠長</span>
+                <span class="role-main">G37 Senior Director</span>
+                <span class="role-zh">台積電資深處長 / 廠長</span>
               </td>
               <td>JG13 : Senior Director ($420k–$650k USD)</td>
-              <td><span class="tc-figure">~S$260–380k</span></td>
+              <td><span class="tc-val">~S$260–380k</span></td>
               <td><span class="role-sub">~250–450</span></td>
-              <td><span class="kpi-badge csuite">Senior Exec</span></td>
+              <td><span class="tier-badge csuite">Senior Exec</span></td>
             </tr>
 
             <!-- Row 10: MX7 -->
@@ -1216,19 +1049,19 @@
               <td><strong>MX7</strong></td>
               <td>Group Director</td>
               <td>
-                <span class="role-primary">UOB: ED (Executive Dir)</span>
+                <span class="role-main">UOB: ED (Executive Dir)</span>
                 <span class="role-sub">OCBC: Managing Director (MD)</span>
               </td>
               <td>簡任12–13</td>
-              <td><span class="role-chinese">司長 / 主任秘書</span></td>
+              <td><span class="role-zh">重要司長 / 常任主任秘書</span></td>
               <td>
-                <span class="role-primary">G38 Vice President (VP)</span>
-                <span class="role-chinese">台積電副總裁 (VP)</span>
+                <span class="role-main">G38 Vice President (VP)</span>
+                <span class="role-zh">台積電副總裁 (VP)</span>
               </td>
-              <td>JG14 : Vice President ($650k–$1.0M+ USD)</td>
-              <td><span class="tc-figure">~S$330–500k+</span></td>
+              <td>JG14 : Vice President ($500k–$850k+ USD)</td>
+              <td><span class="tc-val">~S$350–520k+</span></td>
               <td><span class="role-sub">~70–150</span></td>
-              <td><span class="kpi-badge csuite">Very Senior</span></td>
+              <td><span class="tier-badge csuite">Very Senior</span></td>
             </tr>
 
             <!-- Row 11: Deputy Secretary -->
@@ -1236,19 +1069,19 @@
               <td><strong>Deputy Secretary</strong></td>
               <td>Ministry-wide Leadership</td>
               <td>
-                <span class="role-primary">UOB: MD (Managing Dir)</span>
+                <span class="role-main">UOB: MD (Managing Dir)</span>
                 <span class="role-sub">OCBC: MD1 (Cluster Head)</span>
               </td>
               <td>簡任13–14</td>
-              <td><span class="role-chinese">主任秘書 ～ 常務次長</span></td>
+              <td><span class="role-zh">主任秘書 ～ 常務次長 / 署長</span></td>
               <td>
-                <span class="role-primary">G38/39 VP / Senior VP</span>
-                <span class="role-chinese">台積電副總裁 / 資深副總裁</span>
+                <span class="role-main">G38/39 VP / Senior VP</span>
+                <span class="role-zh">台積電副總裁 / 資深副總裁</span>
               </td>
-              <td>JG15 : Senior VP ($1.0M–$1.8M+ USD)</td>
-              <td><span class="tc-figure">~S$400–650k+</span></td>
+              <td>JG14/15 : VP / Senior VP ($650k–$1.2M+ USD)</td>
+              <td><span class="tc-val">~S$450–700k+</span></td>
               <td><span class="role-sub">~35–50</span></td>
-              <td><span class="kpi-badge top">Ministry Lead</span></td>
+              <td><span class="tier-badge top">Ministry Lead</span></td>
             </tr>
 
             <!-- Row 12: Permanent Secretary -->
@@ -1256,19 +1089,19 @@
               <td><strong>Permanent Secretary</strong></td>
               <td>Top Career Civil Servant</td>
               <td>
-                <span class="role-primary">UOB: Senior MD / ExCo</span>
-                <span class="role-sub">OCBC: MD1 / GMD (CTO/COO)</span>
+                <span class="role-main">UOB: Senior MD / ExCo</span>
+                <span class="role-sub">OCBC: MD1 / GMD (CTO/COO Scope)</span>
               </td>
               <td>簡任14頂層</td>
-              <td><span class="role-chinese">常務次長 (文官頂點)</span></td>
+              <td><span class="role-zh">常務次長 (文官體系最高頂點)</span></td>
               <td>
-                <span class="role-primary">G39 SVP / EVP</span>
-                <span class="role-chinese">台積電資深副總 / 執行副總</span>
+                <span class="role-main">G39 SVP / EVP</span>
+                <span class="role-zh">台積電資深副總 / 執行副總</span>
               </td>
-              <td>JG16 / BoM : Exec VP ($2.5M–$5.0M+ USD)</td>
-              <td><span class="tc-highlight">~S$600k–1.0M+</span></td>
+              <td>JG15 : Senior VP ($800k–$1.8M+ USD)</td>
+              <td><span class="tc-peak">~S$650k–1.2M+</span></td>
               <td><span class="role-sub">~25–35</span></td>
-              <td><span class="kpi-badge top">Top Career</span></td>
+              <td><span class="tier-badge top">Top Career</span></td>
             </tr>
 
             <!-- Row 13: Senior Perm Sec / HCS -->
@@ -1276,19 +1109,19 @@
               <td><strong>Senior Perm Sec / HCS</strong></td>
               <td>Whole-of-Government Head</td>
               <td>
-                <span class="role-primary">UOB: Top Senior MD</span>
+                <span class="role-main">UOB: Top Senior MD</span>
                 <span class="role-sub">OCBC: GMD (Group Managing Dir)</span>
               </td>
               <td>頂層簡任文官</td>
-              <td><span class="role-chinese">公務體系最高常任文官長</span></td>
+              <td><span class="role-zh">公務體系最高常任文官長</span></td>
               <td>
-                <span class="role-primary">G39 EVP / COO level</span>
-                <span class="role-chinese">執行副總 / 共同營運長</span>
+                <span class="role-main">G39 EVP / COO level</span>
+                <span class="role-zh">執行副總 / 共同營運長</span>
               </td>
-              <td>Board of Management (BoM Executive)</td>
-              <td><span class="tc-highlight">~S$800k–1.0M+</span></td>
+              <td>JG16 / BoM : Executive Board ($2.5M–$6.0M+ USD)</td>
+              <td><span class="tc-peak">~S$850k–1.4M+</span></td>
               <td><span class="role-sub">個位數 (&lt;10)</span></td>
-              <td><span class="kpi-badge top">Enterprise</span></td>
+              <td><span class="tier-badge top">Enterprise</span></td>
             </tr>
 
             <!-- Row 14: MR4 Minister -->
@@ -1296,19 +1129,19 @@
               <td><strong>MR4 Minister</strong></td>
               <td>Cabinet Minister</td>
               <td>
-                <span class="role-primary">UOB: Group C-Suite</span>
+                <span class="role-main">UOB: Group C-Suite</span>
                 <span class="role-sub">OCBC: Group C-Suite Economics</span>
               </td>
               <td>政務官層級</td>
-              <td><span class="role-chinese">內閣部長 (政務首長)</span></td>
+              <td><span class="role-zh">內閣部長 (部會政務首長)</span></td>
               <td>
-                <span class="role-primary">EVP / CEO Economics</span>
-                <span class="role-chinese">最高經營團隊 / 董事會層級</span>
+                <span class="role-main">EVP / CEO Economics</span>
+                <span class="role-zh">最高經營團隊 / 董事會層級</span>
               </td>
               <td>ASML Board of Management / CEO</td>
-              <td><span class="tc-highlight">S$1.8M ref.</span></td>
+              <td><span class="tc-peak">S$1.1M–1.8M ref.</span></td>
               <td><span class="role-sub">~10–20</span></td>
-              <td><span class="kpi-badge top">Political Exec</span></td>
+              <td><span class="tier-badge top">Political Exec</span></td>
             </tr>
 
             <!-- Row 15: Higher MR -->
@@ -1316,19 +1149,19 @@
               <td><strong>Higher MR</strong></td>
               <td>Senior Ministerial Grade</td>
               <td>
-                <span class="role-primary">UOB: Group C-Suite</span>
+                <span class="role-main">UOB: Group C-Suite</span>
                 <span class="role-sub">OCBC: Group C-Suite</span>
               </td>
               <td>高階政務官</td>
-              <td><span class="role-chinese">資深部長層 / 副院長級</span></td>
+              <td><span class="role-zh">資深部長層 / 副院長級</span></td>
               <td>
-                <span class="role-primary">CEO / Chairman territory</span>
-                <span class="role-chinese">董事長 / 執行長層級</span>
+                <span class="role-main">CEO / Chairman territory</span>
+                <span class="role-zh">董事長 / 執行長層級</span>
               </td>
               <td>Global CEO / Board Chairman</td>
-              <td><span class="tc-highlight">&gt; S$1.8M</span></td>
+              <td><span class="tc-peak">&gt; S$1.8M</span></td>
               <td><span class="role-sub">極少數</span></td>
-              <td><span class="kpi-badge top">National Lead</span></td>
+              <td><span class="tier-badge top">National Lead</span></td>
             </tr>
 
             <!-- Row 16: PM (Prime Minister) -->
@@ -1336,91 +1169,224 @@
               <td><strong>PM (Prime Minister)</strong></td>
               <td>National Head of Gov</td>
               <td>
-                <span class="role-primary">UOB: Group CEO Economics</span>
+                <span class="role-main">UOB: Group CEO Economics</span>
                 <span class="role-sub">OCBC: Group CEO Economics</span>
               </td>
               <td>不可直接對等</td>
-              <td><span class="role-chinese">行政院長 / 國家領導人概念</span></td>
+              <td><span class="role-zh">行政院長 / 國家領導人概念</span></td>
               <td>
-                <span class="role-primary">Chairman / CEO Economics</span>
-                <span class="role-chinese">全球頂尖企業領導人薪酬</span>
+                <span class="role-main">Chairman / CEO Economics</span>
+                <span class="role-zh">全球頂尖企業領導人薪酬</span>
               </td>
               <td>Global CEO Economics</td>
-              <td><span class="tc-highlight">~S$3.6M ref.</span></td>
+              <td><span class="tc-peak">~S$3.6M ref.</span></td>
               <td><span class="role-sub">1</span></td>
-              <td><span class="kpi-badge top">National Exec</span></td>
+              <td><span class="tier-badge top">National Exec</span></td>
             </tr>
           </tbody>
         </table>
       </div>
     </section>
 
-    <!-- Strategic Career Playbook -->
-    <section class="lux-card">
-      <div class="lux-card-head">
+    <!-- SECTION 3: Strategic Insights -->
+    <section class="section-card">
+      <div class="section-card-head">
+        <div>
+          <h2>Consultant's Strategic Analysis: Three Economic Insights</h2>
+          <p>Deconstructing structural incentives, compensation ceilings, and institutional scale factors.</p>
+        </div>
+        <span class="tag-badge">ANALYSIS</span>
+      </div>
+
+      <div class="insights-grid">
+        <div class="insight-card">
+          <div>
+            <div class="index-num">Insight 01</div>
+            <h3>Job Security vs. Market Premium: Public Sector Caps</h3>
+            <p>The Taiwan Civil Service ladder is linear and highly compressed. Even at the apex <strong>Rank 14 (常務次長/署長)</strong>, TC is capped around NT$2.2M. In global tech or banking, this is reached at the junior-to-mid engineering tier (TSMC G32 or Singapore Banking Manager).</p>
+          </div>
+          <div class="card-footer">
+            <strong>Key Takeaway:</strong> Public institutions trade financial alpha for stability; remaining long-term carries high opportunity cost against capital-backed industries.
+          </div>
+        </div>
+
+        <div class="insight-card">
+          <div>
+            <div class="index-num">Insight 02</div>
+            <h3>Tech Giant Leverage: TSMC & ASML Exponential Scale</h3>
+            <p>TSMC features an exponential scaling curve: crossing Grade 33 (capped ~5M NTD) into Grade 34–36 elevates compensation to NT$8M–20M+. At C-suite levels (G38/39 VP/SVP), TC scales to NT$20M–100M+. ASML similarly yields massive packages in USD at JG14/15.</p>
+          </div>
+          <div class="card-footer">
+            <strong>Key Takeaway:</strong> Global semiconductor leaders convert gross margin moats into asymmetric compensation pools for core technical & management executives.
+          </div>
+        </div>
+
+        <div class="insight-card">
+          <div>
+            <div class="index-num">Insight 03</div>
+            <h3>Singapore Gravity: OCBC, UOB & A*STAR Arbitrage</h3>
+            <p>Singapore acts as an apex liquidity sponge. A Banking VP reaches S$150k–300k (NT$3.5M–7M), while an ED/MD commands S$280k–1.5M+. Even statutory research bodies like A*STAR pay commercial market rates (Principal Scientists earn S$150k–300k).</p>
+          </div>
+          <div class="card-footer">
+            <strong>Key Takeaway:</strong> Low progressive income tax (capped at 22–24%) combined with strong currency creates superior personal balance-sheet compounding.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Strategic Career Roadmap -->
+    <section class="section-card">
+      <div class="section-card-head">
         <div>
           <h2>The Strategic Roadmap: Navigating the Career Chasm</h2>
           <p>Actionable principles for transitioning from additive salary increments to multiplicative equity compounding.</p>
         </div>
-        <span class="lux-tag">CAREER ROADMAP</span>
+        <span class="tag-badge">ROADMAP</span>
       </div>
 
       <div class="roadmap-grid">
         <div class="roadmap-card">
-          <div class="step-index">01</div>
+          <div class="step-num">01</div>
           <h4>Identify Your Industry Arbitrage</h4>
           <p>Assess how parallel industries price your core competency. A technical manager or AVP in local banking may unlock 2.5x–4x multiple expansions by pivoting into high-margin semiconductor, quantitative finance, or AI systems infrastructure.</p>
         </div>
         <div class="roadmap-card">
-          <div class="step-index">02</div>
+          <div class="step-num">02</div>
           <h4>Surmount the Multiplicative Chasm</h4>
           <p>Before Director (TSMC G36 / Banking ED), compensation increases additively (+10–20%). Beyond that threshold, bonuses, stock grants, and carried equity dominate base pay. Reaching this tier demands demonstrable P&L stewardship and proprietary asset ownership.</p>
         </div>
         <div class="roadmap-card">
-          <div class="step-index">03</div>
+          <div class="step-num">03</div>
           <h4>Leverage Capital Geo-Arbitrage</h4>
           <p>Relocating to Singapore (SGD) or US-denominated tech hubs unlocks lower marginal tax brackets and direct exposure to global capital flows. Geo-arbitrage remains the single fastest physical route to 7-figure personal balance sheet velocity.</p>
         </div>
       </div>
     </section>
 
+    <!-- SECTION 5 (At Bottom): Verified Institutional Leveling Rules & 3-Axis Methodology -->
+    <section class="methodology-box" id="methodologySection">
+      <div class="methodology-head">
+        <h3>Verified Institutional Leveling Rules & 3-Axis Methodology (2026 Calibration)</h3>
+        <p>Structural equivalence derived from corporate ladders, regulatory filings, post-2025 compensation data, and verified cross-border executive hires.</p>
+      </div>
+
+      <div class="rules-grid">
+        <div class="rule-tile">
+          <strong>1. Axis 1: Singapore Triad (Salary-Based Matching)</strong>
+          <p>Within Singapore's domestic labor market, <strong>OCBC</strong>, <strong>UOB</strong>, and <strong>SG Gov (MX Scheme)</strong> are calibrated by annual Total Compensation (post-June 2025 data):<br/>
+          • <strong>OCBC AVP</strong> (TC S$120k–$190k) spans across <strong>UOB AVP2 and VP1</strong> (matching SG Gov MX11/MX11A).<br/>
+          • <strong>OCBC VP</strong> (TC S$200k–$300k) aligns directly with <strong>SG Gov MX9 (Superscale entry)</strong> and UOB VP2 / FVP / entry SVP.</p>
+        </div>
+        <div class="rule-tile">
+          <strong>2. Axis 2: SG Gov ↔ Taiwan Gov (Scope-Based Matching)</strong>
+          <p>Because Taiwan Civil Service operates under statutory salary caps (Rank 14 is legally capped at NT$2.2M ≈ S$95k), parity is determined strictly by <strong>Job Grade & Administrative Scope</strong>: e.g. MX14/13 ≡ 委任/薦任基層; MX11A ≡ 薦任9科長; MX9 ≡ 簡任11副司長; MX8 ≡ 簡任12司長/參事; PermSec ≡ 簡任14頂常務次長; Minister ≡ 內閣政務部長.</p>
+        </div>
+        <div class="rule-tile">
+          <strong>3. Axis 3: Tech-to-Banking Bridging (ASML → TSMC → Banking)</strong>
+          <p>We leverage <strong>ASML Job Grades (JG6–JG16)</strong> to first anchor <strong>TSMC Job Grades (G31–G39)</strong>, then use that organizational ladder to match <strong>UOB and OCBC Grade Titles</strong> (regardless of domestic currency and pay differences): e.g., JG9/G34 副理 ≡ UOB AVP1/2 & OCBC AVP; JG10/G35 部理 ≡ UOB VP1/2 & OCBC VP; JG11-12/G36 處長 ≡ UOB FVP/SVP & OCBC ED; JG14/G38 副總裁 ≡ UOB Senior MD & OCBC MD1.</p>
+        </div>
+        <div class="rule-tile">
+          <strong>4. Apex Equivalence: TSMC VP ≡ OCBC GMD ≡ UOB Top Senior MD</strong>
+          <p>TSMC Vice President (G38/39 副總裁/資深副總, NT$20M–100M+) is structurally and economically equivalent to <strong>OCBC Group Managing Director (GMD) / Group CTO/COO</strong> or <strong>UOB Top Senior MD / Group CTO/COO</strong> (S$1.5M–4.5M+ ≈ NT$35M–105M+).</p>
+        </div>
+      </div>
+    </section>
+
     <!-- Footer -->
-    <footer class="app-foot">
+    <footer class="blog-foot">
       <p>Autumn Memo · Kent Chiu · Executive Intelligence Series · Released 2026-09-08</p>
     </footer>
+
   </div>
 
+  <!-- Interactive Table JavaScript -->
   <script>
-    // Search and Tier Filter Logic for Master Benchmark Table
-    const searchInput = document.getElementById('bigTableSearch');
-    const filterTabs = document.querySelectorAll('.pill-tab');
-    const tableRows = document.querySelectorAll('#bigBenchmarkTable tbody tr');
+    // Enable row highlighting on both tables
+    function setupTableInteractions(tableId) {
+      const table = document.getElementById(tableId);
+      if (!table) return;
 
-    let activeFilter = 'all';
+      const rows = table.querySelectorAll('tbody tr');
+      const headers = table.querySelectorAll('thead th');
 
-    function filterTable() {
+      // Row Selection
+      rows.forEach(row => {
+        row.addEventListener('click', (e) => {
+          // If shift is not pressed, clear other selections unless user wants multi-select
+          if (!e.shiftKey && !e.metaKey && !e.ctrlKey) {
+            rows.forEach(r => { if (r !== row) r.classList.remove('row-selected'); });
+          }
+          row.classList.toggle('row-selected');
+        });
+      });
+
+      // Column Highlighting on header click
+      headers.forEach(header => {
+        header.addEventListener('click', () => {
+          const colIndex = parseInt(header.getAttribute('data-col'), 10);
+          const isAlreadyActive = header.classList.contains('col-active');
+
+          // Reset all column active headers and highlights in this table
+          headers.forEach(h => h.classList.remove('col-active'));
+          table.querySelectorAll('tbody td').forEach(td => td.classList.remove('col-highlight'));
+
+          if (!isAlreadyActive) {
+            header.classList.add('col-active');
+            rows.forEach(r => {
+              const cells = r.querySelectorAll('td');
+              if (cells[colIndex]) {
+                cells[colIndex].classList.add('col-highlight');
+              }
+            });
+          }
+        });
+      });
+    }
+
+    setupTableInteractions('matrixTable');
+    setupTableInteractions('masterBenchmarkTable');
+
+    // Clear Selection Button
+    const clearBtn = document.getElementById('clearSelectionBtn');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        document.querySelectorAll('tbody tr').forEach(r => r.classList.remove('row-selected'));
+        document.querySelectorAll('thead th').forEach(h => h.classList.remove('col-active'));
+        document.querySelectorAll('tbody td').forEach(td => td.classList.remove('col-highlight'));
+      });
+    }
+
+    // Master Table Search & Filter Logic
+    const searchInput = document.getElementById('masterSearchInput');
+    const pillButtons = document.querySelectorAll('.pill-btn');
+    const masterRows = document.querySelectorAll('#masterBenchmarkTable tbody tr');
+
+    let activeTierFilter = 'all';
+
+    function runMasterFilter() {
       const query = (searchInput.value || '').trim().toLowerCase();
-      tableRows.forEach(row => {
+      masterRows.forEach(row => {
         const text = row.textContent.toLowerCase();
         const tier = row.getAttribute('data-tier') || '';
-        const matchesSearch = !query || text.includes(query);
-        const matchesFilter = (activeFilter === 'all') || (tier === activeFilter);
-        row.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
+        const matchesQuery = !query || text.includes(query);
+        const matchesTier = (activeTierFilter === 'all') || (tier === activeTierFilter);
+        row.style.display = (matchesQuery && matchesTier) ? '' : 'none';
       });
     }
 
     if (searchInput) {
-      searchInput.addEventListener('input', filterTable);
+      searchInput.addEventListener('input', runMasterFilter);
     }
 
-    filterTabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        filterTabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        activeFilter = tab.getAttribute('data-filter') || 'all';
-        filterTable();
+    pillButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        pillButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeTierFilter = btn.getAttribute('data-filter') || 'all';
+        runMasterFilter();
       });
     });
   </script>
+
 </body>
 </html>
