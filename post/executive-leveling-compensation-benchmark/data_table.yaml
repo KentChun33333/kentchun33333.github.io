@@ -120,10 +120,10 @@ institutions:
     nodes:
       - {id: operator, grade: "Operator / DL", title: "Production Technician", compensation: "< US$90k", detail: "Separate operations family", tier: junior, level: 7}
       - {id: jg5, grade: "L5", title: "Professional Engineer", compensation: "US$105–150k", detail: "TSMC G30 lower-entry anchor", tier: junior, level: 13}
-      - {id: jg6, grade: "L6", title: "Engineer", compensation: "US$130–190k", detail: "TSMC G31 anchor", tier: junior, level: 18}
-      - {id: jg7, grade: "L7", title: "Senior / Principal Engineer", compensation: "US$145–220k", detail: "Spans TSMC G32–33 responsibility band", tier: middle, level: 30}
-      - {id: jg8, grade: "L8", title: "Lead Engineer / Manager", compensation: "US$175–260k", detail: "TSMC G34 anchor · senior IC / first-manager dual track", tier: middle, level: 43}
-      - {id: jg9, grade: "L9", title: "Manager / Principal", compensation: "US$220–320k", detail: "Spans TSMC G35–36 responsibility band", tier: superscale, level: 56}
+      - {id: jg6, grade: "L6", title: "Engineer", compensation: "US$102–125k TC", detail: "TSMC G31 anchor · San Diego total-comp range across ASML Mechanical/Software benchmarks (Levels.fyi, Sep 2026)", tier: junior, level: 18}
+      - {id: jg7, grade: "L7", title: "Senior / Principal Engineer", compensation: "US$121–158k TC", detail: "Spans TSMC G32–33 responsibility band · San Diego total-comp range across ASML Mechanical/Software benchmarks (Levels.fyi, Sep 2026)", tier: middle, level: 30}
+      - {id: jg8, grade: "L8", title: "Lead Engineer / Manager", compensation: "US$143–193k TC", detail: "TSMC G34 anchor · San Diego total-comp range across ASML Mechanical/Software benchmarks (Levels.fyi, Sep 2026)", tier: middle, level: 43}
+      - {id: jg9, grade: "L9", title: "Manager / Principal", compensation: "US$206–274k TC", detail: "Spans TSMC G35–36 responsibility band · San Diego total-comp range across ASML Mechanical/Software benchmarks (Levels.fyi, Sep 2026)", tier: superscale, level: 56}
       - {id: jg10, grade: "L10", title: "Department Manager", compensation: "US$260–400k", detail: "TSMC G37 anchor", tier: superscale, level: 66}
       - {id: jg11, grade: "L11", title: "Senior Manager", compensation: "US$350–520k", detail: "TSMC G38 anchor", tier: superscale, level: 72}
       - {id: jg12, grade: "L12", title: "Director / Fellow", compensation: "US$420–750k", detail: "TSMC G39 anchor · director / fellow dual track", tier: superscale, level: 77}
