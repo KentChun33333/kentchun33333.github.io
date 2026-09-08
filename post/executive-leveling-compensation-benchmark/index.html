@@ -426,7 +426,7 @@
       background: #ffffff;
       color: #24272a;
       box-shadow: 0 1px 3px rgba(17, 24, 39, 0.06);
-      overflow: auto;
+      overflow: hidden;
       text-align: center;
       transition: filter 0.12s ease, transform 0.12s ease;
     }
@@ -1905,11 +1905,11 @@
         return { start: index, end: index, anchored: false };
       }
 
-      function renderStackChart() {
+      function renderStackChart(heightOverride = 0, fitPass = 0) {
         if (!stackChart) return;
         const primaryNodes = institutions[primaryAxis].nodes;
         const columnIds = visibleColumns();
-        const chartHeight = Math.max(1800, primaryNodes.length * 130);
+        const chartHeight = heightOverride || Math.max(6000, primaryNodes.length * 380);
         const headers = columnIds.map((id, index) => `<div class="stack-company-head${index === 0 ? ' primary' : ''}">
           ${index === 0 ? 'Primary · ' : ''}${escapeHtml(institutions[id].label)}
           <small>Entry → Apex · block height = responsibility span</small>
@@ -1917,15 +1917,23 @@
 
         const lanes = columnIds.map((institutionId, columnIndex) => {
           const nodes = institutions[institutionId].nodes;
-          let previousCenter = -0.25;
-          const centers = nodes.map(node => {
+          const rawCenters = nodes.map(node => {
             const rawCenter = institutionId === primaryAxis
               ? Number(node.level)
               : projectedLevel(institutionId, node, primaryAxis);
-            const center = Math.min(99.75, Math.max(previousCenter + 0.25, rawCenter));
-            previousCenter = center;
-            return center;
+            return rawCenter;
           });
+          const centers = [...rawCenters];
+          if (institutionId !== primaryAxis) {
+            const minimumCenterGap = 3;
+            for (let index = 1; index < centers.length; index += 1) {
+              centers[index] = Math.max(centers[index], centers[index - 1] + minimumCenterGap);
+            }
+            centers[centers.length - 1] = Math.min(99.5, centers[centers.length - 1]);
+            for (let index = centers.length - 2; index >= 0; index -= 1) {
+              centers[index] = Math.min(centers[index], centers[index + 1] - minimumCenterGap);
+            }
+          }
           const items = nodes.map((node, nodePosition) => {
             const interval = nodeInterval(institutionId, node, primaryNodes);
             const lowerBoundary = nodePosition === 0 ? 0 : (centers[nodePosition - 1] + centers[nodePosition]) / 2;
@@ -1963,6 +1971,16 @@
         stackChart.innerHTML = [...headers, ...lanes].join('');
         stackChart.querySelectorAll('.stack-level-card').forEach(card => {
           card.addEventListener('click', () => card.classList.toggle('selected'));
+        });
+        requestAnimationFrame(() => {
+          const cards = [...stackChart.querySelectorAll('.stack-level-card')];
+          const requiredScale = cards.reduce((largest, card) => {
+            if (!card.clientHeight) return largest;
+            return Math.max(largest, card.scrollHeight / card.clientHeight);
+          }, 1);
+          if (requiredScale > 1.01 && fitPass < 2) {
+            renderStackChart(Math.ceil(chartHeight * requiredScale * 1.06), fitPass + 1);
+          }
         });
       }
 
