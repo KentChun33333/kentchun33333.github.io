@@ -1829,6 +1829,9 @@
       function projectedLevel(institutionId, node, targetInstitutionId) {
         const span = mappedSpan(node, targetInstitutionId);
         if (span) return (span.start + span.end) / 2;
+        // SG Government is the global spine: project by the canonical 0–100
+        // responsibility coordinate instead of legacy direct-edge placement.
+        if (targetInstitutionId === 'sg_gov') return Number(node.level);
         const ref = `${institutionId}.${node.id}`;
         const edges = directAnchors(ref, targetInstitutionId);
         if (!edges.length) return Number(node.level);
@@ -1862,7 +1865,7 @@
         const buckets = primaryNodes.map(() => []);
         institutions[institutionId].nodes.forEach(node => {
           const nodeRef = `${institutionId}.${node.id}`;
-          const anchoredIndexes = [...new Set(directAnchors(nodeRef, primaryAxis).map(edge => {
+          const anchoredIndexes = primaryAxis === 'sg_gov' ? [] : [...new Set(directAnchors(nodeRef, primaryAxis).map(edge => {
             const primaryRef = edge.from === nodeRef ? edge.to : edge.from;
             const primaryNodeId = nodeIndex.get(primaryRef)?.node.id;
             return primaryNodes.findIndex(item => item.id === primaryNodeId);
@@ -1919,7 +1922,7 @@
           const end = closestPrimaryIndex(span.end, primaryNodes);
           return { start: Math.min(start, end), end: Math.max(start, end), anchored: true, span };
         }
-        const anchoredIndexes = [...new Set(directAnchors(nodeRef, primaryAxis).map(edge => {
+        const anchoredIndexes = primaryAxis === 'sg_gov' ? [] : [...new Set(directAnchors(nodeRef, primaryAxis).map(edge => {
           const primaryRef = edge.from === nodeRef ? edge.to : edge.from;
           const primaryNodeId = nodeIndex.get(primaryRef)?.node.id;
           return primaryNodes.findIndex(item => item.id === primaryNodeId);
