@@ -64,15 +64,18 @@ institutions:
     label: "CTBC 中信金"
     short_label: "CTBC"
     nodes:
-      - {id: grade8, grade: "8 職等", title: "MA 起聘 / 高專", compensation: "Not provided", detail: "Management associate entry / senior specialist track; aligned to TSMC G31 entry", tier: junior, level: 16}
-      - {id: grade9, grade: "9 職等", title: "襄理", compensation: "Not provided", detail: "MA after approximately one year; base execution and learning band", tier: junior, level: 18}
-      - {id: grade10, grade: "10 職等", title: "一般經理", compensation: "Not provided", detail: "MA after approximately two years; independent project contributor", tier: junior, level: 22}
-      - {id: grade11, grade: "11 職等", title: "資深經辦 / 資深經理", compensation: "Not provided", detail: "Senior operator / senior-manager band; upper G32 into G33 responsibility", tier: middle, level: 30}
-      - {id: grade12, grade: "12 職等", title: "資深經理 / 實任科長", compensation: "Not provided", detail: "Senior manager or formal section lead; overlaps TSMC G33–G34", tier: middle, level: 39}
-      - {id: grade13, grade: "13 職等", title: "大科長 / 初任部主管", compensation: "Not provided", detail: "Initial department-head scope; comparable to TSMC G35", tier: middle, level: 51}
-      - {id: grade14, grade: "14 職等", title: "協理 / 部室主管 / Director", compensation: "Not provided", detail: "Department leadership with broader management span; comparable to TSMC G36", tier: superscale, level: 60}
-      - {id: grade15, grade: "15 職等", title: "資深協理 / 副總經理", compensation: "Not provided", detail: "Senior executive management; TSMC G37–G38 scope", tier: superscale, level: 69}
-      - {id: grade16, grade: "16 職等", title: "資深協理 / 副總經理 / MD", compensation: "Not provided", detail: "Top banking management band; TSMC G37–G38 upper scope", tier: superscale, level: 75}
+      - {id: grade7, grade: "7 職等", title: "辦事員 / 經辦", compensation: "Not provided", detail: "Junior Officer / Specialist; university entry through initial professional support", tier: junior, level: 10}
+      - {id: grade8, grade: "8 職等", title: "專員 / 高級專員（高專）", compensation: "Not provided", detail: "Senior Officer / Specialist; MA entry and independent G31–G32 contributor", tier: junior, level: 22}
+      - {id: grade9, grade: "9 職等", title: "襄理", compensation: "Not provided", detail: "Assistant Vice President / Manager track; MA completion and senior project lead", tier: middle, level: 29}
+      - {id: grade10, grade: "10 職等", title: "經理（經辦階段）", compensation: "Not provided", detail: "Manager track; AVP1 → AVP2 responsibility at the upper G32–G33 band", tier: middle, level: 34}
+      - {id: grade11, grade: "11 職等", title: "資深經理", compensation: "Not provided", detail: "Associate Director / VP1; senior IC ceiling or first section-lead scope", tier: middle, level: 41}
+      - {id: grade12, grade: "12 職等", title: "資深經理（主管職）", compensation: "Not provided", detail: "VP2 / FVP transition; formal 10–15 person team and G33-top–G35 span", tier: middle, level: 51}
+      - {id: grade13, grade: "13 職等", title: "協理（部室主管）", compensation: "Not provided", detail: "Director / SVP; department-head threshold and G36–G37 scope", tier: superscale, level: 60}
+      - {id: grade14, grade: "14 職等", title: "協理（部室主管）", compensation: "Not provided", detail: "Senior department leadership; broad SVP responsibility at the G36–G37 band", tier: superscale, level: 64}
+      - {id: grade15, grade: "15 職等", title: "資深協理 / 副總經理", compensation: "Not provided", detail: "Managing Director / UOB ED; division or regional business owner at TSMC G38", tier: superscale, level: 72}
+      - {id: grade16, grade: "16 職等", title: "資深副總 / 執行副總", compensation: "Not provided", detail: "Senior MD / Group ExCo; whole-bank business-group responsibility across G39–G50", tier: superscale, level: 82}
+      - {id: grade16plus, grade: "16+ 職等", title: "資深副總 / 執行副總（EVP）", compensation: "Not provided", detail: "Senior MD / ExCo and functional C-suite scope; TSMC G39–G50 upper band", tier: superscale, level: 94}
+      - {id: evp, grade: "EVP / 各功能長", title: "金控核心決策層首長", compensation: "Not provided", detail: "Group C-suite (CFO, CIO, CRO, CTO) / President track; enterprise apex", tier: political, level: 100}
 
   tsmc:
     label: "TSMC 台積電"
@@ -156,16 +159,33 @@ anchors:
   - {from: "sg_gov.senior_perm_sec", to: "astar.shared_senior_perm_sec", relation: shared_public_spine, weight: 1.0, note: "Above A*STAR leadership, use the common SG head-of-service level"}
   - {from: "sg_gov.ministers", to: "astar.shared_ministers", relation: shared_public_spine, weight: 1.0, note: "Common SG political leadership level"}
   - {from: "sg_gov.pm", to: "astar.shared_pm", relation: shared_public_spine, weight: 1.0, note: "Common SG head-of-government level"}
-  - {from: "tsmc.g31", to: "ctbc.grade8", relation: lower_edge, weight: 0.9, note: "CTBC 8 職等 MA起聘 aligns to TSMC G31 entry"}
-  - {from: "tsmc.g31", to: "ctbc.grade9", relation: equivalent, weight: 0.9, note: "CTBC 9 職等 襄理 remains in the TSMC G31 / AM entry band"}
-  - {from: "tsmc.g32", to: "ctbc.grade10", relation: lower_edge, weight: 0.9, note: "CTBC 10 職等 一般經理 begins in the TSMC G32 band"}
-  - {from: "tsmc.g32", to: "ctbc.grade11", relation: upper_edge, weight: 0.9, note: "CTBC 11 職等 reaches the upper TSMC G32 responsibility band"}
-  - {from: "tsmc.g33", to: "ctbc.grade12", relation: lower_edge, weight: 1.0, note: "CTBC 12 職等 overlaps TSMC G33 senior-lead scope"}
-  - {from: "tsmc.g34", to: "ctbc.grade12", relation: upper_edge, weight: 0.8, note: "CTBC 12 職等 can extend into formal TSMC G34-style section leadership"}
-  - {from: "tsmc.g35", to: "ctbc.grade13", relation: equivalent, weight: 0.9, note: "CTBC 13 職等 initial department-head anchor"}
-  - {from: "tsmc.g36", to: "ctbc.grade14", relation: equivalent, weight: 0.9, note: "CTBC 14 職等 director / department-lead anchor"}
-  - {from: "tsmc.g37", to: "ctbc.grade15", relation: lower_edge, weight: 0.8, note: "CTBC 15 職等 enters senior executive scope"}
-  - {from: "tsmc.g38", to: "ctbc.grade16", relation: upper_edge, weight: 0.8, note: "CTBC 16 職等 reaches MD-level upper scope"}
+  - {from: "tsmc.operator", to: "ctbc.grade7", relation: equivalent, weight: 0.8, note: "CTBC 7 職等 entry support aligns to the operator / officer band"}
+  - {from: "tsmc.g30", to: "ctbc.grade7", relation: upper_edge, weight: 0.8, note: "CTBC 7 職等 extends into G30 initial professional support"}
+  - {from: "tsmc.g31", to: "ctbc.grade8", relation: equivalent, weight: 0.9, note: "CTBC 8 職等 MA / senior specialist aligns to TSMC G31"}
+  - {from: "uob.officer", to: "ctbc.grade7", relation: equivalent, weight: 0.9, note: "CTBC 7 職等 maps to UOB Officer / Analyst"}
+  - {from: "uob.am", to: "ctbc.grade7", relation: upper_edge, weight: 0.8, note: "CTBC 7 職等 reaches the UOB AM entry edge"}
+  - {from: "uob.manager", to: "ctbc.grade8", relation: equivalent, weight: 0.9, note: "CTBC 8 職等 maps to UOB Manager / Senior Manager entry"}
+  - {from: "tsmc.g32", to: "ctbc.grade9", relation: lower_edge, weight: 0.9, note: "CTBC 9 職等 begins at the TSMC G32 upper band"}
+  - {from: "uob.avp1", to: "ctbc.grade9", relation: equivalent, weight: 0.9, note: "CTBC 9 職等 maps to UOB AVP1"}
+  - {from: "tsmc.g33", to: "ctbc.grade10", relation: upper_edge, weight: 0.9, note: "CTBC 10 職等 reaches TSMC G33 project-lead scope"}
+  - {from: "uob.avp2", to: "ctbc.grade10", relation: equivalent, weight: 0.9, note: "CTBC 10 職等 maps to UOB AVP2"}
+  - {from: "tsmc.g33", to: "ctbc.grade11", relation: lower_edge, weight: 1.0, note: "CTBC 11 職等 starts at the TSMC G33 senior-IC ceiling"}
+  - {from: "tsmc.g34", to: "ctbc.grade12", relation: upper_edge, weight: 1.0, note: "CTBC 12 職等 crosses the formal TSMC G34 manager threshold"}
+  - {from: "uob.vp1", to: "ctbc.grade11", relation: equivalent, weight: 0.9, note: "CTBC 11 職等 maps to UOB VP1"}
+  - {from: "uob.vp2", to: "ctbc.grade12", relation: equivalent, weight: 0.9, note: "CTBC 12 職等 maps to UOB VP2"}
+  - {from: "uob.fvp", to: "ctbc.grade12", relation: upper_edge, weight: 0.8, note: "CTBC 12 職等 reaches the UOB FVP transition"}
+  - {from: "tsmc.g35", to: "ctbc.grade13", relation: lower_edge, weight: 0.9, note: "CTBC 13 職等 begins around TSMC G35"}
+  - {from: "uob.fvp", to: "ctbc.grade13", relation: equivalent, weight: 0.9, note: "CTBC 13 職等 maps to UOB FVP / senior management"}
+  - {from: "tsmc.g36", to: "ctbc.grade14", relation: equivalent, weight: 0.9, note: "CTBC 14 職等 maps to TSMC G36 department leadership"}
+  - {from: "uob.svp", to: "ctbc.grade14", relation: equivalent, weight: 0.9, note: "CTBC 14 職等 maps to UOB SVP"}
+  - {from: "tsmc.g38", to: "ctbc.grade15", relation: equivalent, weight: 0.9, note: "CTBC 15 職等 maps to TSMC G38 / UOB ED scope"}
+  - {from: "uob.ed", to: "ctbc.grade15", relation: equivalent, weight: 0.9, note: "CTBC 15 職等 maps to UOB ED"}
+  - {from: "tsmc.g39", to: "ctbc.grade16", relation: lower_edge, weight: 0.8, note: "CTBC 16 職等 enters TSMC G39–G50 executive scope"}
+  - {from: "uob.md", to: "ctbc.grade16", relation: equivalent, weight: 0.9, note: "CTBC 16 職等 maps to UOB MD"}
+  - {from: "tsmc.g50", to: "ctbc.grade16plus", relation: equivalent, weight: 0.9, note: "CTBC 16+ 職等 maps to TSMC G50 enterprise VP scope"}
+  - {from: "uob.senior_md", to: "ctbc.grade16plus", relation: equivalent, weight: 0.9, note: "CTBC 16+ 職等 maps to UOB Senior MD / ExCo"}
+  - {from: "tsmc.g52", to: "ctbc.evp", relation: equivalent, weight: 0.9, note: "CTBC EVP / functional heads align to TSMC G52 executive scope"}
+  - {from: "uob.group_ceo", to: "ctbc.evp", relation: equivalent, weight: 0.8, note: "CTBC enterprise apex aligns to UOB Group CEO track"}
   - {from: "asml.jg7", to: "astar.senior_research_scientist", relation: equivalent, weight: 1.0, note: "A*STAR Senior Research Engineer / Research Scientist aligns to ASML L7"}
   - {from: "asml.jg8", to: "astar.lead_senior_scientist", relation: equivalent, weight: 1.0, note: "A*STAR Lead Research Engineer / Senior Scientist aligns to ASML L8"}
   - {from: "asml.jg11", to: "astar.senior_director", relation: equivalent, weight: 1.0, note: "A*STAR Senior Director aligns to ASML L11 Senior Manager"}
