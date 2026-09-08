@@ -37,7 +37,7 @@ To resolve cross-border currency disparities, institutional pay constraints, and
 
 [Axis 3: Tech-to-Banking Job Grade Bridging (+26 Rule & Segment Tree Calibration)]
   ASML (責任層級約當跨度)       <=== +26 規則 ===>  TSMC (TW Grade & Title)                 <=== UOB (Granular) ===>  <=== OCBC (Consolidated) ===>
-  JG5–6 (Junior / MSc fresh)                       31 (工程師 / 碩士新人)                   Analyst                   Officer / Analyst
+  JG5–6 (Junior / graduate entry)                  30–31 (工程師 / 學碩入口帶)             Analyst                   Officer / Analyst
   JG7–8 (Senior Eng / 跨職系)                     32 (資深工程師)                           UOB AVP1 (32 mapping)     OCBC AM (Assistant Mgr)
   JG7–9 (新人JG7-8 · 成熟JG8-9)                    33 (主任工程師 / Principal Eng)          UOB VP1 (33 mapping)      OCBC AVP (Entry/Lower)
   JG8–9 (初階主管 / 資深IC雙軌)                    34 (副理 / Technical Manager)            UOB VP2 (34 mapping)      OCBC AVP (Senior Band)
@@ -140,7 +140,7 @@ Tech companies price technical competence through individual contributor (IC) an
 
 | TSMC Grade | TSMC 定位與職稱 | ASML 責任層級約當跨度 | 對標說明與軌道定位 | UOB Title (Ladders) | OCBC Title (Ladders) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **31** | Engineer / MSc fresh (碩士新人) | **JG6 左右** (JG5–6) | 入職層級相近 (荷/台碩士起點) | Analyst | Officer / Analyst |
+| **30–31** | Engineer / Bachelor or MSc fresh (學士／碩士新人入口帶) | **JG5–6 左右** | 31 並非碩士專屬；學士與碩士皆有 31 案例但本薪不同。30 僅見於部分非官方整理，故不作固定一對一映射 | Analyst | Officer / Analyst |
 | **32** | Senior Engineer (資深工程師) | **JG7–8** | ASML 不同職系跨度較大 | **AM (32 mapping) / AVP1** | **AM (Assistant Manager)** |
 | **33** | Principal / PhD fresh (主任工程師) | **JG7–9** | 入職對標約 JG7–8；成熟責任可達 JG8–9 | **AVP1 (32/33) / VP1 entry** | **AM / AVP lower band** |
 | **34** | 副理 (Technical Manager) | **JG8–9** | 初階主管或資深 IC (管理起點) | **AVP2 / VP2 (34 mapping)** | **AVP (Core Band: S$120k–160k)** |
@@ -154,9 +154,17 @@ Tech companies price technical competence through individual contributor (IC) an
 | **約52** | 執行副總經理 EVP / 共同營運長 | **JG16 / BoM** | Executive VP / 執行董事會成員 | **Group C-Suite / CEO** | **Group C-Suite / CEO Economics** |
 
 > **兩種比較維度的關鍵分流（學歷入口 vs. 成熟職位責任）：**  
-> 1. **按新人學歷入口**：TSMC 33 ≈ ASML JG7–8（入職門檻相近；美國高階研發中心的 fresh PhD 甚至可能直接給到 JG8）。  
+> 1. **按新人學歷入口**：TSMC 30–31 是學士／碩士工程師入口帶，31 非碩士專屬；TSMC 33 ≈ ASML JG7–8（入職門檻相近；美國高階研發中心的 fresh PhD 甚至可能直接給到 JG8）。
 > 2. **按成熟職位責任**：TSMC 33 成熟主任責任對標可達 ASML JG8–9；TSMC 34 副理 ≈ JG8–9；TSMC 35 經理 ≈ JG9–10；TSMC 36 部經理 ≈ JG10–11。  
 > **結論：** 不能再簡單斷言「33 就是 JG7」。JG7 是 TSMC 33 可能的新人入口對應，但成熟職責具備寬帶彈性；且台積電 34–40 明確綁定管理階層，而 ASML JG8–11 採技術 IC 與管理雙軌。銀行端 VP 很多屬於資深高階 IC，在層級與責任上等同 TSMC 35/36 核心主力。
+
+### 5.1 Grade 30/31 新人入口證據校準
+
+- 台積電沒有在公開招募或年報中發布「學歷 → 內部 Grade」的正式對照表；官方公開資料能確認的是學士與碩士新人起薪不同，而非 30/31 的硬性分流。
+- [陽明交大電機學院 2023 博士班招生簡報](https://www.nycu.edu.tw/doctoralece/ch/app/news/doc?detailNo=1317006017006931968&module=headnews&type=s) 明列「職等 31－工程師新人價」，並在同一職等下分列學士 51k、碩士 60k，是目前較具機構來源的反例。
+- [PTT 2015 實例](https://www.ptt.cc/bbs/Tech_Job/M.1445883923.A.DC5.html)與 [PTT 2022 offer 討論](https://www.ptt.cc/bbs/Tech_Job/M.1654944979.A.E34.html)均出現學士 Grade 31；匿名討論只能作交叉驗證，不能當官方政策。
+- [2024 二手職等整理](https://mtk.tw/%E7%AB%B9%E7%A7%91%E5%B7%A5%E7%A8%8B%E5%B8%AB%E7%9A%84%E8%81%B7%E7%AD%89/)列出 Grade 30 學士、Grade 31 碩士，但作者明示台商資料取自 PTT/Dcard，且與上述案例衝突。
+- 因此本報告把 **TSMC Grade 30–31** 視為新人可能入口帶，把 **OCBC Officer / UOB Analyst** 對標到此入口帶；不因學歷單一因素斷言 Officer 必然低於 Grade 31。
 
 ---
 
