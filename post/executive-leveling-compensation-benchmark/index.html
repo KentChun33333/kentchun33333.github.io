@@ -268,6 +268,34 @@
       background: transparent;
       font-family: inherit;
     }
+    .axis-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 260px;
+    }
+    .axis-control label {
+      color: var(--muted);
+      font: 700 10px 'IBM Plex Mono', monospace;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .axis-control select {
+      flex: 1;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #ffffff;
+      color: var(--lux);
+      font: 700 11px 'IBM Plex Mono', monospace;
+      padding: 7px 28px 7px 9px;
+      cursor: pointer;
+    }
+    .axis-status {
+      flex-basis: 100%;
+      color: var(--dim);
+      font-size: 11px;
+      line-height: 1.45;
+    }
     .pill-group {
       display: flex;
       gap: 6px;
@@ -419,6 +447,41 @@
       color: #4b5563;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
       margin-top: 2px;
+    }
+    .primary-axis-cell {
+      background: #fffaf0;
+      box-shadow: inset 3px 0 0 var(--gold);
+      min-width: 210px;
+    }
+    .primary-axis-cell .cell-title::before {
+      content: 'ANCHOR · ';
+      color: var(--gold);
+      font: 700 9px 'IBM Plex Mono', monospace;
+    }
+    .node-stack {
+      display: grid;
+      gap: 7px;
+      min-width: 180px;
+    }
+    .mapped-node + .mapped-node {
+      border-top: 1px dashed #d8cfbd;
+      padding-top: 7px;
+    }
+    .anchor-badge {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 2px 5px;
+      border-radius: 3px;
+      color: #735d2d;
+      background: #f8f0dc;
+      border: 1px solid #e8d8ae;
+      font: 700 8.5px 'IBM Plex Mono', monospace;
+      white-space: normal;
+    }
+    .empty-map {
+      color: #9ca3af;
+      font-style: italic;
+      font-size: 10.5px;
     }
 
     /* Legacy compatibility classes */
@@ -673,35 +736,40 @@
       <div class="interact-hint">
         <span class="tip">
           <span>💡</span>
-          <span><strong>Interactive Table Controls:</strong> Click any table row to <strong>highlight & track</strong> across all systems. Click column headers to <strong>scan vertically</strong>.</span>
+          <span><strong>Interactive Table Controls:</strong> Select any institution as the <strong>primary axis</strong>. Its native grades become unique rows; other ladders scale and fold into the closest anchored row.</span>
         </span>
         <button type="button" class="reset-btn" id="clearSelectionBtn">Clear Selection</button>
       </div>
     </header>
 
-    <!-- UNIFIED MASTER SECTION: Cross-System Executive Leveling & Compensation Matrix (18 Tiers) -->
+    <!-- ADAPTIVE MASTER SECTION: graph-projected cross-system matrix -->
     <section class="section-card" id="masterTableSection">
       <div class="section-card-head">
         <div>
-          <h2>Cross-System Executive Leveling & Compensation Matrix (18 Tiers Unified)</h2>
-          <p>Single-source benchmark linking Singapore Civil Service (MX14 → PM), SG Banking (OCBC & UOB), TSMC, ASML, Taiwan Civil Service, and A*STAR.</p>
+          <h2>Adaptive Cross-System Leveling Matrix</h2>
+          <p>Choose any institution as the native-grade axis; graph anchors project and fold every other ladder around it.</p>
         </div>
-        <span class="tag-badge">18 TIERS UNIFIED</span>
+        <span class="tag-badge" id="axisTierBadge">15 SG GOV GRADES</span>
       </div>
 
       <!-- Interactive Toolbar -->
       <div class="table-toolbar">
+        <div class="axis-control">
+          <label for="primaryAxisSelect">Primary axis</label>
+          <select id="primaryAxisSelect" aria-label="Select primary institution"></select>
+        </div>
         <div class="search-box">
           <span style="color: var(--dim);">🔍</span>
           <input type="text" id="masterSearchInput" placeholder="Filter grades, TSMC level, Chinese title, or salary..." autocomplete="off"/>
         </div>
         <div class="pill-group">
           <button type="button" class="pill-btn active" data-filter="all">All Levels (15)</button>
-          <button type="button" class="pill-btn" data-filter="political">Political / Apex (MR+ & PM)</button>
-          <button type="button" class="pill-btn" data-filter="superscale">Superscale / C-Suite (MX9–PermSec)</button>
-          <button type="button" class="pill-btn" data-filter="middle">Management / Tech Leads (MX10–MX12)</button>
-          <button type="button" class="pill-btn" data-filter="junior">Professional IC (MX13–MX14)</button>
+          <button type="button" class="pill-btn" data-filter="political">Political / Apex</button>
+          <button type="button" class="pill-btn" data-filter="superscale">Senior Executive / C-Suite</button>
+          <button type="button" class="pill-btn" data-filter="middle">Management / Tech Leads</button>
+          <button type="button" class="pill-btn" data-filter="junior">Professional / Entry</button>
         </div>
+        <div class="axis-status" id="axisStatus" aria-live="polite"></div>
       </div>
 
       <div class="table-wrap">
@@ -1502,92 +1570,200 @@
 
   </div>
 
+  <script src="data_table.generated.js"></script>
   <!-- Interactive Table JavaScript -->
   <script>
-    // Enable row highlighting on both tables
-    function setupTableInteractions(tableId) {
-      const table = document.getElementById(tableId);
-      if (!table) return;
+    (() => {
+      const graph = window.LEVEL_GRAPH;
+      const table = document.getElementById('masterBenchmarkTable');
+      const axisSelect = document.getElementById('primaryAxisSelect');
+      const searchInput = document.getElementById('masterSearchInput');
+      const pillButtons = [...document.querySelectorAll('.pill-btn')];
+      const clearBtn = document.getElementById('clearSelectionBtn');
+      const axisStatus = document.getElementById('axisStatus');
+      const axisTierBadge = document.getElementById('axisTierBadge');
+      let activeTierFilter = 'all';
+      let primaryAxis = graph && graph.default_axis;
 
-      const rows = table.querySelectorAll('tbody tr');
-      const headers = table.querySelectorAll('thead th');
+      if (!graph || !table || !axisSelect) {
+        if (axisStatus) axisStatus.textContent = 'Graph data unavailable; showing the static fallback table.';
+        return;
+      }
 
-      // Row Selection
-      rows.forEach(row => {
-        row.addEventListener('click', (e) => {
-          // If shift is not pressed, clear other selections unless user wants multi-select
-          if (!e.shiftKey && !e.metaKey && !e.ctrlKey) {
-            rows.forEach(r => { if (r !== row) r.classList.remove('row-selected'); });
-          }
-          row.classList.toggle('row-selected');
+      const institutions = graph.institutions;
+      const institutionIds = Object.keys(institutions);
+      const nodeIndex = new Map();
+      institutionIds.forEach(institutionId => {
+        institutions[institutionId].nodes.forEach(node => {
+          nodeIndex.set(`${institutionId}.${node.id}`, { institutionId, node });
         });
       });
 
-      // Column Highlighting on header click
-      headers.forEach(header => {
-        header.addEventListener('click', () => {
-          const colIndex = parseInt(header.getAttribute('data-col'), 10);
-          const isAlreadyActive = header.classList.contains('col-active');
+      function escapeHtml(value) {
+        return String(value ?? '')
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+      }
 
-          // Reset all column active headers and highlights in this table
-          headers.forEach(h => h.classList.remove('col-active'));
-          table.querySelectorAll('tbody td').forEach(td => td.classList.remove('col-highlight'));
+      function directAnchors(nodeRef, targetInstitutionId) {
+        return graph.anchors.filter(edge => {
+          const otherRef = edge.from === nodeRef ? edge.to : edge.to === nodeRef ? edge.from : null;
+          return otherRef && nodeIndex.get(otherRef)?.institutionId === targetInstitutionId;
+        });
+      }
 
-          if (!isAlreadyActive) {
-            header.classList.add('col-active');
-            rows.forEach(r => {
-              const cells = r.querySelectorAll('td');
-              if (cells[colIndex]) {
-                cells[colIndex].classList.add('col-highlight');
-              }
-            });
+      function projectedLevel(institutionId, node, targetInstitutionId) {
+        const ref = `${institutionId}.${node.id}`;
+        const edges = directAnchors(ref, targetInstitutionId);
+        if (!edges.length) return Number(node.level);
+        let weightedLevel = 0;
+        let totalWeight = 0;
+        edges.forEach(edge => {
+          const otherRef = edge.from === ref ? edge.to : edge.from;
+          const target = nodeIndex.get(otherRef)?.node;
+          if (!target) return;
+          const weight = Number(edge.weight || 1);
+          weightedLevel += Number(target.level) * weight;
+          totalWeight += weight;
+        });
+        return totalWeight ? weightedLevel / totalWeight : Number(node.level);
+      }
+
+      function closestPrimaryIndex(level, primaryNodes) {
+        let bestIndex = 0;
+        let bestDistance = Infinity;
+        primaryNodes.forEach((node, index) => {
+          const distance = Math.abs(Number(node.level) - level);
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            bestIndex = index;
           }
         });
-      });
-    }
+        return bestIndex;
+      }
 
-    setupTableInteractions('masterBenchmarkTable');
+      function projectInstitution(institutionId, primaryNodes) {
+        const buckets = primaryNodes.map(() => []);
+        institutions[institutionId].nodes.forEach(node => {
+          const level = projectedLevel(institutionId, node, primaryAxis);
+          buckets[closestPrimaryIndex(level, primaryNodes)].push(node);
+        });
+        return buckets;
+      }
 
-    // Clear Selection Button
-    const clearBtn = document.getElementById('clearSelectionBtn');
-    if (clearBtn) {
-      clearBtn.addEventListener('click', () => {
-        document.querySelectorAll('tbody tr').forEach(r => r.classList.remove('row-selected'));
-        document.querySelectorAll('thead th').forEach(h => h.classList.remove('col-active'));
-        document.querySelectorAll('tbody td').forEach(td => td.classList.remove('col-highlight'));
-      });
-    }
+      function anchorNote(institutionId, node) {
+        const edges = directAnchors(`${institutionId}.${node.id}`, primaryAxis);
+        if (!edges.length) return '';
+        return edges.map(edge => `${edge.relation}: ${edge.note}`).join(' · ');
+      }
 
-    // Master Table Search & Filter Logic
-    const searchInput = document.getElementById('masterSearchInput');
-    const pillButtons = document.querySelectorAll('.pill-btn');
-    const masterRows = document.querySelectorAll('#masterBenchmarkTable tbody tr');
+      function renderNode(institutionId, node, isPrimary) {
+        const note = isPrimary ? '' : anchorNote(institutionId, node);
+        return `<div class="mapped-node">
+          <span class="cell-title">${escapeHtml(node.grade)} · ${escapeHtml(node.title)}</span>
+          <span class="cell-salary${node.tier === 'political' ? ' peak' : ''}">${escapeHtml(node.compensation)}</span>
+          <span class="cell-detail">${escapeHtml(node.detail)}</span>
+          ${note ? `<span class="anchor-badge">${escapeHtml(note)}</span>` : ''}
+        </div>`;
+      }
 
-    let activeTierFilter = 'all';
+      function renderTable() {
+        const primaryInstitution = institutions[primaryAxis];
+        const primaryNodes = primaryInstitution.nodes;
+        const columnIds = [primaryAxis, ...institutionIds.filter(id => id !== primaryAxis)];
+        const projections = Object.fromEntries(
+          columnIds.slice(1).map(id => [id, projectInstitution(id, primaryNodes)])
+        );
 
-    function runMasterFilter() {
-      const query = (searchInput.value || '').trim().toLowerCase();
-      masterRows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        const tier = row.getAttribute('data-tier') || '';
-        const matchesQuery = !query || text.includes(query);
-        const matchesTier = (activeTierFilter === 'all') || (tier === activeTierFilter);
-        row.style.display = (matchesQuery && matchesTier) ? '' : 'none';
-      });
-    }
+        table.querySelector('thead').innerHTML = `<tr>${columnIds.map((id, index) =>
+          `<th data-col="${index}"${index === 0 ? ' class="col-active"' : ''}>${index === 0 ? 'Primary · ' : ''}${escapeHtml(institutions[id].label)}</th>`
+        ).join('')}</tr>`;
 
-    if (searchInput) {
-      searchInput.addEventListener('input', runMasterFilter);
-    }
+        table.querySelector('tbody').innerHTML = primaryNodes.map((primaryNode, rowIndex) => {
+          const cells = [`<td class="primary-axis-cell"><div class="node-stack">${renderNode(primaryAxis, primaryNode, true)}</div></td>`];
+          columnIds.slice(1).forEach(institutionId => {
+            const nodes = projections[institutionId][rowIndex];
+            cells.push(`<td><div class="node-stack">${nodes.length
+              ? nodes.map(node => renderNode(institutionId, node, false)).join('')
+              : '<span class="empty-map">No grade anchored at this level</span>'}</div></td>`);
+          });
+          return `<tr data-tier="${escapeHtml(primaryNode.tier)}" data-level="${escapeHtml(primaryNode.level)}">${cells.join('')}</tr>`;
+        }).join('');
 
-    pillButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        pillButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        activeTierFilter = btn.getAttribute('data-filter') || 'all';
+        axisTierBadge.textContent = `${primaryNodes.length} ${primaryInstitution.short_label.toUpperCase()} GRADES`;
+        const allLevelsButton = pillButtons.find(button => button.dataset.filter === 'all');
+        if (allLevelsButton) allLevelsButton.textContent = `All Levels (${primaryNodes.length})`;
+        axisStatus.textContent = `${primaryInstitution.label} is the primary axis: ${primaryNodes.length} native grades, one row each. Other grades appear once and fold into their nearest anchored level.`;
+        bindTableInteractions();
         runMasterFilter();
+      }
+
+      function bindTableInteractions() {
+        const rows = [...table.querySelectorAll('tbody tr')];
+        const headers = [...table.querySelectorAll('thead th')];
+        rows.forEach(row => {
+          row.onclick = event => {
+            if (!event.shiftKey && !event.metaKey && !event.ctrlKey) {
+              rows.forEach(other => { if (other !== row) other.classList.remove('row-selected'); });
+            }
+            row.classList.toggle('row-selected');
+          };
+        });
+        headers.forEach(header => {
+          header.onclick = () => {
+            const colIndex = Number(header.dataset.col);
+            const wasActive = header.classList.contains('col-active');
+            headers.forEach(item => item.classList.remove('col-active'));
+            table.querySelectorAll('tbody td').forEach(cell => cell.classList.remove('col-highlight'));
+            if (!wasActive || colIndex === 0) {
+              header.classList.add('col-active');
+              rows.forEach(row => row.children[colIndex]?.classList.add('col-highlight'));
+            }
+          };
+        });
+      }
+
+      function runMasterFilter() {
+        const query = (searchInput?.value || '').trim().toLowerCase();
+        table.querySelectorAll('tbody tr').forEach(row => {
+          const matchesQuery = !query || row.textContent.toLowerCase().includes(query);
+          const matchesTier = activeTierFilter === 'all' || row.dataset.tier === activeTierFilter;
+          row.style.display = matchesQuery && matchesTier ? '' : 'none';
+        });
+      }
+
+      institutionIds.forEach(id => {
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = institutions[id].label;
+        option.selected = id === primaryAxis;
+        axisSelect.appendChild(option);
       });
-    });
+
+      axisSelect.addEventListener('change', () => {
+        primaryAxis = axisSelect.value;
+        renderTable();
+      });
+      searchInput?.addEventListener('input', runMasterFilter);
+      pillButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          pillButtons.forEach(item => item.classList.remove('active'));
+          button.classList.add('active');
+          activeTierFilter = button.dataset.filter || 'all';
+          runMasterFilter();
+        });
+      });
+      clearBtn?.addEventListener('click', () => {
+        table.querySelectorAll('.row-selected, .col-active, .col-highlight').forEach(item =>
+          item.classList.remove('row-selected', 'col-active', 'col-highlight'));
+        table.querySelector('thead th')?.classList.add('col-active');
+      });
+
+      renderTable();
+    })();
   </script>
 
 </body>
