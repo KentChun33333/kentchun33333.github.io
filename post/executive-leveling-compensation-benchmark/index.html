@@ -1937,14 +1937,11 @@
         const columnIds = visibleColumns();
         const minimumCardHeight = 82;
         const chartHeight = Math.max(2300, primaryNodes.length * 145);
-        const primaryLevels = primaryNodes.map(node => Number(node.level));
-        const lowerHalfStep = primaryLevels.length > 1 ? (primaryLevels[1] - primaryLevels[0]) / 2 : 0;
-        const upperHalfStep = primaryLevels.length > 1
-          ? (primaryLevels[primaryLevels.length - 1] - primaryLevels[primaryLevels.length - 2]) / 2
-          : 0;
-        const scaleLower = Math.max(0, primaryLevels[0] - lowerHalfStep);
-        const scaleUpper = Math.min(100, primaryLevels[primaryLevels.length - 1] + upperHalfStep);
-        const scaleSpan = Math.max(1, scaleUpper - scaleLower);
+        // All lanes share one invariant global responsibility coordinate (0–100).
+        // Keeping the full domain prevents mappings from shifting when the primary axis changes.
+        const scaleLower = 0;
+        const scaleUpper = 100;
+        const scaleSpan = 100;
         const headers = columnIds.map((id, index) => `<div class="stack-company-head${index === 0 ? ' primary' : ''}">
           ${index === 0 ? 'Primary · ' : ''}${escapeHtml(institutions[id].label)}
           <small>Entry → Apex · block height = responsibility span</small>
@@ -2053,7 +2050,7 @@
         axisTierBadge.textContent = `${primaryNodes.length} ${primaryInstitution.short_label.toUpperCase()} GRADES`;
         const allLevelsButton = pillButtons.find(button => button.dataset.filter === 'all');
         if (allLevelsButton) allLevelsButton.textContent = `All Levels (${primaryNodes.length})`;
-        axisStatus.textContent = `${primaryInstitution.label} is the primary axis: unused space below its first grade is cropped, while continuous company stacks retain a compact four-line minimum and the same responsibility anchors.`;
+        axisStatus.textContent = `${primaryInstitution.label} is the primary axis on the invariant global responsibility coordinate (0–100); continuous company stacks retain a compact four-line minimum and the same responsibility anchors.`;
         renderStackChart();
         bindTableInteractions();
         runMasterFilter();
