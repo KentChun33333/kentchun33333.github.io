@@ -34,14 +34,14 @@ institutions:
       - {id: am, grade: "Assistant Manager", title: "AM", compensation: "S$55–75k", detail: "Distinct rank below Manager", tier: junior, level: 14}
       - {id: manager, grade: "Manager", title: "Manager", compensation: "S$55–77k", detail: "Professional manager band", tier: junior, level: 20}
       - {id: senior_manager, grade: "Senior Manager", title: "Senior Manager", compensation: "S$70–95k est.", detail: "Upper Manager segment", tier: middle, level: 24}
-      - {id: avp1, grade: "AVP1", title: "Assistant Vice President 1", compensation: "S$82–109k band", detail: "Lower AVP analytical/internal segment", tier: middle, level: 29}
-      - {id: avp2, grade: "AVP2", title: "Assistant Vice President 2", compensation: "S$95–118k band", detail: "Upper AVP analytical/internal segment", tier: middle, level: 34}
-      - {id: vp1, grade: "VP1", title: "Vice President 1", compensation: "S$118–150k", detail: "Senior professional / lead", tier: middle, level: 38}
-      - {id: vp2, grade: "VP2", title: "Vice President 2", compensation: "S$145–174k", detail: "Leadership transition", tier: middle, level: 44}
-      - {id: fvp, grade: "FVP", title: "First Vice President", compensation: "S$174–240k", detail: "Established functional leadership", tier: middle, level: 51}
-      - {id: svp, grade: "SVP", title: "Senior Vice President", compensation: "S$230–354k", detail: "Senior organizational leadership", tier: superscale, level: 64}
-      - {id: ed, grade: "ED", title: "Executive Director", compensation: "S$350–500k+ est.", detail: "Major function / regional executive", tier: superscale, level: 72}
-      - {id: md, grade: "MD", title: "Managing Director", compensation: "S$450–700k+ est.", detail: "Business-line executive", tier: superscale, level: 79}
+      - {id: avp1, grade: "AVP1", title: "Assistant Vice President 1", compensation: "S$105–135k TC", detail: "S$7–9k monthly base × 15 months", tier: middle, level: 29}
+      - {id: avp2, grade: "AVP2", title: "Assistant Vice President 2", compensation: "S$127.5–165k TC", detail: "S$8.5–11k monthly base × 15 months", tier: middle, level: 34}
+      - {id: vp1, grade: "VP1", title: "Vice President 1", compensation: "S$150–210k TC", detail: "S$10–14k monthly base × 15 months", tier: middle, level: 38}
+      - {id: vp2, grade: "VP2", title: "Vice President 2", compensation: "S$195–270k TC", detail: "S$13–18k monthly base × 15 months", tier: middle, level: 44}
+      - {id: fvp, grade: "FVP", title: "First Vice President", compensation: "S$255–330k TC", detail: "S$17–22k monthly base × 15 months", tier: middle, level: 51}
+      - {id: svp, grade: "SVP", title: "Senior Vice President", compensation: "~S$300–405k TC", detail: "~S$20–27k monthly base × 15 months", tier: superscale, level: 64}
+      - {id: ed, grade: "ED", title: "Executive Director", compensation: "~S$360–480k+ TC", detail: "~S$24–32k+ monthly base × 15 months", tier: superscale, level: 72}
+      - {id: md, grade: "MD", title: "Managing Director", compensation: "~S$450–675k+ TC", detail: "~S$30–45k+ monthly base × 15 months", tier: superscale, level: 79}
       - {id: senior_md, grade: "Senior MD / ExCo", title: "Senior Managing Director", compensation: "S$650k–1.4M+ est.", detail: "Group executive committee scope", tier: superscale, level: 88}
       - {id: group_ceo, grade: "Group CEO", title: "Group Chief Executive", compensation: "S$10M–16M+ TC", detail: "Enterprise apex", tier: political, level: 100}
 
@@ -51,9 +51,9 @@ institutions:
     nodes:
       - {id: officer, grade: "Officer / Analyst", title: "Entry Support", compensation: "< S$65k", detail: "Entry professional / operations", tier: junior, level: 8}
       - {id: am, grade: "Assistant Manager", title: "AM", compensation: "S$48–66k", detail: "Distinct rank below Manager", tier: junior, level: 14}
-      - {id: manager, grade: "Manager", title: "Manager", compensation: "S$60–96k", detail: "Broad professional Manager band", tier: junior, level: 21}
-      - {id: avp, grade: "AVP", title: "Assistant Vice President", compensation: "S$94–143k", detail: "Senior IC through people/project lead; covers TSMC G33–34", tier: middle, level: 36}
-      - {id: vp, grade: "VP", title: "Vice President", compensation: "S$154–237k", detail: "Covers UOB VP2–FVP and TSMC G34–35", tier: middle, level: 47}
+      - {id: manager, grade: "Manager", title: "Manager", compensation: "S$90–135k TC", detail: "Broad professional Manager band", tier: junior, level: 21}
+      - {id: avp, grade: "AVP", title: "Assistant Vice President", compensation: "S$100–180k TC", detail: "Senior IC through people/project lead; covers TSMC G33–34", tier: middle, level: 36}
+      - {id: vp, grade: "VP", title: "Vice President", compensation: "S$180–270k TC", detail: "Covers UOB VP2–FVP and TSMC G34–35", tier: middle, level: 47}
       - {id: ed, grade: "ED", title: "Executive Director", compensation: "S$260–380k est.", detail: "Covers TSMC G36–37", tier: superscale, level: 63}
       - {id: md, grade: "MD", title: "Managing Director", compensation: "S$350–700k+ est.", detail: "Maps to UOB ED and TSMC G38", tier: superscale, level: 72}
       - {id: md1, grade: "MD1", title: "Cluster Head", compensation: "S$650k–1.2M+ est.", detail: "Maps to UOB MD and TSMC G39–40; distinct from GMD", tier: superscale, level: 80}
@@ -127,7 +127,7 @@ institutions:
       - {id: research_eng, grade: "Research Engineer", title: "Research Engineer", compensation: "S$60–90k", detail: "Research professional entry", tier: junior, level: 15}
       - {id: senior_research_scientist, grade: "Senior Research Engineer / Research Scientist", title: "Senior Engineer / Scientist", compensation: "S$85–130k", detail: "Merged equivalent senior research IC band", tier: middle, level: 28}
       - {id: lead_senior_scientist, grade: "Lead Research Engineer / Senior Scientist", title: "Research Lead / Senior Scientist", compensation: "S$120–190k", detail: "Merged equivalent technical-lead and senior-scientist band", tier: middle, level: 41}
-      - {id: principal_scientist, grade: "Principal Engineer / Principal Scientist", title: "Principal Technical Authority", compensation: "S$150–220k", detail: "Grade above Lead Research Engineer; principal engineering/science track", tier: middle, level: 51}
+      - {id: principal_scientist, grade: "Principal Engineer / Principal Scientist", title: "Principal Technical Authority", compensation: "S$150–250k", detail: "Grade above Lead Research Engineer; principal engineering/science track", tier: middle, level: 51}
       - {id: senior_principal, grade: "Senior Principal Scientist", title: "Senior Principal Scientist", compensation: "S$200–300k", detail: "Research department leadership", tier: superscale, level: 58}
       - {id: executive_director, grade: "Executive Director", title: "Institute Executive Director", compensation: "S$250–500k", detail: "Institute / major function leadership", tier: superscale, level: 64}
       - {id: senior_director, grade: "Senior Director", title: "Senior Director", compensation: "S$450–650k", detail: "Enterprise research leadership", tier: superscale, level: 69}
