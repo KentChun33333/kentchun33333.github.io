@@ -1905,11 +1905,12 @@
         return { start: index, end: index, anchored: false };
       }
 
-      function renderStackChart(heightOverride = 0, fitPass = 0) {
+      function renderStackChart() {
         if (!stackChart) return;
         const primaryNodes = institutions[primaryAxis].nodes;
         const columnIds = visibleColumns();
-        const chartHeight = heightOverride || Math.max(6000, primaryNodes.length * 380);
+        const minimumCardHeight = 96;
+        const chartHeight = Math.max(2700, primaryNodes.length * 165);
         const headers = columnIds.map((id, index) => `<div class="stack-company-head${index === 0 ? ' primary' : ''}">
           ${index === 0 ? 'Primary · ' : ''}${escapeHtml(institutions[id].label)}
           <small>Entry → Apex · block height = responsibility span</small>
@@ -1934,10 +1935,24 @@
               centers[index] = Math.min(centers[index], centers[index + 1] - minimumCenterGap);
             }
           }
+          const boundaries = [0];
+          for (let index = 1; index < centers.length; index += 1) {
+            boundaries.push((centers[index - 1] + centers[index]) / 2);
+          }
+          boundaries.push(100);
+          const minimumBand = minimumCardHeight / chartHeight * 100;
+          for (let index = 1; index < boundaries.length; index += 1) {
+            boundaries[index] = Math.max(boundaries[index], boundaries[index - 1] + minimumBand);
+          }
+          boundaries[boundaries.length - 1] = 100;
+          for (let index = boundaries.length - 2; index >= 0; index -= 1) {
+            boundaries[index] = Math.min(boundaries[index], boundaries[index + 1] - minimumBand);
+          }
+          boundaries[0] = 0;
           const items = nodes.map((node, nodePosition) => {
             const interval = nodeInterval(institutionId, node, primaryNodes);
-            const lowerBoundary = nodePosition === 0 ? 0 : (centers[nodePosition - 1] + centers[nodePosition]) / 2;
-            const upperBoundary = nodePosition === nodes.length - 1 ? 100 : (centers[nodePosition] + centers[nodePosition + 1]) / 2;
+            const lowerBoundary = boundaries[nodePosition];
+            const upperBoundary = boundaries[nodePosition + 1];
             return {
               node,
               anchored: interval.anchored,
@@ -1957,7 +1972,8 @@
             const searchText = `${item.node.grade} ${item.node.title} ${item.node.compensation} ${item.node.detail} ${note}`.toLowerCase();
             return `<article class="stack-level-card${columnIndex === 0 ? ' primary' : ''}"
               style="top:${top}px;height:${height}px"
-              data-tier="${escapeHtml(item.node.tier)}" data-search="${escapeHtml(searchText)}" tabindex="0">
+              data-tier="${escapeHtml(item.node.tier)}" data-search="${escapeHtml(searchText)}"
+              title="${escapeHtml(`${item.node.grade} · ${item.node.title} | ${item.node.compensation} | ${item.node.detail}${note ? ` | ${note}` : ''}`)}" tabindex="0">
               <span class="stack-range">${escapeHtml(range)}${item.anchored ? ' · anchored' : ' · projected'}</span>
               <span class="cell-title">${escapeHtml(item.node.grade)} · ${escapeHtml(item.node.title)}</span>
               <span class="cell-salary${item.node.tier === 'political' ? ' peak' : ''}">${escapeHtml(item.node.compensation)}</span>
@@ -1971,16 +1987,6 @@
         stackChart.innerHTML = [...headers, ...lanes].join('');
         stackChart.querySelectorAll('.stack-level-card').forEach(card => {
           card.addEventListener('click', () => card.classList.toggle('selected'));
-        });
-        requestAnimationFrame(() => {
-          const cards = [...stackChart.querySelectorAll('.stack-level-card')];
-          const requiredScale = cards.reduce((largest, card) => {
-            if (!card.clientHeight) return largest;
-            return Math.max(largest, card.scrollHeight / card.clientHeight);
-          }, 1);
-          if (requiredScale > 1.01 && fitPass < 2) {
-            renderStackChart(Math.ceil(chartHeight * requiredScale * 1.06), fitPass + 1);
-          }
         });
       }
 
@@ -2010,7 +2016,7 @@
         axisTierBadge.textContent = `${primaryNodes.length} ${primaryInstitution.short_label.toUpperCase()} GRADES`;
         const allLevelsButton = pillButtons.find(button => button.dataset.filter === 'all');
         if (allLevelsButton) allLevelsButton.textContent = `All Levels (${primaryNodes.length})`;
-        axisStatus.textContent = `${primaryInstitution.label} is the primary axis: all company ladders are continuous with no vacant bands. Each native grade appears once; block boundaries stretch or compress through responsibility anchors.`;
+        axisStatus.textContent = `${primaryInstitution.label} is the primary axis: all company ladders remain continuous, with a four-line minimum card height. Boundaries stretch or compress around the same responsibility anchors.`;
         renderStackChart();
         bindTableInteractions();
         runMasterFilter();
