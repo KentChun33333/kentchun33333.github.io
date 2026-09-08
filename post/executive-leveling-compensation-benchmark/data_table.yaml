@@ -191,7 +191,9 @@ anchors:
   - {from: "uob.group_ceo", to: "ctbc.ceo", relation: equivalent, weight: 0.9, note: "CTBC CEO / President maps to UOB Group CEO apex"}
   - {from: "asml.jg7", to: "astar.senior_research_scientist", relation: equivalent, weight: 1.0, note: "A*STAR Senior Research Engineer / Research Scientist aligns to ASML L7"}
   - {from: "asml.jg8", to: "astar.lead_senior_scientist", relation: equivalent, weight: 1.0, note: "A*STAR Lead Research Engineer / Senior Scientist aligns to ASML L8"}
-  - {from: "asml.jg11", to: "astar.senior_director", relation: equivalent, weight: 1.0, note: "A*STAR Senior Director aligns to ASML L11 Senior Manager"}
+  - {from: "asml.jg9", to: "astar.principal_scientist", relation: equivalent, weight: 1.0, note: "A*STAR Principal Scientist aligns to ASML L9"}
+  - {from: "asml.jg10", to: "astar.senior_principal", relation: equivalent, weight: 1.0, note: "A*STAR Senior Principal Scientist aligns to ASML L10"}
+  - {from: "asml.jg11", to: "astar.executive_director", relation: equivalent, weight: 1.0, note: "A*STAR Executive Director aligns to ASML L11"}
   - {from: "sg_gov.mx14", to: "uob.officer", relation: equivalent, weight: 1.0, note: "Entry support anchor"}
   - {from: "sg_gov.mx13i", to: "ocbc.am", relation: compensation_overlap, weight: 0.8, note: "AM salary window"}
   - {from: "sg_gov.mx13", to: "ocbc.manager", relation: compensation_overlap, weight: 0.9, note: "Manager window"}
@@ -234,10 +236,10 @@ anchors:
   - {from: "tsmc.g32", to: "asml.jg7", relation: lower_edge, weight: 1.0, note: "L7 begins at the G32 responsibility band"}
   - {from: "tsmc.g33", to: "asml.jg7", relation: upper_edge, weight: 1.0, note: "L7 extends through the G33 responsibility band"}
   - {from: "tsmc.g34", to: "asml.jg8", relation: equivalent, weight: 1.0, note: "Lead / first-manager anchor"}
-  - {from: "tsmc.g35", to: "asml.jg9", relation: lower_edge, weight: 1.0, note: "L9 begins at the G35 responsibility band"}
-  - {from: "tsmc.g36", to: "asml.jg9", relation: upper_edge, weight: 1.0, note: "L9 extends through the G36 responsibility band"}
-  - {from: "tsmc.g37", to: "asml.jg10", relation: equivalent, weight: 1.0, note: "Department-manager anchor"}
-  - {from: "tsmc.g38", to: "asml.jg11", relation: equivalent, weight: 1.0, note: "Senior-manager anchor"}
+  - {from: "tsmc.g35", to: "asml.jg10", relation: lower_edge, weight: 1.0, note: "L10 begins at the G35 responsibility band"}
+  - {from: "tsmc.g36", to: "asml.jg10", relation: upper_edge, weight: 1.0, note: "L10 extends through the G36 responsibility band"}
+  - {from: "tsmc.g36", to: "asml.jg11", relation: lower_edge, weight: 1.0, note: "L11 begins at the G36 responsibility band"}
+  - {from: "tsmc.g37", to: "asml.jg11", relation: upper_edge, weight: 1.0, note: "L11 extends through the G37 responsibility band"}
   - {from: "tsmc.g39", to: "asml.jg12", relation: equivalent, weight: 1.0, note: "Director / fellow anchor"}
   - {from: "tsmc.g40", to: "asml.jg13", relation: equivalent, weight: 1.0, note: "Senior director"}
   - {from: "tsmc.g50", to: "asml.jg14", relation: equivalent, weight: 1.0, note: "Vice president"}
