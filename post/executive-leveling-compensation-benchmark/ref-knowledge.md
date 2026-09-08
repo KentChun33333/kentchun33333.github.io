@@ -97,9 +97,9 @@ ASML operates a standardized Global Job Grade (JG) system governing engineering,
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **National / Board** | PM / Senior Ministers | Group CEO | Group CEO | Chairman / CEO | Board of Mgmt (JG16) | President / Premier (Ref) |
 | **Apex Executive** | MR4 Cabinet Minister | Group ExCo / Top SMD | Group Managing Dir (GMD) / CTO / COO | Vice President (G38/39) | Vice President (JG14/15) | Political Minister (政務官) |
-| **Top Leadership** | Perm Sec / Deputy Sec | Managing Director (MD) | MD / MD1 | Senior Director (G37) | Senior Director (JG13) | 常務次長 / 簡任13–14 |
-| **Senior Executive** | MX7 / MX8 (Director) | Senior VP (SVP) / ED | Executive Director (ED) | Director (G36) | Director / Fellow (JG12) | 司長 / 簡任11–12 |
-| **Upper Management** | MX9 (Entry Superscale) | First VP (FVP) | VP (Senior Band) | Section Dir / Dep Dir (G35) | Senior Manager (JG11) | 副司長 / 簡任專委 (簡任10) |
+| **Top Leadership** | Perm Sec / Deputy Sec | Managing Director (MD) | MD / MD1 | Senior Director (G37) | Senior Director (JG13) | 常務次長 / 簡任14 |
+| **Senior Executive** | MX7 / MX8 (Director) | Senior VP (SVP) / ED | Executive Director (ED) | Director (G36) | Director / Fellow (JG12) | 司長 / 參事 / 簡任12–13 |
+| **Upper Management** | MX9 (Entry Superscale) | First VP (FVP) | VP (Senior Band) | Section Dir / Dep Dir (G35) | Senior Manager (JG11) | 副司長 / 專門委員 (簡任11–12) |
 | **Mid Management** | MX10 / MX11A | VP1 / VP2 | Vice President (VP) | Manager (G34/35) | Principal / Group Lead (JG10) | 科長 / 薦任9 |
 | **Team Lead / Junior Lead** | MX11 / MX12 | AVP1 / AVP2 | Assistant VP (AVP) | Technical Manager (G34) | Senior Specialist (JG8/9) | 專員 / 薦任7–8 |
 | **Professional IC** | MX13 / MX13(I) | Analyst / AM | Analyst / AM | Engineer (G31–33) | Engineer (JG6/7) | 科員 / 薦任6 |
