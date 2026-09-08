@@ -1695,9 +1695,9 @@
             - <strong>UOB Career Track:</strong> <code>Officer → AM → Manager → AVP1 → AVP2 → VP1 → VP2 → FVP → SVP → ED → MD</code><br/>
           • <strong>Cross-Institutional Mapping (ref-ocbc-uob.md):</strong><br/>
             - <strong>TSMC DL / Operator</strong> = OCBC Officer ↔ UOB Officer / Analyst<br/>
-            - <strong>TSMC Grade 30–31</strong> = OCBC Assistant Manager (AM) ↔ UOB Assistant Manager (AM)<br/>
-            - <strong>TSMC G31–32</strong> = OCBC Manager ↔ UOB Manager<br/>
-            - <strong>TSMC G33–34</strong> = OCBC AVP ↔ UOB [AVP2 → VP1], with people-leading AVP at the G34 upper edge<br/>
+            - <strong>TSMC Grade 30 → first 0.3 of G31</strong> = OCBC Assistant Manager (AM) ↔ UOB Assistant Manager (AM)<br/>
+            - <strong>TSMC first 0.3 of G31 → all G32</strong> = OCBC Manager ↔ UOB Manager<br/>
+            - <strong>TSMC G33 → first 0.5 of G34</strong> = OCBC AVP ↔ UOB [AVP2 → VP1], with people-leading AVP at the G34 upper edge<br/>
             - <strong>TSMC G34–35</strong> = OCBC VP ↔ UOB [VP2 → FVP]; G34 is deliberately shared by OCBC AVP and VP<br/>
             - <strong>TSMC G36–37</strong> = OCBC ED ↔ UOB SVP segment<br/>
             - <strong>TSMC G38</strong> = OCBC MD ↔ UOB ED<br/>
@@ -1808,7 +1808,19 @@
         });
       }
 
+      function mappedSpan(node, targetInstitutionId) {
+        const mapping = node && node.mapping;
+        if (!mapping || mapping.to !== targetInstitutionId) return null;
+        const start = Number(mapping.start);
+        const end = Number(mapping.end);
+        return Number.isFinite(start) && Number.isFinite(end) && end > start
+          ? { ...mapping, start, end }
+          : null;
+      }
+
       function projectedLevel(institutionId, node, targetInstitutionId) {
+        const span = mappedSpan(node, targetInstitutionId);
+        if (span) return (span.start + span.end) / 2;
         const ref = `${institutionId}.${node.id}`;
         const edges = directAnchors(ref, targetInstitutionId);
         if (!edges.length) return Number(node.level);
@@ -1893,6 +1905,12 @@
           return { start: index, end: index, anchored: true };
         }
         const nodeRef = `${institutionId}.${node.id}`;
+        const span = mappedSpan(node, primaryAxis);
+        if (span) {
+          const start = closestPrimaryIndex(span.start, primaryNodes);
+          const end = closestPrimaryIndex(span.end, primaryNodes);
+          return { start: Math.min(start, end), end: Math.max(start, end), anchored: true, span };
+        }
         const anchoredIndexes = [...new Set(directAnchors(nodeRef, primaryAxis).map(edge => {
           const primaryRef = edge.from === nodeRef ? edge.to : edge.from;
           const primaryNodeId = nodeIndex.get(primaryRef)?.node.id;
@@ -1964,10 +1982,11 @@
             return {
               node,
               anchored: interval.anchored,
-              lowerBoundary,
-              upperBoundary,
+              lowerBoundary: interval.span ? interval.span.start : lowerBoundary,
+              upperBoundary: interval.span ? interval.span.end : upperBoundary,
               primaryStart: interval.start,
-              primaryEnd: interval.end
+              primaryEnd: interval.end,
+              span: interval.span || null
             };
           });
           const cards = items.map(item => {
@@ -1975,14 +1994,16 @@
             const height = Math.max(2, (item.upperBoundary - item.lowerBoundary) / scaleSpan * chartHeight);
             const startGrade = primaryNodes[item.primaryStart]?.grade || '';
             const endGrade = primaryNodes[item.primaryEnd]?.grade || '';
-            const range = startGrade === endGrade ? startGrade : `${startGrade} → ${endGrade}`;
+            const range = item.node.mapping?.to === primaryAxis
+              ? escapeHtml(item.node.mapping.label)
+              : (startGrade === endGrade ? startGrade : `${startGrade} → ${endGrade}`);
             const note = institutionId === primaryAxis ? '' : anchorNote(institutionId, item.node);
             const searchText = `${item.node.grade} ${item.node.title} ${item.node.compensation} ${item.node.detail} ${note}`.toLowerCase();
             return `<article class="stack-level-card${columnIndex === 0 ? ' primary' : ''}"
               style="top:${top}px;height:${height}px"
               data-tier="${escapeHtml(item.node.tier)}" data-search="${escapeHtml(searchText)}"
               title="${escapeHtml(`${item.node.grade} · ${item.node.title} | ${item.node.compensation} | ${item.node.detail}${note ? ` | ${note}` : ''}`)}" tabindex="0">
-              <span class="stack-range">${escapeHtml(range)}${item.anchored ? ' · anchored' : ' · projected'}</span>
+              <span class="stack-range">${range}${item.anchored ? ' · anchored' : ' · projected'}</span>
               <span class="cell-title">${escapeHtml(item.node.grade)} · ${escapeHtml(item.node.title)}</span>
               <span class="cell-salary${item.node.tier === 'political' ? ' peak' : ''}">${escapeHtml(item.node.compensation)}</span>
               <span class="cell-detail">${escapeHtml(item.node.detail)}</span>

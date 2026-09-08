@@ -50,9 +50,9 @@ institutions:
     short_label: "OCBC"
     nodes:
       - {id: officer, grade: "Officer / Analyst", title: "Entry Support", compensation: "< S$65k", detail: "Entry professional / operations", tier: junior, level: 8}
-      - {id: am, grade: "Assistant Manager", title: "AM", compensation: "S$48–66k", detail: "Distinct rank below Manager", tier: junior, level: 14}
-      - {id: manager, grade: "Manager", title: "Manager", compensation: "S$90–135k TC", detail: "Broad professional Manager band", tier: junior, level: 21}
-      - {id: avp, grade: "AVP", title: "Assistant Vice President", compensation: "S$100–180k TC", detail: "Senior IC through people/project lead; covers TSMC G33–34", tier: middle, level: 36}
+      - {id: am, grade: "Assistant Manager", title: "AM", compensation: "S$48–66k", detail: "Distinct rank below Manager · covers the first 0.3 of TSMC G31", tier: junior, level: 14, mapping: {to: "tsmc", start: 13, end: 14.5, label: "G30 → 0.3×G31"}}
+      - {id: manager, grade: "Manager", title: "Manager", compensation: "S$90–135k TC", detail: "Broad professional Manager band · follows AM through all of TSMC G32", tier: junior, level: 21, mapping: {to: "tsmc", start: 14.5, end: 24, label: "0.3×G31 → G32"}}
+      - {id: avp, grade: "AVP", title: "Assistant Vice President", compensation: "S$100–180k TC", detail: "Senior IC through people/project lead; G33 plus the first 0.5 of TSMC G34", tier: middle, level: 36, mapping: {to: "tsmc", start: 35, end: 39, label: "G33 → 0.5×G34"}}
       - {id: vp, grade: "VP", title: "Vice President", compensation: "S$180–270k TC", detail: "Covers UOB VP2–FVP and TSMC G34–35", tier: middle, level: 47}
       - {id: ed, grade: "ED", title: "Executive Director", compensation: "S$260–380k est.", detail: "Covers TSMC G36–37", tier: superscale, level: 63}
       - {id: md, grade: "MD", title: "Managing Director", compensation: "S$350–700k+ est.", detail: "Maps to UOB ED and TSMC G38", tier: superscale, level: 72}
@@ -179,6 +179,8 @@ anchors:
   - {from: "uob.md", to: "ocbc.md1", relation: equivalent, weight: 1.0, note: "OCBC MD1 maps to UOB MD"}
   - {from: "tsmc.g50", to: "ocbc.gmd", relation: equivalent, weight: 0.9, note: "Enterprise executive anchor"}
   - {from: "tsmc.g30", to: "asml.jg5", relation: equivalent, weight: 1.0, note: "Lower engineering-entry anchor"}
+  - {from: "tsmc.g30", to: "ocbc.am", relation: lower_edge, weight: 1.0, note: "OCBC AM begins at G30 and extends 0.3 into G31"}
+  - {from: "tsmc.g31", to: "ocbc.am", relation: upper_edge, weight: 1.0, note: "OCBC AM covers the first 0.3 of G31"}
   - {from: "tsmc.g31", to: "asml.jg6", relation: equivalent, weight: 1.0, note: "Engineer anchor"}
   - {from: "tsmc.g32", to: "asml.jg7", relation: lower_edge, weight: 1.0, note: "L7 begins at the G32 responsibility band"}
   - {from: "tsmc.g33", to: "asml.jg7", relation: upper_edge, weight: 1.0, note: "L7 extends through the G33 responsibility band"}
