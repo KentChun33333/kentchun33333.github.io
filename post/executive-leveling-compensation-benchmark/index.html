@@ -1909,8 +1909,16 @@
         if (!stackChart) return;
         const primaryNodes = institutions[primaryAxis].nodes;
         const columnIds = visibleColumns();
-        const minimumCardHeight = 96;
-        const chartHeight = Math.max(2700, primaryNodes.length * 165);
+        const minimumCardHeight = 82;
+        const chartHeight = Math.max(2300, primaryNodes.length * 145);
+        const primaryLevels = primaryNodes.map(node => Number(node.level));
+        const lowerHalfStep = primaryLevels.length > 1 ? (primaryLevels[1] - primaryLevels[0]) / 2 : 0;
+        const upperHalfStep = primaryLevels.length > 1
+          ? (primaryLevels[primaryLevels.length - 1] - primaryLevels[primaryLevels.length - 2]) / 2
+          : 0;
+        const scaleLower = Math.max(0, primaryLevels[0] - lowerHalfStep);
+        const scaleUpper = Math.min(100, primaryLevels[primaryLevels.length - 1] + upperHalfStep);
+        const scaleSpan = Math.max(1, scaleUpper - scaleLower);
         const headers = columnIds.map((id, index) => `<div class="stack-company-head${index === 0 ? ' primary' : ''}">
           ${index === 0 ? 'Primary · ' : ''}${escapeHtml(institutions[id].label)}
           <small>Entry → Apex · block height = responsibility span</small>
@@ -1935,20 +1943,20 @@
               centers[index] = Math.min(centers[index], centers[index + 1] - minimumCenterGap);
             }
           }
-          const boundaries = [0];
+          const boundaries = [scaleLower];
           for (let index = 1; index < centers.length; index += 1) {
-            boundaries.push((centers[index - 1] + centers[index]) / 2);
+            boundaries.push(Math.min(scaleUpper, Math.max(scaleLower, (centers[index - 1] + centers[index]) / 2)));
           }
-          boundaries.push(100);
-          const minimumBand = minimumCardHeight / chartHeight * 100;
+          boundaries.push(scaleUpper);
+          const minimumBand = minimumCardHeight / chartHeight * scaleSpan;
           for (let index = 1; index < boundaries.length; index += 1) {
             boundaries[index] = Math.max(boundaries[index], boundaries[index - 1] + minimumBand);
           }
-          boundaries[boundaries.length - 1] = 100;
+          boundaries[boundaries.length - 1] = scaleUpper;
           for (let index = boundaries.length - 2; index >= 0; index -= 1) {
             boundaries[index] = Math.min(boundaries[index], boundaries[index + 1] - minimumBand);
           }
-          boundaries[0] = 0;
+          boundaries[0] = scaleLower;
           const items = nodes.map((node, nodePosition) => {
             const interval = nodeInterval(institutionId, node, primaryNodes);
             const lowerBoundary = boundaries[nodePosition];
@@ -1963,8 +1971,8 @@
             };
           });
           const cards = items.map(item => {
-            const top = item.lowerBoundary / 100 * chartHeight;
-            const height = Math.max(2, (item.upperBoundary - item.lowerBoundary) / 100 * chartHeight);
+            const top = (item.lowerBoundary - scaleLower) / scaleSpan * chartHeight;
+            const height = Math.max(2, (item.upperBoundary - item.lowerBoundary) / scaleSpan * chartHeight);
             const startGrade = primaryNodes[item.primaryStart]?.grade || '';
             const endGrade = primaryNodes[item.primaryEnd]?.grade || '';
             const range = startGrade === endGrade ? startGrade : `${startGrade} → ${endGrade}`;
@@ -2016,7 +2024,7 @@
         axisTierBadge.textContent = `${primaryNodes.length} ${primaryInstitution.short_label.toUpperCase()} GRADES`;
         const allLevelsButton = pillButtons.find(button => button.dataset.filter === 'all');
         if (allLevelsButton) allLevelsButton.textContent = `All Levels (${primaryNodes.length})`;
-        axisStatus.textContent = `${primaryInstitution.label} is the primary axis: all company ladders remain continuous, with a four-line minimum card height. Boundaries stretch or compress around the same responsibility anchors.`;
+        axisStatus.textContent = `${primaryInstitution.label} is the primary axis: unused space below its first grade is cropped, while continuous company stacks retain a compact four-line minimum and the same responsibility anchors.`;
         renderStackChart();
         bindTableInteractions();
         runMasterFilter();
