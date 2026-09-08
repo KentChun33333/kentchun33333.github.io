@@ -60,6 +60,20 @@ institutions:
       - {id: gmd, grade: "GMD", title: "Group Managing Director", compensation: "S$850k–3.5M+ est.", detail: "Group ExCo / key BU leadership", tier: superscale, level: 91}
       - {id: group_ceo, grade: "Group CEO", title: "Group Chief Executive", compensation: "S$10M–14M+ TC", detail: "Enterprise apex", tier: political, level: 100}
 
+  ctbc:
+    label: "CTBC 中信金"
+    short_label: "CTBC"
+    nodes:
+      - {id: grade8, grade: "8 職等", title: "MA 起聘 / 高專", compensation: "Not provided", detail: "Management associate entry / senior specialist track; aligned to TSMC G31 entry", tier: junior, level: 16}
+      - {id: grade9, grade: "9 職等", title: "襄理", compensation: "Not provided", detail: "MA after approximately one year; base execution and learning band", tier: junior, level: 18}
+      - {id: grade10, grade: "10 職等", title: "一般經理", compensation: "Not provided", detail: "MA after approximately two years; independent project contributor", tier: junior, level: 22}
+      - {id: grade11, grade: "11 職等", title: "資深經辦 / 資深經理", compensation: "Not provided", detail: "Senior operator / senior-manager band; upper G32 into G33 responsibility", tier: middle, level: 30}
+      - {id: grade12, grade: "12 職等", title: "資深經理 / 實任科長", compensation: "Not provided", detail: "Senior manager or formal section lead; overlaps TSMC G33–G34", tier: middle, level: 39}
+      - {id: grade13, grade: "13 職等", title: "大科長 / 初任部主管", compensation: "Not provided", detail: "Initial department-head scope; comparable to TSMC G35", tier: middle, level: 51}
+      - {id: grade14, grade: "14 職等", title: "協理 / 部室主管 / Director", compensation: "Not provided", detail: "Department leadership with broader management span; comparable to TSMC G36", tier: superscale, level: 60}
+      - {id: grade15, grade: "15 職等", title: "資深協理 / 副總經理", compensation: "Not provided", detail: "Senior executive management; TSMC G37–G38 scope", tier: superscale, level: 69}
+      - {id: grade16, grade: "16 職等", title: "資深協理 / 副總經理 / MD", compensation: "Not provided", detail: "Top banking management band; TSMC G37–G38 upper scope", tier: superscale, level: 75}
+
   tsmc:
     label: "TSMC 台積電"
     short_label: "TSMC"
@@ -142,6 +156,16 @@ anchors:
   - {from: "sg_gov.senior_perm_sec", to: "astar.shared_senior_perm_sec", relation: shared_public_spine, weight: 1.0, note: "Above A*STAR leadership, use the common SG head-of-service level"}
   - {from: "sg_gov.ministers", to: "astar.shared_ministers", relation: shared_public_spine, weight: 1.0, note: "Common SG political leadership level"}
   - {from: "sg_gov.pm", to: "astar.shared_pm", relation: shared_public_spine, weight: 1.0, note: "Common SG head-of-government level"}
+  - {from: "tsmc.g31", to: "ctbc.grade8", relation: lower_edge, weight: 0.9, note: "CTBC 8 職等 MA起聘 aligns to TSMC G31 entry"}
+  - {from: "tsmc.g31", to: "ctbc.grade9", relation: equivalent, weight: 0.9, note: "CTBC 9 職等 襄理 remains in the TSMC G31 / AM entry band"}
+  - {from: "tsmc.g32", to: "ctbc.grade10", relation: lower_edge, weight: 0.9, note: "CTBC 10 職等 一般經理 begins in the TSMC G32 band"}
+  - {from: "tsmc.g32", to: "ctbc.grade11", relation: upper_edge, weight: 0.9, note: "CTBC 11 職等 reaches the upper TSMC G32 responsibility band"}
+  - {from: "tsmc.g33", to: "ctbc.grade12", relation: lower_edge, weight: 1.0, note: "CTBC 12 職等 overlaps TSMC G33 senior-lead scope"}
+  - {from: "tsmc.g34", to: "ctbc.grade12", relation: upper_edge, weight: 0.8, note: "CTBC 12 職等 can extend into formal TSMC G34-style section leadership"}
+  - {from: "tsmc.g35", to: "ctbc.grade13", relation: equivalent, weight: 0.9, note: "CTBC 13 職等 initial department-head anchor"}
+  - {from: "tsmc.g36", to: "ctbc.grade14", relation: equivalent, weight: 0.9, note: "CTBC 14 職等 director / department-lead anchor"}
+  - {from: "tsmc.g37", to: "ctbc.grade15", relation: lower_edge, weight: 0.8, note: "CTBC 15 職等 enters senior executive scope"}
+  - {from: "tsmc.g38", to: "ctbc.grade16", relation: upper_edge, weight: 0.8, note: "CTBC 16 職等 reaches MD-level upper scope"}
   - {from: "asml.jg7", to: "astar.senior_research_scientist", relation: equivalent, weight: 1.0, note: "A*STAR Senior Research Engineer / Research Scientist aligns to ASML L7"}
   - {from: "asml.jg8", to: "astar.lead_senior_scientist", relation: equivalent, weight: 1.0, note: "A*STAR Lead Research Engineer / Senior Scientist aligns to ASML L8"}
   - {from: "asml.jg11", to: "astar.senior_director", relation: equivalent, weight: 1.0, note: "A*STAR Senior Director aligns to ASML L11 Senior Manager"}
