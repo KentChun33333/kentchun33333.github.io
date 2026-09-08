@@ -1821,7 +1821,7 @@
         if (!mapping || mapping.to !== targetInstitutionId) return null;
         const start = Number(mapping.start);
         const end = Number(mapping.end);
-        return Number.isFinite(start) && Number.isFinite(end) && end > start
+        return Number.isFinite(start) && Number.isFinite(end) && end >= start
           ? { ...mapping, start, end }
           : null;
       }
