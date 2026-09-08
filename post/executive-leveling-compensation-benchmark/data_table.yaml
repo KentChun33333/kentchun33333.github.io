@@ -86,18 +86,18 @@ institutions:
     short_label: "ASML"
     nodes:
       - {id: operator, grade: "Operator / DL", title: "Production Technician", compensation: "< US$90k", detail: "Separate operations family", tier: junior, level: 7}
-      - {id: jg5, grade: "JG5", title: "Professional Engineer", compensation: "US$105–150k", detail: "Graduate / professional entry", tier: junior, level: 15}
-      - {id: jg6, grade: "JG6", title: "Senior Engineer", compensation: "US$130–190k", detail: "Experienced professional", tier: junior, level: 23}
-      - {id: jg7, grade: "JG7", title: "Principal Engineer", compensation: "US$145–220k", detail: "Principal / PhD entry context", tier: middle, level: 32}
-      - {id: jg8, grade: "JG8", title: "Lead Engineer / Manager", compensation: "US$175–260k", detail: "Senior IC / first manager dual track", tier: middle, level: 41}
-      - {id: jg9, grade: "JG9", title: "Manager / Principal", compensation: "US$220–320k", detail: "Manager / principal dual track", tier: middle, level: 51}
-      - {id: jg10, grade: "JG10", title: "Department Manager", compensation: "US$260–400k", detail: "Manager / senior manager", tier: superscale, level: 59}
-      - {id: jg11, grade: "JG11", title: "Senior Manager", compensation: "US$350–520k", detail: "Senior manager / deputy director", tier: superscale, level: 66}
-      - {id: jg12, grade: "JG12", title: "Director / Fellow", compensation: "US$420–750k", detail: "Director / fellow dual track", tier: superscale, level: 73}
-      - {id: jg13, grade: "JG13", title: "Senior Director", compensation: "US$550k–1.3M+", detail: "Senior director", tier: superscale, level: 82}
-      - {id: jg14, grade: "JG14", title: "Vice President", compensation: "US$800k–1.8M+", detail: "Global VP", tier: superscale, level: 90}
-      - {id: jg15, grade: "JG15", title: "Senior Vice President", compensation: "US$1.2–2.5M+", detail: "Global SVP", tier: political, level: 95}
-      - {id: jg16, grade: "JG16", title: "Executive VP / BoM", compensation: "US$1.8–4.5M+", detail: "Executive board scope", tier: political, level: 98}
+      - {id: jg5, grade: "L5", title: "Professional Engineer", compensation: "US$105–150k", detail: "TSMC G30 lower-entry anchor", tier: junior, level: 13}
+      - {id: jg6, grade: "L6", title: "Engineer", compensation: "US$130–190k", detail: "TSMC G31 anchor", tier: junior, level: 18}
+      - {id: jg7, grade: "L7", title: "Senior / Principal Engineer", compensation: "US$145–220k", detail: "Spans TSMC G32–33 responsibility band", tier: middle, level: 30}
+      - {id: jg8, grade: "L8", title: "Lead Engineer / Manager", compensation: "US$175–260k", detail: "TSMC G34 anchor · senior IC / first-manager dual track", tier: middle, level: 43}
+      - {id: jg9, grade: "L9", title: "Manager / Principal", compensation: "US$220–320k", detail: "Spans TSMC G35–36 responsibility band", tier: superscale, level: 56}
+      - {id: jg10, grade: "L10", title: "Department Manager", compensation: "US$260–400k", detail: "TSMC G37 anchor", tier: superscale, level: 66}
+      - {id: jg11, grade: "L11", title: "Senior Manager", compensation: "US$350–520k", detail: "TSMC G38 anchor", tier: superscale, level: 72}
+      - {id: jg12, grade: "L12", title: "Director / Fellow", compensation: "US$420–750k", detail: "TSMC G39 anchor · director / fellow dual track", tier: superscale, level: 77}
+      - {id: jg13, grade: "L13", title: "Senior Director", compensation: "US$550k–1.3M+", detail: "TSMC G40 anchor", tier: superscale, level: 82}
+      - {id: jg14, grade: "L14", title: "Vice President", compensation: "US$800k–1.8M+", detail: "TSMC G50 anchor · global VP", tier: superscale, level: 90}
+      - {id: jg15, grade: "L15", title: "Senior Vice President", compensation: "US$1.2–2.5M+", detail: "TSMC G51 anchor · global SVP", tier: political, level: 95}
+      - {id: jg16, grade: "L16", title: "Executive VP / BoM", compensation: "US$1.8–4.5M+", detail: "TSMC G52 anchor · executive board scope", tier: political, level: 97}
       - {id: ceo, grade: "CEO / BoM Chair", title: "President & CEO", compensation: "€10–18M+", detail: "Corporate apex", tier: political, level: 100}
 
   tw_gov:
@@ -176,15 +176,16 @@ anchors:
   - {from: "tsmc.g40", to: "uob.md", relation: upper_edge, weight: 1.0, note: "UOB MD extends through G40"}
   - {from: "uob.md", to: "ocbc.md1", relation: equivalent, weight: 1.0, note: "OCBC MD1 maps to UOB MD"}
   - {from: "tsmc.g50", to: "ocbc.gmd", relation: equivalent, weight: 0.9, note: "Enterprise executive anchor"}
-  - {from: "tsmc.g31", to: "asml.jg5", relation: entry_context, weight: 0.8, note: "Graduate entry context"}
-  - {from: "tsmc.g32", to: "asml.jg6", relation: equivalent, weight: 1.0, note: "+26 responsibility anchor"}
-  - {from: "tsmc.g33", to: "asml.jg7", relation: entry_context, weight: 0.8, note: "Fresh PhD / entry context"}
-  - {from: "tsmc.g33", to: "asml.jg8", relation: mature_scope, weight: 0.7, note: "Mature responsibility overlap"}
-  - {from: "tsmc.g34", to: "asml.jg8", relation: equivalent, weight: 1.0, note: "Lead / first manager"}
-  - {from: "tsmc.g35", to: "asml.jg9", relation: equivalent, weight: 1.0, note: "Manager / principal"}
-  - {from: "tsmc.g36", to: "asml.jg10", relation: equivalent, weight: 1.0, note: "Department manager"}
-  - {from: "tsmc.g37", to: "asml.jg11", relation: equivalent, weight: 1.0, note: "Senior manager"}
-  - {from: "tsmc.g38", to: "asml.jg12", relation: equivalent, weight: 1.0, note: "Director / fellow"}
+  - {from: "tsmc.g30", to: "asml.jg5", relation: equivalent, weight: 1.0, note: "Lower engineering-entry anchor"}
+  - {from: "tsmc.g31", to: "asml.jg6", relation: equivalent, weight: 1.0, note: "Engineer anchor"}
+  - {from: "tsmc.g32", to: "asml.jg7", relation: lower_edge, weight: 1.0, note: "L7 begins at the G32 responsibility band"}
+  - {from: "tsmc.g33", to: "asml.jg7", relation: upper_edge, weight: 1.0, note: "L7 extends through the G33 responsibility band"}
+  - {from: "tsmc.g34", to: "asml.jg8", relation: equivalent, weight: 1.0, note: "Lead / first-manager anchor"}
+  - {from: "tsmc.g35", to: "asml.jg9", relation: lower_edge, weight: 1.0, note: "L9 begins at the G35 responsibility band"}
+  - {from: "tsmc.g36", to: "asml.jg9", relation: upper_edge, weight: 1.0, note: "L9 extends through the G36 responsibility band"}
+  - {from: "tsmc.g37", to: "asml.jg10", relation: equivalent, weight: 1.0, note: "Department-manager anchor"}
+  - {from: "tsmc.g38", to: "asml.jg11", relation: equivalent, weight: 1.0, note: "Senior-manager anchor"}
+  - {from: "tsmc.g39", to: "asml.jg12", relation: equivalent, weight: 1.0, note: "Director / fellow anchor"}
   - {from: "tsmc.g40", to: "asml.jg13", relation: equivalent, weight: 1.0, note: "Senior director"}
   - {from: "tsmc.g50", to: "asml.jg14", relation: equivalent, weight: 1.0, note: "Vice president"}
   - {from: "tsmc.g51", to: "asml.jg15", relation: equivalent, weight: 1.0, note: "Senior vice president"}
