@@ -4,7 +4,8 @@ This reference knowledge document establishes the verified structural facts, lev
 
 # # human added key points 
 - notice OCBC VP is about TSMC manager (G35)
-- OCBC Manager is the consolidated TSMC G31–32 segment; OCBC AVP is the consolidated TSMC G33–34 segment, and senior AVPs may start to lead people
+- OCBC ladder must preserve **Officer → Assistant Manager (AM) → Manager → AVP → VP → ED → MD → MD1 → GMD**; AM and Manager are distinct ranks
+- OCBC Manager is the consolidated TSMC G31–32 professional-scope segment; OCBC AVP is the consolidated TSMC G32–34 segment, and senior AVPs may start to lead people
 - UOB public ladders support Officer / Senior Officer / Manager / Senior Manager / AVP / VP1 / VP2 / FVP / SVP / ED / MD; public evidence does not establish formal AVP1 or AVP2 ranks
 - using salary mapping for SG gov to UOB to OCBC
 - where OCBC senior AVP (also called AVP) will start to lead people like G33/G34 in TSMC, but still have AVP, VP is actly like G34/G35/G36 as senior IC. 
@@ -39,8 +40,9 @@ To resolve cross-border currency disparities, institutional pay constraints, and
 
 [Axis 3: Tech-to-Banking Job Grade Bridging (+26 Rule & Segment Tree Calibration)]
   ASML (責任層級約當跨度)       <=== +26 規則 ===>  TSMC (TW Grade & Title)                 <=== UOB (Granular) ===>  <=== OCBC (Consolidated) ===>
-  JG5–6 (Junior / graduate entry)                  30–31 (工程師 / 學碩入口帶)             Analyst                   Officer / Analyst
-  JG5–6 (Professional)                             31 (工程師)                              UOB AM / Manager          OCBC Manager (Entry)
+  Banking support / operations salary-only         No clean engineering-grade equivalent   Officer / AM              Officer / AM
+  JG5–6 (Junior / graduate entry)                  30–31 (工程師 / 學碩入口帶)             Educational-entry context Educational-entry context
+  JG5–6 (Professional)                             31 (工程師)                              UOB Manager               OCBC Manager (Entry)
   JG7–8 (Senior Eng / 跨職系)                     32 (資深工程師)                           UOB Sr Manager / lower AVP OCBC Manager (Core/Senior)
   JG7–9 (新人JG7-8 · 成熟JG8-9)                    33 (主任工程師 / Principal Eng)          UOB upper AVP / VP1       OCBC AVP (Entry/Core)
   JG8–9 (初階主管 / 資深IC雙軌)                    34 (副理 / Technical Manager)            UOB VP2 (34 anchor)       OCBC AVP (Senior/Leader)
@@ -60,7 +62,7 @@ To resolve cross-border currency disparities, institutional pay constraints, and
 
 ### 2.1 OCBC AVP vs. UOB AVP / VP Segment Parity
 Current 2025/2026 employee-reported aggregates and post-June-2025 submissions support these broad windows, not an exact internal grade conversion:
-- **OCBC:** Manager **S$60k–96k**, AVP **S$94k–143k**, VP **S$154k–237k** annual total pay.
+- **OCBC:** Assistant Manager **S$48k–66k**, Manager **S$60k–96k**, AVP **S$94k–143k**, VP **S$154k–237k** annual total pay.
 - **UOB:** Manager **S$55k–77k**, AVP **S$82k–109k**, VP **S$118k–174k**, FVP **S$174k–240k** annual total pay.
 - **Salary conclusion:** OCBC Manager overlaps UOB Manager through lower AVP; OCBC AVP overlaps upper AVP through VP1, with VP2 as an upper edge; OCBC VP overlaps upper VP/VP2 through FVP.
 - **Title-control conclusion:** UOB public material supports a single AVP band followed by VP1 and VP2. `Lower AVP` and `upper AVP` below are analytical slices, not asserted formal UOB ranks.
@@ -86,7 +88,7 @@ Singapore Civil Service total compensation comprises 12 months base salary, 1 mo
 | SG Gov Grade | Indicative Title / Scope | Monthly Base Range | Annual TC Window (SGD) | UOB & OCBC Parity (Salary-Matched) |
 | :--- | :--- | :--- | :--- | :--- |
 | **MX14** | Junior Executive | S$3,200 – S$4,200 | **S$45k – S$65k** | UOB Analyst / OCBC Officer |
-| **MX13(I)** | Graduate Executive | S$3,800 – S$4,800 | **S$55k – S$75k** | UOB AM/Manager entry / OCBC Manager entry |
+| **MX13(I)** | Graduate Executive | S$3,800 – S$4,800 | **S$55k – S$75k** | UOB AM / **OCBC Assistant Manager (AM)**; both distinct from Manager |
 | **MX13** | Senior Executive | S$4,500 – S$6,200 | **S$65k – S$95k** | UOB Manager/Senior Manager/lower AVP / OCBC Manager |
 | **MX12** | Manager / Policy Officer | S$5,200 – S$7,500 | **S$75k – S$115k** | UOB upper AVP/VP1 entry / OCBC AVP (lower) |
 | **MX11** | Assistant Director (AD) | S$6,500 – S$9,800 | **S$95k – S$150k** | UOB VP1/VP2 entry / OCBC AVP (core) |
@@ -139,7 +141,7 @@ Tech companies price technical competence through individual contributor (IC) an
 
 | TSMC Grade | TSMC 定位與職稱 | ASML 責任層級約當跨度 | 對標說明與軌道定位 | UOB Title (Ladders) | OCBC Title (Ladders) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **30–31** | Engineer / Bachelor or MSc fresh (學士／碩士新人入口帶) | **JG5–6 左右** | 31 並非碩士專屬；30 僅見於部分非官方整理 | **Analyst → AM/Manager entry (31)** | **Officer/Analyst → Manager entry (31)** |
+| **30–31** | Engineer / Bachelor or MSc fresh (學士／碩士新人入口帶) | **JG5–6 左右** | 31 並非碩士專屬；此列是教育入口脈絡，不把銀行 Officer/AM 硬映射為 G31 | **Educational-entry context only; Officer/AM has no clean grade match** | **Educational-entry context only; Officer/AM has no clean grade match** |
 | **32** | Senior Engineer (資深工程師) | **JG7–8** | 專案主力；OCBC Manager 段上緣 | **Senior Manager / lower AVP** | **Manager (Core/Senior; G31–32 segment)** |
 | **33** | Principal / PhD fresh (主任工程師) | **JG7–9** | 成熟責任可達 JG8–9；AVP 段中心 | **Upper AVP / VP1** | **AVP (Entry/Core; G32–34 segment)** |
 | **34** | 副理 (Technical Manager) | **JG8–9** | 初階主管或資深 IC；開始帶人並非例外 | **VP2 (34 anchor)** | **AVP (Senior/Leader; G33–34 segment)** |
@@ -160,6 +162,7 @@ Tech companies price technical competence through individual contributor (IC) an
 ### 5.1A UOB / OCBC Segment Tree 人工覆核
 
 - Segment tree 的節點以職責為主、title 為輔：**OCBC Manager 覆蓋 TSMC 31–32**，**OCBC AVP 覆蓋 TSMC 32–34（中心 G33）**，且 G34／people-leading AVP 是較明確的正式管理邊界。
+- OCBC 的 **AM 與 Manager 必須拆開**：Officer/AM 是 Manager 之前的獨立節點；OCBC AM 目前約 S$48k–66k。因工作族群不同，AM 不等同 TSMC G31，也不應被寫成 Manager entry。
 - UOB 採 **Manager/Senior Manager/lower AVP→31–32、upper AVP/VP1→33、VP1/VP2→34、FVP→35、SVP→36** 的人工責任校準。公開資料並未確認 `AVP1/AVP2` 是 UOB 正式 ranks，因此不再用這兩個名稱。
 - 公開職缺證明 title 本身具有寬帶：[UOB AVP PMO](https://uobgroup.wd3.myworkdayjobs.com/en-US/UOBExternal/job/AVP--Project-Management-Office--Innovation-Group_JR77354)甚至接受 fresh graduates；另一個 [UOB AVP 調查職](https://uobgroup.wd3.myworkdayjobs.com/en-US/UOBExternal/job/Assistant-Vice-President_JR78769)要求至少五年經驗並支援 Team Lead。
 - 領導責任也與 title 並非一刀切：[OCBC AVP Payments Transformation](https://ocbc.wd102.myworkdayjobs.com/en-US/External/job/Assistant-Vice-President--Group-Payment-Operations--Payments-Transformation--One-Operations---Workflow---User-Experience-_JR00010538)明載 transformation lead；[UOB VP/FVP Senior Team Head](https://uobgroup.wd3.myworkdayjobs.com/en-US/UOBExternal/job/VP-FVP---Senior-Team-Head---Privilege-Banking--Onshore-_JR69929)則明載 leadership and team management。因此 AVP 可是資深 IC，也可開始帶人，符合 G33–34 的責任跨度。
