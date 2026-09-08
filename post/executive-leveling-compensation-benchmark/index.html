@@ -1989,7 +1989,9 @@
           if (institutionId === primaryAxis) primaryBoundaryCache = boundaries.slice();
           const items = nodes.map((node, nodePosition) => {
             const interval = nodeInterval(institutionId, node, primaryNodes);
-            const usePrimaryBoundaries = institutionId === 'fubon' && primaryAxis === 'ctbc' && interval.span && primaryBoundaryCache;
+            const usePrimaryBoundaries = institutionId === 'fubon'
+              && (primaryAxis === 'ctbc' || primaryAxis === 'uob')
+              && interval.span && primaryBoundaryCache;
             const lowerBoundary = usePrimaryBoundaries
               ? primaryBoundaryCache[interval.start]
               : boundaries[nodePosition];
