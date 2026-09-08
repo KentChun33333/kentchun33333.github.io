@@ -1992,10 +1992,12 @@
             return {
               node,
               anchored: interval.anchored,
-              // Lane geometry stays contiguous on the invariant global axis;
-              // explicit spans remain available for labels and anchor semantics.
-              lowerBoundary,
-              upperBoundary,
+              // Use CTBC-mapped span edges for Fubon when CTBC is primary;
+              // other lanes retain contiguous global geometry.
+              lowerBoundary: institutionId === 'fubon' && primaryAxis === 'ctbc' && interval.span
+                ? interval.span.start : lowerBoundary,
+              upperBoundary: institutionId === 'fubon' && primaryAxis === 'ctbc' && interval.span
+                ? interval.span.end : upperBoundary,
               primaryStart: interval.start,
               primaryEnd: interval.end,
               span: interval.span || null
