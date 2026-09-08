@@ -49,19 +49,7 @@
       prompt: `Contract-first Knowledge Distiller:\nExtract operational flow first, terminology second, and boundaries always.\nEvery claim must bind directly to raw source file and line offsets.`,
       snippet: `python -m skills.knowledge_distill \\\n  --corpus ./raw_papers/ \\\n  --output ./distilled_pkg/ \\\n  --mode structured`
     },
-    'semantic-pattern-mining': {
-      title: 'Semantic Pattern Mining',
-      category: 'Analytics & Discovery',
-      badge: 'Algorithmic',
-      description: 'Extract recurring semantic, causal, and sequential patterns from noisy, unstructured text using embedding clustering and contrastive auditing.',
-      contract: {
-        inputs: ['Unstructured logs/tickets/alerts', 'Schema definitions', 'Evaluation labels'],
-        outputs: ['Canonical pattern cards', 'Support & Lift metrics', 'Adversarial counter-examples'],
-        trigger: 'Applied when diagnosing systemic workflow faults, incident cascades, or algorithmic trading anomalies.'
-      },
-      prompt: `Analyze heterogeneous event stream:\n1. Normalize cases into canonical schema.\n2. Compute vector embeddings & cluster into semantic groups.\n3. Generate hypothesized causal pattern cards.\n4. Run contrastive audit against control baselines.`,
-      snippet: `python -m skills.pattern_mining.mine \\\n  --input ./logs/system_events.jsonl \\\n  --min-support 0.05 \\\n  --min-lift 1.8`
-    },
+
     'evaluate-web-deliverable': {
       title: 'Evaluate Web Deliverables',
       category: 'Evaluation & QA',

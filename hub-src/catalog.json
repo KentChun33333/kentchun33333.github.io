@@ -1500,33 +1500,6 @@
       }
     },
     {
-      "id": "skill-semantic-pattern-mining",
-      "title": "Semantic Pattern Mining",
-      "path": "skills/semantic-pattern-mining/SKILL.md",
-      "kind": "Skill",
-      "stream": "Build",
-      "summary": "Read the actual skill instructions, usage conditions, and source definitions.",
-      "topics": [
-        "Agent workflows",
-        "Reusable skills"
-      ],
-      "status": "Source available",
-      "featured": false,
-      "audiences": [
-        "learn",
-        "research",
-        "evaluate"
-      ],
-      "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
-      "dates": {
-        "added": {
-          "at": "2026-08-27T14:05:03+00:00",
-          "source": "git:76587168ef8d6c50e8ab6bb6debd24c39b06d42b:skills/semantic-pattern-mining/SKILL.md"
-        }
-      }
-    },
-    {
       "id": "skill-web",
       "title": "Web",
       "path": "skills/web/SKILL.md",
@@ -1588,6 +1561,37 @@
           "source": "git-first-add:4b057f11b615ef815c7f3dcfc153c8321d90d454:about/index.html"
         }
       }
+    },
+    {
+      "id": "writing-executive-leveling-compensation-benchmark",
+      "title": "Global Executive Leveling & Compensation Benchmark: The Road past 7-Figures",
+      "path": "post/executive-leveling-compensation-benchmark/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "An exclusive decoded matrix aligning job levels and compensation across Taiwan Civil Service, TSMC, ASML, Singapore's OCBC, and A*STAR, featuring complete Singapore Government MX-to-Minister grade benchmarks.",
+      "topics": [
+        "Career",
+        "Compensation"
+      ],
+      "status": "Archived writing",
+      "featured": true,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2026-03-22T00:00:00+00:00",
+          "source": "post/executive-leveling-compensation-benchmark/index.html"
+        },
+        "added": {
+          "at": "2026-03-22T00:00:00+00:00",
+          "source": "post/executive-leveling-compensation-benchmark/index.html"
+        }
+      }
     }
   ],
   "relations": [
@@ -1619,12 +1623,6 @@
       "source": "gse",
       "type": "related_topic",
       "target": "skill-knowledge-distill",
-      "basis": "Editorial topic connection; does not assert implementation or measured results."
-    },
-    {
-      "source": "gse",
-      "type": "related_topic",
-      "target": "skill-semantic-pattern-mining",
       "basis": "Editorial topic connection; does not assert implementation or measured results."
     },
     {

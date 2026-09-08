@@ -3,3 +3,5 @@
 Thumbs.db
 __pycache__/
 *.py[cod]
+*_sample.txt
+sample_*.txt

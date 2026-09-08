@@ -297,61 +297,6 @@
       "bytes": 15014
     },
     {
-      "path": "openmemo/agent-learner/output/mercor-skyrl-397b-frontier-agent/analysis/boundaries-and-invalidation.md",
-      "sha256": "73a5b1df51c514586c632d53c6ef36ca077cb9a1d97f4391895520235c916d80",
-      "bytes": 1900
-    },
-    {
-      "path": "openmemo/agent-learner/output/mercor-skyrl-397b-frontier-agent/analysis/dependency.md",
-      "sha256": "6ee8f02b5ac5954f8c764c9ce162dcf352cf53f8e2192eb31d11c6a76769cb07",
-      "bytes": 1751
-    },
-    {
-      "path": "openmemo/agent-learner/output/mercor-skyrl-397b-frontier-agent/analysis/flow.md",
-      "sha256": "d5a423dee1469d859e3d920fd982d40253acaa0b636173780b73a7493191cfdb",
-      "bytes": 2534
-    },
-    {
-      "path": "openmemo/agent-learner/output/mercor-skyrl-397b-frontier-agent/analysis/iq-training-evaluation.md",
-      "sha256": "887bd83a6fe76c9a3fc42fc46f1cce75bdbcc3037d68a99bb0116ffe96f3aabf",
-      "bytes": 2675
-    },
-    {
-      "path": "openmemo/agent-learner/output/mercor-skyrl-397b-frontier-agent/data-cooked/source-001.md",
-      "sha256": "cae412d39ae3c64ed4b940ee55c166b34e91244ca34ae020e1117a753065ac05",
-      "bytes": 4997
-    },
-    {
-      "path": "openmemo/agent-learner/output/mercor-skyrl-397b-frontier-agent/data-cooked/source-index.md",
-      "sha256": "4fe2123901ee93f90b7400652da1a1f8908e734cc76f587eee5302255e85e94e",
-      "bytes": 203
-    },
-    {
-      "path": "openmemo/agent-learner/output/mercor-skyrl-397b-frontier-agent/data-raw/mercor_blog.md",
-      "sha256": "53f4c4f5e7ae12408b7fdbde6a5b1610b60028e616b4aafc877642f313ab1a80",
-      "bytes": 2036
-    },
-    {
-      "path": "openmemo/agent-learner/output/mercor-skyrl-397b-frontier-agent/knowledge/big-picture.md",
-      "sha256": "709a9ba3cef122c78a08a8ebe123a8b6f631ff412cb860c49390c89e4b1d18f3",
-      "bytes": 2439
-    },
-    {
-      "path": "openmemo/agent-learner/output/mercor-skyrl-397b-frontier-agent/knowledge/executive-summary.md",
-      "sha256": "e0f68cffe458e30be6ca1228cd8f78ff8b7c6bc02b4979ba0a9bfe57bac58a60",
-      "bytes": 1646
-    },
-    {
-      "path": "openmemo/agent-learner/output/mercor-skyrl-397b-frontier-agent/knowledge/read-order.md",
-      "sha256": "6ec6dd1b40243c81b919f0c404d1a612d0fd46870f6a74e3cd991512f0999766",
-      "bytes": 1326
-    },
-    {
-      "path": "openmemo/agent-learner/output/mercor-skyrl-397b-frontier-agent/knowledge/workflow-reference.md",
-      "sha256": "fba19b7bee46fcb9727f084f73aa0ffb0daa1f41873b5f35bb03f00c842cce7b",
-      "bytes": 3488
-    },
-    {
       "path": "page/1/index.html",
       "sha256": "e36d83abb877f8fbfa547945504d2bf9bd676eb760c60b3b89ab688ac5801d3b",
       "bytes": 331
@@ -445,6 +390,16 @@
       "path": "post/db-index-vs-silhouette-score/index.html",
       "sha256": "789d98e23a64d1d005869a0c5cb5d3bcef75fde4a6783279ec03fa92626903e5",
       "bytes": 18803
+    },
+    {
+      "path": "post/executive-leveling-compensation-benchmark/index.html",
+      "sha256": "060eab062d43b031fc919391fd04b086fc5e3a192e489b5ac3d941befe1669fa",
+      "bytes": 46137
+    },
+    {
+      "path": "post/executive-leveling-compensation-benchmark/ref-knowledge.md",
+      "sha256": "3f6c33cdd35568955e1d4e9a932522640fa6734d82769d7d5109ce51d7e36f21",
+      "bytes": 8577
     },
     {
       "path": "post/hostpersonalgpt/index.html",
@@ -1017,6 +972,11 @@
       "bytes": 346
     },
     {
+      "path": "showcase/table-tennis-backhand-receive/index.html",
+      "sha256": "3a569f66c77c95b9a8e1a544cdd3756a42f9fbc4849e43cca141a2e96e3ee873",
+      "bytes": 25539
+    },
+    {
       "path": "skills/build-async-agentic-web-demo/SKILL.md",
       "sha256": "270811f5902948bc5ded6285cfe26dbebc15cd6de9d61dbcdc0bcf1fcb2556c6",
       "bytes": 4951
@@ -1172,6 +1132,11 @@
       "bytes": 2262
     },
     {
+      "path": "skills/grilling/SKILL.md",
+      "sha256": "7faee07cb030770ffcb2ea294de66fb6fcafd659fef428eb264bac272464b9ba",
+      "bytes": 10412
+    },
+    {
       "path": "skills/ideogram-image-generation/skill.md",
       "sha256": "4d33e3f802169567e1026b6e8eef397b7b424828c5053463cecd4e0307d07285",
       "bytes": 2652
@@ -1270,11 +1235,6 @@
       "path": "skills/markdown-to-pdf/skill.md",
       "sha256": "8d3896559af77e71116d35d8d6fb64c7bf3ab6b15ad1f339e359573f2bdf6006",
       "bytes": 1945
-    },
-    {
-      "path": "skills/semantic-pattern-mining/SKILL.md",
-      "sha256": "9bbe954927e04f0d69bee1bfbe9ab3ad4563772f417f5257ad07f516e7f5c18d",
-      "bytes": 9305
     },
     {
       "path": "skills/web/SKILL.md",
@@ -1790,6 +1750,11 @@
       "path": "ter-agentic-demos/ter-signal-room.html",
       "sha256": "9e88c2f67642fed13c0955c0915fd7c47c03dd98cbef3c240b2e473fbbb9d32c",
       "bytes": 36961
+    },
+    {
+      "path": "wealthy_data_insight/billionary-trader-system.html",
+      "sha256": "c1dbc7ff5a68f250df18cb2e17a11cd00424da811606fe6bc6cced056d06d8a2",
+      "bytes": 47040
     },
     {
       "path": "wealthy_data_insight/index-v2.html",

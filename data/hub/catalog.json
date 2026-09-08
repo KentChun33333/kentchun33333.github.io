@@ -1842,37 +1842,6 @@
       "images": []
     },
     {
-      "id": "skill-semantic-pattern-mining",
-      "title": "Semantic Pattern Mining",
-      "path": "skills/semantic-pattern-mining/SKILL.md",
-      "kind": "Skill",
-      "stream": "Build",
-      "summary": "Read the actual skill instructions, usage conditions, and source definitions.",
-      "topics": [
-        "Agent workflows",
-        "Reusable skills"
-      ],
-      "status": "Source available",
-      "featured": false,
-      "audiences": [
-        "learn",
-        "research",
-        "evaluate"
-      ],
-      "visibility": "public",
-      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
-      "dates": {
-        "added": {
-          "at": "2026-08-27T14:05:03+00:00",
-          "source": "git:76587168ef8d6c50e8ab6bb6debd24c39b06d42b:skills/semantic-pattern-mining/SKILL.md"
-        }
-      },
-      "sha256": "9bbe954927e04f0d69bee1bfbe9ab3ad4563772f417f5257ad07f516e7f5c18d",
-      "url": "/skills/semantic-pattern-mining/SKILL.md",
-      "detail_url": "/hub/assets/skill-semantic-pattern-mining/",
-      "images": []
-    },
-    {
       "id": "skill-web",
       "title": "Web",
       "path": "skills/web/SKILL.md",
@@ -1949,6 +1918,88 @@
           "sha256": "78598e22fa400960fb395cdd6c91d0046b1157c404386c4d795496f9a445272c"
         }
       ]
+    },
+    {
+      "id": "writing-executive-leveling-compensation-benchmark",
+      "title": "Global Executive Leveling & Compensation Benchmark: The Road past 7-Figures",
+      "path": "post/executive-leveling-compensation-benchmark/index.html",
+      "kind": "Article",
+      "stream": "Publish",
+      "summary": "An exclusive decoded matrix aligning job levels and compensation across Taiwan Civil Service, TSMC, ASML, Singapore's OCBC, and A*STAR, featuring complete Singapore Government MX-to-Minister grade benchmarks.",
+      "topics": [
+        "Career",
+        "Compensation"
+      ],
+      "status": "Archived writing",
+      "featured": true,
+      "audiences": [
+        "learn",
+        "research",
+        "evaluate"
+      ],
+      "visibility": "public",
+      "rights": "No additional reuse license granted by this catalogue. Consult the source or request permission.",
+      "dates": {
+        "published": {
+          "at": "2026-03-22T00:00:00+00:00",
+          "source": "post/executive-leveling-compensation-benchmark/index.html"
+        },
+        "added": {
+          "at": "2026-03-22T00:00:00+00:00",
+          "source": "post/executive-leveling-compensation-benchmark/index.html"
+        }
+      },
+      "sha256": "060eab062d43b031fc919391fd04b086fc5e3a192e489b5ac3d941befe1669fa",
+      "url": "/post/executive-leveling-compensation-benchmark/index.html",
+      "detail_url": "/hub/assets/writing-executive-leveling-compensation-benchmark/",
+      "images": []
+    },
+    {
+      "id": "table-tennis-backhand-receive",
+      "title": "乒乓 Note｜樊振東式反手接發球 3D",
+      "summary": "以 Three.js 程序化 3D 骨架分析樊振東式近台反手：低重心、身前高肘、緊湊引拍，以及快擰與快撕的動力鏈。",
+      "kind": "Demo",
+      "stream": "Build",
+      "topics": [
+        "Table tennis",
+        "Movement notes",
+        "Sports training",
+        "3D biomechanics"
+      ],
+      "status": "Interactive 3D movement note",
+      "visibility": "public",
+      "rights": "All rights reserved. Contact the author for reuse.",
+      "dates": {},
+      "path": "showcase/table-tennis-backhand-receive/index.html",
+      "audiences": [],
+      "featured": false,
+      "sha256": "3a569f66c77c95b9a8e1a544cdd3756a42f9fbc4849e43cca141a2e96e3ee873",
+      "url": "/showcase/table-tennis-backhand-receive/index.html",
+      "detail_url": "/hub/assets/table-tennis-backhand-receive/",
+      "images": []
+    },
+    {
+      "id": "billionary-trader-system-design",
+      "title": "Billionary Trader Workflow Explorer",
+      "summary": "Explore implementation-backed trading workflows, their composed functions, runtime states, I/O contracts, and exact repository dependencies.",
+      "kind": "Demo",
+      "stream": "Build",
+      "topics": [
+        "Financial intelligence",
+        "Developer tools",
+        "Workflow design"
+      ],
+      "status": "Interactive developer workflow explorer",
+      "visibility": "public",
+      "rights": "All rights reserved. Contact the author for reuse.",
+      "dates": {},
+      "path": "wealthy_data_insight/billionary-trader-system.html",
+      "audiences": [],
+      "featured": false,
+      "sha256": "c1dbc7ff5a68f250df18cb2e17a11cd00424da811606fe6bc6cced056d06d8a2",
+      "url": "/wealthy_data_insight/billionary-trader-system.html",
+      "detail_url": "/hub/assets/billionary-trader-system-design/",
+      "images": []
     }
   ],
   "relations": [
@@ -1980,12 +2031,6 @@
       "source": "gse",
       "type": "related_topic",
       "target": "skill-knowledge-distill",
-      "basis": "Editorial topic connection; does not assert implementation or measured results."
-    },
-    {
-      "source": "gse",
-      "type": "related_topic",
-      "target": "skill-semantic-pattern-mining",
       "basis": "Editorial topic connection; does not assert implementation or measured results."
     },
     {
