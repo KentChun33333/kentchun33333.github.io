@@ -1952,15 +1952,11 @@
           <small>Entry → Apex · block height = responsibility span</small>
         </div>`);
 
-        let primaryBoundaryCache = null;
         const lanes = columnIds.map((institutionId, columnIndex) => {
           const nodes = institutions[institutionId].nodes;
-          const rawCenters = nodes.map(node => {
-            const rawCenter = institutionId === primaryAxis
-              ? Number(node.level)
-              : projectedLevel(institutionId, node, primaryAxis);
-            return rawCenter;
-          });
+          // Geometry always uses each node's canonical global 0–100 level;
+          // the selected primary axis changes labels/rows, never coordinates.
+          const rawCenters = nodes.map(node => Number(node.level));
           const centers = [...rawCenters];
           if (institutionId !== primaryAxis) {
             const minimumCenterGap = 3;
@@ -1986,18 +1982,10 @@
             boundaries[index] = Math.min(boundaries[index], boundaries[index + 1] - minimumBand);
           }
           boundaries[0] = scaleLower;
-          if (institutionId === primaryAxis) primaryBoundaryCache = boundaries.slice();
           const items = nodes.map((node, nodePosition) => {
             const interval = nodeInterval(institutionId, node, primaryNodes);
-            const usePrimaryBoundaries = institutionId === 'fubon'
-              && (primaryAxis === 'ctbc' || primaryAxis === 'uob')
-              && interval.span && primaryBoundaryCache;
-            const lowerBoundary = usePrimaryBoundaries
-              ? primaryBoundaryCache[interval.start]
-              : boundaries[nodePosition];
-            const upperBoundary = usePrimaryBoundaries
-              ? primaryBoundaryCache[interval.end + 1]
-              : boundaries[nodePosition + 1];
+            const lowerBoundary = boundaries[nodePosition];
+            const upperBoundary = boundaries[nodePosition + 1];
             return {
               node,
               anchored: interval.anchored,
