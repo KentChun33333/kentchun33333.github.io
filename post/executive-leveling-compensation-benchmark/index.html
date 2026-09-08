@@ -1990,8 +1990,10 @@
             return {
               node,
               anchored: interval.anchored,
-              lowerBoundary: interval.span ? interval.span.start : lowerBoundary,
-              upperBoundary: interval.span ? interval.span.end : upperBoundary,
+              // Lane geometry stays contiguous on the invariant global axis;
+              // explicit spans remain available for labels and anchor semantics.
+              lowerBoundary,
+              upperBoundary,
               primaryStart: interval.start,
               primaryEnd: interval.end,
               span: interval.span || null
