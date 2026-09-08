@@ -304,6 +304,7 @@
     }
     table.data-table {
       width: 100%;
+      min-width: 1550px;
       border-collapse: collapse;
       font-size: 12.5px;
       text-align: left;
@@ -659,11 +660,12 @@
             <tr>
               <th data-col="0">Grade & Tier</th>
               <th data-col="1">Singapore Civil Service (Scope & TC)</th>
-              <th data-col="2">SG Banking: UOB & OCBC Track (SGD)</th>
-              <th data-col="3">TSMC 台積電 (Grade, Title & NTD)</th>
-              <th data-col="4">ASML 艾司摩爾 (JG & USD Comp)</th>
-              <th data-col="5">Taiwan Civil Service (官等職等與官俸)</th>
-              <th data-col="6">Research Anchor (A*STAR SGD)</th>
+              <th data-col="2">UOB 大華銀行 (Grade & Ladder)</th>
+              <th data-col="3">OCBC 華僑銀行 (Grade, Title & Typical TC)</th>
+              <th data-col="4">TSMC 台積電 (Grade, Title & NTD)</th>
+              <th data-col="5">ASML 艾司摩爾 (JG & USD Comp)</th>
+              <th data-col="6">Taiwan Civil Service (官等職等與官俸)</th>
+              <th data-col="7">Research Anchor (A*STAR SGD)</th>
             </tr>
           </thead>
           <tbody>
@@ -679,8 +681,12 @@
                 <span class="role-sub">大量基層承辦</span>
               </td>
               <td>
-                <span class="role-main">UOB: Analyst</span>
-                <span class="role-sub">OCBC: Officer / Analyst (&lt; S$65k)</span>
+                <span class="role-main">Analyst</span>
+                <span class="role-sub">Junior Analyst</span>
+              </td>
+              <td>
+                <span class="role-main">Officer / Analyst</span>
+                <span class="tc-val">&lt; S$65k</span>
               </td>
               <td>
                 <span class="role-main">Grade 31 工程師 : <span class="tc-val">&lt; 3M NTD</span></span>
@@ -712,8 +718,13 @@
                 <span class="role-sub">~10k+ 人</span>
               </td>
               <td>
-                <span class="role-main">UOB: Analyst / AM</span>
-                <span class="role-sub">OCBC: Analyst / AM (Assistant Mgr)</span>
+                <span class="role-main">Analyst / AM</span>
+                <span class="role-sub">Entry Professional</span>
+              </td>
+              <td>
+                <span class="role-main">Analyst / AM</span>
+                <span class="tc-val">S$55k–75k</span>
+                <span class="role-sub">Assistant Manager</span>
               </td>
               <td>
                 <span class="role-main">Grade 31/32 工程師 : <span class="tc-val">2.2M–3.2M NTD</span></span>
@@ -745,8 +756,12 @@
                 <span class="role-sub">~10k 人</span>
               </td>
               <td>
-                <span class="role-main">UOB: AM (32 mapping) / AVP1</span>
-                <span class="role-sub">OCBC: Assistant Manager (AM: S$70k–95k)</span>
+                <span class="role-main">AM (32 mapping) / AVP1</span>
+                <span class="role-sub">Senior Officer / Assistant Mgr</span>
+              </td>
+              <td>
+                <span class="role-main">Assistant Manager (AM)</span>
+                <span class="tc-val">S$70k–95k</span>
               </td>
               <td>
                 <span class="role-main">Grade 32 資深工程師 : <span class="tc-val">2.8M–4.2M NTD</span></span>
@@ -778,8 +793,12 @@
                 <span class="role-sub">~8–12k 人</span>
               </td>
               <td>
-                <span class="role-main">UOB: AVP1 (32/33 mapping)</span>
-                <span class="role-sub">OCBC: AVP lower band / Manager (S$80k–115k)</span>
+                <span class="role-main">AVP1 (32/33 mapping)</span>
+                <span class="role-sub">Entry AVP / Manager</span>
+              </td>
+              <td>
+                <span class="role-main">AVP (Lower Band) / Manager</span>
+                <span class="tc-val">S$80k–115k</span>
               </td>
               <td>
                 <span class="role-main">Grade 33 主任工程師 : <span class="tc-val">3.8M–5.0M NTD</span></span>
@@ -811,8 +830,12 @@
                 <span class="role-sub">~5–8k 人</span>
               </td>
               <td>
-                <span class="role-main">UOB: AVP2 / VP2 (34 mapping)</span>
-                <span class="role-sub">OCBC: AVP (Core Band: S$120k–$160k)</span>
+                <span class="role-main">AVP2 / VP2 (34 mapping)</span>
+                <span class="role-sub">Core AVP / Senior Specialist</span>
+              </td>
+              <td>
+                <span class="role-main">AVP (Core Band)</span>
+                <span class="tc-val">S$120k–$160k</span>
                 <span class="role-sub" style="color:#8c6b2d;">※ Senior AVP starts leading people (33/34 scope)</span>
               </td>
               <td>
@@ -845,8 +868,12 @@
                 <span class="role-sub">~3–5k 人</span>
               </td>
               <td>
-                <span class="role-main">UOB: VP1 / VP2 (34 mapping)</span>
-                <span class="role-sub">OCBC: AVP (Senior Band: S$150k–$190k · People Lead)</span>
+                <span class="role-main">VP1 / VP2 (34 mapping)</span>
+                <span class="role-sub">Senior AVP / Vice President 1</span>
+              </td>
+              <td>
+                <span class="role-main">AVP (Senior Band · People Lead)</span>
+                <span class="tc-val">S$150k–$190k</span>
               </td>
               <td>
                 <span class="role-main">Grade 34/35 副理/經理 : <span class="tc-val">5.5M–7.5M NTD</span></span>
@@ -878,8 +905,12 @@
                 <span class="role-sub">~2–4k 人</span>
               </td>
               <td>
-                <span class="role-main">UOB: VP2 (34) / FVP (35 mapping)</span>
-                <span class="role-sub">OCBC: VP (Junior Band: S$170k–$210k)</span>
+                <span class="role-main">VP2 (34) / FVP (35 mapping)</span>
+                <span class="role-sub">Vice President 2 / First VP</span>
+              </td>
+              <td>
+                <span class="role-main">VP (Junior Band)</span>
+                <span class="tc-val">S$170k–$210k</span>
                 <span class="role-sub" style="color:#8c6b2d;">※ OCBC VP acts like TSMC 35 Manager / Senior IC</span>
               </td>
               <td>
@@ -912,8 +943,12 @@
                 <span class="role-sub">~1.5–1.9k 人</span>
               </td>
               <td>
-                <span class="role-main">UOB: FVP (35) / SVP entry</span>
-                <span class="role-sub">OCBC: VP (Core/Senior: S$200k–$300k)</span>
+                <span class="role-main">FVP (35) / SVP entry</span>
+                <span class="role-sub">First VP / Senior VP entry</span>
+              </td>
+              <td>
+                <span class="role-main">VP (Core/Senior Band)</span>
+                <span class="tc-val">S$200k–$300k</span>
                 <span class="role-sub" style="color:#8c6b2d;">※ OCBC VP ≈ TSMC 35 Manager / 36 Senior IC</span>
               </td>
               <td>
@@ -946,8 +981,12 @@
                 <span class="role-sub">~250–450 人</span>
               </td>
               <td>
-                <span class="role-main">UOB: SVP (Senior VP)</span>
-                <span class="role-sub">OCBC: Executive Director (ED: S$260k–$380k)</span>
+                <span class="role-main">SVP (Senior VP)</span>
+                <span class="role-sub">Senior Vice President</span>
+              </td>
+              <td>
+                <span class="role-main">Executive Director (ED)</span>
+                <span class="tc-val">S$260k–$380k</span>
               </td>
               <td>
                 <span class="role-main">Grade 37 副處長 : <span class="tc-val">15M–28M NTD</span></span>
@@ -979,8 +1018,12 @@
                 <span class="role-sub">~70–150 人</span>
               </td>
               <td>
-                <span class="role-main">UOB: ED (Executive Dir)</span>
-                <span class="role-sub">OCBC: Managing Director (MD: S$350k–$520k+)</span>
+                <span class="role-main">ED (Executive Dir)</span>
+                <span class="role-sub">Executive Director</span>
+              </td>
+              <td>
+                <span class="role-main">Managing Director (MD)</span>
+                <span class="tc-val">S$350k–$520k+</span>
               </td>
               <td>
                 <span class="role-main">Grade 38 處長/廠長 : <span class="tc-val">20M–45M NTD</span></span>
@@ -1012,8 +1055,12 @@
                 <span class="role-sub">~35–50 人</span>
               </td>
               <td>
-                <span class="role-main">UOB: MD (Managing Dir)</span>
-                <span class="role-sub">OCBC: MD1 (Cluster Head: S$450k–$700k+)</span>
+                <span class="role-main">MD (Managing Dir)</span>
+                <span class="role-sub">Managing Director / Cluster Head</span>
+              </td>
+              <td>
+                <span class="role-main">MD1 (Cluster Head)</span>
+                <span class="tc-val">S$450k–$700k+</span>
               </td>
               <td>
                 <span class="role-main">Grade 39 大型廠長 : <span class="tc-val">25M–60M NTD</span></span>
@@ -1045,8 +1092,12 @@
                 <span class="role-sub">~25–35 人</span>
               </td>
               <td>
-                <span class="role-main">UOB: Senior MD / ExCo</span>
-                <span class="role-sub">OCBC: MD1 / GMD (CTO/COO Scope: S$650k–$1.2M+)</span>
+                <span class="role-main">Senior MD / ExCo</span>
+                <span class="role-sub">Senior Managing Director</span>
+              </td>
+              <td>
+                <span class="role-main">MD1 / GMD (CTO/COO Scope)</span>
+                <span class="tc-peak">S$650k–$1.2M+</span>
               </td>
               <td>
                 <span class="role-main">Grade 40 資深處長 : <span class="tc-peak">30M–70M+ NTD</span></span>
@@ -1079,8 +1130,12 @@
                 <span class="role-sub">個位數 (&lt;10)</span>
               </td>
               <td>
-                <span class="role-main">UOB: Top Senior MD</span>
-                <span class="role-sub">OCBC: GMD (Group Managing Dir: 2.8M–4.5M+ SGD)</span>
+                <span class="role-main">Top Senior MD</span>
+                <span class="role-sub">Group CTO / COO Scope</span>
+              </td>
+              <td>
+                <span class="role-main">GMD (Group Managing Dir)</span>
+                <span class="tc-peak">2.8M–4.5M+ SGD</span>
               </td>
               <td>
                 <span class="role-main">Grade 50 副總經理 VP : <span class="tc-peak">40M–100M+ NTD</span></span>
@@ -1112,8 +1167,12 @@
                 <span class="role-sub">~10–20 人</span>
               </td>
               <td>
-                <span class="role-main">UOB: Group C-Suite</span>
-                <span class="role-sub">OCBC: Group C-Suite Economics</span>
+                <span class="role-main">Group C-Suite</span>
+                <span class="role-sub">Executive Committee</span>
+              </td>
+              <td>
+                <span class="role-main">Group C-Suite Economics</span>
+                <span class="tc-peak">S$1.1M–1.8M+ SGD</span>
               </td>
               <td>
                 <span class="role-main">Grade 51 資深副總 : <span class="tc-peak">80M–150M+ NTD</span></span>
@@ -1145,8 +1204,12 @@
                 <span class="role-sub">~5–10 人</span>
               </td>
               <td>
-                <span class="role-main">UOB: Group C-Suite</span>
-                <span class="role-sub">OCBC: Group C-Suite / Key BU Heads</span>
+                <span class="role-main">Group C-Suite</span>
+                <span class="role-sub">Key BU Heads</span>
+              </td>
+              <td>
+                <span class="role-main">Group C-Suite / Key BU Heads</span>
+                <span class="tc-peak">S$1.3M–2.2M+ SGD</span>
               </td>
               <td>
                 <span class="role-main">Grade 52 執行副總 : <span class="tc-peak">100M–200M+ NTD</span></span>
@@ -1178,8 +1241,12 @@
                 <span class="role-sub">少數 (&lt;5)</span>
               </td>
               <td>
-                <span class="role-main">UOB: Group Top Leadership</span>
-                <span class="role-sub">OCBC: Group Top Leadership</span>
+                <span class="role-main">Group Top Leadership</span>
+                <span class="role-sub">Deputy Group CEO Level</span>
+              </td>
+              <td>
+                <span class="role-main">Group Top Leadership</span>
+                <span class="tc-peak">S$1.6M–2.5M+ SGD</span>
               </td>
               <td>
                 <span class="role-main">Grade 52+ / Board : <span class="tc-peak">150M–250M+ NTD</span></span>
@@ -1211,8 +1278,12 @@
                 <span class="role-sub">1–2 人</span>
               </td>
               <td>
-                <span class="role-main">UOB: Group Top Leadership</span>
-                <span class="role-sub">OCBC: Group Top Leadership</span>
+                <span class="role-main">Group Top Leadership</span>
+                <span class="role-sub">Board Executive Committee</span>
+              </td>
+              <td>
+                <span class="role-main">Group Top Leadership</span>
+                <span class="tc-peak">S$1.9M–2.8M+ SGD</span>
               </td>
               <td>
                 <span class="role-main">Vice Chairman / CEO : <span class="tc-peak">200M–350M+ NTD</span></span>
@@ -1244,8 +1315,12 @@
                 <span class="role-sub">1 人</span>
               </td>
               <td>
-                <span class="role-main">UOB: Group CEO Economics</span>
-                <span class="role-sub">OCBC: Group CEO Economics</span>
+                <span class="role-main">Group CEO Economics</span>
+                <span class="tc-peak">S$3.5M–5.0M+ SGD</span>
+              </td>
+              <td>
+                <span class="role-main">Group CEO Economics</span>
+                <span class="tc-peak">S$3.5M–5.0M+ SGD</span>
               </td>
               <td>
                 <span class="role-main">Chairman / CEO : <span class="tc-peak">250M–500M+ NTD</span></span>
@@ -1270,42 +1345,6 @@
 
       <div class="note-banner">
         <strong>📌 FX & Methodology Calibration:</strong> Total Compensation (TC) accounts for base salary, annual performance bonus, and long-term equity / profit sharing. Currency anchors calibrated at <strong>1 SGD ≈ 23.5 NTD</strong> and <strong>1 USD ≈ 31.5 NTD</strong>.
-      </div>
-    </section>pan>
-              </td>
-              <td>院長級政務首長</td>
-              <td><span class="role-zh">行政院長 (閣揆級)</span></td>
-              <td>
-                <span class="role-main">Vice Chairman / CEO</span>
-                <span class="role-zh">副董事長 / 總裁層級</span>
-              </td>
-              <td>ASML President / Board Leadership</td>
-              <td><span class="tc-peak">~S$1.9M–2.8M ref.</span></td>
-              <td><span class="role-sub">~2–4</span></td>
-              <td><span class="tier-badge top">National Lead</span></td>
-            </tr>
-
-            <!-- Row 18: PM (Prime Minister) -->
-            <tr data-tier="political">
-              <td><strong>PM (Prime Minister)</strong></td>
-              <td>Prime Minister (政府總理 / 國家首長)</td>
-              <td>
-                <span class="role-main">UOB: Group CEO Economics</span>
-                <span class="role-sub">OCBC: Group CEO Economics</span>
-              </td>
-              <td>不可直接對等</td>
-              <td><span class="role-zh">行政院長 / 總統之間概念</span></td>
-              <td>
-                <span class="role-main">Chairman / CEO Economics</span>
-                <span class="role-zh">全球頂尖企業領導人薪酬</span>
-              </td>
-              <td>Global CEO Economics</td>
-              <td><span class="tc-peak">~S$3.6M ref.</span></td>
-              <td><span class="role-sub">1</span></td>
-              <td><span class="tier-badge top">National Exec</span></td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </section>
 
