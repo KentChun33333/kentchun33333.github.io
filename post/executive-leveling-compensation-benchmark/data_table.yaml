@@ -84,13 +84,13 @@ institutions:
     nodes:
       - {id: grade2, grade: "二職等", title: "專員", compensation: "Not provided", detail: "Entry officer / AM band; referenced to CTBC 7 職等", tier: junior, level: 10, mapping: {to: "ctbc", start: 10, end: 10, label: "CTBC 7 職等"}}
       - {id: grade3, grade: "三職等", title: "資深專員 / 襄理", compensation: "Not provided", detail: "Senior officer through assistant-manager band; referenced to CTBC 8–9 職等", tier: junior, level: 22, mapping: {to: "ctbc", start: 22, end: 29, label: "CTBC 8 → 9 職等"}}
-      - {id: grade4, grade: "四職等", title: "副理 / 經理", compensation: "Not provided", detail: "Manager track; referenced to CTBC 9–10 職等", tier: middle, level: 34, mapping: {to: "ctbc", start: 29, end: 34, label: "CTBC 9 → 10 職等"}}
-      - {id: grade5, grade: "五職等", title: "資深經理 / 組長", compensation: "Not provided", detail: "Senior manager / senior operator ceiling; referenced to the full CTBC 12 職等 band", tier: middle, level: 46, mapping: {to: "ctbc", start: 44, end: 44, label: "CTBC 12 職等"}}
+      - {id: grade4, grade: "四職等", title: "副理 / 經理", compensation: "Not provided", detail: "Manager track; referenced to CTBC 9–10 職等", tier: middle, level: 34, mapping: {to: "ctbc", start: 29, end: 36, label: "CTBC 9 → 10 職等"}}
+      - {id: grade5, grade: "五職等", title: "資深經理 / 組長", compensation: "Not provided", detail: "Senior manager / senior operator ceiling; referenced across CTBC 11–12 職等", tier: middle, level: 46, mapping: {to: "ctbc", start: 36, end: 47.5, label: "CTBC 11 → 12 職等"}}
       - {id: grade6, grade: "六職等", title: "協理", compensation: "Not provided", detail: "Associate director threshold; referenced to the full CTBC 13 職等 band", tier: middle, level: 56, mapping: {to: "ctbc", start: 51, end: 51, label: "CTBC 13 職等"}}
       - {id: grade7, grade: "七職等", title: "資深協理（部主管）", compensation: "Not provided", detail: "Department-head band; referenced to CTBC 14 職等", tier: superscale, level: 64, mapping: {to: "ctbc", start: 64, end: 64, label: "CTBC 14 職等"}}
       - {id: grade8, grade: "八職等", title: "副總經理 / 資深副總", compensation: "Not provided", detail: "Managing Director / plant or division head; referenced to CTBC 15 職等", tier: superscale, level: 72, mapping: {to: "ctbc", start: 72, end: 72, label: "CTBC 15 職等"}}
       - {id: grade9, grade: "九職等", title: "執行副總 / 功能長", compensation: "Not provided", detail: "EVP / functional-head band; referenced to CTBC 16 職等", tier: superscale, level: 82, mapping: {to: "ctbc", start: 82, end: 82, label: "CTBC 16 職等"}}
-      - {id: grade10, grade: "十職等", title: "執行副總 / 功能長", compensation: "Not provided", detail: "Group C-suite decision layer; referenced to CTBC 16+ 職等", tier: superscale, level: 94, mapping: {to: "ctbc", start: 94, end: 94, label: "CTBC 16+ 職等"}}
+      - {id: grade10, grade: "十職等", title: "執行副總 / 功能長", compensation: "Not provided", detail: "Group C-suite decision layer; referenced from CTBC 16+ through EVP", tier: superscale, level: 97, mapping: {to: "ctbc", start: 94, end: 100, label: "CTBC 16+ → EVP"}}
       - {id: ceo, grade: "CEO / 董事長", title: "金控 / 銀行總經理（President）", compensation: "Not provided", detail: "Fubon enterprise apex; referenced to CTBC CEO / President", tier: political, level: 100, mapping: {to: "ctbc", start: 100, end: 100, label: "CTBC CEO / President"}}
 
   tsmc:
@@ -216,6 +216,7 @@ anchors:
   - {from: "ctbc.grade15", to: "fubon.grade8", relation: equivalent, weight: 0.9, note: "Fubon 8 職等 references CTBC 15 職等"}
   - {from: "ctbc.grade16", to: "fubon.grade9", relation: equivalent, weight: 0.9, note: "Fubon 9 職等 references CTBC 16 職等"}
   - {from: "ctbc.grade16plus", to: "fubon.grade10", relation: equivalent, weight: 0.9, note: "Fubon 10 職等 references CTBC 16+ 職等"}
+  - {from: "ctbc.evp", to: "fubon.grade10", relation: upper_edge, weight: 0.9, note: "Fubon 10 職等 extends through CTBC EVP"}
   - {from: "ctbc.ceo", to: "fubon.ceo", relation: equivalent, weight: 0.9, note: "Fubon CEO / Chairman references CTBC CEO / President"}
   - {from: "asml.jg7", to: "astar.senior_research_scientist", relation: equivalent, weight: 1.0, note: "A*STAR Senior Research Engineer / Research Scientist aligns to ASML L7"}
   - {from: "asml.jg8", to: "astar.lead_senior_scientist", relation: equivalent, weight: 1.0, note: "A*STAR Lead Research Engineer / Senior Scientist aligns to ASML L8"}
