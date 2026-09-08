@@ -53,7 +53,7 @@ institutions:
       - {id: am, grade: "Assistant Manager", title: "AM", compensation: "S$48–66k", detail: "Distinct rank below Manager · covers the first 0.3 of TSMC G31", tier: junior, level: 14, mapping: {to: "tsmc", start: 13, end: 14.5, label: "G30 → 0.3×G31"}}
       - {id: manager, grade: "Manager", title: "Manager", compensation: "S$90–135k TC", detail: "Broad professional Manager band · follows AM through all of TSMC G32", tier: junior, level: 21, mapping: {to: "tsmc", start: 14.5, end: 24, label: "0.3×G31 → G32"}}
       - {id: avp, grade: "AVP", title: "Assistant Vice President", compensation: "S$100–180k TC", detail: "Senior IC through people/project lead; G33 plus the first 0.5 of TSMC G34", tier: middle, level: 36, mapping: {to: "tsmc", start: 35, end: 39, label: "G33 → 0.5×G34"}}
-      - {id: vp, grade: "VP", title: "Vice President", compensation: "S$180–270k TC", detail: "Covers UOB VP2–FVP and TSMC G34–35", tier: middle, level: 47}
+      - {id: vp, grade: "VP", title: "Vice President", compensation: "S$180–270k TC", detail: "Covers the latter 0.5 of UOB VP2 through full FVP and TSMC G34–35", tier: middle, level: 47, mapping: {to: "uob", start: 41.5, end: 51, label: "0.5×UOB VP2 → FVP"}}
       - {id: ed, grade: "ED", title: "Executive Director", compensation: "S$260–380k est.", detail: "Covers TSMC G36–37", tier: superscale, level: 63}
       - {id: md, grade: "MD", title: "Managing Director", compensation: "S$350–700k+ est.", detail: "Maps to UOB ED and TSMC G38", tier: superscale, level: 72}
       - {id: md1, grade: "MD1", title: "Cluster Head", compensation: "S$650k–1.2M+ est.", detail: "Maps to UOB MD and TSMC G39–40; distinct from GMD", tier: superscale, level: 80}
