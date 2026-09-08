@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Singapore Government × Banking × Taiwan × TSMC × ASML Crosswalk</title>
+<style>
+  :root{
+    --bg:#0b0f14;
+    --panel:#111821;
+    --panel2:#151e29;
+    --text:#e8edf2;
+    --muted:#9fb0c0;
+    --line:#263241;
+    --accent:#7ab7ff;
+    --gold:#e8c36a;
+    --green:#7bd9a8;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:linear-gradient(180deg,#0b0f14 0%,#0d131a 100%);
+    color:var(--text);
+    font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;
+  }
+  .wrap{max-width:1600px;margin:0 auto;padding:32px 24px 48px}
+  h1{font-size:30px;line-height:1.2;margin:0 0 10px}
+  .sub{color:var(--muted);margin-bottom:22px}
+  .note{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px 16px;
+    margin:0 0 20px;
+    color:#c9d5df;
+    line-height:1.55;
+  }
+  .table-wrap{
+    overflow:auto;
+    border:1px solid var(--line);
+    border-radius:16px;
+    background:var(--panel);
+    box-shadow:0 18px 45px rgba(0,0,0,.28);
+  }
+  table{
+    border-collapse:separate;
+    border-spacing:0;
+    width:100%;
+    min-width:1850px;
+  }
+  thead th{
+    position:sticky;
+    top:0;
+    z-index:3;
+    background:#16202b;
+    color:#f3f7fb;
+    text-align:left;
+    font-size:13px;
+    letter-spacing:.02em;
+    padding:14px 12px;
+    border-bottom:1px solid var(--line);
+    white-space:nowrap;
+  }
+  tbody td{
+    padding:13px 12px;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+    font-size:13.5px;
+    line-height:1.45;
+  }
+  tbody tr:nth-child(even){background:#101720}
+  tbody tr:hover{background:#172231}
+  .grade{font-weight:700;color:#ffffff;white-space:nowrap}
+  .tc{font-weight:700;color:var(--green);white-space:nowrap}
+  .senior td:first-child{color:var(--gold)}
+  .political{background:#171d17 !important}
+  .political:hover{background:#1c261c !important}
+  .muted{color:var(--muted)}
+  .tag{
+    display:inline-block;
+    padding:3px 8px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:700;
+    background:#203146;
+    color:#a9d0ff;
+    white-space:nowrap;
+  }
+  .footer{
+    color:var(--muted);
+    font-size:12.5px;
+    margin-top:16px;
+    line-height:1.55;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Singapore Government × OCBC × UOB × Taiwan Civil Service × TSMC × ASML</h1>
+  <div class="sub">Crosswalk of grade, title, compensation, estimated population, and organizational seniority</div>
+
+  <div class="note">
+    <strong>Reading note:</strong>
+    SG TC and grade-population figures are a mix of official anchors and estimates. MX9+ is officially the Superscale / senior-management population;
+    MX8/MX7 exact headcount and salary bands are not publicly disclosed. OCBC and UOB columns are organizational-equivalence mappings, not formal cross-bank grade conversions.
+    TSMC / ASML mappings are scope-based rather than title-name matching.
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>SG Government</th>
+          <th>SG 常見職位 / Scope</th>
+          <th>OCBC 約對應</th>
+          <th>UOB 約對應</th>
+          <th>台灣官等 / 職等</th>
+          <th>台灣常見職位</th>
+          <th>TSMC 約對應</th>
+          <th>ASML 約對應</th>
+          <th>SG Typical TC</th>
+          <th>SG 預估人數</th>
+          <th>Management Positioning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="grade">MX14</td>
+          <td>Junior Executive</td>
+          <td>Officer / Analyst</td>
+          <td>Analyst</td>
+          <td>委任4–5 / 薦任初階</td>
+          <td>辦事員、初階科員</td>
+          <td>G31 Engineer (工程師 / 主任助理)</td>
+          <td>JG6 : Junior Eng ($105k–$135k USD)</td>
+          <td class="tc">S$45–65k</td>
+          <td>大量基層</td>
+          <td>Professional IC</td>
+        </tr>
+        <tr>
+          <td class="grade">MX13(I)</td>
+          <td>Graduate / Executive</td>
+          <td>Analyst / AM</td>
+          <td>Analyst / AM</td>
+          <td>薦任6</td>
+          <td>科員、技士</td>
+          <td>G31/32 Engineer (工程師 2–3年資歷)</td>
+          <td>JG6/7 : Professional ($125k–$155k USD)</td>
+          <td class="tc">S$55–75k</td>
+          <td>~10k+</td>
+          <td>Professional</td>
+        </tr>
+        <tr>
+          <td class="grade">MX13</td>
+          <td>Executive / Senior Executive</td>
+          <td>Assistant Manager (AM)</td>
+          <td>AM (Assistant Manager)</td>
+          <td>薦任6–7</td>
+          <td>資深科員、專員</td>
+          <td>G32/33 Senior Engineer (資深工程師)</td>
+          <td>JG7/8 : Senior Eng ($130k–$190k USD)</td>
+          <td class="tc">S$65–95k</td>
+          <td>~10k</td>
+          <td>Senior IC</td>
+        </tr>
+        <tr>
+          <td class="grade">MX12</td>
+          <td>Manager / junior policy officer</td>
+          <td>AVP lower band / Manager</td>
+          <td>AVP1 / Manager</td>
+          <td>薦任6–7</td>
+          <td>專員、股長</td>
+          <td>G33 Technical Manager (主任工程師 / Tech Lead)</td>
+          <td>JG8 : Senior Eng / Team Lead ($145k–$190k USD)</td>
+          <td class="tc">S$75–115k</td>
+          <td>~8–12k</td>
+          <td>Lower Management</td>
+        </tr>
+        <tr>
+          <td class="grade">MX11</td>
+          <td>Manager / Assistant Director (AD)</td>
+          <td><strong>AVP (Core: S$120k–$160k)</strong></td>
+          <td><strong>AVP2</strong></td>
+          <td>薦任7–8</td>
+          <td>專員 / 股長 / 秘書</td>
+          <td>G34 Deputy Manager (副理 / 課長)</td>
+          <td>JG9 : Lead Eng / Group Lead ($175k–$240k USD)</td>
+          <td class="tc">S$95–150k</td>
+          <td>~5–8k</td>
+          <td>Middle Management</td>
+        </tr>
+        <tr>
+          <td class="grade">MX11A</td>
+          <td>Senior Assistant Director / junior DD</td>
+          <td><strong>AVP (Senior: S$150k–$190k)</strong></td>
+          <td><strong>VP1</strong></td>
+          <td>薦任8–9</td>
+          <td>科長 (薦任9主管職)</td>
+          <td>G34/35 Deputy Mgr / Dept Mgr (資深副理 / 部理)</td>
+          <td>JG10 : Principal Eng ($200k–$280k USD)</td>
+          <td class="tc">S$120–180k</td>
+          <td>~3–5k</td>
+          <td>Mid-High Management</td>
+        </tr>
+        <tr>
+          <td class="grade">MX10</td>
+          <td>Deputy Director (DD) / senior AD</td>
+          <td><strong>VP (Junior: S$170k–$210k)</strong></td>
+          <td><strong>VP2</strong></td>
+          <td>薦任9～簡任10</td>
+          <td>大科科長 / 簡任專門委員</td>
+          <td>G35/36 Dept Manager / Jr Director (部理 / 準處長級)</td>
+          <td>JG11 : Senior Manager ($240k–$350k USD)</td>
+          <td class="tc">S$145–225k</td>
+          <td>~2–4k</td>
+          <td>Upper-Middle Management</td>
+        </tr>
+        <tr class="senior">
+          <td class="grade">MX9</td>
+          <td>Senior Deputy Director / Director (Entry Superscale)</td>
+          <td><strong>VP (Core/Senior: S$200k–$300k)</strong></td>
+          <td><strong>FVP / SVP entry</strong></td>
+          <td>簡任10–11</td>
+          <td>簡任專委 / 副司長附近</td>
+          <td><strong>G36 Director (處長 / 廠長)</strong></td>
+          <td><strong>JG12 : Director / Fellow ($280k–$480k USD)</strong></td>
+          <td class="tc">S$200–300k</td>
+          <td>~1.5–1.9k est.</td>
+          <td><span class="tag">Superscale starts</span></td>
+        </tr>
+        <tr class="senior">
+          <td class="grade">MX8</td>
+          <td>Director / Senior Director</td>
+          <td><strong>ED (Executive Director: S$260k–$380k)</strong></td>
+          <td><strong>SVP (Senior VP)</strong></td>
+          <td>簡任11–12</td>
+          <td>副司長～司長 / 參事</td>
+          <td><strong>G37 Senior Director (資深處長 / 晶圓廠長)</strong></td>
+          <td><strong>JG13 : Senior Director ($420k–$650k USD)</strong></td>
+          <td class="tc">~S$260–380k</td>
+          <td>~250–450 est.</td>
+          <td>Senior Executive</td>
+        </tr>
+        <tr class="senior">
+          <td class="grade">MX7</td>
+          <td>Senior Director / Group Director / Major Function Head</td>
+          <td><strong>MD (Managing Director: S$350k–$520k+)</strong></td>
+          <td><strong>ED (Executive Director)</strong></td>
+          <td>簡任12–13</td>
+          <td>重要司長 / 常任主任秘書 / 局長</td>
+          <td><strong>G37 Senior Director (Top Band 資深處長頂層)</strong></td>
+          <td><strong>JG14 : Vice President ($500k–$850k+ USD)</strong></td>
+          <td class="tc">~S$350–520k+</td>
+          <td>~70–150 est.</td>
+          <td>Very Senior Management</td>
+        </tr>
+        <tr class="senior">
+          <td class="grade">Deputy Secretary</td>
+          <td>Ministry-wide leadership; top few officials under Permanent Secretary</td>
+          <td><strong>MD1 (Cluster Head: S$450k–$700k+)</strong></td>
+          <td><strong>MD (Managing Director)</strong></td>
+          <td>簡任13–14</td>
+          <td>主任秘書～常務次長之間 / 署長</td>
+          <td><strong>G37/38 Senior Director / VP Candidate (副總裁候選)</strong></td>
+          <td><strong>JG14/15 : VP / Senior VP ($650k–$1.2M+ USD)</strong></td>
+          <td class="tc">~S$450–700k+</td>
+          <td>~35–50</td>
+          <td>Top Ministry Leadership</td>
+        </tr>
+        <tr class="senior">
+          <td class="grade">Permanent Secretary</td>
+          <td>Highest-ranking career civil servant heading a ministry</td>
+          <td><strong>MD1 / GMD (CTO/COO Scope: S$650k–$1.2M+)</strong></td>
+          <td><strong>Senior MD / ExCo</strong></td>
+          <td>簡任14頂層</td>
+          <td><strong>常務次長 (文官體系頂點)</strong></td>
+          <td><strong>G38 Vice President (副總裁 VP)</strong></td>
+          <td><strong>JG15 : Senior VP ($800k–$1.8M+ USD)</strong></td>
+          <td class="tc">~S$650k–1.2M+</td>
+          <td>~25–35</td>
+          <td>Top Career Executive</td>
+        </tr>
+        <tr class="senior">
+          <td class="grade">Senior Permanent Secretary / Head of Civil Service</td>
+          <td>Whole-of-government / multi-portfolio leadership</td>
+          <td><strong>GMD (Group Managing Director / CTO / COO)</strong></td>
+          <td><strong>Top Senior MD (CTO / COO)</strong></td>
+          <td>頂層簡任文官</td>
+          <td>最高常任文官長 (特任常任官)</td>
+          <td><strong>G38/39 VP / Senior VP / EVP (執行副總)</strong></td>
+          <td><strong>JG16 / BoM : Executive Board ($2.5M–$6.0M+ USD)</strong></td>
+          <td class="tc">~S$850k–1.4M+</td>
+          <td>個位數 (&lt;10)</td>
+          <td>Enterprise Leadership (Apex)</td>
+        </tr>
+        <tr class="political">
+          <td class="grade">MR4 Minister</td>
+          <td>Entry Cabinet Minister (部會部長)</td>
+          <td>Group C-Suite Economics</td>
+          <td>Group C-Suite Economics</td>
+          <td>政務官</td>
+          <td><strong>部長 (部會政務首長)</strong></td>
+          <td>EVP / CEO Economics (最高經營團隊)</td>
+          <td>Board of Management / CEO Economics</td>
+          <td class="tc">S$1.1M–1.8M ref.</td>
+          <td>~10–20</td>
+          <td>Political Executive</td>
+        </tr>
+        <tr class="political">
+          <td class="grade">MR3 Minister</td>
+          <td>Full Cabinet Minister (資深部長)</td>
+          <td>Group C-Suite / Key BU Heads</td>
+          <td>Group C-Suite / Key BU Heads</td>
+          <td>資深政務官</td>
+          <td><strong>重要部會部長 / 兼政務委員</strong></td>
+          <td>Top EVP / Co-COO level (共同營運長層級)</td>
+          <td>ASML Board of Management Member</td>
+          <td class="tc">~S$1.3M–2.1M ref.</td>
+          <td>~5–10</td>
+          <td>Senior Political</td>
+        </tr>
+        <tr class="political">
+          <td class="grade">MR2 Minister</td>
+          <td>Coordinating Minister (統籌部長 / 資深部長)</td>
+          <td>Group Top C-Suite Leadership</td>
+          <td>Group Top C-Suite Leadership</td>
+          <td>院級政務副首長</td>
+          <td><strong>行政院副院長 / 國安會秘書長級</strong></td>
+          <td>Board Director / CEO Economics (常務董事級)</td>
+          <td>ASML Board Member / Co-CEO Territory</td>
+          <td class="tc">~S$1.6M–2.5M ref.</td>
+          <td>少數 (&lt;5)</td>
+          <td>Coordinating Leadership</td>
+        </tr>
+        <tr class="political">
+          <td class="grade">MR1 Minister</td>
+          <td>Senior Coordinating Minister / Deputy Prime Minister</td>
+          <td>Group Board Executive Level</td>
+          <td>Group Board Executive Level</td>
+          <td>院長級政務首長</td>
+          <td><strong>行政院院長 (閣揆級)</strong></td>
+          <td>CEO / Vice Chairman Economics (副董事長層級)</td>
+          <td>Executive Board President / CEO Economics</td>
+          <td class="tc">~S$1.9M–2.8M ref.</td>
+          <td>1–2</td>
+          <td>National Strategic Exec</td>
+        </tr>
+        <tr class="political">
+          <td class="grade">PM</td>
+          <td>Prime Minister (National Head of Government)</td>
+          <td>Group CEO Economics</td>
+          <td>Group CEO Economics</td>
+          <td>國家最高領導人概念</td>
+          <td><strong>行政院長 / 總統之間概念</strong></td>
+          <td>Chairman / CEO Economics (董事長 / 總裁領銜)</td>
+          <td>ASML President & CEO Economics</td>
+          <td class="tc">~S$3.6M reference</td>
+          <td>1</td>
+          <td>National Executive Chief</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note" style="margin-top:18px">
+    <strong>Verified Institutional Leveling Rules (2026 Calibration):</strong><br/>
+    1. <strong>TSMC VP ≡ OCBC GMD ≡ UOB Top Senior MD:</strong> At TSMC, a Vice President (G38/39 副總裁) reports to the CEO/Chairman, managing thousands of personnel and NT$30M–80M+ compensation. This equates to OCBC Group Managing Director (GMD) / Group CTO/COO, or UOB Top Senior MD / Group ExCo, rather than middle-management bank VPs.<br/>
+    2. <strong>Bank Ladders (OCBC vs. UOB):</strong><br/>
+       • <strong>OCBC:</strong> Officer/Analyst → AM → AVP (S$120–190k) → VP (S$170–300k) → ED (S$260–380k) → MD (S$350–520k+) → MD1 (Cluster Head) → GMD (Group Managing Director / CTO / COO).<br/>
+       • <strong>UOB:</strong> Analyst → AM → AVP1 → AVP2 → VP1 → VP2 → FVP → SVP → ED → MD → Top Senior MD.<br/>
+       • OCBC AVP spans UOB AVP2 to VP1. OCBC VP (S$200k–300k core) aligns financially and organizationally with MX9 (Entry Superscale) and UOB FVP/SVP.<br/>
+    3. <strong>Three-Axis Methodology:</strong> (A) Within Singapore (Gov, OCBC, UOB), use compensation windows. (B) SG Gov to Taiwan Gov, use organizational rank and statutory scope. (C) ASML job grade matches TSMC job grade first, which then anchors bank grade titles.
+  </div>
+
+  <div class="footer">
+    <strong>Singapore Political Benchmark Breakdown:</strong> MR4 Minister (Entry: S$1.1M–1.8M ref.), MR3 Minister (Full Cabinet: ~S$1.3M–2.1M ref.), MR2 Minister (Coordinating: ~S$1.6M–2.5M ref.), MR1 Minister (DPM / Senior: ~S$1.9M–2.8M ref.), and PM (Prime Minister: ~S$3.6M ref.).
+    <br/>
+    <strong>Important:</strong> These are approximate organizational-equivalence mappings calibrated against 2025/2026 institutional filings, statutory benchmarks, and Levels.fyi tech verified data.
+  </div>
+</div>
+</body>
+</html>

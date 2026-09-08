@@ -2,6 +2,12 @@
 
 This reference knowledge document establishes the verified structural facts, leveling taxonomies, and cross-system equivalence rules for the Autumn Memo benchmark report: **"Global Executive Leveling & Compensation Benchmark: The Road past 7-Figures"**.
 
+# human added key points 
+- notice OCBC VP is about TSMC manager (G35)
+- UOB AVP1 is 32, VP1 is 33, VP2 is 34 , FVP is 35 in grade mapping to TSMC
+- using salary mapping for SG gov to UOB to OCBC
+- where OCBC senior AVP (also called AVP) will start to lead people like G33/G34 in TSMC
+
 ---
 
 ## 1. The Tri-Fold Mapping Methodology
@@ -81,7 +87,10 @@ Singapore Civil Service total compensation comprises 12 months base salary, 1 mo
 | **Deputy Secretary**| Ministry Leadership | S$26,000 – S$38,000 | **S$450k – S$700k+** | UOB MD / OCBC MD1 (Cluster Head) |
 | **Permanent Sec**   | Top Career Civil Servant | S$38,000 – S$65,000 | **S$650k – S$1.2M+** | UOB Senior MD / OCBC GMD (CTO/COO) |
 | **Senior Perm Sec** | Whole-of-Gov Head (HCS)  | S$50,000 – S$75,000 | **S$850k – S$1.4M+** | UOB Top Senior MD / OCBC GMD ExCo |
-| **MR4 Minister**    | Cabinet Minister         | Statutory Benchmark | **S$1.1M – S$1.8M ref.**| UOB / OCBC Group C-Suite Economics |
+| **MR4 Minister**    | Entry Cabinet Minister   | Statutory Benchmark | **S$1.1M – S$1.8M ref.**| UOB / OCBC Group C-Suite Economics |
+| **MR3 Minister**    | Full Cabinet Minister    | Statutory Benchmark | **~S$1.3M – S$2.1M ref.**| UOB / OCBC C-Suite / Key BU Heads |
+| **MR2 Minister**    | Coordinating Minister    | Statutory Benchmark | **~S$1.6M – S$2.5M ref.**| UOB / OCBC Top C-Suite Leadership |
+| **MR1 Minister**    | Deputy Prime Minister    | Statutory Benchmark | **~S$1.9M – S$2.8M ref.**| UOB / OCBC Board Executive Level |
 | **Prime Minister**  | National Head of Gov     | Statutory Benchmark | **~S$3.6M ref.**       | UOB / OCBC Group CEO Economics |
 
 ---
@@ -105,8 +114,11 @@ Because Taiwan public sector salaries are strictly bounded by statutory civil se
 | **Deputy Sec**| Ministry Leadership (副次長層級) | 簡任第13–14職等 | **常任主任秘書、署長、常任次長邊緣** |
 | **Perm Sec**  | Top Career Civil Servant (事務官最高階) | **簡任第14職等頂層** | **常務次長 (公務員體系常任文官頂點)** |
 | **Senior Perm**| Whole-of-Government Leader (文官長) | 特任常任文官首長 | **銓敘部/人事行政總處常任首長** |
-| **MR4 Minister**| Cabinet Minister (政治首長) | **政務官** | **內閣部長 (部會政務首長)** |
-| **Prime Minister**| Head of Government (國家領導) | 院長 / 國家元首 | **行政院院長 / 國家領導人** |
+| **MR4 Minister**| Entry Cabinet Minister (部會部長) | **政務官** | **內閣部長 (部會政務首長)** |
+| **MR3 Minister**| Full Cabinet Minister (資深部長) | **資深政務官** | **重要部會部長 / 兼行政院政務委員** |
+| **MR2 Minister**| Coordinating Minister (統籌部長) | **院級政務副首長** | **行政院副院長 / 國安會秘書長級** |
+| **MR1 Minister**| Deputy Prime Minister (副總理) | **院長級政務首長** | **行政院院長 (閣揆級)** |
+| **Prime Minister**| Head of Government (國家領導) | 國家最高領導人概念 | **行政院院長 / 總統之間概念** |
 
 ---
 
@@ -119,11 +131,12 @@ Tech companies price technical competence through individual contributor (IC) an
 | **JG 6** | **G31** | 工程師 / 主任助理 (Associate / Eng) | Analyst / Officer | Analyst / Officer |
 | **JG 7 / 8** | **G32 / G33** | 資深工程師 / 主任工程師 (Senior Eng / Tech Lead) | Senior Officer / AM / Manager | Assistant Manager (AM) |
 | **JG 9** | **G34** | 副理 / 課長 (Section Manager / Deputy Mgr) | **AVP1 / AVP2** | **AVP** |
-| **JG 10** | **G35** | 部理 / 部門經理 (Department Manager) | **VP1 / VP2** | **VP** |
-| **JG 11 / 12** | **G36** | 處長 / 廠長 (Director / Plant Manager) | **FVP / SVP** | **ED (Executive Director)** |
-| **JG 13** | **G37** | 資深處長 / 晶圓廠長 (Senior Director / Fab Director) | **ED (Executive Director)** | **MD (Managing Director)** |
-| **JG 14** | **G38** | 副總裁 (Vice President / VP) | **Senior MD** | **MD1 (Cluster Head)** |
-| **JG 15 / 16** | **G39** | 資深副總裁 / 執行副總 (SVP / EVP) | **Top Senior MD / ExCo** | **GMD (Group Managing Director)** |
+| **JG 10** | **G35** | 部理 / 部門經理 (Department Manager) | **VP1 / VP2** | **VP (Junior / Core)** |
+| **JG 11 / 12** | **G36** | 處長 / 廠長 (Director / Plant Manager) | **FVP / SVP entry** | **VP (Core / Senior) / ED edge** |
+| **JG 13** | **G37** | 資深處長 / 晶圓廠長 (Senior Director / Fab Director) | **SVP / ED** | **ED (Executive Director)** |
+| **JG 14** | **G37/38** | 資深處長頂層 / 副總裁候選 (Senior Dir / VP Candidate) | **ED / MD** | **MD / MD1 (Cluster Head)** |
+| **JG 14 / 15** | **G38** | 副總裁 (Vice President / VP) | **Senior MD / ExCo** | **MD1 / GMD (CTO/COO Scope)** |
+| **JG 15 / 16** | **G39** | 資深副總裁 / 執行副總 (SVP / EVP) | **Top Senior MD / Group CTO/COO** | **GMD (Group Managing Director / Group CTO/COO)** |
 
 ---
 
