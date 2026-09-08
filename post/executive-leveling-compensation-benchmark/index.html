@@ -318,12 +318,16 @@
       letter-spacing: 0.05em;
       text-transform: uppercase;
       border-bottom: 2px solid var(--line);
+      border-right: 1px solid var(--line);
       position: sticky;
       top: 0;
       z-index: 10;
       cursor: pointer;
       user-select: none;
       transition: background 0.15s;
+    }
+    table.data-table thead th:last-child {
+      border-right: none;
     }
     table.data-table thead th:hover {
       background: #ede9df;
@@ -346,9 +350,13 @@
     table.data-table tbody td {
       padding: 10px 12px;
       border-bottom: 1px solid var(--line-light);
+      border-right: 1px solid #f0ecdf;
       color: #24272a;
       vertical-align: top;
       white-space: normal;
+    }
+    table.data-table tbody td:last-child {
+      border-right: none;
     }
     table.data-table tbody tr:nth-child(even) {
       background: #fdfcf9;
@@ -724,17 +732,17 @@
               </td>
               <td>
                 <span class="cell-title">Analyst</span>
-                <span class="cell-salary">&lt; S$65k</span>
+                <span class="cell-salary">< S$65k</span>
                 <span class="cell-detail">Junior Analyst (31 mapping)</span>
               </td>
               <td>
                 <span class="cell-title">Officer / Analyst</span>
-                <span class="cell-salary">&lt; S$65k</span>
+                <span class="cell-salary">< S$65k</span>
                 <span class="cell-detail">基層專案與作業支援</span>
               </td>
               <td>
                 <span class="cell-title">Grade 31 工程師</span>
-                <span class="cell-salary">&lt; 3M NTD</span>
+                <span class="cell-salary">< 3M NTD</span>
                 <span class="cell-detail">新進工程師 (碩士新人起點)</span>
               </td>
               <td>
@@ -744,12 +752,12 @@
               </td>
               <td>
                 <span class="cell-title">委任4–5 / 薦任初階</span>
-                <span class="cell-salary">&lt; 1.0M NTD</span>
+                <span class="cell-salary">< 1.0M NTD</span>
                 <span class="cell-detail">書記、辦事員、委任初階科員</span>
               </td>
               <td>
                 <span class="cell-title">Research Eng</span>
-                <span class="cell-salary">&lt; 90k SGD</span>
+                <span class="cell-salary">< 90k SGD</span>
                 <span class="cell-detail">初階研究工程師</span>
               </td>
             </tr>
@@ -816,7 +824,7 @@
               <td>
                 <span class="cell-title">Assistant Manager (AM)</span>
                 <span class="cell-salary">S$70k–95k</span>
-                <span class="cell-detail">資深業務／分析師階</span>
+                <span class="cell-detail">資深業務／分析師階 (32 mapping)</span>
               </td>
               <td>
                 <span class="cell-title">Grade 32 資深工程師</span>
@@ -857,7 +865,7 @@
                 <span class="cell-detail">Entry AVP / Team Specialist</span>
               </td>
               <td>
-                <span class="cell-title">AVP (Lower) / Manager</span>
+                <span class="cell-title">AVP (Entry/Lower)</span>
                 <span class="cell-salary">S$80k–115k</span>
                 <span class="cell-detail">AVP lower band / Manager</span>
               </td>
@@ -895,9 +903,9 @@
                 <span class="cell-detail">~5–8k 人</span>
               </td>
               <td>
-                <span class="cell-title">AVP2 / VP2 (34 mapping)</span>
+                <span class="cell-title">VP1 (33 mapping)</span>
                 <span class="cell-salary">S$120k–160k</span>
-                <span class="cell-detail">Core AVP / Senior Specialist</span>
+                <span class="cell-detail">Vice President 1 (33 mapping)</span>
               </td>
               <td>
                 <span class="cell-title">AVP (Core Band)</span>
@@ -905,9 +913,9 @@
                 <span class="cell-detail">開始帶團隊 · 33/34 scope</span>
               </td>
               <td>
-                <span class="cell-title">Grade 34 副理</span>
-                <span class="cell-salary">4.8M–6.5M NTD</span>
-                <span class="cell-detail">Technical Manager (管理起點)</span>
+                <span class="cell-title">Grade 33/34 主任/副理</span>
+                <span class="cell-salary">4.5M–6.0M NTD</span>
+                <span class="cell-detail">成熟主任 / 初任副理</span>
               </td>
               <td>
                 <span class="cell-title">JG8–9 : Lead Eng</span>
@@ -915,7 +923,7 @@
                 <span class="cell-detail">初階主管 / 資深 IC 雙軌</span>
               </td>
               <td>
-                <span class="cell-title">薦任第7–8職等</span>
+                <span class="cell-title">薦任第8職等</span>
                 <span class="cell-salary">~1.25M–1.4M NTD</span>
                 <span class="cell-detail">專員 / 股長 / 薦任秘書</span>
               </td>
@@ -938,19 +946,19 @@
                 <span class="cell-detail">~3–5k 人</span>
               </td>
               <td>
-                <span class="cell-title">VP1 / VP2 (34 mapping)</span>
+                <span class="cell-title">VP2 (34 mapping)</span>
                 <span class="cell-salary">S$150k–190k</span>
-                <span class="cell-detail">Senior AVP / Vice President 1</span>
+                <span class="cell-detail">Vice President 2 (34 mapping)</span>
               </td>
               <td>
                 <span class="cell-title">AVP (Senior Band)</span>
                 <span class="cell-salary">S$150k–$190k</span>
-                <span class="cell-detail">People Lead 主力主管</span>
+                <span class="cell-detail">Senior AVP · People Lead 主管</span>
               </td>
               <td>
-                <span class="cell-title">Grade 34/35 副理/經理</span>
-                <span class="cell-salary">5.5M–7.5M NTD</span>
-                <span class="cell-detail">資深副理 / 經理主管</span>
+                <span class="cell-title">Grade 34 副理</span>
+                <span class="cell-salary">5.2M–7.0M NTD</span>
+                <span class="cell-detail">Technical Manager (管理起點)</span>
               </td>
               <td>
                 <span class="cell-title">JG8–10 : Lead/Manager</span>
@@ -983,17 +991,17 @@
               <td>
                 <span class="cell-title">VP2 / FVP (35 mapping)</span>
                 <span class="cell-salary">S$170k–220k</span>
-                <span class="cell-detail">Vice President 2 / First VP</span>
+                <span class="cell-detail">34/35 mapping · VP2 to FVP</span>
               </td>
               <td>
-                <span class="cell-title">VP (Junior Band)</span>
-                <span class="cell-salary">S$170k–$210k</span>
-                <span class="cell-detail">≈ TSMC 35 經理 / 資深 IC</span>
+                <span class="cell-title">VP (Vice President)</span>
+                <span class="cell-salary">S$170k–$230k</span>
+                <span class="cell-detail">Segment Tree: UOB [VP2, FVP] ≡ OCBC VP ≡ TSMC G35 經理</span>
               </td>
               <td>
                 <span class="cell-title">Grade 35 經理</span>
                 <span class="cell-salary">6.5M–9.5M NTD</span>
-                <span class="cell-detail">經理 / 模組經理 (Manager)</span>
+                <span class="cell-detail">經理 / 模組經理 (Manager · 核心對標)</span>
               </td>
               <td>
                 <span class="cell-title">JG9–10 : Manager</span>
@@ -1024,19 +1032,19 @@
                 <span class="cell-detail">~1.5–1.9k 人</span>
               </td>
               <td>
-                <span class="cell-title">FVP (35) / SVP entry</span>
+                <span class="cell-title">FVP / SVP entry</span>
                 <span class="cell-salary">S$200k–300k</span>
-                <span class="cell-detail">First VP / Senior VP entry</span>
+                <span class="cell-detail">First VP / Senior VP entry (35/36)</span>
               </td>
               <td>
-                <span class="cell-title">VP (Core/Senior Band)</span>
-                <span class="cell-salary">S$200k–$300k</span>
-                <span class="cell-detail">≈ TSMC 36 部經理 / 高階專才</span>
+                <span class="cell-title">VP (Senior/Peak) / ED entry</span>
+                <span class="cell-salary">S$220k–$300k</span>
+                <span class="cell-detail">Senior VP / Senior IC / ED entry</span>
               </td>
               <td>
-                <span class="cell-title">Grade 36 部經理</span>
-                <span class="cell-salary">8M–20M NTD</span>
-                <span class="cell-detail">部經理 / 資深經理 (Dept Mgr)</span>
+                <span class="cell-title">Grade 35/36 經理/部經理</span>
+                <span class="cell-salary">8M–18M NTD</span>
+                <span class="cell-detail">資深模組經理 / 初任部經理</span>
               </td>
               <td>
                 <span class="cell-title">JG10–11 : Dept Manager</span>
@@ -1069,17 +1077,17 @@
               <td>
                 <span class="cell-title">SVP (Senior VP)</span>
                 <span class="cell-salary">S$260k–380k</span>
-                <span class="cell-detail">Senior Vice President</span>
+                <span class="cell-detail">36 mapping · Senior Vice President</span>
               </td>
               <td>
-                <span class="cell-title">Executive Director (ED)</span>
+                <span class="cell-title">ED (Executive Director)</span>
                 <span class="cell-salary">S$260k–$380k</span>
-                <span class="cell-detail">事業群副主管 / 處長級</span>
+                <span class="cell-detail">事業群副主管 / 處長級 (TSMC 36/37)</span>
               </td>
               <td>
-                <span class="cell-title">Grade 37 副處長</span>
-                <span class="cell-salary">15M–28M NTD</span>
-                <span class="cell-detail">副處長 / 副廠長 (Deputy Dir)</span>
+                <span class="cell-title">Grade 36/37 部經理/副處長</span>
+                <span class="cell-salary">12M–25M NTD</span>
+                <span class="cell-detail">部經理 / 副處長 (TSMC 36 Dept Mgr)</span>
               </td>
               <td>
                 <span class="cell-title">JG11 : Senior Manager</span>
@@ -1110,23 +1118,23 @@
                 <span class="cell-detail">~70–150 人</span>
               </td>
               <td>
-                <span class="cell-title">ED (Executive Dir)</span>
+                <span class="cell-title">SVP / ED</span>
                 <span class="cell-salary">S$350k–500k+</span>
-                <span class="cell-detail">Executive Director</span>
+                <span class="cell-detail">Senior VP / Executive Director (37/38)</span>
               </td>
               <td>
-                <span class="cell-title">Managing Director (MD)</span>
+                <span class="cell-title">ED / MD entry</span>
                 <span class="cell-salary">S$350k–$520k+</span>
-                <span class="cell-detail">核心事業群主管</span>
+                <span class="cell-detail">Senior ED / Managing Director entry</span>
               </td>
               <td>
-                <span class="cell-title">Grade 38 處長/廠長</span>
-                <span class="cell-salary">20M–45M NTD</span>
-                <span class="cell-detail">處長 / 廠長 (Fab Director)</span>
+                <span class="cell-title">Grade 37/38 副處長/處長</span>
+                <span class="cell-salary">18M–38M NTD</span>
+                <span class="cell-detail">副處長 / 廠長 (Fab Director)</span>
               </td>
               <td>
-                <span class="cell-title">JG12 : Director</span>
-                <span class="cell-salary">$450k–$750k USD</span>
+                <span class="cell-title">JG11/12 : Director</span>
+                <span class="cell-salary">$420k–$650k USD</span>
                 <span class="cell-detail">Director / ASML Fellow (院士)</span>
               </td>
               <td>
@@ -1153,34 +1161,34 @@
                 <span class="cell-detail">~35–50 人</span>
               </td>
               <td>
-                <span class="cell-title">MD (Managing Dir)</span>
+                <span class="cell-title">ED / MD</span>
                 <span class="cell-salary">S$450k–700k+</span>
+                <span class="cell-detail">Managing Director (38–40)</span>
+              </td>
+              <td>
+                <span class="cell-title">MD (Managing Director)</span>
+                <span class="cell-salary">S$450k–$700k+</span>
                 <span class="cell-detail">Managing Director / Cluster Head</span>
               </td>
               <td>
-                <span class="cell-title">MD1 (Cluster Head)</span>
-                <span class="cell-salary">S$450k–$700k+</span>
-                <span class="cell-detail">Cluster Head 統領跨部門</span>
+                <span class="cell-title">Grade 38–40 處長/資深處長</span>
+                <span class="cell-salary">25M–55M NTD</span>
+                <span class="cell-detail">處長 / 資深廠長 (張忠謀40職等)</span>
               </td>
               <td>
-                <span class="cell-title">Grade 39 大型廠長</span>
-                <span class="cell-salary">25M–60M NTD</span>
-                <span class="cell-detail">大型處長 / 資深處長候選帶</span>
-              </td>
-              <td>
-                <span class="cell-title">JG12/13 : Senior Dir</span>
-                <span class="cell-salary">$600k–$1.0M+ USD</span>
-                <span class="cell-detail">Director / Senior Director 候選</span>
+                <span class="cell-title">JG12/13 : Senior Director</span>
+                <span class="cell-salary">$550k–$850k USD</span>
+                <span class="cell-detail">Senior Director (資深總監)</span>
               </td>
               <td>
                 <span class="cell-title">簡任第13–14職等</span>
-                <span class="cell-salary">~2.05M–2.2M NTD</span>
-                <span class="cell-detail">主任秘書 ～ 常務次長邊緣 / 署長</span>
+                <span class="cell-salary">~2.1M–2.2M NTD</span>
+                <span class="cell-detail">常任主任秘書 / 署長</span>
               </td>
               <td>
-                <span class="cell-title">Asst Chief Exec</span>
+                <span class="cell-title">Senior Director</span>
                 <span class="cell-salary">450k–650k SGD</span>
-                <span class="cell-detail">助理總裁</span>
+                <span class="cell-detail">資深處長</span>
               </td>
             </tr>
 
@@ -1188,42 +1196,42 @@
             <tr data-tier="superscale">
               <td>
                 <span class="cell-title">Permanent Sec</span>
-                <span class="cell-detail"><span class="tier-badge top">Top Career</span></span>
+                <span class="cell-detail"><span class="tier-badge top">Top Bureaucrat</span></span>
               </td>
               <td>
                 <span class="cell-title">Top Career Civil Servant</span>
-                <span class="cell-salary">~S$650k–1.2M+</span>
-                <span class="cell-detail">~25–35 人</span>
+                <span class="cell-salary peak">~S$650k–1.2M+</span>
+                <span class="cell-detail">~20–30 人 (事務官最高)</span>
               </td>
               <td>
-                <span class="cell-title">Senior MD / ExCo</span>
-                <span class="cell-salary">S$650k–1.2M+</span>
+                <span class="cell-title">MD / Senior MD</span>
+                <span class="cell-salary peak">S$650k–1.2M+</span>
                 <span class="cell-detail">Senior Managing Director</span>
               </td>
               <td>
-                <span class="cell-title">MD1 / GMD</span>
-                <span class="cell-salary">S$650k–$1.2M+</span>
-                <span class="cell-detail">CTO / COO Scope 經理人</span>
+                <span class="cell-title">MD1 / GMD (CTO/COO Scope)</span>
+                <span class="cell-salary peak">S$650k–$1.2M+</span>
+                <span class="cell-detail">Cluster Head / Group CTO/COO</span>
               </td>
               <td>
-                <span class="cell-title">Grade 40 資深處長</span>
-                <span class="cell-salary">30M–70M+ NTD</span>
-                <span class="cell-detail">資深處長/廠長 (張忠謀40職等)</span>
+                <span class="cell-title">Grade 40/50 資深處長/副總</span>
+                <span class="cell-salary peak">40M–80M NTD</span>
+                <span class="cell-detail">資深處長 / 營運副總經理</span>
               </td>
               <td>
-                <span class="cell-title">JG13 : Senior Director</span>
-                <span class="cell-salary">$700k–$1.3M+ USD</span>
-                <span class="cell-detail">Senior Director (全球資深總監)</span>
+                <span class="cell-title">JG13/14 : VP</span>
+                <span class="cell-salary peak">$650k–$1.2M USD</span>
+                <span class="cell-detail">Vice President (全球副總裁)</span>
               </td>
               <td>
-                <span class="cell-title">簡任14職等頂層</span>
-                <span class="cell-salary">2.2M+ NTD</span>
-                <span class="cell-detail">常務次長 (文官體系最高頂點)</span>
+                <span class="cell-title">簡任第14職等頂</span>
+                <span class="cell-salary peak">~2.2M+ NTD 頂</span>
+                <span class="cell-detail">常務次長 (文官頂點)</span>
               </td>
               <td>
-                <span class="cell-title">Deputy Chief Exec</span>
-                <span class="cell-salary">500k–750k SGD</span>
-                <span class="cell-detail">副總裁</span>
+                <span class="cell-title">Distinguished Sci</span>
+                <span class="cell-salary peak">600k–900k SGD</span>
+                <span class="cell-detail">傑出科學家</span>
               </td>
             </tr>
 
@@ -1231,42 +1239,42 @@
             <tr data-tier="superscale">
               <td>
                 <span class="cell-title">Senior Perm Sec</span>
-                <span class="cell-detail"><span class="tier-badge top">Enterprise</span></span>
+                <span class="cell-detail"><span class="tier-badge top">Whole-of-Gov Head</span></span>
               </td>
               <td>
-                <span class="cell-title">Head of Civil Service</span>
-                <span class="cell-salary">~S$850k–1.4M+</span>
-                <span class="cell-detail">個位數 (&lt;10)</span>
+                <span class="cell-title">Whole-of-Gov Leader</span>
+                <span class="cell-salary peak">~S$850k–1.4M+</span>
+                <span class="cell-detail">~5–10 人 (HCS 文官首長)</span>
               </td>
               <td>
-                <span class="cell-title">Top Senior MD</span>
-                <span class="cell-salary">S$1.2M–2.5M+</span>
-                <span class="cell-detail">Group CTO / COO Scope</span>
+                <span class="cell-title">Senior MD / ExCo</span>
+                <span class="cell-salary peak">S$850k–1.4M+</span>
+                <span class="cell-detail">Senior MD / Group ExCo Member</span>
               </td>
               <td>
-                <span class="cell-title">GMD (Group Managing Dir)</span>
-                <span class="cell-salary">2.8M–4.5M+ SGD</span>
-                <span class="cell-detail">集團常任領導頂層</span>
+                <span class="cell-title">GMD (ExCo Member)</span>
+                <span class="cell-salary peak">S$850k–$1.4M+</span>
+                <span class="cell-detail">Group Managing Director ExCo</span>
               </td>
               <td>
                 <span class="cell-title">Grade 50 副總經理 VP</span>
-                <span class="cell-salary">40M–100M+ NTD</span>
-                <span class="cell-detail">副總經理 VP (報告董事長/CEO)</span>
+                <span class="cell-salary peak">60M–100M+ NTD</span>
+                <span class="cell-detail">副總經理 VP (直接報告CEO/董事長)</span>
               </td>
               <td>
-                <span class="cell-title">JG14 : Vice President</span>
-                <span class="cell-salary">$800k–$1.8M+ USD</span>
-                <span class="cell-detail">Vice President (全球副總裁)</span>
+                <span class="cell-title">JG14 : VP</span>
+                <span class="cell-salary peak">$800k–$1.5M USD</span>
+                <span class="cell-detail">全球副總裁 (VP)</span>
               </td>
               <td>
-                <span class="cell-title">頂層簡任特任官</span>
-                <span class="cell-salary">2.2M–2.4M NTD</span>
-                <span class="cell-detail">最高常任文官長 (特任常任官)</span>
+                <span class="cell-title">特任常任文官首長</span>
+                <span class="cell-salary peak">~2.4M+ NTD</span>
+                <span class="cell-detail">常任文官首長 (銓敘/人事長)</span>
               </td>
               <td>
-                <span class="cell-title">A*STAR CEO</span>
-                <span class="cell-salary">500k–800k+ SGD</span>
-                <span class="cell-detail">局長 / 總裁層級</span>
+                <span class="cell-title">Executive VP / Dir</span>
+                <span class="cell-salary peak">800k–1.2M SGD</span>
+                <span class="cell-detail">執行副總裁 / 所長</span>
               </td>
             </tr>
 
@@ -1274,42 +1282,42 @@
             <tr data-tier="political">
               <td>
                 <span class="cell-title">MR4 Minister</span>
-                <span class="cell-detail"><span class="tier-badge top">Political Exec</span></span>
+                <span class="cell-detail"><span class="tier-badge top">Cabinet Entry</span></span>
               </td>
               <td>
-                <span class="cell-title">Cabinet Minister (部會首長)</span>
-                <span class="cell-salary">S$1.1M–1.8M ref.</span>
-                <span class="cell-detail">~10–20 人</span>
+                <span class="cell-title">Entry Cabinet Minister</span>
+                <span class="cell-salary peak">~S$1.1M–1.8M ref.</span>
+                <span class="cell-detail">部會首長政務官 (~20人)</span>
               </td>
               <td>
-                <span class="cell-title">Group C-Suite</span>
-                <span class="cell-salary">S$1.5M–3.0M+</span>
-                <span class="cell-detail">Executive Committee</span>
+                <span class="cell-title">Top Senior MD</span>
+                <span class="cell-salary peak">S$1.1M–1.8M</span>
+                <span class="cell-detail">Head of Key BU / ExCo</span>
               </td>
               <td>
-                <span class="cell-title">Group C-Suite Economics</span>
-                <span class="cell-salary">S$1.1M–1.8M+ SGD</span>
-                <span class="cell-detail">Group C-Suite 決策層</span>
+                <span class="cell-title">GMD (Key BU Head)</span>
+                <span class="cell-salary peak">S$1.1M–$1.8M</span>
+                <span class="cell-detail">Group Managing Director</span>
               </td>
               <td>
-                <span class="cell-title">Grade 51 資深副總</span>
-                <span class="cell-salary">80M–150M+ NTD</span>
-                <span class="cell-detail">資深副總經理 (Senior VP)</span>
+                <span class="cell-title">Grade 50/51 副總/資深副總</span>
+                <span class="cell-salary peak">80M–150M NTD</span>
+                <span class="cell-detail">副總經理 / 資深副總經理</span>
               </td>
               <td>
-                <span class="cell-title">JG15 : Senior VP</span>
-                <span class="cell-salary">$1.2M–$2.5M+ USD</span>
-                <span class="cell-detail">Senior Vice President (資深副總)</span>
+                <span class="cell-title">JG14/15 : VP/SVP</span>
+                <span class="cell-salary peak">$1.0M–$1.8M USD</span>
+                <span class="cell-detail">副總裁 / 資深副總裁</span>
               </td>
               <td>
-                <span class="cell-title">政務官</span>
-                <span class="cell-salary">~2.5M–3.0M NTD</span>
+                <span class="cell-title">政務首長 (部長)</span>
+                <span class="cell-salary peak">~2.5M–3.0M NTD</span>
                 <span class="cell-detail">內閣部長 (部會政務首長)</span>
               </td>
               <td>
-                <span class="cell-title">Ministerial Reference</span>
-                <span class="cell-salary">S$1.1M–1.8M ref.</span>
-                <span class="cell-detail">法定基準薪資錨點</span>
+                <span class="cell-title">Deputy CEO</span>
+                <span class="cell-salary peak">1.0M–1.5M SGD</span>
+                <span class="cell-detail">國家級副執行長</span>
               </td>
             </tr>
 
@@ -1317,42 +1325,42 @@
             <tr data-tier="political">
               <td>
                 <span class="cell-title">MR3 Minister</span>
-                <span class="cell-detail"><span class="tier-badge top">Senior Political</span></span>
+                <span class="cell-detail"><span class="tier-badge top">Full Minister</span></span>
               </td>
               <td>
-                <span class="cell-title">Full Cabinet Minister (資深部長)</span>
-                <span class="cell-salary">~S$1.3M–2.1M ref.</span>
-                <span class="cell-detail">~5–10 人</span>
+                <span class="cell-title">Full Cabinet Minister</span>
+                <span class="cell-salary peak">~S$1.3M–2.1M ref.</span>
+                <span class="cell-detail">重要部會首長 / 兼政委</span>
               </td>
               <td>
-                <span class="cell-title">Group C-Suite</span>
-                <span class="cell-salary">S$2.0M–3.5M+</span>
-                <span class="cell-detail">Key BU Heads 核心負責人</span>
+                <span class="cell-title">Senior MD / ExCo Lead</span>
+                <span class="cell-salary peak">S$1.3M–2.2M</span>
+                <span class="cell-detail">Executive Committee Leader</span>
               </td>
               <td>
-                <span class="cell-title">Group C-Suite / Key BU</span>
-                <span class="cell-salary">S$1.3M–2.2M+ SGD</span>
-                <span class="cell-detail">Key BU Heads 核心負責人</span>
+                <span class="cell-title">GMD (Senior ExCo Lead)</span>
+                <span class="cell-salary peak">S$1.3M–$2.2M</span>
+                <span class="cell-detail">Senior ExCo Business Leader</span>
               </td>
               <td>
-                <span class="cell-title">Grade 52 執行副總</span>
-                <span class="cell-salary">100M–200M+ NTD</span>
-                <span class="cell-detail">執行副總 / 共同營運長 (Co-COO)</span>
+                <span class="cell-title">Grade 51 資深副總經理</span>
+                <span class="cell-salary peak">120M–220M NTD</span>
+                <span class="cell-detail">資深副總經理 SVP</span>
               </td>
               <td>
-                <span class="cell-title">JG16 : Executive VP</span>
-                <span class="cell-salary">$2.0M–$4.5M+ USD</span>
-                <span class="cell-detail">Executive VP / BoM 執董</span>
+                <span class="cell-title">JG15 : SVP</span>
+                <span class="cell-salary peak">$1.3M–$2.5M USD</span>
+                <span class="cell-detail">資深副總裁 (SVP)</span>
               </td>
               <td>
-                <span class="cell-title">資深政務官</span>
-                <span class="cell-salary">~2.6M–3.2M NTD</span>
-                <span class="cell-detail">重要部會部長 / 兼政務委員</span>
+                <span class="cell-title">資深政務部長/政委</span>
+                <span class="cell-salary peak">~3.0M–3.5M NTD</span>
+                <span class="cell-detail">行政院政務委員 / 重要部長</span>
               </td>
               <td>
-                <span class="cell-title">Senior Portfolio</span>
-                <span class="cell-salary">S$1.3M–2.1M ref.</span>
-                <span class="cell-detail">資深部會首長基準</span>
+                <span class="cell-title">Executive Director / Sci</span>
+                <span class="cell-salary peak">1.2M–1.8M SGD</span>
+                <span class="cell-detail">國家首席研發總監</span>
               </td>
             </tr>
 
@@ -1360,42 +1368,42 @@
             <tr data-tier="political">
               <td>
                 <span class="cell-title">MR2 Minister</span>
-                <span class="cell-detail"><span class="tier-badge top">Coordinating Exec</span></span>
+                <span class="cell-detail"><span class="tier-badge top">Coord Minister</span></span>
               </td>
               <td>
-                <span class="cell-title">Coordinating Minister (統籌部長)</span>
-                <span class="cell-salary">~S$1.6M–2.5M ref.</span>
-                <span class="cell-detail">少數 (&lt;5)</span>
+                <span class="cell-title">Coordinating Minister</span>
+                <span class="cell-salary peak">~S$1.6M–2.5M ref.</span>
+                <span class="cell-detail">統籌部長 / 國安級</span>
               </td>
               <td>
-                <span class="cell-title">Group Top Leadership</span>
-                <span class="cell-salary">S$2.5M–4.0M+</span>
-                <span class="cell-detail">Deputy Group CEO Level</span>
+                <span class="cell-title">Deputy CEO / Group ExCo</span>
+                <span class="cell-salary peak">S$1.6M–2.8M</span>
+                <span class="cell-detail">Deputy Group CEO scope</span>
               </td>
               <td>
-                <span class="cell-title">Group Top Leadership</span>
-                <span class="cell-salary">S$1.6M–2.5M+ SGD</span>
-                <span class="cell-detail">Deputy CEO 統籌層級</span>
+                <span class="cell-title">Deputy CEO / Group ExCo</span>
+                <span class="cell-salary peak">S$1.6M–$2.8M</span>
+                <span class="cell-detail">Deputy Group CEO scope</span>
               </td>
               <td>
-                <span class="cell-title">Grade 52+ / Board</span>
-                <span class="cell-salary">150M–250M+ NTD</span>
-                <span class="cell-detail">常務董事 / 執行長層級</span>
+                <span class="cell-title">Grade 51/52 資深副總/執行副總</span>
+                <span class="cell-salary peak">150M–280M NTD</span>
+                <span class="cell-detail">資深副總 / 執行副總經理</span>
               </td>
               <td>
-                <span class="cell-title">ASML Senior Board</span>
-                <span class="cell-salary">$2.5M–$5.5M+ USD</span>
-                <span class="cell-detail">董事會資深委員 / Vice Chair</span>
+                <span class="cell-title">JG15/16 : SVP/EVP</span>
+                <span class="cell-salary peak">$1.8M–$3.2M USD</span>
+                <span class="cell-detail">資深副總 / 執行副總 (EVP)</span>
               </td>
               <td>
                 <span class="cell-title">院級政務副首長</span>
-                <span class="cell-salary">~2.8M–3.5M NTD</span>
-                <span class="cell-detail">行政院副院長 / 國安會秘書長級</span>
+                <span class="cell-salary peak">~3.5M–4.0M NTD</span>
+                <span class="cell-detail">行政院副院長 / 國安會秘書長</span>
               </td>
               <td>
-                <span class="cell-title">Coordinating Portfolio</span>
-                <span class="cell-salary">S$1.6M–2.5M ref.</span>
-                <span class="cell-detail">跨院政務統籌首長</span>
+                <span class="cell-title">Chief Scientist / Board</span>
+                <span class="cell-salary peak">1.5M–2.2M SGD</span>
+                <span class="cell-detail">院級首席顧問</span>
               </td>
             </tr>
 
@@ -1403,87 +1411,88 @@
             <tr data-tier="political">
               <td>
                 <span class="cell-title">MR1 Minister</span>
-                <span class="cell-detail"><span class="tier-badge top">National Lead</span></span>
+                <span class="cell-detail"><span class="tier-badge top">Deputy PM</span></span>
               </td>
               <td>
-                <span class="cell-title">Deputy Prime Minister (副總理)</span>
-                <span class="cell-salary">~S$1.9M–2.8M ref.</span>
-                <span class="cell-detail">1–2 人</span>
+                <span class="cell-title">Deputy Prime Minister</span>
+                <span class="cell-salary peak">~S$1.9M–2.8M ref.</span>
+                <span class="cell-detail">副總理 (DPM)</span>
               </td>
               <td>
-                <span class="cell-title">Group Top Leadership</span>
-                <span class="cell-salary">S$3.0M–4.5M+</span>
-                <span class="cell-detail">Board Executive Committee</span>
+                <span class="cell-title">Group Board / Deputy CEO</span>
+                <span class="cell-salary peak">S$2.0M–3.5M</span>
+                <span class="cell-detail">Group Board Executive</span>
               </td>
               <td>
-                <span class="cell-title">Group Top Leadership</span>
-                <span class="cell-salary">S$1.9M–2.8M+ SGD</span>
-                <span class="cell-detail">董事會執行主管階</span>
+                <span class="cell-title">Group Board / Deputy CEO</span>
+                <span class="cell-salary peak">S$2.0M–$3.5M</span>
+                <span class="cell-detail">Group Board Executive</span>
               </td>
               <td>
-                <span class="cell-title">Vice Chairman / CEO</span>
-                <span class="cell-salary">200M–350M+ NTD</span>
-                <span class="cell-detail">副董事長 / 總裁層級</span>
+                <span class="cell-title">Grade 52 執行副總經理</span>
+                <span class="cell-salary peak">200M–350M+ NTD</span>
+                <span class="cell-detail">執行副總經理 EVP / 共同營運長</span>
               </td>
               <td>
-                <span class="cell-title">ASML President / Board</span>
-                <span class="cell-salary">$3.0M–$6.5M+ USD</span>
-                <span class="cell-detail">執行董事會領導層</span>
+                <span class="cell-title">JG16 : EVP / BoM</span>
+                <span class="cell-salary peak">$2.5M–$4.5M+ USD</span>
+                <span class="cell-detail">Executive VP / 董事會成員</span>
               </td>
               <td>
                 <span class="cell-title">院長級政務首長</span>
-                <span class="cell-salary">~3.5M–4.0M NTD</span>
-                <span class="cell-detail">行政院院長 (閣揆級)</span>
+                <span class="cell-salary peak">~4.0M–4.5M NTD</span>
+                <span class="cell-detail">行政院院長 (閣揆)</span>
               </td>
               <td>
-                <span class="cell-title">DPM Benchmark</span>
-                <span class="cell-salary">S$1.9M–2.8M ref.</span>
-                <span class="cell-detail">國家副總理基準</span>
+                <span class="cell-title">Chairman / Board Member</span>
+                <span class="cell-salary peak">1.8M–2.8M SGD</span>
+                <span class="cell-detail">國家級董事長</span>
               </td>
             </tr>
 
-            <!-- Row 18: PM -->
+            <!-- Row 18: Prime Minister -->
             <tr data-tier="political">
               <td>
-                <span class="cell-title">PM</span>
-                <span class="cell-detail"><span class="tier-badge top">National Exec</span></span>
+                <span class="cell-title">Prime Minister</span>
+                <span class="cell-detail"><span class="tier-badge top">Head of Gov</span></span>
               </td>
               <td>
-                <span class="cell-title">Prime Minister (政府總理)</span>
-                <span class="cell-salary">~S$3.6M ref.</span>
-                <span class="cell-detail">1 人</span>
+                <span class="cell-title">Head of Government</span>
+                <span class="cell-salary peak">~S$3.6M ref.</span>
+                <span class="cell-detail">國家最高行政首長</span>
               </td>
               <td>
-                <span class="cell-title">Group CEO Economics</span>
-                <span class="cell-salary">S$3.5M–5.0M+ SGD</span>
-                <span class="cell-detail">Group Chief Executive</span>
+                <span class="cell-title">Group CEO</span>
+                <span class="cell-salary peak">S$10M–16M+ TC</span>
+                <span class="cell-detail">Group CEO (Wee Ee Cheong)</span>
               </td>
               <td>
-                <span class="cell-title">Group CEO Economics</span>
-                <span class="cell-salary">S$3.5M–5.0M+ SGD</span>
-                <span class="cell-detail">Group Chief Executive</span>
+                <span class="cell-title">Group CEO</span>
+                <span class="cell-salary peak">S$10M–14M+ TC</span>
+                <span class="cell-detail">Group CEO (Helen Wong)</span>
               </td>
               <td>
-                <span class="cell-title">Chairman / CEO : Apex</span>
-                <span class="cell-salary">250M–500M+ NTD</span>
-                <span class="cell-detail">董事長 / 總裁領銜 (Apex)</span>
+                <span class="cell-title">董事長 / 總裁</span>
+                <span class="cell-salary peak">NT$400M–600M+</span>
+                <span class="cell-detail">Chairman & CEO (魏哲家等)</span>
               </td>
               <td>
-                <span class="cell-title">ASML President & CEO</span>
-                <span class="cell-salary">$4.0M–$8.0M+ USD</span>
-                <span class="cell-detail">Global Chief Executive</span>
+                <span class="cell-title">ASML CEO / BoM Chair</span>
+                <span class="cell-salary peak">€10M–18M+ EUR</span>
+                <span class="cell-detail">President & CEO (Fouquet等)</span>
               </td>
               <td>
-                <span class="cell-title">國家最高領導人概念</span>
-                <span class="cell-salary">~4.5M–6.0M NTD</span>
-                <span class="cell-detail">行政院長 / 總統之間概念</span>
+                <span class="cell-title">國家領導人概念</span>
+                <span class="cell-salary peak">~5.0M–6.0M NTD</span>
+                <span class="cell-detail">行政院院長 / 總統之間概念</span>
               </td>
               <td>
-                <span class="cell-title">PM Benchmark</span>
-                <span class="cell-salary">S$3.6M ref.</span>
-                <span class="cell-detail">國家元首/閣揆法定最高基準</span>
+                <span class="cell-title">Apex Board / Leadership</span>
+                <span class="cell-salary peak">S$3M+ SGD</span>
+                <span class="cell-detail">國家頂尖科學首長</span>
               </td>
             </tr>
+
           </tbody>
         </table>
       </div>
@@ -1576,11 +1585,13 @@
       </div>
 
       <div class="rules-grid">
-        <div class="rule-tile">
-          <strong>1. Axis 1: Singapore Triad (Salary-Based Matching)</strong>
-          <p>Within Singapore's domestic labor market, <strong>OCBC</strong>, <strong>UOB</strong>, and <strong>SG Gov (MX Scheme)</strong> are calibrated by annual Total Compensation (post-June 2025 data):<br/>
-          • <strong>OCBC AVP</strong> (TC S$120k–$190k) spans across <strong>UOB AVP2 and VP1</strong> (matching SG Gov MX11/MX11A).<br/>
-          • <strong>OCBC VP</strong> (TC S$200k–$300k) aligns directly with <strong>SG Gov MX9 (Superscale entry)</strong> and UOB VP2 / FVP / entry SVP.</p>
+                <div class="rule-tile">
+          <strong>1. Axis 1: Singapore Triad & Segment Tree Alignment (Salary & Title Matching)</strong>
+          <p>Within Singapore's domestic labor market, <strong>OCBC</strong>, <strong>UOB</strong>, and <strong>SG Gov (MX Scheme)</strong> are calibrated by annual Total Compensation (post-June 2025 data), operating as a <strong>Segment Tree Hierarchy</strong>:<br/>
+          • <strong>Dedicated Two-Bank Representation:</strong> UOB and OCBC are distinct financial institutions with differing title granularities and are tracked in separate dedicated columns.<br/>
+          • <strong>Segment Tree Interval:</strong> UOB provides granular ladders [<code>VP2</code> (Grade 34) and <code>FVP</code> (Grade 35)]. In contrast, OCBC aggregates this interval into a consolidated title: <strong>OCBC VP ≡ UOB [VP2, FVP]</strong>.<br/>
+          • <strong>TSMC G35 Central Anchor:</strong> <strong>OCBC VP is about TSMC Grade 35 (經理 / Manager)</strong> (TC S$170k–$230k).<br/>
+          • <strong>Department Manager Boundary:</strong> TSMC Grade 36 (部經理) corresponds to <strong>UOB SVP</strong> and <strong>OCBC ED (Executive Director)</strong> (TC S$260k–$380k), sitting strictly above OCBC VP.</p>
         </div>
         <div class="rule-tile">
           <strong>2. Axis 2: SG Gov ↔ Taiwan Gov (Scope-Based Matching)</strong>
