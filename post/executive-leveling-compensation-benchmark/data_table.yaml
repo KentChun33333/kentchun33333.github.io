@@ -104,18 +104,17 @@ institutions:
     label: "Taiwan Civil Service"
     short_label: "Taiwan Government"
     nodes:
-      - {id: rank4_5, grade: "委任4–5", title: "辦事員 / 初階科員", compensation: "< NT$1.0M", detail: "Junior civil service", tier: junior, level: 8}
-      - {id: rank6, grade: "薦任6", title: "科員 / 技士", compensation: "NT$1.0–1.15M", detail: "Professional entry", tier: junior, level: 15}
-      - {id: rank6_7, grade: "薦任6–7", title: "資深科員 / 專員", compensation: "NT$1.1–1.25M", detail: "Senior professional", tier: junior, level: 21}
-      - {id: rank7_8, grade: "薦任7–8", title: "專員 / 股長", compensation: "NT$1.15–1.3M", detail: "Lower management", tier: middle, level: 29}
+      - {id: rank4, grade: "委任4", title: "辦事員", compensation: "< NT$0.9M", detail: "Junior civil service", tier: junior, level: 5}
+      - {id: rank5, grade: "委任5", title: "初階科員", compensation: "NT$0.85–1.0M", detail: "Upper commissioned-rank support", tier: junior, level: 11}
+      - {id: rank6, grade: "薦任6", title: "科員 / 技士", compensation: "NT$1.0–1.15M", detail: "Professional entry", tier: junior, level: 18}
+      - {id: rank7, grade: "薦任7", title: "資深科員 / 專員", compensation: "NT$1.1–1.25M", detail: "Senior professional", tier: junior, level: 27}
       - {id: rank8, grade: "薦任8", title: "專員 / 薦任秘書", compensation: "NT$1.25–1.4M", detail: "Middle management", tier: middle, level: 36}
-      - {id: rank9, grade: "薦任9", title: "主管科長", compensation: "NT$1.3–1.5M", detail: "First-line management", tier: middle, level: 43}
-      - {id: rank9_10, grade: "薦任9～簡任10", title: "科長 / 簡任專委", compensation: "NT$1.45–1.65M", detail: "Upper-middle management", tier: middle, level: 51}
-      - {id: rank10_11, grade: "簡任10–11", title: "簡任專委 / 副司長", compensation: "NT$1.6–1.8M", detail: "Senior management", tier: superscale, level: 59}
-      - {id: rank11_12, grade: "簡任11–12", title: "副司長 / 司長 / 參事", compensation: "NT$1.75–1.95M", detail: "Senior executive", tier: superscale, level: 66}
-      - {id: rank12_13, grade: "簡任12–13", title: "重要司長 / 主秘 / 局長", compensation: "NT$1.95–2.1M", detail: "Major function head", tier: superscale, level: 72}
-      - {id: rank13_14, grade: "簡任13–14", title: "主任秘書 / 署長", compensation: "NT$2.1–2.2M", detail: "Ministry leadership", tier: superscale, level: 78}
-      - {id: rank14, grade: "簡任14頂", title: "常務次長", compensation: "NT$2.2M+", detail: "Top career civil servant", tier: superscale, level: 84}
+      - {id: rank9, grade: "薦任9", title: "主管科長", compensation: "NT$1.3–1.5M", detail: "First-line management", tier: middle, level: 45}
+      - {id: rank10, grade: "簡任10", title: "科長 / 簡任專委", compensation: "NT$1.45–1.65M", detail: "Upper-middle management", tier: middle, level: 55}
+      - {id: rank11, grade: "簡任11", title: "副司長 / 參事", compensation: "NT$1.6–1.8M", detail: "Senior management", tier: superscale, level: 64}
+      - {id: rank12, grade: "簡任12", title: "司長 / 重要司長", compensation: "NT$1.75–2.0M", detail: "Senior executive", tier: superscale, level: 72}
+      - {id: rank13, grade: "簡任13", title: "主任秘書 / 局長", compensation: "NT$1.95–2.1M", detail: "Major function leadership", tier: superscale, level: 79}
+      - {id: rank14, grade: "簡任14", title: "常務次長 / 署長", compensation: "NT$2.1–2.2M+", detail: "Top career civil servant", tier: superscale, level: 85}
       - {id: service_head, grade: "特任常任文官首長", title: "常任文官首長", compensation: "NT$2.4M+", detail: "Whole-of-government scope", tier: superscale, level: 89}
       - {id: ministers, grade: "政務官", title: "部長 / 政委 / 副院長", compensation: "NT$2.5–4.5M", detail: "Political leadership", tier: political, level: 95}
       - {id: national_head, grade: "國家領導人概念", title: "行政院長 / 總統", compensation: "NT$5–6M", detail: "National apex", tier: political, level: 100}
@@ -124,12 +123,11 @@ institutions:
     label: "A*STAR Research"
     short_label: "A*STAR"
     nodes:
-      - {id: research_eng, grade: "Research Engineer", title: "Research Engineer", compensation: "S$60–90k", detail: "Research professional entry", tier: junior, level: 13}
-      - {id: senior_research_eng, grade: "Senior Research Engineer", title: "Senior Research Engineer", compensation: "S$85–110k", detail: "Senior research IC", tier: junior, level: 21}
-      - {id: scientist, grade: "Research Scientist", title: "Scientist", compensation: "S$95–130k", detail: "Research scientist", tier: middle, level: 29}
-      - {id: lead_research, grade: "Lead Research Engineer", title: "Research Lead", compensation: "S$120–170k", detail: "Technical / project lead", tier: middle, level: 37}
-      - {id: senior_scientist, grade: "Senior Scientist", title: "Senior Scientist", compensation: "S$140–190k", detail: "Senior scientific lead", tier: middle, level: 44}
-      - {id: principal_scientist, grade: "Principal Scientist", title: "Principal Scientist", compensation: "S$150–220k", detail: "Principal technical authority", tier: middle, level: 51}
+      - {id: operator, grade: "Operator / Technical Support", title: "Operations & Lab Support", compensation: "S$40–65k est.", detail: "Operations, facilities, laboratory, and technical support family", tier: junior, level: 5}
+      - {id: research_eng, grade: "Research Engineer", title: "Research Engineer", compensation: "S$60–90k", detail: "Research professional entry", tier: junior, level: 15}
+      - {id: senior_research_scientist, grade: "Senior Research Engineer / Research Scientist", title: "Senior Engineer / Scientist", compensation: "S$85–130k", detail: "Merged equivalent senior research IC band", tier: middle, level: 28}
+      - {id: lead_senior_scientist, grade: "Lead Research Engineer / Senior Scientist", title: "Research Lead / Senior Scientist", compensation: "S$120–190k", detail: "Merged equivalent technical-lead and senior-scientist band", tier: middle, level: 41}
+      - {id: principal_scientist, grade: "Principal Engineer / Principal Scientist", title: "Principal Technical Authority", compensation: "S$150–220k", detail: "Grade above Lead Research Engineer; principal engineering/science track", tier: middle, level: 51}
       - {id: senior_principal, grade: "Senior Principal Scientist", title: "Senior Principal Scientist", compensation: "S$200–300k", detail: "Research department leadership", tier: superscale, level: 60}
       - {id: executive_director, grade: "Executive Director", title: "Institute Executive Director", compensation: "S$250–500k", detail: "Institute / major function leadership", tier: superscale, level: 69}
       - {id: senior_director, grade: "Senior Director", title: "Senior Director", compensation: "S$450–650k", detail: "Enterprise research leadership", tier: superscale, level: 78}

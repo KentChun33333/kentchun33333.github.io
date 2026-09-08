@@ -290,6 +290,33 @@
       padding: 7px 28px 7px 9px;
       cursor: pointer;
     }
+    .company-toggle-control {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+      flex: 1 1 520px;
+    }
+    .company-toggle-control > span {
+      color: var(--dim);
+      font: 700 9px 'IBM Plex Mono', monospace;
+      text-transform: uppercase;
+    }
+    .company-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 7px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #ffffff;
+      color: var(--muted);
+      font: 700 9px 'IBM Plex Mono', monospace;
+      cursor: pointer;
+    }
+    .company-check:has(input:checked) { color: var(--lux); border-color: #c8b98f; background: #fffcf5; }
+    .company-check:has(input:disabled) { opacity: 0.65; cursor: default; }
+    .company-check input { margin: 0; accent-color: var(--lux); }
     .axis-status {
       flex-basis: 100%;
       color: var(--dim);
@@ -356,7 +383,7 @@
       grid-template-columns: repeat(var(--company-count), minmax(235px, 1fr));
       min-width: calc(var(--company-count) * 235px);
       align-items: start;
-      background: #171717;
+      background: #ffffff;
     }
     .stack-company-head {
       position: sticky;
@@ -364,73 +391,75 @@
       z-index: 20;
       min-height: 66px;
       padding: 14px 12px;
-      background: #171717;
-      border-right: 1px solid #3d3d3d;
-      border-bottom: 3px solid var(--stack-color);
+      background: #f7f5f0;
+      border-right: 1px solid var(--line);
+      border-bottom: 2px solid var(--line);
       font: 700 10px/1.35 'IBM Plex Mono', monospace;
       text-transform: uppercase;
-      color: #d7d7d7;
+      color: #4a4e54;
     }
     .stack-company-head.primary {
-      color: #ffffff;
-      box-shadow: inset 0 0 0 1px var(--stack-color);
+      color: var(--lux);
+      background: #eee6d4;
+      border-bottom-color: var(--gold);
     }
     .stack-company-head small {
       display: block;
       margin-top: 5px;
-      color: #969696;
+      color: var(--dim);
       font-size: 8px;
     }
     .stack-company-lane {
       position: relative;
       height: var(--stack-height);
-      border-right: 1px solid #4a4a4a;
-      background: #171717;
+      border-right: 1px solid var(--line);
+      background: #fdfcf9;
     }
     .stack-level-card {
       position: absolute;
       box-sizing: border-box;
       inset-inline: 2px;
       padding: 8px 9px;
-      border: 1px solid rgba(255, 255, 255, 0.52);
-      border-radius: 7px;
-      background: var(--stack-color);
-      color: #ffffff;
-      box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.24);
+      border: 1px solid #d8d2c5;
+      border-left: 3px solid #9a8350;
+      border-radius: 5px;
+      background: #ffffff;
+      color: #24272a;
+      box-shadow: 0 1px 3px rgba(17, 24, 39, 0.06);
       overflow: auto;
       text-align: center;
       transition: filter 0.12s ease, transform 0.12s ease;
     }
     .stack-level-card.primary {
-      border-width: 2px;
-      border-color: #ffffff;
+      border-left-color: var(--gold);
+      background: #fffaf0;
     }
-    .stack-level-card:hover { filter: brightness(1.1); z-index: 5; }
-    .stack-level-card.selected { outline: 3px solid #ffffff; z-index: 6; }
-    .stack-level-card .cell-title { color: #ffffff; font-size: 11px; }
+    .stack-level-card:hover { background: #fffaf0; z-index: 5; }
+    .stack-level-card.selected { outline: 2px solid var(--gold); z-index: 6; }
+    .stack-level-card .cell-title { color: #111827; font-size: 11px; }
     .stack-level-card .cell-salary {
-      color: #ffffff;
-      background: rgba(0, 0, 0, 0.18);
-      border-color: rgba(255, 255, 255, 0.38);
+      color: #b91c1c;
+      background: #fef2f2;
+      border-color: #fecaca;
       font-size: 9px;
       white-space: normal;
     }
     .stack-level-card .cell-detail {
-      color: #f4f4f4;
-      background: rgba(0, 0, 0, 0.12);
-      border-color: rgba(255, 255, 255, 0.25);
+      color: #4b5563;
+      background: #ffffff;
+      border-color: #e2e8f0;
       font-size: 9px;
     }
     .stack-level-card .anchor-badge {
-      color: #ffffff;
-      background: rgba(0, 0, 0, 0.2);
-      border-color: rgba(255, 255, 255, 0.3);
+      color: #735d2d;
+      background: #f8f0dc;
+      border-color: #e8d8ae;
       font-size: 7.5px;
     }
     .stack-range {
       display: block;
       margin-bottom: 4px;
-      color: rgba(255, 255, 255, 0.78);
+      color: #806a37;
       font: 700 8px 'IBM Plex Mono', monospace;
       text-transform: uppercase;
     }
@@ -880,6 +909,9 @@
         <div class="axis-control">
           <label for="primaryAxisSelect">Primary axis</label>
           <select id="primaryAxisSelect" aria-label="Select primary institution"></select>
+        </div>
+        <div class="company-toggle-control" id="companyToggleControl" aria-label="Show or hide company columns">
+          <span>Visible columns</span>
         </div>
         <div class="search-box">
           <span style="color: var(--dim);">🔍</span>
@@ -1676,7 +1708,7 @@
         </div>
         <div class="rule-tile">
           <strong>2. Axis 2: SG Gov ↔ Taiwan Gov (Scope-Based Matching)</strong>
-          <p>Because Taiwan Civil Service operates under statutory salary caps (Rank 14 is legally capped at NT$2.2M ≈ S$95k), parity is determined strictly by <strong>Job Grade & Administrative Scope</strong>: e.g. MX14/13 ≡ 委任/薦任基層; MX11A ≡ 薦任9科長; MX9 ≡ 簡任11副司長; MX8 ≡ 簡任12司長/參事; PermSec ≡ 簡任14頂常務次長; Minister ≡ 內閣政務部長.</p>
+          <p>Because Taiwan Civil Service operates under statutory salary caps (Rank 14 is legally capped at NT$2.2M ≈ S$95k), parity is determined strictly by <strong>Job Grade & Administrative Scope</strong>. The interactive stack preserves one block per grade from 委任4 through 簡任14: e.g. MX11A ≡ 薦任9科長; MX9 ≡ 簡任11副司長; MX8 ≡ 簡任12司長/參事; PermSec ≡ 簡任14常務次長; Minister ≡ 內閣政務部長.</p>
         </div>
         <div class="rule-tile">
           <strong>3. Axis 3: Tech-to-Banking Bridging (ASML ↔ TSMC [+26 Rule & Two-Tier Model] → Banking)</strong>
@@ -1718,6 +1750,7 @@
       const stackChartWrap = document.getElementById('levelStackChartWrap');
       const detailTableWrap = document.getElementById('detailTableWrap');
       const viewButtons = [...document.querySelectorAll('.view-btn')];
+      const companyToggleControl = document.getElementById('companyToggleControl');
       let activeTierFilter = 'all';
       let primaryAxis = graph && graph.default_axis;
 
@@ -1728,6 +1761,7 @@
 
       const institutions = graph.institutions;
       const institutionIds = Object.keys(institutions);
+      const visibleInstitutionIds = new Set(institutionIds);
       const nodeIndex = new Map();
       institutionIds.forEach(institutionId => {
         institutions[institutionId].nodes.forEach(node => {
@@ -1742,6 +1776,28 @@
           .replaceAll('>', '&gt;')
           .replaceAll('"', '&quot;')
           .replaceAll("'", '&#039;');
+      }
+
+      function visibleColumns() {
+        return [primaryAxis, ...institutionIds.filter(id => id !== primaryAxis && visibleInstitutionIds.has(id))];
+      }
+
+      function renderCompanyToggles() {
+        if (!companyToggleControl) return;
+        companyToggleControl.innerHTML = `<span>Visible columns</span>${institutionIds.map(id => {
+          const isPrimary = id === primaryAxis;
+          return `<label class="company-check">
+            <input type="checkbox" value="${escapeHtml(id)}" ${visibleInstitutionIds.has(id) ? 'checked' : ''} ${isPrimary ? 'disabled' : ''}/>
+            ${escapeHtml(institutions[id].short_label)}
+          </label>`;
+        }).join('')}`;
+        companyToggleControl.querySelectorAll('input[type="checkbox"]').forEach(input => {
+          input.addEventListener('change', () => {
+            if (input.checked) visibleInstitutionIds.add(input.value);
+            else visibleInstitutionIds.delete(input.value);
+            renderTable();
+          });
+        });
       }
 
       function directAnchors(nodeRef, targetInstitutionId) {
@@ -1851,13 +1907,9 @@
       function renderStackChart() {
         if (!stackChart) return;
         const primaryNodes = institutions[primaryAxis].nodes;
-        const columnIds = [primaryAxis, ...institutionIds.filter(id => id !== primaryAxis)];
+        const columnIds = visibleColumns();
         const chartHeight = Math.max(1800, primaryNodes.length * 130);
-        const colors = {
-          sg_gov: '#77531d', uob: '#253f77', ocbc: '#a03621', tsmc: '#ad1828',
-          asml: '#126b68', tw_gov: '#5d457f', astar: '#3c568f'
-        };
-        const headers = columnIds.map((id, index) => `<div class="stack-company-head${index === 0 ? ' primary' : ''}" style="--stack-color:${colors[id] || '#555555'}">
+        const headers = columnIds.map((id, index) => `<div class="stack-company-head${index === 0 ? ' primary' : ''}">
           ${index === 0 ? 'Primary · ' : ''}${escapeHtml(institutions[id].label)}
           <small>Entry → Apex · block height = responsibility span</small>
         </div>`);
@@ -1904,7 +1956,7 @@
               ${note ? `<span class="anchor-badge">${escapeHtml(note)}</span>` : ''}
             </article>`;
           }).join('');
-          return `<div class="stack-company-lane${columnIndex === 0 ? ' primary' : ''}" style="--stack-height:${chartHeight}px;--stack-color:${colors[institutionId] || '#555555'}">${cards}</div>`;
+          return `<div class="stack-company-lane${columnIndex === 0 ? ' primary' : ''}" style="--stack-height:${chartHeight}px">${cards}</div>`;
         });
         stackChart.style.setProperty('--company-count', columnIds.length);
         stackChart.innerHTML = [...headers, ...lanes].join('');
@@ -1916,7 +1968,7 @@
       function renderTable() {
         const primaryInstitution = institutions[primaryAxis];
         const primaryNodes = primaryInstitution.nodes;
-        const columnIds = [primaryAxis, ...institutionIds.filter(id => id !== primaryAxis)];
+        const columnIds = visibleColumns();
         const projections = Object.fromEntries(
           columnIds.slice(1).map(id => [id, projectInstitution(id, primaryNodes)])
         );
@@ -1994,6 +2046,8 @@
 
       axisSelect.addEventListener('change', () => {
         primaryAxis = axisSelect.value;
+        visibleInstitutionIds.add(primaryAxis);
+        renderCompanyToggles();
         renderTable();
       });
       viewButtons.forEach(button => {
@@ -2020,6 +2074,7 @@
         stackChart?.querySelectorAll('.selected').forEach(item => item.classList.remove('selected'));
       });
 
+      renderCompanyToggles();
       renderTable();
     })();
   </script>
