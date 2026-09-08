@@ -244,6 +244,104 @@
       background: rgba(9, 23, 18, 0.68);
       box-shadow: var(--shadow);
     }
+    .system-workbench {
+      display: grid;
+      grid-template-columns: 230px minmax(420px, 1fr) 300px;
+      min-height: 650px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(7, 18, 14, 0.84);
+      box-shadow: var(--shadow);
+    }
+    .workbench-panel { min-width: 0; }
+    .function-rail, .dependency-rail { background: rgba(11, 25, 20, 0.92); }
+    .function-rail { border-right: 1px solid var(--line); }
+    .dependency-rail { border-left: 1px solid var(--line); }
+    .panel-head {
+      display: flex;
+      min-height: 67px;
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid var(--line-soft);
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.7rem;
+    }
+    .panel-head strong { font-size: 0.86rem; }
+    .panel-head small { color: var(--muted); font-family: var(--mono); font-size: 0.64rem; text-transform: uppercase; }
+    .function-list { display: grid; gap: 0.38rem; max-height: 580px; padding: 0.75rem; overflow-y: auto; }
+    .function-button {
+      display: grid;
+      grid-template-columns: 27px 1fr;
+      gap: 0.58rem;
+      min-height: 68px;
+      padding: 0.68rem;
+      border: 1px solid transparent;
+      border-radius: 11px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      text-align: left;
+    }
+    .function-button:hover { background: rgba(128, 231, 169, 0.05); color: var(--text); }
+    .function-button[aria-pressed="true"] { border-color: rgba(128, 231, 169, 0.45); background: var(--green-deep); color: var(--text); }
+    .function-index { color: var(--green); font-family: var(--mono); font-size: 0.67rem; }
+    .function-name { display: block; font-size: 0.8rem; font-weight: 720; line-height: 1.25; }
+    .function-state { display: block; margin-top: 0.25rem; color: var(--muted); font-family: var(--mono); font-size: 0.6rem; text-transform: uppercase; }
+    .diagram-pane { display: flex; min-width: 0; background: radial-gradient(circle at 50% 42%, rgba(38, 90, 64, 0.13), transparent 55%); flex-direction: column; }
+    .diagram-title { min-width: 0; }
+    .diagram-title strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .diagram-title small { color: var(--green); }
+    .canvas-controls { display: flex; flex-wrap: wrap; gap: 0.38rem; justify-content: flex-end; }
+    .canvas-controls .scenario-button { min-height: 34px; padding: 0.38rem 0.58rem; font-size: 0.7rem; }
+    .scenario-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid var(--line-soft);
+      align-items: center;
+    }
+    .scenario-strip > span { margin-right: auto; color: var(--muted); font-family: var(--mono); font-size: 0.65rem; text-transform: uppercase; }
+    .scenario-strip .scenario-button { min-height: 34px; padding: 0.38rem 0.58rem; font-size: 0.7rem; }
+    .diagram-wrap { min-height: 430px; padding: 0.7rem; }
+    #system-diagram { display: block; width: 100%; height: auto; min-height: 410px; }
+    .svg-column-label { fill: #779185; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 1.5px; }
+    .svg-box { fill: #10231b; stroke: #355246; stroke-width: 1.3; }
+    .svg-box.process { fill: #173e2a; stroke: #80e7a9; }
+    .svg-box.output { fill: #10251f; stroke: #4f7463; }
+    .svg-box.output.warning { fill: #4a3515; stroke: #f4c66a; }
+    .svg-box.output.alert { fill: #4d2220; stroke: #ff8d83; }
+    .svg-text { fill: #edf7f1; font-family: var(--sans); font-size: 13px; font-weight: 680; }
+    .svg-subtext { fill: #9eb4a9; font-family: var(--mono); font-size: 10px; }
+    .svg-arrow { fill: none; stroke: #527365; stroke-width: 1.5; marker-end: url(#arrowhead); }
+    .svg-pulse { fill: #80e7a9; }
+    .canvas-caption {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
+      margin-top: auto;
+      padding: 1rem;
+      border-top: 1px solid var(--line-soft);
+      background: rgba(5, 15, 11, 0.7);
+      align-items: center;
+    }
+    .canvas-caption h3 { margin-bottom: 0.25rem; font-size: 0.92rem; }
+    .canvas-caption p { max-width: 680px; margin-bottom: 0; color: var(--muted); font-size: 0.8rem; }
+    .dependency-tree { max-height: 580px; padding: 0.9rem 0.8rem 1.2rem; overflow: auto; }
+    .tree, .tree ul { margin: 0; padding: 0; list-style: none; }
+    .tree ul { position: relative; margin-left: 0.7rem; padding-left: 0.88rem; }
+    .tree ul::before { position: absolute; top: 0; bottom: 0.75rem; left: 0; width: 1px; background: #2f4c3f; content: ""; }
+    .tree li { position: relative; padding: 0.18rem 0; }
+    .tree ul > li::before { position: absolute; top: 0.82rem; left: -0.88rem; width: 0.7rem; height: 1px; background: #2f4c3f; content: ""; }
+    .tree-node { display: flex; gap: 0.42rem; min-width: 0; padding: 0.28rem 0.34rem; border-radius: 6px; align-items: flex-start; }
+    .tree-node:hover { background: rgba(128, 231, 169, 0.06); }
+    .tree-icon { width: 16px; flex: 0 0 16px; color: var(--amber); font-family: var(--mono); font-size: 0.66rem; }
+    .tree-file .tree-icon { color: var(--blue); }
+    .tree-label { min-width: 0; color: #c8d8d0; font-family: var(--mono); font-size: 0.68rem; overflow-wrap: anywhere; }
+    .tree-role { display: block; margin-top: 0.12rem; color: #6f887c; font-family: var(--sans); font-size: 0.65rem; }
+    .tree a { color: inherit; text-decoration: none; }
+    .tree a:hover .tree-label { color: var(--green); }
     .scenario-bar {
       display: flex;
       flex-wrap: wrap;
@@ -540,6 +638,9 @@
     footer strong { color: var(--text); }
 
     @media (max-width: 980px) {
+      .system-workbench { grid-template-columns: 190px minmax(400px, 1fr); }
+      .dependency-rail { grid-column: 1 / -1; border-top: 1px solid var(--line); border-left: 0; }
+      .dependency-tree { max-height: none; }
       .pipeline { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       .node:not(:last-child)::after { display: none; }
       .rr-grid { grid-template-columns: 1fr; }
@@ -548,6 +649,13 @@
     }
 
     @media (max-width: 760px) {
+      .system-workbench { grid-template-columns: 1fr; }
+      .function-rail { border-right: 0; border-bottom: 1px solid var(--line); }
+      .function-list { grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: none; }
+      .diagram-pane, .dependency-rail { grid-column: 1; }
+      .dependency-rail { border-left: 0; }
+      .diagram-wrap { min-height: 360px; overflow-x: auto; }
+      #system-diagram { min-width: 650px; min-height: 350px; }
       nav { display: none; }
       .hero, .section-head, .trace-panel, .maintenance, .coverage-panel { grid-template-columns: 1fr; }
       .hero { min-height: auto; padding: 4rem 0 3rem; }
@@ -560,6 +668,8 @@
     }
 
     @media (max-width: 440px) {
+      .function-list { grid-template-columns: 1fr; }
+      .canvas-caption { grid-template-columns: 1fr; }
       .pipeline { grid-template-columns: 1fr; }
       .chain-grid { grid-template-columns: 1fr; }
       .node { min-height: 118px; }
@@ -651,32 +761,51 @@
         <span class="badge target">Contracted / target</span>
       </div>
 
-      <div class="pipeline-shell">
-        <div class="scenario-bar" aria-label="Operating condition">
-          <span>Trace condition</span>
-          <button class="scenario-button" id="reset" type="button" data-scenario="normal" aria-pressed="true">Fresh data / reset</button>
-          <button class="scenario-button" id="failure" type="button" data-scenario="stale" aria-pressed="false">Stale data</button>
-          <button class="scenario-button" type="button" data-scenario="drawdown" aria-pressed="false">12% drawdown</button>
-          <button class="scenario-button" type="button" data-scenario="broker" aria-pressed="false">Broker risk call</button>
-          <button class="scenario-button" id="next" type="button">Next stage →</button>
-          <button class="scenario-button" id="play" type="button" aria-pressed="false">Auto trace</button>
-        </div>
+      <div class="system-workbench">
+        <aside class="workbench-panel function-rail" aria-label="System functions">
+          <div class="panel-head"><strong>Functions</strong><small id="function-count">8 modules</small></div>
+          <div class="function-list" id="function-list"></div>
+        </aside>
 
-        <div class="pipeline" id="pipeline" aria-label="Ordered system stages"></div>
-
-        <div class="trace-panel" id="status" aria-live="polite">
-          <article class="trace-copy">
-            <h3 id="detail-title">Broker runtime</h3>
-            <p id="detail-copy">Retrieves account, positions, orders, fills, and quotes, then normalizes them into shared contracts. It does not give advice or place live orders.</p>
-          </article>
-          <article class="gate-result">
-            <div>
-              <h3>Permitted output</h3>
-              <p id="gate-copy">A reviewable recommendation packet may be produced. Execution remains a separate, explicitly authorized phase.</p>
+        <section class="workbench-panel diagram-pane" aria-labelledby="selected-function">
+          <div class="panel-head">
+            <div class="diagram-title"><strong id="selected-function">Evaluation gate</strong><small id="selected-state">current core</small></div>
+            <div class="canvas-controls" aria-label="Canvas controls">
+              <button class="scenario-button" id="reset" type="button" data-scenario="normal" aria-pressed="true">Reset</button>
+              <button class="scenario-button" id="next" type="button">Next →</button>
+              <button class="scenario-button" id="play" type="button" aria-pressed="false">Auto trace</button>
             </div>
-            <span class="gate-pill" id="gate-pill">NORMAL</span>
-          </article>
-        </div>
+          </div>
+
+          <div class="scenario-strip" aria-label="Operating condition">
+            <span>Guardrail overlay</span>
+            <button class="scenario-button" type="button" data-scenario="normal" aria-pressed="true">Fresh data</button>
+            <button class="scenario-button" id="failure" type="button" data-scenario="stale" aria-pressed="false">Stale data</button>
+            <button class="scenario-button" type="button" data-scenario="drawdown" aria-pressed="false">12% drawdown</button>
+            <button class="scenario-button" type="button" data-scenario="broker" aria-pressed="false">Broker risk call</button>
+          </div>
+
+          <div class="diagram-wrap">
+            <svg id="system-diagram" viewBox="0 0 760 430" role="img" aria-labelledby="diagram-svg-title diagram-svg-desc">
+              <title id="diagram-svg-title">Selected function data and control flow</title>
+              <desc id="diagram-svg-desc">Inputs enter the selected function, pass through ordered processing steps, and produce bounded outputs.</desc>
+              <defs>
+                <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#527365"></path></marker>
+              </defs>
+              <g id="diagram-content"></g>
+            </svg>
+          </div>
+
+          <div class="canvas-caption" id="status" aria-live="polite">
+            <div><h3 id="detail-title">Evaluation gate</h3><p id="detail-copy">Scores prior recommendations before new directional advice.</p></div>
+            <div><span class="gate-pill" id="gate-pill">NORMAL</span><p id="gate-copy" style="margin-top: 0.4rem; max-width: 230px;">Review may proceed; execution remains separate.</p></div>
+          </div>
+        </section>
+
+        <aside class="workbench-panel dependency-rail" aria-label="Related repository hierarchy">
+          <div class="panel-head"><strong>Related files</strong><small id="dependency-count">3 paths</small></div>
+          <div class="dependency-tree" id="dependency-tree"></div>
+        </aside>
       </div>
     </section>
 
@@ -841,17 +970,132 @@
 
   <script>
     const stages = [
-      { id: "contracts", label: "Contracts & knowledge", short: "schemas + policy", status: "available", detail: "Shared schemas, policy, and historical context define the evidence boundary used by native modules and LLM-facing skill contracts." },
-      { id: "evaluation", label: "Evaluation gate", short: "quality history", status: "current", detail: "The current review path scores prior recommendations first. Failures or malformed records can restrict directional advice or require human review." },
-      { id: "broker", label: "Broker runtime", short: "account + market", status: "current", detail: "The current review path retrieves account, positions, and open orders. The adapter also exposes fills and quotes, but never advice or live order submission." },
-      { id: "account", label: "Snapshot + account risk", short: "portfolio gate", status: "current", detail: "The current review path saves an account snapshot, then evaluates trend, drawdown, concentration, cash, margin, and broker risk status." },
-      { id: "lessons", label: "Lesson replay", short: "misses + drift", status: "current", detail: "The current review path matches saved lessons against positions, calculates risk signals, and contributes a reduction hint to the final gate." },
-      { id: "positions", label: "Position operations", short: "grouped exposure", status: "current", detail: "The current review path groups stock and option legs into operations so advice addresses the whole position rather than isolated contracts." },
-      { id: "options", label: "Option risk", short: "greeks + spread", status: "target", detail: "The contract requires DTE, Greeks, liquidity, assignment, IV, and whole-spread economics. Full option-risk reporting is not currently called by build_review()." },
-      { id: "market", label: "Market context", short: "regime + levels", status: "available", detail: "FVG, technical, regime, and scanner implementations exist as independent paths, but the current native review does not call them." },
-      { id: "playbooks", label: "Playbook research", short: "strategy evidence", status: "available", detail: "Playbook and backtesting packages exist for research and validation. A playbook must carry reproducible out-of-sample evidence before forward use." },
-      { id: "optimizer", label: "Portfolio optimizer", short: "size + conflicts", status: "target", detail: "A partial account-play optimizer exists outside the native review. Portfolio optimization remains a contracted integration rather than a build_review() stage." },
-      { id: "output", label: "Review packet", short: "review only", status: "current", detail: "The current path returns account evidence, evaluation and lesson reports, orders, grouped operations, urgent items, and a final gate. It does not append an order or authorize execution." }
+      {
+        id: "evaluation",
+        label: "Evaluation gate",
+        status: "current",
+        detail: "Scores prior recommendations before new directional advice. Failures and malformed records tighten the permitted decision state.",
+        inputs: ["Recommendation events", "Outcome price bars"],
+        steps: ["Load + validate ledger", "Score direction + geometry", "Derive evaluation gate"],
+        outputs: ["Scored events", "Failure evidence", "Gate state"],
+        deps: [
+          { path: "src/billionary_trader/evaluation.py", role: "deterministic scoring" },
+          { path: "src/billionary_trader/recommendations.py", role: "event contract + ledger" },
+          { path: "skillset/optimization/evaluation-gate/skill.md", role: "LLM-facing contract" },
+          { path: "log/evaluation_gate/latest.json", role: "observable output" },
+          { path: "log/recommendations/recommendation_events.jsonl", role: "input ledger" }
+        ]
+      },
+      {
+        id: "broker",
+        label: "Broker runtime",
+        status: "current",
+        detail: "Collects broker and market state and normalizes it into shared records. Collection is read-only; this module does not advise or submit orders.",
+        inputs: ["Host + port", "Reporting currency", "Requested symbols"],
+        steps: ["Connect to OpenD / Futu", "Query broker contexts", "Normalize shared records"],
+        outputs: ["AccountSnapshot", "PositionRow[]", "Orders / fills / quotes"],
+        deps: [
+          { path: "src/billionary_trader/broker.py", role: "native adapter" },
+          { path: "src/billionary_trader/common.py", role: "normalization helpers" },
+          { path: "skillset/external_service/moomoo/skill.md", role: "adapter boundary" },
+          { path: "skillset/external_service/moomoo/scripts/broker_cli.py", role: "command entry point" },
+          { path: "skillset/contracts/data_schemas.md", role: "shared schemas" }
+        ]
+      },
+      {
+        id: "account",
+        label: "Account risk",
+        status: "current",
+        detail: "Evaluates the portfolio before any position opinion. Comparable-currency history, drawdown, concentration, cash, and margin determine the directive.",
+        inputs: ["Current account", "PositionRow[]", "Prior snapshots", "Manual override"],
+        steps: ["Align comparable history", "Measure trend + drawdown", "Check concentration + margin", "Raise directive"],
+        outputs: ["Account report", "Risk flags", "Final directive input"],
+        deps: [
+          { path: "src/billionary_trader/account_risk.py", role: "risk engine" },
+          { path: "src/billionary_trader/common.py", role: "snapshot path + I/O" },
+          { path: "skillset/risk_management/account-risk/skill.md", role: "threshold contract" },
+          { path: "skillset/risk_management/account-risk/scripts/account_risk.py", role: "command entry point" },
+          { path: "data/account/account_snapshots.jsonl", role: "historical evidence" }
+        ]
+      },
+      {
+        id: "lessons",
+        label: "Lesson replay",
+        status: "current",
+        detail: "Matches stored lessons against live positions and technical context, then returns risk signals and a gate hint before advice is formed.",
+        inputs: ["Saved lessons", "Current positions", "Technical context"],
+        steps: ["Match ticker + exposure", "Apply lesson checks", "Score repeated risk"],
+        outputs: ["Matched lessons", "Action bias", "Gate hint"],
+        deps: [
+          { path: "src/billionary_trader/lessons.py", role: "native replay logic" },
+          { path: "skillset/optimization/lesson-replay/skill.md", role: "lesson contract" },
+          { path: "skillset/optimization/lesson-replay/scripts/lesson_replay.py", role: "command entry point" },
+          { path: "data/lessons/trading_misses.json", role: "lesson source" },
+          { path: "data/lesson_replays/latest.json", role: "latest replay output" }
+        ]
+      },
+      {
+        id: "positions",
+        label: "Position operations",
+        status: "current",
+        detail: "Groups stock and option legs by underlying and strategy so risk is assessed at the operation level instead of contract by contract.",
+        inputs: ["Normalized positions", "Option metadata"],
+        steps: ["Group by underlying", "Pair strategy legs", "Classify urgency"],
+        outputs: ["Operation[]", "Spread identity", "Urgent operations"],
+        deps: [
+          { path: "src/billionary_trader/positions.py", role: "grouping implementation" },
+          { path: "skillset/risk_management/position-operations/skill.md", role: "operation contract" },
+          { path: "skillset/risk_management/position-operations/scripts/position_operations.py", role: "command entry point" },
+          { path: "skillset/contracts/data_schemas.md", role: "Operation schema" }
+        ]
+      },
+      {
+        id: "options",
+        label: "Option risk",
+        status: "target",
+        detail: "Defines whole-spread checks for DTE, Greeks, liquidity, assignment, IV, and event payoff. The full report is contracted but not called by build_review().",
+        inputs: ["Operation[]", "Option chain", "Greeks + IV", "Account directive"],
+        steps: ["Price whole operation", "Check time + assignment", "Test event scenarios"],
+        outputs: ["Risk score", "Action bias", "Evidence gaps"],
+        deps: [
+          { path: "skillset/risk_management/option-risk/skill.md", role: "target contract" },
+          { path: "src/billionary_trader/positions.py", role: "implemented grouping" },
+          { path: "src/billionary_trader/calendar_spread.py", role: "calendar analysis" },
+          { path: "skillset/playbook/calendar-spread-setups/skill.md", role: "entry setup contract" }
+        ]
+      },
+      {
+        id: "research",
+        label: "Research + playbooks",
+        status: "available",
+        detail: "Independent market-data, backtesting, regime, scanner, and playbook packages produce reproducible research. They are not all wired into native account review.",
+        inputs: ["Market history", "Playbook rules", "Run configuration"],
+        steps: ["Validate data quality", "Simulate execution", "Walk-forward evaluate", "Promote or reject"],
+        outputs: ["Metrics + trades", "Validation evidence", "Qualified signals"],
+        deps: [
+          { path: "src/market_data/quality.py", role: "data-quality checks" },
+          { path: "src/backtesting/engine.py", role: "simulation engine" },
+          { path: "src/evaluation/walk_forward.py", role: "out-of-sample validation" },
+          { path: "src/playbook/registry.py", role: "playbook registry" },
+          { path: "skillset/playbook/top-trader-playbooks/skill.md", role: "playbook contract" },
+          { path: "data/backtests/tqqq_dca_20190101_20221231_20260702_231147/summary.json", role: "representative research artifact" }
+        ]
+      },
+      {
+        id: "review",
+        label: "Review orchestrator",
+        status: "current",
+        detail: "Coordinates the implemented review path, raises the strictest gate, and returns a decision packet. It never crosses into broker execution.",
+        inputs: ["Evaluation report", "Broker state", "Account + lesson gates", "Grouped operations"],
+        steps: ["Call native modules", "Raise strictest gate", "Assemble review packet"],
+        outputs: ["Final gate", "Urgent checklist", "Review-only packet"],
+        deps: [
+          { path: "src/billionary_trader/review.py", role: "top-level runtime" },
+          { path: "skillset/review-orchestrator/skill.md", role: "broader pipeline contract" },
+          { path: "skillset/review-orchestrator/scripts/review_cli.py", role: "command entry point" },
+          { path: "src/billionary_trader/engine_contracts.py", role: "shared output contract" }
+        ]
+      }
     ];
 
     const scenarios = {
@@ -859,29 +1103,25 @@
         gate: "NORMAL",
         className: "",
         copy: "A reviewable recommendation packet may be produced. Execution remains a separate, explicitly authorized phase.",
-        activeThrough: 10,
-        emphasis: null
+        diagramClass: ""
       },
       stale: {
         gate: "WAIT / UNCONFIRMED",
         className: "alert",
         copy: "Required evidence is stale. The affected recommendation path stops until fresh broker, quote, or option-chain data is available.",
-        activeThrough: 2,
-        emphasis: 2
+        diagramClass: "alert"
       },
       drawdown: {
         gate: "REDUCE_RISK_BIAS",
         className: "warn",
         copy: "A 12% drawdown crosses the −10% threshold. Advice must prioritize risk reduction and include explicit invalidation levels.",
-        activeThrough: 10,
-        emphasis: 3
+        diagramClass: "warning"
       },
       broker: {
         gate: "DEFENSIVE_ONLY",
         className: "alert",
         copy: "A broker call, liquidation, or deficit state forces portfolio defense. No new long or directional exposure is permitted without explicit hedging and review.",
-        activeThrough: 10,
-        emphasis: 3
+        diagramClass: "alert"
       }
     };
 
@@ -933,49 +1173,134 @@
       }
     };
 
-    const pipeline = document.querySelector("#pipeline");
+    const functionList = document.querySelector("#function-list");
+    const diagramContent = document.querySelector("#diagram-content");
+    const dependencyTree = document.querySelector("#dependency-tree");
     const detailTitle = document.querySelector("#detail-title");
     const detailCopy = document.querySelector("#detail-copy");
     const gatePill = document.querySelector("#gate-pill");
     const gateCopy = document.querySelector("#gate-copy");
+    const selectedFunction = document.querySelector("#selected-function");
+    const selectedState = document.querySelector("#selected-state");
 
     stages.forEach((stage, index) => {
       const button = document.createElement("button");
       button.type = "button";
-      button.className = `node status-${stage.status}`;
+      button.className = "function-button";
       button.dataset.index = String(index);
       const statusLabel = stage.status === "current" ? "current core" : stage.status === "available" ? "available" : "contracted";
-      button.innerHTML = `<span class="node-num">${String(index + 1).padStart(2, "0")}</span><strong>${stage.label}</strong><span class="mini-status">${statusLabel}</span><small>${stage.short}</small>`;
+      button.setAttribute("aria-pressed", String(index === 0));
+      button.innerHTML = `<span class="function-index">${String(index + 1).padStart(2, "0")}</span><span><span class="function-name">${stage.label}</span><span class="function-state">${statusLabel}</span></span>`;
       button.addEventListener("click", () => showStage(index));
-      pipeline.appendChild(button);
+      functionList.appendChild(button);
     });
 
-    let currentStage = 2;
+    let currentStage = 0;
+    let currentScenario = "normal";
     let traceTimer = null;
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[character]));
+    }
+
+    function svgLines(label, x, y, maxChars = 22) {
+      const words = label.split(" ");
+      const lines = [];
+      words.forEach((word) => {
+        const last = lines[lines.length - 1];
+        if (!last || `${last} ${word}`.length > maxChars) lines.push(word);
+        else lines[lines.length - 1] = `${last} ${word}`;
+      });
+      return lines.slice(0, 2).map((line, index) => `<tspan x="${x}" y="${y + index * 15}">${escapeHtml(line)}</tspan>`).join("");
+    }
+
+    function renderDiagram(stage) {
+      const scenario = scenarios[currentScenario];
+      const columns = [
+        { title: "INPUTS", items: stage.inputs, x: 24, kind: "" },
+        { title: "FUNCTION", items: stage.steps, x: 286, kind: "process" },
+        { title: "OUTPUTS", items: stage.outputs, x: 548, kind: `output ${scenario.diagramClass}`.trim() }
+      ];
+      const boxWidth = 188;
+      const availableHeight = 255;
+      const top = 68;
+      const boxes = [];
+      columns.forEach((column) => {
+        boxes.push(`<text class="svg-column-label" x="${column.x}" y="30">${column.title}</text>`);
+        const gap = Math.min(18, Math.max(8, (availableHeight - column.items.length * 52) / Math.max(1, column.items.length - 1)));
+        column.items.forEach((item, index) => {
+          const y = top + index * (52 + gap);
+          boxes.push(`<rect class="svg-box ${column.kind}" x="${column.x}" y="${y}" width="${boxWidth}" height="52" rx="10"></rect>`);
+          boxes.push(`<text class="svg-text" text-anchor="middle">${svgLines(item, column.x + boxWidth / 2, y + 24)}</text>`);
+        });
+      });
+      const functionCenterY = top + ((stage.steps.length - 1) * 65) / 2 + 26;
+      stage.inputs.forEach((_, index) => {
+        const y = top + index * (52 + Math.min(18, Math.max(8, (availableHeight - stage.inputs.length * 52) / Math.max(1, stage.inputs.length - 1)))) + 26;
+        boxes.push(`<path class="svg-arrow" d="M212 ${y} C248 ${y}, 250 ${functionCenterY}, 286 ${functionCenterY}"></path>`);
+      });
+      stage.outputs.forEach((_, index) => {
+        const y = top + index * (52 + Math.min(18, Math.max(8, (availableHeight - stage.outputs.length * 52) / Math.max(1, stage.outputs.length - 1)))) + 26;
+        boxes.push(`<path class="svg-arrow" d="M474 ${functionCenterY} C512 ${functionCenterY}, 510 ${y}, 548 ${y}"></path>`);
+      });
+      const gateClass = scenario.diagramClass ? `output ${scenario.diagramClass}` : "output";
+      boxes.push(`<rect class="svg-box ${gateClass}" x="286" y="370" width="188" height="38" rx="19"></rect>`);
+      boxes.push(`<circle class="svg-pulse" cx="306" cy="389" r="4"></circle>`);
+      boxes.push(`<text class="svg-subtext" x="319" y="393">GUARDRAIL: ${escapeHtml(scenario.gate)}</text>`);
+      diagramContent.innerHTML = boxes.join("");
+      document.querySelector("#diagram-svg-title").textContent = `${stage.label} data and control flow`;
+      document.querySelector("#diagram-svg-desc").textContent = `${stage.inputs.join(", ")} enter ${stage.label}, pass through ${stage.steps.join(", ")}, and produce ${stage.outputs.join(", ")}.`;
+    }
+
+    function buildDependencyTree(dependencies) {
+      const root = {};
+      dependencies.forEach((dependency) => {
+        let branch = root;
+        dependency.path.split("/").forEach((part, index, parts) => {
+          branch[part] = branch[part] || { children: {} };
+          if (index === parts.length - 1) {
+            branch[part].role = dependency.role;
+            branch[part].path = dependency.path;
+          }
+          branch = branch[part].children;
+        });
+      });
+      return root;
+    }
+
+    function renderTreeBranch(branch) {
+      return `<ul class="tree">${Object.entries(branch).map(([name, node]) => {
+        const isFile = Boolean(node.path);
+        const content = `<span class="tree-node ${isFile ? "tree-file" : "tree-folder"}"><span class="tree-icon">${isFile ? "·" : "+"}</span><span class="tree-label">${escapeHtml(name)}${node.role ? `<span class="tree-role">${escapeHtml(node.role)}</span>` : ""}</span></span>`;
+        return `<li>${isFile ? `<a href="../${node.path}">${content}</a>` : content}${Object.keys(node.children).length ? renderTreeBranch(node.children) : ""}</li>`;
+      }).join("")}</ul>`;
+    }
 
     function showStage(index) {
       const stage = stages[index];
       currentStage = index;
-      document.querySelectorAll(".node").forEach((node, nodeIndex) => node.classList.toggle("active", nodeIndex === index));
+      document.querySelectorAll(".function-button").forEach((button, buttonIndex) => button.setAttribute("aria-pressed", String(buttonIndex === index)));
+      const statusLabel = stage.status === "current" ? "current core" : stage.status === "available" ? "available outside review" : "contracted / target";
+      selectedFunction.textContent = stage.label;
+      selectedState.textContent = statusLabel;
       detailTitle.textContent = stage.label;
       detailCopy.textContent = stage.detail;
+      dependencyTree.innerHTML = renderTreeBranch(buildDependencyTree(stage.deps));
+      document.querySelector("#dependency-count").textContent = `${stage.deps.length} related paths`;
+      renderDiagram(stage);
     }
 
     function setScenario(name) {
       stopTrace();
       const scenario = scenarios[name];
+      currentScenario = name;
       document.querySelectorAll(".scenario-button").forEach((button) => {
-        button.setAttribute("aria-pressed", String(button.dataset.scenario === name));
-      });
-      document.querySelectorAll(".node").forEach((node, index) => {
-        node.classList.remove("blocked", "alert", "warn");
-        if (index > scenario.activeThrough) node.classList.add("blocked");
-        if (index === scenario.emphasis) node.classList.add(scenario.className);
+        if (button.dataset.scenario) button.setAttribute("aria-pressed", String(button.dataset.scenario === name));
       });
       gatePill.textContent = scenario.gate;
       gatePill.className = `gate-pill ${scenario.className}`.trim();
       gateCopy.textContent = scenario.copy;
-      showStage(scenario.emphasis ?? 2);
+      renderDiagram(stages[currentStage]);
     }
 
     function stopTrace() {
@@ -1026,7 +1351,7 @@
       stopTrace();
       const nextStage = (currentStage + 1) % stages.length;
       showStage(nextStage);
-      document.querySelectorAll(".node")[nextStage].focus();
+      document.querySelectorAll(".function-button")[nextStage].focus();
     });
 
     document.querySelector("#play").addEventListener("click", () => {
@@ -1055,6 +1380,7 @@
       chainControls.appendChild(button);
     });
 
+    showStage(0);
     setScenario("normal");
     renderChain("review");
   </script>
