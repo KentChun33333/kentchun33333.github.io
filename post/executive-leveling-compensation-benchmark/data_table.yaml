@@ -53,10 +53,10 @@ institutions:
       - {id: am, grade: "Assistant Manager", title: "AM", compensation: "S$48–66k", detail: "Distinct rank below Manager", tier: junior, level: 14}
       - {id: manager, grade: "Manager", title: "Manager", compensation: "S$60–96k", detail: "Broad professional Manager band", tier: junior, level: 21}
       - {id: avp, grade: "AVP", title: "Assistant Vice President", compensation: "S$94–143k", detail: "Senior IC through people/project lead", tier: middle, level: 36}
-      - {id: vp, grade: "VP", title: "Vice President", compensation: "S$154–237k", detail: "Senior professional / functional leader", tier: middle, level: 51}
-      - {id: ed, grade: "ED", title: "Executive Director", compensation: "S$260–380k est.", detail: "Senior organizational leadership", tier: superscale, level: 65}
-      - {id: md, grade: "MD", title: "Managing Director", compensation: "S$350–700k+ est.", detail: "Division / business-line executive", tier: superscale, level: 77}
-      - {id: md1, grade: "MD1", title: "Cluster Head", compensation: "S$650k–1.2M+ est.", detail: "Above MD; distinct from GMD", tier: superscale, level: 85}
+      - {id: vp, grade: "VP", title: "Vice President", compensation: "S$154–237k", detail: "Covers UOB VP2–FVP and TSMC G34–35", tier: middle, level: 47}
+      - {id: ed, grade: "ED", title: "Executive Director", compensation: "S$260–380k est.", detail: "Covers TSMC G36–37", tier: superscale, level: 63}
+      - {id: md, grade: "MD", title: "Managing Director", compensation: "S$350–700k+ est.", detail: "Maps to UOB ED and TSMC G38", tier: superscale, level: 72}
+      - {id: md1, grade: "MD1", title: "Cluster Head", compensation: "S$650k–1.2M+ est.", detail: "Maps to UOB MD and TSMC G39–40; distinct from GMD", tier: superscale, level: 80}
       - {id: gmd, grade: "GMD", title: "Group Managing Director", compensation: "S$850k–3.5M+ est.", detail: "Group ExCo / key BU leadership", tier: superscale, level: 91}
       - {id: group_ceo, grade: "Group CEO", title: "Group Chief Executive", compensation: "S$10M–14M+ TC", detail: "Enterprise apex", tier: political, level: 100}
 
@@ -146,17 +146,29 @@ anchors:
   - {from: "tsmc.g31", to: "ocbc.manager", relation: segment, weight: 0.9, note: "OCBC Manager covers G31–32"}
   - {from: "tsmc.g32", to: "ocbc.manager", relation: segment, weight: 0.9, note: "Upper Manager segment"}
   - {from: "tsmc.g32", to: "uob.avp1", relation: lower_edge, weight: 0.7, note: "Lower AVP edge"}
-  - {from: "tsmc.g33", to: "ocbc.avp", relation: equivalent, weight: 1.0, note: "OCBC AVP center"}
+  - {from: "tsmc.g33", to: "ocbc.avp", relation: equivalent, weight: 1.0, note: "OCBC AVP responsibility anchor"}
   - {from: "tsmc.g33", to: "uob.avp2", relation: segment, weight: 0.8, note: "Upper AVP segment"}
   - {from: "tsmc.g33", to: "uob.vp1", relation: segment, weight: 0.9, note: "VP1 anchor"}
-  - {from: "tsmc.g34", to: "ocbc.avp", relation: upper_edge, weight: 0.9, note: "People-leading AVP edge"}
+  - {from: "uob.avp2", to: "ocbc.avp", relation: lower_edge, weight: 1.0, note: "OCBC AVP begins around UOB AVP2"}
+  - {from: "uob.vp1", to: "ocbc.avp", relation: upper_edge, weight: 1.0, note: "OCBC AVP extends through UOB VP1"}
   - {from: "tsmc.g34", to: "uob.vp2", relation: equivalent, weight: 1.0, note: "VP2 leadership transition"}
+  - {from: "tsmc.g34", to: "ocbc.vp", relation: lower_edge, weight: 1.0, note: "OCBC VP begins at G34"}
   - {from: "tsmc.g35", to: "ocbc.vp", relation: equivalent, weight: 1.0, note: "OCBC VP center"}
   - {from: "tsmc.g35", to: "uob.fvp", relation: equivalent, weight: 1.0, note: "UOB FVP center"}
+  - {from: "uob.vp2", to: "ocbc.vp", relation: lower_edge, weight: 1.0, note: "OCBC VP begins around UOB VP2"}
+  - {from: "uob.fvp", to: "ocbc.vp", relation: upper_edge, weight: 1.0, note: "OCBC VP extends through UOB FVP"}
   - {from: "tsmc.g36", to: "ocbc.ed", relation: lower_edge, weight: 0.8, note: "OCBC ED lower edge"}
+  - {from: "tsmc.g37", to: "ocbc.ed", relation: upper_edge, weight: 0.8, note: "OCBC ED upper edge"}
   - {from: "tsmc.g36", to: "uob.svp", relation: equivalent, weight: 1.0, note: "UOB SVP anchor"}
-  - {from: "tsmc.g38", to: "ocbc.md", relation: lower_edge, weight: 0.8, note: "OCBC MD entry"}
-  - {from: "tsmc.g40", to: "ocbc.md1", relation: segment, weight: 0.8, note: "OCBC MD1 segment"}
+  - {from: "tsmc.g37", to: "uob.svp", relation: upper_edge, weight: 0.8, note: "UOB SVP / OCBC ED upper segment"}
+  - {from: "tsmc.g38", to: "ocbc.md", relation: equivalent, weight: 1.0, note: "OCBC MD responsibility anchor"}
+  - {from: "tsmc.g38", to: "uob.ed", relation: equivalent, weight: 1.0, note: "UOB ED responsibility anchor"}
+  - {from: "uob.ed", to: "ocbc.md", relation: equivalent, weight: 1.0, note: "OCBC MD maps to UOB ED"}
+  - {from: "tsmc.g39", to: "ocbc.md1", relation: lower_edge, weight: 1.0, note: "OCBC MD1 begins at G39"}
+  - {from: "tsmc.g40", to: "ocbc.md1", relation: upper_edge, weight: 1.0, note: "OCBC MD1 extends through G40"}
+  - {from: "tsmc.g39", to: "uob.md", relation: lower_edge, weight: 1.0, note: "UOB MD begins around G39"}
+  - {from: "tsmc.g40", to: "uob.md", relation: upper_edge, weight: 1.0, note: "UOB MD extends through G40"}
+  - {from: "uob.md", to: "ocbc.md1", relation: equivalent, weight: 1.0, note: "OCBC MD1 maps to UOB MD"}
   - {from: "tsmc.g50", to: "ocbc.gmd", relation: equivalent, weight: 0.9, note: "Enterprise executive anchor"}
   - {from: "tsmc.g31", to: "asml.jg5", relation: entry_context, weight: 0.8, note: "Graduate entry context"}
   - {from: "tsmc.g32", to: "asml.jg6", relation: equivalent, weight: 1.0, note: "+26 responsibility anchor"}

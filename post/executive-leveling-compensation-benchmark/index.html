@@ -467,6 +467,16 @@
       border-top: 1px dashed #d8cfbd;
       padding-top: 7px;
     }
+    .continuation-node {
+      padding: 5px 6px;
+      border-left: 2px solid var(--gold);
+      background: #fffbf2;
+      border-radius: 0 4px 4px 0;
+    }
+    .continuation-node .cell-title {
+      color: #735d2d;
+      font-size: 10.5px;
+    }
     .anchor-badge {
       display: inline-block;
       margin-top: 4px;
@@ -1064,7 +1074,7 @@
               <td>
                 <span class="cell-title">VP (Vice President)</span>
                 <span class="cell-salary">S$154k–$237k</span>
-                <span class="cell-detail">TSMC G35/36 = OCBC VP -> UOB FVP</span>
+                <span class="cell-detail">TSMC G34–35 = OCBC VP ↔ UOB VP2–FVP</span>
               </td>
               <td>
                 <span class="cell-title">Grade 35 經理</span>
@@ -1150,7 +1160,7 @@
               <td>
                 <span class="cell-title">ED (Executive Director)</span>
                 <span class="cell-salary">S$260k–$380k</span>
-                <span class="cell-detail">TSMC G37/38 = OCBC ED -> UOB SVP</span>
+                <span class="cell-detail">TSMC G36–37 = OCBC ED ↔ UOB SVP segment</span>
               </td>
               <td>
                 <span class="cell-title">Grade 36/37 部經理/副處長</span>
@@ -1236,7 +1246,7 @@
               <td>
                 <span class="cell-title">MD (Managing Director)</span>
                 <span class="cell-salary">S$450k–$700k+</span>
-                <span class="cell-detail">TSMC G39/40 = OCBC MD -> UOB ED</span>
+                <span class="cell-detail">TSMC G38 = OCBC MD ↔ UOB ED</span>
               </td>
               <td>
                 <span class="cell-title">Grade 38–40 處長/資深處長</span>
@@ -1534,12 +1544,13 @@
             - <strong>TSMC DL / Operator</strong> = OCBC Officer ↔ UOB Officer / Analyst<br/>
             - <strong>TSMC Grade 30–31</strong> = OCBC Assistant Manager (AM) ↔ UOB Assistant Manager (AM)<br/>
             - <strong>TSMC G31–32</strong> = OCBC Manager ↔ UOB Manager<br/>
-            - <strong>TSMC G32–34</strong> = OCBC AVP (G33 center; G34 people-manager edge) ↔ UOB [AVP1 → AVP2 → VP1 → VP2]<br/>
-            - <strong>TSMC G35/36</strong> = OCBC VP → UOB FVP<br/>
-            - <strong>TSMC G37/38</strong> = OCBC ED → UOB SVP<br/>
-            - <strong>TSMC G39/40</strong> = OCBC MD → UOB ED<br/>
-            - <strong>TSMC 40+ (VP, SVP, COO, CTO)</strong> = OCBC GMD (COO, CTO) → UOB MD (Senior MD, COO, CTO)<br/>
-          • <strong>AVP Leadership & Scope:</strong> AVP spans from senior IC / PMO to people leader. A <a href="https://uobgroup.wd3.myworkdayjobs.com/en-US/UOBExternal/job/AVP--Project-Management-Office--Innovation-Group_JR77354" target="_blank" rel="noopener">UOB AVP PMO role</a> may consider entry/fresh graduates, while an <a href="https://ocbc.wd102.myworkdayjobs.com/en-US/External/job/Assistant-Vice-President--Group-Payment-Operations--Payments-Transformation--One-Operations---Workflow---User-Experience-_JR00010538" target="_blank" rel="noopener">OCBC AVP transformation role</a> explicitly leads change delivery, matching TSMC G32–34.<br/>
+            - <strong>TSMC G33</strong> = OCBC AVP ↔ UOB [AVP2 → VP1]<br/>
+            - <strong>TSMC G34–35</strong> = OCBC VP ↔ UOB [VP2 → FVP]<br/>
+            - <strong>TSMC G36–37</strong> = OCBC ED ↔ UOB SVP segment<br/>
+            - <strong>TSMC G38</strong> = OCBC MD ↔ UOB ED<br/>
+            - <strong>TSMC G39–40</strong> = OCBC MD1 ↔ UOB MD<br/>
+            - <strong>TSMC G50+</strong> = OCBC GMD / Group ExCo ↔ UOB Senior MD / Group ExCo<br/>
+          • <strong>AVP Leadership & Scope:</strong> OCBC AVP spans senior IC, PMO, transformation lead, and some people-lead roles; its structural center is TSMC G33 and UOB AVP2–VP1. Formal TSMC line management remains more clearly anchored at G34, which now begins the OCBC VP interval.<br/>
           • <strong>Evidence:</strong> <a href="https://static.glassdoor.sg/Salary/OCBC-Salaries-E9773.htm" target="_blank" rel="noopener">OCBC salary aggregate</a> · <a href="https://static.glassdoor.sg/Salary/United-Overseas-Bank-Salaries-E11462.htm" target="_blank" rel="noopener">UOB salary aggregate</a> · <a href="https://static.glassdoor.sg/Salary/United-Overseas-Bank-Salaries-E11462_P2.htm" target="_blank" rel="noopener">UOB FVP aggregate</a> · <a href="https://www.uobgroup.com/investor-relations/assets/pdfs/investor/annual/Indonesia/UOBIndo_AR21.pdf" target="_blank" rel="noopener">UOB published grade ladder</a>.</p>
         </div>
         <div class="rule-tile">
@@ -1648,8 +1659,26 @@
       function projectInstitution(institutionId, primaryNodes) {
         const buckets = primaryNodes.map(() => []);
         institutions[institutionId].nodes.forEach(node => {
+          const nodeRef = `${institutionId}.${node.id}`;
+          const anchoredIndexes = [...new Set(directAnchors(nodeRef, primaryAxis).map(edge => {
+            const primaryRef = edge.from === nodeRef ? edge.to : edge.from;
+            const primaryNodeId = nodeIndex.get(primaryRef)?.node.id;
+            return primaryNodes.findIndex(item => item.id === primaryNodeId);
+          }).filter(index => index >= 0))].sort((a, b) => a - b);
+
+          if (anchoredIndexes.length > 1) {
+            const start = anchoredIndexes[0];
+            const end = anchoredIndexes[anchoredIndexes.length - 1];
+            const coverage = `${primaryNodes[start].grade} → ${primaryNodes[end].grade}`;
+            for (let index = start; index <= end; index += 1) {
+              buckets[index].push({ node, continuation: index !== start, coverage });
+            }
+            return;
+          }
+
           const level = projectedLevel(institutionId, node, primaryAxis);
-          buckets[closestPrimaryIndex(level, primaryNodes)].push(node);
+          const index = anchoredIndexes.length ? anchoredIndexes[0] : closestPrimaryIndex(level, primaryNodes);
+          buckets[index].push({ node, continuation: false, coverage: '' });
         });
         return buckets;
       }
@@ -1660,8 +1689,14 @@
         return edges.map(edge => `${edge.relation}: ${edge.note}`).join(' · ');
       }
 
-      function renderNode(institutionId, node, isPrimary) {
+      function renderNode(institutionId, node, isPrimary, continuation = false, coverage = '') {
         const note = isPrimary ? '' : anchorNote(institutionId, node);
+        if (continuation) {
+          return `<div class="mapped-node continuation-node">
+            <span class="cell-title">↳ ${escapeHtml(node.grade)} continues</span>
+            <span class="cell-detail">Coverage band: ${escapeHtml(coverage)}</span>
+          </div>`;
+        }
         return `<div class="mapped-node">
           <span class="cell-title">${escapeHtml(node.grade)} · ${escapeHtml(node.title)}</span>
           <span class="cell-salary${node.tier === 'political' ? ' peak' : ''}">${escapeHtml(node.compensation)}</span>
@@ -1687,7 +1722,7 @@
           columnIds.slice(1).forEach(institutionId => {
             const nodes = projections[institutionId][rowIndex];
             cells.push(`<td><div class="node-stack">${nodes.length
-              ? nodes.map(node => renderNode(institutionId, node, false)).join('')
+              ? nodes.map(item => renderNode(institutionId, item.node, false, item.continuation, item.coverage)).join('')
               : '<span class="empty-map">No grade anchored at this level</span>'}</div></td>`);
           });
           return `<tr data-tier="${escapeHtml(primaryNode.tier)}" data-level="${escapeHtml(primaryNode.level)}">${cells.join('')}</tr>`;
