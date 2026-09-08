@@ -51,7 +51,7 @@ institutions:
     nodes:
       - {id: officer, grade: "Officer / Analyst", title: "Entry Support", compensation: "< S$65k", detail: "Entry professional / operations", tier: junior, level: 8}
       - {id: am, grade: "Assistant Manager", title: "AM", compensation: "S$48–66k", detail: "Distinct rank below Manager · covers the first 0.3 of TSMC G31", tier: junior, level: 14, mapping: {to: "tsmc", start: 13, end: 14.5, label: "G30 → 0.3×G31"}}
-      - {id: manager, grade: "Manager", title: "Manager", compensation: "S$90–135k TC", detail: "Broad professional Manager band · follows AM through all of TSMC G32", tier: junior, level: 21, mapping: {to: "tsmc", start: 14.5, end: 24, label: "0.3×G31 → G32"}}
+      - {id: manager, grade: "Manager", title: "Senior Manager", compensation: "S$90–135k TC", detail: "Broad senior-manager band · spans UOB Senior Manager through AVP1 and follows AM through TSMC G32", tier: junior, level: 21, mapping: {to: "tsmc", start: 14.5, end: 24, label: "0.3×G31 → G32"}}
       - {id: avp, grade: "AVP", title: "Assistant Vice President", compensation: "S$100–180k TC", detail: "Senior IC through people/project lead; G33 plus the first 0.5 of TSMC G34", tier: middle, level: 36, mapping: {to: "tsmc", start: 35, end: 39, label: "G33 → 0.5×G34"}}
       - {id: vp, grade: "VP", title: "Vice President", compensation: "S$180–270k TC", detail: "Covers the latter 0.5 of UOB VP2 through full FVP and TSMC G34–35", tier: middle, level: 47, mapping: {to: "uob", start: 41.5, end: 51, label: "0.5×UOB VP2 → FVP"}}
       - {id: ed, grade: "ED", title: "Executive Director", compensation: "S$260–380k est.", detail: "Covers TSMC G36–37", tier: superscale, level: 63}
@@ -200,6 +200,8 @@ anchors:
   - {from: "sg_gov.mx10", to: "ocbc.vp", relation: equivalent, weight: 0.9, note: "VP / DD scope anchor"}
   - {from: "tsmc.g31", to: "ocbc.manager", relation: segment, weight: 0.9, note: "OCBC Manager covers G31–32"}
   - {from: "tsmc.g32", to: "ocbc.manager", relation: segment, weight: 0.9, note: "Upper Manager segment"}
+  - {from: "uob.senior_manager", to: "ocbc.manager", relation: lower_edge, weight: 1.0, note: "OCBC Senior Manager band begins around UOB Senior Manager"}
+  - {from: "uob.avp1", to: "ocbc.manager", relation: upper_edge, weight: 1.0, note: "OCBC Senior Manager band extends through UOB AVP1"}
   - {from: "tsmc.g32", to: "uob.avp1", relation: lower_edge, weight: 0.7, note: "Lower AVP edge"}
   - {from: "tsmc.g33", to: "ocbc.avp", relation: equivalent, weight: 1.0, note: "OCBC AVP responsibility anchor"}
   - {from: "tsmc.g34", to: "ocbc.avp", relation: upper_edge, weight: 1.0, note: "People-leading OCBC AVP can reach G34"}
