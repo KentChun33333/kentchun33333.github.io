@@ -52,7 +52,7 @@ institutions:
       - {id: officer, grade: "Officer / Analyst", title: "Entry Support", compensation: "< S$65k", detail: "Entry professional / operations", tier: junior, level: 8}
       - {id: am, grade: "Assistant Manager", title: "AM", compensation: "S$48–66k", detail: "Distinct rank below Manager", tier: junior, level: 14}
       - {id: manager, grade: "Manager", title: "Manager", compensation: "S$60–96k", detail: "Broad professional Manager band", tier: junior, level: 21}
-      - {id: avp, grade: "AVP", title: "Assistant Vice President", compensation: "S$94–143k", detail: "Senior IC through people/project lead", tier: middle, level: 36}
+      - {id: avp, grade: "AVP", title: "Assistant Vice President", compensation: "S$94–143k", detail: "Senior IC through people/project lead; covers TSMC G33–34", tier: middle, level: 36}
       - {id: vp, grade: "VP", title: "Vice President", compensation: "S$154–237k", detail: "Covers UOB VP2–FVP and TSMC G34–35", tier: middle, level: 47}
       - {id: ed, grade: "ED", title: "Executive Director", compensation: "S$260–380k est.", detail: "Covers TSMC G36–37", tier: superscale, level: 63}
       - {id: md, grade: "MD", title: "Managing Director", compensation: "S$350–700k+ est.", detail: "Maps to UOB ED and TSMC G38", tier: superscale, level: 72}
@@ -147,12 +147,13 @@ anchors:
   - {from: "tsmc.g32", to: "ocbc.manager", relation: segment, weight: 0.9, note: "Upper Manager segment"}
   - {from: "tsmc.g32", to: "uob.avp1", relation: lower_edge, weight: 0.7, note: "Lower AVP edge"}
   - {from: "tsmc.g33", to: "ocbc.avp", relation: equivalent, weight: 1.0, note: "OCBC AVP responsibility anchor"}
+  - {from: "tsmc.g34", to: "ocbc.avp", relation: upper_edge, weight: 1.0, note: "People-leading OCBC AVP can reach G34"}
   - {from: "tsmc.g33", to: "uob.avp2", relation: segment, weight: 0.8, note: "Upper AVP segment"}
   - {from: "tsmc.g33", to: "uob.vp1", relation: segment, weight: 0.9, note: "VP1 anchor"}
   - {from: "uob.avp2", to: "ocbc.avp", relation: lower_edge, weight: 1.0, note: "OCBC AVP begins around UOB AVP2"}
   - {from: "uob.vp1", to: "ocbc.avp", relation: upper_edge, weight: 1.0, note: "OCBC AVP extends through UOB VP1"}
   - {from: "tsmc.g34", to: "uob.vp2", relation: equivalent, weight: 1.0, note: "VP2 leadership transition"}
-  - {from: "tsmc.g34", to: "ocbc.vp", relation: lower_edge, weight: 1.0, note: "OCBC VP begins at G34"}
+  - {from: "tsmc.g34", to: "ocbc.vp", relation: lower_edge, weight: 1.0, note: "OCBC VP begins at G34; overlaps the AVP upper edge"}
   - {from: "tsmc.g35", to: "ocbc.vp", relation: equivalent, weight: 1.0, note: "OCBC VP center"}
   - {from: "tsmc.g35", to: "uob.fvp", relation: equivalent, weight: 1.0, note: "UOB FVP center"}
   - {from: "uob.vp2", to: "ocbc.vp", relation: lower_edge, weight: 1.0, note: "OCBC VP begins around UOB VP2"}

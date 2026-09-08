@@ -321,6 +321,112 @@
       color: #ffffff;
       border-color: var(--lux);
     }
+    .view-switch {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    .view-btn {
+      border: 0;
+      border-right: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--muted);
+      padding: 7px 10px;
+      font: 700 10px 'IBM Plex Mono', monospace;
+      cursor: pointer;
+    }
+    .view-btn:last-child { border-right: 0; }
+    .view-btn.active { background: var(--lux); color: #ffffff; }
+
+    /* Levels-style stacked bands: responsibility rises upward; overlaps use lanes. */
+    .stack-chart-wrap {
+      overflow: auto;
+      max-height: 78vh;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #ffffff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    }
+    .stack-chart-wrap[hidden], .table-wrap[hidden] { display: none; }
+    .stack-chart {
+      --stack-row-height: 124px;
+      display: grid;
+      grid-template-columns: 170px repeat(var(--company-count), minmax(225px, 1fr));
+      min-width: calc(170px + var(--company-count) * 225px);
+      align-items: start;
+    }
+    .stack-axis-head, .stack-company-head {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      min-height: 54px;
+      padding: 10px 11px;
+      background: #f7f5f0;
+      border-right: 1px solid var(--line);
+      border-bottom: 2px solid var(--line);
+      font: 700 10px/1.35 'IBM Plex Mono', monospace;
+      text-transform: uppercase;
+      color: #4a4e54;
+    }
+    .stack-company-head.primary {
+      background: #eee6d4;
+      color: var(--lux);
+      border-bottom-color: var(--gold);
+    }
+    .stack-scale {
+      position: relative;
+      height: calc(var(--primary-count) * var(--stack-row-height));
+      border-right: 1px solid var(--line);
+      background: #faf8f3;
+    }
+    .stack-scale-row {
+      position: absolute;
+      inset-inline: 0;
+      height: var(--stack-row-height);
+      padding: 9px 10px;
+      border-bottom: 1px solid #e9e3d7;
+      box-sizing: border-box;
+    }
+    .stack-scale-row .scale-grade { display: block; font-weight: 800; color: var(--lux); }
+    .stack-scale-row .scale-title { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; line-height: 1.3; }
+    .stack-company-lane {
+      position: relative;
+      height: calc(var(--primary-count) * var(--stack-row-height));
+      border-right: 1px solid var(--line);
+      background: repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--stack-row-height) - 1px), #eee8dc calc(var(--stack-row-height) - 1px), #eee8dc var(--stack-row-height));
+    }
+    .stack-company-lane.primary { background-color: #fffdf7; }
+    .stack-level-card {
+      position: absolute;
+      box-sizing: border-box;
+      padding: 7px;
+      border: 1px solid #d7d0c1;
+      border-left: 3px solid #9a8350;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.97);
+      box-shadow: 0 2px 5px rgba(17, 24, 39, 0.07);
+      overflow: auto;
+    }
+    .stack-level-card.primary {
+      border-left-color: var(--gold);
+      background: #fffaf0;
+    }
+    .stack-level-card.overlap { border-right-color: #c69d44; }
+    .stack-level-card.selected { outline: 2px solid var(--gold); z-index: 5; }
+    .stack-level-card .cell-title { font-size: 10.5px; }
+    .stack-level-card .cell-salary { font-size: 9px; white-space: normal; }
+    .stack-level-card .cell-detail { font-size: 9px; }
+    .stack-level-card .anchor-badge { font-size: 7.5px; }
+    .stack-range {
+      display: block;
+      margin-bottom: 4px;
+      color: #806a37;
+      font: 700 8px 'IBM Plex Mono', monospace;
+      text-transform: uppercase;
+    }
 
     /* Interactive Clear Table */
     .table-wrap {
@@ -746,7 +852,7 @@
       <div class="interact-hint">
         <span class="tip">
           <span>💡</span>
-          <span><strong>Interactive Table Controls:</strong> Select any institution as the <strong>primary axis</strong>. Its native grades become unique rows; other ladders scale and fold into the closest anchored row.</span>
+          <span><strong>Interactive Comparison:</strong> Select any institution as the <strong>primary axis</strong>. Use the stack chart for level spans and overlaps, or the detail table for row-by-row audit.</span>
         </span>
         <button type="button" class="reset-btn" id="clearSelectionBtn">Clear Selection</button>
       </div>
@@ -757,7 +863,7 @@
       <div class="section-card-head">
         <div>
           <h2>Adaptive Cross-System Leveling Matrix</h2>
-          <p>Choose any institution as the native-grade axis; graph anchors project and fold every other ladder around it.</p>
+          <p>Choose any institution as the native-grade axis; graph anchors project every other ladder into stacked responsibility bands, preserving overlaps.</p>
         </div>
         <span class="tag-badge" id="axisTierBadge">15 SG GOV GRADES</span>
       </div>
@@ -772,6 +878,10 @@
           <span style="color: var(--dim);">🔍</span>
           <input type="text" id="masterSearchInput" placeholder="Filter grades, TSMC level, Chinese title, or salary..." autocomplete="off"/>
         </div>
+        <div class="view-switch" aria-label="Choose benchmark view">
+          <button type="button" class="view-btn active" data-view="stack">Stack chart</button>
+          <button type="button" class="view-btn" data-view="table">Detail table</button>
+        </div>
         <div class="pill-group">
           <button type="button" class="pill-btn active" data-filter="all">All Levels (15)</button>
           <button type="button" class="pill-btn" data-filter="political">Political / Apex</button>
@@ -782,7 +892,11 @@
         <div class="axis-status" id="axisStatus" aria-live="polite"></div>
       </div>
 
-      <div class="table-wrap">
+      <div class="stack-chart-wrap" id="levelStackChartWrap">
+        <div class="stack-chart" id="levelStackChart" aria-label="Stacked cross-company level comparison"></div>
+      </div>
+
+      <div class="table-wrap" id="detailTableWrap" hidden>
         <table class="data-table" id="masterBenchmarkTable">
           <thead>
             <tr>
@@ -1544,13 +1658,13 @@
             - <strong>TSMC DL / Operator</strong> = OCBC Officer ↔ UOB Officer / Analyst<br/>
             - <strong>TSMC Grade 30–31</strong> = OCBC Assistant Manager (AM) ↔ UOB Assistant Manager (AM)<br/>
             - <strong>TSMC G31–32</strong> = OCBC Manager ↔ UOB Manager<br/>
-            - <strong>TSMC G33</strong> = OCBC AVP ↔ UOB [AVP2 → VP1]<br/>
-            - <strong>TSMC G34–35</strong> = OCBC VP ↔ UOB [VP2 → FVP]<br/>
+            - <strong>TSMC G33–34</strong> = OCBC AVP ↔ UOB [AVP2 → VP1], with people-leading AVP at the G34 upper edge<br/>
+            - <strong>TSMC G34–35</strong> = OCBC VP ↔ UOB [VP2 → FVP]; G34 is deliberately shared by OCBC AVP and VP<br/>
             - <strong>TSMC G36–37</strong> = OCBC ED ↔ UOB SVP segment<br/>
             - <strong>TSMC G38</strong> = OCBC MD ↔ UOB ED<br/>
             - <strong>TSMC G39–40</strong> = OCBC MD1 ↔ UOB MD<br/>
             - <strong>TSMC G50+</strong> = OCBC GMD / Group ExCo ↔ UOB Senior MD / Group ExCo<br/>
-          • <strong>AVP Leadership & Scope:</strong> OCBC AVP spans senior IC, PMO, transformation lead, and some people-lead roles; its structural center is TSMC G33 and UOB AVP2–VP1. Formal TSMC line management remains more clearly anchored at G34, which now begins the OCBC VP interval.<br/>
+          • <strong>AVP Leadership & Scope:</strong> OCBC AVP spans senior IC, PMO, transformation lead, and some people-lead roles; its center is TSMC G33 and UOB AVP2–VP1, while its people-leading upper edge reaches TSMC G34. G34 is therefore an overlap zone: upper-edge OCBC AVP and lower-edge OCBC VP both map there.<br/>
           • <strong>Evidence:</strong> <a href="https://static.glassdoor.sg/Salary/OCBC-Salaries-E9773.htm" target="_blank" rel="noopener">OCBC salary aggregate</a> · <a href="https://static.glassdoor.sg/Salary/United-Overseas-Bank-Salaries-E11462.htm" target="_blank" rel="noopener">UOB salary aggregate</a> · <a href="https://static.glassdoor.sg/Salary/United-Overseas-Bank-Salaries-E11462_P2.htm" target="_blank" rel="noopener">UOB FVP aggregate</a> · <a href="https://www.uobgroup.com/investor-relations/assets/pdfs/investor/annual/Indonesia/UOBIndo_AR21.pdf" target="_blank" rel="noopener">UOB published grade ladder</a>.</p>
         </div>
         <div class="rule-tile">
@@ -1593,6 +1707,10 @@
       const clearBtn = document.getElementById('clearSelectionBtn');
       const axisStatus = document.getElementById('axisStatus');
       const axisTierBadge = document.getElementById('axisTierBadge');
+      const stackChart = document.getElementById('levelStackChart');
+      const stackChartWrap = document.getElementById('levelStackChartWrap');
+      const detailTableWrap = document.getElementById('detailTableWrap');
+      const viewButtons = [...document.querySelectorAll('.view-btn')];
       let activeTierFilter = 'all';
       let primaryAxis = graph && graph.default_axis;
 
@@ -1705,6 +1823,109 @@
         </div>`;
       }
 
+      function nodeInterval(institutionId, node, primaryNodes) {
+        if (institutionId === primaryAxis) {
+          const index = primaryNodes.findIndex(item => item.id === node.id);
+          return { start: index, end: index, anchored: true };
+        }
+        const nodeRef = `${institutionId}.${node.id}`;
+        const anchoredIndexes = [...new Set(directAnchors(nodeRef, primaryAxis).map(edge => {
+          const primaryRef = edge.from === nodeRef ? edge.to : edge.from;
+          const primaryNodeId = nodeIndex.get(primaryRef)?.node.id;
+          return primaryNodes.findIndex(item => item.id === primaryNodeId);
+        }).filter(index => index >= 0))].sort((a, b) => a - b);
+        if (anchoredIndexes.length) {
+          return { start: anchoredIndexes[0], end: anchoredIndexes[anchoredIndexes.length - 1], anchored: true };
+        }
+        const index = closestPrimaryIndex(projectedLevel(institutionId, node, primaryAxis), primaryNodes);
+        return { start: index, end: index, anchored: false };
+      }
+
+      function assignStackLanes(items) {
+        items.sort((a, b) => a.displayStart - b.displayStart || a.displayEnd - b.displayEnd);
+        let cluster = [];
+        let clusterEnd = -1;
+        const finishCluster = () => {
+          if (!cluster.length) return;
+          const laneEnds = [];
+          cluster.forEach(item => {
+            let lane = laneEnds.findIndex(end => end < item.displayStart);
+            if (lane < 0) lane = laneEnds.length;
+            laneEnds[lane] = item.displayEnd;
+            item.lane = lane;
+          });
+          cluster.forEach(item => { item.laneCount = Math.max(1, laneEnds.length); });
+          cluster = [];
+          clusterEnd = -1;
+        };
+        items.forEach(item => {
+          if (cluster.length && item.displayStart > clusterEnd) finishCluster();
+          cluster.push(item);
+          clusterEnd = Math.max(clusterEnd, item.displayEnd);
+        });
+        finishCluster();
+        return items;
+      }
+
+      function renderStackChart() {
+        if (!stackChart) return;
+        const primaryNodes = institutions[primaryAxis].nodes;
+        const columnIds = [primaryAxis, ...institutionIds.filter(id => id !== primaryAxis)];
+        const rowHeight = 124;
+        const headers = [
+          '<div class="stack-axis-head">Primary responsibility scale<br/>Apex ↑</div>',
+          ...columnIds.map((id, index) => `<div class="stack-company-head${index === 0 ? ' primary' : ''}">${index === 0 ? 'Primary · ' : ''}${escapeHtml(institutions[id].label)}</div>`)
+        ];
+        const scale = `<div class="stack-scale" style="--primary-count:${primaryNodes.length}">${[...primaryNodes].reverse().map((node, displayIndex) =>
+          `<div class="stack-scale-row" style="top:${displayIndex * rowHeight}px" data-tier="${escapeHtml(node.tier)}">
+            <span class="scale-grade">${escapeHtml(node.grade)}</span>
+            <span class="scale-title">${escapeHtml(node.title)}</span>
+          </div>`
+        ).join('')}</div>`;
+
+        const lanes = columnIds.map((institutionId, columnIndex) => {
+          const items = institutions[institutionId].nodes.map(node => {
+            const interval = nodeInterval(institutionId, node, primaryNodes);
+            return {
+              node,
+              anchored: interval.anchored,
+              displayStart: primaryNodes.length - 1 - interval.end,
+              displayEnd: primaryNodes.length - 1 - interval.start,
+              primaryStart: interval.start,
+              primaryEnd: interval.end
+            };
+          });
+          assignStackLanes(items);
+          const cards = items.map(item => {
+            const top = item.displayStart * rowHeight + 4;
+            const height = (item.displayEnd - item.displayStart + 1) * rowHeight - 8;
+            const width = 100 / item.laneCount;
+            const left = item.lane * width;
+            const startGrade = primaryNodes[item.primaryStart]?.grade || '';
+            const endGrade = primaryNodes[item.primaryEnd]?.grade || '';
+            const range = startGrade === endGrade ? startGrade : `${startGrade} → ${endGrade}`;
+            const note = institutionId === primaryAxis ? '' : anchorNote(institutionId, item.node);
+            const searchText = `${item.node.grade} ${item.node.title} ${item.node.compensation} ${item.node.detail} ${note}`.toLowerCase();
+            return `<article class="stack-level-card${columnIndex === 0 ? ' primary' : ''}${item.laneCount > 1 ? ' overlap' : ''}"
+              style="top:${top}px;height:${height}px;left:calc(${left}% + 4px);width:calc(${width}% - 8px)"
+              data-tier="${escapeHtml(item.node.tier)}" data-search="${escapeHtml(searchText)}" tabindex="0">
+              <span class="stack-range">${escapeHtml(range)}${item.anchored ? ' · anchored' : ' · projected'}</span>
+              <span class="cell-title">${escapeHtml(item.node.grade)} · ${escapeHtml(item.node.title)}</span>
+              <span class="cell-salary${item.node.tier === 'political' ? ' peak' : ''}">${escapeHtml(item.node.compensation)}</span>
+              <span class="cell-detail">${escapeHtml(item.node.detail)}</span>
+              ${note ? `<span class="anchor-badge">${escapeHtml(note)}</span>` : ''}
+            </article>`;
+          }).join('');
+          return `<div class="stack-company-lane${columnIndex === 0 ? ' primary' : ''}" style="--primary-count:${primaryNodes.length}">${cards}</div>`;
+        });
+        stackChart.style.setProperty('--company-count', columnIds.length);
+        stackChart.style.setProperty('--primary-count', primaryNodes.length);
+        stackChart.innerHTML = [...headers, scale, ...lanes].join('');
+        stackChart.querySelectorAll('.stack-level-card').forEach(card => {
+          card.addEventListener('click', () => card.classList.toggle('selected'));
+        });
+      }
+
       function renderTable() {
         const primaryInstitution = institutions[primaryAxis];
         const primaryNodes = primaryInstitution.nodes;
@@ -1732,6 +1953,7 @@
         const allLevelsButton = pillButtons.find(button => button.dataset.filter === 'all');
         if (allLevelsButton) allLevelsButton.textContent = `All Levels (${primaryNodes.length})`;
         axisStatus.textContent = `${primaryInstitution.label} is the primary axis: ${primaryNodes.length} native grades, one row each. Other grades appear once and fold into their nearest anchored level.`;
+        renderStackChart();
         bindTableInteractions();
         runMasterFilter();
       }
@@ -1768,6 +1990,11 @@
           const matchesTier = activeTierFilter === 'all' || row.dataset.tier === activeTierFilter;
           row.style.display = matchesQuery && matchesTier ? '' : 'none';
         });
+        stackChart?.querySelectorAll('.stack-level-card').forEach(card => {
+          const matchesQuery = !query || (card.dataset.search || '').includes(query);
+          const matchesTier = activeTierFilter === 'all' || card.dataset.tier === activeTierFilter;
+          card.style.display = matchesQuery && matchesTier ? '' : 'none';
+        });
       }
 
       institutionIds.forEach(id => {
@@ -1782,6 +2009,14 @@
         primaryAxis = axisSelect.value;
         renderTable();
       });
+      viewButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const isStack = button.dataset.view === 'stack';
+          viewButtons.forEach(item => item.classList.toggle('active', item === button));
+          if (stackChartWrap) stackChartWrap.hidden = !isStack;
+          if (detailTableWrap) detailTableWrap.hidden = isStack;
+        });
+      });
       searchInput?.addEventListener('input', runMasterFilter);
       pillButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -1795,6 +2030,7 @@
         table.querySelectorAll('.row-selected, .col-active, .col-highlight').forEach(item =>
           item.classList.remove('row-selected', 'col-active', 'col-highlight'));
         table.querySelector('thead th')?.classList.add('col-active');
+        stackChart?.querySelectorAll('.selected').forEach(item => item.classList.remove('selected'));
       });
 
       renderTable();
