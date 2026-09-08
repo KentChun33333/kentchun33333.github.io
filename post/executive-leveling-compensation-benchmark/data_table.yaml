@@ -128,14 +128,15 @@ institutions:
       - {id: senior_research_scientist, grade: "Senior Research Engineer / Research Scientist", title: "Senior Engineer / Scientist", compensation: "S$85–130k", detail: "Merged equivalent senior research IC band", tier: middle, level: 28}
       - {id: lead_senior_scientist, grade: "Lead Research Engineer / Senior Scientist", title: "Research Lead / Senior Scientist", compensation: "S$120–190k", detail: "Merged equivalent technical-lead and senior-scientist band", tier: middle, level: 41}
       - {id: principal_scientist, grade: "Principal Engineer / Principal Scientist", title: "Principal Technical Authority", compensation: "S$150–220k", detail: "Grade above Lead Research Engineer; principal engineering/science track", tier: middle, level: 51}
-      - {id: senior_principal, grade: "Senior Principal Scientist", title: "Senior Principal Scientist", compensation: "S$200–300k", detail: "Research department leadership", tier: superscale, level: 60}
-      - {id: executive_director, grade: "Executive Director", title: "Institute Executive Director", compensation: "S$250–500k", detail: "Institute / major function leadership", tier: superscale, level: 69}
-      - {id: senior_director, grade: "Senior Director", title: "Senior Director", compensation: "S$450–650k", detail: "Enterprise research leadership", tier: superscale, level: 78}
-      - {id: distinguished, grade: "Distinguished Scientist", title: "Distinguished Scientist", compensation: "S$600–900k", detail: "Apex scientific track", tier: superscale, level: 84}
-      - {id: executive_vp, grade: "Executive VP / Director", title: "Executive VP", compensation: "S$800k–1.2M", detail: "Agency executive leadership", tier: superscale, level: 90}
-      - {id: leadership, grade: "A*STAR Leadership", title: "Board / Agency Leadership", compensation: "S$1.0–2.8M est.", detail: "National R&D leadership", tier: political, level: 96}
+      - {id: senior_principal, grade: "Senior Principal Scientist", title: "Senior Principal Scientist", compensation: "S$200–300k", detail: "Research department leadership", tier: superscale, level: 58}
+      - {id: executive_director, grade: "Executive Director", title: "Institute Executive Director", compensation: "S$250–500k", detail: "Institute / major function leadership", tier: superscale, level: 64}
+      - {id: senior_director, grade: "Senior Director", title: "Senior Director", compensation: "S$450–650k", detail: "Enterprise research leadership", tier: superscale, level: 69}
+      - {id: distinguished, grade: "Distinguished Scientist", title: "Distinguished Scientist", compensation: "S$600–900k", detail: "Apex scientific track within the public research ladder", tier: superscale, level: 73}
+      - {id: executive_vp, grade: "Executive VP / Director", title: "Executive VP", compensation: "S$800k–1.2M", detail: "Agency executive leadership on a parallel public-service track", tier: superscale, level: 76}
+      - {id: leadership, grade: "A*STAR Leadership", title: "Board / Agency Leadership", compensation: "S$1.0–2.8M est.", detail: "Parallel SG public-research ceiling; anchored to Deputy Secretary scope", tier: superscale, level: 78}
 
 anchors:
+  - {from: "sg_gov.deputy_sec", to: "astar.leadership", relation: parallel_track, weight: 1.0, note: "A*STAR ceiling aligns to Deputy Secretary scope on a separate public-research track"}
   - {from: "sg_gov.mx14", to: "uob.officer", relation: equivalent, weight: 1.0, note: "Entry support anchor"}
   - {from: "sg_gov.mx13i", to: "ocbc.am", relation: compensation_overlap, weight: 0.8, note: "AM salary window"}
   - {from: "sg_gov.mx13", to: "ocbc.manager", relation: compensation_overlap, weight: 0.9, note: "Manager window"}
