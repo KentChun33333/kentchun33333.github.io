@@ -1696,10 +1696,10 @@
             - <strong>CTBC Career Track:</strong> <code>7 職等 → 8 → 9 → 10 → 11 → 12 → 13 → 14 → 15 → 16 → 16+ / EVP</code><br/>
           • <strong>Cross-Institutional Mapping (ref-ocbc-uob.md):</strong><br/>
             - <strong>TSMC DL / Operator</strong> = OCBC Officer ↔ UOB Officer / Analyst<br/>
-            - <strong>TSMC Grade 30 → first 0.3 of G31</strong> = OCBC Assistant Manager (AM) ↔ UOB Assistant Manager (AM)<br/>
-            - <strong>TSMC first 0.3 of G31 → all G32</strong> = OCBC Senior Manager ↔ UOB [Senior Manager → AVP1]<br/>
+            - <strong>TSMC Grade 30 → first 0.3 of G31</strong> = OCBC Assistant Manager (AM), while UOB span is AM → 0.5×Manager<br/>
+            - <strong>TSMC first 0.3 of G31 → all G32</strong> = OCBC Senior Manager, while UOB span is 0.5×Manager → AVP1<br/>
             - <strong>TSMC G33 → first 0.5 of G34</strong> = OCBC AVP ↔ UOB [AVP2 → VP1], with people-leading AVP at the G34 upper edge<br/>
-            - <strong>TSMC G34–35</strong> = OCBC VP ↔ UOB [0.5×VP2 → almost full FVP band]; G34 is deliberately shared by OCBC AVP and VP<br/>
+            - <strong>TSMC G34–35</strong> = OCBC VP ↔ UOB [VP2 → almost full FVP band]; G34 is deliberately shared by OCBC AVP and VP<br/>
             - <strong>TSMC G36–37</strong> = OCBC ED ↔ UOB SVP segment<br/>
             - <strong>TSMC G38</strong> = OCBC MD ↔ UOB ED<br/>
             - <strong>TSMC G39–40</strong> = OCBC MD1 ↔ UOB MD<br/>
@@ -1816,7 +1816,8 @@
       }
 
       function mappedSpan(node, targetInstitutionId) {
-        const mapping = node && node.mapping;
+        const mapping = node && ((Array.isArray(node.mappings) && node.mappings.find(item => item.to === targetInstitutionId))
+          || (node.mapping && node.mapping.to === targetInstitutionId ? node.mapping : null));
         if (!mapping || mapping.to !== targetInstitutionId) return null;
         const start = Number(mapping.start);
         const end = Number(mapping.end);
@@ -2001,8 +2002,8 @@
             const height = Math.max(2, (item.upperBoundary - item.lowerBoundary) / scaleSpan * chartHeight);
             const startGrade = primaryNodes[item.primaryStart]?.grade || '';
             const endGrade = primaryNodes[item.primaryEnd]?.grade || '';
-            const range = item.node.mapping?.to === primaryAxis
-              ? escapeHtml(item.node.mapping.label)
+            const range = item.span
+              ? escapeHtml(item.span.label)
               : (startGrade === endGrade ? startGrade : `${startGrade} → ${endGrade}`);
             const note = institutionId === primaryAxis ? '' : anchorNote(institutionId, item.node);
             const searchText = `${item.node.grade} ${item.node.title} ${item.node.compensation} ${item.node.detail} ${note}`.toLowerCase();
