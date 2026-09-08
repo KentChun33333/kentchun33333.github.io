@@ -104,8 +104,8 @@
     SG TC and grade-population figures are a mix of official anchors and estimates. MX9+ is officially the Superscale / senior-management population;
     MX8/MX7 exact headcount and salary bands are not publicly disclosed.
     <strong>Segment Tree Alignment:</strong> UOB and OCBC are distinct institutions tracked in separate dedicated columns.
-    <strong>TSMC G31–32 ≡ OCBC Manager ≡ UOB [AM/Manager, AVP1]</strong>;
-    <strong>TSMC G33–34 ≡ OCBC AVP ≡ UOB [AVP2, VP1, VP2]</strong> (VP1 anchors G33; VP2 anchors G34);
+    <strong>TSMC G31–32 ≈ OCBC Manager ≈ UOB [Manager, Senior Manager, lower AVP]</strong>;
+    <strong>TSMC G32–34 ≈ OCBC AVP ≈ UOB [upper AVP, VP1, lower VP2]</strong> (G33 center; G34 people-manager edge);
     <strong>TSMC G35 ≡ OCBC VP ≡ UOB FVP</strong>, with VP2 retained only as a transition edge.
     Above OCBC VP, <strong>TSMC Grade 36 (部經理)</strong> aligns to <strong>UOB SVP</strong> and <strong>OCBC ED (Executive Director)</strong>.
     TSMC / ASML mappings are scope-based rather than title-name matching.
@@ -159,7 +159,7 @@
           <td class="grade">MX13</td>
           <td>Executive / Senior Executive</td>
           <td>Manager (Core / Senior; G31–32 segment)</td>
-          <td>AVP1 (32 anchor)</td>
+          <td>Senior Manager / lower AVP (31–32)</td>
           <td>薦任6–7</td>
           <td>資深科員、專員</td>
           <td>Grade 32 資深工程師 (Senior Engineer)</td>
@@ -172,7 +172,7 @@
           <td class="grade">MX12</td>
           <td>Manager / junior policy officer</td>
           <td>AVP (Entry / Lower; G33)</td>
-          <td>AVP2 / VP1 entry (33)</td>
+          <td>Upper AVP / VP1 entry (33)</td>
           <td>薦任6–7</td>
           <td>專員、股長</td>
           <td>Grade 33 主任工程師 (Principal Engineer, 博士新人起點)</td>
@@ -184,7 +184,7 @@
         <tr>
           <td class="grade">MX11</td>
           <td>Manager / Assistant Director (AD)</td>
-          <td><strong>AVP (Core: S$120k–$160k)</strong></td>
+          <td><strong>AVP (Core: S$105k–$135k)</strong></td>
           <td><strong>VP1 / VP2 entry (33–34)</strong></td>
           <td>薦任7–8</td>
           <td>專員 / 股長 / 秘書</td>
@@ -197,7 +197,7 @@
         <tr>
           <td class="grade">MX11A</td>
           <td>Senior Assistant Director / junior DD</td>
-          <td><strong>AVP (Senior: S$150k–$190k)</strong></td>
+          <td><strong>AVP (Senior: S$130k–$143k)</strong></td>
           <td><strong>VP2 (34 anchor)</strong></td>
           <td>薦任8–9</td>
           <td>科長 (薦任9主管職)</td>
@@ -210,8 +210,8 @@
         <tr>
           <td class="grade">MX10</td>
           <td>Deputy Director (DD) / senior AD</td>
-          <td><strong>VP (S$170k–$230k · Segment Tree Anchor)</strong></td>
-          <td><strong>FVP (35 anchor; VP2 transition edge)</strong></td>
+          <td><strong>VP (S$154k–$237k · Segment Tree Anchor)</strong></td>
+          <td><strong>FVP (S$174k–$240k · 35 anchor; VP2 transition edge)</strong></td>
           <td>薦任9～簡任10</td>
           <td>大科科長 / 簡任專門委員</td>
           <td><strong>Grade 35 經理 (經理 / 模組經理 · 核心對標)</strong></td>
@@ -275,7 +275,7 @@
         <tr class="senior">
           <td class="grade">Permanent Secretary</td>
           <td>Highest-ranking career civil servant heading a ministry</td>
-          <td><strong>MD1 / GMD (CTO/COO Scope: S$650k–$1.2M+)</strong></td>
+          <td><strong>MD1 (distinct from GMD: S$650k–$1.2M+)</strong></td>
           <td><strong>Senior MD / ExCo</strong></td>
           <td>簡任14頂層</td>
           <td><strong>常務次長 (文官體系頂點)</strong></td>
@@ -379,8 +379,9 @@
     2. <strong>以 TSMC 對齊新加坡銀行體系 (OCBC / UOB)：</strong><br/>
        • 銀行 VP 多為高階資深 IC（如架構師、交易專員、專案主力），組織層級對應 TSMC 35（經理）或 36（部經理）。<br/>
        • <strong>OCBC：</strong>Officer/Analyst → Manager (TSMC 31–32) → AVP (TSMC 33–34；senior AVP 可開始帶人) → VP (TSMC 35) → ED (TSMC 36+) → MD → MD1 → GMD。<br/>
-       • <strong>UOB：</strong>Analyst → AM → AVP1 → AVP2 → VP1 → VP2 → FVP → SVP → ED → MD → Top Senior MD。<br/>
-       • <strong>Human-reviewed Segment Tree：</strong>OCBC Manager ≡ UOB [AM/Manager, AVP1] ≡ TSMC 31–32；OCBC AVP ≡ UOB [AVP2, VP1, VP2] ≡ TSMC 33–34；OCBC VP ≡ UOB FVP ≡ TSMC 35。UOB VP1 錨定 33、VP2 錨定 34；UOB SVP 與 OCBC ED 錨定 TSMC 36。公開職缺亦顯示同一 AVP title 可從 <a href="https://uobgroup.wd3.myworkdayjobs.com/en-US/UOBExternal/job/AVP--Project-Management-Office--Innovation-Group_JR77354" target="_blank" rel="noopener">專案支援／fresh-graduate eligible</a> 延伸至 <a href="https://ocbc.wd102.myworkdayjobs.com/en-US/External/job/Assistant-Vice-President--Group-Payment-Operations--Payments-Transformation--One-Operations---Workflow---User-Experience-_JR00010538" target="_blank" rel="noopener">transformation lead</a>，故採責任寬帶而非 title 一對一。<br/>
+       • <strong>UOB：</strong>Officer → Senior Officer → Manager → Senior Manager → AVP → VP1 → VP2 → FVP → SVP → ED → MD。公開資料未確認 AVP1／AVP2 為正式 ranks。<br/>
+       • <strong>Human-reviewed Segment Tree：</strong>OCBC Manager ≈ UOB [Manager, Senior Manager, lower AVP] ≈ TSMC 31–32；OCBC AVP ≈ UOB [upper AVP, VP1, lower VP2] ≈ TSMC 32–34（中心 G33）；OCBC VP ≈ UOB [upper VP2, FVP] ≈ TSMC 34–35（中心 G35）。公開職缺亦顯示同一 AVP title 可從 <a href="https://uobgroup.wd3.myworkdayjobs.com/en-US/UOBExternal/job/AVP--Project-Management-Office--Innovation-Group_JR77354" target="_blank" rel="noopener">專案支援／fresh-graduate eligible</a> 延伸至 <a href="https://ocbc.wd102.myworkdayjobs.com/en-US/External/job/Assistant-Vice-President--Group-Payment-Operations--Payments-Transformation--One-Operations---Workflow---User-Experience-_JR00010538" target="_blank" rel="noopener">transformation lead</a>，故採責任寬帶而非 title 一對一。TSMC G34 是較合理的正式 line-manager 錨點，但 G33 仍可能帶專案或技術方向。<br/>
+       • <strong>薪酬與階梯來源：</strong><a href="https://static.glassdoor.sg/Salary/OCBC-Salaries-E9773.htm" target="_blank" rel="noopener">OCBC salary aggregate</a> · <a href="https://static.glassdoor.sg/Salary/United-Overseas-Bank-Salaries-E11462.htm" target="_blank" rel="noopener">UOB salary aggregate</a> · <a href="https://static.glassdoor.sg/Salary/United-Overseas-Bank-Salaries-E11462_P2.htm" target="_blank" rel="noopener">UOB FVP aggregate</a> · <a href="https://www.uobgroup.com/investor-relations/assets/pdfs/investor/annual/Indonesia/UOBIndo_AR21.pdf" target="_blank" rel="noopener">UOB published grade ladder</a>。薪酬資料為目前廣義 aggregates 並由 2025 年 6 月後提交交叉確認，不代表銀行正式逐級換算。<br/>
        • <strong>TSMC VP (Grade 50) ≡ OCBC GMD ≡ UOB Top Senior MD：</strong>台積電副總經理掌管數千人與核心 BU，等同新加坡銀行集團執行長/營運長層級 (S$2.8M–4.5M+ ≈ NT$65M–105M+)。<br/>
     3. <strong>以 SG 政府體系對標台灣文官 (SG Gov ↔ TW Gov)：</strong><br/>
        • 台灣公務體系受法律俸給上限限制（簡任14職等頂約 NT$2.2M ≈ S$95k），故對標採取<strong>「職等與主管官署管轄實權 (Scope)」</strong>而非薪資：MX14/13 ≡ 委任/薦任基層；MX11A ≡ 薦任9主管科長；MX9 ≡ 簡任11副司長；MX8 ≡ 簡任12司長/參事；PermSec ≡ 簡任14頂常務次長；Minister ≡ 內閣政務首長。
