@@ -882,8 +882,8 @@
     <section class="section-card" id="masterTableSection">
       <div class="section-card-head">
         <div>
-          <h2>Adaptive Cross-System Leveling Matrix</h2>
-          <p>Choose any institution as the native-grade axis; graph anchors project every other ladder into stacked responsibility bands, preserving overlaps.</p>
+          <h2 id="matrixTitle">自適應跨體系職等對照矩陣</h2>
+          <p id="matrixSubtitle">選擇任一機構作為原生職等基準軸；圖譜錨點會將其他職級體系投影至責任區間堆疊，並保留重疊關係。</p>
         </div>
         <span class="tag-badge" id="axisTierBadge">15 SG GOV GRADES</span>
       </div>
@@ -1735,7 +1735,7 @@
 
   </div>
 
-  <script src="data_table.generated.js?v=20260909-bank-vp-salary-refresh"></script>
+  <script src="data_table.generated.js?v=20260909-localized-matrix-heading"></script>
   <!-- Interactive Table JavaScript -->
   <script>
     (() => {
@@ -1753,6 +1753,8 @@
       const companyToggleControl = document.getElementById('companyToggleControl');
       const languageSwitch = document.getElementById('languageSwitch');
       const languageLabel = document.getElementById('languageLabel');
+      const matrixTitle = document.getElementById('matrixTitle');
+      const matrixSubtitle = document.getElementById('matrixSubtitle');
       const primaryAxisLabel = document.getElementById('primaryAxisLabel');
       const languageButtons = [...document.querySelectorAll('.language-btn')];
       const i18nConfig = graph?.i18n || {};
@@ -2156,6 +2158,8 @@
       function renderLanguageControls() {
         document.documentElement.lang = activeLanguage;
         if (languageLabel) languageLabel.textContent = uiText('language');
+        if (matrixTitle) matrixTitle.textContent = uiText('matrix_title');
+        if (matrixSubtitle) matrixSubtitle.textContent = uiText('matrix_subtitle');
         if (languageSwitch) languageSwitch.setAttribute('aria-label', uiText('language'));
         if (primaryAxisLabel) primaryAxisLabel.textContent = uiText('primary_axis');
         axisSelect.setAttribute('aria-label', uiText('select_primary'));

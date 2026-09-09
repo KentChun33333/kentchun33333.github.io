@@ -10,7 +10,7 @@
   let request = 0, current = null, libraryScroll = 0, returnFocus = null, catalogue;
   const sourceAssets = new Map();
   const baseTitle = document.title;
-  const getCatalogue = () => catalogue || (catalogue = fetch('/data/hub/catalog.json').then(r => {
+  const getCatalogue = () => catalogue || (catalogue = fetch('/data/hub/catalog.json', { cache: 'no-store' }).then(r => {
     if (!r.ok) throw new Error('Catalogue unavailable');
     return r.json();
   }).then(data => {
@@ -77,7 +77,10 @@
         frame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox');
         frame.addEventListener('load', () => { if (ticket === request) status.textContent = ''; });
         frame.addEventListener('error', () => { if (ticket === request) fail('The embedded page could not load.', () => showAsset(asset.id, false)); });
-        frame.src = asset.url; canvas.append(frame);
+        const sourceUrl = new URL(asset.url, location.origin);
+        sourceUrl.searchParams.set('hub_refresh', Date.now().toString());
+        frame.src = sourceUrl.pathname + sourceUrl.search;
+        canvas.append(frame);
       }
     } catch (_) {
       if (ticket === request) fail('This asset could not load. Your library is still available.', () => showAsset(id, false));

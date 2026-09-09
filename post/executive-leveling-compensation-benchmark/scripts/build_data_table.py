@@ -17,6 +17,7 @@ REQUIRED_NODE_FIELDS = {"id", "grade", "title", "compensation", "detail", "tier"
 VALID_TIERS = {"junior", "middle", "superscale", "political"}
 REQUIRED_I18N_UI_FIELDS = {
     "language", "primary_axis", "select_primary", "visible_columns",
+    "matrix_title", "matrix_subtitle",
     "toggle_columns", "search_placeholder", "choose_view", "stack_chart",
     "detail_table", "all_levels", "political_apex", "senior_executive",
     "management_tech", "professional_entry", "primary", "stack_note",
