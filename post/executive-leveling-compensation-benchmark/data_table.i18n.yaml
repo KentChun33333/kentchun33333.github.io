@@ -1,0 +1,229 @@
+version: 1
+default_language: en
+
+languages:
+  en:
+    label: "English"
+    ui:
+      language: "Language"
+      primary_axis: "Primary axis"
+      select_primary: "Select primary institution"
+      visible_columns: "Visible columns"
+      toggle_columns: "Show or hide company columns"
+      search_placeholder: "Filter grades, company, title, description, or salary..."
+      choose_view: "Choose benchmark view"
+      stack_chart: "Stack chart"
+      detail_table: "Detail table"
+      all_levels: "All Levels ({count})"
+      political_apex: "Political / Apex"
+      senior_executive: "Senior Executive / C-Suite"
+      management_tech: "Management / Tech Leads"
+      professional_entry: "Professional / Entry"
+      primary: "Primary"
+      stack_note: "Entry → Apex · block height = responsibility span"
+      no_grade: "No grade anchored at this level"
+      continues: "continues"
+      coverage_band: "Coverage band"
+      anchored: "anchored"
+      projected: "projected"
+      grades: "grades"
+      not_provided: "Not provided"
+      clear_selection: "Clear Selection"
+      graph_unavailable: "Graph data unavailable; showing the static fallback table."
+      axis_status: "{institution} is the primary axis on the invariant global responsibility coordinate (0–100); continuous company stacks retain the same responsibility anchors."
+    institutions:
+      sg_gov: {label: "Singapore Civil Service", short_label: "SG Government"}
+      uob: {label: "UOB", short_label: "UOB"}
+      ocbc: {label: "OCBC", short_label: "OCBC"}
+      ctbc: {label: "CTBC Financial Holding", short_label: "CTBC"}
+      fubon: {label: "Fubon Financial Holding", short_label: "Fubon"}
+      tsmc: {label: "TSMC", short_label: "TSMC"}
+      asml: {label: "ASML", short_label: "ASML"}
+      tw_gov: {label: "Taiwan Civil Service", short_label: "Taiwan Government"}
+      astar: {label: "A*STAR Research", short_label: "A*STAR"}
+
+  zh-Hant:
+    label: "繁體中文"
+    ui:
+      language: "語言"
+      primary_axis: "主要基準軸"
+      select_primary: "選擇主要機構"
+      visible_columns: "顯示欄位"
+      toggle_columns: "顯示或隱藏公司欄位"
+      search_placeholder: "篩選職等、公司、職稱、說明或薪酬…"
+      choose_view: "選擇比較檢視"
+      stack_chart: "堆疊圖"
+      detail_table: "明細表"
+      all_levels: "全部職等（{count}）"
+      political_apex: "政務／最高層"
+      senior_executive: "高階主管／C-Suite"
+      management_tech: "管理／技術領導"
+      professional_entry: "專業／入門"
+      primary: "主要基準"
+      stack_note: "入門 → 最高層 · 區塊高度＝責任跨度"
+      no_grade: "此責任層級沒有對應職等"
+      continues: "延續"
+      coverage_band: "涵蓋範圍"
+      anchored: "錨定"
+      projected: "推估"
+      grades: "個職等"
+      not_provided: "未提供"
+      clear_selection: "清除選取"
+      graph_unavailable: "無法載入圖表資料；目前顯示靜態備用表格。"
+      axis_status: "{institution}目前是主要基準軸；全表沿用固定的全球責任座標（0–100），各公司連續堆疊並保留相同責任錨點。"
+    institutions:
+      sg_gov:
+        label: "新加坡公務員體系"
+        short_label: "新加坡政府"
+        nodes:
+          mx14: {detail: "初階個人貢獻者 · 大型專業人員群體"}
+          mx13i: {detail: "專業職系起點"}
+          mx13: {detail: "資深個人貢獻者"}
+          mx12: {detail: "初階管理"}
+          mx11: {detail: "中階管理"}
+          mx11a: {detail: "中高階管理"}
+          mx10: {detail: "中高階管理"}
+          mx9: {detail: "高階管理"}
+          mx8: {detail: "資深高階主管"}
+          mx7: {detail: "主要職能負責人"}
+          deputy_sec: {detail: "常任秘書長以下最高級官員"}
+          perm_sec: {detail: "部會最高常任文官"}
+          senior_perm_sec: {detail: "全政府專業體系領導範圍"}
+          ministers: {detail: "部長至副總理"}
+          pm: {detail: "政府行政首長"}
+      uob:
+        label: "大華銀行"
+        short_label: "大華銀行"
+        nodes:
+          officer: {detail: "初階專業與營運支援"}
+          am: {detail: "獨立職級，位於經理以下"}
+          manager: {detail: "專業經理職級帶"}
+          senior_manager: {detail: "經理職級高段"}
+          avp1: {detail: "每月基本薪 S$7–9k × 15 個月"}
+          avp2: {detail: "每月基本薪 S$8.5–11k × 15 個月"}
+          vp1: {detail: "每月基本薪 S$10–14k × 15 個月"}
+          vp2: {detail: "每月基本薪 S$13–18k × 15 個月"}
+          fvp: {detail: "每月基本薪 S$17–22k × 15 個月"}
+          svp: {detail: "每月基本薪約 S$20–27k × 15 個月"}
+          ed: {detail: "每月基本薪約 S$24–32k+ × 15 個月"}
+          md: {detail: "每月基本薪約 S$30–45k+ × 15 個月"}
+          senior_md: {detail: "集團執行委員會層級"}
+          group_ceo: {detail: "企業最高領導層"}
+      ocbc:
+        label: "華僑銀行"
+        short_label: "華僑銀行"
+        nodes:
+          officer: {detail: "初階專業與營運支援"}
+          am: {detail: "獨立職級，位於經理以下 · 完整涵蓋 UOB AM，並延伸至 Manager 前半；同時涵蓋 TSMC G31 前 0.3 段"}
+          manager: {detail: "資深經理寬帶 · 起於 UOB Manager 後半並延伸至 AVP1；承接 AM 並涵蓋 TSMC G32"}
+          avp: {detail: "由資深個人貢獻者延伸至人員／專案領導；對應 UOB AVP2 至 VP1，以及 TSMC G33 至 G34 前半"}
+          vp: {detail: "起於 UOB VP2，延伸至幾乎完整的 FVP，並對應 TSMC G34–35"}
+          ed: {detail: "涵蓋 TSMC G36–37"}
+          md: {detail: "對應 UOB ED 與 TSMC G38"}
+          md1: {detail: "對應 UOB MD 與 TSMC G39–40；與 GMD 為不同層級"}
+          gmd: {detail: "集團執行委員會／關鍵事業群領導"}
+          group_ceo: {detail: "企業最高領導層"}
+      ctbc:
+        label: "中信金控"
+        short_label: "中信金控"
+        nodes:
+          grade7: {detail: "初階辦事員／專員；大學畢業起點至初階專業支援"}
+          grade8: {detail: "資深辦事員／專員；MA 起聘與可獨立作業的 G31–G32 貢獻者"}
+          grade9: {detail: "襄理／經理職系；與 UOB AVP1 及 OCBC Manager 重疊"}
+          grade10: {detail: "經理職系；高段責任由 AVP1 延伸至 AVP2，約在 G32–G33"}
+          grade11: {detail: "Associate Director／VP1；資深個人貢獻者天花板或初任科組主管"}
+          grade12: {detail: "對應 UOB VP2；正式帶領約 10–15 人團隊，責任涵蓋 G33 高段至 G35"}
+          grade13: {detail: "對應 UOB FVP；部室主管門檻與 G36–G37 責任範圍"}
+          grade14: {detail: "對應 UOB SVP；位於 G36–G37 的資深部門領導層"}
+          grade15: {detail: "對應 UOB ED；掌管事業處或區域業務，約為 TSMC G38"}
+          grade16: {detail: "對應 UOB MD 與 OCBC MD1；負責全行事業群，涵蓋 TSMC G39–G50"}
+          grade16plus: {detail: "對應 OCBC GMD 與 UOB Senior MD／ExCo；資深功能長層級"}
+          evp: {detail: "集團 C-Suite（CFO、CIO、CRO、CTO）／功能長職系；錨定 UOB Senior MD"}
+          ceo: {detail: "中信金控企業最高層；獨立於 EVP／功能長之上的 CEO 職系"}
+      fubon:
+        label: "富邦金控"
+        short_label: "富邦金控"
+        nodes:
+          grade2: {detail: "初階辦事員／AM 職級帶；參照 CTBC 7 職等"}
+          grade3: {detail: "資深辦事員至襄理職級帶；參照 CTBC 8–9 職等"}
+          grade4: {detail: "經理職系；參照 CTBC 9–10 職等"}
+          grade5: {detail: "資深經理／資深經辦天花板；涵蓋 CTBC 11–12 職等"}
+          grade6: {detail: "協理門檻；完整對應 CTBC 13 職等"}
+          grade7: {detail: "部門主管職級帶；參照 CTBC 14 職等"}
+          grade8: {detail: "董事總經理／廠處級主管；參照 CTBC 15 職等"}
+          grade9: {detail: "執行副總／功能長職級帶；參照 CTBC 16 職等"}
+          grade10: {detail: "集團 C-Suite 決策層；涵蓋 CTBC 16+ 至 EVP"}
+          ceo: {detail: "富邦企業最高層；參照 CTBC CEO／總經理"}
+      tsmc:
+        label: "台積電"
+        short_label: "台積電"
+        nodes:
+          operator: {detail: "獨立的直接人工職系"}
+          g30: {detail: "可能為學士新人起聘職等；並非普遍適用"}
+          g31: {detail: "學士與碩士新人皆有起聘案例"}
+          g32: {detail: "核心專案貢獻者"}
+          g33: {detail: "技術／專案領導"}
+          g34: {detail: "通常為正式第一線主管起點"}
+          g35: {detail: "經理／資深個人貢獻者"}
+          g36: {detail: "部門領導"}
+          g37: {detail: "副處級主管範圍"}
+          g38: {detail: "處長／晶圓廠領導"}
+          g39: {detail: "大型單位主管"}
+          g40: {detail: "資深處長"}
+          g50: {detail: "企業副總經理"}
+          g51: {detail: "企業資深高階主管"}
+          g52: {detail: "執行副總／共同營運長範圍"}
+          ceo: {detail: "企業最高領導層"}
+      asml:
+        label: "艾司摩爾"
+        short_label: "艾司摩爾"
+        nodes:
+          operator: {detail: "獨立的營運作業職系"}
+          jg5: {detail: "TSMC G30 初階工程職錨點"}
+          jg6: {detail: "TSMC G31 錨點 · ASML 聖地牙哥機械／軟體工程職系總薪酬範圍（Levels.fyi，2026 年 9 月）"}
+          jg7: {detail: "涵蓋 TSMC G32–33 責任帶 · ASML 聖地牙哥機械／軟體工程職系總薪酬範圍（Levels.fyi，2026 年 9 月）"}
+          jg8: {detail: "TSMC G34 錨點 · ASML 聖地牙哥機械／軟體工程職系總薪酬範圍（Levels.fyi，2026 年 9 月）"}
+          jg9: {detail: "涵蓋 TSMC G35–36 責任帶 · ASML 聖地牙哥機械／軟體工程職系總薪酬範圍（Levels.fyi，2026 年 9 月）"}
+          jg10: {detail: "TSMC G37 錨點"}
+          jg11: {detail: "TSMC G38 錨點"}
+          jg12: {detail: "TSMC G39 錨點 · 總監／Fellow 雙軌"}
+          jg13: {detail: "TSMC G40 錨點"}
+          jg14: {detail: "TSMC G50 錨點 · 全球副總裁"}
+          jg15: {detail: "TSMC G51 錨點 · 全球資深副總裁"}
+          jg16: {detail: "TSMC G52 錨點 · 執行董事會層級"}
+          ceo: {detail: "企業最高領導層"}
+      tw_gov:
+        label: "臺灣公務員體系"
+        short_label: "臺灣政府"
+        nodes:
+          rank4: {detail: "初階公務人員"}
+          rank5: {detail: "委任職等高段支援職"}
+          rank6: {detail: "專業職系起點"}
+          rank7: {detail: "資深專業人員"}
+          rank8: {detail: "中階管理"}
+          rank9: {detail: "第一線主管"}
+          rank10: {detail: "中高階管理"}
+          rank11: {detail: "高階管理"}
+          rank12: {detail: "資深高階主管"}
+          rank13: {detail: "主要職能領導"}
+          rank14: {detail: "最高常任文官"}
+          service_head: {detail: "全政府領導範圍"}
+          ministers: {detail: "政務領導"}
+          national_head: {detail: "國家最高行政領導"}
+      astar:
+        label: "新加坡科技研究局（A*STAR）"
+        short_label: "A*STAR"
+        nodes:
+          operator: {detail: "營運、設施、實驗室與技術支援職系"}
+          research_eng: {detail: "研究專業職系起點"}
+          senior_research_scientist: {detail: "合併的資深研究個人貢獻者職級帶 · 對應 ASML L7"}
+          lead_senior_scientist: {detail: "合併的技術領導／資深科學家職級帶 · 對應 ASML L8"}
+          principal_scientist: {detail: "高於 Lead Research Engineer 的首席工程／科學職系"}
+          senior_principal: {detail: "研究部門領導"}
+          executive_director: {detail: "研究機構／主要職能領導"}
+          senior_director: {detail: "企業研究領導 · 對應 ASML L11 Senior Manager"}
+          executive_vp: {detail: "A*STAR 內對等的頂尖科學與行政領導雙軌"}
+          leadership: {detail: "平行的新加坡公共研究體系天花板；錨定 Deputy Secretary 責任範圍"}
+          shared_senior_perm_sec: {detail: "A*STAR 專屬職系之上的共用新加坡政府主幹 · 全政府專業體系領導"}
+          shared_ministers: {detail: "共用的新加坡政務領導層 · 部長至副總理"}
+          shared_pm: {detail: "共用的新加坡政府首長層級 · 國家行政首長"}

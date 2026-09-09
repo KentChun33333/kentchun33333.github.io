@@ -11,9 +11,19 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "data_table.yaml"
+I18N_SOURCE = ROOT / "data_table.i18n.yaml"
 TARGET = ROOT / "data_table.generated.js"
 REQUIRED_NODE_FIELDS = {"id", "grade", "title", "compensation", "detail", "tier", "level"}
 VALID_TIERS = {"junior", "middle", "superscale", "political"}
+REQUIRED_I18N_UI_FIELDS = {
+    "language", "primary_axis", "select_primary", "visible_columns",
+    "toggle_columns", "search_placeholder", "choose_view", "stack_chart",
+    "detail_table", "all_levels", "political_apex", "senior_executive",
+    "management_tech", "professional_entry", "primary", "stack_note",
+    "no_grade", "continues", "coverage_band", "anchored", "projected",
+    "grades", "not_provided", "clear_selection", "graph_unavailable",
+    "axis_status",
+}
 
 
 def validate(data: dict) -> None:
@@ -48,12 +58,69 @@ def validate(data: dict) -> None:
             raise ValueError(f"anchor weight must be within (0, 1]: {edge}")
 
 
+def validate_i18n(data: dict, i18n: dict) -> None:
+    languages = i18n.get("languages", {})
+    default_language = i18n.get("default_language")
+    if not languages or default_language not in languages:
+        raise ValueError("i18n must define languages and a valid default_language")
+
+    institutions = data["institutions"]
+    known_node_ids = {
+        institution_id: {node["id"] for node in institution["nodes"]}
+        for institution_id, institution in institutions.items()
+    }
+    for language_id, language in languages.items():
+        missing_ui = REQUIRED_I18N_UI_FIELDS - set(language.get("ui", {}))
+        if missing_ui:
+            raise ValueError(
+                f"i18n language {language_id} is missing UI fields: {sorted(missing_ui)}"
+            )
+        localized_institutions = language.get("institutions", {})
+        unknown_institutions = set(localized_institutions) - set(institutions)
+        if unknown_institutions:
+            raise ValueError(
+                f"i18n language {language_id} has unknown institutions: "
+                f"{sorted(unknown_institutions)}"
+            )
+        missing_institutions = set(institutions) - set(localized_institutions)
+        if missing_institutions:
+            raise ValueError(
+                f"i18n language {language_id} is missing institutions: "
+                f"{sorted(missing_institutions)}"
+            )
+        for institution_id, localized in localized_institutions.items():
+            missing_labels = {"label", "short_label"} - set(localized)
+            if missing_labels:
+                raise ValueError(
+                    f"i18n language {language_id} is missing labels for "
+                    f"{institution_id}: {sorted(missing_labels)}"
+                )
+            unknown_nodes = set(localized.get("nodes", {})) - known_node_ids[institution_id]
+            if unknown_nodes:
+                raise ValueError(
+                    f"i18n language {language_id} has unknown nodes for "
+                    f"{institution_id}: {sorted(unknown_nodes)}"
+                )
+            if language_id != default_language:
+                translated_nodes = localized.get("nodes", {})
+                missing_nodes = known_node_ids[institution_id] - set(translated_nodes)
+                if missing_nodes:
+                    raise ValueError(
+                        f"i18n language {language_id} is missing node descriptions for "
+                        f"{institution_id}: {sorted(missing_nodes)}"
+                    )
+
+
 def main() -> None:
     data = yaml.safe_load(SOURCE.read_text(encoding="utf-8"))
     validate(data)
+    if I18N_SOURCE.exists():
+        i18n = yaml.safe_load(I18N_SOURCE.read_text(encoding="utf-8"))
+        validate_i18n(data, i18n)
+        data["i18n"] = i18n
     payload = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
     TARGET.write_text(
-        "// Generated from data_table.yaml. Do not edit directly.\n"
+        "// Generated from data_table.yaml and data_table.i18n.yaml. Do not edit directly.\n"
         f"window.LEVEL_GRAPH={payload};\n",
         encoding="utf-8",
     )

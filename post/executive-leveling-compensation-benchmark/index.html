@@ -367,6 +367,36 @@
     }
     .view-btn:last-child { border-right: 0; }
     .view-btn.active { background: var(--lux); color: #ffffff; }
+    .language-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .language-control > span {
+      color: var(--muted);
+      font: 700 10px 'IBM Plex Mono', monospace;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .language-switch {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    .language-btn {
+      border: 0;
+      border-right: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--muted);
+      padding: 7px 10px;
+      font: 700 10px 'IBM Plex Mono', monospace;
+      cursor: pointer;
+    }
+    .language-btn:last-child { border-right: 0; }
+    .language-btn.active { background: var(--lux); color: #ffffff; }
 
     /* Continuous mono-stacks: every company fills the scale with native grades. */
     .stack-chart-wrap {
@@ -906,8 +936,15 @@
 
       <!-- Interactive Toolbar -->
       <div class="table-toolbar">
+        <div class="language-control">
+          <span id="languageLabel">Language</span>
+          <div class="language-switch" id="languageSwitch" role="group" aria-label="Language">
+            <button type="button" class="language-btn active" data-language="en" aria-pressed="true">EN</button>
+            <button type="button" class="language-btn" data-language="zh-Hant" aria-pressed="false">繁中</button>
+          </div>
+        </div>
         <div class="axis-control">
-          <label for="primaryAxisSelect">Primary axis</label>
+          <label for="primaryAxisSelect" id="primaryAxisLabel">Primary axis</label>
           <select id="primaryAxisSelect" aria-label="Select primary institution"></select>
         </div>
         <div class="company-toggle-control" id="companyToggleControl" aria-label="Show or hide company columns">
@@ -1744,7 +1781,7 @@
 
   </div>
 
-  <script src="data_table.generated.js?v=20260909-asml-sd"></script>
+  <script src="data_table.generated.js?v=20260909-i18n"></script>
   <!-- Interactive Table JavaScript -->
   <script>
     (() => {
@@ -1761,11 +1798,25 @@
       const detailTableWrap = document.getElementById('detailTableWrap');
       const viewButtons = [...document.querySelectorAll('.view-btn')];
       const companyToggleControl = document.getElementById('companyToggleControl');
+      const languageSwitch = document.getElementById('languageSwitch');
+      const languageLabel = document.getElementById('languageLabel');
+      const primaryAxisLabel = document.getElementById('primaryAxisLabel');
+      const languageButtons = [...document.querySelectorAll('.language-btn')];
+      const i18nConfig = graph?.i18n || {};
+      const languages = i18nConfig.languages || {};
       let activeTierFilter = 'all';
       let primaryAxis = graph && graph.default_axis;
+      let activeLanguage = i18nConfig.default_language || 'en';
+
+      try {
+        const savedLanguage = localStorage.getItem('benchmark-language');
+        if (savedLanguage && languages[savedLanguage]) activeLanguage = savedLanguage;
+      } catch (_) {
+        // File previews or privacy settings may disable local storage.
+      }
 
       if (!graph || !table || !axisSelect) {
-        if (axisStatus) axisStatus.textContent = 'Graph data unavailable; showing the static fallback table.';
+        if (axisStatus) axisStatus.textContent = uiText('graph_unavailable');
         return;
       }
 
@@ -1788,17 +1839,47 @@
           .replaceAll("'", '&#039;');
       }
 
+      function interpolate(template, values = {}) {
+        return String(template ?? '').replace(/\{(\w+)\}/g, (_, key) => values[key] ?? `{${key}}`);
+      }
+
+      function uiText(key, values = {}) {
+        const fallback = languages.en?.ui?.[key] ?? key;
+        const translated = languages[activeLanguage]?.ui?.[key] ?? fallback;
+        return interpolate(translated, values);
+      }
+
+      function institutionText(institutionId, field) {
+        return languages[activeLanguage]?.institutions?.[institutionId]?.[field]
+          ?? languages.en?.institutions?.[institutionId]?.[field]
+          ?? institutions[institutionId]?.[field]
+          ?? '';
+      }
+
+      function nodeText(institutionId, node, field) {
+        return languages[activeLanguage]?.institutions?.[institutionId]?.nodes?.[node.id]?.[field]
+          ?? node[field]
+          ?? '';
+      }
+
+      function nodeCompensation(node) {
+        return activeLanguage === 'zh-Hant' && node.compensation === 'Not provided'
+          ? uiText('not_provided')
+          : node.compensation;
+      }
+
       function visibleColumns() {
         return [primaryAxis, ...institutionIds.filter(id => id !== primaryAxis && visibleInstitutionIds.has(id))];
       }
 
       function renderCompanyToggles() {
         if (!companyToggleControl) return;
-        companyToggleControl.innerHTML = `<span>Visible columns</span>${institutionIds.map(id => {
+        companyToggleControl.setAttribute('aria-label', uiText('toggle_columns'));
+        companyToggleControl.innerHTML = `<span>${escapeHtml(uiText('visible_columns'))}</span>${institutionIds.map(id => {
           const isPrimary = id === primaryAxis;
           return `<label class="company-check">
             <input type="checkbox" value="${escapeHtml(id)}" ${visibleInstitutionIds.has(id) ? 'checked' : ''} ${isPrimary ? 'disabled' : ''}/>
-            ${escapeHtml(institutions[id].short_label)}
+            ${escapeHtml(institutionText(id, 'short_label'))}
           </label>`;
         }).join('')}`;
         companyToggleControl.querySelectorAll('input[type="checkbox"]').forEach(input => {
@@ -1900,14 +1981,15 @@
         const note = isPrimary ? '' : anchorNote(institutionId, node);
         if (continuation) {
           return `<div class="mapped-node continuation-node">
-            <span class="cell-title">↳ ${escapeHtml(node.grade)} continues</span>
-            <span class="cell-detail">Coverage band: ${escapeHtml(coverage)}</span>
+            <span class="cell-title">↳ ${escapeHtml(node.grade)} ${escapeHtml(uiText('continues'))}</span>
+            <span class="cell-detail">${escapeHtml(uiText('coverage_band'))}: ${escapeHtml(coverage)}</span>
           </div>`;
         }
+        const detail = nodeText(institutionId, node, 'detail');
         return `<div class="mapped-node">
           <span class="cell-title">${escapeHtml(node.grade)} · ${escapeHtml(node.title)}</span>
-          <span class="cell-salary${node.tier === 'political' ? ' peak' : ''}">${escapeHtml(node.compensation)}</span>
-          <span class="cell-detail">${escapeHtml(node.detail)}</span>
+          <span class="cell-salary${node.tier === 'political' ? ' peak' : ''}">${escapeHtml(nodeCompensation(node))}</span>
+          <span class="cell-detail">${escapeHtml(detail)}</span>
           ${note ? `<span class="anchor-badge">${escapeHtml(note)}</span>` : ''}
         </div>`;
       }
@@ -1948,8 +2030,8 @@
         const scaleUpper = 100;
         const scaleSpan = 100;
         const headers = columnIds.map((id, index) => `<div class="stack-company-head${index === 0 ? ' primary' : ''}">
-          ${index === 0 ? 'Primary · ' : ''}${escapeHtml(institutions[id].label)}
-          <small>Entry → Apex · block height = responsibility span</small>
+          ${index === 0 ? `${escapeHtml(uiText('primary'))} · ` : ''}${escapeHtml(institutionText(id, 'label'))}
+          <small>${escapeHtml(uiText('stack_note'))}</small>
         </div>`);
 
         const lanes = columnIds.map((institutionId, columnIndex) => {
@@ -2007,15 +2089,17 @@
               ? escapeHtml(item.span.label)
               : (startGrade === endGrade ? startGrade : `${startGrade} → ${endGrade}`);
             const note = institutionId === primaryAxis ? '' : anchorNote(institutionId, item.node);
-            const searchText = `${item.node.grade} ${item.node.title} ${item.node.compensation} ${item.node.detail} ${note}`.toLowerCase();
+            const detail = nodeText(institutionId, item.node, 'detail');
+            const compensation = nodeCompensation(item.node);
+            const searchText = `${institutionText(institutionId, 'label')} ${item.node.grade} ${item.node.title} ${item.node.compensation} ${item.node.detail} ${detail} ${note}`.toLowerCase();
             return `<article class="stack-level-card${columnIndex === 0 ? ' primary' : ''}"
               style="top:${top}px;height:${height}px"
               data-tier="${escapeHtml(item.node.tier)}" data-search="${escapeHtml(searchText)}"
-              title="${escapeHtml(`${item.node.grade} · ${item.node.title} | ${item.node.compensation} | ${item.node.detail}${note ? ` | ${note}` : ''}`)}" tabindex="0">
-              <span class="stack-range">${range}${item.anchored ? ' · anchored' : ' · projected'}</span>
+              title="${escapeHtml(`${item.node.grade} · ${item.node.title} | ${compensation} | ${detail}${note ? ` | ${note}` : ''}`)}" tabindex="0">
+              <span class="stack-range">${range}${item.anchored ? ` · ${escapeHtml(uiText('anchored'))}` : ` · ${escapeHtml(uiText('projected'))}`}</span>
               <span class="cell-title">${escapeHtml(item.node.grade)} · ${escapeHtml(item.node.title)}</span>
-              <span class="cell-salary${item.node.tier === 'political' ? ' peak' : ''}">${escapeHtml(item.node.compensation)}</span>
-              <span class="cell-detail">${escapeHtml(item.node.detail)}</span>
+              <span class="cell-salary${item.node.tier === 'political' ? ' peak' : ''}">${escapeHtml(compensation)}</span>
+              <span class="cell-detail">${escapeHtml(detail)}</span>
               ${note ? `<span class="anchor-badge">${escapeHtml(note)}</span>` : ''}
             </article>`;
           }).join('');
@@ -2037,7 +2121,7 @@
         );
 
         table.querySelector('thead').innerHTML = `<tr>${columnIds.map((id, index) =>
-          `<th data-col="${index}"${index === 0 ? ' class="col-active"' : ''}>${index === 0 ? 'Primary · ' : ''}${escapeHtml(institutions[id].label)}</th>`
+          `<th data-col="${index}"${index === 0 ? ' class="col-active"' : ''}>${index === 0 ? `${escapeHtml(uiText('primary'))} · ` : ''}${escapeHtml(institutionText(id, 'label'))}</th>`
         ).join('')}</tr>`;
 
         table.querySelector('tbody').innerHTML = primaryNodes.map((primaryNode, rowIndex) => {
@@ -2046,15 +2130,18 @@
             const nodes = projections[institutionId][rowIndex];
             cells.push(`<td><div class="node-stack">${nodes.length
               ? nodes.map(item => renderNode(institutionId, item.node, false, item.continuation, item.coverage)).join('')
-              : '<span class="empty-map">No grade anchored at this level</span>'}</div></td>`);
+              : `<span class="empty-map">${escapeHtml(uiText('no_grade'))}</span>`}</div></td>`);
           });
           return `<tr data-tier="${escapeHtml(primaryNode.tier)}" data-level="${escapeHtml(primaryNode.level)}">${cells.join('')}</tr>`;
         }).join('');
 
-        axisTierBadge.textContent = `${primaryNodes.length} ${primaryInstitution.short_label.toUpperCase()} GRADES`;
+        const shortLabel = institutionText(primaryAxis, 'short_label');
+        axisTierBadge.textContent = activeLanguage === 'en'
+          ? `${primaryNodes.length} ${shortLabel.toUpperCase()} ${uiText('grades').toUpperCase()}`
+          : `${primaryNodes.length} ${shortLabel}${uiText('grades')}`;
         const allLevelsButton = pillButtons.find(button => button.dataset.filter === 'all');
-        if (allLevelsButton) allLevelsButton.textContent = `All Levels (${primaryNodes.length})`;
-        axisStatus.textContent = `${primaryInstitution.label} is the primary axis on the invariant global responsibility coordinate (0–100); continuous company stacks retain a compact four-line minimum and the same responsibility anchors.`;
+        if (allLevelsButton) allLevelsButton.textContent = uiText('all_levels', { count: primaryNodes.length });
+        axisStatus.textContent = uiText('axis_status', { institution: institutionText(primaryAxis, 'label') });
         renderStackChart();
         bindTableInteractions();
         runMasterFilter();
@@ -2099,13 +2186,54 @@
         });
       }
 
-      institutionIds.forEach(id => {
-        const option = document.createElement('option');
-        option.value = id;
-        option.textContent = institutions[id].label;
-        option.selected = id === primaryAxis;
-        axisSelect.appendChild(option);
-      });
+      function renderAxisOptions() {
+        axisSelect.innerHTML = institutionIds.map(id =>
+          `<option value="${escapeHtml(id)}"${id === primaryAxis ? ' selected' : ''}>${escapeHtml(institutionText(id, 'label'))}</option>`
+        ).join('');
+      }
+
+      function renderLanguageControls() {
+        document.documentElement.lang = activeLanguage;
+        if (languageLabel) languageLabel.textContent = uiText('language');
+        if (languageSwitch) languageSwitch.setAttribute('aria-label', uiText('language'));
+        if (primaryAxisLabel) primaryAxisLabel.textContent = uiText('primary_axis');
+        axisSelect.setAttribute('aria-label', uiText('select_primary'));
+        if (searchInput) searchInput.placeholder = uiText('search_placeholder');
+        if (clearBtn) clearBtn.textContent = uiText('clear_selection');
+        const viewKeys = { stack: 'stack_chart', table: 'detail_table' };
+        viewButtons.forEach(button => {
+          button.textContent = uiText(viewKeys[button.dataset.view]);
+          button.parentElement?.setAttribute('aria-label', uiText('choose_view'));
+        });
+        const filterKeys = {
+          political: 'political_apex',
+          superscale: 'senior_executive',
+          middle: 'management_tech',
+          junior: 'professional_entry'
+        };
+        pillButtons.forEach(button => {
+          if (button.dataset.filter !== 'all') button.textContent = uiText(filterKeys[button.dataset.filter]);
+        });
+        languageButtons.forEach(button => {
+          const active = button.dataset.language === activeLanguage;
+          button.classList.toggle('active', active);
+          button.setAttribute('aria-pressed', String(active));
+        });
+      }
+
+      function setLanguage(languageId) {
+        if (!languages[languageId] || languageId === activeLanguage) return;
+        activeLanguage = languageId;
+        try {
+          localStorage.setItem('benchmark-language', activeLanguage);
+        } catch (_) {
+          // Language still applies for the current page session.
+        }
+        renderLanguageControls();
+        renderAxisOptions();
+        renderCompanyToggles();
+        renderTable();
+      }
 
       axisSelect.addEventListener('change', () => {
         primaryAxis = axisSelect.value;
@@ -2130,6 +2258,9 @@
           runMasterFilter();
         });
       });
+      languageButtons.forEach(button => {
+        button.addEventListener('click', () => setLanguage(button.dataset.language));
+      });
       clearBtn?.addEventListener('click', () => {
         table.querySelectorAll('.row-selected, .col-active, .col-highlight').forEach(item =>
           item.classList.remove('row-selected', 'col-active', 'col-highlight'));
@@ -2137,6 +2268,8 @@
         stackChart?.querySelectorAll('.selected').forEach(item => item.classList.remove('selected'));
       });
 
+      renderLanguageControls();
+      renderAxisOptions();
       renderCompanyToggles();
       renderTable();
     })();
