@@ -392,19 +392,34 @@
       "bytes": 18803
     },
     {
+      "path": "post/executive-leveling-compensation-benchmark/doc.md",
+      "sha256": "fdc01d2d230f69c4679fa2edf70b02f47b57af68e5a664bd99b20cc8243311c3",
+      "bytes": 15656
+    },
+    {
       "path": "post/executive-leveling-compensation-benchmark/index.html",
-      "sha256": "5f03fd3f403419b30e410aae3d54070463c521372d44bcbfc8eae518cfa7092a",
-      "bytes": 72753
+      "sha256": "d18d5844c48e4de2f31e8df7186f1dd9a21a9fcfac184f7b9c15ff4d104973de",
+      "bytes": 99693
     },
     {
       "path": "post/executive-leveling-compensation-benchmark/ref-knowledge.md",
-      "sha256": "6406a839e1868d7b5468d19ff39a929b861e06edfb824767650fce8de2aad4b1",
-      "bytes": 20177
+      "sha256": "6a13dd61adea77419ba405aa77048ebcd3cb09921600a023c5940d60efee6951",
+      "bytes": 21608
+    },
+    {
+      "path": "post/executive-leveling-compensation-benchmark/ref-ocbc-uob.md",
+      "sha256": "3ae09d3825875720df9f0ef6f69019a0757ee3c69db1f38c0e15eb63c0c4d3d2",
+      "bytes": 519
     },
     {
       "path": "post/executive-leveling-compensation-benchmark/ref-tsmc-grade.md",
       "sha256": "56950804c43113eada892d44c8806ee87088bff9ccc318522e51f37cb8dccca5",
       "bytes": 1651
+    },
+    {
+      "path": "post/executive-leveling-compensation-benchmark/ref-twgov-sg-domestic.md",
+      "sha256": "4d3c69e198d03acb7e6dcb5398af5d955a0da8edd3920a5486df17f566e954f7",
+      "bytes": 3777
     },
     {
       "path": "post/executive-leveling-compensation-benchmark/ref_tsmc-asml.md",
@@ -413,8 +428,8 @@
     },
     {
       "path": "post/executive-leveling-compensation-benchmark/sg_government_bank_taiwan_tsmc_asml_crosswalk.html",
-      "sha256": "c5eceb5c6e1709e68c4a6f4e51b086000e9bb685e3d00a0e5ea244c4dad38160",
-      "bytes": 19671
+      "sha256": "e6d577528f47cdb2a7ea8cb62d303e07352f614778c641f359b290d7025ee182",
+      "bytes": 19249
     },
     {
       "path": "post/hostpersonalgpt/index.html",
