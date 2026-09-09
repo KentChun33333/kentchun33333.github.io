@@ -441,7 +441,7 @@ $('#v10FlowTools .v10-chip').forEach(b=>b.onclick=()=>{$('#v10FlowTools .v10-chi
 $('#v10TimelineTools .v10-chip').forEach(b=>b.onclick=()=>{$('#v10TimelineTools .v10-chip').forEach(x=>x.classList.toggle('active',x===b));v10RenderTimeline(b.dataset.time)});
 $('#v10DonutTools .v10-chip').forEach(b=>b.onclick=()=>{$('#v10DonutTools .v10-chip').forEach(x=>x.classList.toggle('active',x===b));v10RenderDonut(b.dataset.donut)});
 const _v10GoPage=goPage;goPage=function(n){_v10GoPage(n);if(n===2)setTimeout(v10Refresh,0)};
-$('.source-option').forEach(b=>b.addEventListener('click',()=>{if(currentPage===2)setTimeout(v10Refresh,0)}));
+$$('.source-option').forEach(b=>b.addEventListener('click',()=>{if(currentPage===2)setTimeout(v10Refresh,0)}));
 $('#p2Lookback')?.addEventListener('change',e=>v10RenderTimeline(e.target.value==='24 months'?'24m':e.target.value==='12 months'?'12m':'6m'));
 v10Refresh();
 
