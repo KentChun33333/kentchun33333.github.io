@@ -1,0 +1,1810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank of Singapore — Shared Entities + Direct Relationships</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --red-primary: #c0392b;
+            --red-dark: #96281b;
+            --red-light: #e74c3c;
+            --red-soft: #fadbd8;
+            --red-subtle: #fdf2f0;
+            --red-glow: rgba(192, 57, 43, 0.15);
+            --white-bg: #ffffff;
+            --white-card: #ffffff;
+            --white-surface: #f8f9fa;
+            --gray-border: #e0e0e0;
+            --gray-light: #f0f0f0;
+            --text-primary: #1a1a1a;
+            --text-secondary: #555555;
+            --text-muted: #999999;
+            --success: #27ae60;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.1);
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--white-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .header {
+            background: var(--white-card);
+            border-bottom: 3px solid var(--red-primary);
+            padding: 16px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .logo {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 15px;
+            color: white;
+            box-shadow: 0 4px 12px var(--red-glow);
+        }
+        .header-title h1 {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .header-title span {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .badge {
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+        .badge-green {
+            background: #eafaf1;
+            border: 1px solid #a9dfbf;
+            color: var(--success);
+        }
+        .badge-gray {
+            background: #f5f5f5;
+            border: 1px solid #d5d5d5;
+            color: #999999;
+        }
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 28px 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        .module {
+            background: var(--white-card);
+            border: 1px solid var(--gray-border);
+            border-radius: 12px;
+            padding: 22px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        .module::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--red-primary), var(--red-light), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .module:hover::before {
+            opacity: 1;
+        }
+        .module:hover {
+            border-color: var(--red-soft);
+            box-shadow: var(--shadow-md);
+        }
+        .module-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--red-primary);
+        }
+        .module-title .icon {
+            width: 30px;
+            height: 30px;
+            background: var(--red-subtle);
+            border: 1px solid var(--red-soft);
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        .module-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            line-height: 1.5;
+        }
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            background: var(--white-surface);
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            font-size: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            flex-shrink: 0;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(39,174,96,0.4); }
+            50% { opacity: 0.4; box-shadow: none; }
+        }
+        .status-bar .sep {
+            color: var(--gray-border);
+            margin: 0 2px;
+        }
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+        }
+        .stat-card {
+            background: var(--white-surface);
+            border: 1px solid var(--gray-light);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            border-color: var(--red-soft);
+            box-shadow: var(--shadow-sm);
+        }
+        .stat-number {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--red-primary);
+        }
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 3px;
+        }
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .checkbox-grid.two-col {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .checkbox-grid.four-col {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            background: var(--white-surface);
+            border: 1px solid var(--gray-light);
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 12px;
+            user-select: none;
+        }
+        .checkbox-item:hover {
+            border-color: var(--red-soft);
+            background: var(--red-subtle);
+            transform: translateY(-1px);
+        }
+        .checkbox-item.checked {
+            background: var(--red-subtle);
+            border-color: var(--red-primary);
+        }
+        .checkbox-item input[type="checkbox"] {
+            display: none;
+        }
+        .checkbox-box {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--gray-border);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .checkbox-item.checked .checkbox-box {
+            background: var(--red-primary);
+            border-color: var(--red-primary);
+        }
+        .checkbox-item.checked .checkbox-box::after {
+            content: '✓';
+            font-size: 10px;
+            color: white;
+            font-weight: bold;
+        }
+        .checkbox-label {
+            font-weight: 500;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+        .form-group {
+            margin-bottom: 14px;
+        }
+        .form-label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        select, input[type="text"], input[type="date"], input[type="number"], textarea {
+            width: 100%;
+            padding: 9px 13px;
+            background: var(--white-surface);
+            border: 1px solid var(--gray-border);
+            border-radius: 7px;
+            color: var(--text-primary);
+            font-size: 13px;
+            transition: all 0.2s ease;
+            outline: none;
+            font-family: inherit;
+        }
+        select:focus, input:focus, textarea:focus {
+            border-color: var(--red-primary);
+            box-shadow: 0 0 0 3px var(--red-glow);
+            background: white;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 70px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+        .form-row > * {
+            flex: 1;
+        }
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 5px;
+            background: var(--gray-light);
+            border-radius: 3px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--red-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px var(--red-glow);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: var(--red-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+        .range-value {
+            min-width: 38px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--red-primary);
+            background: var(--red-subtle);
+            padding: 4px 8px;
+            border-radius: 5px;
+        }
+        .toggle-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--white-surface);
+            border: 1px solid var(--gray-border);
+            padding: 8px 14px;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            font-size: 12px;
+        }
+        .toggle-item:hover {
+            border-color: var(--red-soft);
+        }
+        .toggle-item.active {
+            background: var(--red-subtle);
+            border-color: var(--red-primary);
+        }
+        .toggle-switch {
+            width: 32px;
+            height: 18px;
+            background: var(--gray-border);
+            border-radius: 9px;
+            position: relative;
+            transition: background 0.3s ease;
+            flex-shrink: 0;
+        }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .toggle-item.active .toggle-switch {
+            background: var(--red-primary);
+        }
+        .toggle-item.active .toggle-switch::after {
+            left: 16px;
+        }
+        .tabs {
+            display: flex;
+            gap: 3px;
+            margin-bottom: 14px;
+            background: var(--white-surface);
+            padding: 3px;
+            border-radius: 8px;
+            border: 1px solid var(--gray-light);
+        }
+        .tab {
+            flex: 1;
+            padding: 7px 10px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+            border: none;
+            background: transparent;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .tab.active {
+            background: var(--red-primary);
+            color: white;
+            box-shadow: 0 2px 8px var(--red-glow);
+        }
+        .tab:hover:not(.active) {
+            color: var(--text-primary);
+            background: white;
+        }
+        .prompt-output {
+            background: var(--white-surface);
+            border: 1px solid var(--gray-border);
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+            font-size: 11.5px;
+            line-height: 1.85;
+            color: var(--text-primary);
+            max-height: 480px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .prompt-output::-webkit-scrollbar {
+            width: 6px;
+        }
+        .prompt-output::-webkit-scrollbar-track {
+            background: var(--white-surface);
+        }
+        .prompt-output::-webkit-scrollbar-thumb {
+            background: var(--red-soft);
+            border-radius: 3px;
+        }
+        .prompt-output::-webkit-scrollbar-thumb:hover {
+            background: var(--red-primary);
+        }
+        .action-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+            align-items: center;
+        }
+        .btn {
+            padding: 11px 22px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+            color: white;
+            box-shadow: 0 4px 15px var(--red-glow);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--red-glow);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        .btn-secondary {
+            background: var(--white-surface);
+            color: var(--text-primary);
+            border: 1px solid var(--gray-border);
+        }
+        .btn-secondary:hover {
+            border-color: var(--red-primary);
+            color: var(--red-primary);
+            background: var(--red-subtle);
+        }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--gray-border);
+        }
+        .btn-ghost:hover {
+            border-color: var(--red-primary);
+            color: var(--red-primary);
+        }
+        .copy-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            padding: 5px 12px;
+            background: white;
+            border: 1px solid var(--gray-border);
+            border-radius: 5px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        .copy-btn:hover {
+            border-color: var(--red-primary);
+            color: var(--red-primary);
+        }
+        .copy-btn.copied {
+            color: var(--success) !important;
+            border-color: var(--success) !important;
+            background: #eafaf1;
+        }
+        .dual-link-visual {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 14px;
+            padding: 14px;
+            background: var(--white-surface);
+            border-radius: 10px;
+            border: 1px solid var(--gray-light);
+        }
+        .link-node {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+        .link-node.client {
+            background: var(--red-primary);
+            color: white;
+        }
+        .link-node.entity {
+            background: var(--white-surface);
+            border: 2px solid var(--red-primary);
+            color: var(--red-primary);
+            border-radius: 8px;
+        }
+        .link-line-entity {
+            width: 24px;
+            height: 0;
+            border-top: 2px solid var(--red-primary);
+        }
+        .link-line-rel {
+            width: 24px;
+            height: 0;
+            border-top: 2px dashed var(--red-light);
+        }
+        .link-legend {
+            display: flex;
+            gap: 16px;
+            margin-left: 12px;
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-line-solid {
+            width: 16px;
+            height: 0;
+            border-top: 2px solid var(--red-primary);
+        }
+        .legend-line-dash {
+            width: 16px;
+            height: 0;
+            border-top: 2px dashed var(--red-light);
+        }
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gray-border), transparent);
+            margin: 16px 0;
+        }
+        .graph-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+        .graph-preview-card {
+            background: var(--white-surface);
+            border: 1px solid var(--gray-light);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .graph-preview-card:hover {
+            border-color: var(--red-soft);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .graph-preview-card.selected {
+            border-color: var(--red-primary);
+            box-shadow: 0 0 0 3px var(--red-glow);
+        }
+        .graph-preview-thumb {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(135deg, #fafafa, #f0f0f0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .graph-preview-thumb svg {
+            width: 100%;
+            height: 100%;
+        }
+        .graph-preview-info {
+            padding: 12px 14px;
+        }
+        .graph-preview-info h4 {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        .graph-preview-info p {
+            font-size: 10px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+        .graph-preview-check {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--red-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .graph-preview-card.selected .graph-preview-check {
+            opacity: 1;
+        }
+        .graph-preview-check::after {
+            content: '✓';
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        @media (max-width: 1100px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 16px;
+            }
+            .checkbox-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .checkbox-grid.four-col {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .summary-stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .graph-preview-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            .header {
+                padding: 14px 16px;
+                flex-direction: column;
+                gap: 12px;
+            }
+            .container {
+                padding: 12px;
+            }
+            .checkbox-grid,
+            .checkbox-grid.two-col,
+            .checkbox-grid.four-col {
+                grid-template-columns: 1fr;
+            }
+            .summary-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .form-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .graph-preview-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.35s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">BoS</div>
+            <div class="header-title">
+                <h1>Shared Entities + Direct Relationships</h1>
+                <span>Bank of Singapore</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="badge badge-green">● CRM Active</div>
+            <div class="badge badge-green">● FileNet Active</div>
+            <div class="badge badge-gray">● T24</div>
+            <div class="badge badge-gray">● HELIOS</div>
+        </div>
+    </div>
+    <div class="container">
+        <!-- Status & Stats -->
+        <div class="module full-width">
+            <div class="status-bar">
+                <div class="status-dot"></div>
+                <span>Module Active</span>
+                <span class="sep">|</span>
+                <span>Engines: <strong>Entity Matching + Relationship Graph + CRM Core + Document Repository</strong></span>
+                <span class="sep">|</span>
+                <span>Dataset: <strong>840K clients · 2.4M entities · 1.2M relationship edges</strong></span>
+                <span style="margin-left:auto; color:var(--text-muted);">Last Sync: <span id="lastSync">Just now</span></span>
+            </div>
+            <div class="summary-stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="statEntities">0</div>
+                    <div class="stat-label">Entity Types</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statRelTypes">0</div>
+                    <div class="stat-label">Relationship Layers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statGraphs">0</div>
+                    <div class="stat-label">Visualizations</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statWeight">—</div>
+                    <div class="stat-label">Chain Depth</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statComplexity">Med</div>
+                    <div class="stat-label">Query Complexity</div>
+                </div>
+            </div>
+        </div>
+        <!-- Module 1: Shared Entity Types -->
+        <div class="module">
+            <div class="module-title">
+                <div class="icon">🏢</div>
+                Shared Entity Types
+            </div>
+            <p class="module-desc">Shared business or personal entities that link clients together. When two or more clients connect to the same entity, they're grouped. Shown as solid red lines in the network map.</p>
+            <div class="checkbox-grid" id="entityTypeGrid">
+                <div class="checkbox-item checked" data-value="company">
+                    <input type="checkbox" checked>
+                    <div class="checkbox-box"></div>
+                    <span class="checkbox-label">Shared Company / SPV</span>
+                </div>
+                <div class="checkbox-item checked" data-value="beneficial_owner">
+                    <input type="checkbox" checked>
+                    <div class="checkbox-box"></div>
+                    <span class="checkbox-label">Beneficial Ownership</span>
+                </div>
+                <div class="checkbox-item checked" data-value="trust">
+                    <input type="checkbox" checked>
+                    <div class="checkbox-box"></div>
+                    <span class="checkbox-label">Trust Structure</span>
+                </div>
+                <div class="checkbox-item checked" data-value="board_director">
+                    <input type="checkbox" checked>
+                    <div class="checkbox-box"></div>
+                    <span class="checkbox-label">Board Director / Officer</span>
+                </div>
+                <div class="checkbox-item" data-value="family_office">
+                    <input type="checkbox">
+                    <div class="checkbox-box"></div>
+                    <span class="checkbox-label">Family Office</span>
+                </div>
+                <div class="checkbox-item" data-value="investment_vehicle">
+                    <input type="checkbox">
+                    <div class="checkbox-box"></div>
+                    <span class="checkbox-label">Investment Vehicle / Fund</span>
+                </div>
+                <div class="checkbox-item" data-value="foundation">
+                    <input type="checkbox">
+                    <div class="checkbox-box"></div>
+                    <span class="checkbox-label">Foundation</span>
+                </div>
+                <div class="checkbox-item" data-value="real_estate">
+                    <input type="checkbox">
+                    <div class="checkbox-box"></div>
+                    <span class="checkbox-label">Shared Real Estate</span>
+                </div>
+                <div class="checkbox-item" data-value="legal_rep">
+                    <input type="checkbox">
+                    <div class="checkbox-box"></div>
+                    <span class="checkbox-label">Legal Rep / Counsel</span>
+                </div>
+                <div class="checkbox-item" data-value="advisor">
+                    <input type="checkbox">
+                    <div class="checkbox-box"></div>
+                    <span class="checkbox-label">Shared Advisor</span>
+                </div>
+                <div class="checkbox-item" data-value="address">
+                    <input type="checkbox">
+                    <div class="checkbox-box"></div>
+                    <span class="checkbox-label">Shared Address</span>
+                </div>
+                <div class="checkbox-item" data-value="nominee">
+                    <input type="checkbox">
+                    <div class="checkbox-box"></div>
+                    <span class="checkbox-label">Nominee Arrangement</span>
+                </div>
+                <div class="checkbox-item" data-value="bank_account">
+                    <input type="checkbox">
+                    <div class="checkbox-box"></div>
+                    <span class="checkbox-label">Shared Bank Account</span>
+                </div>
+                <div class="checkbox-item" data-value="phone_email">
+                    <input type="checkbox">
+                    <div class="checkbox-box"></div>
+                    <span class="checkbox-label">Phone / Email</span>
+                </div>
+            </div>
+        </div>
+        <!-- Module 2: Client Relationship Types -->
+        <div class="module">
+            <div class="module-title">
+                <div class="icon">🤝</div>
+                Client-to-Client Relationship Types
+            </div>
+            <p class="module-desc">Select the relationship layers to include in the analysis. Each layer draws from different data sources within the CRM and document repository.</p>
+            <div class="checkbox-grid" id="relTypeGrid" style="grid-template-columns: 1fr; gap: 10px;">
+                <div class="checkbox-item checked" data-value="portfolio_roles" style="padding: 14px 16px;">
+                    <input type="checkbox" checked>
+                    <div class="checkbox-box"></div>
+                    <div>
+                        <span class="checkbox-label" style="font-size:13px;">Client to Portfolio Roles</span>
+                        <p style="font-size:10px;color:var(--text-muted);margin-top:2px;">Director, Trustee, Beneficiary, Signatory, Power of Attorney (POA), Nominee, and other formal roles in portfolio entities</p>
+                    </div>
+                </div>
+                <div class="checkbox-item checked" data-value="client_relationships" style="padding: 14px 16px;">
+                    <input type="checkbox" checked>
+                    <div class="checkbox-box"></div>
+                    <div>
+                        <span class="checkbox-label" style="font-size:13px;">Client to Client Relationships</span>
+                        <p style="font-size:10px;color:var(--text-muted);margin-top:2px;">Direct interpersonal links: family, referral, business partner, social circle, co-investor, mentor, alumni</p>
+                    </div>
+                </div>
+                <div class="checkbox-item" data-value="writeup_relationships" style="padding: 14px 16px;">
+                    <input type="checkbox">
+                    <div class="checkbox-box"></div>
+                    <div>
+                        <span class="checkbox-label" style="font-size:13px;">Additional Relationships Found in Client Write-ups</span>
+                        <p style="font-size:10px;color:var(--text-muted);margin-top:2px;">AI-identified relationships extracted from RM notes, meeting summaries, email transcripts, and document repository files. ⚠️ Increases query complexity to High.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Module 3: Client Base & Scope -->
+        <div class="module">
+            <div class="module-title">
+                <div class="icon">🏦</div>
+                Client Base & Scope
+            </div>
+            <div class="form-group">
+                <label class="form-label">Client Population</label>
+                <select id="clientPopulation">
+                    <option value="all">All Clients</option>
+                    <option value="ulhwn">ULHN — Ultra High Net Worth ($30M+)</option>
+                    <option value="hwn">HWN — High Net Worth ($5M – $30M)</option>
+                    <option value="affluent">Affluent ($1M – $5M)</option>
+                    <option value="segment">Custom Segment (tag-based)</option>
+                    <option value="new_clients">New Clients (last 12 months)</option>
+                    <option value="cross_sell">Cross-Sell Targets</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Jurisdiction Scope</label>
+                <select id="jurisdiction">
+                    <option value="global">Global (All Jurisdictions)</option>
+                    <option value="gulf">Gulf Region (UAE, KSA, Qatar, Oman)</option>
+                    <option value="europe">Europe (UK, CH, DE, FR, LU)</option>
+                    <option value="asia">Asia-Pacific (SG, HK, JP, AU)</option>
+                    <option value="americas">Americas (US, CA, BR, MX)</option>
+                    <option value="multi">Multi-Jurisdiction Only (2+)</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Min AUM (USD M)</label>
+                    <input type="number" id="minAum" placeholder="0" value="5">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Max Groups</label>
+                    <input type="number" id="maxGroups" placeholder="50" value="25">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Sector / Industry Filter</label>
+                <select id="sector">
+                    <option value="all">All Sectors</option>
+                    <option value="realestate">Real Estate</option>
+                    <option value="energy">Energy / Oil & Gas</option>
+                    <option value="finance">Financial Services</option>
+                    <option value="tech">Technology</option>
+                    <option value="hospitality">Hospitality / Tourism</option>
+                    <option value="industrial">Industrial / Manufacturing</option>
+                    <option value="conglomerate">Conglomerate / Diversified</option>
+                    <option value="investor">Pure Investment / Holding</option>
+                </select>
+            </div>
+        </div>
+        <!-- Module 4: Multi-Step Chain Logic & Algorithm -->
+        <div class="module">
+            <div class="module-title">
+                <div class="icon">🧩</div>
+                Multi-Step Chain Logic & Algorithm
+            </div>
+            <p class="module-desc">Controls how the system follows connections between clients. When chain linking is enabled, the system doesn't just find direct links — it follows a chain of connections (like A→B→C) to uncover broader clusters. The depth setting determines how many steps to follow. The algorithm setting determines the method used to define group boundaries once all connections are mapped.</p>
+            <div class="form-group">
+                <label class="form-label">Multi-Step Chain Linking</label>
+                <div class="toggle-group">
+                    <div class="toggle-item active" id="toggleTransitive">
+                        <div class="toggle-switch"></div>
+                        <span class="toggle-label">Enable (follow chains beyond direct links)</span>
+                    </div>
+                    <div class="toggle-item" id="toggleTransitiveOff">
+                        <div class="toggle-switch"></div>
+                        <span class="toggle-label">Direct Links Only</span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Chain Depth (steps to follow)</label>
+                <div class="range-container">
+                    <input type="range" id="transitiveDepth" min="1" max="5" value="2">
+                    <div class="range-value" id="transitiveDepthDisplay">2 hops</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Chain Across Link Types</label>
+                <p style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">Allow mixing entity links and relationship links in the same chain (e.g., A→[shared company]→B→[referral]→C)</p>
+                <div class="toggle-group">
+                    <div class="toggle-item active" id="toggleCrossType">
+                        <div class="toggle-switch"></div>
+                        <span class="toggle-label">Allow mixing link types in chains</span>
+                    </div>
+                    <div class="toggle-item" id="toggleCrossTypeOff">
+                        <div class="toggle-switch"></div>
+                        <span class="toggle-label">Same-type chains only</span>
+                    </div>
+                </div>
+            </div>
+            <div class="section-divider"></div>
+            <div class="form-group">
+                <label class="form-label">Grouping Algorithm</label>
+                <select id="algorithm">
+                    <option value="connected_components" selected>Connected Components (group all linked clients together)</option>
+                    <option value="community_louvain">Community Detection (finds natural sub-groups within clusters)</option>
+                    <option value="hierarchical">Hierarchical (builds groups from smallest to largest)</option>
+                    <option value="label_propagation">Label Propagation (clients inherit group from their closest neighbors)</option>
+                    <option value="ml_embedding">AI-Powered Clustering (learns patterns from relationship data)</option>
+                    <option value="rule_based">Rule-Based (custom manual rules)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Minimum Link Confidence (filter out weak connections)</label>
+                <div class="range-container">
+                    <input type="range" id="linkConfidence" min="50" max="99" value="70">
+                    <div class="range-value" id="linkConfidenceDisplay">70%</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Duplicate Client Handling</label>
+                <select id="dedupStrategy">
+                    <option value="fuzzy" selected>Flexible Match (tolerates minor name/attribute differences)</option>
+                    <option value="exact">Exact Match Only (names must be identical)</option>
+                    <option value="entity_id">Entity ID Cross-Reference (match by system ID)</option>
+                    <option value="ml">AI-Assisted Matching (smart duplicate detection)</option>
+                </select>
+            </div>
+        </div>
+        <!-- Module 5: Analytics Enrichments -->
+        <div class="module full-width">
+            <div class="module-title">
+                <div class="icon">📊</div>
+                Analytics Enrichments
+            </div>
+            <p class="module-desc">Select the visualizations to generate alongside your grouping results. Each provides a different analytical lens on the identified client clusters.</p>
+            <div class="graph-preview-grid" id="graphPreviewGrid">
+                <!-- Graph 1: Network Topology -->
+                <div class="graph-preview-card" data-graph="network_topology" onclick="toggleGraphCard(this)">
+                    <div class="graph-preview-thumb">
+                        <svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+                            <line x1="40" y1="30" x2="100" y2="60" stroke="#c0392b" stroke-width="2"/>
+                            <line x1="100" y1="60" x2="160" y2="30" stroke="#c0392b" stroke-width="2"/>
+                            <line x1="100" y1="60" x2="60" y2="95" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="4,3"/>
+                            <line x1="100" y1="60" x2="140" y2="95" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="4,3"/>
+                            <line x1="40" y1="30" x2="60" y2="95" stroke="#e74c3c" stroke-width="1" stroke-dasharray="3,3"/>
+                            <line x1="160" y1="30" x2="140" y2="95" stroke="#e74c3c" stroke-width="1" stroke-dasharray="3,3"/>
+                            <circle cx="40" cy="30" r="10" fill="#c0392b"/>
+                            <circle cx="160" cy="30" r="10" fill="#c0392b"/>
+                            <circle cx="100" cy="60" r="14" fill="#c0392b"/>
+                            <circle cx="60" cy="95" r="8" fill="#fadbd8" stroke="#c0392b" stroke-width="2"/>
+                            <circle cx="140" cy="95" r="8" fill="#fadbd8" stroke="#c0392b" stroke-width="2"/>
+                            <text x="100" y="63" text-anchor="middle" fill="white" font-size="7" font-weight="bold">Hub</text>
+                        </svg>
+                        <div class="graph-preview-check"></div>
+                    </div>
+                    <div class="graph-preview-info">
+                        <h4>Network Map</h4>
+                        <p>Interactive map showing all clients, shared entities, and relationship connections. Circle size = client AUM, line thickness = connection strength. Groups outlined in color.</p>
+                    </div>
+                </div>
+                <!-- Graph 2: Horizontal Bar Chart -->
+                <div class="graph-preview-card selected" data-graph="horizontal_bar_chart" onclick="toggleGraphCard(this)">
+                    <div class="graph-preview-thumb">
+                        <svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+                            <text x="5" y="18" fill="#555" font-size="6" font-weight="600">Group Alpha</text>
+                            <rect x="65" y="10" width="110" height="12" rx="3" fill="#c0392b" opacity="0.9"/>
+                            <text x="180" y="19" fill="#c0392b" font-size="6" font-weight="bold">42</text>
+                            <text x="5" y="36" fill="#555" font-size="6" font-weight="600">Group Beta</text>
+                            <rect x="65" y="28" width="95" height="12" rx="3" fill="#c0392b" opacity="0.75"/>
+                            <text x="165" y="37" fill="#c0392b" font-size="6" font-weight="bold">36</text>
+                            <text x="5" y="54" fill="#555" font-size="6" font-weight="600">Group Gamma</text>
+                            <rect x="65" y="46" width="72" height="12" rx="3" fill="#e74c3c" opacity="0.8"/>
+                            <text x="142" y="55" fill="#e74c3c" font-size="6" font-weight="bold">28</text>
+                            <text x="5" y="72" fill="#555" font-size="6" font-weight="600">Group Delta</text>
+                            <rect x="65" y="64" width="55" height="12" rx="3" fill="#e74c3c" opacity="0.6"/>
+                            <text x="125" y="73" fill="#e74c3c" font-size="6" font-weight="bold">19</text>
+                            <text x="5" y="90" fill="#555" font-size="6" font-weight="600">Group Epsilon</text>
+                            <rect x="65" y="82" width="38" height="12" rx="3" fill="#fadbd8" stroke="#c0392b" stroke-width="0.5"/>
+                            <text x="108" y="91" fill="#999" font-size="6" font-weight="bold">12</text>
+                            <text x="5" y="108" fill="#555" font-size="6" font-weight="600">Group Zeta</text>
+                            <rect x="65" y="100" width="22" height="12" rx="3" fill="#fadbd8" stroke="#c0392b" stroke-width="0.5"/>
+                            <text x="92" y="109" fill="#999" font-size="6" font-weight="bold">7</text>
+                            <text x="100" y="118" text-anchor="middle" fill="#999" font-size="6">Client Count per Group (sorted)</text>
+                        </svg>
+                        <div class="graph-preview-check"></div>
+                    </div>
+                    <div class="graph-preview-info">
+                        <h4>Group Comparison Bar Chart</h4>
+                        <p>Horizontal bar chart comparing groups by selected metric (client count, AUM, link count, or risk score). Sorted for immediate ranking visibility.</p>
+                    </div>
+                </div>
+                <!-- Graph 3: Relationship Flow -->
+                <div class="graph-preview-card" data-graph="relationship_sankey" onclick="toggleGraphCard(this)">
+                    <div class="graph-preview-thumb">
+                        <svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="10" y="15" width="12" height="25" rx="2" fill="#c0392b"/>
+                            <rect x="10" y="48" width="12" height="20" rx="2" fill="#e74c3c"/>
+                            <rect x="10" y="76" width="12" height="15" rx="2" fill="#fadbd8" stroke="#c0392b" stroke-width="0.5"/>
+                            <rect x="94" y="20" width="12" height="35" rx="2" fill="#c0392b" opacity="0.7"/>
+                            <rect x="94" y="62" width="12" height="25" rx="2" fill="#e74c3c" opacity="0.7"/>
+                            <rect x="178" y="15" width="12" height="30" rx="2" fill="#c0392b" opacity="0.5"/>
+                            <rect x="178" y="52" width="12" height="22" rx="2" fill="#e74c3c" opacity="0.5"/>
+                            <rect x="178" y="81" width="12" height="18" rx="2" fill="#fadbd8" stroke="#c0392b" stroke-width="0.5"/>
+                            <path d="M22,25 C60,25 60,35 94,35" stroke="#c0392b" stroke-width="3" fill="none" opacity="0.4"/>
+                            <path d="M22,32 C60,32 60,50 94,50" stroke="#e74c3c" stroke-width="2" fill="none" opacity="0.4"/>
+                            <path d="M22,55 C60,55 60,45 94,40" stroke="#e74c3c" stroke-width="2" fill="none" opacity="0.3"/>
+                            <path d="M106,30 C140,30 140,25 178,25" stroke="#c0392b" stroke-width="4" fill="none" opacity="0.3"/>
+                            <path d="M106,55 C140,55 140,60 178,60" stroke="#e74c3c" stroke-width="3" fill="none" opacity="0.3"/>
+                            <path d="M106,70 C140,70 140,88 178,88" stroke="#c0392b" stroke-width="1.5" fill="none" opacity="0.2"/>
+                            <text x="10" y="10" fill="#555" font-size="6">Source</text>
+                            <text x="90" y="10" fill="#555" font-size="6">Link Type</text>
+                            <text x="172" y="10" fill="#555" font-size="6">Group</text>
+                        </svg>
+                        <div class="graph-preview-check"></div>
+                    </div>
+                    <div class="graph-preview-info">
+                        <h4>Relationship Flow Diagram</h4>
+                        <p>Flow diagram showing how different relationship sources feed into final group assignments. Reveals which link types dominate each cluster.</p>
+                    </div>
+                </div>
+                <!-- Graph 4: Timeline -->
+                <div class="graph-preview-card" data-graph="timeline_evolution" onclick="toggleGraphCard(this)">
+                    <div class="graph-preview-thumb">
+                        <svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+                            <line x1="20" y1="100" x2="185" y2="100" stroke="#e0e0e0" stroke-width="1"/>
+                            <line x1="40" y1="100" x2="40" y2="15" stroke="#c0392b" stroke-width="2"/>
+                            <line x1="80" y1="100" x2="80" y2="35" stroke="#c0392b" stroke-width="2"/>
+                            <line x1="120" y1="100" x2="120" y2="25" stroke="#c0392b" stroke-width="2"/>
+                            <line x1="160" y1="100" x2="160" y2="18" stroke="#c0392b" stroke-width="2"/>
+                            <circle cx="40" cy="15" r="4" fill="#c0392b"/>
+                            <circle cx="80" cy="35" r="5" fill="#c0392b"/>
+                            <circle cx="120" cy="25" r="7" fill="#c0392b"/>
+                            <circle cx="160" cy="18" r="9" fill="#c0392b"/>
+                            <path d="M40,15 Q60,25 80,35 Q100,20 120,25 Q140,15 160,18" stroke="#e74c3c" stroke-width="1" fill="none" stroke-dasharray="3,2"/>
+                            <text x="35" y="112" fill="#999" font-size="6">2021</text>
+                            <text x="75" y="112" fill="#999" font-size="6">2022</text>
+                            <text x="115" y="112" fill="#999" font-size="6">2023</text>
+                            <text x="155" y="112" fill="#999" font-size="6">2024</text>
+                            <text x="100" y="8" text-anchor="middle" fill="#555" font-size="6">Group Size Over Time</text>
+                        </svg>
+                        <div class="graph-preview-check"></div>
+                    </div>
+                    <div class="graph-preview-info">
+                        <h4>Group Evolution Timeline</h4>
+                        <p>Shows how groups form, grow, merge, or dissolve over time. Identifies emerging clusters and stable core groups.</p>
+                    </div>
+                </div>
+                <!-- Graph 5: AUM Concentration -->
+                <div class="graph-preview-card" data-graph="aum_concentration" onclick="toggleGraphCard(this)">
+                    <div class="graph-preview-thumb">
+                        <svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="100" cy="55" r="40" fill="none" stroke="#fadbd8" stroke-width="12"/>
+                            <circle cx="100" cy="55" r="40" fill="none" stroke="#c0392b" stroke-width="12" stroke-dasharray="100 253" stroke-dashoffset="0" transform="rotate(-90,100,55)"/>
+                            <circle cx="100" cy="55" r="28" fill="none" stroke="#fadbd8" stroke-width="10"/>
+                            <circle cx="100" cy="55" r="28" fill="none" stroke="#e74c3c" stroke-width="10" stroke-dasharray="175 432" stroke-dashoffset="0" transform="rotate(-90,100,55)"/>
+                            <circle cx="100" cy="55" r="16" fill="none" stroke="#fadbd8" stroke-width="8"/>
+                            <circle cx="100" cy="55" r="16" fill="none" stroke="#96281b" stroke-width="8" stroke-dasharray="42 57" stroke-dashoffset="0" transform="rotate(-90,100,55)"/>
+                            <text x="100" y="58" text-anchor="middle" fill="#c0392b" font-size="9" font-weight="bold">AUM</text>
+                            <text x="30" y="108" fill="#c0392b" font-size="6">■ Top 20%</text>
+                            <text x="75" y="108" fill="#e74c3c" font-size="6">■ Mid 50%</text>
+                            <text x="125" y="108" fill="#96281b" font-size="6">■ Top Group</text>
+                        </svg>
+                        <div class="graph-preview-check"></div>
+                    </div>
+                    <div class="graph-preview-info">
+                        <h4>AUM Concentration Chart</h4>
+                        <p>Nested donut chart showing how assets are distributed across groups. Flags concentration risk when one group holds a disproportionate share.</p>
+                    </div>
+                </div>
+                <!-- Graph 6: Bridge Clients -->
+                <div class="graph-preview-card selected" data-graph="bridge_clients" onclick="toggleGraphCard(this)">
+                    <div class="graph-preview-thumb">
+                        <svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse cx="50" cy="55" rx="32" ry="30" fill="#fadbd8" opacity="0.4"/>
+                            <ellipse cx="150" cy="55" rx="32" ry="30" fill="#fadbd8" opacity="0.4"/>
+                            <circle cx="35" cy="45" r="7" fill="#c0392b" opacity="0.7"/>
+                            <circle cx="55" cy="35" r="6" fill="#c0392b" opacity="0.7"/>
+                            <circle cx="30" cy="65" r="6" fill="#c0392b" opacity="0.7"/>
+                            <circle cx="55" cy="70" r="7" fill="#c0392b" opacity="0.7"/>
+                            <circle cx="140" cy="40" r="6" fill="#e74c3c" opacity="0.7"/>
+                            <circle cx="160" cy="55" r="7" fill="#e74c3c" opacity="0.7"/>
+                            <circle cx="145" cy="72" r="6" fill="#e74c3c" opacity="0.7"/>
+                            <circle cx="165" cy="38" r="5" fill="#e74c3c" opacity="0.7"/>
+                            <circle cx="100" cy="55" r="12" fill="#c0392b" stroke="#96281b" stroke-width="2"/>
+                            <text x="100" y="58" text-anchor="middle" fill="white" font-size="7" font-weight="bold">B</text>
+                            <line x1="62" y1="52" x2="88" y2="55" stroke="#c0392b" stroke-width="2"/>
+                            <line x1="112" y1="55" x2="138" y2="52" stroke="#c0392b" stroke-width="2"/>
+                            <text x="50" y="95" text-anchor="middle" fill="#555" font-size="6">Cluster A</text>
+                            <text x="150" y="95" text-anchor="middle" fill="#555" font-size="6">Cluster B</text>
+                            <text x="100" y="82" text-anchor="middle" fill="#c0392b" font-size="6" font-weight="bold">Bridge</text>
+                        </svg>
+                        <div class="graph-preview-check"></div>
+                    </div>
+                    <div class="graph-preview-info">
+                        <h4>Bridge & Connector Map</h4>
+                        <p>Identifies key clients who connect otherwise separate groups. Critical for understanding network vulnerabilities and referral potential.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Module 6: Output Configuration -->
+        <div class="module">
+            <div class="module-title">
+                <div class="icon">📋</div>
+                Output Configuration
+            </div>
+            <div class="tabs" id="outputFormatTabs">
+                <button class="tab active" data-format="structured">Structured</button>
+                <button class="tab" data-format="graph">Graph</button>
+                <button class="tab" data-format="matrix">Matrix</button>
+                <button class="tab" data-format="narrative">Brief</button>
+                <button class="tab" data-format="json">JSON</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Detail Level</label>
+                <select id="detailLevel">
+                    <option value="summary">Summary — Groups + Counts Only</option>
+                    <option value="standard" selected>Standard — Groups + Links + Confidence Scores</option>
+                    <option value="detailed">Detailed — Full Connection Paths + Source References</option>
+                    <option value="forensic">Forensic — All Raw Data + Timestamps</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Include Visual Graph Data?</label>
+                <div class="toggle-group">
+                    <div class="toggle-item active" id="toggleGraph">
+                        <div class="toggle-switch"></div>
+                        <span class="toggle-label">Yes (nodes + edges + colors)</span>
+                    </div>
+                    <div class="toggle-item" id="toggleGraphOff">
+                        <div class="toggle-switch"></div>
+                        <span class="toggle-label">No</span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Access / Sensitivity Level</label>
+                <select id="sensitivity">
+                    <option value="standard">Standard — Relationship Team</option>
+                    <option value="elevated">Elevated — RM + Compliance</option>
+                    <option value="restricted">Restricted — Head of RM Only</option>
+                    <option value="board">Board / Executive Summary</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Sort / Rank Groups By</label>
+                <select id="sortBy">
+                    <option value="size" selected>Group Size (client count)</option>
+                    <option value="aum">Combined AUM</option>
+                    <option value="risk">Risk Score (highest first)</option>
+                    <option value="density">Connection Tightness (how densely linked)</option>
+                    <option value="opportunity">Opportunity Score</option>
+                    <option value="recency">Most Recent Activity</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Custom Instructions</label>
+                <textarea id="customInstructions" placeholder="e.g., Prioritize groups where relationship links dominate. Flag any group with 3+ clients from the same family office. Exclude groups where all links are below 60% confidence..."></textarea>
+            </div>
+        </div>
+        <!-- Module 7: Generated Prompt -->
+        <div class="module full-width">
+            <div class="module-title">
+                <div class="icon">🤖</div>
+                Generated Prompt — Client Grouping by Shared Entities & Relationships
+            </div>
+            <div style="position:relative;">
+                <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">📋 Copy Prompt</button>
+                <div class="prompt-output" id="promptOutput"></div>
+            </div>
+            <div class="action-bar">
+                <button class="btn btn-primary" id="executeBtn" onclick="executePrompt()">
+                    ▶ Run Grouping Analysis
+                </button>
+                <button class="btn btn-secondary" onclick="regeneratePrompt()">
+                    ↻ Regenerate
+                </button>
+                <button class="btn btn-ghost" onclick="resetAll()">
+                    ✕ Reset
+                </button>
+                <div style="margin-left:auto; font-size:11px; color:var(--text-muted);">
+                    Est. time: <span id="estTime" style="color:var(--red-primary);font-weight:700;">~60s</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const state = {
+            entityTypes: ['company', 'beneficial_owner', 'trust', 'board_director'],
+            relTypes: ['portfolio_roles', 'client_relationships'],
+            analyses: ['horizontal_bar_chart', 'bridge_clients'],
+            transitive: true,
+            transitiveDepth: 2,
+            crossType: true,
+            linkConfidence: 70,
+            outputFormat: 'structured',
+            detailLevel: 'standard',
+            graphData: true,
+            sensitivity: 'standard',
+            algorithm: 'connected_components',
+            sortBy: 'size'
+        };
+        function initCheckboxes(containerId) {
+            document.querySelectorAll(`#${containerId} .checkbox-item`).forEach(item => {
+                item.addEventListener('click', function() {
+                    this.classList.toggle('checked');
+                    this.querySelector('input[type="checkbox"]').checked = this.classList.contains('checked');
+                    updateState();
+                    generatePrompt();
+                });
+            });
+        }
+        initCheckboxes('entityTypeGrid');
+        initCheckboxes('relTypeGrid');
+        function setupToggle(onId, offId, key) {
+            const on = document.getElementById(onId);
+            const off = document.getElementById(offId);
+            if (!on || !off) return;
+            on.addEventListener('click', () => { on.classList.add('active'); off.classList.remove('active'); state[key] = true; generatePrompt(); });
+            off.addEventListener('click', () => { off.classList.add('active'); on.classList.remove('active'); state[key] = false; generatePrompt(); });
+        }
+        setupToggle('toggleTransitive', 'toggleTransitiveOff', 'transitive');
+        setupToggle('toggleCrossType', 'toggleCrossTypeOff', 'crossType');
+        setupToggle('toggleGraph', 'toggleGraphOff', 'graphData');
+        const sliders = [
+            { id: 'transitiveDepth', key: 'transitiveDepth', suffix: ' hops' },
+            { id: 'linkConfidence', key: 'linkConfidence', suffix: '%' }
+        ];
+        sliders.forEach(s => {
+            const el = document.getElementById(s.id);
+            if (!el) return;
+            el.addEventListener('input', function() {
+                state[s.key] = parseInt(this.value);
+                const display = document.getElementById(s.id + 'Display');
+                if (display) display.textContent = this.value + s.suffix;
+                generatePrompt();
+            });
+        });
+        ['clientPopulation', 'jurisdiction', 'sector', 'algorithm', 'dedupStrategy', 'detailLevel', 'sensitivity', 'sortBy'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('change', generatePrompt);
+        });
+        ['minAum', 'maxGroups'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', generatePrompt);
+        });
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                state.outputFormat = this.dataset.format;
+                generatePrompt();
+            });
+        });
+        function toggleGraphCard(card) {
+            card.classList.toggle('selected');
+            updateState();
+            generatePrompt();
+        }
+        function updateState() {
+            const entityItems = document.querySelectorAll('#entityTypeGrid .checkbox-item.checked');
+            const relItems = document.querySelectorAll('#relTypeGrid .checkbox-item.checked');
+            const graphCards = document.querySelectorAll('#graphPreviewGrid .graph-preview-card.selected');
+            state.entityTypes = [...entityItems].map(i => i.dataset.value);
+            state.relTypes = [...relItems].map(i => i.dataset.value);
+            state.analyses = [...graphCards].map(i => i.dataset.graph);
+            document.getElementById('statEntities').textContent = entityItems.length;
+            document.getElementById('statRelTypes').textContent = relItems.length;
+            document.getElementById('statGraphs').textContent = graphCards.length;
+            document.getElementById('statWeight').textContent = state.transitive ? state.transitiveDepth + 'h' : '1h';
+            const total = entityItems.length + relItems.length + graphCards.length;
+            let complexity;
+            if (state.relTypes.includes('writeup_relationships')) {
+                complexity = 'High';
+            } else {
+                complexity = total < 6 ? 'Low' : total < 12 ? 'Med' : 'High';
+            }
+            document.getElementById('statComplexity').textContent = complexity;
+            updateEstimate();
+        }
+        function updateEstimate() {
+            const base = 25;
+            const entityF = state.entityTypes.length * 3;
+            const relF = state.relTypes.length * 5;
+            const graphF = state.analyses.length * 4;
+            const transF = state.transitive ? state.transitiveDepth * 8 : 0;
+            const writeupF = state.relTypes.includes('writeup_relationships') ? 30 : 0;
+            const total = base + entityF + relF + graphF + transF + writeupF;
+            document.getElementById('estTime').textContent = `~${Math.round(total)}s`;
+        }
+        function generatePrompt() {
+            const entityLabels = {
+                'company': 'Shared Companies / SPVs / Holding Vehicles',
+                'beneficial_owner': 'Shared Beneficial Owners (>10% equity)',
+                'trust': 'Shared Trust Structures (settlor, trustee, protector, beneficiary)',
+                'board_director': 'Shared Board Directors / Officers',
+                'family_office': 'Shared Family Office Structures',
+                'investment_vehicle': 'Shared Investment Vehicles / Funds',
+                'foundation': 'Shared Foundations (governance, funding)',
+                'real_estate': 'Shared Real Estate Holdings',
+                'legal_rep': 'Shared Legal Representatives / Attorneys',
+                'advisor': 'Shared Financial Advisors / Accountants',
+                'address': 'Shared Registered / Residential Addresses',
+                'nominee': 'Shared Nominee Arrangements',
+                'bank_account': 'Shared Bank Accounts',
+                'phone_email': 'Shared Phone / Email Contact Details'
+            };
+            const relLabels = {
+                'portfolio_roles': 'Client to Portfolio Roles — Director, Trustee, Beneficiary, Signatory, Power of Attorney (POA), Nominee, Guardian, Protector, and other formal roles held by clients in portfolio entities (sourced from CRM entity records, trust deeds, and corporate registry)',
+                'client_relationships': 'Client to Client Relationships — Direct interpersonal and professional links between clients: family/marital ties, business partnerships, referrals, social circles, co-investment, mentorship, alumni connections, club memberships (sourced from CRM relationship records and structured interaction logs)',
+                'writeup_relationships': 'Additional Relationships from Client Write-ups — AI-identified relationships extracted from unstructured text: RM meeting notes, call transcripts, email correspondence, event debriefs, and FileNet documents. May include informal associations, observed interactions, and contextual links not captured in structured fields (sourced from FileNet document repository and CRM narrative fields). NOTE: This layer significantly increases processing time and query complexity.'
+            };
+            const graphLabels = {
+                'network_topology': 'Network Map — Interactive visualization showing all clients, shared entities, and relationship connections. Circle size proportional to AUM, line thickness proportional to connection strength. Entity nodes as rounded rectangles, client nodes as circles. Group boundaries shown as colored outlines.',
+                'horizontal_bar_chart': 'Group Comparison Bar Chart — Horizontal bar chart comparing identified groups by selected metric (client count, combined AUM, total link count, or risk score). Groups sorted descending for immediate ranking visibility. Color-coded by risk tier. Includes value labels on each bar.',
+                'relationship_sankey': 'Relationship Flow Diagram — Flow diagram showing the flow from data source types (CRM structured, FileNet unstructured, Entity Registry) through relationship categories (portfolio roles, interpersonal, AI-extracted) into final group assignments. Reveals which source types dominate each cluster.',
+                'timeline_evolution': 'Group Evolution Timeline — Temporal chart showing group size and composition changes over time (quarterly granularity). Identifies emerging clusters, stable core groups, and groups that are fragmenting. Includes annotations for significant events (new client onboarding, entity changes).',
+                'aum_concentration': 'AUM Concentration Chart — Nested donut chart showing AUM distribution across identified groups. Outer ring = all groups, middle ring = top 5 groups, inner ring = single largest group. Flags concentration when any single group exceeds 20% of total in-scope AUM.',
+                'bridge_clients': 'Bridge & Connector Map — Specialized subgraph highlighting clients who connect 2+ otherwise disconnected clusters. Shows the "bridge" clients with elevated prominence, their connected clusters as colored regions, and the specific relationship types that form the bridge. Critical for understanding network vulnerabilities and key-person risk.'
+            };
+            const entities = state.entityTypes.map(e => `• ${entityLabels[e] || e}`).join('\n');
+            const rels = state.relTypes.map(r => `• ${relLabels[r] || r}`).join('\n');
+            const graphs = state.analyses.map(a => `• ${graphLabels[a] || a}`).join('\n');
+            const popText = document.getElementById('clientPopulation').selectedOptions[0].text;
+            const jurisText = document.getElementById('jurisdiction').selectedOptions[0].text;
+            const minAum = document.getElementById('minAum').value || '0';
+            const maxGroups = document.getElementById('maxGroups').value || '25';
+            const sectorText = document.getElementById('sector').value === 'all' ? 'All' : document.getElementById('sector').selectedOptions[0].text;
+            const algoText = document.getElementById('algorithm').selectedOptions[0].text;
+            const dedupText = document.getElementById('dedupStrategy').selectedOptions[0].text;
+            const detailText = document.getElementById('detailLevel').selectedOptions[0].text;
+            const sensText = document.getElementById('sensitivity').selectedOptions[0].text;
+            const sortText = document.getElementById('sortBy').selectedOptions[0].text;
+            const custom = document.getElementById('customInstructions').value || 'None specified.';
+
+            const totalSel = state.entityTypes.length + state.relTypes.length + state.analyses.length;
+            let complexityLabel;
+            if (state.relTypes.includes('writeup_relationships')) {
+                complexityLabel = 'HIGH (includes AI text extraction from document repository)';
+            } else {
+                complexityLabel = totalSel < 6 ? 'LOW' : totalSel < 12 ? 'MEDIUM' : 'HIGH';
+            }
+
+            const prompt = `SYSTEM:
+You are a Dual-Layer Network Analyst operating within the Bank of Singapore Private Banking CRM platform, equipped with an Entity Matching Graph, a Client Relationship Graph, and FileNet document intelligence. Your task is to identify and cluster clients by combining shared entity links and direct client-to-client relationships.
+ENVIRONMENT:
+- Platform: Bank of Singapore Private Wealth CRM + Entity Matching Graph + Client Relationship Graph + FileNet
+- Connected Systems: CRM (Active), FileNet (Active), T24 (Inactive), HELIOS (Inactive)
+- Graph Engine: Neo4j (entity layer) + NetworkX (relationship layer), unified via overlay
+- Document Intelligence: FileNet (AI text extraction from RM notes, emails, meeting transcripts, client write-ups)
+- Dataset: 840K active clients | 2.4M entities | 1.2M relationship edges
+- Classification: ${sensText}
+- Query Complexity: ${complexityLabel}
+═══════════════════════════════════════════════════
+QUERY PARAMETERS
+═══════════════════════════════════════════════════
+CLIENT POPULATION:
+- Scope: ${popText}
+- Jurisdiction: ${jurisText}
+- Minimum AUM: USD $${minAum}M
+- Sector: ${sectorText}
+- Maximum Groups to Return: ${maxGroups}
+═══════════════════════════════════════════════════
+LINK LAYER 1: SHARED ENTITIES
+═══════════════════════════════════════════════════
+Entity Types to Detect:
+${entities || '  • None selected'}
+═══════════════════════════════════════════════════
+LINK LAYER 2: CLIENT RELATIONSHIPS
+═══════════════════════════════════════════════════
+Relationship Layers to Detect:
+${rels || '  • None selected'}
+═══════════════════════════════════════════════════
+MULTI-STEP CHAIN LOGIC & ALGORITHM
+═══════════════════════════════════════════════════
+ALGORITHM: ${algoText}
+CHAIN LINKING:
+- Status: ${state.transitive ? 'ENABLED (follow connections beyond direct links)' : 'DISABLED (direct links only)'}
+- Depth: ${state.transitiveDepth} step(s)
+- Cross-type chaining: ${state.crossType ? 'ALLOWED (entity links and relationship links can be mixed in the same chain)' : 'DISABLED (only same-type links can be chained)'}
+  Example (cross-type, depth=2):
+    Client A —[shared company]→ Client B —[referral]→ Client C
+    → All three form one group
+CONSTRAINTS:
+- Minimum link confidence: ≥ ${state.linkConfidence}%
+- Duplicate handling: ${dedupText}
+- A client may appear in multiple groups (non-exclusive membership)
+- Groups with fewer than 2 clients are discarded
+- Overlapping groups should be noted with shared members highlighted
+═══════════════════════════════════════════════════
+ANALYTICS ENRICHMENTS (VISUALIZATIONS TO GENERATE)
+═══════════════════════════════════════════════════
+Generate the following visualizations alongside the grouping results:
+${graphs || '  • None selected'}
+═══════════════════════════════════════════════════
+OUTPUT SPECIFICATION
+═══════════════════════════════════════════════════
+FORMAT: ${state.outputFormat.toUpperCase()}
+DETAIL LEVEL: ${detailText}
+SORT GROUPS BY: ${sortText}
+${state.graphData ? 'INCLUDE: Graph visualization data (nodes, edges, weights, group colors, link-type styling)' : 'GRAPH DATA: Excluded'}
+VISUALIZATION CONVENTIONS (if graph data included):
+- Client nodes: Circle, sized by AUM, colored by group
+- Entity nodes: Rounded rectangle, gray fill, red border
+- Entity links: Solid red line, thickness = weight
+- Relationship links: Dashed red line, thickness = weight
+- Group boundaries: Colored outline around group members (semi-transparent)
+- Hub clients (most connected): Star overlay or larger radius
+- Bridge clients (connect separate groups): Diamond overlay
+${state.outputFormat === 'json' ? `STRUCTURE:
+{
+  "meta": {
+    "generated_at": "ISO8601",
+    "institution": "Bank of Singapore",
+    "population_scope": "${popText}",
+    "jurisdiction": "${jurisText}",
+    "algorithm": "${state.algorithm}",
+    "total_groups": <int>,
+    "total_clients_in_groups": <int>,
+    "link_confidence_threshold": ${state.linkConfidence},
+    "chain_depth": ${state.transitiveDepth},
+    "query_complexity": "${complexityLabel}",
+    "connected_systems": {
+      "crm": "active",
+      "filenet": "active",
+      "t24": "inactive",
+      "helios": "inactive"
+    }
+  },
+  "groups": [
+    {
+      "group_id": "GRP-001",
+      "label": "<descriptive label>",
+      "client_count": <int>,
+      "combined_aum_usd_m": <float>,
+      "clients": [
+        {
+          "client_id": "CL-XXXXX",
+          "display_name": "<name>",
+          "aum_usd_m": <float>,
+          "jurisdiction": "<code>",
+          "role_in_network": "hub|bridge|peripheral|member"
+        }
+      ],
+      "entity_links": [
+        {
+          "entity_id": "ENT-XXXXX",
+          "entity_name": "<name>",
+          "entity_type": "<type>",
+          "jurisdiction": "<code>",
+          "linked_clients": ["CL-A", "CL-B"],
+          "link_detail": "<e.g., 'Board Director: J. Smith'>",
+          "confidence": 0.94
+        }
+      ],
+      "relationship_links": [
+        {
+          "rel_layer": "portfolio_roles|client_relationships|writeup_relationships",
+          "rel_type": "<specific type>",
+          "client_a": "CL-A",
+          "client_b": "CL-B",
+          "detail": "<context>",
+          "source": "<CRM structured|FileNet document|Entity Registry>",
+          "source_ref": "<document_id or record_id>",
+          "date": "YYYY-MM-DD",
+          "confidence": 0.82
+        }
+      ],
+      "network_metrics": {
+        "density": <float 0-1>,
+        "diameter": <int>,
+        "avg_degree": <float>,
+        "hub_client": "CL-XXXXX",
+        "bridge_clients": ["CL-XXXXX"],
+        "entity_link_count": <int>,
+        "rel_link_count": <int>
+      },
+      "scores": {
+        "risk_score": <float 0-1>,
+        "opportunity_score": <float 0-1>,
+        "concentration_risk": <float 0-1>
+      },
+      "recommended_actions": ["<action 1>", "<action 2>"]
+    }
+  ],
+  "analytics_enrichments": {
+    "generated_visualizations": ["<graph_type_1>", "<graph_type_2>"],
+    "key_insights": [
+      "<insight 1>",
+      "<insight 2>"
+    ]
+  },
+  "graph_data": {
+    "nodes": [
+      {"id": "CL-XXXXX", "label": "<name>", "type": "client", "group": "GRP-001", "size": <aum>},
+      {"id": "ENT-XXXXX", "label": "<name>", "type": "entity", "group": "GRP-001", "size": 10}
+    ],
+    "edges": [
+      {"source": "CL-A", "target": "ENT-X", "type": "entity", "weight": 0.94, "label": "Board Director"},
+      {"source": "CL-A", "target": "CL-B", "type": "relationship", "weight": 0.82, "label": "Referral"}
+    ],
+    "layout": "force_directed",
+    "group_colors": {"GRP-001": "#c0392b", "GRP-002": "#8e44ad"}
+  }
+` : state.outputFormat === 'narrative' ? `STRUCTURE:
+Return as a structured intelligence briefing:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CLIENT GROUPING INTELLIGENCE BRIEF
+Bank of Singapore — Shared Entities + Direct Relationships
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Date: [auto]
+Scope: ${popText} | ${jurisText} | Min AUM $${minAum}M
+Groups Identified: [N] | Clients in Groups: [M]
+Query Complexity: ${complexityLabel}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GROUP [N]: [Descriptive Label]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Clients: [List with AUM and jurisdiction]
+Combined AUM: $[X]M
+ENTITY LINKS:
+  • [Entity Name] ([Type], [Jurisdiction])
+    → Links: [Client A ↔ Client B] via [detail]
+    → Confidence: [XX]%
+RELATIONSHIP LINKS:
+  • [Client A] ↔ [Client B]: [Rel Type] ([Layer: Portfolio Role / Client Relationship / Write-up])
+    → Context: [detail from source]
+    → Source: [CRM / FileNet doc ref] | Date: [date]
+    → Confidence: [XX]%
+NETWORK METRICS:
+  • Density: [0.XX] | Diameter: [N] | Hub: [Client]
+  • Bridge Clients: [List or "None"]
+ANALYTICS ENRICHMENTS:
+  • [Generated visualization 1]: [key finding]
+  • [Generated visualization 2]: [key finding]
+RECOMMENDED ACTIONS:
+1. [Priority action]
+2. [Secondary action]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ` : state.outputFormat === 'matrix' ? `STRUCTURE:
+Return a dual-layer connection matrix representation:
+1. CLIENT × CLIENT MATRIX (rows = clients, cols = clients)
+   - Cell value = combined link score (0 to 100)
+   - Color coding:
+     • Red solid = entity link dominant
+     • Red dashed = relationship link dominant
+     • Red gradient = mixed
+   - Include legend
+2. CLIENT × ENTITY MATRIX
+   - Rows = clients, Cols = shared entities
+   - Cell = relationship type (DO=Director, BO=Owner, TR=Trustee, etc.)
+3. CLIENT × RELATIONSHIP LAYER MATRIX
+   - Rows = clients, Cols = relationship layers (Portfolio Roles, Client Relationships, Write-ups)
+   - Cell = count of links in that layer within the group
+4. GROUP SUMMARY TABLE
+   | Group ID | Label | Clients | AUM | Entity Links | Rel Links | Density | Risk |
+   |----------|-------|---------|-----|--------------|-----------|---------|------| ` : `STRUCTURE:
+Return as a structured hierarchical report:
+■ EXECUTIVE SUMMARY
+  • Total groups: [N] | Total clients in groups: [M] / [population]
+  • Largest group: [ID/Label] — [X] clients, $[Y]M
+  • Key insight: [One-line]
+  • Query Complexity: ${complexityLabel}
+■ GROUP DETAILS
+  GROUP [ID] — [Label]
+  ├─ Profile: [N] clients | $[X]M AUM | [Jurisdictions]
+  ├─ Members:
+  │   • [Client A] — $[X]M, [Jurisdiction] — Role: Hub (most connected)
+  │   • [Client B] — $[X]M, [Jurisdiction] — Role: Member
+  ├─ Entity Links:
+  │   • [Entity Name] (Type, Jur) → A↔B [Conf: XX%]
+  ├─ Relationship Links:
+  │   • A ↔ B: [Type] ([Layer]) [Conf: XX%]
+  ├─ Analytics:
+  │   • [Visualization finding]
+  └─ Action:
+      • [Recommendation]
+■ ANALYTICS ENRICHMENTS SUMMARY
+  • [Graph 1]: [Key finding]
+  • [Graph 2]: [Key finding]
+■ RECOMMENDATIONS
+  1. [P1: Immediate]
+  2. [P2: This quarter]
+  3. [P3: Strategic]`};
+═══════════════════════════════════════════════════
+CONSTRAINTS & GUARDRAILS
+═══════════════════════════════════════════════════
+1. Only include links with confidence ≥ ${state.linkConfidence}%.
+2. Do NOT fabricate relationships or entity links. Mark uncertain items as [UNCONFIRMED: XX%].
+3. Distinguish clearly between entity links and relationship links in all output.
+4. If a pair of clients has BOTH an entity link AND a relationship link, note the reinforcement (e.g., "Multi-signal: shared company + mutual referral").
+5. Respect data minimization — only include details relevant to grouping.
+6. Use exact CRM client identifiers. Display names only where output format requires.
+7. If < 2 groups found, state clearly and suggest parameter adjustments (lower threshold, broaden population, add link types).
+8. Flag single-dependency groups: where one entity or one person accounts for >50% of group connectivity.
+9. Flag overlapping groups: clients appearing in 2+ groups (potential bridge / power clients).
+10. Maintain strict confidentiality. Bank of Singapore internal use only. No external distribution.
+11. Where relationship data is inferred from FileNet write-ups, note the inference method and source document reference.
+12. Do NOT merge groups solely on the basis of a single weak relationship link unless the combined score meets threshold.
+13. Clearly label which relationship layer each link originates from (Portfolio Roles / Client Relationships / Write-up Extraction).
+14. For FileNet-sourced relationships, include the source document ID and extraction confidence separately from the relationship confidence.
+15. T24 and HELIOS systems are currently INACTIVE. Do not reference or attempt to pull data from these systems. If a link would require T24 or HELIOS data, mark it as [PENDING: system offline].
+CUSTOM INSTRUCTIONS:
+${custom}
+Begin dual-layer grouping analysis.`;
+
+            document.getElementById('promptOutput').textContent = prompt;
+            updateState();
+        }
+        function copyPrompt() {
+            const text = document.getElementById('promptOutput').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.textContent = '✓ Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = '📋 Copy Prompt';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+        function executePrompt() {
+            const btn = document.getElementById('executeBtn');
+            btn.innerHTML = '⏳ Building Entity Graph...';
+            btn.disabled = true;
+            btn.style.opacity = '0.7';
+            setTimeout(() => { btn.innerHTML = '📄 Querying FileNet Documents...'; }, 800);
+            setTimeout(() => { btn.innerHTML = '🤝 Mapping Relationships...'; }, 1600);
+            setTimeout(() => { btn.innerHTML = '📐 Computing Clusters...'; }, 2400);
+            setTimeout(() => { btn.innerHTML = '📊 Generating Analytics Enrichments...'; }, 3200);
+            setTimeout(() => {
+                btn.innerHTML = '✓ Analysis Complete';
+                btn.style.opacity = '1';
+                setTimeout(() => {
+                    btn.innerHTML = '▶ Run Grouping Analysis';
+                    btn.disabled = false;
+                }, 2500);
+            }, 4000);
+        }
+        function regeneratePrompt() {
+            generatePrompt();
+            const output = document.getElementById('promptOutput');
+            output.classList.remove('fade-in');
+            void output.offsetWidth;
+            output.classList.add('fade-in');
+        }
+        function resetAll() {
+            document.getElementById('clientPopulation').value = 'all';
+            document.getElementById('jurisdiction').value = 'global';
+            document.getElementById('minAum').value = '5';
+            document.getElementById('maxGroups').value = '25';
+            document.getElementById('sector').value = 'all';
+            document.getElementById('algorithm').value = 'connected_components';
+            document.getElementById('dedupStrategy').value = 'fuzzy';
+            document.getElementById('detailLevel').value = 'standard';
+            document.getElementById('sensitivity').value = 'standard';
+            document.getElementById('sortBy').value = 'size';
+            document.getElementById('customInstructions').value = '';
+            document.getElementById('transitiveDepth').value = 2;
+            document.getElementById('transitiveDepthDisplay').textContent = '2 hops';
+            document.getElementById('linkConfidence').value = 70;
+            document.getElementById('linkConfidenceDisplay').textContent = '70%';
+            state.transitive = true;
+            state.crossType = true;
+            state.graphData = true;
+            state.transitiveDepth = 2;
+            state.linkConfidence = 70;
+            document.getElementById('toggleTransitive').classList.add('active');
+            document.getElementById('toggleTransitiveOff').classList.remove('active');
+            document.getElementById('toggleCrossType').classList.add('active');
+            document.getElementById('toggleCrossTypeOff').classList.remove('active');
+            document.getElementById('toggleGraph').classList.add('active');
+            document.getElementById('toggleGraphOff').classList.remove('active');
+            document.querySelectorAll('#entityTypeGrid .checkbox-item').forEach(item => {
+                const defaults = ['company', 'beneficial_owner', 'trust', 'board_director'];
+                const isDefault = defaults.includes(item.dataset.value);
+                item.classList.toggle('checked', isDefault);
+                item.querySelector('input[type="checkbox"]').checked = isDefault;
+            });
+            document.querySelectorAll('#relTypeGrid .checkbox-item').forEach(item => {
+                const defaults = ['portfolio_roles', 'client_relationships'];
+                const isDefault = defaults.includes(item.dataset.value);
+                item.classList.toggle('checked', isDefault);
+                item.querySelector('input[type="checkbox"]').checked = isDefault;
+            });
+            document.querySelectorAll('#graphPreviewGrid .graph-preview-card').forEach(card => {
+                const defaults = ['horizontal_bar_chart', 'bridge_clients'];
+                const isDefault = defaults.includes(card.dataset.graph);
+                card.classList.toggle('selected', isDefault);
+            });
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('.tab[data-format="structured"]').classList.add('active');
+            state.outputFormat = 'structured';
+            generatePrompt();
+        }
+        generatePrompt();
+    </script>
+</body>
+</html>

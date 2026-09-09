@@ -1,0 +1,1316 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+								
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --red: #c0392b;
+            --red-mid: #e63946;
+            --red-light: #ff6b81;
+            --black: #0d0d0d;
+            --grey-1: #f7f8fa;
+            --grey-2: #eef0f4;
+            --grey-3: #d1d5db;
+            --grey-4: #6b7280;
+            --grey-5: #374151;
+            --white: #ffffff;
+            --left-pad: 48px;
+            --panel-width: 300px;
+            --trending-width: 280px;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: var(--grey-1);
+            color: var(--black);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+        }
+        /* ─── Left Panel (History) ─── */
+        .left-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--panel-width);
+            height: 100vh;
+            background: var(--white);
+            border-right: 1px solid var(--grey-2);
+            box-shadow: 4px 0 24px rgba(0,0,0,0.05);
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+        }
+        .left-panel.open {
+            transform: translateX(0);
+        }
+        .panel-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--grey-2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 64px;
+        }
+        .panel-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--grey-5);
+        }
+        .panel-close {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background 0.2s;
+            color: var(--grey-4);
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+        .panel-close:hover {
+            background: var(--grey-1);
+            color: var(--black);
+        }
+        .panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        .history-item {
+            padding: 12px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 2px;
+        }
+        .history-item:hover {
+            background: var(--grey-1);
+        }
+        .history-item.active {
+            background: var(--grey-2);
+        }
+        .history-item-text {
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--grey-5);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .history-item-meta {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        /* ─── Right Panel (Help / Contact) ─── */
+        .right-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: var(--panel-width);
+            height: 100vh;
+            background: var(--white);
+            border-left: 1px solid var(--grey-2);
+            box-shadow: -4px 0 24px rgba(0,0,0,0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+        }
+        .right-panel.open {
+            transform: translateX(0);
+        }
+        .right-panel .panel-body {
+            padding: 0;
+        }
+        .faq-item {
+            border-bottom: 1px solid var(--grey-2);
+        }
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+        .faq-question {
+            width: 100%;
+            padding: 16px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--black);
+            text-align: left;
+            transition: background 0.15s;
+            line-height: 1.4;
+        }
+        .faq-question:hover {
+            background: var(--grey-1);
+        }
+        .faq-chevron {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            transition: transform 0.25s ease;
+            color: var(--grey-3);
+        }
+        .faq-item.open .faq-chevron {
+            transform: rotate(180deg);
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            padding: 0 20px;
+            font-size: 0.8rem;
+            color: var(--grey-4);
+            line-height: 1.6;
+        }
+        .faq-item.open .faq-answer {
+            max-height: 200px;
+            padding: 0 20px 16px;
+        }
+        .contact-content {
+            padding: 20px;
+        }
+        .contact-card {
+            background: var(--grey-1);
+            border: 1px solid var(--grey-2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .contact-card-label {
+            font-size: 0.62rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--grey-4);
+            margin-bottom: 8px;
+        }
+        .contact-card-value {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--black);
+            line-height: 1.5;
+        }
+        .contact-card-value a {
+            color: var(--red);
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+        .contact-card-value a:hover {
+            opacity: 0.75;
+        }
+        .contact-footer {
+            padding: 0 20px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .contact-btn {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--red-light) 0%, var(--red-mid) 45%, var(--red) 100%);
+            color: var(--black);
+            box-shadow:
+                0 4px 14px rgba(230, 57, 70, 0.25),
+                0 2px 5px rgba(192, 57, 43, 0.1),
+                inset 0 2px 3px rgba(255, 255, 255, 0.25),
+                inset 0 -2px 3px rgba(0, 0, 0, 0.06);
+        }
+        .contact-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%);
+            border-radius: 50px 50px 0 0;
+            pointer-events: none;
+        }
+        .contact-btn:hover {
+            transform: translateY(-1px);
+            box-shadow:
+                0 6px 20px rgba(230, 57, 70, 0.35),
+                0 3px 7px rgba(192, 57, 43, 0.12),
+                inset 0 2px 3px rgba(255, 255, 255, 0.3),
+                inset 0 -2px 3px rgba(0, 0, 0, 0.06);
+        }
+        .contact-btn:active {
+            transform: translateY(0);
+        }
+        /* ─── Overlay ─── */
+        .panel-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.08);
+            z-index: 150;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .panel-overlay.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+        /* ─── Page Wrapper ─── */
+        .page-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+        }
+        .page-wrapper.shifted-left {
+            margin-left: var(--panel-width);
+        }
+        /* Header */
+        header {
+            background: var(--white);
+            border-bottom: 1px solid var(--grey-2);
+            padding: 20px var(--left-pad);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        .logo-mark {
+            width: 28px;
+            height: 28px;
+            border: 2px solid var(--black);
+            border-radius: 4px;
+            transform: rotate(45deg);
+            position: relative;
+            flex-shrink: 0;
+        }
+        .logo-mark::after {
+            content: '';
+            position: absolute;
+            inset: 5px;
+            background: var(--red-mid);
+            border-radius: 1px;
+        }
+        .logo-text {
+            font-size: 1.05rem;
+            font-weight: 600;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--black);
+        }
+        nav {
+            display: flex;
+            gap: 32px;
+        }
+        nav a {
+            text-decoration: none;
+            color: var(--grey-4);
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: color 0.2s;
+            letter-spacing: 0.2px;
+            cursor: pointer;
+        }
+        nav a:hover {
+            color: var(--black);
+        }
+        nav a.active {
+            color: var(--black);
+        }
+        /* Main */
+        main {
+            flex: 1;
+            padding: 32px var(--left-pad) 48px;
+        }
+        .container {
+            max-width: 1040px;
+            padding-right: calc(var(--trending-width) + 48px);
+        }
+        .page-subtitle {
+            font-size: 0.88rem;
+            color: var(--grey-4);
+            margin-bottom: 24px;
+            font-weight: 400;
+        }
+        /* ─── Content Layout ─── */
+        .content-row {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .content-left {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .section-label {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--black);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        /* ─── Checkbox Pills (Multi-select) ─── */
+        .radio-group {
+            display: flex;
+            flex-direction: row;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .radio-option {
+            position: relative;
+        }
+        .radio-option input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .radio-option label {
+            display: block;
+            padding: 9px 16px;
+            border-radius: 50px;
+            font-size: 0.68rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.2px;
+        }
+        .radio-option input[type="checkbox"]:not(:checked) + label {
+            background: var(--white);
+            color: var(--grey-3);
+            border: 1px solid var(--grey-2);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .radio-option input[type="checkbox"]:not(:checked) + label:hover {
+            background: var(--grey-1);
+            color: var(--grey-4);
+            border-color: var(--grey-3);
+        }
+        .radio-option input[type="checkbox"]:checked + label {
+            background: linear-gradient(135deg, var(--red-light) 0%, var(--red-mid) 45%, var(--red) 100%);
+            color: var(--black);
+            border: 1px solid transparent;
+            box-shadow:
+                0 4px 14px rgba(230, 57, 70, 0.3),
+                0 2px 5px rgba(192, 57, 43, 0.12),
+                inset 0 2px 3px rgba(255, 255, 255, 0.25),
+                inset 0 -2px 3px rgba(0, 0, 0, 0.06);
+        }
+        .radio-option input[type="checkbox"]:checked + label::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%);
+            border-radius: 50px 50px 0 0;
+            pointer-events: none;
+        }
+        /* Query Card */
+        .query-card {
+            background: var(--white);
+            border: 1px solid var(--grey-2);
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.04);
+            transition: box-shadow 0.3s;
+            position: relative;
+        }
+        .query-card:focus-within {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.07);
+        }
+        .query-card label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--grey-4);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        .query-input-area {
+            position: relative;
+        }
+        .query-input {
+            width: 100%;
+            padding: 14px 16px;
+            padding-bottom: 48px;
+            border: 1px solid var(--grey-2);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+            line-height: 1.6;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: var(--grey-1);
+            color: var(--black);
+        }
+        .query-input:focus {
+            outline: none;
+            border-color: var(--black);
+            box-shadow: 0 0 0 3px rgba(13, 13, 13, 0.04);
+            background: var(--white);
+        }
+        .query-input::placeholder {
+            color: var(--grey-3);
+        }
+        .attach-btn {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            width: 34px;
+            height: 34px;
+            border: none;
+            background: var(--white);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            border: 1px solid var(--grey-2);
+        }
+        .attach-btn:hover {
+            background: var(--grey-1);
+            border-color: var(--grey-3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+        .attach-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .attach-btn svg {
+            width: 16px;
+            height: 16px;
+            color: var(--grey-4);
+            transition: color 0.2s;
+        }
+        .attach-btn:hover svg {
+            color: var(--black);
+        }
+        .file-input-hidden {
+            display: none;
+        }
+        .file-chip {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 9px 12px;
+            background: var(--grey-1);
+            border: 1px solid var(--grey-2);
+            border-radius: 8px;
+            font-size: 0.76rem;
+            font-weight: 500;
+            color: var(--grey-5);
+            animation: chipIn 0.2s ease;
+        }
+        .file-chip.visible {
+            display: flex;
+        }
+        @keyframes chipIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .file-chip-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            color: var(--grey-4);
+        }
+        .file-chip-name {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .file-chip-size {
+            font-size: 0.66rem;
+            color: var(--grey-3);
+            flex-shrink: 0;
+        }
+        .file-chip-remove {
+            width: 20px;
+            height: 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            color: var(--grey-3);
+            font-size: 0.9rem;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+        .file-chip-remove:hover {
+            background: var(--grey-2);
+            color: var(--black);
+        }
+        /* Generate + Complexity Row */
+        .generate-wrapper {
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            gap: 14px;
+        }
+        .complexity-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .complexity-label {
+            font-size: 0.62rem;
+            font-weight: 700;
+            color: var(--grey-4);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-align: center;
+        }
+        .complexity-select {
+            padding: 12px 18px;
+            border: 1px solid var(--grey-2);
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--white);
+            color: var(--grey-5);
+            transition: all 0.2s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+        }
+        .complexity-select:focus {
+            outline: none;
+            border-color: var(--black);
+            box-shadow: 0 0 0 3px rgba(13, 13, 13, 0.04);
+        }
+        .complexity-select:hover {
+            border-color: var(--grey-3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .generate-btn {
+            min-width: 140px;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 50px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, var(--red-light) 0%, var(--red-mid) 45%, var(--red) 100%);
+            color: var(--black);
+            position: relative;
+            overflow: hidden;
+            box-shadow:
+                0 6px 20px rgba(230, 57, 70, 0.3),
+                0 2px 6px rgba(192, 57, 43, 0.15),
+                inset 0 2px 4px rgba(255, 255, 255, 0.25),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.08);
+            letter-spacing: 0.3px;
+        }
+        .generate-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%);
+            border-radius: 50px 50px 0 0;
+            pointer-events: none;
+        }
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 10px 30px rgba(230, 57, 70, 0.4),
+                0 3px 8px rgba(192, 57, 43, 0.18),
+                inset 0 2px 4px rgba(255, 255, 255, 0.3),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.08);
+        }
+        .generate-btn:active {
+            transform: translateY(0);
+            box-shadow:
+                0 3px 10px rgba(230, 57, 70, 0.25),
+                0 1px 4px rgba(192, 57, 43, 0.1),
+                inset 0 2px 3px rgba(255, 255, 255, 0.2),
+                inset 0 -1px 3px rgba(0, 0, 0, 0.06);
+        }
+        /* ─── Shared Tag Styles ─── */
+        .tag {
+            display: inline-block;
+            font-size: 0.55rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            width: fit-content;
+        }
+        .tag.low {
+            background: rgba(39, 174, 96, 0.08);
+            color: #27ae60;
+            border: 1px solid rgba(39, 174, 96, 0.12);
+        }
+        .tag.medium {
+            background: rgba(243, 156, 18, 0.08);
+            color: #f39c12;
+            border: 1px solid rgba(243, 156, 18, 0.12);
+        }
+        .tag.hard {
+            background: rgba(192, 57, 43, 0.08);
+            color: var(--red);
+            border: 1px solid rgba(192, 57, 43, 0.12);
+        }
+        .tag-db {
+            display: inline-block;
+            font-size: 0.52rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            width: fit-content;
+            background: var(--grey-1);
+            color: var(--grey-4);
+            border: 1px solid var(--grey-2);
+        }
+        .item-meta {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        /* ─── Trending Card (Fixed Right) ─── */
+        .content-right {
+            position: fixed;
+            top: 88px;
+            right: 24px;
+            width: var(--trending-width);
+            z-index: 100;
+            max-height: calc(100vh - 112px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--grey-3) transparent;
+        }
+        .content-right::-webkit-scrollbar {
+            width: 4px;
+        }
+        .content-right::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .content-right::-webkit-scrollbar-thumb {
+            background: var(--grey-3);
+            border-radius: 4px;
+        }
+        .trending-card {
+            background: var(--white);
+            border: 1px solid var(--grey-2);
+            border-radius: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.04);
+            overflow: hidden;
+        }
+        .trending-card-header {
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--grey-2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .trending-card-header svg {
+            width: 15px;
+            height: 15px;
+            color: var(--red-mid);
+            flex-shrink: 0;
+        }
+        .trending-card-header .trending-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--grey-5);
+        }
+        .trending-card-body {
+            padding: 10px;
+        }
+        .trending-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .trending-item:hover {
+            background: var(--grey-1);
+        }
+        .trending-item.active {
+            background: var(--grey-2);
+        }
+        .trending-item-text {
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--grey-5);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .content-right {
+                position: static;
+                width: 100%;
+                max-height: none;
+                overflow-y: visible;
+            }
+            .container {
+                padding-right: 0;
+            }
+            .content-row {
+                gap: 32px;
+            }
+        }
+        @media (max-width: 768px) {
+            :root {
+                --left-pad: 20px;
+                --panel-width: 100%;
+            }
+            .page-wrapper.shifted-left {
+                margin-left: 0;
+            }
+            .radio-group {
+                flex-direction: column;
+            }
+            .generate-wrapper {
+                flex-direction: column-reverse;
+                align-items: stretch;
+            }
+            .generate-btn {
+                min-width: unset;
+                width: 100%;
+            }
+            .complexity-group {
+                width: 100%;
+            }
+            .complexity-select {
+                width: 100%;
+            }
+            .complexity-label {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Left Panel — History -->
+    <aside class="left-panel" id="leftPanel">
+        <div class="panel-header">
+            <span class="panel-title">History</span>
+            <button class="panel-close" onclick="closeLeftPanel()">&times;</button>
+        </div>
+        <div class="panel-body">
+            <div class="history-item active" onclick="loadHistory(this, 0)">
+                <span class="history-item-text">Group the connected clients by shared entity</span>
+                <div class="item-meta">
+                    <span class="tag hard">Hard</span>
+                    <span class="tag-db">CRM</span>
+                    <span class="tag-db">T24</span>
+                </div>
+            </div>
+            <div class="history-item" onclick="loadHistory(this, 1)">
+                <span class="history-item-text">Is there mention of the client or his company's family?</span>
+                <div class="item-meta">
+                    <span class="tag medium">Medium</span>
+                    <span class="tag-db">FileNet</span>
+                    <span class="tag-db">CRM</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+    <!-- Right Panel — Help / Contact -->
+    <aside class="right-panel" id="rightPanel">
+        <div class="panel-header">
+            <span class="panel-title" id="rightPanelTitle">Help</span>
+            <button class="panel-close" onclick="closeRightPanel()">&times;</button>
+        </div>
+        <div class="panel-body" id="rightPanelBody"></div>
+    </aside>
+    <!-- Overlay -->
+    <div class="panel-overlay" id="panelOverlay"></div>
+    <!-- Page Wrapper -->
+    <div class="page-wrapper" id="pageWrapper">
+        <header>
+            <a class="logo" href="#">
+                <div class="logo-mark"></div>
+                <span class="logo-text">AURA</span>
+            </a>
+            <nav>
+                <a href="#" id="navHistory" onclick="openLeftPanel(); return false;">History</a>
+                <a href="#" id="navHelp" onclick="openRightPanel('help'); return false;">Help</a>
+                <a href="#" id="navContact" onclick="openRightPanel('contact'); return false;">Contact</a>
+            </nav>
+        </header>
+        <main>
+            <div class="container">
+                <p class="page-subtitle">Select a database, type your question along with the complexity, and generate.</p>
+                <div class="content-row">
+                    <div class="content-left">
+                        <div>
+                            <span class="section-label">Database</span>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="checkbox" name="database" id="dbAll" value="All" checked onchange="handleDbAll(this)">
+                                    <label for="dbAll">All</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="checkbox" name="database" id="dbCRM" value="CRM" onchange="handleDbIndividual(this)">
+                                    <label for="dbCRM">CRM</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="checkbox" name="database" id="dbFileNet" value="FileNet" onchange="handleDbIndividual(this)">
+                                    <label for="dbFileNet">FileNet</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="checkbox" name="database" id="dbT24" value="T24" onchange="handleDbIndividual(this)">
+                                    <label for="dbT24">T24</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="checkbox" name="database" id="dbHelios" value="HELIOS" onchange="handleDbIndividual(this)">
+                                    <label for="dbHelios">HELIOS</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="query-card">
+                            <label>Your Question</label>
+                            <div class="query-input-area">
+                                <textarea class="query-input" id="queryInput" placeholder="What would you like to find?"></textarea>
+                                <button class="attach-btn" onclick="document.getElementById('fileInput').click()" title="Attach a file" type="button">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+                                    </svg>
+                                </button>
+                                <input type="file" class="file-input-hidden" id="fileInput" onchange="handleFileSelect(this)">
+                            </div>
+                            <div class="file-chip" id="fileChip">
+                                <svg class="file-chip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/>
+                                    <polyline points="13 2 13 9 20 9"/>
+                                </svg>
+                                <span class="file-chip-name" id="fileChipName"></span>
+                                <span class="file-chip-size" id="fileChipSize"></span>
+                                <button class="file-chip-remove" onclick="removeFile()" title="Remove file">&times;</button>
+                            </div>
+                        </div>
+                        <div class="generate-wrapper">
+                            <div class="complexity-group">
+                                <span class="complexity-label">Complexity</span>
+                                <select class="complexity-select" id="complexitySelect">
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="hard">Hard</option>
+                                </select>
+                            </div>
+                            <button class="generate-btn" onclick="handleGenerate()">Generate</button>
+                        </div>
+                    </div>
+                    <div class="content-right">
+                        <div class="trending-card">
+                            <div class="trending-card-header">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                                    <polyline points="17 6 23 6 23 12"/>
+                                </svg>
+                                <span class="trending-title">Trending</span>
+                            </div>
+                            <div class="trending-card-body">
+                                <div class="trending-item" onclick="loadTrending(this, 0)">
+                                    <span class="trending-item-text">Identify the potential next generation clients.</span>
+                                    <div class="item-meta">
+                                        <span class="tag medium">Medium</span>
+                                        <span class="tag-db">CRM</span>
+                                        <span class="tag-db">FileNet</span>
+                                    </div>
+                                </div>
+                                <div class="trending-item" onclick="loadTrending(this, 1)">
+                                    <span class="trending-item-text">Do a client grouping based shared entity and client relationships</span>
+                                    <div class="item-meta">
+                                        <span class="tag hard">Hard</span>
+                                        <span class="tag-db">CRM</span>
+                                        <span class="tag-db">FileNet</span>
+                                    </div>
+                                </div>
+                                <div class="trending-item" onclick="loadTrending(this, 2)">
+                                    <span class="trending-item-text">Can you provide the thematic investment opportunities the clients has been requesting from the RM-Clients meeting for the last 6 months?</span>
+                                    <div class="item-meta">
+                                        <span class="tag medium">Medium</span>
+                                        <span class="tag-db">FileNet</span>
+                                        <span class="tag-db">CRM</span>
+                                    </div>
+                                </div>
+                                <div class="trending-item" onclick="loadTrending(this, 3)">
+                                    <span class="trending-item-text">Which clients hold banking accounts outside Bank of Singapore and provide the share of wallet with Bank of Singapore for such clients?</span>
+                                    <div class="item-meta">
+                                        <span class="tag hard">Hard</span>
+                                        <span class="tag-db">T24</span>
+                                        <span class="tag-db">CRM</span>
+                                    </div>
+                                </div>
+                                <div class="trending-item" onclick="loadTrending(this, 4)">
+                                    <span class="trending-item-text">Classify clients' purpose of setting up accounts with BOS into categories</span>
+                                    <div class="item-meta">
+                                        <span class="tag medium">Medium</span>
+                                        <span class="tag-db">T24</span>
+                                        <span class="tag-db">FileNet</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        const historyData = [
+            {
+                dbs: ['CRM', 'T24'],
+                question: 'Group the connected clients by shared entity. What relationship is explicitly recorded between each client and the shared entity? Which RMs manage the connected portfolios?',
+                complexity: 'hard'
+            },
+            {
+                dbs: ['FileNet', 'CRM'],
+                question: "Is there mention of the client or his company's family? Such as son, daughter, grandson and granddaughter or any other relatives.",
+                complexity: 'medium'
+            }
+        ];
+        const trendingData = [
+            {
+                dbs: ['CRM', 'FileNet'],
+                question: 'Identify the potential next generation clients.',
+                complexity: 'medium'
+            },
+            {
+                dbs: ['CRM', 'FileNet'],
+                question: 'Do a client grouping based shared entity and client relationships',
+                complexity: 'hard'
+            },
+            {
+                dbs: ['FileNet', 'CRM'],
+                question: 'Can you provide the thematic investment opportunities the clients has been requesting from the RM-Clients meeting for the last 6 months?',
+                complexity: 'medium'
+            },
+            {
+                dbs: ['T24', 'CRM'],
+                question: 'Which clients hold banking accounts outside Bank of Singapore and provide the share of wallet with Bank of Singapore for such clients?',
+                complexity: 'hard'
+            },
+            {
+                dbs: ['T24', 'FileNet'],
+                question: "Classify clients' purpose of setting up accounts with BOS into categories",
+                complexity: 'medium'
+            }
+        ];
+        const helpContent = `
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <button class="faq-question">
+                    How do I select a database?
+                    <svg class="faq-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+                </button>
+                <div class="faq-answer">Use the Database section to choose one or more data sources. You can select multiple databases to search across them simultaneously. Selecting "All" enables every database.</div>
+            </div>
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <button class="faq-question">
+                    What does the complexity level do?
+                    <svg class="faq-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+                </button>
+                <div class="faq-answer">Complexity level helps the system understand the depth of analysis needed. Low is for straightforward lookups, Medium for multi-step cross-references, and Hard for complex analytical queries requiring multiple joins and aggregations.</div>
+            </div>
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <button class="faq-question">
+                    Can I switch databases mid-session?
+                    <svg class="faq-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+                </button>
+                <div class="faq-answer">Yes. Change the database selection at any time before hitting Generate. Each query is independent of the previous one.</div>
+            </div>
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <button class="faq-question">
+                    How do I review previous queries?
+                    <svg class="faq-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+                </button>
+                <div class="faq-answer">Click "History" in the top navigation. A side panel will appear listing your recent queries. Click any entry to reload it into the workspace.</div>
+            </div>
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <button class="faq-question">
+                    What is the Trending section?
+                    <svg class="faq-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+                </button>
+                <div class="faq-answer">Trending shows popular queries displayed vertically to the right of your workspace. Click any entry to prefill your question, databases, and complexity level.</div>
+            </div>
+        `;
+        const contactContent = `
+            <div class="contact-content">
+                <div class="contact-card">
+                    <div class="contact-card-label">Support Email</div>
+                    <div class="contact-card-value"><a href="mailto:support@aura.io">support@aura.io</a></div>
+                </div>
+                <div class="contact-card">
+                    <div class="contact-card-label">Phone</div>
+                    <div class="contact-card-value">+65 6012 3456</div>
+                </div>
+                <div class="contact-card">
+                    <div class="contact-card-label">Office Hours</div>
+                    <div class="contact-card-value">Monday – Friday<br>09:00 – 18:00 SGT</div>
+                </div>
+            </div>
+            <div class="contact-footer">
+                <button class="contact-btn">Submit a Ticket</button>
+                <button class="contact-btn">Schedule a Teams Call</button>
+            </div>
+        `;
+        /* ─── Database Multi-Select Logic ─── */
+        function handleDbAll(checkbox) {
+            const allIds = ['dbCRM', 'dbFileNet', 'dbT24', 'dbHelios'];
+            allIds.forEach(id => {
+                document.getElementById(id).checked = checkbox.checked;
+            });
+        }
+        function handleDbIndividual(checkbox) {
+            const allIds = ['dbCRM', 'dbFileNet', 'dbT24', 'dbHelios'];
+            const allChecked = allIds.every(id => document.getElementById(id).checked);
+            document.getElementById('dbAll').checked = allChecked;
+        }
+        function getSelectedDbs() {
+            const allIds = ['dbCRM', 'dbFileNet', 'dbT24', 'dbHelios'];
+            const selected = [];
+            if (document.getElementById('dbAll').checked) {
+                return ['All'];
+            }
+            allIds.forEach(id => {
+                if (document.getElementById(id).checked) {
+                    selected.push(document.getElementById(id).value);
+                }
+            });
+            return selected.length > 0 ? selected : ['All'];
+        }
+        function setDatabases(dbs) {
+            const allIds = ['dbCRM', 'dbFileNet', 'dbT24', 'dbHelios'];
+            if (dbs.includes('All')) {
+                document.getElementById('dbAll').checked = true;
+                allIds.forEach(id => document.getElementById(id).checked = true);
+            } else {
+                document.getElementById('dbAll').checked = false;
+                allIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    el.checked = dbs.includes(el.value);
+                });
+            }
+        }
+        /* ─── Panel Controls ─── */
+        function openLeftPanel() {
+            closeRightPanel(true);
+            document.getElementById('leftPanel').classList.add('open');
+            document.getElementById('pageWrapper').classList.add('shifted-left');
+            document.getElementById('navHistory').classList.add('active');
+            document.getElementById('panelOverlay').classList.add('visible');
+        }
+        function closeLeftPanel(silent) {
+            document.getElementById('leftPanel').classList.remove('open');
+            document.getElementById('pageWrapper').classList.remove('shifted-left');
+            document.getElementById('navHistory').classList.remove('active');
+            if (!silent || !document.getElementById('rightPanel').classList.contains('open')) {
+                document.getElementById('panelOverlay').classList.remove('visible');
+            }
+        }
+        function openRightPanel(type) {
+            closeLeftPanel(true);
+            const panel = document.getElementById('rightPanel');
+            const title = document.getElementById('rightPanelTitle');
+            const body = document.getElementById('rightPanelBody');
+            if (type === 'help') {
+                title.textContent = 'Help';
+                body.innerHTML = helpContent;
+                document.getElementById('navHelp').classList.add('active');
+                document.getElementById('navContact').classList.remove('active');
+            } else {
+                title.textContent = 'Contact';
+                body.innerHTML = contactContent;
+                document.getElementById('navContact').classList.add('active');
+                document.getElementById('navHelp').classList.remove('active');
+            }
+            panel.classList.add('open');
+            document.getElementById('panelOverlay').classList.add('visible');
+        }
+        function closeRightPanel(silent) {
+            document.getElementById('rightPanel').classList.remove('open');
+            document.getElementById('navHelp').classList.remove('active');
+            document.getElementById('navContact').classList.remove('active');
+            if (!silent || !document.getElementById('leftPanel').classList.contains('open')) {
+                document.getElementById('panelOverlay').classList.remove('visible');
+            }
+        }
+        document.getElementById('panelOverlay').addEventListener('click', function() {
+            closeLeftPanel();
+            closeRightPanel();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeLeftPanel();
+                closeRightPanel();
+            }
+        });
+        function toggleFaq(item) {
+            const wasOpen = item.classList.contains('open');
+            document.querySelectorAll('.faq-item').forEach(f => f.classList.remove('open'));
+            if (!wasOpen) item.classList.add('open');
+        }
+        /* ─── Load History / Trending ─── */
+        function loadHistory(el, index) {
+            document.querySelectorAll('.history-item').forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+            document.querySelectorAll('.trending-item').forEach(item => item.classList.remove('active'));
+            const data = historyData[index];
+            if (!data) return;
+            setDatabases(data.dbs);
+            document.getElementById('queryInput').value = data.question;
+            document.getElementById('complexitySelect').value = data.complexity || 'low';
+            if (window.innerWidth <= 768) {
+                closeLeftPanel();
+            }
+        }
+        function loadTrending(el, index) {
+            document.querySelectorAll('.trending-item').forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+            document.querySelectorAll('.history-item').forEach(item => item.classList.remove('active'));
+            const data = trendingData[index];
+            if (!data) return;
+            setDatabases(data.dbs);
+            document.getElementById('queryInput').value = data.question;
+            document.getElementById('complexitySelect').value = data.complexity || 'low';
+        }
+        function handleGenerate() {
+            const question = document.getElementById('queryInput').value.trim();
+            const dbs = getSelectedDbs();
+            const complexity = document.getElementById('complexitySelect').value;
+            if (!question) return;
+            console.log(`[${complexity}] [${dbs.join(', ')}]: ${question}`);
+        }
+        function handleFileSelect(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const chip = document.getElementById('fileChip');
+            document.getElementById('fileChipName').textContent = file.name;
+            document.getElementById('fileChipSize').textContent = formatFileSize(file.size);
+            chip.classList.add('visible');
+        }
+        function removeFile() {
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileChip').classList.remove('visible');
+        }
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+        document.getElementById('queryInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleGenerate();
+        });
+    </script>
+</body>
+</html>
+							<script>
+                            	
+							</script>
+                        </body>
+                        </html>
+
+							<script>
+                            	
+							</script>
+                        </body>
+                        </html>
+                    
