@@ -15,7 +15,9 @@
       |
       | visualise safe aggregates
       | human narrows boundary
-      | right panel: prompt / quick QA
+      | right panel: prompt
+      | [Finetune] -> async loop
+      | [Next] -> P3
       v
 [ASYNC MANAGER RUN]
       |
@@ -67,7 +69,7 @@ Page 3 renders the approved boundary as a Summary Report. It should show the cro
 
 ### Page 2 loop: refine the search boundary
 
-The right sliding panel accepts a short human prompt such as “include trust beneficiaries but exclude shared addresses.” The Async Manager records it as a `P2 / QA` or `P2 / FINETUNE` event, runs against the current case version, and returns to Case Management. The case row then exposes “Open updated Page 2” and “Continue to Page 3”.
+The visible right sliding panel accepts a short human prompt such as “include trust beneficiaries but exclude shared addresses.” **Finetune** records a `P2 / FINETUNE` event, runs against the current case version, and returns to Case Management. **Next** sends the approved boundary to Page 3. The current case context is attached automatically, so the prompt contains only the delta and uses minimal tokens.
 
 ### Page 3 loop: refine or freeze the report
 
