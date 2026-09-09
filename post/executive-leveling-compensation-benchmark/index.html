@@ -160,43 +160,6 @@
       max-width: 1040px;
     }
 
-    /* Interactive Instruction Pill */
-    .interact-hint {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-      background: #faf8f4;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 10px 16px;
-      margin: 20px 0 24px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .interact-hint span.tip {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-    .interact-hint strong {
-      color: var(--lux);
-    }
-    .reset-btn {
-      background: transparent;
-      border: 1px solid var(--line);
-      color: var(--muted);
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .reset-btn:hover {
-      background: #ffffff;
-      color: var(--lux);
-    }
-
     /* Section Cards */
     .section-card {
       background: var(--paper);
@@ -908,20 +871,11 @@
         <span>Author: <strong>Kent Chiu</strong></span>
         <span>Release Date: <strong>2026-09-08</strong></span>
         <span>Category: <strong>Salary & Executive Strategy</strong></span>
-        <span>Systems: <strong>Taiwan (Gov & TSMC) · Singapore (Gov & Banking) · Taiwan Banking (CTBC / Fubon) · Global (ASML)</strong></span>
       </div>
 
       <p class="blog-lead">
         During the golden decade of career progression, the greatest blind spot for most professionals is the lack of cross-industry, cross-border awareness of <strong>Leveling & Compensation</strong>. When you climb the ladder within a single system, the ceiling you hit may essentially be the starting floor in another. Below are the decoded cross-system matrix and 16-tier government-to-corporate benchmarks.
       </p>
-
-      <div class="interact-hint">
-        <span class="tip">
-          <span>💡</span>
-          <span><strong>Interactive Comparison:</strong> Select any institution as the <strong>primary axis</strong>. Use the stack chart for level spans and overlaps, or the detail table for row-by-row audit.</span>
-        </span>
-        <button type="button" class="reset-btn" id="clearSelectionBtn">Clear Selection</button>
-      </div>
     </header>
 
     <!-- ADAPTIVE MASTER SECTION: graph-projected cross-system matrix -->
@@ -1790,7 +1744,6 @@
       const axisSelect = document.getElementById('primaryAxisSelect');
       const searchInput = document.getElementById('masterSearchInput');
       const pillButtons = [...document.querySelectorAll('.pill-btn')];
-      const clearBtn = document.getElementById('clearSelectionBtn');
       const axisStatus = document.getElementById('axisStatus');
       const axisTierBadge = document.getElementById('axisTierBadge');
       const stackChart = document.getElementById('levelStackChart');
@@ -2207,7 +2160,6 @@
         if (primaryAxisLabel) primaryAxisLabel.textContent = uiText('primary_axis');
         axisSelect.setAttribute('aria-label', uiText('select_primary'));
         if (searchInput) searchInput.placeholder = uiText('search_placeholder');
-        if (clearBtn) clearBtn.textContent = uiText('clear_selection');
         const viewKeys = { stack: 'stack_chart', table: 'detail_table' };
         viewButtons.forEach(button => {
           button.textContent = uiText(viewKeys[button.dataset.view]);
@@ -2269,13 +2221,6 @@
       languageButtons.forEach(button => {
         button.addEventListener('click', () => setLanguage(button.dataset.language));
       });
-      clearBtn?.addEventListener('click', () => {
-        table.querySelectorAll('.row-selected, .col-active, .col-highlight').forEach(item =>
-          item.classList.remove('row-selected', 'col-active', 'col-highlight'));
-        table.querySelector('thead th')?.classList.add('col-active');
-        stackChart?.querySelectorAll('.selected').forEach(item => item.classList.remove('selected'));
-      });
-
       renderLanguageControls();
       renderAxisOptions();
       renderCompanyToggles();
