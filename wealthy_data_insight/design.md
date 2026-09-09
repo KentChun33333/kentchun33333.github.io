@@ -100,3 +100,22 @@ The next increment should reuse the same three-stage shell and swap only the sce
 2. Thematic Investment Demand — meeting-derived themes, client demand clusters, suitability matching, and opportunity prioritisation.
 
 This keeps data-source selection and the visualization asset library stable while allowing scenario-specific intelligence modules to evolve independently.
+
+## DEV-001 architecture refinement
+
+The workflow is now defined as a case-based asynchronous loop. Page 1 is the user entry and Case Management surface. Page 2 is a human-guided data-capability discovery workspace: the agent explains what each selected source can provide at safe aggregation levels, while the user narrows the query boundary through foldable pillars. Page 3 is the cross-source Summary Report and insight surface.
+
+The system must return to Case Management after every asynchronous action. A Page 2 prompt is recorded as a `P2 / QA` or `P2 / FINETUNE` event; the user can reopen the updated Page 2 or continue to Page 3. A Page 3 **Finetune** action records a new `P3 / FINETUNE` event and report version. **Done** records `P3 / DONE` and freezes the case. Historical events and report versions remain immutable.
+
+The user-facing term for the generated prompt, execution trace, and compact provenance is **Summary Report / Agent Trace**. It should include the actor, timestamp, topic, lookback period, selected sources, aggregation boundary, human hypothesis, guardrails, evidence manifest, confidence summary, and run status.
+
+Source visibility is deliberately layered:
+
+- CRM: profile, client, relationship, and portfolio levels; no raw transaction-level display.
+- FileNet: document type, client, and portfolio levels; no unrestricted document key-value dump.
+- HELIOS: processed case type, client, and portfolio levels; no underlying processing detail.
+- T24 or account systems: client and account-relationship aggregates; transaction detail requires separate authorisation.
+
+Page 2 should show capability cards that state what a source can answer, what visualisations it supports, what aggregation level is used, the data freshness, and what is withheld. The right sliding panel is the only prompt-entry surface for quick QA or refinement, and every submission must carry the active case context.
+
+The three scenario designs and feasibility assessments are documented in [`s1.html`](s1.html), [`s2.html`](s2.html), and [`s3.html`](s3.html). The ASCII lifecycle is maintained in [`design-flow.md`](design-flow.md), and the polished implementation request is maintained in [`dev-001.md`](dev-001.md).
