@@ -69,7 +69,7 @@ Page 3 renders the approved boundary as a Summary Report. It should show the cro
 
 ### Page 2 loop: refine the search boundary
 
-The visible right sliding panel accepts a short human prompt such as “include trust beneficiaries but exclude shared addresses.” **Finetune** records a `P2 / FINETUNE` event, runs against the current case version, and returns to Case Management. **Next** sends the approved boundary to Page 3. The current case context is attached automatically, so the prompt contains only the delta and uses minimal tokens.
+The visible right sliding panel accepts a short human prompt such as “include trust beneficiaries but exclude shared addresses.” On desktop it occupies the same application canvas and narrows Page 2 as it opens. **Finetune** records a `P2 / FINETUNE` event, runs against the current case version, and returns to Case Management. **Next** sends the approved boundary to Page 3. The current case context is attached automatically, so the prompt contains only the delta and uses minimal tokens.
 
 ### Page 3 loop: refine or freeze the report
 
