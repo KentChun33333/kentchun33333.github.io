@@ -102,8 +102,8 @@ languages:
           avp1: {detail: "每月基本薪 S$7–9k × 15 個月"}
           avp2: {detail: "每月基本薪 S$8.5–11k × 15 個月"}
           vp1: {detail: "每月基本薪 S$10–14k × 15 個月"}
-          vp2: {detail: "每月基本薪 S$13–18k × 15 個月"}
-          fvp: {detail: "每月基本薪 S$17–22k × 15 個月"}
+          vp2: {detail: "每月基本薪 S$12.5–16.5k；總薪酬以 15–16 個月估算"}
+          fvp: {detail: "每月基本薪 S$16–22k；總薪酬以 15–16 個月估算"}
           svp: {detail: "每月基本薪約 S$20–27k × 15 個月"}
           ed: {detail: "每月基本薪約 S$24–32k+ × 15 個月"}
           md: {detail: "每月基本薪約 S$30–45k+ × 15 個月"}
@@ -117,7 +117,7 @@ languages:
           am: {detail: "獨立職級，位於經理以下 · 完整涵蓋 UOB AM，並延伸至 Manager 前半；同時涵蓋 TSMC G31 前 0.3 段"}
           manager: {detail: "資深經理寬帶 · 起於 UOB Manager 後半並延伸至 AVP1；承接 AM 並涵蓋 TSMC G32"}
           avp: {detail: "由資深個人貢獻者延伸至人員／專案領導；對應 UOB AVP2 至 VP1，以及 TSMC G33 至 G34 前半"}
-          vp: {detail: "起於 UOB VP2，延伸至幾乎完整的 FVP，並對應 TSMC G34–35"}
+          vp: {detail: "每月基本薪 S$11.25–22.5k；總薪酬以 15–16 個月估算。起於 UOB VP2，延伸至幾乎完整的 FVP，並對應 TSMC G34–35"}
           ed: {detail: "涵蓋 TSMC G36–37"}
           md: {detail: "對應 UOB ED 與 TSMC G38"}
           md1: {detail: "對應 UOB MD 與 TSMC G39–40；與 GMD 為不同層級"}
