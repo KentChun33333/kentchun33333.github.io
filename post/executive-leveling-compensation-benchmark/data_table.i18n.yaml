@@ -1,5 +1,5 @@
 version: 1
-default_language: en
+default_language: zh-Hant
 
 languages:
   en:

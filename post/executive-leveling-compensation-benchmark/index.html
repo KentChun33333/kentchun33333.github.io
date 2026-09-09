@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -939,8 +939,8 @@
         <div class="language-control">
           <span id="languageLabel">Language</span>
           <div class="language-switch" id="languageSwitch" role="group" aria-label="Language">
-            <button type="button" class="language-btn active" data-language="en" aria-pressed="true">EN</button>
-            <button type="button" class="language-btn" data-language="zh-Hant" aria-pressed="false">繁中</button>
+            <button type="button" class="language-btn" data-language="en" aria-pressed="false">EN</button>
+            <button type="button" class="language-btn active" data-language="zh-Hant" aria-pressed="true">繁中</button>
           </div>
         </div>
         <div class="axis-control">
@@ -1781,7 +1781,7 @@
 
   </div>
 
-  <script src="data_table.generated.js?v=20260909-twgov-coordinates"></script>
+  <script src="data_table.generated.js?v=20260909-default-ocbc-zh"></script>
   <!-- Interactive Table JavaScript -->
   <script>
     (() => {
@@ -1804,12 +1804,13 @@
       const languageButtons = [...document.querySelectorAll('.language-btn')];
       const i18nConfig = graph?.i18n || {};
       const languages = i18nConfig.languages || {};
+      const LANGUAGE_STORAGE_KEY = 'benchmark-language-v2';
       let activeTierFilter = 'all';
       let primaryAxis = graph && graph.default_axis;
       let activeLanguage = i18nConfig.default_language || 'en';
 
       try {
-        const savedLanguage = localStorage.getItem('benchmark-language');
+        const savedLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY);
         if (savedLanguage && languages[savedLanguage]) activeLanguage = savedLanguage;
       } catch (_) {
         // File previews or privacy settings may disable local storage.
@@ -1821,8 +1822,15 @@
       }
 
       const institutions = graph.institutions;
-      const institutionIds = Object.keys(institutions);
-      const visibleInstitutionIds = new Set(institutionIds);
+      const configuredOrder = Array.isArray(graph.institution_order)
+        ? graph.institution_order.filter(institutionId => institutions[institutionId])
+        : [];
+      const institutionIds = [...new Set([...configuredOrder, ...Object.keys(institutions)])];
+      const configuredVisible = Array.isArray(graph.default_visible_institutions)
+        ? graph.default_visible_institutions.filter(institutionId => institutions[institutionId])
+        : institutionIds;
+      const visibleInstitutionIds = new Set(configuredVisible);
+      visibleInstitutionIds.add(primaryAxis);
       const nodeIndex = new Map();
       institutionIds.forEach(institutionId => {
         institutions[institutionId].nodes.forEach(node => {
@@ -2225,7 +2233,7 @@
         if (!languages[languageId] || languageId === activeLanguage) return;
         activeLanguage = languageId;
         try {
-          localStorage.setItem('benchmark-language', activeLanguage);
+          localStorage.setItem(LANGUAGE_STORAGE_KEY, activeLanguage);
         } catch (_) {
           // Language still applies for the current page session.
         }

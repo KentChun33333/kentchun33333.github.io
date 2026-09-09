@@ -1,5 +1,7 @@
 version: 1
-default_axis: sg_gov
+default_axis: ocbc
+institution_order: [ocbc, uob, fubon, asml, sg_gov, tw_gov, ctbc, tsmc, astar]
+default_visible_institutions: [ocbc, uob, fubon, asml, sg_gov, tw_gov]
 method:
   coordinate: "Normalized responsibility level (0–100); compensation never determines the coordinate by itself."
   projection: "Direct anchor edges are preferred; otherwise a node is assigned to the nearest primary-axis responsibility level."

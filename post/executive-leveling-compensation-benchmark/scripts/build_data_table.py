@@ -31,6 +31,25 @@ def validate(data: dict) -> None:
     if data.get("default_axis") not in institutions:
         raise ValueError("default_axis must reference an institution")
 
+    institution_order = data.get("institution_order", [])
+    if not isinstance(institution_order, list) or set(institution_order) != set(institutions):
+        raise ValueError("institution_order must list every institution exactly once")
+    if len(institution_order) != len(set(institution_order)):
+        raise ValueError("institution_order must not contain duplicates")
+
+    default_visible = data.get("default_visible_institutions", [])
+    if not isinstance(default_visible, list) or not default_visible:
+        raise ValueError("default_visible_institutions must be a non-empty list")
+    if len(default_visible) != len(set(default_visible)):
+        raise ValueError("default_visible_institutions must not contain duplicates")
+    unknown_visible = set(default_visible) - set(institutions)
+    if unknown_visible:
+        raise ValueError(
+            f"default_visible_institutions has unknown institutions: {sorted(unknown_visible)}"
+        )
+    if data["default_axis"] not in default_visible:
+        raise ValueError("default_axis must be visible by default")
+
     known_nodes: set[str] = set()
     for institution_id, institution in institutions.items():
         nodes = institution.get("nodes", [])
@@ -101,7 +120,10 @@ def validate_i18n(data: dict, i18n: dict) -> None:
                     f"i18n language {language_id} has unknown nodes for "
                     f"{institution_id}: {sorted(unknown_nodes)}"
                 )
-            if language_id != default_language:
+            # English descriptions live in the canonical data_table.yaml; every
+            # additional language must provide a complete node overlay regardless
+            # of which language the interface opens with by default.
+            if language_id != "en":
                 translated_nodes = localized.get("nodes", {})
                 missing_nodes = known_node_ids[institution_id] - set(translated_nodes)
                 if missing_nodes:
