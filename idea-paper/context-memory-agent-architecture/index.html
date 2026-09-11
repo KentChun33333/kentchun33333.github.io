@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Autonomous Agent Architecture — a practical guide to unifying context engineering and memory engineering for production LLM agents.">
+<title>Autonomous Agent Architecture — Context × Memory</title>
+<style>
+:root{
+  --bg:#081019;--panel:#0d1824;--panel2:#111f2d;--text:#edf4fb;--muted:#93a8ba;
+  --line:#23384a;--cyan:#6ee7f2;--green:#9ae6b4;--violet:#b8a1ff;--amber:#ffd479;
+  --max:1220px;--r:22px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:
+ radial-gradient(circle at 12% 8%,rgba(110,231,242,.09),transparent 26%),
+ radial-gradient(circle at 87% 16%,rgba(184,161,255,.08),transparent 25%),
+ var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.6}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+.wrap{width:min(var(--max),calc(100% - 36px));margin:auto}
+.topbar{position:sticky;top:0;z-index:30;background:rgba(8,16,25,.78);backdrop-filter:blur(18px);border-bottom:1px solid rgba(147,168,186,.12)}
+.topbar .inner{height:68px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;gap:11px;align-items:center;font-weight:760;letter-spacing:-.02em}
+.mark{width:31px;height:31px;border:1px solid var(--line);border-radius:10px;display:grid;place-items:center;background:linear-gradient(145deg,#112435,#0a131d);box-shadow:inset 0 0 20px rgba(110,231,242,.08)}
+.mark:before{content:"";width:12px;height:12px;border:2px solid var(--cyan);border-radius:4px;transform:rotate(45deg)}
+nav{display:flex;gap:18px;font-size:14px;color:var(--muted)}
+nav a:hover{color:var(--text)}
+.hero{padding:88px 0 64px}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:999px;padding:7px 12px;color:#c8d7e3;font-size:12px;letter-spacing:.06em;text-transform:uppercase;background:rgba(255,255,255,.02)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 14px var(--cyan)}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:54px;align-items:center;margin-top:30px}
+h1{font-size:clamp(48px,7vw,92px);line-height:.96;letter-spacing:-.065em;margin:0;max-width:900px}
+.grad{background:linear-gradient(90deg,var(--cyan),#d5fbff 48%,var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:19px;color:#afc0ce;max-width:700px;margin:28px 0}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+.btn{padding:12px 17px;border-radius:12px;border:1px solid var(--line);background:#102132;color:var(--text);cursor:pointer}
+.btn.primary{background:var(--text);color:#081019;border-color:var(--text);font-weight:700}
+.btn:hover{transform:translateY(-1px)}
+.arch-card{position:relative;border:1px solid var(--line);border-radius:28px;background:linear-gradient(180deg,rgba(17,31,45,.94),rgba(9,17,26,.94));padding:24px;min-height:430px;overflow:hidden}
+.arch-card:after{content:"";position:absolute;inset:auto -80px -110px auto;width:260px;height:260px;border-radius:50%;background:rgba(110,231,242,.08);filter:blur(8px)}
+.diagram-title{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:18px}
+.flow{display:grid;gap:13px;position:relative;z-index:2}
+.node{border:1px solid var(--line);border-radius:16px;padding:16px;background:#0b1722}
+.node strong{display:block;font-size:15px;margin-bottom:4px}
+.node span{color:var(--muted);font-size:13px}
+.arrow{height:24px;display:grid;place-items:center;color:#547087}
+.arrow:before{content:"↓"}
+.node.memory{border-color:rgba(184,161,255,.35);box-shadow:inset 0 0 0 1px rgba(184,161,255,.03)}
+.node.context{border-color:rgba(110,231,242,.36);box-shadow:inset 0 0 0 1px rgba(110,231,242,.03)}
+.node.exec{border-color:rgba(154,230,180,.32)}
+.loopback{margin-top:18px;padding-top:16px;border-top:1px dashed #2b4356;color:#8da4b6;font-size:13px;display:flex;gap:10px;align-items:center}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--violet);animation:pulse 1.7s infinite}
+@keyframes pulse{50%{opacity:.25;transform:scale(1.8)}}
+.section{padding:86px 0}
+.section-head{display:grid;grid-template-columns:.8fr 1.2fr;gap:40px;margin-bottom:36px}
+.kicker{font-size:13px;color:var(--cyan);text-transform:uppercase;letter-spacing:.1em}
+h2{font-size:clamp(34px,5vw,58px);line-height:1.05;letter-spacing:-.045em;margin:10px 0 0}
+.section-head p{font-size:17px;color:var(--muted);margin:7px 0 0;align-self:end}
+.rule{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.compare-card{border:1px solid var(--line);border-radius:var(--r);padding:26px;background:rgba(13,24,36,.66)}
+.compare-card .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.compare-card h3{font-size:26px;margin:8px 0}
+.compare-card p{color:#9db1c1;margin:0}
+.ram h3{color:var(--cyan)} .ssd h3{color:var(--violet)}
+.prompt-stack{display:grid;gap:10px;margin-top:26px}
+.layer{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;border:1px solid var(--line);border-radius:16px;padding:16px;background:#0b1621}
+.badge{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:#132638;color:#d8e7f2;font-weight:760}
+.layer b{display:block}.layer small{color:var(--muted)}.hit{font-size:12px;color:var(--green);white-space:nowrap}
+.memory-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.mem{border:1px solid var(--line);border-radius:20px;padding:20px;background:rgba(13,24,36,.72);cursor:pointer;transition:.2s}
+.mem:hover,.mem.active{transform:translateY(-4px);border-color:#48667d;background:#112131}
+.mem .n{font-size:12px;color:var(--muted);margin-bottom:28px}.mem h3{font-size:19px;margin:0 0 6px}.mem p{color:#90a5b5;font-size:14px;margin:0}
+.mem.active h3{color:var(--cyan)}
+.detail{margin-top:16px;border:1px solid var(--line);border-radius:20px;padding:24px;background:#0c1722;min-height:132px}
+.detail strong{font-size:18px}.detail p{color:var(--muted);margin-bottom:0}
+.dual{display:grid;grid-template-columns:280px 1fr;gap:18px}
+.loop-tabs{display:grid;gap:10px;align-content:start}
+.loop-tab{border:1px solid var(--line);border-radius:14px;background:#0b1621;color:#9fb2c1;padding:15px 16px;text-align:left;cursor:pointer}
+.loop-tab.active{color:var(--text);background:#122536;border-color:#43617a}
+.loop-panel{border:1px solid var(--line);border-radius:24px;padding:28px;background:rgba(13,24,36,.72)}
+.loop-panel h3{font-size:28px;margin:0 0 8px}.loop-panel>p{color:var(--muted)}
+.pipeline{display:flex;align-items:stretch;gap:7px;margin-top:26px;overflow:auto;padding-bottom:4px}
+.pipe{min-width:145px;flex:1;border:1px solid var(--line);border-radius:14px;padding:14px;background:#0a151f;font-size:13px}
+.pipe b{display:block;margin-bottom:4px}.pipe span{color:#8096a8}.chev{display:grid;place-items:center;color:#49667b}
+.crud{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.crud>div{border:1px solid var(--line);border-radius:16px;padding:17px;background:#0c1823}
+.crud b{display:block;margin-bottom:5px}.crud span{color:var(--muted);font-size:13px}
+.blueprint{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.step{border:1px solid var(--line);border-radius:21px;padding:24px;background:#0c1722;position:relative;overflow:hidden}
+.step .num{font-size:54px;line-height:1;color:#1e3648;font-weight:850;position:absolute;right:18px;top:12px}
+.step h3{margin:0 0 8px;font-size:20px}.step p{margin:0;color:#91a6b7}
+.code{margin-top:18px;background:#061018;border:1px solid #1c3345;border-radius:16px;padding:16px;overflow:auto;color:#bfd4e3;font:12.5px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace}
+.takeaways{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.take{border-top:2px solid #315169;padding:16px 6px}.take b{display:block;font-size:14px;margin-bottom:8px}.take span{font-size:13px;color:var(--muted)}
+footer{padding:44px 0 70px;color:#7890a2;font-size:13px;border-top:1px solid rgba(147,168,186,.1)}
+@media(max-width:900px){
+ nav{display:none}.hero-grid,.section-head,.dual{grid-template-columns:1fr}.hero{padding-top:60px}.arch-card{min-height:0}
+ .memory-grid,.takeaways{grid-template-columns:repeat(2,1fr)}.crud{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:620px){
+ .wrap{width:min(100% - 24px,var(--max))}.hero{padding-top:44px}.hero-grid{gap:28px}
+ h1{font-size:48px}.compare,.blueprint,.memory-grid,.takeaways,.crud{grid-template-columns:1fr}
+ .pipeline{display:grid}.chev{transform:rotate(90deg)}.layer{grid-template-columns:40px 1fr}.hit{grid-column:2}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap inner">
+    <a class="brand" href="#top"><span class="mark"></span><span>Autonomous Agent Architecture</span></a>
+    <nav><a href="#context">Context</a><a href="#memory">Memory</a><a href="#runtime">Runtime</a><a href="#build">Build</a></nav>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span> Production LLM Systems · 2026</span>
+    <div class="hero-grid">
+      <div>
+        <h1>Context is <span class="grad">RAM.</span><br>Memory is SSD.</h1>
+        <p class="lead">Reliable autonomous agents emerge when active inference and persistent knowledge are treated as two synchronized systems—not one oversized prompt.</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#runtime">Explore the architecture</a>
+          <a class="btn" href="#build">Implementation blueprint</a>
+        </div>
+      </div>
+      <div class="arch-card">
+        <div class="diagram-title">Unified cognitive stack</div>
+        <div class="flow">
+          <div class="node memory"><strong>Persistent Memory Substrate</strong><span>Semantic facts · episodes · skills · graph relations</span></div>
+          <div class="arrow"></div>
+          <div class="node context"><strong>Dynamic Context Engine</strong><span>Selective retrieval · scope elision · budget allocation</span></div>
+          <div class="arrow"></div>
+          <div class="node exec"><strong>Deterministic Execution</strong><span>Inference · tool calls · validated action</span></div>
+        </div>
+        <div class="loopback"><span class="pulse"></span> Raw traces flow back into a slower consolidation loop.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<section class="section" id="context">
+<div class="wrap">
+  <div class="section-head">
+    <div><div class="kicker">01 · Context Engineering</div><h2>Orchestrate the active inference window.</h2></div>
+    <p>The context window is a scarce execution surface. Stable prefixes, selective repository slices, and an append-only dynamic tail keep reasoning focused while improving cache reuse.</p>
+  </div>
+  <div class="compare">
+    <article class="compare-card ram"><div class="label">Volatile working memory</div><h3>Context = RAM</h3><p>Use it for the exact information needed now: policies, relevant memory, code interfaces, current user intent, and live tool output.</p></article>
+    <article class="compare-card ssd"><div class="label">Persistent knowledge</div><h3>Memory ≠ Prompt History</h3><p>Long-lived facts and procedures should sit outside the prompt and be retrieved only when they improve the current decision.</p></article>
+  </div>
+  <div class="prompt-stack">
+    <div class="layer"><span class="badge">1</span><div><b>Immutable system prefix</b><small>Identity · safety · tool schemas · output contract</small></div><span class="hit">highest cache reuse</span></div>
+    <div class="layer"><span class="badge">2</span><div><b>Relevant memory + repository slice</b><small>Atomic facts · AST map · top-K retrieval · scope-aware code</small></div><span class="hit">semi-static</span></div>
+    <div class="layer"><span class="badge">3</span><div><b>Append-only dynamic tail</b><small>User query · live state · tool outputs · immediate scratch data</small></div><span class="hit">volatile</span></div>
+  </div>
+</div>
+</section>
+
+<section class="section" id="memory">
+<div class="wrap">
+  <div class="section-head">
+    <div><div class="kicker">02 · Memory Engineering</div><h2>Persist knowledge without creating a retrieval swamp.</h2></div>
+    <p>Good agent memory is structured, versioned, and forgetful. Click a tier to see its operational role.</p>
+  </div>
+  <div class="memory-grid" id="memoryGrid">
+    <article class="mem active" data-key="working"><div class="n">TIER 01</div><h3>Working</h3><p>Active prompt and live scratchpad.</p></article>
+    <article class="mem" data-key="episodic"><div class="n">TIER 02</div><h3>Episodic</h3><p>Recent turns and execution traces.</p></article>
+    <article class="mem" data-key="semantic"><div class="n">TIER 03</div><h3>Semantic</h3><p>Consolidated facts and system models.</p></article>
+    <article class="mem" data-key="procedural"><div class="n">TIER 04</div><h3>Procedural</h3><p>Validated workflows and execution skills.</p></article>
+  </div>
+  <div class="detail" id="memoryDetail"></div>
+
+  <div style="height:42px"></div>
+  <div class="section-head" style="margin-bottom:22px">
+    <div><div class="kicker">Atomic Memory Operations</div><h2 style="font-size:38px">CRUD, not transcript dumping.</h2></div>
+    <p>Every incoming event should create, revise, invalidate, or ignore a memory record explicitly.</p>
+  </div>
+  <div class="crud">
+    <div><b>ADD</b><span>Create a new atomic fact when information is genuinely novel.</span></div>
+    <div><b>UPDATE</b><span>Merge changed information into an existing record instead of duplicating it.</span></div>
+    <div><b>DELETE</b><span>Invalidate facts contradicted by newer verified information.</span></div>
+    <div><b>NOOP</b><span>Discard temporary noise, pleasantries, and low-value state.</span></div>
+  </div>
+</div>
+</section>
+
+<section class="section" id="runtime">
+<div class="wrap">
+  <div class="section-head">
+    <div><div class="kicker">03 · Runtime</div><h2>The dual-loop cognitive architecture.</h2></div>
+    <p>The fast loop protects latency. The slow loop protects memory quality. Separating them prevents long-term maintenance from blocking user-facing execution.</p>
+  </div>
+  <div class="dual">
+    <div class="loop-tabs">
+      <button class="loop-tab active" data-loop="fast">Fast inner loop</button>
+      <button class="loop-tab" data-loop="slow">Slow outer loop</button>
+    </div>
+    <div class="loop-panel" id="loopPanel"></div>
+  </div>
+</div>
+</section>
+
+<section class="section" id="build">
+<div class="wrap">
+  <div class="section-head">
+    <div><div class="kicker">04 · Implementation Blueprint</div><h2>Build the stack in four moves.</h2></div>
+    <p>The architecture can be implemented incrementally. Start with prompt stability, then compress code, consolidate memory, and finally improve retrieval diversity.</p>
+  </div>
+  <div class="blueprint">
+    <article class="step"><span class="num">01</span><h3>Lock the byte-0 system prompt</h3><p>Keep identity, policy, tool definitions, and output contracts deterministically ordered and stable across related turns.</p><pre class="code">SYSTEM_PREFIX = stable(policy, tools, schema)
+PROMPT = SYSTEM_PREFIX + memory_slice + dynamic_tail</pre></article>
+    <article class="step"><span class="num">02</span><h3>Extract a code map</h3><p>Parse repositories into signatures and dependencies. Load full implementation bodies only on demand.</p><pre class="code">class PaymentProcessor:
+    def __init__(self, api_key: str): ...
+    def process_charge(self, user_id: str,
+                       amount_cents: int) -> ChargeResult: ...</pre></article>
+    <article class="step"><span class="num">03</span><h3>Consolidate post-session facts</h3><p>Convert raw traces into small, self-contained records with explicit operation, subject, evidence, tags, and importance.</p><pre class="code">{
+  "action": "ADD",
+  "subject": "codebase.convention",
+  "importance_score": 0.9
+}</pre></article>
+    <article class="step"><span class="num">04</span><h3>Retrieve across multiple indexes</h3><p>Fuse semantic, keyword, and graph candidates, then rerank for both relevance and diversity before prompt injection.</p><pre class="code">candidates = vector + keyword + graph
+context = mmr_rerank(candidates, lambda_=0.7)
+inject(context[:token_budget])</pre></article>
+  </div>
+</div>
+</section>
+
+<section class="section">
+<div class="wrap">
+  <div class="section-head">
+    <div><div class="kicker">05 · Operating Principles</div><h2>Five rules to keep the agent sharp.</h2></div>
+    <p>Architecture quality comes from controlling what is remembered, what is retrieved, and what is allowed into the model at each turn.</p>
+  </div>
+  <div class="takeaways">
+    <div class="take"><b>Context is RAM; memory is SSD.</b><span>Separate active reasoning from persistence.</span></div>
+    <div class="take"><b>Cache the prefix; vary the tail.</b><span>Keep stable instructions deterministic.</span></div>
+    <div class="take"><b>Compress before injection.</b><span>Prefer interfaces and structure over raw dumps.</span></div>
+    <div class="take"><b>Curate, don’t hoard.</b><span>Small verified memories beat noisy archives.</span></div>
+    <div class="take"><b>Decouple maintenance.</b><span>Keep consolidation outside the latency-critical path.</span></div>
+  </div>
+</div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">Autonomous Agent Architecture · Context Engineering × Memory Engineering · Technical concept page</div>
+</footer>
+
+<script>
+const memoryData={
+ working:{title:"Working Memory",text:"Active prompt context, live scratchpad, and tool outputs. Storage lives in the model context / KV-cache and expires with the immediate inference cycle."},
+ episodic:{title:"Short-Term Episodic Memory",text:"A chronological record of recent turns and tool traces. Useful for local continuity during a working session without promoting every event into long-term knowledge."},
+ semantic:{title:"Long-Term Semantic Memory",text:"Consolidated domain facts, preferences, architecture decisions, and entity relationships. Best backed by hybrid retrieval across vector, keyword, and graph indexes."},
+ procedural:{title:"Procedural Memory",text:"Validated workflows, self-correction rules, and tool-use skills. Versioning matters because these memories influence how the agent acts, not just what it knows."}
+};
+const detail=document.getElementById("memoryDetail");
+function setMem(key){
+ const d=memoryData[key];
+ detail.innerHTML=`<strong>${d.title}</strong><p>${d.text}</p>`;
+ document.querySelectorAll(".mem").forEach(x=>x.classList.toggle("active",x.dataset.key===key));
+}
+document.querySelectorAll(".mem").forEach(x=>x.addEventListener("click",()=>setMem(x.dataset.key)));
+setMem("working");
+
+const loops={
+ fast:{title:"Fast inner loop",desc:"Latency-critical turn execution. Retrieve the smallest useful slice, preserve diversity, allocate budget, infer, and execute tools.",pipes:[
+ ["User Query","current task intent"],["Hybrid Search","vector + keyword + graph"],["MMR","deduplicate + diversify"],["Budget / Scope","memory + AST slice"],["LLM","structured prompt"],["Tools","deterministic action"]]},
+ slow:{title:"Slow outer loop",desc:"Maintenance path. Consolidate raw traces into durable knowledge without delaying the live interaction.",pipes:[
+ ["Raw Traces","turns + tool results"],["Atomic Extractor","ADD / UPDATE / DELETE"],["Entity Linking","knowledge graph"],["Decay Score","relevance + recency + use"],["Consolidate","resolve contradictions"],["Memory Store","persistent substrate"]]}
+};
+const panel=document.getElementById("loopPanel");
+function setLoop(key){
+ const d=loops[key];
+ panel.innerHTML=`<h3>${d.title}</h3><p>${d.desc}</p><div class="pipeline">${d.pipes.map((p,i)=>`${i?'<div class="chev">→</div>':''}<div class="pipe"><b>${p[0]}</b><span>${p[1]}</span></div>`).join("")}</div>`;
+ document.querySelectorAll(".loop-tab").forEach(x=>x.classList.toggle("active",x.dataset.loop===key));
+}
+document.querySelectorAll(".loop-tab").forEach(x=>x.addEventListener("click",()=>setLoop(x.dataset.loop)));
+setLoop("fast");
+</script>
+</body>
+</html>
