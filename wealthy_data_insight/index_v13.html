@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="AURA Wealth Intelligence Agent v13 — v12 with concise navigation and dataset contribution insights on Page 2.">
+<meta name="aura-version" content="13">
+<title>Wealth Intelligence Agent · v13</title>
+<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f4f4f1}#base{display:block;width:100%;height:100%;border:0;background:#f4f4f1}</style>
+</head>
+<body>
+<iframe id="base" src="index_v12.html" title="AURA Wealth Intelligence Agent v13"></iframe>
+<script>
+(()=>{'use strict';
+const outer=document.getElementById('base');
+function boot(){
+  const od=outer.contentDocument;
+  const inner=od&&od.getElementById('base');
+  if(!inner||!inner.contentDocument||!inner.contentDocument.body){setTimeout(boot,100);return}
+  const d=inner.contentDocument,w=inner.contentWindow;
+  if(d.getElementById('aura-v13-contributions'))return;
+  d.title='Wealth Intelligence Agent · v13';
+  const meta=d.querySelector('meta[name="aura-version"]');if(meta)meta.setAttribute('content','13');
+  const mode=d.querySelector('.mode');if(mode)mode.textContent='DEMO · GOVERNED DATA · V13';
+  const q=(s,c=d)=>c.querySelector(s),qs=(s,c=d)=>Array.from(c.querySelectorAll(s));
+
+  const style=d.createElement('style');
+  style.textContent=`
+  .v13-contrib{background:#fff;border:1px solid var(--line);border-radius:9px;box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden}
+  .v13-contrib-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding:14px 15px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,#fafaf8)}
+  .v13-contrib-head h2{font-size:14px;margin:2px 0 3px}.v13-contrib-head p{font-size:10px;color:var(--muted);margin:0;max-width:720px;line-height:1.45}
+  .v13-flow-label{font:8px ui-monospace,monospace;color:var(--muted);padding:5px 7px;border:1px solid var(--line);border-radius:99px;white-space:nowrap}
+  .v13-contrib-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;padding:12px}
+  .v13-source-card{display:grid;grid-template-columns:42px 1fr;gap:10px;border:1px solid var(--line);border-radius:8px;padding:11px;background:#fff;position:relative;overflow:hidden}
+  .v13-source-card:after{content:'→ GRAPH';position:absolute;right:9px;top:8px;font:7px ui-monospace,monospace;color:#9a9fa3;letter-spacing:.06em}
+  .v13-source-icon{width:40px;height:40px;border-radius:7px;background:var(--navy);color:#fff;display:grid;place-items:center;font:8px ui-monospace,monospace;font-weight:800}
+  .v13-source-card[data-source="FileNet"] .v13-source-icon{background:#3569c8}.v13-source-card[data-source="T24"] .v13-source-icon{background:#b79a61}.v13-source-card[data-source="HELIOS"] .v13-source-icon{background:#087f5b}
+  .v13-source-card h3{font-size:11px;margin:0 58px 4px 0}.v13-source-card p{font-size:9px;color:var(--muted);line-height:1.4;margin:0}
+  .v13-insight{margin-top:7px;border-left:3px solid var(--red);background:#fff7f7;padding:7px 8px;font-size:9px;line-height:1.4}
+  .v13-insight b{color:var(--ink)}
+  .v13-graph-value{display:grid;grid-template-columns:62px 1fr;gap:7px;margin-top:6px;font-size:8px}.v13-graph-value span{font:7px ui-monospace,monospace;color:var(--muted);text-transform:uppercase}.v13-graph-value b{font-size:8px;font-weight:700}
+  .v13-contrib-summary{margin:0 12px 12px;border:1px dashed #c9cbcc;border-radius:7px;padding:9px 10px;background:#fafaf8;font-size:9px;color:var(--muted)}.v13-contrib-summary b{color:var(--ink)}
+  @media(max-width:900px){.v13-contrib-grid{grid-template-columns:1fr}.v13-flow-label{display:none}}
+  `;
+  d.head.appendChild(style);
+
+  const sourceMeta={
+    CRM:{icon:'CRM',title:'CRM · relationship backbone',contribution:'Provides the structured people, entity, family, referral and declared-role relationships that define the initial graph topology.',insight:'Establishes the high-confidence core links and candidate relationship groups.',graph:'Nodes, direct links, shared entities and baseline group structure'},
+    FileNet:{icon:'DOC',title:'FileNet · hidden relationship evidence',contribution:'Adds RM notes, trust documents and narrative evidence that can explain links not visible in structured systems.',insight:'Strengthens or qualifies inferred bridges and reveals hidden relationship paths.',graph:'Document-supported edges, trust links and confidence uplift'},
+    T24:{icon:'T24',title:'T24 · operational proximity',contribution:'Adds account-role, signatory and permitted transaction-context signals to test whether relationships are operationally meaningful.',insight:'Separates nominal associations from relationships with recent account-level relevance.',graph:'Validation layer, activity-linked edges and relationship strength'},
+    HELIOS:{icon:'H',title:'HELIOS · commercial relevance',contribution:'Adds holdings, suitability and portfolio context so connected groups can be ranked by value, exposure and opportunity.',insight:'Turns a relationship graph into an actionable wealth opportunity view.',graph:'AUM weighting, exposure context and opportunity prioritisation'}
+  };
+
+  const section=d.createElement('section');
+  section.id='aura-v13-contributions';section.className='v13-contrib';
+  section.innerHTML=`<div class="v13-contrib-head"><div><div class="eyebrow">DATASET VALUE ADD</div><h2>How selected databases contribute to this insight</h2><p>Each source contributes a different evidence layer. The visualisations below combine those layers into relationship structure, validation, ranking and opportunity context.</p></div><span class="v13-flow-label">DATABASE → SIGNAL → GRAPH</span></div><div class="v13-contrib-grid" id="v13ContributionGrid"></div><div class="v13-contrib-summary" id="v13ContributionSummary"></div>`;
+
+  const page2=q('#page2');
+  const folds=qs('#page2 > .fold');
+  const lensFold=folds.find(x=>x.textContent.includes('Interactive insight lenses'));
+  if(lensFold)page2.insertBefore(section,lensFold);else page2.appendChild(section);
+
+  function selectedSources(){return qs('.source.selected').map(x=>x.dataset.source)}
+  function renderContrib(){
+    const sel=selectedSources();
+    const grid=q('#v13ContributionGrid');if(!grid)return;
+    const ordered=['CRM','FileNet','T24','HELIOS'].filter(s=>sel.includes(s));
+    grid.innerHTML=ordered.map(s=>{const m=sourceMeta[s];return `<article class="v13-source-card" data-source="${s}"><div class="v13-source-icon">${m.icon}</div><div><h3>${m.title}</h3><p>${m.contribution}</p><div class="v13-insight"><b>Contributed insight:</b> ${m.insight}</div><div class="v13-graph-value"><span>Adds to graph</span><b>${m.graph}</b></div></div></article>`}).join('')||'<div class="muted">Select at least one database on Page 1.</div>';
+    const summary=q('#v13ContributionSummary');
+    if(summary){
+      const names=ordered.join(' + ')||'No sources';
+      const meaning=ordered.length>1?'The graph below is therefore a fused view: no single database supplies the full relationship picture.':'The graph below currently reflects a single-source view and will gain additional evidence layers when more databases are selected.';
+      summary.innerHTML=`<b>Current evidence stack:</b> ${names}. ${meaning}`;
+    }
+  }
+
+  // concise navigation
+  const p2Back=q('#page2 [data-goto="1"]');if(p2Back)p2Back.textContent='Back';
+  const p2Next=q('#approveP2');if(p2Next)p2Next.textContent='Next';
+  const drawerNext=q('#v12Next');if(drawerNext)drawerNext.textContent='Next';
+  const p3Back=q('#page3 [data-goto="1"]');if(p3Back)p3Back.textContent='Back';
+  const p3Refine=q('#page3 [data-goto="2"]');if(p3Refine)p3Refine.textContent='Refine';
+
+  renderContrib();
+  qs('.source').forEach(x=>x.addEventListener('click',()=>setTimeout(renderContrib,0)));
+  const obs=new w.MutationObserver(()=>{if(page2.classList.contains('active'))renderContrib()});
+  obs.observe(page2,{attributes:true,attributeFilter:['class']});
+}
+outer.addEventListener('load',()=>setTimeout(boot,180));
+setTimeout(boot,500);
+})();
+</script>
+</body>
+</html>
