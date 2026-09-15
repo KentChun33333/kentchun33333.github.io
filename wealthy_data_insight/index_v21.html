@@ -291,7 +291,7 @@
 
     .entry-grid {
       display: grid;
-      grid-template-columns: 0.22fr 0.52fr 0.26fr;
+      grid-template-columns: minmax(0, 1fr) 280px;
       gap: 12px;
       align-items: start;
     }
@@ -305,6 +305,11 @@
       margin-top: 11px;
     }
 
+    .source-list {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin: 8px 0 12px;
+    }
+
     .source,
     .suggestion {
       border: 1px solid var(--line);
@@ -316,16 +321,17 @@
     }
 
     .source {
-      min-height: 56px;
+      min-height: 50px;
       display: grid;
-      grid-template-columns: 36px 1fr;
+      grid-template-columns: 30px 1fr;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      padding: 7px 9px;
     }
 
     .source-icon {
-      width: 34px;
-      height: 34px;
+      width: 30px;
+      height: 30px;
       display: grid;
       place-items: center;
       border-radius: 8px;
@@ -765,7 +771,7 @@
       border-radius: 9px;
       padding: 15px 17px;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 320px;
+      grid-template-columns: minmax(0, 1fr);
       gap: 12px;
       align-items: center;
       margin-bottom: 12px;
@@ -780,51 +786,6 @@
       margin: 0;
       color: #bdc7cf;
       font-size: 11px;
-    }
-
-    .source-state-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
-    }
-
-    .source-state {
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 7px;
-      padding: 7px;
-      color: #9facb5;
-      display: grid;
-      grid-template-columns: 28px 1fr;
-      gap: 7px;
-      align-items: center;
-    }
-
-    .source-state.on {
-      border-color: #79b9a2;
-      background: rgba(8,127,91,0.14);
-      color: #d7f3e8;
-    }
-
-    .source-state-icon {
-      width: 26px;
-      height: 26px;
-      display: grid;
-      place-items: center;
-      border-radius: 6px;
-      background: rgba(255,255,255,.1);
-    }
-
-    .source-state-icon svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-
-    .source-state b {
-      display: block;
-      font: 9px 'IBM Plex Mono';
-    }
-
-    .source-state span {
-      display: block;
-      font: 7px 'IBM Plex Mono';
-      margin-top: 2px;
     }
 
     .fold {
@@ -1937,6 +1898,7 @@
 
     @media (max-width: 700px) {
       .intelligence-layers { grid-template-columns: repeat(2,1fr); }
+      .source-list { grid-template-columns: repeat(2,1fr); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1988,27 +1950,23 @@
 
         <div class="request-body">
           <div class="entry-grid">
-            <aside class="card entry-card">
-              <div class="eyebrow">DATA SOURCES</div>
-              <div class="source-list">
-                <button class="source selected" data-source="CRM">
-                  <span class="source-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 18c.7-3.2 2.5-4.8 5.5-4.8s4.8 1.6 5.5 4.8"/><circle cx="17" cy="9" r="2.2"/><path d="M15.5 13.8c2.7-.5 4.4.9 5 3.4"/></svg></span><b>CRM</b>
-                </button>
-                <button class="source selected" data-source="FileNet">
-                  <span class="source-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse cx="7.5" cy="6" rx="4.5" ry="2.2"/><path d="M3 6v8c0 1.2 2 2.2 4.5 2.2 1.2 0 2.2-.2 3-.5V6"/><path d="M13 4h5l3 3v13h-8zM18 4v3h3M15.5 12h3M15.5 15h3"/></svg></span><b>FileNet</b>
-                </button>
-                <button class="source selected" data-source="T24">
-                  <span class="source-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></span><b>T24</b>
-                </button>
-                <button class="source selected" data-source="HELIOS">
-                  <span class="source-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.1 3 14.9 0 18M12 3c-3 3.1-3 14.9 0 18"/></svg></span><b>HELIOS</b>
-                </button>
-              </div>
-            </aside>
-
             <section class="card entry-card new-case">
               <div class="eyebrow">NEW CASE</div>
               <h2>Start a new analysis</h2>
+              <div class="source-list" aria-label="Data sources">
+                <button class="source selected" data-source="CRM" aria-pressed="true">
+                  <span class="source-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 18c.7-3.2 2.5-4.8 5.5-4.8s4.8 1.6 5.5 4.8"/><circle cx="17" cy="9" r="2.2"/><path d="M15.5 13.8c2.7-.5 4.4.9 5 3.4"/></svg></span><b>CRM</b>
+                </button>
+                <button class="source selected" data-source="FileNet" aria-pressed="true">
+                  <span class="source-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse cx="7.5" cy="6" rx="4.5" ry="2.2"/><path d="M3 6v8c0 1.2 2 2.2 4.5 2.2 1.2 0 2.2-.2 3-.5V6"/><path d="M13 4h5l3 3v13h-8zM18 4v3h3M15.5 12h3M15.5 15h3"/></svg></span><b>FileNet</b>
+                </button>
+                <button class="source selected" data-source="T24" aria-pressed="true">
+                  <span class="source-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></span><b>T24</b>
+                </button>
+                <button class="source selected" data-source="HELIOS" aria-pressed="true">
+                  <span class="source-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.1 3 14.9 0 18M12 3c-3 3.1-3 14.9 0 18"/></svg></span><b>HELIOS</b>
+                </button>
+              </div>
               <textarea id="query">Group clients using shared entities and direct relationships, then identify hidden relationships and the highest-value bridge clients.</textarea>
               <div class="new-case-footer">
                 <button class="btn" id="startCase">Start new case →</button>
@@ -2044,7 +2002,7 @@
               <tr>
                 <th>Case</th>
                 <th>Topic</th>
-                <th>Report users</th>
+                <th>Analysis users</th>
                 <th>Start date</th>
                 <th>End date</th>
                 <th>Sources</th>
@@ -2088,7 +2046,6 @@
               <h2 id="queryTitle">Shared entities & relationships</h2>
               <p id="queryMirror"></p>
             </div>
-            <div class="source-state-grid" id="sourceStates"></div>
           </section>
 
           <div class="knowledge-highlights" id="knowledgeHighlights"></div>
@@ -2339,9 +2296,9 @@
         page: 1, activeCaseId: 'WDI-001', selectedScenario: 's1', compoundStage: 1, caseCounter: 4,
         simulationMode: 'p1p2', frame: 0, timer: null, running: false,
         cases: [
-          { id: 'WDI-001', scenario: 's1', topic: 'Shared entities + direct relationships', query: 'Group clients using shared entities and direct relationships, then identify hidden relationships and the highest-value bridge clients.', users: ['Michelle Lim','Aaron Koh'], queryStart: '01 Jan 2026', queryEnd: '31 Aug 2026', sources: ['CRM', 'FileNet', 'T24', 'HELIOS'], page2Approved: false, page3Ready: false, status: 'Ready' },
-          { id: 'WDI-002', scenario: 's2', topic: 'Next-generation client identification', query: 'Identify children, grandchildren and connected prospects who may become clients, then rank them by relationship readiness and an appropriate RM approach.', users: ['David Wong','Priya Nair','Sarah Tan'], queryStart: '01 Jan 2025', queryEnd: '31 Aug 2026', sources: ['CRM', 'FileNet', 'T24', 'HELIOS'], page2Approved: false, page3Ready: false, status: 'Ready' },
-          { id: 'WDI-003', scenario: 's3', topic: 'Thematic opportunities from RM meetings', query: 'Extract recurring investment themes from RM-client meeting evidence, connect them to client and transaction context, then add relevant HELIOS market intelligence.', users: ['Sofia Chen','Marcus Lee'], queryStart: '01 Jun 2026', queryEnd: '31 Aug 2026', sources: ['CRM', 'FileNet', 'T24', 'HELIOS'], page2Approved: false, page3Ready: false, status: 'Ready' }
+          { id: 'WDI-001', scenario: 's1', topic: 'Shared entities + direct relationships', query: 'Group clients using shared entities and direct relationships, then identify hidden relationships and the highest-value bridge clients.', users: ['KentC','Gravu'], queryStart: '01 Jan 2026', queryEnd: '31 Aug 2026', sources: ['CRM', 'FileNet', 'T24', 'HELIOS'], page2Approved: false, page3Ready: false, status: 'Ready' },
+          { id: 'WDI-002', scenario: 's2', topic: 'Next-generation client identification', query: 'Identify children, grandchildren and connected prospects who may become clients, then rank them by relationship readiness and an appropriate RM approach.', users: ['KentC','Gravu'], queryStart: '01 Jan 2025', queryEnd: '31 Aug 2026', sources: ['CRM', 'FileNet', 'T24', 'HELIOS'], page2Approved: false, page3Ready: false, status: 'Ready' },
+          { id: 'WDI-003', scenario: 's3', topic: 'Thematic opportunities from RM meetings', query: 'Extract recurring investment themes from RM-client meeting evidence, connect them to client and transaction context, then add relevant HELIOS market intelligence.', users: ['KentC','Gravu'], queryStart: '01 Jun 2026', queryEnd: '31 Aug 2026', sources: ['CRM', 'FileNet', 'T24', 'HELIOS'], page2Approved: false, page3Ready: false, status: 'Ready' }
         ]
       };
 
@@ -2488,7 +2445,7 @@
       function returnToCases() { showPage(1); $('#casebox').open = true; requestAnimationFrame(() => $('#casebox').scrollIntoView({ behavior: 'smooth', block: 'start' })); }
       function syncSourceButtons(caseItem) {
         state.selectedScenario = caseItem.scenario || 's1';
-        $$('.source').forEach(button => button.classList.toggle('selected', caseItem.sources.includes(button.dataset.source)));
+        $$('.source').forEach(button => { const selected = caseItem.sources.includes(button.dataset.source); button.classList.toggle('selected', selected); button.setAttribute('aria-pressed', String(selected)); });
         $$('.suggestion').forEach(button => button.classList.toggle('active', button.dataset.scenario === state.selectedScenario));
         $('#query').value = caseItem.query;
       }
@@ -2497,7 +2454,7 @@
         const config = scenarioData[key];
         state.selectedScenario = key;
         $$('.suggestion').forEach(button => button.classList.toggle('active', button.dataset.scenario === key));
-        $$('.source').forEach(button => button.classList.toggle('selected', config.defaults.includes(button.dataset.source)));
+        $$('.source').forEach(button => { const selected = config.defaults.includes(button.dataset.source); button.classList.toggle('selected', selected); button.setAttribute('aria-pressed', String(selected)); });
         $('#query').value = config.query;
         $('#query').focus();
       }
@@ -2530,12 +2487,8 @@
         const sources = [...internalSources];
         const id = `WDI-${String(state.caseCounter++).padStart(3, '0')}`;
         const config = scenarioData[state.selectedScenario];
-        const item = { id, scenario: state.selectedScenario, topic: config.topic, query, users: ['Michelle Lim','Report Review Team'], queryStart: '01 Sep 2026', queryEnd: '15 Sep 2026', sources, page2Approved: false, page3Ready: false, status: 'Ready' };
+        const item = { id, scenario: state.selectedScenario, topic: config.topic, query, users: ['KentC','Gravu'], queryStart: '01 Sep 2026', queryEnd: '15 Sep 2026', sources, page2Approved: false, page3Ready: false, status: 'Ready' };
         state.cases.unshift(item); state.activeCaseId = id; renderCases(); $('#casebox').open = true; toast('Case created · open Page 2 or optionally watch Agent-work');
-      }
-
-      function renderSourceStates(caseItem) {
-        $('#sourceStates').innerHTML = ['CRM', 'FileNet', 'T24', 'HELIOS'].map(source => { const on = caseItem.sources.includes(source); return `<div class="source-state ${on ? 'on' : ''}"><i class="source-state-icon">${sourceIcon(source)}</i><span><b>${sourceMeta[source].display}</b><span>${on ? 'SELECTED' : 'NOT SELECTED'}</span></span></div>`; }).join('');
       }
 
       function knowledgeMini(source) {
@@ -2634,7 +2587,6 @@
         $('#rankingRows').innerHTML = config.rankings.map(row => `<div class="bridge-row"><b>${row[0]}</b><span>${row[1]}</span></div>`).join('');
         $('#donutVisual').setAttribute('data-label', item.scenario === 's1' ? 'S$122M' : item.scenario === 's2' ? 'S$48M est.' : '14 news signals');
         $('#relationshipGraph').setAttribute('aria-label', config.chart[0]);
-        renderSourceStates(item);
         renderKnowledgeHighlights(item);
         renderDatasetValueAdd(item);
         renderIntelligenceLayers(item);
@@ -2720,7 +2672,7 @@
         $('#evidenceModal').classList.add('show');
       }
 
-      $$('.source').forEach(button => button.addEventListener('click', () => button.classList.toggle('selected')));
+      $$('.source').forEach(button => button.addEventListener('click', () => { const selected = button.classList.toggle('selected'); button.setAttribute('aria-pressed', String(selected)); }));
       $$('.suggestion').forEach(button => button.addEventListener('click', () => selectScenario(button.dataset.scenario)));
       $('#startCase').addEventListener('click', addCase);
       $$('.step').forEach(button => button.addEventListener('click', () => { const target = Number(button.dataset.step); if (target <= state.page) showPage(target); }));

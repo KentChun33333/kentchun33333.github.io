@@ -1,0 +1,179 @@
+LUNA WORK TRACE
+===============
+
+Operation folder
+----------------
+/Users/kentchiu/Developer/kentchiu33333-github/post/executive-leveling-compensation-benchmark
+
+Date
+----
+2026-09-09 (Asia/Singapore)
+
+Purpose
+-------
+Maintain the executive-leveling compensation benchmark with a shared global
+responsibility coordinate, selectable primary company axis, and contiguous
+company mono-stacks.
+
+Requested model decisions recorded during this work
+----------------------------------------------------
+- Use one invariant global responsibility coordinate (0–100) for all companies.
+- Allow the primary axis to change without changing the underlying coordinate
+  or the ordering of any company's levels.
+- Keep each company's vertical stack contiguous; cards must not leave vertical
+  gaps between adjacent native grades.
+- Preserve company-specific grade/title data while using anchor relationships
+  for cross-company comparisons.
+- CTBC requested alignment: L11 → UOB VP1, L12 → UOB VP2, L13 → UOB FVP,
+  L14 → UOB SVP, L15 → UOB ED, and L16 → UOB MD.
+- Fubon requested references: Fubon 3 covers CTBC 8–9, Fubon 5 covers CTBC 12,
+  and Fubon 6 covers CTBC 13.
+- OCBC, TSMC, ASML, A*STAR, Singapore Civil Service, and Taiwan Civil Service
+  mappings were retained from the existing data model and prior user-approved
+  revisions.
+
+Implementation trace
+--------------------
+1. Inspected the stack renderer in index.html (renderStackChart).
+2. Confirmed the canonical level source is node.level and the global domain is
+   scaleLower = 0 through scaleUpper = 100.
+3. Identified the latest experiment (commit 962c550) as the source of the
+   unwanted visual behavior: it centered every card on node.level and assigned
+   one fixed four-row card height (globalCardHeight). This created visible gaps
+   and departed from the previous contiguous stack presentation.
+4. Reverted only that experiment in index.html. Restored the previous lane
+   boundary geometry:
+     top = (lowerBoundary - scaleLower) / scaleSpan * chartHeight
+     height = max(2, (upperBoundary - lowerBoundary) / scaleSpan * chartHeight)
+5. Kept the canonical 0–100 coordinate, original node ordering, anchor spans,
+   primary-axis selection, and all data files unchanged.
+6. Did not stage or alter the unrelated working-tree files belonging to the
+   user: ref-knowledge.md, ref_tsmc-asml.md, the deleted legacy HTML file,
+   ref-astar.md, ref-cbtc.md, and skill.md.
+
+Verification and delivery
+-------------------------
+- Ran git diff --check for index.html successfully.
+- Reviewed the resulting diff: 2 insertions and 7 deletions, limited to the
+  fixed-height geometry removal.
+- Committed the change as:
+    867e601 Restore contiguous stack lane sizing
+- Pushed successfully to:
+    origin/hugo
+- Confirmed branch state after push:
+    hugo...origin/hugo
+- Relevant recent commit trail:
+    962c550 Use fixed global card geometry (reverted by 867e601)
+    7635278 Use canonical global lane coordinates
+    b24e466 Align Fubon bands on UOB coordinator
+    8b09af9 Close Fubon CTBC bands
+    9ba115c Bust generated data cache
+    dacb75a Fix Fubon CTBC row anchoring
+    8073af9 Copy CTBC lane boundaries to Fubon
+- The local browser tab was identified as the file-based index.html tab. A
+  browser reload through the automation surface was blocked by its file-URL
+  navigation policy; static diff validation and Git push verification passed.
+
+Final renderer state
+--------------------
+The stack chart again uses each lane's contiguous responsibility boundaries,
+so adjacent cards share boundaries with no intentional vertical gaps. The
+global responsibility coordinate remains invariant across primary-axis changes.
+
+ASML San Diego compensation refresh (2026-09-09)
+-------------------------------------------------
+- Checked current Greater San Diego Area ASML compensation data on Levels.fyi.
+- Updated the canonical ASML nodes in data_table.yaml with cross-family San
+  Diego total-compensation bands (Mechanical Engineer ↔ Software Engineer):
+    L6: US$102–125k TC
+    L7: US$121–158k TC
+    L8: US$143–193k TC
+    L9: US$206–274k TC
+- Updated the corresponding L6–L9 salary displays in index.html, including
+  combined crosswalk rows, without changing titles or level mappings.
+- Regenerated data_table.generated.js using scripts/build_data_table.py.
+- Validation result: 9 institutions, 119 nodes, 103 anchors; generated JS
+  syntax check passed.
+- Sources checked:
+    https://www.levels.fyi/companies/asml/salaries/software-engineer/locations/greater-san-diego-area
+    https://www.levels.fyi/companies/asml/salaries/mechanical-engineer/locations/greater-san-diego-area
+    https://www.levels.fyi/companies/asml/salaries/hardware-engineer/locations/greater-san-diego-area
+- Delivery commit for this refresh: 21194d2 Refresh ASML San Diego L6-L9 compensation
+
+English / Traditional Chinese toggle (2026-09-09)
+--------------------------------------------------
+- Added a two-state EN / 繁中 language control to the benchmark toolbar.
+- Kept data_table.yaml as the canonical English data and preserved every global
+  coordinate, anchor, salary, grade ordering, and stack geometry value.
+- Added data_table.i18n.yaml as a separate localization component. It contains
+  language-specific UI labels, hard-switched company names, and Traditional
+  Chinese descriptions for all 9 institutions and all 119 nodes.
+- Job grades and job titles remain canonical and may stay English, Chinese, or
+  bilingual, as requested.
+- Updated the shared stack-card and detail-table render functions to resolve
+  localized company labels and descriptions from the same data model.
+- Added fallback to canonical English and device-local language preference.
+- Extended scripts/build_data_table.py to merge and validate localization data;
+  incomplete institution or Traditional Chinese node coverage now fails the build.
+- Regenerated data_table.generated.js and changed its browser cache key.
+- Validation passed: 9 institutions, 119 nodes, 103 anchors; generated and inline
+  JavaScript syntax checks passed; data_table.yaml remained unchanged.
+
+Taiwan Government coordinate correction (2026-09-09)
+-----------------------------------------------------
+- Changed Taiwan Government 薦任9 · 主管科長 from global level 45 to 44,
+  matching the existing numeric coordinate of UOB VP2.
+- Changed Taiwan Government 簡任10 · 科長 / 簡任專委 from global level 55 to
+  51, matching the existing numeric coordinate of UOB FVP.
+- No UOB mapping field, anchor, or runtime dependency was introduced. The UOB
+  values were used only as numeric references for the canonical global levels.
+- Regenerated data_table.generated.js and refreshed the browser cache key.
+- Validation confirmed rank9 = VP2 = 44 and rank10 = FVP = 51.
+
+Traditional Chinese OCBC default view (2026-09-09)
+---------------------------------------------------
+- Changed the initial language to Traditional Chinese and the primary axis to
+  OCBC without changing any global coordinates, anchors, or level mappings.
+- Added configuration-driven institution order and initial visibility settings.
+- Default visible order is OCBC, UOB, Fubon, ASML, Singapore Government, and
+  Taiwan Government; CTBC, TSMC, and A*STAR remain available as unchecked toggles.
+- Versioned the saved-language preference so an earlier English selection does
+  not override the new Traditional Chinese default on first load.
+- Extended build validation to reject invalid institution order or visibility
+  configuration, then regenerated data_table.generated.js.
+- Browser QA confirmed the Traditional Chinese UI, OCBC primary axis, requested
+  six checked columns, requested column order, and three unchecked companies.
+
+UOB VP2 / FVP and OCBC VP salary refresh (2026-09-09)
+------------------------------------------------------
+- UOB VP2 (global level 44): S$12.5–16.5k monthly base and S$185–250k
+  estimated TC under the supplied 15×–16× benchmark model.
+- UOB FVP (global level 51): S$16–22k monthly base and S$240–340k estimated TC.
+- OCBC VP (global span 43–52): S$11.25–22.5k monthly base and
+  S$170–340k+ estimated TC.
+- Updated canonical YAML, Traditional Chinese descriptions, static HTML cells,
+  methodology wording, web evidence links, and generated JavaScript.
+- Kept all global coordinates, grade mappings, anchors, and stack geometry intact.
+- Validation passed for 9 institutions, 119 nodes, and 103 anchors; generated and
+  inline JavaScript syntax checks passed.
+
+Introductory HTML cleanup (2026-09-09)
+--------------------------------------
+- Removed the redundant Systems metadata line.
+- Removed the redundant Interactive Comparison hint container.
+- Removed its now-unused clear-selection handler and CSS rules.
+- Preserved the comparison controls, table, coordinates, mappings, and data.
+- Inline JavaScript syntax validation passed.
+
+Localized matrix heading and live hub refresh (2026-09-09)
+-----------------------------------------------------------
+- Added English and Traditional Chinese strings for the adaptive matrix heading
+  and explanatory subtitle; both now follow the existing language toggle.
+- Kept Traditional Chinese as the initial rendered text and preserved all global
+  coordinates, institution visibility, mappings, and stack geometry.
+- Updated the hub asset viewer to fetch its catalogue without browser caching and
+  load HTML assets with a per-open cache-busting query parameter.
+- Rebuilt the hub catalogue, public memory database, source manifest, library,
+  and generated asset pages from a clean checkout.
+- Validation passed for 9 institutions, 119 nodes, 103 anchors, 67 generated hub
+  pages, 58 catalogue assets, source fingerprints, and navigation integrity.
