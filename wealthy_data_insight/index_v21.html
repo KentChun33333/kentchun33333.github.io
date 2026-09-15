@@ -269,59 +269,19 @@
     .request-shell {
       overflow: hidden;
       margin-bottom: 14px;
-      box-shadow: none;
+      border-top: 4px solid var(--red);
     }
 
     .request-shell > summary {
       list-style: none;
       cursor: pointer;
-      background: #e7e7e4;
-      border-left: 5px solid #3f4347;
-      padding: 13px 15px;
+      background: #25292d;
+      color: white;
+      padding: 12px 15px;
+      font-weight: 700;
     }
 
     .request-shell > summary::-webkit-details-marker { display: none; }
-
-    .request-summary {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .request-summary h1 {
-      margin: 2px 0 0;
-      font-size: 19px;
-    }
-
-    .request-summary p {
-      margin: 3px 0 0;
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .request-toggle {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font: 9px 'IBM Plex Mono';
-      color: var(--muted);
-    }
-
-    .request-toggle::after {
-      content: '+';
-      width: 24px;
-      height: 24px;
-      border: 1px solid #bfc1c2;
-      border-radius: 50%;
-      background: white;
-      display: grid;
-      place-items: center;
-      color: var(--red);
-      font-size: 16px;
-    }
-
-    .request-shell[open] .request-toggle::after { content: '−'; }
 
     .request-body {
       border-top: 1px solid #d4d4d1;
@@ -354,6 +314,39 @@
       text-align: left;
       color: var(--ink);
     }
+
+    .source {
+      min-height: 56px;
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .source-icon {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: #202b3a;
+      color: white;
+      font: 8px 'IBM Plex Mono';
+      letter-spacing: .04em;
+    }
+
+    .source-icon svg,
+    .dataset-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .source.selected .source-icon { background: var(--red); }
 
     .source.selected {
       border-color: var(--red);
@@ -411,7 +404,7 @@
     .case-table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 920px;
+      min-width: 1120px;
     }
 
     .case-table th {
@@ -426,6 +419,40 @@
       padding: 11px;
       border-top: 1px solid var(--line);
       font-size: 11px;
+    }
+
+    .report-users {
+      display: flex;
+      align-items: center;
+      min-width: 145px;
+    }
+
+    .report-user {
+      display: inline-grid;
+      place-items: center;
+      width: 27px;
+      height: 27px;
+      margin-right: -5px;
+      border: 2px solid white;
+      border-radius: 50%;
+      background: #e7eef4;
+      color: #294b62;
+      font: 8px 'IBM Plex Mono';
+    }
+
+    .report-user:first-child { background: #202b3a; color: white; }
+
+    .report-user-names {
+      margin-left: 10px;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.35;
+    }
+
+    .query-date {
+      white-space: nowrap;
+      font: 9px 'IBM Plex Mono';
+      color: #4d5358;
     }
 
     .case-actions {
@@ -454,6 +481,27 @@
       grid-template-columns: minmax(0, 1fr) 330px;
       gap: 14px;
       align-items: start;
+      transition: grid-template-columns .34s cubic-bezier(.2,.8,.2,1);
+    }
+
+    #page2 .stage-shell {
+      grid-template-columns: 238px minmax(0, 1fr) 330px;
+    }
+
+    #page2 .stage-shell.panel-collapsed {
+      grid-template-columns: 238px minmax(0, 1fr) 48px;
+    }
+
+    #page2 .stage-shell.left-collapsed {
+      grid-template-columns: 48px minmax(0, 1fr) 330px;
+    }
+
+    #page2 .stage-shell.left-collapsed.panel-collapsed {
+      grid-template-columns: 48px minmax(0, 1fr) 48px;
+    }
+
+    #page3 .stage-shell.panel-collapsed {
+      grid-template-columns: minmax(0, 1fr) 48px;
     }
 
     .stage-main { min-width: 0; }
@@ -462,7 +510,224 @@
       position: sticky;
       top: 145px;
       overflow: hidden;
+      min-width: 0;
+      max-height: calc(100vh - 166px);
+      transition: box-shadow .3s ease;
     }
+
+    .right-panel:not(:has(.panel-collapse[aria-expanded="false"])) {
+      box-shadow: 0 18px 38px rgba(22,28,33,.16);
+    }
+
+    .right-panel-inner {
+      width: 328px;
+      max-height: calc(100vh - 224px);
+      overflow: auto;
+      background: white;
+      opacity: 1;
+      transform: translateX(0);
+      transition: opacity .22s ease .14s, transform .34s cubic-bezier(.2,.8,.2,1) .06s;
+    }
+
+    .panel-collapse {
+      width: 100%;
+      min-height: 58px;
+      border: 0;
+      border-radius: 0;
+      background: #25292d;
+      color: white;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      text-align: left;
+      font-weight: 800;
+      transition: background .25s ease, height .32s ease, padding .32s ease;
+    }
+
+    .panel-collapse:hover { background: #343b42; }
+
+    .panel-collapse-copy { min-width: 0; }
+    .panel-collapse-title,
+    .panel-collapse-subtitle { display: block; }
+    .panel-collapse-title { font-size: 12px; }
+    .panel-collapse-subtitle { margin-top: 2px; color: #d7dadd; font-size: 9px; font-weight: 500; white-space: nowrap; }
+
+    .panel-collapse::after {
+      content: '›';
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .stage-shell.panel-collapsed .right-panel {
+      box-shadow: -6px 0 18px rgba(25,30,34,.12);
+    }
+
+    .stage-shell.panel-collapsed .panel-collapse {
+      height: 210px;
+      padding: 12px 9px;
+      flex-direction: column;
+    }
+
+    .stage-shell.panel-collapsed .panel-collapse-copy {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stage-shell.panel-collapsed .panel-collapse-title {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      letter-spacing: .05em;
+    }
+
+    .stage-shell.panel-collapsed .panel-collapse-subtitle { display: none; }
+    .stage-shell.panel-collapsed .panel-collapse::after { content: '‹'; }
+
+    .stage-shell.panel-collapsed .right-panel-inner {
+      visibility: hidden;
+      opacity: 0;
+      transform: translateX(34px);
+      pointer-events: none;
+      transition: opacity .12s ease, transform .24s ease;
+    }
+
+    .intelligence-rail {
+      position: sticky;
+      top: 145px;
+      overflow: hidden;
+      max-height: calc(100vh - 166px);
+      padding: 0;
+      min-width: 0;
+      transition: box-shadow .3s ease;
+    }
+
+    .intelligence-rail-head {
+      width: 100%;
+      min-height: 64px;
+      border: 0;
+      border-radius: 0;
+      padding: 14px;
+      background: linear-gradient(135deg,#101b27,#25394a);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      text-align: left;
+      cursor: pointer;
+      transition: height .32s ease, padding .32s ease;
+    }
+
+    .intelligence-rail-head:hover { background: linear-gradient(135deg,#192838,#30495e); }
+    .intelligence-rail-title { font-size: 13px; font-weight: 800; }
+    .intelligence-rail-head::after { content: '‹'; font-size: 20px; line-height: 1; }
+
+    .intelligence-rail-body {
+      width: 236px;
+      max-height: calc(100vh - 230px);
+      overflow: auto;
+      opacity: 1;
+      transform: translateX(0);
+      transition: opacity .22s ease .12s, transform .32s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .stage-shell.left-collapsed .intelligence-rail { box-shadow: 6px 0 18px rgba(25,30,34,.12); }
+
+    .stage-shell.left-collapsed .intelligence-rail-head {
+      height: 210px;
+      padding: 12px 9px;
+      flex-direction: column;
+    }
+
+    .stage-shell.left-collapsed .intelligence-rail-title {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      letter-spacing: .05em;
+    }
+
+    .stage-shell.left-collapsed .intelligence-rail-head::after { content: '›'; }
+
+    .stage-shell.left-collapsed .intelligence-rail-body {
+      visibility: hidden;
+      opacity: 0;
+      transform: translateX(-34px);
+      pointer-events: none;
+      transition: opacity .12s ease, transform .24s ease;
+    }
+
+    .intelligence-layers { display: grid; gap: 7px; padding: 10px; }
+
+    .intelligence-layer {
+      position: relative;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 26px 1fr;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fafaf8;
+      color: var(--ink);
+      padding: 9px;
+      text-align: left;
+      transition: .2s ease;
+    }
+
+    .intelligence-layer:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 21px;
+      bottom: -8px;
+      height: 8px;
+      border-left: 2px solid #cbd2d6;
+    }
+
+    .intelligence-layer i {
+      width: 25px;
+      height: 25px;
+      border-radius: 6px;
+      background: #e4e8ea;
+      color: #6e777d;
+      display: grid;
+      place-items: center;
+      font: 8px 'IBM Plex Mono';
+      font-style: normal;
+    }
+
+    .intelligence-layer b,
+    .intelligence-layer span { display: block; }
+    .intelligence-layer b { font-size: 9px; }
+    .intelligence-layer span { margin-top: 2px; color: var(--muted); font-size: 7px; line-height: 1.4; }
+    .intelligence-layer.in-case { border-color: #91c9b5; background: #eff9f5; }
+    .intelligence-layer.in-case i { background: var(--green); color: white; }
+    .intelligence-layer.previewing { border-color: var(--blue); background: #eef5ff; box-shadow: 0 0 0 3px rgba(53,105,200,.08); }
+    .intelligence-layer.previewing i { background: var(--blue); color: white; }
+
+    .compound-result {
+      margin: 0 10px 11px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #f1f5f7;
+    }
+
+    .compound-result small { font: 7px 'IBM Plex Mono'; color: #47768c; }
+    .compound-result b { display: block; margin: 4px 0; font-size: 11px; }
+    .compound-result p { margin: 0; color: var(--muted); font-size: 8px; line-height: 1.45; }
+    .compound-meter { height: 5px; margin-top: 8px; border-radius: 9px; background: #d9e2e6; overflow: hidden; }
+    .compound-meter i { display: block; height: 100%; background: linear-gradient(90deg,var(--blue),var(--green)); transition: width .35s ease; }
+
+    .scenario-tag {
+      display: inline-flex;
+      margin-bottom: 4px;
+      border-radius: 99px;
+      padding: 4px 7px;
+      background: #fff0f0;
+      color: var(--red);
+      font: 8px 'IBM Plex Mono';
+    }
+
+    .suggestion.active { border-color: var(--red); background: #fff4f4; box-shadow: inset 0 0 0 1px var(--red); }
 
     .right-panel-head {
       padding: 15px;
@@ -529,17 +794,9 @@
       padding: 7px;
       color: #9facb5;
       display: grid;
-      grid-template-columns: 9px 1fr;
+      grid-template-columns: 28px 1fr;
       gap: 7px;
       align-items: center;
-    }
-
-    .source-state::before {
-      content: '';
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #667682;
     }
 
     .source-state.on {
@@ -548,7 +805,16 @@
       color: #d7f3e8;
     }
 
-    .source-state.on::before { background: #4fc399; }
+    .source-state-icon {
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      background: rgba(255,255,255,.1);
+    }
+
+    .source-state-icon svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
     .source-state b {
       display: block;
@@ -649,8 +915,10 @@
     }
 
     .dataset-card.active[data-source="HELIOS"] .dataset-icon {
-      background: var(--gold);
+      background: #7251a8;
     }
+
+    .intelligence-layer i svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 
     .dataset-card h3 {
       margin: 0;
@@ -687,6 +955,89 @@
       color: var(--muted);
       background: white;
     }
+
+    .knowledge-highlights {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .knowledge-highlight {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      padding: 10px;
+    }
+
+    .knowledge-highlight small { font: 7px 'IBM Plex Mono'; color: var(--muted); }
+    .knowledge-highlight b { display: block; margin-top: 4px; font-size: 13px; }
+    .knowledge-highlight span { display: block; margin-top: 3px; color: var(--muted); font-size: 8px; }
+
+    .knowledge-mini {
+      grid-column: 1 / -1;
+      height: 46px;
+      margin-top: 8px;
+      border: 1px solid #e4e7e8;
+      border-radius: 7px;
+      background: #f7f9fa;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .knowledge-mini.network::before,
+    .knowledge-mini.network::after { content: ''; position: absolute; border-radius: 50%; background: var(--blue); }
+    .knowledge-mini.network::before { width: 14px; height: 14px; left: 25%; top: 15px; box-shadow: 52px -7px 0 #b79a61, 105px 6px 0 #087f5b; }
+    .knowledge-mini.network::after { width: 112px; height: 2px; left: 28%; top: 22px; border-radius: 0; background: linear-gradient(90deg,var(--blue),var(--gold),var(--green)); transform: rotate(-3deg); opacity: .55; }
+    .knowledge-mini.flow::before { content: 'INFLOW  +2.8M'; position:absolute; left:10px; top:7px; width:62%; height:10px; background:#dff3eb; color:var(--green); font:7px 'IBM Plex Mono'; padding:2px 5px; }
+    .knowledge-mini.flow::after { content: 'OUTFLOW  −1.1M'; position:absolute; right:10px; bottom:7px; width:38%; height:10px; background:#fde7e7; color:var(--red); font:7px 'IBM Plex Mono'; padding:2px 5px; }
+    .knowledge-mini.hidden { background: repeating-linear-gradient(135deg,#f7f9fa,#f7f9fa 8px,#eef4fb 8px,#eef4fb 16px); }
+    .knowledge-mini.hidden::after { content: '+ hidden links · + document transactions'; position:absolute; inset:0; display:grid; place-items:center; color:var(--blue); font:8px 'IBM Plex Mono'; }
+    .knowledge-mini.web::after { content: 'PEP NEWS  2  ·  ADVERSE MEDIA  1  ·  MARKET  14'; position:absolute; inset:8px; border-left:4px solid #7251a8; background:#f5f0fb; display:grid; align-items:center; padding-left:9px; color:#5a3e83; font:8px 'IBM Plex Mono'; }
+
+    .config-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .config-field label { display:block; margin-bottom:4px; font-size:8px; font-weight:700; color:var(--muted); }
+    .config-field select { padding:8px; font-size:9px; }
+
+    .report-fold {
+      margin: 0 12px 10px;
+      border: 1px solid #ded8cc;
+      border-radius: 8px;
+      background: white;
+      overflow: hidden;
+    }
+
+    .report-fold > summary {
+      list-style: none;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      background: #f7f6f2;
+    }
+
+    .report-fold > summary::-webkit-details-marker { display:none; }
+    .report-fold > summary::after { content:'+'; color:var(--muted); font-size:16px; }
+    .report-fold[open] > summary::after { content:'−'; color:var(--red); }
+    .report-fold-title small { display:block; font:8px 'IBM Plex Mono'; color:var(--red); }
+    .report-fold-title b { display:block; margin-top:3px; font-size:13px; }
+    .report-fold-body { border-top:1px solid var(--line); padding:12px; }
+
+    .cross-status-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; }
+    .cross-status-card { border:1px solid var(--line); border-radius:7px; padding:9px; background:#fafaf8; }
+    .cross-status-card strong { display:block; font-size:9px; }
+    .cross-status-card span { display:inline-block; margin:5px 0; border-radius:99px; padding:3px 6px; background:#e8f5ef; color:var(--green); font:7px 'IBM Plex Mono'; }
+    .cross-status-card.off span { background:#eee; color:var(--muted); }
+    .cross-status-card p { margin:0; color:var(--muted); font-size:8px; line-height:1.4; }
+
+    .research-grid { display:grid; grid-template-columns:1.3fr .7fr; gap:10px; }
+    .research-answer { border-left:4px solid var(--red); background:#fff7f7; padding:12px; }
+    .research-answer h3 { margin:0 0 6px; font:400 17px Georgia,serif; }
+    .research-answer p,.research-side li { color:var(--muted); font-size:9px; line-height:1.55; }
+    .research-side { border:1px solid var(--line); border-radius:7px; padding:10px; }
+    .research-side b { font-size:10px; }
+    .research-side ul { margin:7px 0 0; padding-left:16px; }
 
     .charts-grid {
       display: grid;
@@ -842,7 +1193,7 @@
     }
 
     .donut::after {
-      content: 'S$122M';
+      content: attr(data-label);
       position: absolute;
       inset: 22px;
       border-radius: 50%;
@@ -1067,6 +1418,10 @@
     }
 
     .evidence-link.db i { background: var(--green); }
+
+    .evidence-link.helios { border-color: #cbb9df; background: #f7f2fb; color: #5a3e83; }
+    .evidence-link.helios i { background: #7251a8; }
+    .evidence-link i svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 
     .simulation {
       position: fixed;
@@ -1524,21 +1879,48 @@
       transform: translate(-50%, 0);
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 1080px) {
       .entry-grid,
       .stage-shell,
       .simulation-body {
         grid-template-columns: 1fr;
       }
 
-      .right-panel { position: static; }
+      #page2 .stage-shell,
+      #page2 .stage-shell.panel-collapsed,
+      #page2 .stage-shell.left-collapsed,
+      #page2 .stage-shell.left-collapsed.panel-collapsed,
+      #page3 .stage-shell.panel-collapsed { grid-template-columns: 1fr; }
+
+      .right-panel,
+      .intelligence-rail { position: static; }
+
+      .right-panel { width: 100%; max-height: 580px; }
+      .right-panel-inner { width: auto; max-height: 520px; }
+      .stage-shell.panel-collapsed .right-panel { max-height: 48px; }
+      .stage-shell.panel-collapsed .panel-collapse { height: 48px; padding: 10px 14px; flex-direction: row; }
+      .stage-shell.panel-collapsed .panel-collapse-copy { display: block; }
+      .stage-shell.panel-collapsed .panel-collapse-title { writing-mode: horizontal-tb; transform: none; }
+      .stage-shell.panel-collapsed .panel-collapse::after { content: '⌄'; }
+
+      .intelligence-layers { grid-template-columns: repeat(4,1fr); }
+
+      .intelligence-rail { width: 100%; max-height: none; }
+      .intelligence-rail-body { width: auto; max-height: none; }
+      .stage-shell.left-collapsed .intelligence-rail { max-height: 48px; }
+      .stage-shell.left-collapsed .intelligence-rail-head { height: 48px; min-height: 48px; padding: 10px 14px; flex-direction: row; }
+      .stage-shell.left-collapsed .intelligence-rail-title { writing-mode: horizontal-tb; transform: none; }
+      .stage-shell.left-collapsed .intelligence-rail-head::after { content: '⌄'; }
 
       .query-banner { grid-template-columns: 1fr; }
 
       .dataset-grid,
       .charts-grid,
       .summary-pillars,
-      .priority-grid {
+      .priority-grid,
+      .knowledge-highlights,
+      .cross-status-grid,
+      .research-grid {
         grid-template-columns: 1fr;
       }
 
@@ -1551,6 +1933,10 @@
       .proof-arrow { transform: rotate(90deg); }
 
       .simulation-panel { min-height: 260px; }
+    }
+
+    @media (max-width: 700px) {
+      .intelligence-layers { grid-template-columns: repeat(2,1fr); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1581,33 +1967,24 @@
   <nav class="journey">
     <button class="step active" data-step="1">
       <span class="step-number">01</span>
-      <span><b>Frame the question</b><small>Sources & intent</small></span>
+      <span><b>Frame the question</b></span>
     </button>
 
     <button class="step" data-step="2">
       <span class="step-number">02</span>
-      <span><b>Shape the search</b><small>Evidence & lenses</small></span>
+      <span><b>Shape the search</b></span>
     </button>
 
     <button class="step" data-step="3">
       <span class="step-number">03</span>
-      <span><b>Review insight</b><small>Outcome & provenance</small></span>
+      <span><b>Review insight</b></span>
     </button>
   </nav>
 
   <main class="app">
     <section class="page active" id="page1">
       <details class="card request-shell" id="requestFold" open>
-        <summary>
-          <div class="request-summary">
-            <div>
-              <div class="eyebrow">INTELLIGENCE REQUEST</div>
-              <h1>New Intelligence request with Wealth Data Agents</h1>
-              <p>Select governed data and frame the wealth question. The case is then managed from the queue below.</p>
-            </div>
-            <div class="request-toggle">REQUEST</div>
-          </div>
-        </summary>
+        <summary>INTELLIGENCE REQUEST</summary>
 
         <div class="request-body">
           <div class="entry-grid">
@@ -1615,20 +1992,16 @@
               <div class="eyebrow">DATA SOURCES</div>
               <div class="source-list">
                 <button class="source selected" data-source="CRM">
-                  <b>CRM</b>
-                  <small>Profiles, relationships and declared roles</small>
+                  <span class="source-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 18c.7-3.2 2.5-4.8 5.5-4.8s4.8 1.6 5.5 4.8"/><circle cx="17" cy="9" r="2.2"/><path d="M15.5 13.8c2.7-.5 4.4.9 5 3.4"/></svg></span><b>CRM</b>
                 </button>
                 <button class="source selected" data-source="FileNet">
-                  <b>FileNet</b>
-                  <small>RM notes, trust documents and narrative evidence</small>
+                  <span class="source-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse cx="7.5" cy="6" rx="4.5" ry="2.2"/><path d="M3 6v8c0 1.2 2 2.2 4.5 2.2 1.2 0 2.2-.2 3-.5V6"/><path d="M13 4h5l3 3v13h-8zM18 4v3h3M15.5 12h3M15.5 15h3"/></svg></span><b>FileNet</b>
                 </button>
-                <button class="source" data-source="T24">
-                  <b>T24</b>
-                  <small>Account roles and transaction context</small>
+                <button class="source selected" data-source="T24">
+                  <span class="source-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></span><b>T24</b>
                 </button>
-                <button class="source" data-source="HELIOS">
-                  <b>HELIOS</b>
-                  <small>Holdings, suitability and portfolio context</small>
+                <button class="source selected" data-source="HELIOS">
+                  <span class="source-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.1 3 14.9 0 18M12 3c-3 3.1-3 14.9 0 18"/></svg></span><b>HELIOS</b>
                 </button>
               </div>
             </aside>
@@ -1636,12 +2009,8 @@
             <section class="card entry-card new-case">
               <div class="eyebrow">NEW CASE</div>
               <h2>Start a new analysis</h2>
-              <p class="muted" style="font-size:11px;margin:0 0 10px;">
-                The question carries through Page 2 and Page 3.
-              </p>
               <textarea id="query">Group clients using shared entities and direct relationships, then identify hidden relationships and the highest-value bridge clients.</textarea>
               <div class="new-case-footer">
-                <span class="muted" style="font-size:10px;">Agent-work remains optional from Case Management.</span>
                 <button class="btn" id="startCase">Start new case →</button>
               </div>
             </section>
@@ -1649,17 +2018,17 @@
             <aside class="card entry-card">
               <div class="eyebrow">SUGGESTED ANALYSES</div>
               <div class="suggestion-list">
-                <button class="suggestion" data-prompt="Identify hidden family relationships and next-generation wealth opportunities.">
-                  <b>Hidden family relationships</b>
-                  <small>CRM + FileNet</small>
+                <button class="suggestion active" data-scenario="s1">
+                  <span class="scenario-tag">S1 · RELATIONSHIPS</span>
+                  <b>Shared entities + direct relationships</b>
                 </button>
-                <button class="suggestion" data-prompt="Group clients using shared entities and direct relationships, then identify bridge clients.">
-                  <b>Shared entities & bridge clients</b>
-                  <small>Graph intelligence</small>
+                <button class="suggestion" data-scenario="s2">
+                  <span class="scenario-tag">S2 · SUCCESSION</span>
+                  <b>Next-generation client identification</b>
                 </button>
-                <button class="suggestion" data-prompt="Find portfolio whitespace and recent liquidity signals for connected client groups.">
-                  <b>Portfolio whitespace</b>
-                  <small>T24 + HELIOS</small>
+                <button class="suggestion" data-scenario="s3">
+                  <span class="scenario-tag">S3 · DEMAND</span>
+                  <b>Thematic opportunities from RM meetings</b>
                 </button>
               </div>
             </aside>
@@ -1675,6 +2044,9 @@
               <tr>
                 <th>Case</th>
                 <th>Topic</th>
+                <th>Report users</th>
+                <th>Start date</th>
+                <th>End date</th>
                 <th>Sources</th>
                 <th>Stage</th>
                 <th>Status</th>
@@ -1691,11 +2063,24 @@
     <section class="page" id="page2">
       <div class="pagehead">
         <div class="eyebrow">02 · AGENT SEARCH DESIGN</div>
-        <h1>Shape what the agent should look for</h1>
-        <p>See how each dataset changes the evidence graph, then refine the search contract before deeper opportunity analysis.</p>
+        <h1 id="page2Title">Shape what the agent should look for</h1>
+        <p id="page2Copy">See how each dataset changes the evidence graph, then refine the search contract before deeper opportunity analysis.</p>
       </div>
 
-      <div class="stage-shell">
+      <div class="stage-shell" id="page2Shell">
+        <aside class="panel intelligence-rail" aria-label="Case intelligence layers">
+          <button class="intelligence-rail-head" id="intelligenceRailToggle" type="button" aria-expanded="true" aria-label="Collapse case intelligence layers">
+            <span class="intelligence-rail-title">Case intelligence layers</span>
+          </button>
+          <div class="intelligence-rail-body">
+            <div class="intelligence-layers" id="intelligenceLayers"></div>
+            <div class="compound-result">
+              <small id="compoundStage">1 LAYER</small>
+              <b id="compoundFinding">Structured baseline</b>
+              <div class="compound-meter"><i id="compoundMeter" style="width:25%"></i></div>
+            </div>
+          </div>
+        </aside>
         <div class="stage-main">
           <section class="query-banner">
             <div>
@@ -1706,11 +2091,12 @@
             <div class="source-state-grid" id="sourceStates"></div>
           </section>
 
+          <div class="knowledge-highlights" id="knowledgeHighlights"></div>
+
           <details class="fold" open>
             <summary>
               <span class="fold-title">
-                <b>Dataset value add</b>
-                <small>Each selected dataset should visibly unlock different intelligence.</small>
+                <b>Related knowledge by data estate</b>
               </span>
             </summary>
             <div class="fold-body">
@@ -1721,16 +2107,14 @@
           <details class="fold" open>
             <summary>
               <span class="fold-title">
-                <b>Interactive insight lenses</b>
-                <small>Stable Page 2 visualisations with source-driven relationship expansion.</small>
+                <b>High-level knowledge landscape</b>
               </span>
             </summary>
             <div class="fold-body">
               <div class="charts-grid">
                 <article class="chart-card wide">
                   <div class="chart-title">
-                    <h3>Relationship network</h3>
-                    <small>CRM gives the structured backbone. FileNet adds document-derived relationships.</small>
+                    <h3 id="primaryChartTitle">Relationship network</h3>
                   </div>
                   <div class="chart-stage">
                     <svg id="relationshipGraph" viewBox="0 0 820 250" role="img" aria-label="Relationship network"></svg>
@@ -1740,8 +2124,7 @@
 
                 <article class="chart-card">
                   <div class="chart-title">
-                    <h3>Group comparison</h3>
-                    <small>Illustrative relationship AUM by connected group.</small>
+                    <h3 id="comparisonTitle">Group comparison</h3>
                   </div>
                   <div class="bar-list" id="groupBars"></div>
                 </article>
@@ -1749,15 +2132,13 @@
                 <article class="chart-card">
                   <div class="chart-title">
                     <h3>Evidence contribution</h3>
-                    <small>How much each selected source strengthens the result.</small>
                   </div>
                   <div class="bar-list" id="sourceBars"></div>
                 </article>
 
                 <article class="chart-card wide">
                   <div class="chart-title">
-                    <h3>Relationship evolution</h3>
-                    <small>When structured and document-derived relationship signals appeared.</small>
+                    <h3 id="timelineTitle">Relationship evolution</h3>
                   </div>
                   <div class="timeline">
                     <div class="timeline-line" id="timelineLine"></div>
@@ -1766,25 +2147,18 @@
 
                 <article class="chart-card">
                   <div class="chart-title">
-                    <h3>AUM concentration</h3>
-                    <small>Illustrative concentration of the highest-priority connected group.</small>
+                    <h3 id="donutTitle">AUM concentration</h3>
                   </div>
-                  <div class="donut"></div>
+                  <div class="donut" id="donutVisual" data-label="S$122M"></div>
                 </article>
 
                 <article class="chart-card">
                   <div class="chart-title">
-                    <h3>Bridge ranking</h3>
-                    <small>Clients connecting otherwise separate relationship clusters.</small>
+                    <h3 id="rankingTitle">Bridge ranking</h3>
                   </div>
                   <div class="mini-grid" style="grid-template-columns:1fr;">
                     <div class="mini-card">
-                      <div class="bridge-list">
-                        <div class="bridge-row"><b>Eleanor Tan</b><span>0.94</span></div>
-                        <div class="bridge-row"><b>Adrian Koh</b><span>0.82</span></div>
-                        <div class="bridge-row"><b>Daniel Lim</b><span>0.74</span></div>
-                        <div class="bridge-row"><b>Mei Chen</b><span>0.67</span></div>
-                      </div>
+                      <div class="bridge-list" id="rankingRows"></div>
                     </div>
                   </div>
                 </article>
@@ -1796,7 +2170,6 @@
             <summary>
               <span class="fold-title">
                 <b>Human shaping controls</b>
-                <small>Convert visual observations into explicit deeper-search instructions.</small>
               </span>
             </summary>
             <div class="fold-body">
@@ -1806,19 +2179,28 @@
         </div>
 
         <aside class="panel right-panel">
-          <div class="right-panel-head">
-            <div class="eyebrow">P2 · ANALYST FEEDBACK</div>
-            <h2>Refine the search contract</h2>
-            <p>Navigation and human input stay on the same panel.</p>
-          </div>
+          <button class="panel-collapse" type="button" aria-expanded="true" aria-label="Collapse analyst feedback panel">
+            <span class="panel-collapse-copy">
+              <span class="panel-collapse-title">Analyst Feedback</span>
+            </span>
+          </button>
+          <div class="right-panel-inner">
           <div class="right-panel-body">
+            <div class="eyebrow">P2 · ANALYST FEEDBACK</div>
             <div class="context" id="p2Context">ACTIVE CASE</div>
+            <div class="config-grid">
+              <div class="config-field"><label for="p2Lookback">Query lookback</label><select id="p2Lookback"><option>Last 12 months</option><option>Last 24 months</option><option>Custom period</option></select></div>
+              <div class="config-field"><label for="p2Confidence">Minimum confidence</label><select id="p2Confidence"><option>75% · Balanced</option><option>90% · Strict</option><option>60% · Exploratory</option></select></div>
+              <div class="config-field"><label for="p2Evidence">Evidence boundary</label><select id="p2Evidence"><option>Confirmed + inferred, separated</option><option>Confirmed only</option><option>Include weak signals</option></select></div>
+              <div class="config-field"><label for="p2WebScope">HELIOS web scope</label><select id="p2WebScope"><option>PEP + adverse media</option><option>PEP only</option><option>Market news only</option></select></div>
+            </div>
             <textarea id="p2Feedback" placeholder="Add human guidance for the deeper analysis..."></textarea>
             <button class="btn secondary" id="applyP2Feedback">Apply feedback</button>
             <div class="panel-actions">
               <button class="btn secondary" id="p2Back">Back</button>
               <button class="btn dark" id="p2Next">Next</button>
             </div>
+          </div>
           </div>
         </aside>
       </div>
@@ -1827,8 +2209,8 @@
     <section class="page" id="page3">
       <div class="pagehead">
         <div class="eyebrow">03 · CROSS-SOURCE OUTCOME</div>
-        <h1>Review hidden relationships and wealth opportunities</h1>
-        <p>Start with a concise summary, then review the highest-priority relationship groups and their provenance.</p>
+        <h1 id="page3Title">Review hidden relationships and wealth opportunities</h1>
+        <p id="page3Copy">Start with a concise summary, then review the highest-priority relationship groups and their provenance.</p>
       </div>
 
       <div class="stage-shell">
@@ -1836,25 +2218,37 @@
           <section class="result">
             <div class="hero">
               <div class="eyebrow" style="color:#d8c08b;">AURA WEALTH INTELLIGENCE</div>
-              <h1>Connected-client opportunity view</h1>
-              <p>The agent identifies relationship groups that become materially more actionable when structured CRM records are combined with hidden FileNet context and portfolio evidence.</p>
+              <h1 id="resultTitle">Connected-client opportunity view</h1>
+              <p id="resultCopy">The agent identifies relationship groups that become clearer when structured CRM records combine with hidden FileNet, T24 activity and HELIOS web context.</p>
             </div>
 
-            <div class="summary-pillars">
-              <article class="summary-pillar"><small>RELATIONSHIP GROUPS</small><b>5 priority groups</b><p>Two groups gain additional hidden relationships from FileNet evidence.</p></article>
-              <article class="summary-pillar"><small>HIDDEN LINKS</small><b>7 additional links</b><p>Trust, family-council and SPV relationships not explicit in CRM.</p></article>
-              <article class="summary-pillar"><small>COMMERCIAL VALUE</small><b>S$122M AUM</b><p>Highest-priority connected group spans multiple booking and portfolio contexts.</p></article>
-              <article class="summary-pillar"><small>RM ACTION</small><b>3 immediate opportunities</b><p>Bridge-client coverage, liquidity event and portfolio whitespace.</p></article>
-            </div>
+            <details class="report-fold" open>
+              <summary><span class="report-fold-title"><small>PILLAR 01 · EXECUTIVE STATUS</small><b>Cross-source answer at a glance</b></span></summary>
+              <div class="report-fold-body"><div class="summary-pillars" id="summaryPillars"></div></div>
+            </details>
 
-            <section class="priority-section">
-              <h2>Priority relationship groups</h2>
-              <div class="priority-grid">
-                <article class="priority-card hot"><small>#1 · TAN–KOH CONNECTED GROUP</small><h3>Family + trust + SPV bridge</h3><p>FileNet reveals family-council involvement and trustee context around Eleanor Tan, connecting two CRM clusters that otherwise appear separate.</p></article>
-                <article class="priority-card"><small>#2 · ORCHID NETWORK</small><h3>Cross-entity liquidity opportunity</h3><p>T24 activity suggests a recent liquidity event across related entities with substantial unallocated cash.</p></article>
-                <article class="priority-card"><small>#3 · CHEN FAMILY OFFICE</small><h3>Portfolio-theme whitespace</h3><p>HELIOS shows strong suitability but low allocation to the identified investment theme across the connected family group.</p></article>
+            <details class="report-fold" open>
+              <summary><span class="report-fold-title"><small>PILLAR 02 · RECOMMENDATIONS</small><b id="priorityTitle">Priority relationship groups</b></span></summary>
+              <div class="report-fold-body"><div class="priority-grid" id="priorityGrid"></div></div>
+            </details>
+
+            <details class="report-fold" open>
+              <summary><span class="report-fold-title"><small>PILLAR 03 · RELATIONSHIP EVIDENCE</small><b>Cross-source relationship graph</b></span></summary>
+              <div class="report-fold-body">
+                <div class="chart-stage"><svg id="page3RelationshipGraph" viewBox="0 0 820 250" role="img" aria-label="Cross-source relationship evidence graph"></svg></div>
+                <div class="graph-note" id="page3GraphNote"></div>
               </div>
-            </section>
+            </details>
+
+            <details class="report-fold" open>
+              <summary><span class="report-fold-title"><small>PILLAR 04 · CROSS-SOURCE STATUS</small><b>What is confirmed, inferred and still missing</b></span></summary>
+              <div class="report-fold-body"><div class="cross-status-grid" id="crossSourceStatus"></div></div>
+            </details>
+
+            <details class="report-fold">
+              <summary><span class="report-fold-title"><small>PILLAR 05 · DEEP RESEARCH REPORT</small><b>Answer, rationale, caveats and next actions</b></span></summary>
+              <div class="report-fold-body"><div class="research-grid" id="deepResearchReport"></div></div>
+            </details>
 
             <details class="appendix" open>
               <summary>
@@ -1863,14 +2257,14 @@
                 <div class="muted" style="font-size:9px;">Visible evidence summary only; click each source card to inspect its provenance.</div>
               </summary>
               <div class="appendix-body">
-                <div class="proof-flow">
+                <div class="proof-flow" id="proofFlow">
                   <div class="proof-node"><small>STRUCTURED BACKBONE</small><b>CRM declares household and entity links</b><p>Direct roles establish the initial relationship graph.</p><button class="evidence-link db" data-evidence="crm"><i>DB</i><span><b>CRM relationship table</b><small>client_relationship / declared roles</small></span></button></div>
                   <div class="proof-arrow">→</div>
                   <div class="proof-node"><small>HIDDEN CONTEXT</small><b>FileNet reveals trust and family-council involvement</b><p>RM notes and trust documents add relationships not explicit in CRM.</p><button class="evidence-link" data-evidence="filenet"><i>DOC</i><span><b>FileNet trust memorandum</b><small>source region · relationship wording</small></span></button></div>
                   <div class="proof-arrow">→</div>
                   <div class="proof-node"><small>BEHAVIOURAL CONFIRMATION</small><b>T24 supports operational proximity</b><p>Account roles and transaction context strengthen the relationship interpretation.</p><button class="evidence-link db" data-evidence="t24"><i>DB</i><span><b>T24 relationship activity</b><small>account_role / recent activity</small></span></button></div>
                   <div class="proof-arrow">→</div>
-                  <div class="proof-node"><small>OPPORTUNITY</small><b>HELIOS identifies portfolio whitespace</b><p>Suitability and allocation context turn the relationship signal into an RM opportunity.</p><button class="evidence-link db" data-evidence="helios"><i>DB</i><span><b>HELIOS allocation view</b><small>holdings / suitability / whitespace</small></span></button></div>
+                  <div class="proof-node"><small>PUBLIC CONTEXT</small><b>HELIOS adds relevant web intelligence</b><p>PEP, adverse-media and event signals add external context.</p><button class="evidence-link db" data-evidence="helios"><i>H</i><span><b>HELIOS web intelligence</b><small>PEP / news / market events</small></span></button></div>
                 </div>
               </div>
             </details>
@@ -1878,19 +2272,28 @@
         </div>
 
         <aside class="panel right-panel">
-          <div class="right-panel-head">
-            <div class="eyebrow">P3 · HUMAN REVIEW</div>
-            <h2>Refine the final insight</h2>
-            <p>Same panel model as Page 2; final action is Done.</p>
-          </div>
+          <button class="panel-collapse" type="button" aria-expanded="true" aria-label="Collapse human review panel">
+            <span class="panel-collapse-copy">
+              <span class="panel-collapse-title">Human Review</span>
+            </span>
+          </button>
+          <div class="right-panel-inner">
           <div class="right-panel-body">
+            <div class="eyebrow">P3 · HUMAN REVIEW</div>
             <div class="context" id="p3Context">ACTIVE CASE</div>
+            <div class="config-grid">
+              <div class="config-field"><label for="p3Depth">Report depth</label><select id="p3Depth"><option>Executive + deep report</option><option>Executive only</option><option>Evidence appendix only</option></select></div>
+              <div class="config-field"><label for="p3Tone">Recommendation style</label><select id="p3Tone"><option>Advisory</option><option>Investigative</option><option>Risk-focused</option></select></div>
+              <div class="config-field"><label for="p3Audience">Primary audience</label><select id="p3Audience"><option>Relationship manager</option><option>Investment advisor</option><option>Compliance reviewer</option></select></div>
+              <div class="config-field"><label for="p3GraphMode">Relationship graph</label><select id="p3GraphMode"><option>Show when feasible</option><option>Always show</option><option>Hide from report</option></select></div>
+            </div>
             <textarea id="p3Feedback" placeholder="Add human interpretation or RM-specific guidance..."></textarea>
             <button class="btn secondary" id="applyP3Feedback">Apply feedback</button>
             <div class="panel-actions">
               <button class="btn secondary" id="p3Back">Back</button>
               <button class="btn dark" id="p3Done">Done</button>
             </div>
+          </div>
           </div>
         </aside>
       </div>
@@ -1932,49 +2335,177 @@
       const $ = (selector, context = document) => context.querySelector(selector);
       const $$ = (selector, context = document) => Array.from(context.querySelectorAll(selector));
 
-      const state = { page: 1, activeCaseId: 'WDI-001', caseCounter: 2, simulationMode: 'p1p2', frame: 0, timer: null, running: false, cases: [{ id: 'WDI-001', topic: 'Shared entities & relationships', query: 'Group clients using shared entities and direct relationships, then identify hidden relationships and the highest-value bridge clients.', sources: ['CRM', 'FileNet'], page2Approved: false, page3Ready: false, status: 'Ready' }] };
+      const state = {
+        page: 1, activeCaseId: 'WDI-001', selectedScenario: 's1', compoundStage: 1, caseCounter: 4,
+        simulationMode: 'p1p2', frame: 0, timer: null, running: false,
+        cases: [
+          { id: 'WDI-001', scenario: 's1', topic: 'Shared entities + direct relationships', query: 'Group clients using shared entities and direct relationships, then identify hidden relationships and the highest-value bridge clients.', users: ['Michelle Lim','Aaron Koh'], queryStart: '01 Jan 2026', queryEnd: '31 Aug 2026', sources: ['CRM', 'FileNet', 'T24', 'HELIOS'], page2Approved: false, page3Ready: false, status: 'Ready' },
+          { id: 'WDI-002', scenario: 's2', topic: 'Next-generation client identification', query: 'Identify children, grandchildren and connected prospects who may become clients, then rank them by relationship readiness and an appropriate RM approach.', users: ['David Wong','Priya Nair','Sarah Tan'], queryStart: '01 Jan 2025', queryEnd: '31 Aug 2026', sources: ['CRM', 'FileNet', 'T24', 'HELIOS'], page2Approved: false, page3Ready: false, status: 'Ready' },
+          { id: 'WDI-003', scenario: 's3', topic: 'Thematic opportunities from RM meetings', query: 'Extract recurring investment themes from RM-client meeting evidence, connect them to client and transaction context, then add relevant HELIOS market intelligence.', users: ['Sofia Chen','Marcus Lee'], queryStart: '01 Jun 2026', queryEnd: '31 Aug 2026', sources: ['CRM', 'FileNet', 'T24', 'HELIOS'], page2Approved: false, page3Ready: false, status: 'Ready' }
+        ]
+      };
 
       const sourceMeta = {
-        CRM: { icon: 'CRM', title: 'CRM · relationship backbone', contribution: 'Profiles, declared relationships, family roles, entities and RM ownership.', unlock: 'Creates the structured people/entity graph and the baseline relationship groups.', visuals: ['Relationship network', 'Group comparison', 'Bridge ranking'] },
-        FileNet: { icon: 'DOC', title: 'FileNet · hidden relationship evidence', contribution: 'RM notes, trust documents, meeting records and narrative relationship evidence.', unlock: 'Adds hidden family, trust, referral and influence links that are not explicit in CRM.', visuals: ['Extra graph edges', 'Relationship evolution', 'Evidence confidence'] },
-        T24: { icon: 'T24', title: 'T24 · operational proximity', contribution: 'Account roles, authorised parties and recent transaction context.', unlock: 'Tests whether relationship proximity is operationally meaningful and recent.', visuals: ['Relationship evolution', 'Group comparison', 'Activity validation'] },
-        HELIOS: { icon: 'H', title: 'HELIOS · commercial relevance', contribution: 'Holdings, suitability, portfolio allocation and investable whitespace.', unlock: 'Converts relationship groups into prioritised wealth opportunities and AUM views.', visuals: ['AUM concentration', 'Opportunity ranking', 'Portfolio whitespace'] }
+        CRM: { display: 'CRM', title: 'CRM · key graphs', contribution: 'Profiles, declared relationships, family roles, entities and RM ownership.', unlock: 'Creates key client, entity and household graphs.', visuals: ['Key graphs', 'Known relationships', 'Client scope'] },
+        FileNet: { display: 'FileNet', title: 'FileNet · hidden relationships and activity', contribution: 'RM notes, trust documents, meeting records and narrative relationship evidence.', unlock: 'Adds hidden relationships, extra connections and document-disclosed transactions.', visuals: ['Hidden links', 'Extra connections', 'Hidden transactions'] },
+        T24: { display: 'T24', title: 'T24 · inflow and outflow knowledge', contribution: 'Inflows, outflows, account roles, counterparties and liquidity movements.', unlock: 'Adds timing, behavioural proximity and transaction patterns.', visuals: ['Inflow / outflow', 'Liquidity events', 'Counterparty links'] },
+        HELIOS: { display: 'HELIOS', title: 'HELIOS · PEP and relevant news', contribution: 'PEP references, adverse media, corporate events and query-related public news.', unlock: 'Adds external risk, recency and market-event context without treating news as fact.', visuals: ['PEP news', 'Adverse media', 'Market events'] }
+      };
+
+      const scenarioData = {
+        s1: {
+          code: 'S1', topic: 'Shared entities + direct relationships',
+          query: 'Group clients using shared entities and direct relationships, then identify hidden relationships and the highest-value bridge clients.',
+          defaults: ['CRM','FileNet','T24','HELIOS'],
+          hypothesis: 'Eleanor Tan may connect the Tan family trust with the Orion SPV network. Validate FileNet-supported relationships separately from CRM-declared relationships.',
+          chart: ['Relevant knowledge map','See which high-level people, entity, document, transaction and web signals may answer the query.','Potential group coverage','Illustrative relationship groups that deeper analysis may validate.','Knowledge arrival','When each class of potentially relevant knowledge becomes available.','Potential value coverage','Illustrative value attached to the query scope.','Candidate connectors','High-level candidates for deeper evidence testing.'],
+          rankings: [['Eleanor Tan','0.94'],['Adrian Koh','0.82'],['Daniel Lim','0.74'],['Mei Chen','0.67']],
+          bars: [['Tan–Koh',122],['Orchid',96],['Chen FO',74],['Straits',51],['Nova',34]],
+          layers: [
+            ['CRM','Declared relationship backbone','Profiles, roles and client-to-entity links.','18 clients · 24 declared links','Structured baseline'],
+            ['FileNet','Hidden relationship evidence','Trust documents and RM notes reveal influence and family links.','+7 hidden links · confidence 81%','Hidden context appears'],
+            ['T24','Operational proximity','Account roles and recent activity test whether links are current.','4 active bridges · confidence 89%','Relationships become current'],
+            ['HELIOS','PEP and external news','Related PEP news, adverse media and corporate events add public context.','2 PEP references · 1 adverse-media review','External context added']
+          ],
+          graph: {
+            nodes: [['ak',110,70,'Adrian Koh','person',0],['et',385,122,'Eleanor Tan','bridge',0],['mc',690,72,'Mei Chen','person',0],['trust',385,212,'Tan Family Trust','entity',0],['spv',215,190,'Orion SPV','entity',0],['family',540,205,'Family Council','document',1],['rmnote',255,38,'RM note: influence','document',1],['dl',690,190,'Daniel Lim','person',2],['pep',565,30,'PEP news review','document',3]],
+            edges: [['ak','et','crm',0],['et','mc','crm',0],['et','trust','crm',0],['ak','spv','crm',0],['et','family','filenet',1],['family','dl','filenet',1],['rmnote','ak','filenet',1],['rmnote','et','filenet',1],['et','dl','t24',2],['spv','trust','t24',2],['pep','mc','web',3]]
+          },
+          timeline: [['Profile graph',10,0],['FileNet links',36,1],['Transaction flow',63,2],['HELIOS news',90,3]],
+          p3: {
+            pageTitle: 'Review hidden relationships and wealth opportunities', pageCopy: 'Start with a concise summary, then review the highest-priority relationship groups and their provenance.',
+            title: 'Connected-client opportunity view', copy: 'Structured client records combine with hidden document context, transaction evidence and HELIOS web intelligence to reveal coordinated relationship opportunities.', priorityTitle: 'Priority relationship groups',
+            pillars: [['RELATIONSHIP GROUPS','5 priority groups','Two groups gain additional hidden links.'],['HIDDEN LINKS','7 additional links','Trust, family-council and SPV evidence.'],['COMMERCIAL VALUE','S$122M AUM','Highest-priority connected group.'],['RM ACTION','3 immediate opportunities','Coordinate, validate or exclude.']],
+            priorities: [['#1 · TAN–KOH CONNECTED GROUP','Family + trust + SPV bridge','FileNet connects two CRM clusters through Eleanor Tan.'],['#2 · ORCHID NETWORK','Cross-entity liquidity opportunity','T24 activity suggests a recent liquidity event.'],['#3 · CHEN FAMILY OFFICE','External-context review','HELIOS adds a related PEP and news review.']],
+            proof: [['STRUCTURED BACKBONE','CRM declares household and entity links','Direct roles establish the initial graph.','crm','CRM relationship table'],['HIDDEN CONTEXT','FileNet reveals trust and family-council involvement','Documents add links absent from CRM.','filenet','FileNet trust memorandum'],['BEHAVIOURAL CONFIRMATION','T24 supports operational proximity','Account roles strengthen the interpretation.','t24','T24 relationship activity'],['PUBLIC CONTEXT','HELIOS adds relevant web intelligence','PEP and news context remain separate from confirmed records.','helios','HELIOS web intelligence']]
+          }
+        },
+        s2: {
+          code: 'S2', topic: 'Next-generation client identification',
+          query: 'Identify children, grandchildren and connected prospects who may become clients, then rank them by relationship readiness and an appropriate RM approach.',
+          defaults: ['CRM','FileNet','T24','HELIOS'],
+          hypothesis: 'Emma Wong and Lucas Wong show distinct readiness signals. Verify family links, transaction proximity and HELIOS public evidence before recommending any outreach.',
+          chart: ['Relevant succession knowledge map','Preview family, document, transaction and public signals that may support the query.','Potential prospect coverage','High-level prospects for deeper evidence-backed readiness analysis.','Knowledge arrival','When each possible succession signal became available.','Potential transfer coverage','Modelled value remains separate from verified holdings.','Candidate prospects','High-level candidates for deeper evidence testing.'],
+          rankings: [['Emma Wong','92%'],['Lucas Wong','84%'],['Sofia Chen','76%'],['Noah Lim','63%']],
+          bars: [['Emma Wong',92],['Lucas Wong',84],['Sofia Chen',76],['Noah Lim',63],['Ava Tan',49]],
+          layers: [
+            ['CRM','Known family backbone','Current clients, declared family roles and RM ownership.','9 families · 14 known heirs','Known relationships'],
+            ['FileNet','Succession evidence','Trust papers, meeting notes and succession references.','+11 sourced signals · 6 new prospects','Prospects gain context'],
+            ['T24','Liquidity proximity','Permitted roles and family-linked flows add timing context.','4 current liquidity signals','Readiness becomes timely'],
+            ['HELIOS','Public-role and PEP context','Public news, directorships and PEP references add external context.','2 public-role matches · 1 PEP review','External context added']
+          ],
+          graph: {
+            nodes: [['rw',125,120,'Robert Wong','bridge',0],['trust',330,65,'Wong Family Trust','entity',0],['biz',330,190,'Wong Holdings','entity',0],['emma',535,55,'Emma Wong','person',1],['lucas',535,185,'Lucas Wong','person',1],['note',690,120,'Succession note','document',1],['acct',690,205,'Family account role','document',2],['public',690,30,'Public-role news','document',3]],
+            edges: [['rw','trust','crm',0],['rw','biz','crm',0],['trust','emma','filenet',1],['biz','lucas','filenet',1],['emma','note','filenet',1],['lucas','note','filenet',1],['lucas','acct','t24',2],['public','emma','web',3]]
+          },
+          timeline: [['Profile graph',10,0],['Trust reference',36,1],['Liquidity role',63,2],['HELIOS news',90,3]],
+          p3: {
+            pageTitle: 'Review next-generation relationship opportunities', pageCopy: 'Inspect each prospect’s sourced family link, readiness signals, confidence and safe next RM action.',
+            title: 'Succession readiness and relationship view', copy: 'The agent separates verified family evidence from modelled readiness, then proposes advisory outreach for human approval.', priorityTitle: 'Priority next-generation prospects',
+            pillars: [['KNOWN FAMILIES','9 family groups','Declared links form the baseline.'],['NEW PROSPECTS','6 sourced prospects','Found in governed documents.'],['MODELLED VALUE','S$48M potential','Estimate, not verified transfer intent.'],['RM ACTION','3 outreach reviews','Approve, investigate or hold.']],
+            priorities: [['#1 · EMMA WONG','High evidence-backed readiness','Trust role and repeated meeting participation support a research conversation.'],['#2 · LUCAS WONG','Emerging operating influence','Company and account roles suggest growing proximity; intent remains unverified.'],['#3 · SOFIA CHEN','Develop relationship first','Strong family link but limited current engagement evidence.']],
+            proof: [['FAMILY BACKBONE','CRM confirms declared relationships','Known family roles establish scope.','crm','CRM family relationship'],['SUCCESSION EVIDENCE','FileNet adds trust and meeting context','Every signal links to a source region.','filenet','FileNet succession note'],['TIMING CONTEXT','T24 shows permitted roles','Operational proximity is not transfer intent.','t24','T24 family account role'],['PUBLIC CONTEXT','HELIOS adds role and PEP context','Public signals guide review, not solicitation.','helios','HELIOS public intelligence']]
+          }
+        },
+        s3: {
+          code: 'S3', topic: 'Thematic opportunities from RM meetings',
+          query: 'Extract recurring investment themes from RM-client meeting evidence, connect them to client and transaction context, then add relevant HELIOS market intelligence.',
+          defaults: ['CRM','FileNet','T24','HELIOS'],
+          hypothesis: 'Obesity care and private-credit themes recur across recent meetings. Separate direct client requests from agent-inferred demand before matching suitable cohorts.',
+          chart: ['Relevant thematic knowledge map','Preview meeting, client, transaction and HELIOS market knowledge that may answer the theme query.','Potential theme coverage','High-level demand patterns for deeper validation.','Knowledge arrival','When demand, transaction and market knowledge became available.','Potential client coverage','Clients connected to supported themes.','Candidate themes','High-level themes for deeper evidence testing.'],
+          rankings: [['Obesity care','91%'],['Private credit','86%'],['Sustainable infra','73%'],['AI enablers','64%']],
+          bars: [['Obesity care',91],['Private credit',86],['Sustainable infra',73],['AI enablers',64],['Asia income',51]],
+          layers: [
+            ['CRM','Client and mandate context','Segments, relationship context and RM ownership.','42 relevant clients · 6 cohorts','Client baseline'],
+            ['FileNet','Meeting demand evidence','RM notes and meeting summaries reveal repeated themes.','38 mentions · 4 recurring themes','Demand becomes visible'],
+            ['T24','Deployable-liquidity context','Recent cash signals add timing without implying client intent.','5 timely review candidates','RM review priority'],
+            ['HELIOS','Theme and market news','Related news, corporate events and public research test theme recency.','14 relevant news items · 3 primary sources','External theme context added']
+          ],
+          graph: {
+            nodes: [['cohort',120,125,'UHNW cohort','bridge',0],['mandate',310,55,'Client context','entity',0],['meeting',310,195,'RM meetings','document',1],['obesity',520,55,'Obesity care','entity',1],['credit',520,125,'Private credit','entity',1],['infra',520,195,'Sustainable infra','entity',1],['cash',705,160,'Liquidity signal','document',2],['news',705,45,'Theme news','document',3]],
+            edges: [['cohort','mandate','crm',0],['cohort','meeting','crm',0],['meeting','obesity','filenet',1],['meeting','credit','filenet',1],['meeting','infra','filenet',1],['obesity','cash','t24',2],['credit','cash','t24',2],['news','obesity','web',3]]
+          },
+          timeline: [['Profile scope',10,0],['Meeting evidence',36,1],['Liquidity context',63,2],['HELIOS news',90,3]],
+          p3: {
+            pageTitle: 'Review thematic investment opportunities', pageCopy: 'Inspect recurring demand, supporting meeting evidence, client context, transaction signals and current market news.',
+            title: 'Theme-to-client opportunity report', copy: 'Meeting mentions become research opportunities after client, transaction and current market context compound.', priorityTitle: 'Priority client-demand themes',
+            pillars: [['MEETING EVIDENCE','38 cited mentions','Across the selected lookback.'],['RECURRING THEMES','4 supported themes','Requests kept separate from inference.'],['MARKET CONTEXT','14 news signals','From HELIOS web intelligence.'],['RM ACTION','5 review candidates','Prepare, investigate or dismiss.']],
+            priorities: [['#1 · OBESITY CARE','Repeated demand with current context','Twelve cited meetings and recent HELIOS news support an RM research conversation.'],['#2 · PRIVATE CREDIT','Strong demand with liquidity context','Repeated interest and T24 activity make this a timely research review.'],['#3 · SUSTAINABLE INFRA','Emerging theme to validate','Meeting frequency is rising; evidence remains below the automatic-priority threshold.']],
+            proof: [['CLIENT BOUNDARY','CRM defines relevant cohorts','Known client context constrains matching.','crm','CRM client cohort'],['DEMAND EVIDENCE','FileNet supplies cited meeting themes','Direct requests stay separate from inferred interest.','filenet','FileNet meeting evidence'],['TIMING CONTEXT','T24 adds liquidity signals','Cash activity prompts review, not a trading instruction.','t24','T24 liquidity context'],['MARKET CONTEXT','HELIOS adds relevant web intelligence','News tests theme recency without becoming client intent.','helios','HELIOS market intelligence']]
+          }
+        }
       };
 
       const workforce = [
         { id: 'or', icon: 'OR', name: 'Orchestrator', cap: 'Plans · delegates · synthesises' },
-        { id: 'da', icon: 'DA', name: 'Data Analyst', cap: 'CRM · T24 · HELIOS queries' },
+        { id: 'da', icon: 'DA', name: 'Data Analyst', cap: 'CRM · T24 queries' },
         { id: 'di', icon: 'DI', name: 'Document Intelligence', cap: 'FileNet · OCR · evidence regions' },
         { id: 'eg', icon: 'EG', name: 'Entity Graph Agent', cap: 'People · entities · hidden links' },
         { id: 'qa', icon: 'QA', name: 'Evidence QA', cap: 'Citations · conflicts · confidence' },
-        { id: 'wi', icon: 'WI', name: 'Wealth Intelligence', cap: 'AUM · suitability · RM action' }
+        { id: 'wi', icon: 'WI', name: 'Wealth Intelligence', cap: 'AUM · risk · RM action' }
       ];
 
-      const animationFrames = {
-        p1p2: [
-          { agent: 'or', kicker: '01 · SCOPE', title: 'Understand the intelligence request', docs: ['Question', 'Selected sources', 'Governance boundary'], sources: [['CASE', 'User intent captured'], ['POLICY', 'Source boundary fixed'], ['QUEUE', 'Workplan created']], conclusion: 'A governed workplan is ready.', copy: 'The orchestrator converts the Page 1 question into an explicit source and evidence plan before any graph is built.' },
-          { agent: 'da', kicker: '02 · STRUCTURED DATA', title: 'Build the CRM relationship backbone', docs: ['Client profile', 'Declared relationships', 'Shared entities'], sources: [['CRM', 'People + entities queried'], ['T24', 'Queued if selected'], ['HELIOS', 'Queued if selected']], conclusion: 'Structured relationship graph created.', copy: 'CRM establishes the baseline client, family, entity and declared-role links.' },
-          { agent: 'di', kicker: '03 · DOCUMENT INTELLIGENCE', title: 'Read FileNet for hidden relationship evidence', docs: ['RM note', 'Trust memorandum', 'Meeting record'], sources: [['FILENET', 'Trust context extracted'], ['VLM', 'Source region retained'], ['CITE', 'Document provenance attached']], conclusion: 'Additional hidden links identified.', copy: 'Document evidence adds trust, family-council and influence relationships that are not explicit in CRM.' },
-          { agent: 'eg', kicker: '04 · GRAPH SYNTHESIS', title: 'Fuse structured and document-derived edges', docs: ['CRM graph', 'FileNet edges', 'Entity aliases'], sources: [['GRAPH', 'Clusters fused'], ['BRIDGE', 'Connectors ranked'], ['TIME', 'Relationship events ordered']], conclusion: 'Relationship groups and bridge clients prioritised.', copy: 'The graph agent keeps declared and inferred links separate while ranking the most important cross-cluster connectors.' },
-          { agent: 'qa', kicker: '05 · PAGE 2 READY', title: 'Validate evidence and prepare the search-design workspace', docs: ['Relationship groups', 'Confidence', 'Source lineage'], sources: [['QA', 'Citations replayed'], ['GAP', 'Open gaps retained'], ['P2', 'Visual lenses prepared']], conclusion: 'Page 2 is ready for human shaping.', copy: 'The case returns to Case Management. The user can open Page 2 directly; the animation never forces a page jump.' }
-        ],
-        p2p3: [
-          { agent: 'or', kicker: '01 · SEARCH CONTRACT', title: 'Apply the human-shaped Page 2 contract', docs: ['Hypothesis', 'Evidence boundary', 'Confidence threshold'], sources: [['P2', 'Human feedback loaded'], ['SCOPE', 'Search contract frozen'], ['QUEUE', 'Deep run started']], conclusion: 'Deeper analysis scope accepted.', copy: 'The orchestrator uses the Page 2 instructions as the governing contract for the deeper opportunity run.' },
-          { agent: 'da', kicker: '02 · BEHAVIOURAL + PORTFOLIO DATA', title: 'Join T24 and HELIOS where available', docs: ['Recent account activity', 'Holdings', 'Suitability'], sources: [['T24', 'Operational proximity tested'], ['HELIOS', 'Portfolio whitespace measured'], ['AUM', 'Group value calculated']], conclusion: 'Commercial relevance added to relationship groups.', copy: 'Relationship intelligence is translated into current activity, portfolio exposure and investable whitespace.' },
-          { agent: 'eg', kicker: '03 · OPPORTUNITY GRAPH', title: 'Rank hidden relationships and bridge opportunities', docs: ['Connected groups', 'Bridge clients', 'Hidden links'], sources: [['GRAPH', 'Priority groups ranked'], ['BRIDGE', 'Connector score calculated'], ['HIDDEN', 'Document-only links preserved']], conclusion: 'Three priority relationship groups identified.', copy: 'The graph highlights where FileNet-supported relationships materially change coverage or opportunity interpretation.' },
-          { agent: 'qa', kicker: '04 · EVIDENCE QA', title: 'Replay source provenance for every key insight', docs: ['CRM rows', 'FileNet source regions', 'T24 / HELIOS tables'], sources: [['CITE', 'Source links attached'], ['QA', 'Claims replayed'], ['GAP', 'Unresolved evidence disclosed']], conclusion: 'Evidence chain is reviewable.', copy: 'Each key relationship claim remains clickable back to its source class rather than becoming an opaque model conclusion.' },
-          { agent: 'wi', kicker: '05 · PAGE 3 READY', title: 'Prepare RM-ready relationship opportunities', docs: ['Summary pillars', 'Priority groups', 'Evidence appendix'], sources: [['RM', 'Actionable groups prepared'], ['AUM', 'Commercial value attached'], ['P3', 'Human review ready']], conclusion: 'Page 3 is ready for human review.', copy: 'The final page starts with an executive summary, then priority groups, then the evidence appendix and human feedback panel.' }
-        ]
+      const animationScripts = {
+        s1: {
+          p1p2: [['or','01 · SCOPE','Frame the relationship question','Governed relationship plan ready.','The orchestrator fixes link types, exclusions and evidence boundaries.'],['da','02 · CRM BACKBONE','Build declared people and entity links','Structured graph created.','CRM establishes client, family, trust and company relationships.'],['di','03 · HIDDEN EVIDENCE','Read trusts, notes and meeting records','Seven hidden links found.','FileNet reveals family-council and influence links absent from CRM.'],['eg','04 · GRAPH SYNTHESIS','Rank groups and bridge clients','Five groups prioritised.','Declared and inferred edges stay visibly separate.'],['qa','05 · PAGE 2 READY','Replay relationship evidence','Search-design workspace ready.','Every node and edge retains source lineage and confidence.']],
+          p2p3: [['or','01 · SEARCH CONTRACT','Apply the analyst-shaped relationship boundary','Deeper scope accepted.','Human guidance becomes the governing contract.'],['da','02 · CURRENT RELEVANCE','Join account activity and HELIOS context','Current relevance added.','T24 activity and HELIOS public signals enrich the group view.'],['eg','03 · OPPORTUNITY GRAPH','Rank bridge-client opportunities','Three priority groups found.','The graph surfaces the connectors that change coverage.'],['qa','04 · EVIDENCE QA','Replay every key relationship claim','Evidence chain reviewable.','Weak and inferred links remain clearly labelled.'],['wi','05 · PAGE 3 READY','Prepare coordinated RM actions','Relationship report ready.','The outcome supports coordination, validation or exclusion.']]
+        },
+        s2: {
+          p1p2: [['or','01 · SCOPE','Frame the succession question','Governed prospect plan ready.','The orchestrator sets generation, age, jurisdiction and outreach boundaries.'],['da','02 · FAMILY BACKBONE','Build declared family and client links','Known family map created.','CRM establishes current clients, family roles and RM ownership.'],['di','03 · SUCCESSION EVIDENCE','Read trust papers and RM notes','Six sourced prospects found.','FileNet adds education, employment and succession signals with citations.'],['eg','04 · PROSPECT MATCHING','Resolve people across records','Next-generation graph resolved.','Aliases and family roles are matched without inventing relationships.'],['qa','05 · PAGE 2 READY','Separate facts from estimates','Readiness workspace ready.','Modelled transfer value and timing are labelled as estimates.']],
+          p2p3: [['or','01 · SEARCH CONTRACT','Apply the human-approved readiness signals','Deeper scope accepted.','Only approved signals enter prioritisation.'],['da','02 · READINESS CONTEXT','Join liquidity and HELIOS context','Current context added.','Operational roles and public evidence refine the cohort.'],['eg','03 · SUCCESSION RANKING','Rank evidence-backed prospects','Three priority prospects found.','Each score exposes its contributing evidence.'],['qa','04 · EVIDENCE QA','Challenge transfer assumptions','Unverified intent quarantined.','Age, timing and inheritance claims remain sourced or explicitly modelled.'],['wi','05 · PAGE 3 READY','Prepare RM-safe outreach options','Succession report ready.','Actions remain advisory until an RM approves them.']]
+        },
+        s3: {
+          p1p2: [['or','01 · SCOPE','Frame the demand-intelligence question','Governed theme plan ready.','The orchestrator sets lookback, taxonomy and client boundaries.'],['di','02 · MEETING EVIDENCE','Read RM notes and meeting summaries','Thirty-eight theme mentions found.','FileNet extracts recurring client demand with source citations.'],['eg','03 · THEME SYNTHESIS','Separate direct requests from inferred themes','Four recurring themes formed.','The agent preserves the distinction between evidence and inference.'],['da','04 · CLIENT MATCHING','Map themes to governed cohorts','Relevant cohorts identified.','CRM adds segment and relationship ownership.'],['qa','05 · PAGE 2 READY','Challenge weak theme evidence','Demand workspace ready.','Low-frequency or conflicting themes stay visible for review.']],
+          p2p3: [['or','01 · SEARCH CONTRACT','Apply the analyst-approved taxonomy','Deeper scope accepted.','The selected lookback and evidence threshold govern the run.'],['da','02 · CURRENT CONTEXT','Join T24 activity and HELIOS news','Current context added.','Transaction timing and market news enrich the theme view.'],['eg','03 · OPPORTUNITY MATCHING','Rank theme-to-client opportunities','Five review candidates found.','Evidence frequency, client relevance and recency drive the ranking.'],['qa','04 · EVIDENCE QA','Replay meeting and public evidence','Evidence chain reviewable.','No meeting mention becomes a trading instruction.'],['wi','05 · PAGE 3 READY','Prepare advisory theme conversations','Demand report ready.','RMs can prepare research, investigate evidence or dismiss a theme.']]
+        }
       };
 
+      function framesFor(mode) {
+        const item = activeCase();
+        const config = scenarioData[item.scenario || 's1'];
+        return animationScripts[item.scenario || 's1'][mode].map((row, index) => ({
+          agent: row[0], kicker: row[1], title: row[2], conclusion: row[3], copy: row[4],
+          docs: [config.code, item.topic, index < 2 ? 'Governed input' : 'Cited output'],
+          sources: [['CASE', item.id], ['DATA', item.sources.join(' + ')], ['TRACE', `Stage ${index + 1} retained`]]
+        }));
+      }
+
       function activeCase() { return state.cases.find(item => item.id === state.activeCaseId) || state.cases[0]; }
+      function sourceIcon(source) {
+        const artwork = {
+          CRM: '<circle cx="9" cy="8" r="3"/><path d="M3.5 18c.7-3.2 2.5-4.8 5.5-4.8s4.8 1.6 5.5 4.8"/><circle cx="17" cy="9" r="2.2"/><path d="M15.5 13.8c2.7-.5 4.4.9 5 3.4"/>',
+          FileNet: '<ellipse cx="7.5" cy="6" rx="4.5" ry="2.2"/><path d="M3 6v8c0 1.2 2 2.2 4.5 2.2 1.2 0 2.2-.2 3-.5V6"/><path d="M13 4h5l3 3v13h-8zM18 4v3h3M15.5 12h3M15.5 15h3"/>',
+          T24: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>',
+          HELIOS: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.1 3 14.9 0 18M12 3c-3 3.1-3 14.9 0 18"/>'
+        };
+        return `<svg viewBox="0 0 24 24" aria-hidden="true">${artwork[source] || artwork.CRM}</svg>`;
+      }
+      function evidenceSourceKey(type) { return type === 'filenet' ? 'FileNet' : type === 't24' ? 'T24' : type === 'helios' ? 'HELIOS' : 'CRM'; }
       function selectedSources() { return $$('.source.selected').map(button => button.dataset.source); }
       function toast(message) { const node = $('#toast'); node.textContent = message; node.classList.add('show'); clearTimeout(toast.timer); toast.timer = setTimeout(() => node.classList.remove('show'), 1800); }
       function setJourney(pageNumber) { $$('.step').forEach((step, index) => { step.classList.toggle('active', index === pageNumber - 1); step.classList.toggle('done', index < pageNumber - 1); }); }
       function showPage(pageNumber) { state.page = pageNumber; $$('.page').forEach(page => page.classList.toggle('active', page.id === `page${pageNumber}`)); setJourney(pageNumber); if (pageNumber === 2) renderPage2(); if (pageNumber === 3) renderPage3(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
       function returnToCases() { showPage(1); $('#casebox').open = true; requestAnimationFrame(() => $('#casebox').scrollIntoView({ behavior: 'smooth', block: 'start' })); }
-      function syncSourceButtons(caseItem) { $$('.source').forEach(button => button.classList.toggle('selected', caseItem.sources.includes(button.dataset.source))); $('#query').value = caseItem.query; }
-      function topicFromQuery(query) { const text = query.toLowerCase(); if (text.includes('family')) return 'Hidden family relationships'; if (text.includes('portfolio')) return 'Portfolio whitespace'; return 'Shared entities & bridge clients'; }
+      function syncSourceButtons(caseItem) {
+        state.selectedScenario = caseItem.scenario || 's1';
+        $$('.source').forEach(button => button.classList.toggle('selected', caseItem.sources.includes(button.dataset.source)));
+        $$('.suggestion').forEach(button => button.classList.toggle('active', button.dataset.scenario === state.selectedScenario));
+        $('#query').value = caseItem.query;
+      }
+
+      function selectScenario(key) {
+        const config = scenarioData[key];
+        state.selectedScenario = key;
+        $$('.suggestion').forEach(button => button.classList.toggle('active', button.dataset.scenario === key));
+        $$('.source').forEach(button => button.classList.toggle('selected', config.defaults.includes(button.dataset.source)));
+        $('#query').value = config.query;
+        $('#query').focus();
+      }
+
+      function renderReportUsers(users = []) {
+        const initials = name => name.split(/\s+/).map(part => part[0]).join('').slice(0, 2).toUpperCase();
+        return `<div class="report-users"><span>${users.map(name => `<span class="report-user" title="${name}">${initials(name)}</span>`).join('')}</span><span class="report-user-names">${users.join('<br>')}</span></div>`;
+      }
 
       function renderCases() {
         const tbody = $('#caseRows');
@@ -1984,7 +2515,7 @@
           const stage = item.page3Ready ? 'Page 3' : item.page2Approved ? 'P2 → P3' : 'Page 2';
           const watchLabel = item.page2Approved ? 'Watch P2 → P3' : 'Watch P1 → P2';
           const row = document.createElement('tr');
-          row.innerHTML = `<td><b class="mono">${item.id}</b></td><td><b>${item.topic}</b></td><td>${item.sources.join(' · ')}</td><td><span class="status">${stage}</span></td><td><span class="status">${item.status}</span></td><td><div class="case-actions"><button class="btn secondary small watch-agent" data-watch="${item.id}">${watchLabel}</button></div></td><td><div class="case-actions"><button class="btn small" data-open-case="${item.id}" data-open-page="${openPage}">Open Page ${openPage}</button></div></td>`;
+          row.innerHTML = `<td><b class="mono">${item.id}</b><small style="display:block;color:var(--muted);">${scenarioData[item.scenario || 's1'].code}</small></td><td><b>${item.topic}</b></td><td>${renderReportUsers(item.users)}</td><td><span class="query-date">${item.queryStart}</span></td><td><span class="query-date">${item.queryEnd}</span></td><td>${item.sources.map(source => sourceMeta[source].display).join(' · ')}</td><td><span class="status">${stage}</span></td><td><span class="status">${item.status}</span></td><td><div class="case-actions"><button class="btn secondary small watch-agent" data-watch="${item.id}">${watchLabel}</button></div></td><td><div class="case-actions"><button class="btn small" data-open-case="${item.id}" data-open-page="${openPage}">Open Page ${openPage}</button></div></td>`;
           tbody.appendChild(row);
         });
         $$('[data-open-case]').forEach(button => button.addEventListener('click', () => { const item = state.cases.find(entry => entry.id === button.dataset.openCase); if (!item) return; state.activeCaseId = item.id; syncSourceButtons(item); showPage(Number(button.dataset.openPage)); }));
@@ -1993,36 +2524,51 @@
 
       function addCase() {
         const query = $('#query').value.trim();
-        const sources = selectedSources();
+        const internalSources = selectedSources();
         if (!query) return $('#query').focus();
-        if (!sources.length) return toast('Select at least one data source');
+        if (!internalSources.length) return toast('Select at least one data source');
+        const sources = [...internalSources];
         const id = `WDI-${String(state.caseCounter++).padStart(3, '0')}`;
-        const item = { id, topic: topicFromQuery(query), query, sources, page2Approved: false, page3Ready: false, status: 'Ready' };
+        const config = scenarioData[state.selectedScenario];
+        const item = { id, scenario: state.selectedScenario, topic: config.topic, query, users: ['Michelle Lim','Report Review Team'], queryStart: '01 Sep 2026', queryEnd: '15 Sep 2026', sources, page2Approved: false, page3Ready: false, status: 'Ready' };
         state.cases.unshift(item); state.activeCaseId = id; renderCases(); $('#casebox').open = true; toast('Case created · open Page 2 or optionally watch Agent-work');
       }
 
       function renderSourceStates(caseItem) {
-        $('#sourceStates').innerHTML = ['CRM', 'FileNet', 'T24', 'HELIOS'].map(source => { const on = caseItem.sources.includes(source); return `<div class="source-state ${on ? 'on' : ''}"><span><b>${source}</b><span>${on ? 'SELECTED' : 'NOT SELECTED'}</span></span></div>`; }).join('');
+        $('#sourceStates').innerHTML = ['CRM', 'FileNet', 'T24', 'HELIOS'].map(source => { const on = caseItem.sources.includes(source); return `<div class="source-state ${on ? 'on' : ''}"><i class="source-state-icon">${sourceIcon(source)}</i><span><b>${sourceMeta[source].display}</b><span>${on ? 'SELECTED' : 'NOT SELECTED'}</span></span></div>`; }).join('');
+      }
+
+      function knowledgeMini(source) {
+        const kind = source === 'CRM' ? 'network' : source === 'FileNet' ? 'hidden' : source === 'T24' ? 'flow' : 'web';
+        return `<div class="knowledge-mini ${kind}" aria-hidden="true"></div>`;
       }
 
       function renderDatasetValueAdd(caseItem) {
-        $('#datasetGrid').innerHTML = ['CRM', 'FileNet', 'T24', 'HELIOS'].map(source => { const meta = sourceMeta[source]; const active = caseItem.sources.includes(source); return `<article class="dataset-card ${active ? 'active' : 'off'}" data-source="${source}"><div class="dataset-icon">${meta.icon}</div><div><h3>${meta.title}</h3><p><b>What it contributes:</b> ${meta.contribution}</p><div class="dataset-unlocks"><b>What it unlocks:</b> ${meta.unlock}</div><div class="dataset-visuals">${meta.visuals.map(label => `<span>${label}</span>`).join('')}</div></div></article>`; }).join('');
+        const config = scenarioData[caseItem.scenario || 's1'];
+        $('#datasetGrid').innerHTML = config.layers.map(layer => { const source = layer[0]; const meta = sourceMeta[source]; const active = caseItem.sources.includes(source); return `<article class="dataset-card ${active ? 'active' : 'off'}" data-source="${source}"><div class="dataset-icon">${sourceIcon(source)}</div><div><h3>${meta.title}</h3><div class="dataset-unlocks">${layer[3]}</div><div class="dataset-visuals">${meta.visuals.map(label => `<span>${label}</span>`).join('')}</div></div>${knowledgeMini(source)}</article>`; }).join('');
       }
 
-      function graphData(caseItem) {
-        const hasFileNet = caseItem.sources.includes('FileNet');
-        const hasT24 = caseItem.sources.includes('T24');
-        const nodes = [
-          { id: 'ak', x: 110, y: 70, label: 'Adrian Koh', kind: 'person' },
-          { id: 'et', x: 385, y: 122, label: 'Eleanor Tan', kind: 'bridge' },
-          { id: 'mc', x: 690, y: 72, label: 'Mei Chen', kind: 'person' },
-          { id: 'dl', x: 690, y: 190, label: 'Daniel Lim', kind: 'person' },
-          { id: 'trust', x: 385, y: 212, label: 'Tan Family Trust', kind: 'entity' },
-          { id: 'spv', x: 215, y: 190, label: 'Orion SPV', kind: 'entity' }
-        ];
-        const edges = [ { a: 'ak', b: 'et', type: 'crm' }, { a: 'et', b: 'mc', type: 'crm' }, { a: 'et', b: 'trust', type: 'crm' }, { a: 'ak', b: 'spv', type: 'crm' } ];
-        if (hasFileNet) { nodes.push({ id: 'family', x: 540, y: 205, label: 'Family Council', kind: 'document' }, { id: 'rmnote', x: 255, y: 38, label: 'RM note: influence', kind: 'document' }); edges.push({ a: 'et', b: 'family', type: 'filenet' }, { a: 'family', b: 'dl', type: 'filenet' }, { a: 'rmnote', b: 'ak', type: 'filenet' }, { a: 'rmnote', b: 'et', type: 'filenet' }); }
-        if (hasT24) edges.push({ a: 'et', b: 'dl', type: 't24' }, { a: 'spv', b: 'trust', type: 't24' });
+      function renderIntelligenceLayers(caseItem) {
+        const config = scenarioData[caseItem.scenario || 's1'];
+        $('#intelligenceLayers').innerHTML = config.layers.map((layer, index) => `<button class="intelligence-layer ${caseItem.sources.includes(layer[0]) ? 'in-case' : ''} ${state.compoundStage === index ? 'previewing' : ''}" type="button" data-layer-stage="${index}"><i>${sourceIcon(layer[0])}</i><span><b>${sourceMeta[layer[0]].display} · ${layer[1]}</b></span></button>`).join('');
+        const current = config.layers[state.compoundStage];
+        $('#compoundStage').textContent = `${state.compoundStage + 1} LAYER${state.compoundStage ? 'S' : ''} COMBINED`;
+        $('#compoundFinding').textContent = current[4];
+        $('#compoundMeter').style.width = `${((state.compoundStage + 1) / config.layers.length) * 100}%`;
+        $$('[data-layer-stage]').forEach(button => button.addEventListener('click', () => {
+          state.compoundStage = Number(button.dataset.layerStage);
+          renderIntelligenceLayers(caseItem);
+          renderRelationshipGraph(caseItem);
+          renderBars(caseItem);
+          renderTimeline(caseItem);
+        }));
+      }
+
+      function graphData(caseItem, stage = state.compoundStage) {
+        const config = scenarioData[caseItem.scenario || 's1'];
+        const nodes = config.graph.nodes.filter(node => node[5] <= stage).map(node => ({ id: node[0], x: node[1], y: node[2], label: node[3], kind: node[4] }));
+        const nodeIds = new Set(nodes.map(node => node.id));
+        const edges = config.graph.edges.filter(edge => edge[3] <= stage && nodeIds.has(edge[0]) && nodeIds.has(edge[1])).map(edge => ({ a: edge[0], b: edge[1], type: edge[2] }));
         return { nodes, edges };
       }
 
@@ -2030,59 +2576,122 @@
         const svg = $('#relationshipGraph');
         const data = graphData(caseItem);
         const lookup = Object.fromEntries(data.nodes.map(node => [node.id, node]));
-        const edgeMarkup = data.edges.map(edge => { const a = lookup[edge.a]; const b = lookup[edge.b]; const style = edge.type === 'filenet' ? 'stroke:#3569c8;stroke-width:2;stroke-dasharray:7 5' : edge.type === 't24' ? 'stroke:#087f5b;stroke-width:2;stroke-dasharray:3 4' : 'stroke:#d71920;stroke-width:2'; return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" style="${style}" />`; }).join('');
+        const edgeMarkup = data.edges.map(edge => { const a = lookup[edge.a]; const b = lookup[edge.b]; const style = edge.type === 'filenet' ? 'stroke:#3569c8;stroke-width:2;stroke-dasharray:7 5' : edge.type === 't24' ? 'stroke:#087f5b;stroke-width:2;stroke-dasharray:3 4' : edge.type === 'web' ? 'stroke:#7251a8;stroke-width:2;stroke-dasharray:2 5' : 'stroke:#d71920;stroke-width:2'; return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" style="${style}" />`; }).join('');
         const nodeMarkup = data.nodes.map(node => { const isEntity = node.kind === 'entity' || node.kind === 'document'; const fill = node.kind === 'bridge' ? '#101b27' : node.kind === 'document' ? '#eef5ff' : isEntity ? '#fff9ed' : '#ffffff'; const stroke = node.kind === 'document' ? '#3569c8' : node.kind === 'bridge' ? '#101b27' : node.kind === 'entity' ? '#b79a61' : '#bfc2c4'; const shape = isEntity ? `<rect x="${node.x - 47}" y="${node.y - 15}" width="94" height="30" rx="7" fill="${fill}" stroke="${stroke}" stroke-width="2" />` : `<circle cx="${node.x}" cy="${node.y}" r="${node.kind === 'bridge' ? 25 : 20}" fill="${fill}" stroke="${stroke}" stroke-width="2" />`; const textColor = node.kind === 'bridge' ? '#ffffff' : '#202124'; return `<g class="graph-node" data-node="${node.id}" style="cursor:pointer;">${shape}<text x="${node.x}" y="${node.y + 3}" text-anchor="middle" fill="${textColor}" font-size="9" font-family="DM Sans, Arial">${node.label}</text></g>`; }).join('');
         svg.innerHTML = `<rect width="820" height="250" fill="#ffffff" /><g opacity="0.45"><line x1="35" y1="220" x2="785" y2="220" stroke="#f0f0ed" /><line x1="35" y1="125" x2="785" y2="125" stroke="#f0f0ed" /><line x1="35" y1="35" x2="785" y2="35" stroke="#f0f0ed" /></g><g>${edgeMarkup}</g><g>${nodeMarkup}</g>`;
-        const extra = caseItem.sources.includes('FileNet') ? 'FileNet is selected: the graph adds document-derived relationship nodes and dashed blue edges that do not exist in the CRM-only view.' : 'CRM-only view: this shows the structured backbone. Add FileNet on Page 1 to reveal additional hidden relationship evidence.';
-        $('#relationshipGraphNote').innerHTML = `<b>Source effect:</b> ${extra}`;
+        const config = scenarioData[caseItem.scenario || 's1'];
+        const layer = config.layers[state.compoundStage];
+        $('#relationshipGraphNote').innerHTML = `<b>${sourceMeta[layer[0]].display} layer:</b> ${layer[2]} <span class="muted">${layer[3]}</span>`;
         bindGraphNodes();
       }
 
       function bindGraphNodes() {
-        $$('.graph-node', $('#relationshipGraph')).forEach(node => node.addEventListener('click', () => { const label = node.textContent.trim(); $('#relationshipGraphNote').innerHTML = `<b>${label}</b> selected. Review which source class supports this relationship before promoting it to a Page 3 opportunity.`; }));
+        $$('.graph-node', $('#relationshipGraph')).forEach(node => node.addEventListener('click', () => { const label = node.textContent.trim(); $('#relationshipGraphNote').innerHTML = `<b>${label}</b> selected. Review which source class supports this node before promoting it to a Page 3 opportunity.`; }));
       }
 
       function renderBars(caseItem) {
-        const groupRows = [['Tan–Koh',122],['Orchid',96],['Chen FO',74],['Straits',51],['Nova',34]];
+        const config = scenarioData[caseItem.scenario || 's1'];
+        const groupRows = config.bars;
         const maxGroup = Math.max(...groupRows.map(row => row[1]));
-        $('#groupBars').innerHTML = groupRows.map(([name, value]) => `<div class="bar-row"><span>${name}</span><div class="bar-track"><div class="bar-fill" style="width:${(value / maxGroup) * 100}%"></div></div><b>S$${value}M</b></div>`).join('');
-        const contribution = { CRM: 52, FileNet: 27, T24: 13, HELIOS: 8 };
-        const active = caseItem.sources.map(source => [source, contribution[source]]);
+        $('#groupBars').innerHTML = groupRows.map(([name, value]) => `<div class="bar-row"><span>${name}</span><div class="bar-track"><div class="bar-fill" style="width:${(value / maxGroup) * 100}%"></div></div><b>${caseItem.scenario === 's1' ? `S$${value}M` : `${value}%`}</b></div>`).join('');
+        const contribution = { CRM: 38, FileNet: 26, T24: 20, HELIOS: 16 };
+        const active = config.layers.slice(0, state.compoundStage + 1).map(layer => [layer[0], contribution[layer[0]]]);
         const maxSource = Math.max(...active.map(row => row[1]), 1);
-        $('#sourceBars').innerHTML = active.map(([name, value]) => `<div class="bar-row"><span>${name}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.max(10, value / maxSource * 100)}%"></div></div><b>${value}%</b></div>`).join('');
+        $('#sourceBars').innerHTML = active.map(([name, value]) => `<div class="bar-row"><span>${sourceMeta[name].display}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.max(10, value / maxSource * 100)}%"></div></div><b>${value}%</b></div>`).join('');
+      }
+
+      function renderKnowledgeHighlights(caseItem) {
+        const config = scenarioData[caseItem.scenario || 's1'];
+        const selected = config.layers.filter(layer => caseItem.sources.includes(layer[0]));
+        const items = [
+          ['RELATED ESTATES', `${selected.length} sources`, 'Potentially relevant to this query'],
+          ['KEY GRAPHS', caseItem.scenario === 's1' ? '5 groups' : caseItem.scenario === 's2' ? '9 families' : '6 cohorts', 'Profile database starting point'],
+          ['HIDDEN KNOWLEDGE', caseItem.scenario === 's1' ? '+7 links' : caseItem.scenario === 's2' ? '+11 signals' : '38 mentions', 'FileNet document contribution'],
+          ['EXTERNAL CONTEXT', caseItem.sources.includes('HELIOS') ? 'HELIOS enabled' : 'Not selected', 'PEP, adverse media and news']
+        ];
+        $('#knowledgeHighlights').innerHTML = items.map(item => `<article class="knowledge-highlight"><small>${item[0]}</small><b>${item[1]}</b></article>`).join('');
       }
 
       function renderTimeline(caseItem) {
-        const points = [ { left: 12, label: 'CRM baseline', kind: 'crm' }, { left: 38, label: 'RM note', kind: 'doc', requires: 'FileNet' }, { left: 59, label: 'Trust memo', kind: 'doc', requires: 'FileNet' }, { left: 78, label: 'Recent activity', kind: 'crm', requires: 'T24' } ].filter(point => !point.requires || caseItem.sources.includes(point.requires));
+        const config = scenarioData[caseItem.scenario || 's1'];
+        const points = config.timeline.filter(point => point[2] <= state.compoundStage).map(point => ({ label: point[0], left: point[1], kind: point[2] === 1 ? 'doc' : 'crm' }));
         $('#timelineLine').innerHTML = points.map(point => `<span class="timeline-point ${point.kind === 'doc' ? 'doc' : ''}" style="left:${point.left}%"><span class="timeline-label">${point.label}</span></span>`).join('');
       }
 
       function renderPage2() {
         const item = activeCase();
+        const config = scenarioData[item.scenario || 's1'];
         syncSourceButtons(item);
+        const selectedIndexes = config.layers.map((layer, index) => item.sources.includes(layer[0]) ? index : -1).filter(index => index >= 0);
+        state.compoundStage = Math.max(...selectedIndexes, 0);
         $('#queryTitle').textContent = item.topic;
         $('#queryMirror').textContent = item.query;
-        $('#p2Context').textContent = `ACTIVE CASE · ${item.id} · ${item.sources.join(' + ')}`;
+        $('#page2Title').textContent = `Shape the ${item.topic.toLowerCase()} search`;
+        $('#page2Copy').textContent = `See what CRM, FileNet, T24 and HELIOS knowledge could relate to the ${config.code} query before deeper analysis.`;
+        $('#p2Context').textContent = `ACTIVE CASE · ${item.id} · ${item.sources.map(source => sourceMeta[source].display).join(' + ')}`;
+        $('#hypothesis').value = config.hypothesis;
+        [$('#primaryChartTitle'),$('#comparisonTitle'),$('#timelineTitle'),$('#donutTitle'),$('#rankingTitle')].forEach((node,index) => node.textContent = config.chart[index * 2]);
+        $('#rankingRows').innerHTML = config.rankings.map(row => `<div class="bridge-row"><b>${row[0]}</b><span>${row[1]}</span></div>`).join('');
+        $('#donutVisual').setAttribute('data-label', item.scenario === 's1' ? 'S$122M' : item.scenario === 's2' ? 'S$48M est.' : '14 news signals');
+        $('#relationshipGraph').setAttribute('aria-label', config.chart[0]);
         renderSourceStates(item);
+        renderKnowledgeHighlights(item);
         renderDatasetValueAdd(item);
+        renderIntelligenceLayers(item);
         renderRelationshipGraph(item);
         renderBars(item);
         renderTimeline(item);
       }
 
       function approvePage2() { const item = activeCase(); item.page2Approved = true; item.page3Ready = true; item.status = 'Ready'; renderCases(); returnToCases(); toast('Page 2 approved · open Page 3 or watch P2 → P3 Agent-work'); }
-      function renderPage3() { const item = activeCase(); $('#p3Context').textContent = `ACTIVE CASE · ${item.id} · FINAL REVIEW`; }
+      function bindEvidenceLinks() { $$('[data-evidence]').forEach(button => button.addEventListener('click', () => openEvidence(button.dataset.evidence))); }
+
+      function renderPage3RelationshipGraph(item) {
+        const config = scenarioData[item.scenario || 's1'];
+        const data = graphData(item, config.layers.length - 1);
+        const lookup = Object.fromEntries(data.nodes.map(node => [node.id, node]));
+        const edgeMarkup = data.edges.map(edge => { const a = lookup[edge.a]; const b = lookup[edge.b]; const style = edge.type === 'filenet' ? 'stroke:#3569c8;stroke-width:2;stroke-dasharray:7 5' : edge.type === 't24' ? 'stroke:#087f5b;stroke-width:2;stroke-dasharray:3 4' : edge.type === 'web' ? 'stroke:#7251a8;stroke-width:2;stroke-dasharray:2 5' : 'stroke:#d71920;stroke-width:2'; return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" style="${style}" />`; }).join('');
+        const nodeMarkup = data.nodes.map(node => { const isEntity = node.kind === 'entity' || node.kind === 'document'; const fill = node.kind === 'bridge' ? '#101b27' : node.kind === 'document' ? '#eef5ff' : isEntity ? '#fff9ed' : '#ffffff'; const stroke = node.kind === 'document' ? '#3569c8' : node.kind === 'bridge' ? '#101b27' : node.kind === 'entity' ? '#b79a61' : '#bfc2c4'; const shape = isEntity ? `<rect x="${node.x - 47}" y="${node.y - 15}" width="94" height="30" rx="7" fill="${fill}" stroke="${stroke}" stroke-width="2" />` : `<circle cx="${node.x}" cy="${node.y}" r="${node.kind === 'bridge' ? 25 : 20}" fill="${fill}" stroke="${stroke}" stroke-width="2" />`; return `<g>${shape}<text x="${node.x}" y="${node.y + 3}" text-anchor="middle" fill="${node.kind === 'bridge' ? '#fff' : '#202124'}" font-size="9" font-family="DM Sans, Arial">${node.label}</text></g>`; }).join('');
+        $('#page3RelationshipGraph').innerHTML = `<rect width="820" height="250" fill="#fff"/><g opacity=".45"><line x1="35" y1="220" x2="785" y2="220" stroke="#f0f0ed"/><line x1="35" y1="125" x2="785" y2="125" stroke="#f0f0ed"/><line x1="35" y1="35" x2="785" y2="35" stroke="#f0f0ed"/></g><g>${edgeMarkup}</g><g>${nodeMarkup}</g>`;
+        $('#page3GraphNote').innerHTML = `<b>Feasible relationship view:</b> ${item.scenario === 's3' ? 'Theme-to-client, transaction and HELIOS news connections are shown without implying direct personal relationships.' : 'Declared, document-inferred, transaction-supported and public-context edges remain visually distinct.'}`;
+      }
+
+      function renderCrossSourceStatus(item) {
+        const config = scenarioData[item.scenario || 's1'];
+        const statusLabel = source => source === 'FileNet' ? 'CONFIRMED + INFERRED' : source === 'HELIOS' ? 'PUBLIC CONTEXT' : 'CONFIRMED';
+        $('#crossSourceStatus').innerHTML = config.layers.map(layer => { const on = item.sources.includes(layer[0]); return `<article class="cross-status-card ${on ? '' : 'off'}"><strong>${sourceMeta[layer[0]].display}</strong><span>${on ? statusLabel(layer[0]) : 'NOT USED'}</span><p>${on ? layer[3] : 'Available for a further configured run.'}</p></article>`; }).join('');
+      }
+
+      function renderDeepResearchReport(item) {
+        const config = scenarioData[item.scenario || 's1']; const report = config.p3; const top = report.priorities[0];
+        const depth = $('#p3Depth').value; const tone = $('#p3Tone').value; const audience = $('#p3Audience').value;
+        $('#deepResearchReport').innerHTML = `<article class="research-answer"><div class="eyebrow">ANSWER TO THE ORIGINAL QUERY</div><h3>${report.title}</h3><p>${report.copy}</p><p><b>Recommended next step:</b> ${top[1]}. ${top[2]}</p></article><aside class="research-side"><b>Research controls & caveats</b><ul><li>${item.sources.length} governed data estates used.</li><li>${depth} · ${tone} · ${audience}.</li><li>FileNet inference remains separate from confirmed records.</li><li>Transaction patterns and Web news provide context, not intent.</li><li>Recommendations require human approval and can be further configured.</li></ul></aside>`;
+      }
+
+      function renderPage3() {
+        const item = activeCase(); const config = scenarioData[item.scenario || 's1']; const report = config.p3;
+        $('#p3Context').textContent = `ACTIVE CASE · ${item.id} · ${config.code} · FINAL REVIEW`;
+        $('#page3Title').textContent = report.pageTitle; $('#page3Copy').textContent = report.pageCopy;
+        $('#resultTitle').textContent = report.title; $('#resultCopy').textContent = report.copy; $('#priorityTitle').textContent = report.priorityTitle;
+        $('#summaryPillars').innerHTML = report.pillars.map(row => `<article class="summary-pillar"><small>${row[0]}</small><b>${row[1]}</b><p>${row[2]}</p></article>`).join('');
+        $('#priorityGrid').innerHTML = report.priorities.map((row,index) => `<article class="priority-card ${index === 0 ? 'hot' : ''}"><small>${row[0]}</small><h3>${row[1]}</h3><p>${row[2]}</p></article>`).join('');
+        $('#proofFlow').innerHTML = report.proof.map((row,index) => `${index ? '<div class="proof-arrow">→</div>' : ''}<div class="proof-node"><small>${row[0]}</small><b>${row[1]}</b><p>${row[2]}</p><button class="evidence-link ${row[3] === 'filenet' ? '' : row[3] === 'helios' ? 'helios' : 'db'}" data-evidence="${row[3]}"><i>${sourceIcon(evidenceSourceKey(row[3]))}</i><span><b>${row[4]}</b><small>Open governed provenance</small></span></button></div>`).join('');
+        renderPage3RelationshipGraph(item);
+        renderCrossSourceStatus(item);
+        renderDeepResearchReport(item);
+        bindEvidenceLinks();
+      }
       function finishPage3() { const item = activeCase(); item.status = 'Reviewed'; renderCases(); returnToCases(); toast('Case completed and returned to Case Management'); }
 
       function renderWorkforce(frameIndex) {
-        const frames = animationFrames[state.simulationMode];
+        const frames = framesFor(state.simulationMode);
         const frameData = frames[frameIndex];
         const completedAgents = new Set(frames.slice(0, frameIndex).map(frame => frame.agent));
         $('#workforce').innerHTML = workforce.map(worker => { const isActive = worker.id === frameData.agent; const isCompleted = completedAgents.has(worker.id); const className = isActive ? 'active' : isCompleted ? 'completed' : ''; return `<article class="worker ${className}"><div class="worker-head"><i class="worker-icon">${worker.icon}</i><div><b>${worker.name}</b><small>${worker.cap}</small></div><span class="worker-status">${isActive ? 'talking' : isCompleted ? 'completed' : 'queued'}</span></div>${isActive ? `<div class="worker-dialog"><div class="typing-dots"><i></i><i></i><i></i></div><div class="dialog-line"><span>TASK</span><b>${frameData.title}</b></div><div class="dialog-line"><span>ACTION</span><b>${frameData.copy}</b></div><div class="dialog-line output"><span>OUTPUT</span><b>${frameData.conclusion}</b></div></div>` : ''}</article>`; }).join('');
       }
 
       function renderSimulationFrame() {
-        const frames = animationFrames[state.simulationMode];
+        const frames = framesFor(state.simulationMode);
         const frameData = frames[state.frame];
         $('#frameCounter').textContent = `FRAME ${state.frame + 1} / ${frames.length}`;
         $('#simulationStageLabel').textContent = state.simulationMode === 'p1p2' ? 'P1 → P2' : 'P2 → P3';
@@ -2096,33 +2705,54 @@
       }
 
       function stopSimulationAuto() { clearTimeout(state.timer); state.running = false; }
-      function runSimulationAuto() { stopSimulationAuto(); state.running = true; const frames = animationFrames[state.simulationMode]; const tick = () => { state.timer = setTimeout(() => { if (!state.running) return; if (state.frame < frames.length - 1) { state.frame += 1; renderSimulationFrame(); tick(); } else { state.running = false; } }, 2300); }; tick(); }
-      function startSimulation(mode) { state.simulationMode = mode; state.frame = 0; $('#simulationTitle').textContent = mode === 'p1p2' ? 'Mapping the intelligence request' : 'Running deeper relationship opportunity analysis'; $('#simulation').classList.add('show'); $('#simulation').setAttribute('aria-hidden', 'false'); renderSimulationFrame(); runSimulationAuto(); }
+      function runSimulationAuto() { stopSimulationAuto(); state.running = true; const frames = framesFor(state.simulationMode); const tick = () => { state.timer = setTimeout(() => { if (!state.running) return; if (state.frame < frames.length - 1) { state.frame += 1; renderSimulationFrame(); tick(); } else { state.running = false; } }, 2300); }; tick(); }
+      function startSimulation(mode) { const config = scenarioData[activeCase().scenario || 's1']; state.simulationMode = mode; state.frame = 0; $('#simulationTitle').textContent = mode === 'p1p2' ? `${config.code} · Mapping ${config.topic.toLowerCase()}` : `${config.code} · Running deeper ${config.topic.toLowerCase()}`; $('#simulation').classList.add('show'); $('#simulation').setAttribute('aria-hidden', 'false'); renderSimulationFrame(); runSimulationAuto(); }
       function closeSimulation() { stopSimulationAuto(); $('#simulation').classList.remove('show'); $('#simulation').setAttribute('aria-hidden', 'true'); returnToCases(); }
 
       function openEvidence(type) {
         const title = $('#evidenceTitle'); const body = $('#evidenceBody');
-        if (type === 'filenet') { title.textContent = 'FileNet · Tan Family Trust memorandum'; body.innerHTML = `<div class="source-paper"><div class="mono" style="font-weight:700;">FILENET DOCUMENT</div><h3 style="margin:8px 0;border-bottom:2px solid #777;padding-bottom:7px;">Tan Family Trust · Relationship memorandum</h3><p style="font-size:11px;line-height:1.6;">RM meeting notes record Eleanor Tan as the coordinating family representative for the trust and identify Daniel Lim as an informal family-council participant.</p><div style="border:2px solid var(--amber);background:#fff8df;padding:10px;font:10px/1.5 'IBM Plex Mono';">SOURCE REGION · pages 4–5<br>“Eleanor coordinates investment discussions across the trust structure and extended family council.”</div></div>`; }
-        if (type === 'crm') { title.textContent = 'CRM · client_relationship'; body.innerHTML = `<table class="source-table"><thead><tr><th>Client</th><th>Related entity</th><th>Relationship</th><th>Source</th></tr></thead><tbody><tr><td>Eleanor Tan</td><td>Tan Family Trust</td><td>Beneficiary / coordinator</td><td>CRM</td></tr><tr><td>Adrian Koh</td><td>Orion SPV</td><td>Director</td><td>CRM</td></tr><tr><td>Mei Chen</td><td>Tan Family Trust</td><td>Related party</td><td>CRM</td></tr></tbody></table>`; }
-        if (type === 't24') { title.textContent = 'T24 · account_role / recent activity'; body.innerHTML = `<table class="source-table"><thead><tr><th>Party</th><th>Account / entity</th><th>Role</th><th>Recent signal</th></tr></thead><tbody><tr><td>Eleanor Tan</td><td>Tan Family Trust</td><td>Authorised representative</td><td>Recent liquidity movement</td></tr><tr><td>Daniel Lim</td><td>Family-linked account</td><td>Permitted signatory</td><td>Operational proximity</td></tr></tbody></table>`; }
-        if (type === 'helios') { title.textContent = 'HELIOS · holdings / suitability / whitespace'; body.innerHTML = `<table class="source-table"><thead><tr><th>Relationship group</th><th>AUM</th><th>Theme allocation</th><th>Opportunity</th></tr></thead><tbody><tr><td>Tan–Koh</td><td>S$122M</td><td>8%</td><td>High whitespace</td></tr><tr><td>Orchid</td><td>S$96M</td><td>14%</td><td>Liquidity deployment</td></tr><tr><td>Chen FO</td><td>S$74M</td><td>6%</td><td>Theme expansion</td></tr></tbody></table>`; }
+        const config = scenarioData[activeCase().scenario || 's1'];
+        const proof = config.p3.proof.find(row => row[3] === type) || config.p3.proof[0];
+        title.textContent = `${type === 'filenet' ? 'FileNet document' : type.toUpperCase() + ' governed view'} · ${config.topic}`;
+        body.innerHTML = type === 'filenet'
+          ? `<div class="source-paper"><div class="mono" style="font-weight:700;">CITED SOURCE REGION · ${config.code}</div><h3 style="margin:8px 0;border-bottom:2px solid #777;padding-bottom:7px;">${proof[4]}</h3><p style="font-size:11px;line-height:1.6;">${proof[2]}</p><div style="border:2px solid var(--amber);background:#fff8df;padding:10px;font:10px/1.5 'IBM Plex Mono';">PROVENANCE RETAINED<br>Document, page region, extraction confidence and review status are attached to this insight.</div></div>`
+          : `<table class="source-table"><thead><tr><th>Scenario</th><th>Governed source</th><th>Contribution</th><th>Control</th></tr></thead><tbody><tr><td>${config.code}</td><td>${type.toUpperCase()}</td><td>${proof[1]}</td><td>${proof[2]}</td></tr><tr><td>${config.code}</td><td>Agent trace</td><td>Source lineage retained</td><td>Human review required</td></tr></tbody></table>`;
         $('#evidenceModal').classList.add('show');
       }
 
       $$('.source').forEach(button => button.addEventListener('click', () => button.classList.toggle('selected')));
-      $$('.suggestion').forEach(button => button.addEventListener('click', () => { $('#query').value = button.dataset.prompt || ''; $('#query').focus(); }));
+      $$('.suggestion').forEach(button => button.addEventListener('click', () => selectScenario(button.dataset.scenario)));
       $('#startCase').addEventListener('click', addCase);
       $$('.step').forEach(button => button.addEventListener('click', () => { const target = Number(button.dataset.step); if (target <= state.page) showPage(target); }));
-      $('#applyP2Feedback').addEventListener('click', () => { const feedback = $('#p2Feedback').value.trim(); if (!feedback) return $('#p2Feedback').focus(); $('#hypothesis').value += `\n\nAnalyst refinement: ${feedback}`; $('#p2Feedback').value = ''; toast('Page 2 feedback added'); });
+      $('#applyP2Feedback').addEventListener('click', () => { const feedback = $('#p2Feedback').value.trim(); const settings = `Lookback: ${$('#p2Lookback').value}; confidence: ${$('#p2Confidence').value}; evidence: ${$('#p2Evidence').value}; HELIOS: ${$('#p2WebScope').value}.`; $('#hypothesis').value += `\n\nAnalyst configuration: ${settings}${feedback ? `\nGuidance: ${feedback}` : ''}`; $('#p2Feedback').value = ''; toast('Page 2 configuration applied'); });
       $('#p2Back').addEventListener('click', returnToCases);
       $('#p2Next').addEventListener('click', approvePage2);
-      $('#applyP3Feedback').addEventListener('click', () => { const feedback = $('#p3Feedback').value.trim(); if (!feedback) return $('#p3Feedback').focus(); toast('Page 3 human guidance added'); $('#p3Feedback').value = ''; });
+      $('#applyP3Feedback').addEventListener('click', () => { const feedback = $('#p3Feedback').value.trim(); activeCase().reviewConfig = { depth: $('#p3Depth').value, tone: $('#p3Tone').value, audience: $('#p3Audience').value, feedback }; renderDeepResearchReport(activeCase()); toast('Report configuration applied'); $('#p3Feedback').value = ''; });
+      $('#p3GraphMode').addEventListener('change', () => { const fold = $('#page3RelationshipGraph').closest('.report-fold'); const hidden = $('#p3GraphMode').value === 'Hide from report'; fold.style.display = hidden ? 'none' : ''; if (!hidden && $('#p3GraphMode').value === 'Always show') fold.open = true; });
       $('#p3Back').addEventListener('click', () => showPage(2));
       $('#p3Done').addEventListener('click', finishPage3);
       $('#closeSimulation').addEventListener('click', closeSimulation);
       $('#prevFrame').addEventListener('click', () => { stopSimulationAuto(); if (state.frame > 0) { state.frame -= 1; renderSimulationFrame(); } });
-      $('#nextFrame').addEventListener('click', () => { stopSimulationAuto(); const frames = animationFrames[state.simulationMode]; if (state.frame < frames.length - 1) { state.frame += 1; renderSimulationFrame(); } else { closeSimulation(); } });
-      $$('[data-evidence]').forEach(button => button.addEventListener('click', () => openEvidence(button.dataset.evidence)));
+      $('#nextFrame').addEventListener('click', () => { stopSimulationAuto(); const frames = framesFor(state.simulationMode); if (state.frame < frames.length - 1) { state.frame += 1; renderSimulationFrame(); } else { closeSimulation(); } });
+      $$('.panel-collapse').forEach(button => button.addEventListener('click', () => {
+        const shell = button.closest('.stage-shell');
+        const collapsed = shell.classList.toggle('panel-collapsed');
+        const inner = button.parentElement.querySelector('.right-panel-inner');
+        button.setAttribute('aria-expanded', String(!collapsed));
+        button.setAttribute('aria-label', `${collapsed ? 'Expand' : 'Collapse'} ${button.closest('#page2') ? 'analyst feedback' : 'human review'} panel`);
+        inner.setAttribute('aria-hidden', String(collapsed));
+        inner.toggleAttribute('inert', collapsed);
+      }));
+      $('#intelligenceRailToggle').addEventListener('click', () => {
+        const button = $('#intelligenceRailToggle');
+        const shell = $('#page2Shell');
+        const body = button.parentElement.querySelector('.intelligence-rail-body');
+        const collapsed = shell.classList.toggle('left-collapsed');
+        button.setAttribute('aria-expanded', String(!collapsed));
+        button.setAttribute('aria-label', `${collapsed ? 'Expand' : 'Collapse'} case intelligence layers`);
+        body.setAttribute('aria-hidden', String(collapsed));
+        body.toggleAttribute('inert', collapsed);
+      });
       $('#closeEvidence').addEventListener('click', () => $('#evidenceModal').classList.remove('show'));
       document.addEventListener('click', event => { const link = event.target.closest('a[href]'); if (!link) return; const href = link.getAttribute('href') || ''; if (/index[_-]v?\d+\.html/i.test(href)) { event.preventDefault(); toast('Internal navigation remains in v21'); } });
       renderCases();
