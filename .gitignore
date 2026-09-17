@@ -5,4 +5,4 @@ __pycache__/
 *.py[cod]
 *_sample.txt
 sample_*.txt
-pi_builds/*
+pi-builds/*
