@@ -6,3 +6,4 @@ __pycache__/
 *_sample.txt
 sample_*.txt
 pi-builds/*
+webapp/*
