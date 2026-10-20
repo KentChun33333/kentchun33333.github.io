@@ -7,3 +7,14 @@ __pycache__/
 sample_*.txt
 pi-builds/*
 webapp/*
+
+# Agent company secrets and private customer artifacts
+agent-company/.env
+agent-company/.venv/
+agent-company/runs/
+agent-company/.pytest_cache/
+
+# kentc-agent: virtualenv and per-workspace agent state (sessions, caches, workflow runs)
+kentc-agent/.venv/
+kentc-agent/.pytest_cache/
+.kentc-agent/

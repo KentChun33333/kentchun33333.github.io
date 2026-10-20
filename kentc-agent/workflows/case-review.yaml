@@ -1,0 +1,52 @@
+name: case-review
+description: >
+  Generic starting point for a new bank-operations idea: run it in the case folder (the workspace) with a task. Inventory ->
+  key values with sources -> analysis -> human review -> report. Copy and edit the steps to shape a new workflow.
+
+inputs:
+  task: {required: true, description: "what to find out or decide"}
+  case_id: {default: "CASE-001"}
+
+instructions: |
+  Case {{ inputs.case_id }}. Task: {{ inputs.task }}
+  Cite [file, location] for every material fact, keep stated facts apart from inferences, and do all arithmetic
+  with bash (python3 -c).
+
+tools: [read, bash]
+max_turns: 20
+
+steps:
+  - id: inventory
+    tools: [bash]
+    prompt: "List the files in the workspace and say what each one probably is and how it may help the task."
+
+  - id: key_values
+    tools: [read]
+    prompt: |
+      Read every file: {{ documents('.') | join(', ') }}. Record the key values for the task (names,
+      identifiers, dates, amounts, statements, red flags) with their location.
+    format: json
+    schema:
+      facts: [{file: string, field: string, value: string, location: string}]
+      gaps: [string]
+
+  - id: analysis
+    prompt: "Analyse the facts for the task: cross-check them, compute what is needed, and give findings with confidence and open questions."
+    format: json
+    schema:
+      findings: [{finding: string, evidence: string, confidence: number}]
+      open_questions: [string]
+      recommendation: string
+
+  - id: review
+    ask: |
+      Findings for {{ inputs.case_id }}:
+      {% for f in data.findings %}- {{ f.finding }} ({{ f.confidence }})
+      {% endfor %}Recommendation: {{ data.recommendation }}
+      Feedback for the report, or "ok":
+    default: ok
+
+  - id: report
+    tools: []
+    prompt: "Write the case report in markdown (summary, findings with sources, open questions, recommendation), applying the reviewer's feedback. Reply with the report only."
+    output: "reports/{{ inputs.case_id }}-report.md"

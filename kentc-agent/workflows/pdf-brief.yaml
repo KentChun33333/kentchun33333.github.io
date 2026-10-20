@@ -1,0 +1,22 @@
+name: pdf-brief
+description: Read a PDF through the parsing sub-agent, draft a brief, then check it against the source.
+
+inputs:
+  pdf: {required: true, description: path to the PDF}
+  audience: {default: engineers}
+  pages: {default: "", description: "page ranges, e.g. 1-10 (empty: all)"}
+
+max_turns: 20
+
+steps:
+  - id: read
+    tools: [read]
+    prompt: "Read {{ inputs.pdf }}{% if inputs.pages %} (pages {{ inputs.pages }}){% endif %}: problem, approach, key results with numbers, limitations."
+
+  - id: draft
+    tools: [write]
+    prompt: "Write a one-page brief for {{ inputs.audience }} to brief.md, then reply with it."
+
+  - id: check
+    tools: [read, edit]
+    prompt: "Check brief.md against what you read: fix wrong or missing numbers and vague claims with edit, then summarize the changes."

@@ -602,6 +602,12 @@ Example:
 
 → **Example**: [uml_sequence_flow.md](example/uml_sequence_flow.md)
 
+### Pi Agent Swarm Sequence Asset
+
+For Pi swarm explanations or an SVG example of the house sequence-flow style, use [Pi agent swarm sequence](example/pi_agent_swarm_sequence.md). Reusable outputs: [SVG](assets/pi-agent-swarm-sequence.svg), [editable draw.io](assets/pi-agent-swarm-sequence.drawio), and [PNG preview](assets/pi-agent-swarm-sequence.png). This example depicts a reference design using a subagent extension; separate agent contexts do not imply filesystem isolation.
+
+For interactive HTML playback, use the sibling [HTML Visualization skill](../html-visualization/SKILL.md) and its [Pi swarm sequence explorer](../html-visualization/assets/pi-agent-swarm-sequence.html).
+
 ### Billionary Trader Sequence Examples
 - **Live account review loop**: [billionary_trader_live_review_sequence.md](example/billionary_trader_live_review_sequence.md)
 - **Backtest engine loop**: [billionary_trader_backtest_sequence.md](example/billionary_trader_backtest_sequence.md)

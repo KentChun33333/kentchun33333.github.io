@@ -1,0 +1,138 @@
+name: rm-client-insight
+description: >
+  Relationship-management wealth insight, as in AURA v3-3: frame the question -> read every source (CRM/T24
+  exports, RM notes, trust documents, e-mails, news) -> relationship graph (stated vs inferred) -> human boundary
+  review -> target clients with evidence chains -> evidence QA -> pillar report -> human review (done / finetune).
+  One agent does every step; each step only gets the tools it needs.
+
+inputs:
+  question: {required: true, description: "the RM's question in plain language"}
+  case_id: {default: "WDI-001"}
+  lookback: {default: "12 months"}
+  aum_min: {default: "S$20M+"}
+  region: {default: "All regions"}
+  task_type: {default: "Opportunity focus", description: "Investigation | Opportunity focus | Risk focus"}
+  audience: {default: "Relationship manager", description: "Relationship manager | Investment advisor | Compliance reviewer"}
+
+instructions: |
+  You support a private-bank relationship manager on case {{ inputs.case_id }}.
+  - Every claim carries its source system (CRM, FileNet document/note/e-mail, T24 transactions, HELIOS news) and
+    [file, location].
+  - Inferred links are never shown as facts: label each relationship stated (in a record) or inferred.
+  - News is context, not fact. A PEP reference triggers a controlled review; it is not an adverse conclusion.
+  - A meeting mention never becomes a trading instruction; recommendations stay advisory until the RM approves.
+  - Estimates (unallocated liquidity, ages, intent) are labelled as estimates with their calculation (bash, python3 -c).
+  - JSON answers stay compact: short strings, no repetition of the inputs.
+
+tools: [read, bash]
+max_turns: 25
+
+steps:
+  - id: scope
+    tools: [bash]
+    prompt: |
+      Question: {{ inputs.question }}
+      Settings: lookback {{ inputs.lookback }}; AUM {{ inputs.aum_min }}; region {{ inputs.region }};
+      task {{ inputs.task_type }}; audience {{ inputs.audience }}. The sources are the files in the workspace.
+      Turn the question into a search contract: link types to look for, exclusions, what each source system may
+      contribute, guardrails, and a working hypothesis.
+    format: json
+    schema:
+      restated_question: string
+      link_types: [string]
+      exclusions: [string]
+      guardrails: [string]
+      hypothesis: string
+
+  - id: evidence
+    tools: [bash, read]
+    prompt: |
+      Read every source file: {{ documents('.') | join(', ') }}.
+      For each file note its source system and the facts that matter: clients (name, ID, region, segment, AUM, RM,
+      age), entities (companies, trusts, SPVs), relationships (from, relation, to, stated or inferred, quote),
+      liquidity events (client, date, amount, currency, in/out/earmarked/expected), interests, risk signals (PEP,
+      adverse media, corporate events) and follow-ups, each with its location.
+    format: json
+    schema:
+      sources: [{file: string, system: "CRM|FileNet|T24|HELIOS|Other", facts: [{fact: string, location: string}]}]
+
+  - id: graph
+    tools: []
+    prompt: |
+      Build the relationship graph: resolve aliases without inventing relationships; keep stated and inferred
+      links apart with their source; group people and entities into client groups; find bridge clients (the only
+      link between clusters); rank groups by combined AUM and relevance to the question.
+    format: json
+    schema:
+      edges: [{from: string, to: string, relation: string, kind: "stated|inferred", source: string}]
+      groups: [{name: string, members: [string], combined_aum: string, why: string}]
+      bridge_clients: [string]
+      hidden_links: [{link: string, source: string, confidence: "high|medium|low"}]
+
+  - id: boundary_review
+    ask: |
+      SHAPE THE SEARCH · {{ inputs.case_id }}
+      {{ data.restated_question }}
+      Hypothesis: {{ data.hypothesis }}
+      Groups:
+      {% for g in data.groups -%}
+      - {{ g.name }} ({{ g.members | join(', ') }}): {{ g.why }}
+      {% endfor -%}
+      Hidden links: {% for h in data.hidden_links %}{{ h.link }} [{{ h.confidence }}]; {% endfor %}
+      Guidance for the analysis (focus, exclusions, corrections), or "go":
+    default: go
+
+  - id: analysis
+    prompt: |
+      Answer the question with named target clients (at most 5, ranked). For each: metric (e.g. estimated
+      unallocated liquidity = inflows minus earmarked/known uses, computed with bash and shown), score 0-100, why
+      this target, caveats, advisory next RM actions, and the evidence chain CRM -> FileNet -> T24 -> HELIOS with
+      [file, location] and stated/inferred per claim. A PEP or adverse-media signal turns the action into a
+      controlled review. Note where two RMs must coordinate.
+    format: json
+    schema:
+      answer: {title: string, summary: string}
+      targets: [{rank: number, name: string, region: string, group: string, metric: string, calculation: string,
+                 score: number, why: [string], caveats: [string], actions: [string],
+                 evidence_chain: [{system: string, claim: string, source: string, kind: "stated|inferred"}]}]
+      coordination: [string]
+
+  - id: qa
+    tools: [read]
+    prompt: |
+      Evidence QA: check every claim in the analysis against its cited file (re-read with a question when unsure).
+      Mark each verified, inferred or unsupported; flag inferred statements written as facts, numbers that do not
+      match the source, missing caveats, and any trading instruction taken from a meeting mention.
+    format: json
+    schema:
+      checks: [{target: string, claim: string, status: "verified|inferred|unsupported", note: string}]
+      corrections: [string]
+      confidence: number
+
+  - id: report
+    tools: []
+    prompt: |
+      Write the RM report in markdown for a {{ inputs.audience }}, applying every QA correction and dropping
+      unsupported claims:
+      # AURA Wealth Intelligence · <answer title>
+      ## Pillar 01 · Target client groups  (ranked table: client, region, group, metric, score)
+      ## Pillar 02 · Relationship evidence  (stated vs inferred links with sources; a mermaid graph, solid arrows
+         for stated, dotted for inferred)
+      ## Pillar 03 · Answer to the original query  (per target: why this target, caveats, next RM actions,
+         analyst direction)
+      ## Pillar 04 · Reasoning & evidence chain  (per target: CRM -> FileNet -> T24 -> HELIOS, claim + source)
+      ## Source provenance  (table: source system | files | evidence items | control)
+      Mark estimates as estimates; actions stay advisory. Reply with the report only.
+    output: "reports/{{ inputs.case_id }}-insight.md"
+
+  - id: review
+    ask: |
+      Report saved to reports/{{ inputs.case_id }}-insight.md (QA confidence {{ data.confidence }}).
+      Reply "done", or finetune feedback (depth, tone, audience, focus) for a new version:
+    default: done
+
+  - id: report_v2
+    when: "steps.review.output | lower != 'done'"
+    tools: []
+    prompt: "Produce a new version of the report following the reviewer's feedback; keep the pillars, citations and caveats. Reply with the report only."
+    output: "reports/{{ inputs.case_id }}-insight-v2.md"

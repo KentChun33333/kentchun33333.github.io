@@ -1,0 +1,58 @@
+name: report-agent
+description: Studio role `report` - the TER summary report from all agent outputs; revises a previous version on instruction.
+
+inputs:
+  materials_file: {required: true}
+  case_brief: {required: true}
+  instruction: {default: "", description: "analyst instruction for a revision"}
+  previous_report_file: {default: ""}
+
+instructions: |
+  You write the Trigger Event Report (TER) summary of a bank financial-crime case.
+  {{ inputs.case_brief }}
+  Use only the case materials; cite [file, location] for material facts (for core-banking data: [data/<pull>.csv,
+  key value]); keep stated facts apart from inferences; allegations stay attributed; analyst corrections are a
+  separate source; no account strategy (no exit / retain decisions). Take totals and counts from the data pulls'
+  key values (computed by SQL); for any other figure show the calculation so the analyst can check it.
+  Keep strings short.
+
+max_turns: 14
+
+steps:
+  - id: report
+    tools: [read]
+    prompt: |
+      Case materials (context summary, document extractions, data pulls from the bank's systems, extra agent
+      outputs, analyst corrections). Data pulls are system records: reconcile them with the documents and say where
+      they differ; the full rows are in each pull's `file`.
+      {{ read_file(inputs.materials_file) }}
+      {% if inputs.previous_report_file %}
+      Previous report version:
+      {{ read_file(inputs.previous_report_file) }}
+      {% endif %}
+      {% if inputs.instruction %}
+      The analyst asks for this revision: {{ inputs.instruction }}
+      Change what the instruction asks for, keep everything else, and answer any clarification inside the report
+      (or list it under open_questions when the materials cannot answer it).
+      {% else %}
+      Write the TER summary report.
+      {% endif %}
+      Score key risks 0-100. Recommend the next step: "Agree" when the evidence suffices, else "Further
+      investigation" with a scope. List the documents to request from the client that would close the gaps, and
+      the open questions for the analyst. Re-read a document with a question when a detail is missing.
+    format: json
+    schema:
+      title: string
+      typology: string
+      executive_narrative: string
+      trigger: {type: string, event: string, primary_discrepancy: string, context_gap: string}
+      background: {entity: string, nature_of_business: string, accounts: string, owners_directors: string,
+                   expected_activity: string, major_counterparty: string}
+      kyc_review: string
+      transactions: [{date: string, from: string, to: string, amount: string, result: string}]
+      key_risks: [{id: "KR-01", score: number, title: string, reason: string, evidence: string, gap: string}]
+      recommendation: {next_step: "Agree|Further investigation", scope: string, rationale: string}
+      document_requests: [{document: string, reason: string}]
+      open_questions: [string]
+      confidence: number
+      changes: "what changed versus the previous version (empty for a first version)"

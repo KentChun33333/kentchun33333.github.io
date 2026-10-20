@@ -1,0 +1,41 @@
+name: context-agent
+description: >
+  Studio role `context` - the Trigger Context summary of the context documents (e.g. the trigger e-mail and its
+  attachments). One model call, no tools: the studio hands over the documents already converted to text.
+
+inputs:
+  context_file: {required: true, description: "the context documents as text, prepared by the studio"}
+  case_brief: {required: true}
+  feedback: {default: ""}
+
+instructions: |
+  You are the context agent of a bank financial-crime case.
+  {{ inputs.case_brief }}
+  Summarise only what the context documents say about the trigger. Do not analyse transactions, do not score
+  risk, and make no risk conclusion. Keep every string to one or two short sentences.
+
+effort: low
+max_turns: 2
+
+steps:
+  - id: summary
+    tools: []
+    prompt: |
+      Context documents:
+      {{ read_file(inputs.context_file) }}
+      {% if inputs.feedback %}
+      Analyst feedback on the previous summary: {{ inputs.feedback }}
+      {% endif %}
+      Write the Trigger Context: what triggered the review and from which source, the parties it names and how
+      they relate to the customer, how this deviates from the customer's profile, the customer's own explanation
+      (if any), the initial evidence gaps, and why the case is routed for review.
+    format: json
+    schema:
+      trigger_type: "e.g. Adverse media, Police intelligence, TM alert"
+      trigger_source: "alert id, source and date"
+      trigger_event: string
+      matched_parties: [{name: string, role: string}]
+      profile_deviation: string
+      customer_explanation: "or 'None provided'"
+      evidence_gaps: [string]
+      routing_rationale: string

@@ -1,0 +1,183 @@
+name: ter-case-review
+description: >
+  Trigger Event Report (TER) case review, as in ter-bank-multi-agent-flow-v15: extraction -> trigger context ->
+  profile and key insights -> human extraction review -> investigation with ranked key risks -> human next step
+  (Agree / Further investigation) -> optional refinement -> STR draft -> approval -> case exports.
+  One agent does every step; each step only gets the tools it needs.
+
+inputs:
+  case_id: {required: true, description: "TER case ID, e.g. TER-2026-00418"}
+  cif: {required: true, description: "Customer CIF, e.g. CIF-8842197"}
+  trigger: {required: true, description: "the trigger event as raised"}
+  start_date: {required: true, description: "review start date YYYY-MM-DD"}
+  lookback_date: {required: true, description: "lookback date YYYY-MM-DD"}
+  customer: {default: ""}
+  related_entity: {default: ""}
+  review_scope: {default: "Import activity and connected transactions"}
+
+instructions: |
+  You work in a bank's financial-crime operations team on TER case {{ inputs.case_id }} (customer {{ inputs.cif }}).
+  - Every material statement cites its source as [file, location].
+  - Keep what a document states apart from what you infer; allegations stay attributed.
+  - Never match people or companies by name only.
+  - Never propose an account strategy (no exit / retain decisions).
+  - Amounts stay in their original currency; all arithmetic goes through bash (python3 -c).
+  - JSON answers stay compact: short strings, no repetition of the inputs.
+
+tools: [read, bash]
+max_turns: 25
+
+steps:
+  # ---------------------------------------------------------------- extraction
+  - id: extraction
+    tools: [bash, read]
+    prompt: |
+      Read every evidence file: {{ documents('.') | join(', ') }}
+      (also the attachments a file lists). For each file record its key values: document type and reference,
+      parties and roles, nature of business, expected activity, accounts, goods description, HS code, amounts and
+      currency, payment terms, transactions (date, direction, counterparty, CIF, amount, reference), the customer's
+      own explanation, documents promised but missing, and anomalies visible in the document itself (corrections,
+      internal contradictions, unusually simple terms, templated text). Note the location of each value.
+    format: json
+    schema:
+      documents: [{file: string, type: string, key_values: [{field: string, value: string, location: string,
+                   confidence: "high|medium|low"}], anomalies: [string]}]
+
+  - id: trigger_context
+    tools: []
+    prompt: |
+      Trigger: {{ inputs.trigger }}
+      Review scope: {{ inputs.review_scope }}; period {{ inputs.lookback_date }} to {{ inputs.start_date }}.
+      {% if inputs.related_entity %}Related entity: {{ inputs.related_entity }}.{% endif %}
+      From the extraction, state the trigger event, the profile deviation it points to, the customer's explanation,
+      the initial evidence gaps and why the case goes to investigation. No risk conclusion at trigger stage.
+    format: json
+    schema:
+      trigger_event: string
+      profile_deviation: string
+      customer_explanation: string
+      evidence_gaps: [{gap: string, status: "OPEN|CLOSED", source: string}]
+      routing_rationale: string
+
+  - id: profile
+    tools: [bash]
+    prompt: |
+      Build the customer profile and transaction view: name, CIF, nature of business, UBO, directors, expected
+      activity, accounts; observed in/out in the period, number of days, ratio to the expected monthly level; top
+      counterparties (name, CIF, total, count, last date). Then the key insight table for human review: nature of
+      business, invoice amount, invoice goods, shipping goods, customs HS code, major counterparty, observed
+      activity, customer rationale - each with value, confidence 0-100 (extraction confidence and agreement between
+      files) and source. Flag rows below 80 as low confidence.
+    format: json
+    schema:
+      profile: {customer_name: string, cif: string, nature_of_business: string, ubo: string, directors: [string],
+                expected_activity: string, accounts: [string]}
+      observed_activity: {total_in: number, total_out: number, days: number, ratio_to_expected: number}
+      top_counterparties: [{name: string, cif: string, total: number, count: number, last_date: string}]
+      key_insights: [{field: string, value: string, confidence: number, source: string, low_confidence: boolean}]
+
+  # ---------------------------------------------------------------- H1 · extraction review
+  - id: extraction_review
+    ask: |
+      {{ inputs.case_id }} · {{ data.profile.customer_name }} ({{ inputs.cif }})
+      Trigger: {{ data.trigger_event }}
+      Gaps: {% for g in data.evidence_gaps %}{{ g.gap }} [{{ g.status }}]; {% endfor %}
+
+      KEY INSIGHTS (!! = low confidence)
+      {% for r in data.key_insights -%}
+      {{ '!!' if r.low_confidence else '  ' }} {{ r.field }}: {{ r.value }} ({{ r.confidence }}%, {{ r.source }})
+      {% endfor %}
+      Reply "accept", or corrections as "Field = value" plus any analyst feedback.
+
+  # ---------------------------------------------------------------- investigation
+  - id: investigation
+    prompt: |
+      Investigate: which entity or client activity carries the strongest mismatch or high-risk signal?
+      1. Cross-check documents against each other and the declared profile (invoice goods vs bill of lading vs
+         customs HS code; declared business vs observed activity; customer rationale vs evidence).
+      2. A value the analyst corrected is a separate source: challenge it against independent documents, never let
+         it overwrite them.
+      3. Score each counterparty 0-100 for mismatch (materiality + contradiction) and rank them.
+      4. List key risks with score, reason, strongest evidence [file, location, quote] and open gap.
+      5. Recommend the next step: "Agree" when the evidence suffices, else "Further investigation" with a concrete
+         scope. Re-read a file (read with a question) when a detail is missing.
+    format: json
+    schema:
+      entity_ranking: [{rank: number, entity: string, score: number, reason: string}]
+      key_risks: [{id: "KR-01", score: number, title: string, reason: string, evidence: string, gap: string}]
+      cross_checks: [{check: string, result: "CONSISTENT|MISMATCH|UNRESOLVED", detail: string}]
+      recommendation: {next_step: "Agree|Further investigation", scope: string, rationale: string}
+      confidence: number
+
+  # ---------------------------------------------------------------- H2 · next step
+  - id: next_step
+    ask: |
+      INVESTIGATION COMPLETE · {{ inputs.case_id }}
+      {% for r in data.key_risks -%}
+      {{ r.id }} [{{ r.score }}] {{ r.title }}: {{ r.reason }}{% if r.gap %} (gap: {{ r.gap }}){% endif %}
+      {% endfor %}
+      Recommended: {{ data.recommendation.next_step }} - {{ data.recommendation.scope }}
+    options: [Agree, Further investigation]
+
+  - id: instruction
+    when: "steps.next_step.output == 'Further investigation'"
+    ask: "Investigation instruction (Enter keeps the recommended scope):"
+    default: "{{ data.recommendation.scope }}"
+
+  - id: refinement
+    when: "steps.next_step.output == 'Further investigation'"
+    prompt: |
+      Further investigation: {{ steps.instruction.output }}
+      Trace the requested path in the evidence (onward payments: amount, date, share of the original payment, time
+      elapsed), resolve identity and control of the entities from the documents, and re-score the key risks. An
+      escalation needs converging independent evidence. You have no internet access: list the open-web checks that
+      are still required instead of guessing.
+    format: json
+    schema:
+      fund_path: [{date: string, from: string, to: string, amount: number}]
+      key_risks: [{id: string, score: number, title: string, reason: string, evidence: string, gap: string}]
+      open_checks: [string]
+      confidence: number
+
+  # ---------------------------------------------------------------- STR draft and approval
+  - id: str_report
+    tools: []
+    prompt: |
+      Write the draft Suspicious Transaction Report in markdown from the validated findings:
+      # Suspicious Transaction Report - <customer name>   (case ID, CIF, CONFIDENTIAL; one-line typology)
+      ## Executive narrative
+      ## Trigger  (trigger type, trigger event, primary discrepancy, context gap)
+      ## Background  (entity, nature of business, accounts with opening dates, directors/UBO, expected activity,
+         major counterparty)
+      ## Review  (### KYC review; ### Transaction review as a table Date | From | To | Amount | Review result)
+      ## Justification and key risks  (per risk: score, confidence, reason, strongest evidence)
+      ## Appendix KR-0n  (per risk: executive conclusion, evidence chain, key transactions, references)
+      Cite [file, location] inline. No account strategy. Reply with the report only.
+    output: "reports/{{ inputs.case_id }}-STR.md"
+
+  - id: approval
+    ask: "Draft STR saved to reports/{{ inputs.case_id }}-STR.md. Approve or return?"
+    options: [Approve, Return]
+
+  - id: comments
+    when: "steps.approval.output == 'Return'"
+    ask: "Comments for the revision:"
+
+  - id: str_revision
+    when: "steps.approval.output == 'Return'"
+    tools: []
+    prompt: "Revise the STR per the reviewer's comments, keeping its structure and citations. Reply with the full report."
+    output: "reports/{{ inputs.case_id }}-STR.md"
+
+  # ---------------------------------------------------------------- exports
+  - id: export
+    tools: [write]
+    prompt: |
+      Write the case exports into reports/:
+      1. {{ inputs.case_id }}-case-detail.json: caseId, cif, customer, startDate {{ inputs.start_date }},
+         lookbackDate {{ inputs.lookback_date }}, trigger, analysisFeedback, nextStep, refined (true/false), decision,
+         key risks, and the per-document key values.
+      2. {{ inputs.case_id }}-evidence-manifest.csv: File,Type,Key values,Anomalies
+      3. {{ inputs.case_id }}-decision-trace.csv: Time,Actor,Step,Event from this trace:
+      {{ trace | json }}
+      Then list the files you wrote.

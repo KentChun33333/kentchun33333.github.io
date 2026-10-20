@@ -1,0 +1,57 @@
+name: web-first-insight
+description: >
+  Pattern 1, web first: the outside information is known up front. The web agent researches it into a cited
+  brief, the main agent reviews the brief with the workspace files into working notes, and the last step delivers
+  whatever the ask wants: a markdown report, an HTML page or dashboard, code, or other files.
+
+inputs:
+  question: {required: true, description: "the ask: what to find out, and what to deliver (report, HTML, code, ...)"}
+  research: {required: true, description: "what to look up on the web, in one or two sentences (no confidential data)"}
+
+instructions: |
+  You turn source material into an evidence-based deliverable.
+  - Cite every material fact: [file, location] for a document, [brief file, source n] for a web brief.
+  - Keep what a source states apart from what you infer; mark web facts that are dated or come only from vendors.
+  - Compute every total and ratio with bash (python3); never add up in your head.
+  - Your context is long-lived but limited: keep working notes in files, re-read only what you need.
+
+tools: [read, bash]
+max_turns: 30
+
+steps:
+  # ---------------------------------------------------------------- collect
+  - id: research
+    web: "{{ inputs.research }}"
+    output: research/web-brief.md
+
+  - id: review
+    tools: [read, bash]
+    prompt: |
+      The ask: {{ inputs.question }}
+      Read the web brief research/web-brief.md. Workspace files: {{ documents('.') | join(', ') }}.
+      Read the ones that are source material for the ask; skip the rest (scripts, earlier outputs). When the
+      sources hold data, compute the key figures with bash. Reply with working notes in markdown: the key facts and
+      figures with their sources, where the files and the web brief agree or conflict, and the open questions.
+    output: notes/evidence.md
+
+  # ---------------------------------------------------------------- deliver (same step in docs-first-insight)
+  - id: deliver
+    tools: [read, write, edit, bash]
+    max_turns: 0                # no limit: works until the ask is delivered
+    prompt: |
+      The ask: {{ inputs.question }}
+      Deliver exactly what the ask wants, in the form it asks for:
+      - a report or insight: markdown, reports/insight.md, unless the ask names another form;
+      - HTML (a page, dashboard, interactive view): one self-contained file under reports/ (inline CSS and
+        JavaScript, no external files); generate its numbers from the data with python, never type them by hand;
+        give every element a unique id, and render each section in its own try/catch so one error cannot blank
+        the page;
+      - code (a script, tool or project): files under project/<name>/ with a short README; run it once to check;
+      - anything else it names (CSV, tables, outlines): under reports/.
+      Material: your notes notes/evidence.md{% if glob('research/*.md') %} and the web briefs
+      {{ glob('research/*.md') | join(', ') }}{% endif %}. Re-read a source only for a detail you need.
+      Build the files with write, edit and bash, never inside your reply. Keep each write or edit under about 300
+      lines: build a big file in parts (a skeleton, then section by section, or a python script that assembles it).
+      Then check every file (read it back, or run it) and fix what is wrong.
+      Reply with a short summary: each file delivered and what it holds, and the key findings.
+    output: reports/summary.md

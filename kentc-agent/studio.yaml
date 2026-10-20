@@ -1,0 +1,114 @@
+# TER Agentic Studio: which agent does each job.
+#   workflow: a kentc-agent workflow run in-process on the configured LLM server (local jobs run one at a time)
+#   url:      an external agent service in another process or host (HTTP JSON contract in README)
+# A workspace can override this file with <workspace>/studio.yaml.
+
+agents:
+  doc:     {workflow: workflows/studio/doc-agent.yaml, label: Doc agent}
+  context: {workflow: workflows/studio/context-agent.yaml, label: Context agent}
+  report:  {workflow: workflows/studio/report-agent.yaml, label: Report agent}
+
+# Optional agents that feed the report. The analyst picks them on Page 3; `default` pre-selects one.
+extra_agents:
+  investigation:
+    workflow: workflows/studio/investigation-agent.yaml
+    label: Investigation agent (cross-checks, entity risk ranking)
+    default: false
+  # openweb:
+  #   url: http://research-host:9000/agent
+  #   label: OpenWeb research agent (registry, adverse news)
+  #   timeout: 1800
+
+# Base URL external agents use to download case documents (GET /api/cases/<id>/docs/<name>).
+public_url: http://127.0.0.1:8090
+
+# Databases the data pulls read from (read-only). `latency` is for the mock database only: it holds each pull
+# that many seconds so the asynchronous Page 1 -> Page 2 flow is visible; remove it for a real database.
+# Build the mock with: uv run --project kentc-agent python dataset/make_core_banking_db.py
+databases:
+  core:
+    url: sqlite:///../dataset/core-banking/core_banking.sqlite
+    label: Core banking (mock)
+    timeout: 1800
+    row_cap: 200000
+    latency: 20
+
+# Data pulls: fixed SQL with the case fields as parameters (:cif, :lookback_date, :start_date, :related_entity,
+# :customer, :case_id, :trigger, :review_scope). They run without the model, in parallel with the agents; the report
+# waits for them. `key_values` are SQL over `result` (the pulled rows): one value, or a small table.
+# Pre-ticked on Page 1 when `default: true` or when the trigger text contains one of `triggers`.
+data_pulls:
+  kyc_profile:
+    database: core
+    label: KYC profile
+    description: Customer master, directors and owners, accounts, expected activity
+    sql_file: queries/kyc_profile.sql
+    default: true
+
+  txn_history:
+    database: core
+    label: Transaction history
+    description: Every transaction on the customer's accounts in the review period
+    sql_file: queries/txn_history.sql
+    default: true
+    key_values:
+      Transactions: SELECT COUNT(*) FROM result
+      Totals by currency: >-
+        SELECT ccy, ROUND(SUM(CASE WHEN direction = 'CR' THEN amount ELSE 0 END), 2) AS credits,
+               ROUND(SUM(CASE WHEN direction = 'DR' THEN amount ELSE 0 END), 2) AS debits
+          FROM result GROUP BY ccy
+      Pass-through (inward TT out again within 1 day): >-
+        SELECT i.value_date AS in_date, i.ccy, i.amount AS inflow, MAX(o.value_date) AS out_date,
+               SUM(o.amount) AS outflow, ROUND(100.0 * SUM(o.amount) / i.amount, 1) AS pct_out
+          FROM result i
+          JOIN result o ON o.ccy = i.ccy AND o.direction = 'DR' AND o.type = 'Outward TT'
+                       AND julianday(o.value_date) - julianday(i.value_date) BETWEEN 0 AND 1
+         WHERE i.direction = 'CR' AND i.type = 'Inward TT'
+         GROUP BY i.value_date, i.ccy, i.amount ORDER BY i.value_date
+      Cash deposits: >-
+        SELECT value_date, amount, counterparty AS depositor, channel FROM result
+         WHERE type = 'Cash deposit' ORDER BY value_date
+      Largest transactions: >-
+        SELECT value_date, direction, ccy, amount, counterparty FROM result ORDER BY amount_sgd DESC LIMIT 5
+
+  counterparties:
+    database: core
+    label: Counterparties
+    description: Who paid and was paid in the review period, cross-border flows, non-customers
+    sql_file: queries/counterparties.sql
+    default: true
+    key_values:
+      Counterparties: SELECT COUNT(DISTINCT counterparty) FROM result
+      Top by value (SGD): >-
+        SELECT counterparty, direction, country, txns, total_sgd FROM result ORDER BY total_sgd DESC LIMIT 5
+      Cross-border: >-
+        SELECT counterparty, country, direction, txns, total_sgd FROM result WHERE country <> 'SG'
+         ORDER BY total_sgd DESC
+      Foreign payers that are not bank customers: >-
+        SELECT counterparty, country, txns, total_sgd FROM result
+         WHERE direction = 'CR' AND bank_customer = 'no' AND country <> 'SG' ORDER BY total_sgd DESC
+      Related entity flows: >-
+        SELECT counterparty, direction, txns, total_sgd, first_date, last_date FROM result
+         WHERE :related_entity <> '' AND upper(counterparty) LIKE '%' || upper(:related_entity) || '%'
+
+  monthly_activity:
+    database: core
+    label: Activity vs profile
+    description: Monthly turnover, 12-month baseline vs review period, against the expected monthly inflow
+    sql_file: queries/monthly_activity.sql
+    triggers: [adverse media, unusual, volume, activity, profile, anomaly, monitoring]
+    key_values:
+      Baseline average monthly inflow (SGD): SELECT ROUND(AVG(inflow_sgd), 2) FROM result WHERE period = 'baseline'
+      Months at 2x expected or more: >-
+        SELECT month, inflow_sgd, expected_inflow_sgd, x_expected FROM result WHERE x_expected >= 2 ORDER BY month
+
+  prior_alerts:
+    database: core
+    label: Prior alerts
+    description: Monitoring and screening alerts in the 24 months before the start date
+    sql_file: queries/prior_alerts.sql
+    default: true
+    key_values:
+      Open alerts: SELECT COUNT(*) FROM result WHERE status = 'OPEN'
+      Closed alerts: >-
+        SELECT alert_id, scenario, raised, closed, disposition FROM result WHERE status = 'CLOSED' ORDER BY raised DESC
