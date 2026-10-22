@@ -1,9 +1,9 @@
-"""Agentic Studio: web front end (web/) + FastAPI backend serving the apps of studio.yaml.
+"""Agentic Studio: web front end (web/) + FastAPI backend serving the apps of config/studio.yaml.
 
     kentc-studio --workspace ~/studio --effort low        # then open http://127.0.0.1:8090
 
-The apps live in apps/<name>/app.yaml (apps.py), the API in api/app.py, the case/job service in service/cases.py and
-the dispatcher in jobs/queue.py.
+The apps live in config/apps/<name>/app.yaml and their agent workflows in config/apps/workflows/ (apps.py), the API
+in api/app.py, the case/job service in service/cases.py and the dispatcher in jobs/queue.py.
 """
 
 from __future__ import annotations
@@ -25,7 +25,8 @@ LOOPBACK = {"127.0.0.1", "localhost", "::1"}
 def main() -> None:
     ap = argparse.ArgumentParser(prog="kentc-studio", description="Agentic Studio (web UI + API over kentc-agent)")
     ap.add_argument("-w", "--workspace", default=".", help="studio folder: cases live in <workspace>/cases/")
-    ap.add_argument("--config", help="studio configuration (default: <workspace>/studio.yaml, else ./studio.yaml)")
+    ap.add_argument("--config", help="studio configuration (default: <workspace>/studio.yaml, else the bundled "
+                                     "config/studio.yaml)")
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--port", type=int, default=8090)
     ap.add_argument("--token", help="API token (default: $KENTC_STUDIO_TOKEN); required when host is not loopback")
@@ -39,7 +40,7 @@ def main() -> None:
     ws = Path(args.workspace).expanduser().resolve()
     ws.mkdir(parents=True, exist_ok=True)
     config = Path(args.config).resolve() if args.config else \
-        ws / "studio.yaml" if (ws / "studio.yaml").is_file() else ROOT / "studio.yaml"
+        ws / "studio.yaml" if (ws / "studio.yaml").is_file() else ROOT / "config" / "studio.yaml"
     studio = CaseService(ws, config, args.effort)
     print(f"Agentic Studio · apps {', '.join(a.title for a in studio.config.apps.values())} · workspace {ws} · "
           f"config {config} · http://{args.host}:{args.port}")

@@ -6,28 +6,33 @@ An app declares the three pages of the async loop:
     Page 2  agents   insight agents that read each lane's files    -> the analyst verifies, flags, adds files
     Page 3  report   the report agent, in the report framework     -> the analyst prompts (one prompt = one version)
 
-Agents answer with JSON of their workflow's `schema`; a `view` says how the front end shows it, using a fixed set
-of blocks. Agents never write HTML. Every view path is checked against the schema when the app loads.
+Agents answer with JSON of their workflow's `schema`; the front end shows it with a fixed set of blocks. An
+agent's optional `view` gives custom blocks; every other schema key is shown with a default block chosen by its
+shape, unless it is in `hide`. Agents never write HTML. Every view path is checked against the schema when the app
+loads. Labels default to readable names, and the one-line case brief every agent gets is built from the fields.
 
 Report framework: every report agent's result carries `title`, `verdict` (one of the app's `verdicts`), `reply`
 (its answer to the analyst's latest prompt), `requests` ([{document, reason}]) and `questions` ([string]); the
-rest of the result is the app's own, shown through `report.view`.
+page shows these itself, and the rest of the result is the app's own, shown through `report.view`.
 """
 
 from __future__ import annotations
 
 import fnmatch
 import re
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
 
-import jinja2
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+from kentc_agent.workflow import WorkflowError
+from kentc_agent.workflow import load as load_workflow
+
 from .data import DataPull
-from .providers import AgentError, Provider, make_provider
+from .providers import AgentError, Provider, make_provider, workflow_path
 
 # block type -> its options besides `title`
 BLOCKS: dict[str, set[str]] = {
@@ -57,7 +62,7 @@ class _Raw(BaseModel):
 
 class FieldSpec(_Raw):
     name: str
-    label: str = ""
+    label: str = ""                 # default: the name, readable ("start_date" -> "Start date")
     type: Literal["text", "textarea", "date", "select"] = "text"
     required: bool = False
     column: bool = False            # shown in the case table
@@ -66,34 +71,44 @@ class FieldSpec(_Raw):
     wide: bool = False
 
 
-class LaneSpec(_Raw):
-    name: str
-    label: str = ""
-    hint: str = ""
-    required: bool = False
-    agent: str = ""                 # the insight agent for this lane's files; "" = only the report agent reads them
-    sample: list[str] = Field(default_factory=list)     # globs: sample-bundle files that go to this lane
-
-
 class _AgentRef(_Raw):
-    workflow: str = ""
+    workflow: str = ""              # a workflow name in the studio's agent library (studio.yaml `workflows`)
     url: str = ""
-    label: str = ""
+    label: str = ""                 # default: from the workflow name ("doc-agent" -> "Doc agent")
     timeout: float = 1800
 
     def provider_spec(self) -> dict[str, Any]:
         return {"workflow": self.workflow, "url": self.url, "label": self.label, "timeout": self.timeout}
 
 
-class AgentSpec(_AgentRef):
-    per: Literal["file", "lane"] = "file"
-    view: list[dict[str, Any]] = Field(default_factory=list)
+class LaneAgentSpec(_AgentRef):
+    """A lane's agent in long form. A workflow decides per file / per lane by its inputs (`file` or `lane_file`);
+    an external agent says it with `per`."""
+    per: Literal["file", "lane"] | None = None
+
+
+class LaneSpec(_Raw):
+    name: str
+    label: str = ""                 # default: the name, readable
+    hint: str = ""
+    required: bool = False
+    agent: str | LaneAgentSpec = ""     # the insight agent: a workflow name, or {workflow | url, label, ...};
+                                        # "" = only the report agent reads this lane's files
+    view: list[dict[str, Any]] = Field(default_factory=list)    # custom blocks; other schema keys are appended
+    hide: list[str] = Field(default_factory=list)               # schema keys never shown
+    sample: list[str] = Field(default_factory=list)     # globs: sample-bundle files that go to this lane
+
+    def agent_spec(self) -> LaneAgentSpec | None:
+        if not self.agent:
+            return None
+        return LaneAgentSpec(workflow=self.agent) if isinstance(self.agent, str) else self.agent
 
 
 class ReportSpec(_AgentRef):
     name: str = "Report"
     verdicts: dict[str, Literal["ok", "warn", "bad", "info"]]
     view: list[dict[str, Any]] = Field(default_factory=list)
+    hide: list[str] = Field(default_factory=list)
 
 
 class ExtraSpec(_AgentRef):
@@ -102,19 +117,17 @@ class ExtraSpec(_AgentRef):
 
 class CaseIdSpec(_Raw):
     label: str = "Case ID"
-    prefix: str = "CASE-"
+    prefix: str = ""                # default: "<APP NAME>-<year>-"
 
 
 class AppSpec(_Raw):
     title: str
     description: str = ""
     case: CaseIdSpec = Field(default_factory=CaseIdSpec)
-    brief: str
     fields: list[FieldSpec]
     lanes: list[LaneSpec]
     sample: str = ""
     pulls: list[str] = Field(default_factory=list)
-    agents: dict[str, AgentSpec] = Field(default_factory=dict)
     report: ReportSpec
     extras: dict[str, ExtraSpec] = Field(default_factory=dict)
 
@@ -146,12 +159,11 @@ class Report:
 class App:
     name: str
     spec: AppSpec
-    agents: dict[str, Agent]
+    agents: dict[str, Agent]        # by lane name: the insight agent that reads that lane
     report: Report
     extras: dict[str, Provider]
     pulls: list[str]
     sample: Path | None
-    brief_template: jinja2.Template
 
     @property
     def title(self) -> str:
@@ -165,11 +177,14 @@ class App:
         return next((ln for ln in self.spec.lanes if ln.name == name), None)
 
     def agent_of(self, lane: str) -> Agent | None:
-        ln = self.lane(lane)
-        return self.agents[ln.agent] if ln and ln.agent else None
+        return self.agents.get(lane)
 
     def brief(self, case_id: str, fields: dict[str, str]) -> str:
-        return " ".join(self.brief_template.render(id=case_id, **fields).split())
+        """The case in one line for every agent: the case, the app, then each filled field as `Label: value`."""
+        filled = "; ".join(f"{f.label}: {' '.join(fields[f.name].split())}" for f in self.spec.fields
+                           if fields.get(f.name))
+        end = "" if not filled or filled.endswith((".", "?", "!")) else "."
+        return f"Case {case_id} ({self.title})." + (f" {filled}{end}" if filled else "")
 
     def clean_fields(self, given: dict[str, Any]) -> dict[str, str]:
         unknown = sorted(set(given) - {f.name for f in self.spec.fields})
@@ -202,9 +217,10 @@ class App:
         return {
             "name": self.name, "title": self.title, "description": self.spec.description,
             "case": self.spec.case.model_dump(), "fields": [f.model_dump() for f in self.spec.fields],
-            "lanes": [{**ln.model_dump(exclude={"sample"}),
-                       "agent_label": self.agents[ln.agent].label if ln.agent else "",
-                       "per": self.agents[ln.agent].per if ln.agent else ""} for ln in self.spec.lanes],
+            "lanes": [{"name": ln.name, "label": ln.label, "hint": ln.hint, "required": ln.required,
+                       "agent": ln.name if ln.name in self.agents else "",
+                       "agent_label": self.agents[ln.name].label if ln.name in self.agents else "",
+                       "per": self.agents[ln.name].per if ln.name in self.agents else ""} for ln in self.spec.lanes],
             "sample": self.sample is not None,
             "pulls": [{"name": n, "label": p.label, "description": p.description, "database": p.database.label,
                        "default": p.default, "triggers": p.triggers, "binds": [b for b in p.binds if b != "case_id"]}
@@ -293,8 +309,91 @@ def check_envelope(schema: dict[str, Any], verdicts: dict[str, str], where: str)
         raise AgentError(f"{where}: questions must be a list of strings")
 
 
+def humanize(key: str) -> str:
+    """A schema key or field name as a label: "start_date" -> "Start date"."""
+    key = key.rsplit(".", 1)[-1].replace("_", " ").strip()
+    return key[:1].upper() + key[1:]
+
+
+def default_view(schema: dict[str, Any], facts: bool) -> list[dict[str, Any]]:
+    """Blocks for schema keys that have no custom block, by shape, in schema order: an object -> kv; a list of
+    {field, value, location, confidence} -> facts (Page 2 only); another list of objects -> table; a list of
+    strings -> list; consecutive plain values -> one kv (a single one -> text)."""
+    out: list[dict[str, Any]] = []
+    plain: list[str] = []
+
+    def flush() -> None:
+        if len(plain) == 1:
+            out.append({"title": humanize(plain[0]), "text": plain[0]})
+        elif plain:
+            out.append({"kv": list(plain)})
+        plain.clear()
+
+    for key, shape in schema.items():
+        if not isinstance(shape, dict | list):
+            plain.append(key)
+            continue
+        flush()
+        item = shape[0] if isinstance(shape, list) and shape else None
+        if isinstance(shape, dict):
+            out.append({"title": humanize(key), "kv": key})
+        elif isinstance(item, dict) and facts and set(FACT_KEYS) <= set(item):
+            out.append({"facts": key})
+        elif isinstance(item, dict):
+            out.append({"title": humanize(key), "table": key})
+        else:
+            out.append({"title": humanize(key), "list": key})
+    flush()
+    return out
+
+
+def resolve_view(view: list[dict[str, Any]], hide: list[str], schema: dict[str, Any] | None, skip: tuple[str, ...],
+                 where: str, facts: bool) -> list[dict[str, Any]]:
+    """The agent's full view: its custom blocks, then a default block for every other schema key that is not hidden
+    (or, for a report, one of the report-framework keys shown by the page itself). An external agent's result is
+    only known at run time, so it needs a complete view."""
+    if schema is None:
+        if not view:
+            raise AgentError(f"{where}: an external agent needs a view (its result shape is unknown until it runs)")
+        check_view(view, None, where, facts)
+        return view
+    unknown = [k for k in hide if k not in schema]
+    if unknown:
+        raise AgentError(f"{where}: hide {', '.join(unknown)}: not in the agent's schema")
+    check_view(view, schema, where, facts)
+    shown = {p.split(".")[0] for b in view for p in block_paths(b)}
+    rest = {k: s for k, s in schema.items() if k not in shown and k not in hide and k not in skip}
+    return view + default_view(rest, facts)
+
+
+def block_paths(block: dict[str, Any]) -> list[str]:
+    paths = block[block_kind(block)]
+    return list(paths) if isinstance(paths, list) else [paths]
+
+
+def lane_agent(ln: LaneSpec, library: Path, where: str) -> Agent:
+    """A lane's insight agent. A workflow taking `lane_file` reads the whole lane as text, one taking `file` reads
+    one file per job; an external agent says which with `per`."""
+    spec, at = ln.agent_spec(), f"{where} lane {ln.name}"
+    if spec.workflow:
+        if spec.per:
+            raise AgentError(f"{at}: per is decided by the workflow's inputs (file or lane_file)")
+        path = workflow_path(library, spec.workflow)
+        try:
+            inputs = load_workflow(path).inputs if path.is_file() else {}
+        except WorkflowError:
+            inputs = {}                             # make_provider reports the workflow's own error
+        per = "lane" if "lane_file" in inputs else "file"
+        label = spec.label or humanize(path.stem.replace("-", "_"))
+    else:
+        per, label = spec.per or "file", spec.label or f"{humanize(ln.name)} agent"
+    provider = make_provider(ln.name, {**spec.provider_spec(), "label": label}, library, AGENT_INPUTS[per])
+    return Agent(provider, per, resolve_view(ln.view, ln.hide, provider.schema, (), at, facts=True))
+
+
 # ---------------------------------------------------------------------- loading
-def load_app(name: str, path: Path, pulls: dict[str, DataPull]) -> App:
+def load_app(name: str, path: Path, pulls: dict[str, DataPull], library: Path) -> App:
+    """`library`: the folder of agent workflows every app shares (studio.yaml `workflows`)."""
     if not NAME_RE.match(name):
         raise AgentError(f"app {name!r}: use lower-case letters, digits and _")
     if not path.is_file():
@@ -317,23 +416,24 @@ def load_app(name: str, path: Path, pulls: dict[str, DataPull]) -> App:
     if not spec.lanes or len(set(lane_names)) != len(lane_names) or not all(NAME_RE.match(n) for n in lane_names):
         raise AgentError(f"{where}: lanes need unique lower-case names (at least one lane)")
     for ln in spec.lanes:
-        if ln.agent and ln.agent not in spec.agents:
-            raise AgentError(f"{where}: lane {ln.name}: agent {ln.agent!r} is not under agents")
-    unused = sorted(set(spec.agents) - {ln.agent for ln in spec.lanes})
-    if unused:
-        raise AgentError(f"{where}: agent(s) {', '.join(unused)} read no lane")
+        if not ln.agent and (ln.view or ln.hide):
+            raise AgentError(f"{where}: lane {ln.name}: view / hide need an agent")
 
-    agents = {}
-    for aname, a in spec.agents.items():
-        provider = make_provider(aname, a.provider_spec(), base, AGENT_INPUTS[a.per])
-        check_view(a.view, provider.schema, f"{where} agent {aname}", facts=True)
-        agents[aname] = Agent(provider, a.per, a.view)
-    rp = make_provider("report", {**spec.report.provider_spec(), "label": spec.report.label or "Report agent"}, base,
-                       REPORT_INPUTS)
+    for f in spec.fields:
+        f.label = f.label or humanize(f.name)
+    for ln in spec.lanes:
+        ln.label = ln.label or humanize(ln.name)
+    spec.case.prefix = spec.case.prefix or f"{name.upper()}-{time.strftime('%Y')}-"
+
+    agents = {ln.name: lane_agent(ln, library, where) for ln in spec.lanes if ln.agent}
+    rp = make_provider("report", {**spec.report.provider_spec(), "label": spec.report.label or "Report agent"},
+                       library, REPORT_INPUTS)
     if rp.schema is not None:
         check_envelope(rp.schema, spec.report.verdicts, f"{where} report")
-    check_view(spec.report.view, rp.schema, f"{where} report", facts=False)
-    extras = {k: make_provider(k, {**e.provider_spec(), "default": e.default}, base, EXTRA_INPUTS)
+    report_view = resolve_view(spec.report.view, spec.report.hide, rp.schema, ENVELOPE, f"{where} report",
+                               facts=False)
+    extras = {k: make_provider(k, {**e.provider_spec(), "label": e.label or humanize(k), "default": e.default},
+                               library, EXTRA_INPUTS)
               for k, e in spec.extras.items()}
 
     unknown = [p for p in spec.pulls if p not in pulls]
@@ -352,10 +452,5 @@ def load_app(name: str, path: Path, pulls: dict[str, DataPull]) -> App:
         if not any(ln.sample for ln in spec.lanes):
             raise AgentError(f"{where}: a sample folder needs lanes with `sample` globs")
 
-    try:
-        template = jinja2.Environment(undefined=jinja2.StrictUndefined).from_string(spec.brief)
-        template.render(id="X", **{n: "x" for n in names})
-    except jinja2.TemplateError as e:
-        raise AgentError(f"{where}: brief: {e}") from None
-    return App(name, spec, agents, Report(rp, spec.report.name, spec.report.verdicts, spec.report.view), extras,
-               spec.pulls, sample, template)
+    return App(name, spec, agents, Report(rp, spec.report.name, spec.report.verdicts, report_view), extras,
+               spec.pulls, sample)

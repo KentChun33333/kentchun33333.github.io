@@ -15,7 +15,11 @@
   </div>
   <div class="top-actions">
     <button class="top-action" id="backBtn" hidden>← Case table</button>
-    <span class="pill" id="queuePill" title="Agent jobs"><span class="dot"></span><span>idle</span></span>
+    <span class="top-group" id="p3Top" hidden>
+      <button class="top-action" data-goto="2">← Insights</button>
+      <a class="top-action" id="zipLink" href="#">Case ZIP</a>
+      <button class="top-action" id="printBtn">Print</button>
+    </span>
     <span class="pill" id="modelPill" title="LLM server"><span class="dot"></span><span>connecting…</span></span>
   </div>
 </header>
@@ -83,7 +87,7 @@
         <h1>Verify what the agents found</h1>
         <p>Flag a value that looks wrong or leave a note: that agent runs again with it. Check the data pulled from the bank's systems and add files at any time. Nothing here waits: cards fill in as each job finishes.</p>
       </div>
-      <div class="actions no-print"><button class="btn secondary small" data-open-work>Agent work</button><button class="btn small" data-goto="3" id="toReport2">Report →</button></div>
+      <div class="actions no-print"><button class="btn small" data-goto="3" id="toReport2">Report →</button></div>
     </header>
     <div class="case-strip" id="strip2"></div>
     <div class="ready-bar" id="ready2"></div>
@@ -109,11 +113,10 @@
         </details>
       </div>
       <aside class="drawer">
-        <header><b>Analyst workspace</b><small>Add files, follow the jobs, move on</small></header>
+        <header><b>Analyst workspace</b><small>Add files, then ask for the report</small></header>
         <div class="drawer-body">
           <div><h3>STAGE MORE FILES</h3><div class="lanes compact" id="moreLanes"></div>
             <button class="btn dark" id="uploadMore" style="width:100%;margin-top:9px" disabled>Upload &amp; read</button></div>
-          <div><h3>AGENT JOBS</h3><ul class="job-list" id="jobList2"></ul></div>
           <div><h3 id="reportHead2">REPORT</h3><div class="extra-list" id="extraList2"></div>
             <button class="btn" id="genReport2" style="width:100%;margin-top:9px">Generate report →</button>
             <p class="caption" id="genHint2"></p></div>
@@ -133,10 +136,6 @@
       <div class="actions no-print">
         <label class="version-pick">Version <select class="input" id="versionSel"></select></label>
         <button class="btn green small" id="approveBtn" disabled>Approve</button>
-        <a class="btn secondary small" id="zipLink" href="#">Case ZIP</a>
-        <button class="btn secondary small" id="printBtn">Print</button>
-        <button class="btn secondary small" data-open-work>Agent work</button>
-        <button class="btn secondary small" data-goto="2">← Insights</button>
       </div>
     </header>
     <div class="case-strip" id="strip3"></div>
@@ -159,7 +158,7 @@
 <aside class="agent-work" id="agentWork" aria-label="Agent work">
   <div class="aw-head">
     <div><small id="awStage">AGENT WORK</small><h2 id="awTitle">—</h2><p id="awStatus"></p></div>
-    <div class="actions"><button class="btn small" id="awStop" hidden>Stop</button><button class="btn secondary small" id="awClose">Close</button></div>
+    <div class="actions"><button class="btn secondary small" id="awClose">Close</button></div>
   </div>
   <ul class="job-list dark" id="awJobs"></ul>
   <div class="live" id="awLive" hidden></div>

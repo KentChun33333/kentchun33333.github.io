@@ -51,18 +51,17 @@ steps:
 
 APP = """
 title: Test app
-brief: "Case {{ id }} about {{ subject }}"
 fields:
   - {name: subject, required: true, column: true}
+  - {name: note, label: Analyst note}
 lanes:
-  - {name: files, required: true, agent: reader}
-agents:
-  reader:
-    workflow: reader.yaml
+  - name: files
+    required: true
+    agent: reader
     view: [{facts: key_values}, {text: summary}]
 report:
   name: Test report
-  workflow: report.yaml
+  workflow: report
   verdicts: {Go: ok, Hold: warn}
   view:
     - {title: Summary, text: summary}
@@ -74,7 +73,7 @@ def studio(tmp_path, app=APP, reader=READER, report=REPORT, extra=""):
     (tmp_path / "reader.yaml").write_text(reader)
     (tmp_path / "report.yaml").write_text(report)
     (tmp_path / "app.yaml").write_text(app)
-    (tmp_path / "studio.yaml").write_text("apps:\n  test: app.yaml\n" + extra)
+    (tmp_path / "studio.yaml").write_text("apps:\n  test: app.yaml\nworkflows: .\n" + extra)
     return tmp_path / "studio.yaml"
 
 
@@ -92,12 +91,15 @@ def test_studio_refuses_agents_with_shell_or_web_access(tmp_path, report, refuse
 # ---------------------------------------------------------------------- manifest checks at load
 @pytest.mark.parametrize("app, refused", [
     (APP.replace("{text: summary}]", "{text: summry}]"),
-     r"agent reader: view\[1\]: text 'summry' is not in the agent's schema"),
+     r"lane files: view\[1\]: text 'summry' is not in the agent's schema"),
     (APP.replace("head: title", "head: name"), r"report: view\[1\]: name not in the items of 'risks'"),
     (APP.replace("{title: Summary, text: summary}", "{title: Summary, facts: risks}"),
      "facts \\(flaggable rows\\) belong to the insight agents"),
     (APP.replace("{Go: ok, Hold: warn}", "{Go: ok, Stop: bad}"), "verdicts must give a tone .* for each verdict: Go, Hold"),
-    (APP.replace("agent: reader}", "agent: nobody}"), "lane files: agent 'nobody' is not under agents"),
+    (APP.replace("    agent: reader\n", ""), "lane files: view / hide need an agent"),
+    (APP.replace("agent: reader", "agent: {workflow: reader, per: lane}"),
+     "lane files: per is decided by the workflow's inputs"),
+    (APP.replace("workflow: report", "workflow: report.yaml"), "agent report: workflow 'report.yaml' not found in "),
 ])
 def test_app_manifest_mistakes_are_refused_when_the_studio_loads(tmp_path, app, refused):
     with pytest.raises(AgentError, match=refused):
@@ -138,6 +140,32 @@ def test_report_markdown_follows_the_view_and_the_framework(tmp_path):
     assert md.index("### High (score 90)") < md.index("### Low (score 20)")      # cards sorted by score
     assert "- **Bank statement** - to trace the inflow" in md and "- Who signs?" in md
     assert md.rstrip().endswith("*Agent reply: Added the second risk.*")
+
+
+# ---------------------------------------------------------------------- defaults: views from the schema, brief from fields
+def test_keys_without_a_custom_block_are_shown_by_shape_in_schema_order_unless_hidden(tmp_path):
+    reader = READER.replace("      summary: string\n", "      summary: string\n      risk: number\n").replace(
+        "      key_values:", "      parties: [{name: string, role: string}]\n      owner: {name: string}\n"
+                            "      gaps: [string]\n      key_values:")
+    app = APP.replace("view: [{facts: key_values}, {text: summary}]", "view: [{title: Gaps, list: gaps}]\n"
+                                                                       "    hide: [risk]")
+    view = load_config(studio(tmp_path, app=app, reader=reader)).apps["test"].agents["files"].view
+    assert view == [{"title": "Gaps", "list": "gaps"}, {"title": "Summary", "text": "summary"},
+                    {"title": "Parties", "table": "parties"}, {"title": "Owner", "kv": "owner"},
+                    {"facts": "key_values"}]
+
+
+def test_hiding_a_key_the_agent_does_not_return_is_refused(tmp_path):
+    with pytest.raises(AgentError, match="lane files: hide risk: not in the agent's schema"):
+        load_config(studio(tmp_path, app=APP.replace("view: [{facts: key_values}, {text: summary}]", "hide: [risk]")))
+
+
+def test_brief_lists_the_filled_fields_by_label(tmp_path):
+    app = load_config(studio(tmp_path)).apps["test"]
+    assert app.brief("C-1", {"subject": "Acme  trade\nimports", "note": ""}) == \
+        "Case C-1 (Test app). Subject: Acme trade imports."
+    assert app.brief("C-1", {"subject": "Why?", "note": "check"}) == \
+        "Case C-1 (Test app). Subject: Why?; Analyst note: check."
 
 
 # ---------------------------------------------------------------------- cases from before studio apps

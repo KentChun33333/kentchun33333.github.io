@@ -8,7 +8,7 @@ A case belongs to one app (apps.py). Its folder <workspace>/cases/<case id>/ hol
     outputs/data/<p>.json       latest data pull (parameters, SQL, row count, key values, preview)
     data/<p>.csv                the pulled rows
     outputs/extra/<a>.json      extra agent results (same wrapper)
-    outputs/reports/v<n>.json / .md   report versions
+    outputs/reports/v<n>.json   report versions (Markdown for print / export is rendered from these on demand)
     jobs/<job id>/              each job's materials, workflow state and agent session
     events.jsonl                the activity feed
 
@@ -137,7 +137,6 @@ class CaseService:
         feedback = feedback or {}
         if not targets:
             return
-        app = self.app(case)
         with case.lock:
             for t in targets:
                 lane = t[5:] if t.startswith("lane:") else case.lane_of(t)
@@ -147,7 +146,7 @@ class CaseService:
                         j.status, j.error = "stopped", "superseded by a newer request"
                         notes.append(j.params.get("feedback", ""))
                 notes.append(feedback.get(t, ""))
-                self._job(case, "insight", app.lane(lane).agent, t, {"feedback": "\n".join(n for n in notes if n)})
+                self._job(case, "insight", lane, t, {"feedback": "\n".join(n for n in notes if n)})
             case.save()
         self._wake()
 
@@ -432,6 +431,11 @@ class CaseService:
                               for d in case.documents],
                 "materials": materials}
 
+    def report_markdown(self, case: Case, version: int) -> str | None:
+        """A report version as Markdown, rendered from its JSON with the app's current view (print, export)."""
+        data = case.read_json(case.out("reports", f"v{version}.json"))
+        return None if data is None else to_markdown(self.app(case), case.id, case.fields, data, version)
+
     def store_result(self, case: Case, job: Job, result: dict[str, Any]) -> None:
         now = time.time()
         if job.role == "insight":
@@ -445,8 +449,6 @@ class CaseService:
             version = len(case.reports) + 1
             job.target = f"v{version}"
             case.write_json(case.out("reports", f"v{version}.json"), result)
-            case.out("reports", f"v{version}.md").write_text(
-                to_markdown(self.app(case), case.id, case.fields, result, version), encoding="utf-8")
             case.reports.append({"version": version, "job": job.id, "created": now,
                                  "instruction": job.params.get("instruction", ""),
                                  "extras": job.params.get("extras", [])})
@@ -538,7 +540,7 @@ class CaseService:
             agent = app.agent_of(d["lane"])
             per_file = bool(agent and agent.per == "file")
             j = latest.get(("insight", d["name"] if per_file else lane_target(d["lane"]))) if agent else None
-            docs.append({**d, "agent": app.lane(d["lane"]).agent, "per": agent.per if agent else "",
+            docs.append({**d, "agent": d["lane"] if agent else "", "per": agent.per if agent else "",
                          "status": j.status if j else "staged" if agent else "stored",
                          "error": j.error if j else None,
                          "insight": case.read_json(self._out(case, d["name"])) if per_file else None,
@@ -551,7 +553,7 @@ class CaseService:
             t = lane_target(ln.name)
             j = latest.get(("insight", t))
             files = case.docs(ln.name)
-            lanes.append({"name": ln.name, "label": ln.label, "agent": ln.agent, "agent_label": agent.label,
+            lanes.append({"name": ln.name, "label": ln.label, "agent": ln.name, "agent_label": agent.label,
                           "files": files, "status": j.status if j else None, "error": j.error if j else None,
                           "insight": case.read_json(self._out(case, t)),
                           "corrections": [c for c in case.corrections if c["target"] == t or c["target"] in files]})

@@ -1,12 +1,17 @@
-# Agentic Studio: the apps it serves, and the bank databases and data pulls they share.
+# Agentic Studio: the apps it serves, the agent workflows they share, and the bank databases and data pulls.
+# Paths are relative to this file.
 #   apps:        name -> app manifest: Page 1 intake (fields, file lanes, pulls), Page 2 insight agents, Page 3
 #                report agent in the report framework (see src/kentc_studio/apps.py)
+#   workflows:   the agent library: an app names its agents (`agent: doc-agent`), so any app can use any agent here.
+#                Studio agents are sandboxed: no bash, no web steps, the studio's fixed inputs, JSON out.
+#                CLI pipelines live in cli/workflows/.
 #   public_url:  base URL external agents use to download case documents (GET /api/cases/<id>/docs/<name>)
 # A workspace can override this file with <workspace>/studio.yaml.
 
 apps:
   ter: apps/ter/app.yaml
   rm: apps/rm/app.yaml
+workflows: apps/workflows
 
 public_url: http://127.0.0.1:8090
 
@@ -15,7 +20,7 @@ public_url: http://127.0.0.1:8090
 # Build the mock with: uv run --project kentc-agent python dataset/make_core_banking_db.py
 databases:
   core:
-    url: sqlite:///../dataset/core-banking/core_banking.sqlite
+    url: sqlite:///../../dataset/core-banking/core_banking.sqlite
     label: Core banking (mock)
     timeout: 1800
     row_cap: 200000
@@ -30,14 +35,14 @@ data_pulls:
     database: core
     label: KYC profile
     description: Customer master, directors and owners, accounts, expected activity
-    sql_file: queries/kyc_profile.sql
+    sql_file: ../queries/kyc_profile.sql
     default: true
 
   txn_history:
     database: core
     label: Transaction history
     description: Every transaction on the customer's accounts in the review period
-    sql_file: queries/txn_history.sql
+    sql_file: ../queries/txn_history.sql
     default: true
     key_values:
       Transactions: SELECT COUNT(*) FROM result
@@ -63,7 +68,7 @@ data_pulls:
     database: core
     label: Counterparties
     description: Who paid and was paid in the review period, cross-border flows, non-customers
-    sql_file: queries/counterparties.sql
+    sql_file: ../queries/counterparties.sql
     default: true
     key_values:
       Counterparties: SELECT COUNT(DISTINCT counterparty) FROM result
@@ -83,7 +88,7 @@ data_pulls:
     database: core
     label: Activity vs profile
     description: Monthly turnover, 12-month baseline vs review period, against the expected monthly inflow
-    sql_file: queries/monthly_activity.sql
+    sql_file: ../queries/monthly_activity.sql
     triggers: [adverse media, unusual, volume, activity, profile, anomaly, monitoring]
     key_values:
       Baseline average monthly inflow (SGD): SELECT ROUND(AVG(inflow_sgd), 2) FROM result WHERE period = 'baseline'
@@ -94,7 +99,7 @@ data_pulls:
     database: core
     label: Prior alerts
     description: Monitoring and screening alerts in the 24 months before the start date
-    sql_file: queries/prior_alerts.sql
+    sql_file: ../queries/prior_alerts.sql
     default: true
     key_values:
       Open alerts: SELECT COUNT(*) FROM result WHERE status = 'OPEN'

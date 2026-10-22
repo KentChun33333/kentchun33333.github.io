@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 
 import markdown as md
 
-from .apps import block_kind
+from .apps import block_kind, humanize
 
 if TYPE_CHECKING:
     from .apps import App
@@ -22,11 +22,6 @@ def get(data: Any, path: str) -> Any:
             return None
         data = data.get(part)
     return data
-
-
-def humanize(key: str) -> str:
-    key = key.rsplit(".", 1)[-1].replace("_", " ").strip()
-    return key[:1].upper() + key[1:]
 
 
 def text(v: Any) -> str:
@@ -109,7 +104,7 @@ def _num(v: Any) -> float:
 
 def to_markdown(app: App, case_id: str, fields: dict[str, str], r: dict[str, Any], version: int) -> str:
     rep = app.report
-    shown = [f"**{f.label or humanize(f.name)}** {fields[f.name]}" for f in app.spec.fields
+    shown = [f"**{f.label}** {fields[f.name]}" for f in app.spec.fields
              if f.column and fields.get(f.name)]
     out = [f"# {rep.name} - {text(r.get('title')) or case_id}",
            " · ".join([f"**Case** {case_id}", *shown, f"**Version** v{version}"]) + "  ",

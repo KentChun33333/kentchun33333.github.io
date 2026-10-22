@@ -1,4 +1,4 @@
-name: report-agent
+name: ter-report-agent
 description: >
   TER app, report agent - the TER summary report from all agent outputs, in the studio report framework (title,
   verdict, reply, requests, questions + the TER sections). An analyst prompt revises the previous version.

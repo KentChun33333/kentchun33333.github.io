@@ -1,4 +1,4 @@
-"""FastAPI routes of the Agentic Studio: one async loop, several apps (studio.yaml -> apps/<name>/app.yaml).
+"""FastAPI routes of the Agentic Studio: one async loop, several apps (config/studio.yaml -> apps/<name>/app.yaml).
 
 Page 1: pick an app, fill its fields, stage files in its lanes, tick data pulls -> the insight agents read the
 files and the pulls run, asynchronously, while the case table updates. Page 2: verify the insights, flag wrong
@@ -73,6 +73,15 @@ def create_app(studio: CaseService, token: str = "") -> FastAPI:
                 return JSONResponse({"detail": "unauthorized"}, status_code=401)
         return await call_next(request)
 
+    @app.middleware("http")
+    async def revalidate_front_end(request: Request, call_next):
+        """The page and its assets change with the studio: make the browser revalidate them (ETag → 304) instead
+        of running a heuristically cached app.js against a newer page or API."""
+        response = await call_next(request)
+        if not request.url.path.startswith("/api"):
+            response.headers["Cache-Control"] = "no-cache"
+        return response
+
     def case_of(case_id: str) -> Case:
         try:
             return studio.get(case_id)
@@ -99,10 +108,7 @@ def create_app(studio: CaseService, token: str = "") -> FastAPI:
         except Exception as e:  # noqa: BLE001 - reported to the UI as offline
             studio.llm._info = None
             model = {"online": False, "error": str(e)}
-        cases = list(studio.cases.values())
-        running = [{"case": c.id, "label": studio.label(c, j)} for c in cases for j in c.jobs if j.status == "running"]
-        return {"model": model, "workspace": str(studio.ws), "running": running,
-                "queued": sum(j.status == "queued" for c in cases for j in c.jobs)}
+        return {"model": model, "workspace": str(studio.ws)}
 
     @app.get("/api/apps")
     def apps() -> list[dict[str, Any]]:
@@ -182,12 +188,11 @@ def create_app(studio: CaseService, token: str = "") -> FastAPI:
     @app.get("/api/cases/{case_id}/reports/{version}")
     def report_version(case_id: str, version: int) -> dict[str, Any]:
         case = case_of(case_id)
-        md = case.out("reports", f"v{version}.md")
-        if not md.is_file():
+        data = case.read_json(case.out("reports", f"v{version}.json"))
+        if data is None:
             raise HTTPException(404, f"no report v{version}")
-        text = md.read_text(encoding="utf-8")
-        return {"version": version, "markdown": text, "html": to_html(text),
-                "data": case.read_json(case.out("reports", f"v{version}.json"))}
+        text = studio.report_markdown(case, version)
+        return {"version": version, "markdown": text, "html": to_html(text), "data": data}
 
     @app.post("/api/cases/{case_id}/approve")
     def approve(case_id: str, body: Approval) -> dict[str, Any]:
@@ -256,11 +261,11 @@ def export_zip(studio: CaseService, case: Case) -> bytes:
             w.writerow([d["name"], d["lane"], d["agent"], d["status"], len(d["corrections"])])
         z.writestr("evidence-manifest.csv", out.getvalue())
         for r in case.reports:
-            md = case.out("reports", f"v{r['version']}.md")
-            if md.is_file():
-                z.write(md, f"reports/v{r['version']}.md")
+            text = studio.report_markdown(case, r["version"])
+            if text is not None:
+                z.writestr(f"reports/v{r['version']}.md", text)
         if version:
-            text = case.out("reports", f"v{version}.md").read_text(encoding="utf-8")
+            text = studio.report_markdown(case, version) or ""
             z.writestr("report.html", f"<!doctype html><meta charset='utf-8'><title>{case.id} {name} v{version}</title>"
                                       f"<body style='font-family:sans-serif;max-width:860px;margin:auto'>"
                                       f"{to_html(text)}")

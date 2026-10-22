@@ -58,7 +58,7 @@
   }
 
   // ---------------------------------------------------------------- state
-  const S = { apps: {}, appOrder: [], intakeApp: null, cases: [], health: null, current: null, detail: null, page: 1,
+  const S = { apps: {}, appOrder: [], intakeApp: null, cases: [], current: null, detail: null, page: 1,
     version: null, factFilter: 'all', openForms: new Set(), work: { id: null, after: 0, timer: null, tick: 0 }, extrasPicked: null };
   const appOf = d => S.apps[d && d.app] || null;
 
@@ -201,6 +201,7 @@
     $$('.page').forEach(p => p.classList.toggle('active', p.id === `page${page}`));
     $$('.journey-step').forEach(j => { const n = +j.dataset.page; j.classList.toggle('active', n === page); j.classList.toggle('done', n < page); });
     $('#backBtn').hidden = page === 1;
+    $('#p3Top').hidden = page !== 3;                 // report actions sit in the top bar on Page 3
     if (page === 1) { S.current = null; S.detail = null; S.openForms.clear(); history.replaceState(null, '', '#'); renderQueue(); }
     else history.replaceState(null, '', `#case/${enc(S.current)}/${page}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -210,7 +211,6 @@
   document.addEventListener('click', e => {
     const g = e.target.closest('[data-goto]');
     if (g) goto(+g.dataset.goto);
-    if (e.target.closest('[data-open-work]') && S.current) openWork(S.current);
   });
   function goto(n) {
     if (n === 1) return show(1);
@@ -228,14 +228,10 @@
   async function refreshHealth() {
     try {
       const h = await api('/api/health');
-      S.health = h;
       const m = $('#modelPill');
       m.className = `pill ${h.model.online ? 'ok' : 'bad'}`;
       m.lastElementChild.textContent = h.model.online ? `${h.model.id} · ${Math.round(h.model.context / 1000)}k` : 'model offline';
       m.title = h.model.online ? `LLM server online · workspace ${h.workspace}` : h.model.error;
-      const q = $('#queuePill');
-      q.className = `pill ${h.running.length ? 'busy' : 'ok'}`;
-      q.lastElementChild.textContent = h.running.length ? `${h.running[0].case} · ${h.running[0].label}${h.queued ? ` · +${h.queued}` : ''}` : h.queued ? `${h.queued} jobs queued` : 'agents idle';
     } catch {
       $('#modelPill').className = 'pill bad';
       $('#modelPill').lastElementChild.textContent = 'server offline';
@@ -404,20 +400,13 @@
       const d = await api(`/api/cases/${enc(S.current)}`);
       if (!S.current || d.id !== S.current) return;
       S.detail = d;
-      if (!force && busyTyping()) { renderJobs(d); return; }        // never wipe what the analyst is typing
+      if (!force && busyTyping()) return;                           // never wipe what the analyst is typing
       S.page === 2 ? renderPage2(d, false) : S.page === 3 ? renderPage3(d, false) : null;
     } catch { /* keep the last view */ }
   }
 
   const STATUS_ICON = { queued: '⏳', running: '<span class="spinner"></span>', done: '✓', failed: '✕', stopped: '■', staged: '·', stored: '·' };
   const jobState = s => `<span class="jstate ${esc(s)}">${STATUS_ICON[s] || '·'} ${esc(s)}</span>`;
-
-  function renderJobs(d) {
-    const items = arr(d.jobs).slice(-12).reverse().map(j => `<li class="${esc(j.status)}"><span>${STATUS_ICON[j.status] || '·'}</span>
-      <div><b>${esc(j.label)}</b><small>${esc(j.role === 'query' ? `data pull${Object.keys(obj(obj(j.params).params)).length ? ` · ${Object.entries(obj(j.params.params)).map(([k, v]) => `${k}=${v}`).join(', ')}` : ''}` : j.params && j.params.feedback ? 'with analyst feedback' : j.params && j.params.instruction ? `prompt: ${j.params.instruction}` : j.role)}${j.error ? ` · ${esc(j.error)}` : ''}</small></div>
-      <time>${j.finished && j.started ? clock(j.finished - j.started) : j.status === 'running' && j.started ? clock(Date.now() / 1000 - j.started) : ''}</time></li>`).join('');
-    $('#jobList2').innerHTML = items || '<li class="muted">No jobs yet.</li>';
-  }
 
   // ---------------------------------------------------------------- page 2
   let moreApp = null;
@@ -522,7 +511,6 @@
     }).join('') || '<div class="placeholder">No files.</div>';
     bindNotes($('#docGrid'));
 
-    renderJobs(d);
     renderExtras($('#extraList2'), d);
     const pending = arr(d.jobs).filter(j => BUSY(j.status) && ['insight', 'query'].includes(j.role)).length;
     const name = app.report.name;
@@ -711,7 +699,7 @@
       banner.hidden = false;
       banner.className = 'banner working';
       banner.innerHTML = `<span class="spinner"></span><div><b>${esc(run ? run.label : `${rep3.name} jobs queued`)}</b> ${run && run.params.instruction ? `working on the prompt: “${esc(run.params.instruction)}”` : run ? 'drafting the next version' : inputs ? `waiting for ${inputs} insight / data job(s)` : `waiting for ${busy.length} job(s)`}
-        <small>${d.live && d.live.text ? esc(d.live.text.slice(-220)) : 'It runs in the background - the case table shows when the version is ready.'}</small></div><button class="btn secondary small" data-open-work>Watch</button>`;
+        <small>It runs in the background - the case table shows when the version is ready.</small></div>`;
     } else if (d.stale && rep && rep.version === last) {
       banner.hidden = false;
       banner.className = 'banner';
@@ -829,7 +817,6 @@
   $('#awClose').onclick = closeWork;
   $('#workBackdrop').onclick = closeWork;
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeWork(); });
-  $('#awStop').onclick = async () => { try { await post(`/api/cases/${enc(S.work.id)}/stop`); toast('Stopping at the next agent event…'); } catch (e) { toast(e.message, true); } };
 
   async function pollWork(full = false) {
     const W = S.work, id = W.id;
@@ -845,7 +832,6 @@
       if (W.id !== id) return;
       $('#awStage').textContent = `AGENT WORK · ${(r.view.stage || r.view.status).toUpperCase()}`;
       $('#awStatus').textContent = r.view.label;
-      $('#awStop').hidden = !BUSY(r.view.status);
       const feed = $('#awFeed');
       const nearBottom = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 60;
       feed.insertAdjacentHTML('beforeend', r.events.map(ev => `<div class="ev ${esc(ev.kind)}"><time>${hhmmss(ev.time)}</time><span class="k">${ICON[ev.kind] || '·'}</span>

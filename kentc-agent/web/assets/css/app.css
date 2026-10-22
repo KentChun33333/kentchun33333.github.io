@@ -39,6 +39,8 @@ a { color: var(--blue) }
 .pill.busy .dot { background: var(--amber); animation: pulse 1.2s infinite }
 .top-action { border: 1px solid var(--line); background: #fff; border-radius: 6px; padding: 8px 12px; font-weight: 600; font-size: 12px }
 .top-action:hover { border-color: #aaa }
+a.top-action { color: var(--ink); text-decoration: none }
+.top-group { display: inline-flex; align-items: center; gap: 8px }
 
 .journey { height: 62px; background: #fff; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: repeat(3, 1fr);
   padding: 9px max(25px, calc((100% - 1100px) / 2)); gap: 20px }

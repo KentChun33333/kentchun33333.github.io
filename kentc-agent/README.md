@@ -420,6 +420,10 @@ so a killed process resumes at that step.
 
 ### Bundled workflows
 
+The bundled CLI workflows live in `config/cli/workflows/` (a workspace's own `workflows/` and
+`.kentc-agent/workflows/` come first). Studio agents are a separate library, `config/apps/workflows/`; see
+[Studio agents vs CLI workflows](#studio-agents-vs-cli-workflows).
+
 | Workflow | Steps |
 | --- | --- |
 | `case-review` | generic template for a new idea: inventory → key values → analysis → review → report |
@@ -468,8 +472,8 @@ Page 3  report & prompt  report framework + the app's view + suggested next step
 | --- | --- | --- |
 | 1 · Intake & track | picks an **app** (TER review, RM insight, …), fills its **fields**, **stages** files in its **lanes** (a required lane needs a file), ticks the **data pulls** (pre-ticked by `default` or by trigger words in the fields), and uploads. Follows every case in **CASE MANAGEMENT** (Case, App, Subject, Status, Verdict, Agent work, Action). | data pulls (SQL, no model, in parallel); per lane: one job over the lane's files, or one job per file |
 | 2 · Verify insights | reads the readiness bar (one item per agent lane, plus Data), each per-lane agent's result, the **data pull** cards, **Facts to verify** (every flaggable fact across files and lanes, with confidence and location; *Low confidence* / *Flagged* filters) and the file cards; **flags** a wrong value or leaves a **note** on a file or lane; **re-runs** a pull with other parameters, or cancels it; **stages more files** at any time; asks for the report at any time (*when ready* while jobs run) | a flag or note re-runs only that file's agent (or that lane's); the report job waits for every pending insight job and pull |
-| 3 · Report & prompt | opens the case from the table once the version is ready and reads it: title, verdict, the app's sections, then **Suggested next steps** on the report itself - the documents to request from the client (each with **Upload** → Page 2 to review what the agents read → regenerate) and the open questions (*Use as prompt*). The slide-out **prompt panel** on the right (⟩ hides it for a wider report) only takes a prompt: it queues the next version and returns to the case table, which marks the row *NEW vN*; the new version shows the prompt and the agent's reply on top. **Approves** a version, exports the ZIP or prints (header buttons); the version picker keeps older versions readable | report agent on all materials; a prompt gets the previous version + the prompt |
-| Agent work | opens a live panel for any case: jobs, the agent's current thinking/writing, every tool call and parsing sub-agent step; *Stop* | |
+| 3 · Report & prompt | opens the case from the table once the version is ready and reads it: title, verdict, the app's sections, then **Suggested next steps** on the report itself - the documents to request from the client (each with **Upload** → Page 2 to review what the agents read → regenerate) and the open questions (*Use as prompt*). The slide-out **prompt panel** on the right (⟩ hides it for a wider report) only takes a prompt: it queues the next version and returns to the case table, which marks the row *NEW vN*; the new version shows the prompt and the agent's reply on top. Picks a version and **approves** it (page header); *← Insights*, *Case ZIP* and *Print* sit in the top bar next to *← Case table* | report agent on all materials; a prompt gets the previous version + the prompt |
+| Agent work | from the case table only (the *Agent work* column): a read-only live panel for any case - jobs, the agent's current thinking/writing, every tool call and parsing sub-agent step. Pages 2 and 3 show results and progress, not the agents' work | |
 
 **Statuses** in the case table come from the jobs: *Pulling data (k/n)*, *<agent> (k/n files)* or *<lane agent>*
 (with *· data k/n* while pulls run), *Insights ready · review required*, *Drafting <report>*, *Revising <report> →
@@ -477,53 +481,90 @@ vN*, *<report> vN ready · review* (Verdict column: the report's verdict, colour
 · report out of date* (a newer insight, pull or correction than the latest version), *Approved*, *… failed*
 (*Retry*). A version you have not opened yet shows *NEW vN* (kept in the browser).
 
-### Apps (`studio.yaml` → `apps/<name>/app.yaml`)
+### Studio agents vs CLI workflows
+
+Both are kentc-agent workflows: one YAML format, one engine (`kentc_agent.workflow.Runner`). They live apart
+because their hosts run them under different contracts:
+
+```
+config/
+  studio.yaml            # apps, agent library, public_url, databases, data pulls (sql_file: ../queries/*.sql)
+  apps/<name>/app.yaml   # wiring only: fields, lanes, pulls, report view; names its agents
+  apps/workflows/        # Studio agents, shared by name: any app may use any agent here
+  cli/workflows/         # CLI pipelines (kentc-agent --workflow NAME)
+queries/*.sql            # data pull SQL
+```
+
+A Studio agent cannot use every engine feature, for three different reasons:
+
+1. **Not built in Studio yet (could be added).**
+   - `ask` gates: Studio runs an agent without a human to ask, so a gate takes its `default` or fails the job.
+     The engine already pauses and resumes (`NeedsAnswer.gate`, `state.json`); Studio lacks a waiting job state
+     and a UI for the gate.
+   - File deliverables: Studio shows only the last step's JSON through `view` blocks; files an agent writes are
+     not displayed.
+2. **Blocked on purpose (a security rule, not a gap).** Studio reads untrusted uploads, so a workflow offering
+   `bash` (or omitting `tools`) or having a `web:` step is refused at load: an injected prompt must not reach a
+   shell, and case data must not leave in search queries.
+3. **Fixed shape of a Studio agent (by design).** Studio passes fixed inputs per role (see the agent contract
+   below) and takes the JSON of the last step. Multi-step agents work; fan-out per file or lane is Studio's.
+
+A CLI workflow has none of these limits but none of Studio's machinery (lanes, data pulls, per-file
+corrections, versioned reports). Any Studio agent also runs from the CLI by path, with its inputs given as `-i`
+(e.g. `--workflow config/apps/workflows/doc-agent.yaml -i file=… -i case_brief=…`).
+
+### Apps (`config/studio.yaml` → `config/apps/<name>/app.yaml`)
 
 ```yaml
-# studio.yaml: the apps one studio serves, and the databases / data pulls they share
+# config/studio.yaml: the apps one studio serves, the agents they share, and the databases / data pulls
 apps:
   ter: apps/ter/app.yaml
   rm: apps/rm/app.yaml
+workflows: apps/workflows                 # the agent library (default); apps name their agents
 public_url: http://127.0.0.1:8090
 ```
 
-An app is one YAML file next to its agent workflows. It declares the three pages:
+An app is one YAML file that names its agents from the shared library. It declares the three pages; everything
+the studio can derive is optional:
 
 ```yaml
 title: TER review
-case: {label: TER case ID, prefix: TER-2026-}
-brief: "Case {{ id }}, CIF {{ cif }}; period {{ lookback_date }} to {{ start_date }}. Trigger: {{ trigger }}"  # Jinja
+case: {label: TER case ID}                # ID prefix defaults to TER-<year>- (app name, upper case)
 fields:                                   # Page 1 form; `column: true` shows the field in the case table
   - {name: cif, label: Customer CIF, required: true, column: true}
-  - {name: start_date, label: Start date, type: date, required: true}   # text | textarea | date | select
-lanes:                                    # file lanes; each names the insight agent that reads it
-  - {name: context, label: Context, required: true, agent: context, sample: ["*.eml", "*.msg"]}
-  - {name: evidence, label: Evidence, agent: doc, sample: ["*"]}
-sample: ../../examples/ter-case           # optional sample bundle (files go to the first lane whose globs match)
-pulls: [kyc_profile, txn_history]         # data pulls this app offers (studio.yaml data_pulls)
-agents:                                   # Page 2: insight agents
-  context:
-    workflow: workflows/context-agent.yaml
-    per: lane                             # one job over all the lane's files, given as text
+  - {name: start_date, type: date, required: true}   # label defaults to "Start date"; text | textarea | date | select
+lanes:                                    # file lanes, each with the insight agent that reads it (Page 2)
+  - name: context
+    required: true
+    sample: ["*.eml", "*.msg"]
+    agent: context-agent                  # takes lane_file: one job over all the lane's files, given as text
     view: [{title: Trigger context, kv: [trigger_type, trigger_event]}, {title: Evidence gaps, list: evidence_gaps}]
-  doc:
-    workflow: workflows/doc-agent.yaml    # per: file (default): one job per file
-    view: [{kv: [document_type, reference]}, {facts: key_values}, {title: Anomalies, list: anomalies}]
+  - name: evidence
+    sample: ["*"]
+    agent: doc-agent                      # takes file: one job per file; no view: shown by its schema
+sample: ../../../examples/ter-case        # optional sample bundle (files go to the first lane whose globs match)
+pulls: [kyc_profile, txn_history]         # data pulls this app offers (studio.yaml data_pulls)
 report:                                   # Page 3
   name: TER report
-  workflow: workflows/report-agent.yaml
+  workflow: ter-report-agent
   verdicts: {Agree: ok, Further investigation: warn}    # tone per verdict: ok | warn | bad | info
-  view:
+  hide: [confidence]                      # schema keys never shown
+  view:                                   # custom blocks first; the other schema keys follow by default
     - {title: Executive narrative, text: executive_narrative}
     - {title: Key risks, cards: key_risks, kicker: id, head: title, score: score, body: reason, notes: [evidence, gap]}
 extras:                                   # optional agents feeding the report, picked per run
-  investigation: {workflow: workflows/investigation-agent.yaml, label: Investigation agent}
+  investigation: {workflow: investigation-agent, label: Investigation agent}
   openweb: {url: http://research-host:9000/agent, label: OpenWeb research agent}   # another process / host
 ```
 
-**Views.** An agent answers with JSON of its workflow's `schema`; its `view` says how the front end (and the
-Markdown export) shows it, with a fixed set of blocks - agents never write HTML. A block is
-`{<type>: <path into the result>, title?, options}`:
+**Case brief.** Every agent gets a one-line `case_brief` built from the fields - the case and app, then each
+filled field as `Label: value` in field order (`Case TER-2026-00001 (TER review). Customer CIF: CIF-8842197; Start
+date: 2026-07-01; …`). Empty optional fields are left out; there is no template to keep in step with the fields.
+Framing ("you write a TER report…") belongs in each agent workflow's `instructions`.
+
+**Views.** An agent answers with JSON of its workflow's `schema`; the front end (and the Markdown export) shows
+it with a fixed set of blocks - agents never write HTML. A block is `{<type>: <path into the result>, title?,
+options}`:
 
 | Block | Path points at | Options |
 | --- | --- | --- |
@@ -535,8 +576,22 @@ Markdown export) shows it, with a fixed set of blocks - agents never write HTML.
 | `cards` | a list of objects | `head`, `kicker`, `score` (0-100 ring, sorted), `body`, `notes: [keys]` |
 | `facts` | a list of `{field, value, location, confidence}` | Page 2 only: rows the analyst can flag |
 
-When the studio loads, every path and option is checked against the workflow's schema (a typo is refused with
-its place), so an app fails at start, not on screen.
+The `view` is optional and only for what needs a custom look. The shown view is the custom blocks in their
+order, then a default block for every other top-level schema key, in schema order, chosen by shape:
+
+| Schema shape | Default block |
+| --- | --- |
+| an object | `kv`, titled from the key (`background` → "Background") |
+| a list of `{field, value, location, confidence}` | `facts` (insight agents; a report gets a `table`) |
+| another list of objects | `table` |
+| a list of strings | `list` |
+| plain values (string, number, `"A\|B"`) | consecutive ones grouped in one `kv`; a single one as `text` |
+
+`hide: [key, ...]` drops keys. A report's framework keys (below) are never in its view: the page shows them
+itself. An external (`url:`) agent's result is unknown until it runs, so it needs a complete view. When the
+studio loads, every view path, option and hidden key is checked against the workflow's schema (a typo is refused
+with its place), so an app fails at start, not on screen. `GET /api/apps` returns each app with its full,
+resolved views.
 
 **Report framework.** Every report agent's result carries `title`, `verdict` (one of the schema's `"A|B"` values,
 each with a tone in `verdicts`), `reply` (its answer to the analyst's prompt), `requests`
@@ -547,7 +602,10 @@ A prompt is a report job with that `instruction`; the version it produces record
 page returns to the case table, which shows the new version when it is in.
 
 **Agent contract.** The studio passes each kind of agent fixed workflow inputs, and a workflow must declare
-exactly those (checked at load):
+exactly those (checked at load). A lane agent's inputs also decide how it runs: a workflow taking `file` gets one
+job per file, one taking `lane_file` one job over the whole lane. Its label defaults to the workflow name
+(`doc-agent` → "Doc agent"). An external lane agent is `agent: {url: …, per: file | lane, label: …}` and
+needs a complete `view`.
 
 | Agent | Inputs |
 | --- | --- |
@@ -570,7 +628,8 @@ pulls' key values and CSV paths, extra agent results and the analyst corrections
   `GET {public_url}/api/cases/<id>/docs/<name>`. The agent returns a JSON object of the shape its view expects
   (a report agent: the report framework keys too); its paths are only known at run time, so missing ones show
   as empty.
-- `<workspace>/studio.yaml` overrides the bundled file; so does `--config`.
+- `<workspace>/studio.yaml` overrides the bundled `config/studio.yaml`; so does `--config`. Its paths (apps,
+  `workflows`, `sql_file`, database URLs) are relative to the file.
 
 **Bundled apps.**
 
@@ -579,7 +638,8 @@ pulls' key values and CSV paths, extra agent results and the analyst corrections
 | `ter` · TER review | Context (required) → context agent, per lane (Trigger Context); Evidence → doc agent, per file (key values, anomalies); five core-banking pulls; extra: investigation agent | TER report: assessment, executive narrative, trigger, background, KYC review, transactions, scored key risks, recommended next step; verdict Agree / Further investigation |
 | `rm` · RM insight | Sources (required) → source agent, per file (source system, facts, stated / inferred relationships, signals) | Wealth insight (AURA pillars): ranked target clients, relationship evidence, answer per target, evidence chain, RM coordination, source provenance; verdict Proceed / Controlled review / Insufficient evidence |
 
-A new use case is a new `apps/<name>/` folder (app.yaml + workflows) and one line under `apps:`; no code.
+A new use case is a new `config/apps/<name>/app.yaml` plus one line under `apps:`; it reuses agents from
+`config/apps/workflows/` by name or adds its own there. No code.
 
 ### Data pulls (`studio.yaml`)
 
@@ -592,13 +652,13 @@ materials.
 
 ```yaml
 databases:
-  core: {url: "sqlite:///../dataset/core-banking/core_banking.sqlite", label: Core banking (mock),
+  core: {url: "sqlite:///../../dataset/core-banking/core_banking.sqlite", label: Core banking (mock),
          timeout: 1800, row_cap: 200000, latency: 20}
 data_pulls:
   txn_history:
     database: core
     label: Transaction history
-    sql_file: queries/txn_history.sql     # binds app fields: :cif, :lookback_date, :start_date, ...
+    sql_file: ../queries/txn_history.sql  # binds app fields: :cif, :lookback_date, :start_date, ...
     default: true                         # pre-ticked on Page 1; or triggers: [adverse media, ...] (words in the fields)
     key_values:
       Transactions: SELECT COUNT(*) FROM result                     # one value
@@ -633,7 +693,7 @@ data_pulls:
 | `outputs/data/<pull>.json` | the latest data pull: parameters, SQL, row count, key values, first rows |
 | `data/<pull>.csv` | the pulled rows |
 | `outputs/extra/<agent>.json` | extra agent results (same wrapper) |
-| `outputs/reports/v<n>.json` and `.md` | the report versions (the Markdown follows the app's view) |
+| `outputs/reports/v<n>.json` | the report versions, exactly as the report agent answered (Markdown for the ZIP and print is rendered from them with the app's current view) |
 | `jobs/<job>/` | per job: materials, workflow state, agent session |
 | `events.jsonl` | the activity feed |
 
@@ -655,7 +715,7 @@ API (`/api/docs`): `GET /api/health`, `GET /api/apps` (each app's fields, lanes,
 
 Build the mock core-banking database once (`uv run --project kentc-agent python dataset/make_core_banking_db.py`).
 Start the LLM server (local Strata on port 8081), then `uv run kentc-studio --workspace /tmp/studio --effort low` and open
-http://127.0.0.1:8090. Both pills in the top bar should be green (model id; *agents idle*). Timings are rough for
+http://127.0.0.1:8090. The model pill in the top bar should be green (model id and context size). Timings are rough for
 the local model at low effort.
 
 1. **Intake validation.** In *TER review*, stage only an Evidence file and press *Upload & start*: the page
@@ -667,7 +727,7 @@ the local model at low effort.
    - *Context agent* (with *· data k/5* while the pulls run), then *Doc agent (k/5 files)*, about 1-3 min per file
    - *Insights ready · review required* with **PENDING REVIEW**
 
-   During this, *Agent work* shows each job, tool calls such as `read(...)`, the parsing sub-agent reading the
+   During this, *Agent work* on the row shows each job, tool calls such as `read(...)`, the parsing sub-agent reading the
    PDFs, and live thinking text.
 3. **Page 2 review.** Open *Review →*.
    - **CONTEXT · Context agent:** trigger type and source, matched parties and evidence gaps are filled. The
@@ -698,17 +758,17 @@ the local model at low effort.
     file. You land on Page 2 with the new file being read; review it, then regenerate (back to the case table).
 11. **Approve and export.** *Approve vN* (Page 3 header) changes the row to *Approved · TER report vN*. *Case ZIP*
     contains `case-detail.json` (fields, lane and file insights, pulls, report versions with their prompts),
-    `decision-trace.csv` (HUM / AGT / SYS), `evidence-manifest.csv`, `reports/v*.md` and `report.html`. *Print*
-    prints the report only.
+    `decision-trace.csv` (HUM / AGT / SYS), `evidence-manifest.csv`, `reports/v*.md` (rendered from each version's
+    JSON at export) and `report.html`. *Print* prints the report only.
 12. **Stop / retry / restart.**
-    - Start a report, press *Stop* in *Agent work*: the job ends as *stopped* at the agent's next event.
+    - Start a report, press *Stop* on the row: the job ends as *stopped* at the agent's next event.
     - Press *Retry* on the row to queue it again.
     - Restart the server during a job: the case reloads with the job stopped (`POST .../retry` queues it again).
 13. **Second app, same loop.** In *RM insight*, use the sample bundle and upload while the TER case runs. Its
     jobs show *Queued* until the local agent is free (a local LLM server serves one request at a time). Page 2
     shows each source's system, facts, stated / inferred relationships and signals; Page 3 the wealth-insight
     pillars with a Proceed / Controlled review / Insufficient evidence verdict, the same next steps and prompt.
-14. **External agent (optional).** Uncomment `extras.openweb` in `apps/ter/app.yaml` and point it at any small
+14. **External agent (optional).** Uncomment `extras.openweb` in `config/apps/ter/app.yaml` and point it at any small
     HTTP service that returns e.g. `{"observations": ["..."]}`. It appears as a checkbox, runs in parallel, and
     its result is in the next report's materials (`jobs/<id>/materials.json`).
 15. **Data pulls with the TER dataset.** Fill Page 1 with the `dataset/README.md` inputs (CIF-7731042,
@@ -797,7 +857,7 @@ with the server's own numbers.
 | `src/kentc_studio/{providers,store,models,config,data,report}.py` | workflow / HTTP agents, atomic persistence, domain model, studio config, SQL pulls, view → Markdown |
 | `web/` | studio front end: `index.html`, `assets/css/app.css`, `assets/js/app.js` (one block renderer for every app) |
 | `docs/` | design explainer in Traditional Chinese: `index.html`, `asset/css/core.css`, `asset/js/core.js` (interactive calculators run in the browser only) |
-| `studio.yaml`, `apps/<name>/`, `queries/` | the apps served, databases and data pulls; each app's manifest and agent workflows; the pull SQL |
+| `config/studio.yaml`, `config/apps/`, `config/cli/workflows/`, `queries/` | studio config (apps, agent library, databases, data pulls); app manifests and the shared Studio agents; CLI workflows; the pull SQL |
 | `src/kentc_agent/workflow.py` | YAML workflows: validation, Jinja, steps, human gates, resume |
 | `src/kentc_agent/adapters/llm.py` | OpenAI-compatible client (Strata, LiteLLM, vLLM): streaming, tool calls, usage, overflow detection |
 | `src/kentc_agent/adapters/web.py` | web search providers (ddgs, SearXNG) and the fallback chain |

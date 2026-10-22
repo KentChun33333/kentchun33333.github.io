@@ -648,7 +648,7 @@ def _slug(value: Any) -> str:
     return re.sub(r"[^A-Za-z0-9]+", "-", str(value)).strip("-").lower()[:60] or "item"
 
 
-BUNDLED = Path(__file__).resolve().parents[2] / "workflows"
+BUNDLED = Path(__file__).resolve().parents[2] / "config" / "cli" / "workflows"
 
 
 def workflow_dirs(workspace: Path) -> list[Path]:
@@ -666,4 +666,4 @@ def find_workflow(workspace: Path, name: str) -> Path:
             if (d / f"{name}{ext}").is_file():
                 return (d / f"{name}{ext}").resolve()
     raise WorkflowError(f"workflow {name!r} not found (a path, or a name in {STATE_DIR}/workflows/, workflows/ or "
-                        f"the bundled workflows)")
+                        f"the bundled config/cli/workflows/)")

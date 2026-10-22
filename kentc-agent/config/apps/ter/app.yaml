@@ -1,0 +1,70 @@
+# TER review: Trigger Event Review of a bank financial-crime case (as in ter-bank-multi-agent-flow-v15.html).
+# Page 1: case fields + Context / Evidence lanes + data pulls · Page 2: Trigger Context and document key values to
+# verify · Page 3: the TER report with suggested next steps; each prompt is a new version.
+# Defaults: labels come from the names, the case ID prefix is TER-<year>-, and an agent without a view (or the
+# keys its view leaves out) is shown by the shape of its schema; `hide` drops keys.
+
+title: TER review
+description: Trigger Event Review - context and evidence documents plus core-banking pulls into a TER report.
+case: {label: TER case ID}
+
+fields:
+  - {name: cif, label: Customer CIF, required: true, column: true, default: CIF-8842197}
+  - {name: customer, label: Customer name, column: true, wide: true, default: Orchid Meridian Trading}
+  - {name: start_date, type: date, required: true, default: "2026-07-01"}
+  - {name: lookback_date, type: date, required: true, default: "2026-04-01"}
+  - {name: related_entity}
+  - {name: review_scope, default: Import activity and connected transactions}
+  - name: trigger
+    label: Trigger event
+    type: textarea
+    required: true
+    default: >-
+      Police intelligence: the Singapore account of UBO Tan Wei Ming may be compromised. The ML trigger model
+      flagged a trade anomaly on recent import payments.
+
+lanes:
+  - name: context
+    hint: Trigger e-mails, customer explanations, case notes → context agent
+    required: true
+    sample: ["*.eml", "*.msg"]
+    agent: context-agent                    # takes lane_file: one job over the whole lane, as text
+    view:
+      - title: Trigger context
+        kv: [trigger_type, trigger_source, trigger_event, profile_deviation, customer_explanation, routing_rationale]
+      - {title: Matched parties, chips: matched_parties}
+      - {title: Initial evidence gaps, list: evidence_gaps}
+  - name: evidence
+    hint: Invoices, contracts, B/L, customs, statements → doc agent (key values)
+    sample: ["*"]
+    agent: doc-agent                        # takes file: one job per file; no view: type / reference / summary,
+                                            # flaggable key values, anomalies
+
+sample: ../../../examples/ter-case
+pulls: [kyc_profile, txn_history, counterparties, monthly_activity, prior_alerts]
+
+report:
+  name: TER report
+  workflow: ter-report-agent
+  verdicts: {Agree: ok, Further investigation: warn}
+  hide: [confidence]
+  view:
+    - {title: Assessment, kv: [typology]}
+    - {title: Executive narrative, text: executive_narrative}
+    - {title: Trigger, kv: trigger, labels: {type: Trigger type, event: Trigger event}}
+    - {title: Background, kv: background, labels: {owners_directors: Directors / UBO}}
+    - {title: KYC review, text: kyc_review}
+    - {title: Transaction review, table: transactions, columns: {date: Date, from: From, to: To, amount: Amount,
+                                                                 result: Review result}}
+    - {title: Justification and key risks, cards: key_risks, kicker: id, head: title, score: score, body: reason,
+       notes: [evidence, gap]}
+    - {title: Recommended next step, kv: recommendation}
+
+extras:
+  investigation:
+    workflow: investigation-agent
+    label: Investigation agent (cross-checks, entity risk ranking)
+  # openweb:
+  #   url: http://research-host:9000/agent
+  #   label: OpenWeb research agent (registry, adverse news)
+  #   timeout: 1800

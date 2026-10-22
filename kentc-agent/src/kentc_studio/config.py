@@ -1,8 +1,9 @@
-"""Studio configuration (studio.yaml): the apps one studio serves, and the bank databases and SQL data pulls they
-share.
+"""Studio configuration (config/studio.yaml): the apps one studio serves, the library of agent workflows they share,
+and the bank databases and SQL data pulls they share. Paths are relative to this file.
 
     apps:                          # name -> app manifest (apps.py): intake, insight agents, report
       ter: apps/ter/app.yaml
+    workflows: apps/workflows      # agent workflows any app refers to by name (the default)
     public_url: http://127.0.0.1:8090
     databases: {...}               # data.py
     data_pulls: {...}              # an app lists the pulls it offers; their SQL binds the app's fields
@@ -28,6 +29,7 @@ class StudioRaw(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     apps: dict[str, str] = Field(default_factory=dict)
+    workflows: str = "apps/workflows"
     public_url: str = "http://127.0.0.1:8090"
     databases: dict[str, dict[str, Any]] = Field(default_factory=dict)
     data_pulls: dict[str, dict[str, Any]] = Field(default_factory=dict)
@@ -52,5 +54,8 @@ def load_config(path: Path) -> StudioConfig:
         pulls = load_pulls(raw.model_dump(), base)
     except DataError as e:
         raise AgentError(f"{path}: {e}") from None
-    apps = {name: load_app(name, (base / rel).resolve(), pulls) for name, rel in raw.apps.items()}
+    library = (base / raw.workflows).resolve()
+    if not library.is_dir():
+        raise AgentError(f"{path}: workflows folder {library} not found")
+    apps = {name: load_app(name, (base / rel).resolve(), pulls, library) for name, rel in raw.apps.items()}
     return StudioConfig(apps, str(raw.public_url or "http://127.0.0.1:8090").rstrip("/"), pulls)

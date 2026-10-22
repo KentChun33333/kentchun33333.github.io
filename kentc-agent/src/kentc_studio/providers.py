@@ -1,7 +1,9 @@
 """Who runs an agent job, and how to reach it.
 
-- WorkflowProvider runs a kentc-agent workflow in-process on the configured LLM server. The result is the JSON
-  answer of the workflow's last step. A local server serves one request at a time, so these jobs run one by one.
+- WorkflowProvider runs a kentc-agent workflow in-process on the configured LLM server. The workflow is named in the
+  app manifest and found in the studio's shared agent library (studio.yaml `workflows`, default apps/workflows/), so
+  any app may use any agent there. The result is the JSON answer of the workflow's last step. A local server serves
+  one request at a time, so these jobs run one by one.
 - HttpProvider calls an external agent: another process or host, any implementation. It POSTs
       {"role", "app", "case_id", "job_id", "inputs", "documents": [{"name", "lane", "url"}], "materials"}
   and expects back a JSON object (the result itself, or {"result": {...}}). These jobs run in parallel with
@@ -108,6 +110,14 @@ class HttpProvider(Provider):
         return data
 
 
+def workflow_path(library: Path, name: str) -> Path:
+    """An agent workflow by name (`doc-agent`) in the studio's shared library."""
+    for ext in (".yaml", ".yml"):
+        if (library / f"{name}{ext}").is_file():
+            return (library / f"{name}{ext}").resolve()
+    return (library / f"{name}.yaml").resolve()
+
+
 def _offered_tools(wf: Workflow) -> set[str]:
     """Every tool some prompt step of `wf` offers the model."""
     out: set[str] = set()
@@ -118,14 +128,15 @@ def _offered_tools(wf: Workflow) -> set[str]:
     return out
 
 
-def make_provider(name: str, spec: dict[str, Any], base: Path, inputs: set[str]) -> Provider:
-    """`inputs`: what the studio passes this agent; a workflow must declare exactly those (it refuses unknown inputs)
-    and may not require any other."""
+def make_provider(name: str, spec: dict[str, Any], library: Path, inputs: set[str]) -> Provider:
+    """`spec["workflow"]`: a workflow name in `library`. `inputs`: what the studio passes this agent; a workflow must
+    declare exactly those (it refuses unknown inputs) and may not require any other."""
     label = str(spec.get("label") or name)
     if spec.get("workflow"):
-        path = (base / spec["workflow"]).resolve()
+        path = workflow_path(library, str(spec["workflow"]))
         if not path.is_file():
-            raise AgentError(f"agent {name}: workflow {path} not found")
+            raise AgentError(f"agent {name}: workflow {spec['workflow']!r} not found in {library} (give its name, "
+                             "without .yaml)")
         try:
             wf = load(path)
         except WorkflowError as e:

@@ -6,16 +6,16 @@ that holds the rows. No model is involved, so pulls run in parallel with the age
 model; the report job waits for them like it waits for the insight agents. An app lists the pulls it offers; each
 pull may only bind that app's fields (checked when the app loads).
 
-studio.yaml:
+config/studio.yaml (paths relative to it):
 
     databases:
-      core: {url: "sqlite:///../dataset/core-banking/core_banking.sqlite", label: Core banking, timeout: 1800,
+      core: {url: "sqlite:///../../dataset/core-banking/core_banking.sqlite", label: Core banking, timeout: 1800,
              row_cap: 200000}
     data_pulls:
       txn_history:
         database: core
         label: Transaction history
-        sql_file: queries/txn_history.sql
+        sql_file: ../queries/txn_history.sql
         default: true                    # pre-ticked on Page 1 (or `triggers: [adverse media, ...]`)
         key_values:
           Transactions: SELECT COUNT(*) FROM result
