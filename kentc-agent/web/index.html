@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BANK · TER Agentic Studio</title>
+<title>BANK · Agentic Studio</title>
 <link rel="stylesheet" href="/assets/css/app.css">
 </head>
 <body>
@@ -11,19 +11,19 @@
   <div class="brand">
     <div class="bank-logo" aria-label="BANK"><i aria-hidden="true">B</i><span>BANK</span></div>
     <div class="mosaic-agents">AI AGENTS</div>
-    <div class="brand-copy">Financial Crime Operations · TER Studio</div>
+    <div class="brand-copy" id="brandCopy">Agentic Studio</div>
   </div>
   <div class="top-actions">
-    <button class="top-action" id="backBtn" hidden>← Case queue</button>
+    <button class="top-action" id="backBtn" hidden>← Case table</button>
     <span class="pill" id="queuePill" title="Agent jobs"><span class="dot"></span><span>idle</span></span>
     <span class="pill" id="modelPill" title="LLM server"><span class="dot"></span><span>connecting…</span></span>
   </div>
 </header>
 
 <nav class="journey" aria-label="Workflow progress">
-  <button class="journey-step active" data-page="1"><i>1</i><div><b>Stage &amp; track</b><small>Upload documents, follow the agents</small></div></button>
-  <button class="journey-step" data-page="2"><i>2</i><div><b>Review extraction</b><small>Correct values, add documents</small></div></button>
-  <button class="journey-step" data-page="3"><i>3</i><div><b>TER report</b><small>Request, refine, approve</small></div></button>
+  <button class="journey-step active" data-page="1"><i>1</i><div><b>Intake &amp; track</b><small>Fields, files, data · case table</small></div></button>
+  <button class="journey-step" data-page="2"><i>2</i><div><b>Verify insights</b><small>Flag values, add files</small></div></button>
+  <button class="journey-step" data-page="3"><i>3</i><div><b id="journey3">Report</b><small>Read, prompt, approve</small></div></button>
 </nav>
 
 <main class="app">
@@ -31,38 +31,31 @@
   <section class="page active" id="page1">
     <header class="page-heading">
       <div>
-        <div class="eyebrow">Page 1 · Case work queue</div>
-        <h1>Stage case documents and track the agents</h1>
-        <p>Stage the context documents (required) and the evidence for the doc agent (optional), pick the data pulls from the bank's systems, then upload. Pulls and agents run asynchronously; the case table updates as they work.</p>
+        <div class="eyebrow">Page 1 · Case table</div>
+        <h1>Start a case and track the agents</h1>
+        <p>Pick an app, fill in its fields, stage files in its lanes and tick the data pulls, then upload. Agents and pulls run asynchronously; the case table shows when insights or a new report version are ready.</p>
       </div>
     </header>
 
     <details class="new-case-panel" id="newCasePanel" open>
       <summary>NEW CASE <span class="summary-meta" id="intakeSummary"></span></summary>
+      <div class="app-pick" id="appPick" role="tablist" aria-label="App"></div>
       <form class="intake-layout" id="caseForm" autocomplete="off">
         <article class="card">
-          <h2>CASE IDENTITY</h2>
-          <div class="form-grid">
-            <div class="field"><label for="cif">Customer CIF</label><input class="input" id="cif" name="cif" required></div>
-            <div class="field"><label for="caseId">TER case ID</label><input class="input" id="caseId" name="case_id" required></div>
-            <div class="field wide"><label for="customer">Customer name (optional)</label><input class="input" id="customer" name="customer"></div>
-            <div class="field"><label for="startDate">Start date</label><input class="input" id="startDate" name="start_date" type="date" required></div>
-            <div class="field"><label for="lookbackDate">Lookback date</label><input class="input" id="lookbackDate" name="lookback_date" type="date" required></div>
-            <div class="field"><label for="relatedEntity">Related entity (optional)</label><input class="input" id="relatedEntity" name="related_entity"></div>
-            <div class="field"><label for="reviewScope">Review scope</label><input class="input" id="reviewScope" name="review_scope"></div>
-            <div class="field wide"><label for="trigger">Trigger event</label><textarea class="input" id="trigger" name="trigger" rows="3" required></textarea></div>
-          </div>
+          <h2 id="fieldsTitle">CASE</h2>
+          <p class="caption" id="appDescription"></p>
+          <div class="form-grid" id="fieldGrid"></div>
         </article>
         <article class="card">
           <div class="actions" style="justify-content:space-between">
-            <h2>STAGE DOCUMENTS</h2>
-            <button type="button" class="btn secondary small" id="sampleBtn" title="Fictional TER evidence bundle">Auto · sample bundle</button>
+            <h2>STAGE FILES</h2>
+            <button type="button" class="btn secondary small" id="sampleBtn" title="Fictional sample bundle">Auto · sample bundle</button>
           </div>
           <div class="lanes" id="intakeLanes"></div>
           <div class="pulls" id="intakePulls"></div>
           <div class="intake-footer">
             <span class="caption" id="stageCount">Nothing staged.</span>
-            <button type="submit" class="btn" id="submitCase">Upload &amp; start parsing →</button>
+            <button type="submit" class="btn" id="submitCase">Upload &amp; start →</button>
           </div>
         </article>
       </form>
@@ -70,12 +63,12 @@
 
     <section class="card">
       <div class="history-head">
-        <div><h2>CASE MANAGEMENT</h2><p>Live status of every case and its agent jobs.</p></div>
-        <label class="history-search">CIF search <input class="input" id="cifSearch" type="search" placeholder="Search CIF or case"></label>
+        <div><h2>CASE MANAGEMENT</h2><p>Live status of every case and its agent jobs. A new report version shows <span class="chip new">NEW</span> until you open it.</p></div>
+        <label class="history-search">Search <input class="input" id="caseSearch" type="search" placeholder="Case ID or field"></label>
       </div>
       <div class="table-wrap">
         <table class="grid">
-          <thead><tr><th>Case</th><th>CIF ID</th><th>Customer</th><th>Status</th><th>Recommendation</th><th>Agent work</th><th>Action</th></tr></thead>
+          <thead><tr><th>Case</th><th>App</th><th>Subject</th><th>Status</th><th>Verdict</th><th>Agent work</th><th>Action</th></tr></thead>
           <tbody id="queueBody"><tr><td colspan="7" class="empty">Loading cases…</td></tr></tbody>
         </table>
       </div>
@@ -86,46 +79,43 @@
   <section class="page" id="page2">
     <header class="page-heading">
       <div>
-        <div class="eyebrow">Page 2 · Extraction review</div>
-        <h1>Review extracted key values and context</h1>
-        <p>Flag values that look wrong (the document is re-extracted with your note), check the data pulled from the bank's systems, add documents at any time, then continue to the TER report. Nothing here waits: cards fill in as each job finishes.</p>
+        <div class="eyebrow" id="p2Eyebrow">Page 2 · Verify insights</div>
+        <h1>Verify what the agents found</h1>
+        <p>Flag a value that looks wrong or leave a note: that agent runs again with it. Check the data pulled from the bank's systems and add files at any time. Nothing here waits: cards fill in as each job finishes.</p>
       </div>
-      <div class="actions no-print"><button class="btn secondary small" data-open-work>Agent work</button><button class="btn small" data-goto="3">TER report →</button></div>
+      <div class="actions no-print"><button class="btn secondary small" data-open-work>Agent work</button><button class="btn small" data-goto="3" id="toReport2">Report →</button></div>
     </header>
     <div class="case-strip" id="strip2"></div>
     <div class="ready-bar" id="ready2"></div>
     <div class="review-layout">
       <div class="stack">
-        <details class="card fold" open id="contextFold">
-          <summary>CONTEXT SUMMARY <span class="summary-meta" id="contextMeta"></span></summary>
-          <div class="fold-body" id="contextBody"></div>
-        </details>
-        <details class="card fold" open>
+        <div class="stack" id="laneFolds"></div>
+        <details class="card fold" open id="dataFold">
           <summary>DATA PULLS <span class="summary-meta" id="dataMeta"></span></summary>
           <div class="fold-body"><div class="data-grid" id="dataGrid"></div></div>
         </details>
-        <details class="card fold" open>
-          <summary>KEY INSIGHT EXTRACTION <span class="summary-meta" id="insightMeta"></span></summary>
+        <details class="card fold" open id="factsFold">
+          <summary>FACTS TO VERIFY <span class="summary-meta" id="factMeta"></span></summary>
           <div class="fold-body">
-            <div class="actions filter-row" id="insightFilter">
+            <div class="actions filter-row" id="factFilter">
               <button class="seg active" data-filter="all">All</button><button class="seg" data-filter="low">Low confidence</button><button class="seg" data-filter="flagged">Flagged</button>
             </div>
-            <div class="insights" id="insights"></div>
+            <div class="insights" id="facts"></div>
           </div>
         </details>
         <details class="card fold" open>
-          <summary>DOCUMENTS <span class="summary-meta" id="docMeta"></span></summary>
+          <summary>FILES <span class="summary-meta" id="docMeta"></span></summary>
           <div class="fold-body"><div class="doc-grid" id="docGrid"></div></div>
         </details>
       </div>
       <aside class="drawer">
-        <header><b>Analyst workspace</b><small>Add evidence, follow the jobs, move on</small></header>
+        <header><b>Analyst workspace</b><small>Add files, follow the jobs, move on</small></header>
         <div class="drawer-body">
-          <div><h3>STAGE MORE DOCUMENTS</h3><div class="lanes compact" id="moreLanes"></div>
-            <button class="btn dark" id="uploadMore" style="width:100%;margin-top:9px" disabled>Upload &amp; extract</button></div>
+          <div><h3>STAGE MORE FILES</h3><div class="lanes compact" id="moreLanes"></div>
+            <button class="btn dark" id="uploadMore" style="width:100%;margin-top:9px" disabled>Upload &amp; read</button></div>
           <div><h3>AGENT JOBS</h3><ul class="job-list" id="jobList2"></ul></div>
-          <div><h3>TER REPORT</h3><div class="extra-list" id="extraList2"></div>
-            <button class="btn" id="genReport2" style="width:100%;margin-top:9px">Generate TER report →</button>
+          <div><h3 id="reportHead2">REPORT</h3><div class="extra-list" id="extraList2"></div>
+            <button class="btn" id="genReport2" style="width:100%;margin-top:9px">Generate report →</button>
             <p class="caption" id="genHint2"></p></div>
         </div>
       </aside>
@@ -136,14 +126,17 @@
   <section class="page" id="page3">
     <header class="page-heading">
       <div>
-        <div class="eyebrow" id="p3Eyebrow">Page 3 · TER report</div>
-        <h1 id="p3Title">Trigger Event Report</h1>
-        <p id="p3Intro">Built from the doc agent, the context agent and any extra agents. Ask for documents, refine it, then approve.</p>
+        <div class="eyebrow" id="p3Eyebrow">Page 3 · Report</div>
+        <h1 id="p3Title">Report</h1>
+        <p>The latest version, with the agent's suggested next steps. A prompt on the right (slide it away for a wider report) becomes the next version in the background - the case table tells you when it is ready.</p>
       </div>
       <div class="actions no-print">
         <label class="version-pick">Version <select class="input" id="versionSel"></select></label>
+        <button class="btn green small" id="approveBtn" disabled>Approve</button>
+        <a class="btn secondary small" id="zipLink" href="#">Case ZIP</a>
+        <button class="btn secondary small" id="printBtn">Print</button>
         <button class="btn secondary small" data-open-work>Agent work</button>
-        <button class="btn secondary small" data-goto="2">← Extraction</button>
+        <button class="btn secondary small" data-goto="2">← Insights</button>
       </div>
     </header>
     <div class="case-strip" id="strip3"></div>
@@ -152,9 +145,10 @@
         <div class="banner" id="staleBanner" hidden></div>
         <section class="card" id="reportCard"><div id="reportView"></div></section>
       </div>
-      <aside class="drawer" id="nextDrawer">
-        <header><b>Next steps</b><small id="nextSub">Follow the suggestions or refine the report</small></header>
-        <div class="drawer-body" id="nextBody"></div>
+      <aside class="drawer prompt-panel" id="promptPanel" aria-label="Prompt">
+        <header><div class="ph-text"><b>New prompt</b><small>One prompt → one new version, in the background</small></div>
+          <button type="button" class="slide-btn" id="promptToggle" aria-controls="promptBody" aria-expanded="true"><span class="open-icon">⟩</span><span class="closed-label">✎ PROMPT</span></button></header>
+        <div class="drawer-body" id="promptBody"></div>
       </aside>
     </div>
   </section>

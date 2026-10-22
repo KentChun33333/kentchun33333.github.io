@@ -1,5 +1,5 @@
 name: investigation-agent
-description: Studio extra agent - cross-checks the extracted evidence and ranks entities by mismatch risk.
+description: TER app, extra agent - cross-checks the evidence and ranks entities by mismatch risk.
 
 inputs:
   materials_file: {required: true}
@@ -17,8 +17,8 @@ steps:
   - id: investigate
     tools: [read]
     prompt: |
-      Case materials (context summary, document extractions, data pulls from the bank's systems, analyst
-      corrections):
+      Case materials (lane_insights.context: the trigger context summary; document extractions; data pulls from
+      the bank's systems; analyst corrections):
       {{ read_file(inputs.materials_file) }}
 
       Cross-check the documents against each other, against the data pulls (system records) and against the

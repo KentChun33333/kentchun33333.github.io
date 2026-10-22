@@ -1,9 +1,10 @@
 """Data pulls: fixed, parameterised SQL queries against bank databases, run as studio jobs without the model.
 
-A pull binds the case fields (:cif, :lookback_date, :start_date, :related_entity, ...) into its SQL, streams the
+A pull binds the case's app fields (e.g. :cif, :lookback_date, :start_date) and :case_id into its SQL, streams the
 rows to cases/<id>/data/<pull>.csv and profiles them with its key-value queries: plain SQL over a `result` table
 that holds the rows. No model is involved, so pulls run in parallel with the agents and do not hold the local
-model; the report job waits for them like it waits for extractions.
+model; the report job waits for them like it waits for the insight agents. An app lists the pulls it offers; each
+pull may only bind that app's fields (checked when the app loads).
 
 studio.yaml:
 
@@ -32,7 +33,6 @@ from typing import Any
 
 from kentc_agent.agent import Aborted, Events
 
-PARAMS = ("case_id", "cif", "customer", "start_date", "lookback_date", "related_entity", "trigger", "review_scope")
 BIND_RE = re.compile(r"(?<![:\w]):([A-Za-z_]\w*)")
 FETCH_ROWS = 2000
 PREVIEW_ROWS = 15
@@ -87,16 +87,15 @@ class DataPull:
 
     @property
     def binds(self) -> list[str]:
-        """The case fields this pull uses."""
-        found = BIND_RE.findall(self.sql + "\n".join(self.key_values.values()))
-        return [p for p in PARAMS if p in found]
+        """The parameters this pull uses (case fields and :case_id), in order of first use."""
+        return list(dict.fromkeys(BIND_RE.findall(self.sql + "\n" + "\n".join(self.key_values.values()))))
 
     def describe(self) -> str:
         return f"SQL on {self.database.label}"
 
-    def selected_for(self, trigger: str) -> bool:
-        """Pre-ticked for a case with this trigger text."""
-        t = trigger.lower()
+    def selected_for(self, text: str) -> bool:
+        """Pre-ticked for a case whose fields contain this text."""
+        t = text.lower()
         return self.default or any(k.lower() in t for k in self.triggers)
 
     # -------------------------------------------------------------- running

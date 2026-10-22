@@ -1,10 +1,11 @@
 name: context-agent
 description: >
-  Studio role `context` - the Trigger Context summary of the context documents (e.g. the trigger e-mail and its
-  attachments). One model call, no tools: the studio hands over the documents already converted to text.
+  TER app, per-lane agent of the Context lane - the Trigger Context summary of the context documents (e.g. the
+  trigger e-mail and its attachments). One model call, no tools: the studio hands over the lane's documents
+  already converted to text.
 
 inputs:
-  context_file: {required: true, description: "the context documents as text, prepared by the studio"}
+  lane_file: {required: true, description: "the lane's documents as text, prepared by the studio"}
   case_brief: {required: true}
   feedback: {default: ""}
 
@@ -22,7 +23,7 @@ steps:
     tools: []
     prompt: |
       Context documents:
-      {{ read_file(inputs.context_file) }}
+      {{ read_file(inputs.lane_file) }}
       {% if inputs.feedback %}
       Analyst feedback on the previous summary: {{ inputs.feedback }}
       {% endif %}

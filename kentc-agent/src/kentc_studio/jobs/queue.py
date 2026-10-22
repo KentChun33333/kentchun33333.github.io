@@ -8,14 +8,14 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any
 
-from kentc_agent.errors import Aborted
 from kentc_agent.adapters.llm import LLMError
 from kentc_agent.adapters.tools import ToolError
+from kentc_agent.errors import Aborted
 from kentc_agent.workflow import WorkflowError
 
-from ..config import AgentError
 from ..data import DataError
 from ..models import SETTLED, Job, JobEvents
+from ..providers import AgentError
 
 if TYPE_CHECKING:
     from ..service.cases import CaseService
@@ -59,9 +59,9 @@ class JobDispatcher:
                 if job.status != "queued" or any(status.get(a, "done") not in SETTLED for a in job.after):
                     continue
                 try:
-                    local = service.provider(job).local
+                    local = service.provider(case, job).local
                 except KeyError:
-                    job.status, job.error = "failed", f"{job.agent} is no longer configured in studio.yaml"
+                    job.status, job.error = "failed", f"{job.agent} is no longer configured in its app"
                     case.save()
                     return True
                 if local and self.local_busy:
@@ -76,25 +76,17 @@ class JobDispatcher:
 
     def _run(self, case: Any, job: Job, local: bool) -> None:
         service = self.service
-        label = service.label(job)
+        label = service.label(case, job)
         try:
             case.event("start", label, "started", job.id)
             job_dir = case.dir / "jobs" / job.id
             job_dir.mkdir(parents=True, exist_ok=True)
             events = JobEvents(case, job, label)
-            inputs = service._inputs(case, job, job_dir, events)
-            request: dict[str, Any] = {}
-            if job.role != "query":
-                materials = {"case": case.meta(),
-                             "context_documents": (job_dir / "context.md").read_text(encoding="utf-8")} \
-                    if job.role == "context" else service.materials(case)
-                request = {"role": job.role, "case_id": case.id, "job_id": job.id, "inputs": inputs,
-                           "documents": [{**d, "url": f"{service.config.public_url}/api/cases/{case.id}/docs/{d['name']}"}
-                                         for d in case.documents],
-                           "materials": materials}
-            result = service.provider(job).run(case_dir=case.dir, job_dir=job_dir, inputs=inputs, events=events,
-                                              settings=service.settings, llm=service.llm, request=request)
-            service._store(case, job, result)
+            inputs = service.inputs(case, job, job_dir, events)
+            result = service.provider(case, job).run(case_dir=case.dir, job_dir=job_dir, inputs=inputs, events=events,
+                                                    settings=service.settings, llm=service.llm,
+                                                    request=service.request(case, job, job_dir, inputs))
+            service.store_result(case, job, result)
             job.status = "done"
             case.audit("AGT", f"{label}: done")
             case.event("done", label, "finished", job.id)

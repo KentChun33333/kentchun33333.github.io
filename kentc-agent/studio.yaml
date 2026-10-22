@@ -1,25 +1,13 @@
-# TER Agentic Studio: which agent does each job.
-#   workflow: a kentc-agent workflow run in-process on the configured LLM server (local jobs run one at a time)
-#   url:      an external agent service in another process or host (HTTP JSON contract in README)
+# Agentic Studio: the apps it serves, and the bank databases and data pulls they share.
+#   apps:        name -> app manifest: Page 1 intake (fields, file lanes, pulls), Page 2 insight agents, Page 3
+#                report agent in the report framework (see src/kentc_studio/apps.py)
+#   public_url:  base URL external agents use to download case documents (GET /api/cases/<id>/docs/<name>)
 # A workspace can override this file with <workspace>/studio.yaml.
 
-agents:
-  doc:     {workflow: workflows/studio/doc-agent.yaml, label: Doc agent}
-  context: {workflow: workflows/studio/context-agent.yaml, label: Context agent}
-  report:  {workflow: workflows/studio/report-agent.yaml, label: Report agent}
+apps:
+  ter: apps/ter/app.yaml
+  rm: apps/rm/app.yaml
 
-# Optional agents that feed the report. The analyst picks them on Page 3; `default` pre-selects one.
-extra_agents:
-  investigation:
-    workflow: workflows/studio/investigation-agent.yaml
-    label: Investigation agent (cross-checks, entity risk ranking)
-    default: false
-  # openweb:
-  #   url: http://research-host:9000/agent
-  #   label: OpenWeb research agent (registry, adverse news)
-  #   timeout: 1800
-
-# Base URL external agents use to download case documents (GET /api/cases/<id>/docs/<name>).
 public_url: http://127.0.0.1:8090
 
 # Databases the data pulls read from (read-only). `latency` is for the mock database only: it holds each pull
@@ -33,10 +21,10 @@ databases:
     row_cap: 200000
     latency: 20
 
-# Data pulls: fixed SQL with the case fields as parameters (:cif, :lookback_date, :start_date, :related_entity,
-# :customer, :case_id, :trigger, :review_scope). They run without the model, in parallel with the agents; the report
-# waits for them. `key_values` are SQL over `result` (the pulled rows): one value, or a small table.
-# Pre-ticked on Page 1 when `default: true` or when the trigger text contains one of `triggers`.
+# Data pulls: fixed SQL with case fields as parameters (:cif, :lookback_date, ... any field of the app that offers
+# the pull, plus :case_id). They run without the model, in parallel with the agents; the report waits for them.
+# `key_values` are SQL over `result` (the pulled rows): one value, or a small table. An app lists the pulls it
+# offers; one is pre-ticked on Page 1 when `default: true` or when the case fields contain one of `triggers`.
 data_pulls:
   kyc_profile:
     database: core

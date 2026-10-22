@@ -1,9 +1,9 @@
-"""FastAPI routes of the TER Agentic Studio.
+"""FastAPI routes of the Agentic Studio: one async loop, several apps (studio.yaml -> apps/<name>/app.yaml).
 
-Flow: stage documents (context: required, doc evidence: optional) -> the doc agent extracts each document and
-the context agent summarises, asynchronously, while the case table updates -> Page 2 review: upload more,
-flag wrong values (re-extracted asynchronously) -> Page 3: the report agent (plus any extra agents) writes the
-TER report; request more documents from the client, refine the report into new versions, approve and export.
+Page 1: pick an app, fill its fields, stage files in its lanes, tick data pulls -> the insight agents read the
+files and the pulls run, asynchronously, while the case table updates. Page 2: verify the insights, flag wrong
+values (re-run asynchronously), add files. Page 3: the report agent writes the report in the report framework;
+every prompt becomes a new version the analyst finds back in the case table; approve and export.
 """
 
 from __future__ import annotations
@@ -22,17 +22,16 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from ..config import AgentError
+from ..providers import AgentError
 from ..report import to_html
-from ..service.cases import CaseService, Case
+from ..service.cases import Case, CaseService
 
 ROOT = Path(__file__).resolve().parents[3]
 WEB = ROOT / "web"
-SAMPLE = ROOT / "examples" / "ter-case"
 
 
 class Feedback(BaseModel):
-    target: str                 # a document name, or "context"
+    target: str                 # a document name, or "lane:<lane>"
     note: str = ""
     field: str = ""
     value: str = ""
@@ -52,14 +51,14 @@ class PullRequest(BaseModel):
     params: dict[str, str] = {}     # case-field overrides for this pull, e.g. {"lookback_date": "2026-03-01"}
 
 
-async def read_uploads(files: list[UploadFile], roles: list[str]) -> list[tuple[str, str, bytes]]:
-    if len(roles) not in (0, len(files)):
-        raise HTTPException(400, "give one role per file")
-    return [(f.filename or "", roles[i] if roles else "doc", await f.read()) for i, f in enumerate(files)]
+async def read_uploads(files: list[UploadFile], lanes: list[str]) -> list[tuple[str, str, bytes]]:
+    if len(lanes) != len(files):
+        raise HTTPException(400, "give one lane per file")
+    return [(f.filename or "", lanes[i], await f.read()) for i, f in enumerate(files)]
 
 
 def create_app(studio: CaseService, token: str = "") -> FastAPI:
-    app = FastAPI(title="TER Agentic Studio", docs_url="/api/docs")
+    app = FastAPI(title="Agentic Studio", docs_url="/api/docs")
     app.mount("/assets", StaticFiles(directory=WEB / "assets"), name="assets")
 
     @app.middleware("http")
@@ -100,35 +99,34 @@ def create_app(studio: CaseService, token: str = "") -> FastAPI:
         except Exception as e:  # noqa: BLE001 - reported to the UI as offline
             studio.llm._info = None
             model = {"online": False, "error": str(e)}
-        jobs = [(c.id, j) for c in studio.cases.values() for j in c.jobs]
-        running = [{"case": cid, "label": studio.label(j)} for cid, j in jobs if j.status == "running"]
+        cases = list(studio.cases.values())
+        running = [{"case": c.id, "label": studio.label(c, j)} for c in cases for j in c.jobs if j.status == "running"]
         return {"model": model, "workspace": str(studio.ws), "running": running,
-                "queued": sum(j.status == "queued" for _, j in jobs), "sample": SAMPLE.is_dir(),
-                "agents": {k: {"label": p.label, "describe": p.describe(), "remote": not p.local}
-                           for k, p in {**studio.config.agents, **studio.config.extras}.items()},
-                "data_pulls": [{"name": k, "label": p.label, "description": p.description, "database": p.database.label,
-                                "default": p.default, "triggers": p.triggers}
-                               for k, p in studio.config.pulls.items()]}
+                "queued": sum(j.status == "queued" for c in cases for j in c.jobs)}
+
+    @app.get("/api/apps")
+    def apps() -> list[dict[str, Any]]:
+        return [a.describe(studio.config.pulls) for a in studio.config.apps.values()]
 
     @app.get("/api/cases")
     def list_cases() -> list[dict[str, Any]]:
         return [studio.view(c) for c in sorted(studio.cases.values(), key=lambda c: c.created, reverse=True)]
 
     @app.post("/api/cases", status_code=201)
-    async def create_case(case_id: str = Form(...), cif: str = Form(...), customer: str = Form(""),
-                          start_date: str = Form(...), lookback_date: str = Form(...), trigger: str = Form(...),
-                          related_entity: str = Form(""), review_scope: str = Form(""),
-                          use_sample: bool = Form(False), files: list[UploadFile] = File(default=[]),
-                          roles: list[str] = Form(default=[]), pulls: list[str] = Form(default=[]),
-                          pulls_selected: bool = Form(False)) -> dict[str, Any]:
-        """`pulls` + `pulls_selected=true`: run exactly these data pulls (none if empty); without
-        `pulls_selected`, the pulls pre-ticked for the trigger run."""
-        uploads = await read_uploads(files, roles)
-        meta = {"id": case_id, "cif": cif, "customer": customer, "start_date": start_date,
-                "lookback_date": lookback_date, "trigger": trigger, "related_entity": related_entity,
-                "review_scope": review_scope}
-        case = guard(studio.create_case, {k: v.strip() for k, v in meta.items()}, uploads,
-                     SAMPLE if use_sample and SAMPLE.is_dir() else None,
+    async def create_case(app_name: str = Form(..., alias="app"), case_id: str = Form(...),
+                          fields: str = Form("{}"), use_sample: bool = Form(False),
+                          files: list[UploadFile] = File(default=[]), lanes: list[str] = Form(default=[]),
+                          pulls: list[str] = Form(default=[]), pulls_selected: bool = Form(False)) -> dict[str, Any]:
+        """`fields`: a JSON object of the app's fields. `pulls` + `pulls_selected=true`: run exactly these data
+        pulls (none if empty); without `pulls_selected`, the pulls pre-ticked for the fields run."""
+        try:
+            values = json.loads(fields)
+        except ValueError:
+            raise HTTPException(400, "fields must be a JSON object") from None
+        if not isinstance(values, dict):
+            raise HTTPException(400, "fields must be a JSON object")
+        uploads = await read_uploads(files, lanes)
+        case = guard(studio.create_case, app_name, case_id, values, uploads, use_sample,
                      [p for p in pulls if p] if pulls_selected else None)
         return studio.view(case)
 
@@ -144,9 +142,9 @@ def create_app(studio: CaseService, token: str = "") -> FastAPI:
 
     @app.post("/api/cases/{case_id}/documents")
     async def add_documents(case_id: str, files: list[UploadFile] = File(...),
-                            roles: list[str] = Form(default=[])) -> dict[str, Any]:
+                            lanes: list[str] = Form(default=[])) -> dict[str, Any]:
         case = case_of(case_id)
-        names = guard(studio.add_documents, case, await read_uploads(files, roles))
+        names = guard(studio.add_documents, case, await read_uploads(files, lanes))
         return {"added": names, "view": studio.view(case)}
 
     @app.post("/api/cases/{case_id}/feedback")
@@ -230,13 +228,17 @@ def create_app(studio: CaseService, token: str = "") -> FastAPI:
 
 def export_zip(studio: CaseService, case: Case) -> bytes:
     detail = studio.detail(case)
+    app = studio.app(case)
+    name = app.report.name
     version = (case.approved or {}).get("version") or (case.reports[-1]["version"] if case.reports else None)
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
         z.writestr("case-detail.json", json.dumps(
-            {"version": 2, "caseType": "TER", **case.meta(), "approved": case.approved,
-             "context": detail["context"], "corrections": case.corrections,
-             "documents": [{k: d[k] for k in ("name", "role", "status", "extraction")} for d in detail["docs"]],
+            {"version": 3, **case.meta(), "appTitle": app.title, "approved": case.approved,
+             "lanes": {ln["name"]: (ln["insight"] or {}).get("result") for ln in detail["lanes"]},
+             "documents": [{"name": d["name"], "lane": d["lane"], "status": d["status"],
+                            "insight": (d["insight"] or {}).get("result")} for d in detail["docs"]],
+             "corrections": case.corrections,
              "dataPulls": {p["name"]: p["result"] for p in detail["data"] if p["result"]},
              "extraAgents": {k: v["result"] for k, v in detail["extras"].items() if v["result"]},
              "reports": case.reports}, indent=2, ensure_ascii=False))
@@ -249,27 +251,25 @@ def export_zip(studio: CaseService, case: Case) -> bytes:
         z.writestr("decision-trace.csv", out.getvalue())
         out = io.StringIO()
         w = csv.writer(out)
-        w.writerow(["File", "Role", "Status", "Document type", "Key values", "Anomalies", "Analyst corrections"])
+        w.writerow(["File", "Lane", "Agent", "Status", "Analyst corrections"])
         for d in detail["docs"]:
-            e = d["extraction"] or {}
-            w.writerow([d["name"], d["role"], d["status"], e.get("document_type", ""), len(e.get("key_values") or []),
-                        len(e.get("anomalies") or []), len(d["corrections"])])
+            w.writerow([d["name"], d["lane"], d["agent"], d["status"], len(d["corrections"])])
         z.writestr("evidence-manifest.csv", out.getvalue())
         for r in case.reports:
             md = case.out("reports", f"v{r['version']}.md")
             if md.is_file():
-                z.write(md, f"reports/TER-v{r['version']}.md")
+                z.write(md, f"reports/v{r['version']}.md")
         if version:
             text = case.out("reports", f"v{version}.md").read_text(encoding="utf-8")
-            z.writestr("report.html", f"<!doctype html><meta charset='utf-8'><title>{case.id} TER v{version}</title>"
+            z.writestr("report.html", f"<!doctype html><meta charset='utf-8'><title>{case.id} {name} v{version}</title>"
                                       f"<body style='font-family:sans-serif;max-width:860px;margin:auto'>"
                                       f"{to_html(text)}")
-        z.writestr("README.txt", f"Case {case.id} ({case.cif}) exported {time.strftime('%Y-%m-%d %H:%M')}.\n"
-                                 f"report.html: TER v{version}{' (approved)' if case.approved else ''}; "
+        z.writestr("README.txt", f"{app.title} case {case.id} exported {time.strftime('%Y-%m-%d %H:%M')}.\n"
+                                 f"report.html: {name} v{version}{' (approved)' if case.approved else ''}; "
                                  "reports/: every version.\n"
-                                 "case-detail.json: case, context summary, extractions, data pulls, corrections, "
-                                 "extra agents.\n"
+                                 "case-detail.json: case fields, insight agent results per lane and file, data pulls, "
+                                 "corrections, extra agents and report versions (with each version's prompt).\n"
                                  "data/: the rows of each data pull (CSV).\n"
                                  "decision-trace.csv: HUM analyst / AGT agent / SYS events.\n"
-                                 "evidence-manifest.csv: documents with roles and extraction counts.\n")
+                                 "evidence-manifest.csv: documents with lanes, agents and statuses.\n")
     return buf.getvalue()

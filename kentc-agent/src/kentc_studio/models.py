@@ -1,4 +1,4 @@
-"""Studio domain model: a case, its jobs, and the event feed adapter."""
+"""Studio domain model: a case (of one app), its jobs, and the event feed adapter."""
 
 from __future__ import annotations
 
@@ -15,18 +15,17 @@ from kentc_agent.ports import Events
 from .store import atomic_write_json, read_json
 
 CASE_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
-ROLES = ("context", "doc")
 MAX_EVENTS = 2000
 SETTLED = ("done", "failed", "stopped")
-CONTEXT_MAX_CHARS = 48_000     # context documents handed to the context agent (~12k tokens)
+LANE_MAX_CHARS = 48_000        # a lane's documents handed to a per-lane agent as text (~12k tokens)
 
 
 @dataclass
 class Job:
     id: str
-    role: str                      # doc | context | query | extra | report
-    agent: str                     # provider name
-    target: str = ""               # document name, extra agent name, or report version
+    role: str                      # insight | query | extra | report
+    agent: str                     # the app's agent / pull / extra name
+    target: str = ""               # insight: a file name or "lane:<lane>"; extra name; report version "v<n>"
     params: dict[str, Any] = field(default_factory=dict)
     after: list[str] = field(default_factory=list)
     status: str = "queued"         # queued | running | done | failed | stopped
@@ -37,15 +36,14 @@ class Job:
 
 
 class Case:
-    META = ("id", "cif", "customer", "start_date", "lookback_date", "related_entity", "trigger", "review_scope")
-
     def __init__(self, root: Path, data: dict[str, Any]) -> None:
         self.root = root
-        for k in self.META:
-            setattr(self, k, str(data.get(k) or ""))
+        self.id: str = data["id"]
+        self.app: str = data["app"]
+        self.fields: dict[str, str] = {k: str(v or "") for k, v in (data.get("fields") or {}).items()}
         self.created: float = data.get("created", time.time())
         self.updated: float = data.get("updated", self.created)
-        self.documents: list[dict[str, Any]] = data.get("documents", [])
+        self.documents: list[dict[str, Any]] = data.get("documents", [])     # name, lane, size, uploaded
         self.jobs: list[Job] = [Job(**j) for j in data.get("jobs", [])]
         self.corrections: list[dict[str, Any]] = data.get("corrections", [])
         self.reports: list[dict[str, Any]] = data.get("reports", [])
@@ -80,28 +78,20 @@ class Case:
     def save(self) -> None:
         with self.lock:
             self.updated = time.time()
-            data = {k: getattr(self, k) for k in self.META}
-            data.update(created=self.created, updated=self.updated, documents=self.documents,
-                        jobs=[asdict(j) for j in self.jobs], corrections=self.corrections, reports=self.reports,
-                        approved=self.approved, trace=self.trace)
-            self.write_json(self.dir / "case.json", data)
+            self.write_json(self.dir / "case.json", {
+                "id": self.id, "app": self.app, "fields": self.fields, "created": self.created,
+                "updated": self.updated, "documents": self.documents, "jobs": [asdict(j) for j in self.jobs],
+                "corrections": self.corrections, "reports": self.reports, "approved": self.approved,
+                "trace": self.trace})
 
-    def meta(self) -> dict[str, str]:
-        return {k: getattr(self, k) for k in self.META}
+    def meta(self) -> dict[str, Any]:
+        return {"id": self.id, "app": self.app, "fields": self.fields}
 
-    def brief(self) -> str:
-        parts = [f"Case {self.id}, customer CIF {self.cif}"]
-        if self.customer:
-            parts.append(f"customer {self.customer}")
-        parts.append(f"review period {self.lookback_date} to {self.start_date}")
-        if self.review_scope:
-            parts.append(f"scope: {self.review_scope}")
-        if self.related_entity:
-            parts.append(f"related entity: {self.related_entity}")
-        return "; ".join(parts) + f". Trigger: {self.trigger}"
+    def docs(self, lane: str | None = None) -> list[str]:
+        return [d["name"] for d in self.documents if lane is None or d["lane"] == lane]
 
-    def docs(self, role: str | None = None) -> list[str]:
-        return [d["name"] for d in self.documents if role is None or d["role"] == role]
+    def lane_of(self, name: str) -> str | None:
+        return next((d["lane"] for d in self.documents if d["name"] == name), None)
 
     # -------------------------------------------------------------- activity
     def event(self, kind: str, agent: str, text: str, job: str = "") -> None:

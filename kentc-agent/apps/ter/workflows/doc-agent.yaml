@@ -1,5 +1,5 @@
 name: doc-agent
-description: Studio role `doc` - key values and anomalies from one evidence document (re-run with analyst feedback).
+description: TER app, per-file agent of the Evidence lane - key values and anomalies from one document (re-run with analyst feedback).
 
 inputs:
   file: {required: true, description: "document path inside the case folder"}

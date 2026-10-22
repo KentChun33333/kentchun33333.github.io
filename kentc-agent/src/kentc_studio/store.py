@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import tempfile
+from collections.abc import Callable, Collection
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 
 def atomic_write_text(path: Path, text: str) -> None:
@@ -45,11 +47,18 @@ class CaseStore:
     def case_files(self) -> list[Path]:
         return sorted(self.root.glob("*/case.json"))
 
-    def load_all(self, factory: Callable[..., Any]) -> dict[str, Any]:
-        """factory: Case(root, data). -> by case id; interrupted jobs are marked stopped."""
+    def load_all(self, factory: Callable[..., Any], apps: Collection[str]) -> dict[str, Any]:
+        """factory: Case(root, data). -> by case id; interrupted jobs are marked stopped. A case without one of
+        `apps` (created before studio apps, or its app was removed from studio.yaml) is skipped, never deleted."""
         cases: dict[str, Any] = {}
         for f in self.case_files():
-            case = factory(self.root, json.loads(f.read_text(encoding="utf-8")))
+            data = json.loads(f.read_text(encoding="utf-8"))
+            if data.get("app") not in apps:
+                why = f"its app {data['app']!r} is not in studio.yaml" if data.get("app") else \
+                    "created before studio apps; delete the folder or recreate the case"
+                print(f"skipped {f.parent}: {why}", file=sys.stderr)
+                continue
+            case = factory(self.root, data)
             for job in case.jobs:
                 if job.status in ("queued", "running"):
                     job.status, job.error = "stopped", "interrupted by a server restart"

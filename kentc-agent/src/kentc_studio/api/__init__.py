@@ -1,4 +1,4 @@
-"""HTTP API of the TER Agentic Studio."""
+"""HTTP API of the Agentic Studio."""
 
 from .app import create_app, export_zip
 

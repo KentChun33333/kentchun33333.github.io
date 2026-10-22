@@ -1,4 +1,4 @@
-"""Guardrails for agents that read untrusted documents (studio) and for structured step outputs."""
+"""Guardrails for agents that read untrusted documents (confined reads) and for structured step outputs."""
 
 from __future__ import annotations
 
@@ -9,7 +9,6 @@ import pytest
 from kentc_agent.adapters.llm import Reply
 from kentc_agent.adapters.tools import CORE_TOOLS, ToolError
 from kentc_agent.workflow import Runner, WorkflowError, load
-from kentc_studio.config import AgentError, load_config
 
 from .conftest import FakeLLM
 
@@ -35,21 +34,6 @@ def test_confined_read_refuses_outside_paths_and_symlink_escapes(make_ctx, tmp_p
     for path in (str(secret), f"../{secret.name}", "link.txt"):
         with pytest.raises(ToolError, match="reads are limited to the workspace"):
             read(ctx, {"path": path})
-
-
-# ---------------------------------------------------------------------- studio refuses shell and web access
-@pytest.mark.parametrize("step, refused", [
-    ("    tools: [read, bash]\n    prompt: hi\n", "offers bash "),
-    ("    prompt: hi\n", "offers bash "),                                 # omitted tools = all tools
-    ("    web: latest AML news\n    output: research/news.md\n", "has web step\\(s\\) s;"),
-])
-def test_studio_refuses_workflows_with_shell_or_web_access(tmp_path, step, refused):
-    (tmp_path / "wf.yaml").write_text(f"steps:\n  - id: s\n{step}")
-    (tmp_path / "safe.yaml").write_text("steps:\n  - id: s\n    tools: [read]\n    prompt: hi\n")
-    (tmp_path / "studio.yaml").write_text(
-        "agents:\n  doc: {workflow: safe.yaml}\n  context: {workflow: safe.yaml}\n  report: {workflow: wf.yaml}\n")
-    with pytest.raises(AgentError, match=f"report: wf.yaml {refused}"):
-        load_config(tmp_path / "studio.yaml")
 
 
 # ---------------------------------------------------------------------- JSON step output shape

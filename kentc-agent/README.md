@@ -30,11 +30,12 @@ The less a human watches, the tighter the permissions:
 | --- | --- | --- | --- | --- |
 | **CLI chat / one prompt** | you, turn by turn | `read`, `write`, `edit`, `bash` + **`web_search`** (screened); `--tools` narrows | the agent searches when your prompt calls for it; results pass the screening sub-agent and the safety check | answers, workspace files |
 | **Workflow** (`--workflow`) | nobody, for long runs | the four core tools per step; `web_search` in a step is refused at load | only `web:` steps: the web agent with screening, search budget, link check, `approve` | files: `research/`, `notes/`, `reports/`; `--resume` |
-| **Studio** (`kentc-studio`) | the analyst, through the web UI | `read` confined to the case folder; no `bash`, no `web:` steps | none: case data never goes into search queries | JSON by each role's `schema`, rendered by the studio front end |
+| **Studio** (`kentc-studio`) | the analyst, through the web UI | `read` confined to the case folder; no `bash`, no `web:` steps | none: case data never goes into search queries | JSON by each agent's `schema`, shown through the app's `view` with a fixed set of blocks |
 
-Studio direction (not built yet): each page transition becomes a workflow - Page 2 → Page 2 (correct the
-extraction), Page 2 → Page 3 (draft the report), Page 3 → Page 3 (revise it) - still returning system-defined
-JSON that the front end renders as known component types, never agent-written HTML.
+In the studio each page transition is a workflow - Page 1 → Page 2 (the insight agents read the files), Page 2 →
+Page 2 (a flag or note runs that agent again), Page 2 → Page 3 (the report agent drafts), Page 3 → Page 3 (a
+prompt revises it into a new version) - returning system-defined JSON that the front end renders as known
+blocks, never agent-written HTML. See *Agentic Studio* below.
 
 ## Install and run
 
@@ -442,61 +443,152 @@ uv run kentc-agent -w ~/cases/ter --workflow ter-case-review \
 
 `ter-case-review` has no web step: open-web / news searches from the demos become "open checks" in the outputs.
 
-## TER Agentic Studio (web UI)
+## Agentic Studio (web UI)
 
-A web front end in the style of `ter-bank-multi-agent-flow-v15.html` on a FastAPI backend. Pluggable agents do
-the work as async jobs while the analyst keeps working:
+A web front end in the style of `ter-bank-multi-agent-flow-v15.html` on a FastAPI backend. One studio serves
+several **apps** (use cases); every app runs the same asynchronous three-page loop, and pluggable agents do the
+work as jobs while the analyst keeps working:
 
 ```sh
-uv run kentc-studio --workspace ~/ter-studio --effort low     # open http://127.0.0.1:8090
+uv run kentc-studio --workspace ~/studio --effort low     # open http://127.0.0.1:8090
 # non-loopback bind: add --token VALUE (or set KENTC_STUDIO_TOKEN); /api then requires it as x-api-token
+```
+
+```
+Page 1  intake & track   app fields + file lanes + data pulls ──► insight agents (per file / per lane), SQL pulls
+   ▲                                                                       │ async: the case table updates
+   │ back to the case table after every async action                       ▼
+Page 2  verify insights  flag a fact / note a file or lane ──► that agent runs again; add files any time
+   │                                                                       │ generate (waits for running jobs)
+   ▼                                                                       ▼
+Page 3  report & prompt  report framework + the app's view + suggested next steps; a prompt ──► a new version
 ```
 
 | Page | The analyst … | Agents (async) |
 | --- | --- | --- |
-| 1 · Stage & track | fills the case identity, **stages** documents in two lanes - **Context** (required: the trigger e-mail or `.msg`, customer explanations, case notes) and **Evidence** (optional: invoices, B/L, customs, statements) - ticks the **data pulls** (pre-ticked from the trigger), and uploads. Follows every case in **CASE MANAGEMENT** (Case, CIF, Customer, Status, Recommendation, Agent work, Action). Page 2 opens at once. | data pulls (SQL, no model, in parallel), context agent once (Trigger Context summary), doc agent once per evidence file |
-| 2 · Review extraction | reads the readiness bar (Context · Documents · Data), the Trigger Context (trigger type and source, event, matched parties, profile deviation, customer explanation, initial evidence gaps, routing rationale - no risk conclusion), the **data pull** cards (key values, small tables, rows, SQL, CSV) and the key-insight table across documents; **flags** a wrong value or asks to re-extract a document with a note; sends feedback to the context agent; **re-runs** a pull, for another period if needed, or cancels it; **stages more documents** at any time; asks for the TER report at any time (*Generate when ready* while jobs run) | a flag re-extracts only that document; the context agent runs again only for new context documents or context feedback; the report job waits for every pending extraction and pull |
-| 3 · TER report | reads the report (executive narrative, trigger, background, KYC and transaction review, key risks, recommended next step) by version; **requests documents** the agent suggests (upload per request → back to Page 2 → regenerate); **refines** the report with an instruction or by clicking an open question (new version); re-runs with extra agents; **approves** a version; exports the ZIP or prints | report agent (and extra agents) on all materials; revisions get the previous version + the instruction |
+| 1 · Intake & track | picks an **app** (TER review, RM insight, …), fills its **fields**, **stages** files in its **lanes** (a required lane needs a file), ticks the **data pulls** (pre-ticked by `default` or by trigger words in the fields), and uploads. Follows every case in **CASE MANAGEMENT** (Case, App, Subject, Status, Verdict, Agent work, Action). | data pulls (SQL, no model, in parallel); per lane: one job over the lane's files, or one job per file |
+| 2 · Verify insights | reads the readiness bar (one item per agent lane, plus Data), each per-lane agent's result, the **data pull** cards, **Facts to verify** (every flaggable fact across files and lanes, with confidence and location; *Low confidence* / *Flagged* filters) and the file cards; **flags** a wrong value or leaves a **note** on a file or lane; **re-runs** a pull with other parameters, or cancels it; **stages more files** at any time; asks for the report at any time (*when ready* while jobs run) | a flag or note re-runs only that file's agent (or that lane's); the report job waits for every pending insight job and pull |
+| 3 · Report & prompt | opens the case from the table once the version is ready and reads it: title, verdict, the app's sections, then **Suggested next steps** on the report itself - the documents to request from the client (each with **Upload** → Page 2 to review what the agents read → regenerate) and the open questions (*Use as prompt*). The slide-out **prompt panel** on the right (⟩ hides it for a wider report) only takes a prompt: it queues the next version and returns to the case table, which marks the row *NEW vN*; the new version shows the prompt and the agent's reply on top. **Approves** a version, exports the ZIP or prints (header buttons); the version picker keeps older versions readable | report agent on all materials; a prompt gets the previous version + the prompt |
 | Agent work | opens a live panel for any case: jobs, the agent's current thinking/writing, every tool call and parsing sub-agent step; *Stop* | |
 
-**Statuses** in the case table come from the jobs: *Pulling data (k/n)*, *Parsing documents (k/n)* and
-*Summarising context* (with *· data k/n* while pulls run), *Evidence extracted · review required*,
-*Drafting / Revising TER report*, *TER report vN ready · review*, *New evidence · report out of date* (a newer
-extraction, pull or correction than the latest version), *Approved*, *… failed* (*Retry*).
+**Statuses** in the case table come from the jobs: *Pulling data (k/n)*, *<agent> (k/n files)* or *<lane agent>*
+(with *· data k/n* while pulls run), *Insights ready · review required*, *Drafting <report>*, *Revising <report> →
+vN*, *<report> vN ready · review* (Verdict column: the report's verdict, coloured by the app's tone), *New evidence
+· report out of date* (a newer insight, pull or correction than the latest version), *Approved*, *… failed*
+(*Retry*). A version you have not opened yet shows *NEW vN* (kept in the browser).
 
-### Agents (`studio.yaml`)
+### Apps (`studio.yaml` → `apps/<name>/app.yaml`)
 
 ```yaml
-agents:
-  doc:     {workflow: workflows/studio/doc-agent.yaml, label: Doc agent}
-  context: {workflow: workflows/studio/context-agent.yaml, label: Context agent}
-  report:  {workflow: workflows/studio/report-agent.yaml, label: Report agent}
-extra_agents:
-  investigation: {workflow: workflows/studio/investigation-agent.yaml, label: Investigation agent, default: false}
-  openweb: {url: http://research-host:9000/agent, label: OpenWeb research agent}   # another process / host
+# studio.yaml: the apps one studio serves, and the databases / data pulls they share
+apps:
+  ter: apps/ter/app.yaml
+  rm: apps/rm/app.yaml
 public_url: http://127.0.0.1:8090
 ```
 
+An app is one YAML file next to its agent workflows. It declares the three pages:
+
+```yaml
+title: TER review
+case: {label: TER case ID, prefix: TER-2026-}
+brief: "Case {{ id }}, CIF {{ cif }}; period {{ lookback_date }} to {{ start_date }}. Trigger: {{ trigger }}"  # Jinja
+fields:                                   # Page 1 form; `column: true` shows the field in the case table
+  - {name: cif, label: Customer CIF, required: true, column: true}
+  - {name: start_date, label: Start date, type: date, required: true}   # text | textarea | date | select
+lanes:                                    # file lanes; each names the insight agent that reads it
+  - {name: context, label: Context, required: true, agent: context, sample: ["*.eml", "*.msg"]}
+  - {name: evidence, label: Evidence, agent: doc, sample: ["*"]}
+sample: ../../examples/ter-case           # optional sample bundle (files go to the first lane whose globs match)
+pulls: [kyc_profile, txn_history]         # data pulls this app offers (studio.yaml data_pulls)
+agents:                                   # Page 2: insight agents
+  context:
+    workflow: workflows/context-agent.yaml
+    per: lane                             # one job over all the lane's files, given as text
+    view: [{title: Trigger context, kv: [trigger_type, trigger_event]}, {title: Evidence gaps, list: evidence_gaps}]
+  doc:
+    workflow: workflows/doc-agent.yaml    # per: file (default): one job per file
+    view: [{kv: [document_type, reference]}, {facts: key_values}, {title: Anomalies, list: anomalies}]
+report:                                   # Page 3
+  name: TER report
+  workflow: workflows/report-agent.yaml
+  verdicts: {Agree: ok, Further investigation: warn}    # tone per verdict: ok | warn | bad | info
+  view:
+    - {title: Executive narrative, text: executive_narrative}
+    - {title: Key risks, cards: key_risks, kicker: id, head: title, score: score, body: reason, notes: [evidence, gap]}
+extras:                                   # optional agents feeding the report, picked per run
+  investigation: {workflow: workflows/investigation-agent.yaml, label: Investigation agent}
+  openweb: {url: http://research-host:9000/agent, label: OpenWeb research agent}   # another process / host
+```
+
+**Views.** An agent answers with JSON of its workflow's `schema`; its `view` says how the front end (and the
+Markdown export) shows it, with a fixed set of blocks - agents never write HTML. A block is
+`{<type>: <path into the result>, title?, options}`:
+
+| Block | Path points at | Options |
+| --- | --- | --- |
+| `text` | a string (or a list of strings: paragraphs) | |
+| `kv` | an object, or a list of paths | `labels: {key: Label}` |
+| `table` | a list of objects | `columns: {key: Label}` or `[key, ...]` |
+| `list` | a list of strings | |
+| `chips` | a list of strings or objects (first value bold) | |
+| `cards` | a list of objects | `head`, `kicker`, `score` (0-100 ring, sorted), `body`, `notes: [keys]` |
+| `facts` | a list of `{field, value, location, confidence}` | Page 2 only: rows the analyst can flag |
+
+When the studio loads, every path and option is checked against the workflow's schema (a typo is refused with
+its place), so an app fails at start, not on screen.
+
+**Report framework.** Every report agent's result carries `title`, `verdict` (one of the schema's `"A|B"` values,
+each with a tone in `verdicts`), `reply` (its answer to the analyst's prompt), `requests`
+(`[{document, reason}]`, shown under *Suggested next steps* with Upload buttons) and `questions` (`[string]`,
+shown there too, each usable as a prompt). The rest of the result is the app's own, shown through `report.view`.
+A prompt is a report job with that `instruction`; the version it produces records the prompt and answers it in
+`reply`. Every report request - the first draft from Page 2, a regeneration, a prompt - is asynchronous: the
+page returns to the case table, which shows the new version when it is in.
+
+**Agent contract.** The studio passes each kind of agent fixed workflow inputs, and a workflow must declare
+exactly those (checked at load):
+
+| Agent | Inputs |
+| --- | --- |
+| insight, `per: file` | `file` (`docs/<name>`), `case_brief`, `feedback`, `previous` (the result the feedback refers to) |
+| insight, `per: lane` | `lane_file` (the lane's files converted to text, attachments included), `case_brief`, `feedback` |
+| report | `materials_file`, `case_brief`, `instruction` (the analyst's prompt), `previous_report_file` |
+| extra | `materials_file`, `case_brief` |
+
+`materials.json` holds the case fields, each file with its insight, `lane_insights` (per-lane results), the data
+pulls' key values and CSV paths, extra agent results and the analyst corrections.
+
 - `workflow:` runs a kentc-agent workflow in this process on the configured LLM server. The result is the last
-  step's JSON. Local jobs run one at a time. Uploaded documents are untrusted (a document can carry injected
-  instructions), so these agents run with reads confined to the case folder, and a workflow that offers `bash`
-  (or omits `tools`, which means all) or has a `web:` step is refused when `studio.yaml` loads: no shell, and case
-  data never leaves in search queries. Their totals come from the data pulls' key values (computed by SQL); any
-  other figure is shown with its calculation for the analyst to check.
+  step's JSON (it must have `format: json` and a `schema`). Local jobs run one at a time. Uploaded documents are
+  untrusted (a document can carry injected instructions), so these agents run with reads confined to the case
+  folder, and a workflow that offers `bash` (or omits `tools`, which means all) or has a `web:` step is refused
+  when the studio loads: no shell, and case data never leaves in search queries. Totals come from the data
+  pulls' key values (computed by SQL); any other figure is shown with its calculation for the analyst to check.
 - `url:` calls an external agent, which runs in parallel with local jobs. It receives
-  `POST {role, case_id, job_id, inputs, documents: [{name, role, url}], materials}`. `documents[].url` is
-  `GET {public_url}/api/cases/<id>/docs/<name>`, and `materials` holds the context summary, extractions, extra
-  results and analyst corrections. The agent returns a JSON object with the role's result shape (see the
-  `schema:` of the matching workflow in `workflows/studio/`).
+  `POST {role, app, case_id, job_id, inputs, documents: [{name, lane, url}], materials}`. `documents[].url` is
+  `GET {public_url}/api/cases/<id>/docs/<name>`. The agent returns a JSON object of the shape its view expects
+  (a report agent: the report framework keys too); its paths are only known at run time, so missing ones show
+  as empty.
 - `<workspace>/studio.yaml` overrides the bundled file; so does `--config`.
+
+**Bundled apps.**
+
+| App | Lanes → agents | Report |
+| --- | --- | --- |
+| `ter` · TER review | Context (required) → context agent, per lane (Trigger Context); Evidence → doc agent, per file (key values, anomalies); five core-banking pulls; extra: investigation agent | TER report: assessment, executive narrative, trigger, background, KYC review, transactions, scored key risks, recommended next step; verdict Agree / Further investigation |
+| `rm` · RM insight | Sources (required) → source agent, per file (source system, facts, stated / inferred relationships, signals) | Wealth insight (AURA pillars): ranked target clients, relationship evidence, answer per target, evidence chain, RM coordination, source provenance; verdict Proceed / Controlled review / Insufficient evidence |
+
+A new use case is a new `apps/<name>/` folder (app.yaml + workflows) and one line under `apps:`; no code.
 
 ### Data pulls (`studio.yaml`)
 
-Fixed SQL against the bank's databases, with the case fields as parameters. A pull is a studio job like an agent
-job, but it uses no model: it starts at intake, runs in parallel with the agents and does not hold the LLM
+Fixed SQL against the bank's databases, with the case's app fields (and `:case_id`) as parameters. An app lists
+the pulls it offers, and a pull may only bind that app's fields (checked at load). A pull is a studio job like an
+agent job, but it uses no model: it starts at intake, runs in parallel with the agents and does not hold the LLM
 server's slot. Its rows go to `data/<pull>.csv`; its key values come from SQL over a `result` table holding the
-rows (deterministic, no model). The report and investigation agents get the key values and the CSV path in
-their materials.
+rows (deterministic, no model). The report and extra agents get the key values and the CSV path in their
+materials.
 
 ```yaml
 databases:
@@ -506,8 +598,8 @@ data_pulls:
   txn_history:
     database: core
     label: Transaction history
-    sql_file: queries/txn_history.sql     # :cif, :lookback_date, :start_date, :related_entity, :customer, ...
-    default: true                         # pre-ticked on Page 1; or triggers: [adverse media, anomaly, ...]
+    sql_file: queries/txn_history.sql     # binds app fields: :cif, :lookback_date, :start_date, ...
+    default: true                         # pre-ticked on Page 1; or triggers: [adverse media, ...] (words in the fields)
     key_values:
       Transactions: SELECT COUNT(*) FROM result                     # one value
       Cash deposits: SELECT value_date, amount FROM result WHERE type = 'Cash deposit'   # a small table
@@ -516,8 +608,8 @@ data_pulls:
 - Connections are read-only. `timeout` interrupts the query, `row_cap` truncates the result (marked *capped*),
   and *Cancel* stops it at once.
 - Without `key_values`, a one-row result (e.g. the KYC profile) shows one key value per column.
-- A re-run supersedes a queued or running run of the same pull. A re-run with another period overrides
-  `lookback_date` / `start_date` for that pull only.
+- A re-run supersedes a queued or running run of the same pull. *Change parameters* overrides the pull's bound
+  fields (e.g. `lookback_date`) for that pull only.
 - `latency` is for the mock database only. It holds each pull that long so the asynchronous flow is visible.
   Remove it for a real database.
 - `src/kentc_studio/data.py` connects to SQLite (`sqlite:///<path>`, relative to the YAML file). Another engine needs its
@@ -534,96 +626,105 @@ data_pulls:
 
 | Path | Content |
 | --- | --- |
-| `case.json` | identity, documents with roles, jobs, corrections, report versions, decision trace |
+| `case.json` | app, fields, documents with lanes, jobs, corrections, report versions, decision trace |
 | `docs/` | the uploaded documents |
-| `outputs/docs/<file>.json` | the latest doc-agent result per document |
-| `outputs/context.json` | the latest context summary |
+| `outputs/files/<file>.json` | the latest per-file insight: `{result, job, updated, feedback}` |
+| `outputs/lanes/<lane>.json` | the latest per-lane insight (same wrapper) |
 | `outputs/data/<pull>.json` | the latest data pull: parameters, SQL, row count, key values, first rows |
 | `data/<pull>.csv` | the pulled rows |
-| `outputs/extra/` | extra agent results |
-| `outputs/reports/v<n>.json` and `.md` | the TER report versions |
+| `outputs/extra/<agent>.json` | extra agent results (same wrapper) |
+| `outputs/reports/v<n>.json` and `.md` | the report versions (the Markdown follows the app's view) |
 | `jobs/<job>/` | per job: materials, workflow state, agent session |
 | `events.jsonl` | the activity feed |
 
-Cases survive restarts: an interrupted job shows as stopped and *Retry* queues it again.
+Cases survive restarts: an interrupted job shows as stopped and *Retry* queues it again. A case folder without an
+`app` (created before studio apps) or whose app left `studio.yaml` is skipped at start with a message; nothing is
+deleted.
 
-API (`/api/docs`): `GET /api/health`, `GET|POST /api/cases` (multipart: case fields, `files[]` + `roles[]`,
+API (`/api/docs`): `GET /api/health`, `GET /api/apps` (each app's fields, lanes, pulls, extras and views),
+`GET|POST /api/cases` (multipart: `app`, `case_id`, `fields` (a JSON object), `files[]` + `lanes[]`,
 `use_sample`, `pulls[]` + `pulls_selected=true`; without `pulls_selected` the pre-ticked pulls run),
-`GET /api/cases/{id}`, `GET .../events?after=N`, `POST .../documents` (`files[]` + `roles[]`),
-`POST .../feedback` (`{target: <file>|"context", field?, value?, note}`), `POST .../data`
-(`{pull, params?: {lookback_date, start_date, ...}}`), `GET .../data/{pull}` (CSV), `POST .../report`
-(`{extras: [...], instruction?}`), `GET .../reports/{n}`, `POST .../approve` (`{version}`),
-`POST .../stop | retry`, `POST .../jobs/{job}/stop`, `GET .../docs/{name}`, `GET .../export.zip`.
+`GET /api/cases/{id}`, `GET .../events?after=N`, `POST .../documents`
+(`files[]` + `lanes[]`), `POST .../feedback` (`{target: <file>|"lane:<lane>", field?, value?, note}`),
+`POST .../data` (`{pull, params?: {<bound field>: value}}`), `GET .../data/{pull}` (CSV), `POST .../report`
+(`{extras: [...], instruction?}`; an instruction is the analyst's prompt), `GET .../reports/{n}`,
+`POST .../approve` (`{version}`), `POST .../stop | retry`, `POST .../jobs/{job}/stop`, `GET .../docs/{name}`,
+`GET .../export.zip`.
 
 ### Testing guide
 
 Build the mock core-banking database once (`uv run --project kentc-agent python dataset/make_core_banking_db.py`).
-Start the LLM server (local Strata on port 8081), then `uv run kentc-studio --workspace /tmp/ter-studio --effort low` and open
+Start the LLM server (local Strata on port 8081), then `uv run kentc-studio --workspace /tmp/studio --effort low` and open
 http://127.0.0.1:8090. Both pills in the top bar should be green (model id; *agents idle*). Timings are rough for
 the local model at low effort.
 
-1. **Intake validation.** Stage only an Evidence file and press *Upload & start parsing*: the page refuses
-   ("add a context document"). Drop an `.mp4` or `.xls`: it is rejected with a message. ⇄ on a chip moves it to
-   the other lane.
-2. **First case.** Click *Auto · sample bundle*, then upload. The row appears and steps through:
-   - *Queued*, then *Parsing documents (k/5)*, about 1-3 min per document
-   - *Summarising context*
-   - *Evidence extracted · review required* with **PENDING REVIEW**
+1. **Intake validation.** In *TER review*, stage only an Evidence file and press *Upload & start*: the page
+   refuses ("add a file to Context"). Drop an `.mp4` or `.xls`: it is rejected with a message. ⇄ on a chip moves
+   it to the next lane. Switch to *RM insight*: the form, the lanes (one *Sources* lane) and the pulls (none)
+   change with the app.
+2. **First case.** In *TER review*, click *Auto · sample bundle*, then upload (the `.eml` goes to Context, the
+   rest to Evidence). The row appears and steps through:
+   - *Context agent* (with *· data k/5* while the pulls run), then *Doc agent (k/5 files)*, about 1-3 min per file
+   - *Insights ready · review required* with **PENDING REVIEW**
 
    During this, *Agent work* shows each job, tool calls such as `read(...)`, the parsing sub-agent reading the
    PDFs, and live thinking text.
 3. **Page 2 review.** Open *Review →*.
-   - **Trigger Context:** type and source (e.g. *Adverse media* · alert id), matched parties and evidence gaps
-     are filled. The context job appears first and is a single model call. The `.msg` attachments are digested
-     by the parsing sub-agent beforehand, so the context agent itself makes no tool calls.
-   - **Key insights:** the *Low confidence* filter keeps rows under 80%.
-   - **Documents:** the cards show anomalies (e.g. the bill of lading correction).
+   - **CONTEXT · Context agent:** trigger type and source, matched parties and evidence gaps are filled. The
+     context job is a single model call: the lane's files (attachments included) are converted beforehand.
+   - **Facts to verify:** every doc-agent key value; the *Low confidence* filter keeps rows under 80%.
+   - **Files:** each card shows the document type, the first key values and its anomalies (e.g. the bill of
+     lading correction).
 4. **Flag a value (async).** On the *goods description* row of the bill of lading, press *Flag*. Enter a value
-   and a note, then *Send to doc agent*.
-   - Expect: only that document's job runs; no context job.
-   - The row shows *RE-EXTRACTING*, then *ANALYST FEEDBACK APPLIED* with the analyst value.
-   - The table row shows *Parsing documents (0/1)* meanwhile.
-5. **Feedback to the context agent.** Write a note under the context summary and press *Re-summarise*. Only a
-   context job runs; the summary's *UPDATED* time changes.
-6. **Add documents (iteration).** In *Stage more documents* add e.g. `examples/rm-case/t24_inflows.csv` as
-   Evidence and press *Upload & extract*. A new card appears with its job state, then its key values.
-7. **TER report.** Optionally tick *Investigation agent*, then *Generate TER report →*.
-   - Page 3 shows the working banner; you can watch via *Agent work*.
-   - The row shows *Drafting TER report*, then *TER report v1 ready · review*.
-   - The recommendation chip reads REQUEST DOCUMENTS, FURTHER INVESTIGATION or AGREE.
-8. **Request documents.** In *Request from the client*, press *Upload* next to a requested document and pick
-   any file. You land on Page 2 with the new document parsing. Back on Page 3, the *New evidence since v1*
-   banner offers *Regenerate v2*.
-9. **Refine.** Click an open question chip (it goes into the instruction) or type one, then *Revise → v2/v3*.
-   - The version picker lists the versions.
-   - A revision shows its instruction and *Changes*.
-   - Older versions stay readable.
-10. **Approve and export.** *Approve vN* changes the row to *Approved · TER vN*. *Case ZIP* contains
-    `case-detail.json`, `decision-trace.csv` (HUM / AGT / SYS), `evidence-manifest.csv`,
-    `reports/TER-v*.md` and `report.html`. *Print / save as PDF* prints the report only.
-11. **Stop / retry / restart.**
+   and a note, then *Send to the agent*.
+   - Expect: only that file's job runs; no context job.
+   - The row shows *RE-READING*, then *ANALYST FEEDBACK APPLIED* with the analyst value.
+   - The table row shows *Doc agent (0/1 files)* meanwhile.
+5. **Note to a lane agent.** Write a note under the Context result and press *Run again with note*. Only a
+   context job runs; the fold's *UPDATED* time changes.
+6. **Add files (iteration).** In *Stage more files* add e.g. `examples/rm-case/t24_inflows.csv` to Evidence and
+   press *Upload & read*. A new card appears with its job state, then its key values.
+7. **Report (async).** Optionally tick *Investigation agent*, then *Generate TER report →*.
+   - You are back on the case table at once; the row shows *Drafting TER report* (*Agent work* shows the job).
+   - Then *TER report v1 ready · review* with *NEW v1* and *Open v1 →*; the Verdict column reads AGREE (green)
+     or FURTHER INVESTIGATION (amber).
+8. **Read the report.** Open it: Page 3 shows v1, ending with *Suggested next steps* (requested documents and
+   open questions). ⟩ on the prompt panel slides it away for a wider report; *✎ PROMPT* brings it back.
+9. **Prompt (async).** Click *Use as prompt* on an open question (it goes into the panel) or type one, then
+   *Send prompt → v2*. You are back on the case table at once; the row reads *Revising TER report → v2*, then
+   *NEW v2* with *Open v2 →*. Reopen it: v2 shows your prompt and the agent's reply on top; the version picker
+   still shows v1, unchanged.
+10. **Request documents.** Under *Suggested next steps*, press *Upload* next to a requested document and pick any
+    file. You land on Page 2 with the new file being read; review it, then regenerate (back to the case table).
+11. **Approve and export.** *Approve vN* (Page 3 header) changes the row to *Approved · TER report vN*. *Case ZIP*
+    contains `case-detail.json` (fields, lane and file insights, pulls, report versions with their prompts),
+    `decision-trace.csv` (HUM / AGT / SYS), `evidence-manifest.csv`, `reports/v*.md` and `report.html`. *Print*
+    prints the report only.
+12. **Stop / retry / restart.**
     - Start a report, press *Stop* in *Agent work*: the job ends as *stopped* at the agent's next event.
     - Press *Retry* on the row to queue it again.
-    - Restart the server during a job: the case reloads with the job stopped, and *Retry* works.
-12. **Two cases.** Submit a second case while the first is parsing. Its jobs show *Queued* until the local
-    agent is free, because a local LLM server (Strata) serves one request at a time.
-13. **External agent (optional).** Point `extra_agents.openweb.url` at any small HTTP service that returns e.g.
-    `{"observations": ["..."]}`. It appears as a checkbox, runs in parallel, and its result is in the next
-    report's materials (`jobs/<id>/materials.json`).
-14. **Data pulls with the TER dataset.** Fill Page 1 with the `dataset/README.md` inputs (CIF-7731042,
+    - Restart the server during a job: the case reloads with the job stopped (`POST .../retry` queues it again).
+13. **Second app, same loop.** In *RM insight*, use the sample bundle and upload while the TER case runs. Its
+    jobs show *Queued* until the local agent is free (a local LLM server serves one request at a time). Page 2
+    shows each source's system, facts, stated / inferred relationships and signals; Page 3 the wealth-insight
+    pillars with a Proceed / Controlled review / Insufficient evidence verdict, the same next steps and prompt.
+14. **External agent (optional).** Uncomment `extras.openweb` in `apps/ter/app.yaml` and point it at any small
+    HTTP service that returns e.g. `{"observations": ["..."]}`. It appears as a checkbox, runs in parallel, and
+    its result is in the next report's materials (`jobs/<id>/materials.json`).
+15. **Data pulls with the TER dataset.** Fill Page 1 with the `dataset/README.md` inputs (CIF-7731042,
     2026-06-01 → 2026-08-14, related entity Kestrel Bunkering Sdn Bhd, an adverse-media trigger). Stage the
     `.msg` as Context and the three PDFs as Evidence.
     - Expect: the *Data pulls* lane has all five ticked (*Activity vs profile* from the trigger words).
-    - Upload. The row reads *Summarising context · data 0/5*, and *Review →* / *Detail* is there at once.
+    - Upload. The row reads *Context agent · data 0/5*, and *Detail* is there at once.
     - Page 2: the readiness bar shows *Data 0/5 … (mock latency 20s)*; the cards show live progress.
     - After about 20 s the cards fill in: pass-through rows at 94.8 / 95.1 / 94.3 / 96.0 %, three cash deposits
       under SGD 20,000, July at 8.5× the expected inflow, TM-77812 closed.
-15. **Generate when ready.** Before the pulls and extractions finish, press *Generate TER report when ready →*.
-    Page 3 shows *waiting for N extraction / data job(s)*, and the report agent starts by itself afterwards.
-    The report's materials (`jobs/<report job>/materials.json`) contain `data_pulls`.
-16. **Re-run / cancel a pull.** *Change period* on *Activity vs profile*, set From to 2026-07-01, and run it.
-    While it runs the previous result stays visible; *Cancel* ends it as *stopped*, with the old result kept.
-    *CSV* downloads the rows, and the case ZIP has `data/*.csv`.
+16. **Generate when ready.** Before the pulls and insight jobs finish, press *Generate TER report when ready →*.
+    You are back on the case table; the row waits (*Queued*) and the report agent starts by itself once the jobs
+    finish. The report's materials (`jobs/<report job>/materials.json`) contain `data_pulls`.
+17. **Re-run / cancel a pull.** *Change parameters* on *Activity vs profile*, set Lookback date to 2026-07-01,
+    and run it. While it runs the previous result stays visible; *Cancel* ends it as *stopped*, with the old
+    result kept. *CSV* downloads the rows, and the case ZIP has `data/*.csv`.
 
 Where to look when something is off:
 - `cases/<id>/jobs/<job>/state.json` and `session.jsonl`: what the agent did in that job.
@@ -689,13 +790,14 @@ with the server's own numbers.
 | `src/kentc_agent/adapters/` | LLM client, sessions, traces, tools, file types and document loaders/policy |
 | `src/kentc_agent/ports.py` | protocols shared by the core and its adapters (`LLM`, `Events`) |
 | `src/kentc_studio/server.py` | studio entry point (`kentc-studio`): CLI, workspace/config resolution, auth guard |
-| `src/kentc_studio/api/` | FastAPI routes (pages, uploads, feedback, reports, approvals, exports) |
-| `src/kentc_studio/service/` | case service: documents, jobs, views, report versions |
+| `src/kentc_studio/api/` | FastAPI routes (apps, pages, uploads, feedback, reports and prompts, approvals, exports) |
+| `src/kentc_studio/service/` | case service: files and lanes, insight / report jobs, views, report versions |
 | `src/kentc_studio/jobs/` | bounded job dispatcher (local-model jobs one at a time) |
-| `src/kentc_studio/{store,models,config,data,report}.py` | atomic persistence, domain model, studio config, SQL pulls, report rendering |
-| `web/` | studio front end: `index.html`, `assets/css/app.css`, `assets/js/app.js` |
+| `src/kentc_studio/apps.py` | app manifests: fields, lanes, agents, report framework, view blocks and their checks against the schemas |
+| `src/kentc_studio/{providers,store,models,config,data,report}.py` | workflow / HTTP agents, atomic persistence, domain model, studio config, SQL pulls, view → Markdown |
+| `web/` | studio front end: `index.html`, `assets/css/app.css`, `assets/js/app.js` (one block renderer for every app) |
 | `docs/` | design explainer in Traditional Chinese: `index.html`, `asset/css/core.css`, `asset/js/core.js` (interactive calculators run in the browser only) |
-| `studio.yaml`, `workflows/studio/`, `queries/` | studio agents, databases and data pulls; the doc / context / report / investigation agent workflows; the pull SQL |
+| `studio.yaml`, `apps/<name>/`, `queries/` | the apps served, databases and data pulls; each app's manifest and agent workflows; the pull SQL |
 | `src/kentc_agent/workflow.py` | YAML workflows: validation, Jinja, steps, human gates, resume |
 | `src/kentc_agent/adapters/llm.py` | OpenAI-compatible client (Strata, LiteLLM, vLLM): streaming, tool calls, usage, overflow detection |
 | `src/kentc_agent/adapters/web.py` | web search providers (ddgs, SearXNG) and the fallback chain |

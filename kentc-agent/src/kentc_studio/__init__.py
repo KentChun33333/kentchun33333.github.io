@@ -1,1 +1,2 @@
-"""TER Agentic Studio backend: cases, async agent jobs, pluggable agents (local kentc-agent workflows or external)."""
+"""Agentic Studio backend: apps (one manifest per use case), cases, async agent jobs, pluggable agents (local
+kentc-agent workflows or external)."""
