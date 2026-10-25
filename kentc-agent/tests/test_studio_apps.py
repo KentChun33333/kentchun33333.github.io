@@ -12,41 +12,24 @@ from kentc_studio.providers import AgentError
 from kentc_studio.report import to_markdown
 from kentc_studio.store import CaseStore
 
-READER = """
-inputs:
-  file: {required: true}
-  case_brief: {required: true}
-  feedback: {default: ""}
-  previous: {default: ""}
-steps:
-  - id: read
-    tools: [read]
-    prompt: Read {{ inputs.file }}.
-    format: json
-    schema:
-      summary: string
-      key_values: [{field: string, value: string, location: string, confidence: number}]
+READER = """\
+      skills: [reading]
+      output:
+        summary: string
+        key_values: [{field: string, value: string, location: string, confidence: number}]
 """
 
-REPORT = """
-inputs:
-  materials_file: {required: true}
-  case_brief: {required: true}
-  instruction: {default: ""}
-  previous_report_file: {default: ""}
-steps:
-  - id: report
-    tools: [read]
-    prompt: Write it.
-    format: json
-    schema:
-      title: string
-      verdict: "Go|Hold"
-      reply: string
-      requests: [{document: string, reason: string}]
-      questions: [string]
-      summary: string
-      risks: [{title: string, score: number, reason: string}]
+REPORT = """\
+  skills: [reporting]
+  tools: [read]
+  output:
+    title: string
+    verdict: "Go|Hold"
+    reply: string
+    requests: [{document: string, reason: string}]
+    questions: [string]
+    summary: string
+    risks: [{title: string, score: number, reason: string}]
 """
 
 APP = """
@@ -57,68 +40,61 @@ fields:
 lanes:
   - name: files
     required: true
-    agent: reader
     view: [{facts: key_values}, {text: summary}]
-report:
+    agent:
+{reader}report:
   name: Test report
-  workflow: report
   verdicts: {Go: ok, Hold: warn}
   view:
     - {title: Summary, text: summary}
     - {title: Risks, cards: risks, head: title, score: score, body: reason}
-"""
+{report}"""
 
 
 def studio(tmp_path, app=APP, reader=READER, report=REPORT, extra=""):
-    (tmp_path / "reader.yaml").write_text(reader)
-    (tmp_path / "report.yaml").write_text(report)
-    (tmp_path / "app.yaml").write_text(app)
-    (tmp_path / "studio.yaml").write_text("apps:\n  test: app.yaml\nworkflows: .\n" + extra)
+    (tmp_path / "skills").mkdir(exist_ok=True)
+    (tmp_path / "skills" / "reading.md").write_text("Read the file.")
+    (tmp_path / "skills" / "reporting.md").write_text("Write the report.")
+    (tmp_path / "app.yaml").write_text(app.replace("{reader}", reader).replace("{report}", report))
+    (tmp_path / "studio.yaml").write_text("apps:\n  test: app.yaml\nskills: skills\n" + extra)
     return tmp_path / "studio.yaml"
 
 
-# ---------------------------------------------------------------------- untrusted documents: no shell, no web
-@pytest.mark.parametrize("report, refused", [
-    (REPORT.replace("tools: [read]", "tools: [read, bash]"), "offers bash "),
-    (REPORT.replace("    tools: [read]\n", ""), "offers bash "),                 # omitted tools = all tools
-    (REPORT.split("    tools: [read]")[0] + "    web: latest AML news\n", "has web step\\(s\\) report;"),
-])
-def test_studio_refuses_agents_with_shell_or_web_access(tmp_path, report, refused):
-    with pytest.raises(AgentError, match=f"agent report: report.yaml {refused}"):
-        load_config(studio(tmp_path, report=report))
+# ---------------------------------------------------------------------- untrusted documents: no shell
+def test_studio_refuses_agents_with_a_shell(tmp_path):
+    with pytest.raises(AgentError, match="app test: agent report: offers bash; studio agents read untrusted"):
+        load_config(studio(tmp_path, report=REPORT.replace("tools: [read]", "tools: [read, bash]")))
 
 
 # ---------------------------------------------------------------------- manifest checks at load
-@pytest.mark.parametrize("app, refused", [
-    (APP.replace("{text: summary}]", "{text: summry}]"),
+@pytest.mark.parametrize("app, reader, report, refused", [
+    (APP.replace("{text: summary}]", "{text: summry}]"), READER, REPORT,
      r"lane files: view\[1\]: text 'summry' is not in the agent's schema"),
-    (APP.replace("head: title", "head: name"), r"report: view\[1\]: name not in the items of 'risks'"),
-    (APP.replace("{title: Summary, text: summary}", "{title: Summary, facts: risks}"),
+    (APP.replace("head: title", "head: name"), READER, REPORT, r"report: view\[1\]: name not in the items of 'risks'"),
+    (APP.replace("{title: Summary, text: summary}", "{title: Summary, facts: risks}"), READER, REPORT,
      "facts \\(flaggable rows\\) belong to the insight agents"),
-    (APP.replace("{Go: ok, Hold: warn}", "{Go: ok, Stop: bad}"), "verdicts must give a tone .* for each verdict: Go, Hold"),
-    (APP.replace("    agent: reader\n", ""), "lane files: view / hide need an agent"),
-    (APP.replace("agent: reader", "agent: {workflow: reader, per: lane}"),
-     "lane files: per is decided by the workflow's inputs"),
-    (APP.replace("workflow: report", "workflow: report.yaml"), "agent report: workflow 'report.yaml' not found in "),
+    (APP.replace("{Go: ok, Hold: warn}", "{Go: ok, Stop: bad}"), READER, REPORT,
+     "verdicts must give a tone .* for each verdict: Go, Hold"),
+    (APP.replace("    agent:\n{reader}", ""), READER, REPORT, "lane files: view / hide need an agent"),
+    (APP, READER.replace("[reading]", "[reading, triage]"), REPORT,
+     r"lane files: agent files: skill 'triage': .*triage\.md not found"),
+    (APP, READER, REPORT.replace("[reporting]", "[]"), "agent report: needs at least one skill"),
+    (APP, READER.split("      output:")[0], REPORT, "agent files: output must give the JSON answer's shape"),
+    (APP, READER + "      checks:\n        key_values[].confidance: 0..100\n", REPORT,
+     r"checks: key_values\[\]\.confidance: not in the output"),
+    (APP, READER + "      checks: {summary: 0..100}\n", REPORT, "summary: 0..100: a range needs a number"),
+    (APP, READER + "      checks: {summary: shortish}\n", REPORT, "summary: unknown rule 'shortish'"),
+    (APP, "      url: http://agent:9000\n" + READER, REPORT, "an external \\(url\\) agent takes no skills, output"),
 ])
-def test_app_manifest_mistakes_are_refused_when_the_studio_loads(tmp_path, app, refused):
+def test_app_manifest_mistakes_are_refused_when_the_studio_loads(tmp_path, app, reader, report, refused):
     with pytest.raises(AgentError, match=refused):
-        load_config(studio(tmp_path, app=app))
+        load_config(studio(tmp_path, app=app, reader=reader, report=report))
 
 
 def test_report_without_the_framework_keys_is_refused(tmp_path):
-    report = REPORT.replace("      reply: string\n", "").replace("      questions: [string]\n", "")
+    report = REPORT.replace("    reply: string\n", "").replace("    questions: [string]\n", "")
     with pytest.raises(AgentError, match=r"report-framework keys .* \(missing reply, questions\)"):
         load_config(studio(tmp_path, report=report))
-
-
-def test_agent_workflow_must_take_the_inputs_the_studio_passes(tmp_path):
-    reader = READER.replace('  previous: {default: ""}\n', "").replace("  case_brief: {required: true}\n",
-                                                                     "  case_brief: {required: true}\n"
-                                                                     "  ticket: {required: true}\n")
-    with pytest.raises(AgentError, match="must declare the inputs .* \\(missing previous\\); the studio never passes "
-                                         "required ticket"):
-        load_config(studio(tmp_path, reader=reader))
 
 
 def test_data_pull_may_only_bind_fields_of_the_app_offering_it(tmp_path):
@@ -144,9 +120,9 @@ def test_report_markdown_follows_the_view_and_the_framework(tmp_path):
 
 # ---------------------------------------------------------------------- defaults: views from the schema, brief from fields
 def test_keys_without_a_custom_block_are_shown_by_shape_in_schema_order_unless_hidden(tmp_path):
-    reader = READER.replace("      summary: string\n", "      summary: string\n      risk: number\n").replace(
-        "      key_values:", "      parties: [{name: string, role: string}]\n      owner: {name: string}\n"
-                            "      gaps: [string]\n      key_values:")
+    reader = READER.replace("        summary: string\n", "        summary: string\n        risk: number\n").replace(
+        "        key_values:", "        parties: [{name: string, role: string}]\n        owner: {name: string}\n"
+                              "        gaps: [string]\n        key_values:")
     app = APP.replace("view: [{facts: key_values}, {text: summary}]", "view: [{title: Gaps, list: gaps}]\n"
                                                                        "    hide: [risk]")
     view = load_config(studio(tmp_path, app=app, reader=reader)).apps["test"].agents["files"].view

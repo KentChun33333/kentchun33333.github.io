@@ -1,8 +1,10 @@
 # TER review: Trigger Event Review of a bank financial-crime case (as in ter-bank-multi-agent-flow-v15.html).
 # Page 1: case fields + Context / Evidence lanes + data pulls · Page 2: Trigger Context and document key values to
 # verify · Page 3: the TER report with suggested next steps; each prompt is a new version.
+# Each agent is an inline contract (output shape, checks, tools) equipped with skills; the prose lives in
+# kentc-agent/skills/<name>.md. The runtime loops an agent until its answer passes the output shape and checks.
 # Defaults: labels come from the names, the case ID prefix is TER-<year>-, and an agent without a view (or the
-# keys its view leaves out) is shown by the shape of its schema; `hide` drops keys.
+# keys its view leaves out) is shown by the shape of its output; `hide` drops keys.
 
 title: TER review
 description: Trigger Event Review - context and evidence documents plus core-banking pulls into a TER report.
@@ -28,7 +30,24 @@ lanes:
     hint: Trigger e-mails, customer explanations, case notes → context agent
     required: true
     sample: ["*.eml", "*.msg"]
-    agent: context-agent                    # takes lane_file: one job over the whole lane, as text
+    agent:                                  # per lane: one job over the whole lane, as text (lane_file)
+      label: Context agent
+      per: lane
+      skills: [ter-trigger-context]
+      tools: []
+      effort: low
+      output:
+        trigger_type: "e.g. Adverse media, Police intelligence, TM alert"
+        trigger_source: "alert id, source and date"
+        trigger_event: string
+        matched_parties: [{name: string, role: string}]
+        profile_deviation: string
+        customer_explanation: "or 'None provided'"
+        evidence_gaps: [string]
+        routing_rationale: string
+      checks:
+        trigger_event: required
+        matched_parties[].name: required
     view:
       - title: Trigger context
         kv: [trigger_type, trigger_source, trigger_event, profile_deviation, customer_explanation, routing_rationale]
@@ -37,15 +56,27 @@ lanes:
   - name: evidence
     hint: Invoices, contracts, B/L, customs, statements → doc agent (key values)
     sample: ["*"]
-    agent: doc-agent                        # takes file: one job per file; no view: type / reference / summary,
+    agent:                                  # per file: one job per file; no view: type / reference / summary,
                                             # flaggable key values, anomalies
+      label: Doc agent
+      per: file
+      skills: [ter-evidence, document-extraction]
+      tools: [read]
+      output:
+        document_type: string
+        reference: string
+        summary: "two sentences"
+        key_values: [{field: string, value: string, location: string, confidence: number}]
+        anomalies: [string]
+      checks:
+        key_values[].location: required
+        key_values[].confidence: 0..100
 
 sample: ../../../examples/ter-case
 pulls: [kyc_profile, txn_history, counterparties, monthly_activity, prior_alerts]
 
 report:
   name: TER report
-  workflow: ter-report-agent
   verdicts: {Agree: ok, Further investigation: warn}
   hide: [confidence]
   view:
@@ -59,11 +90,45 @@ report:
     - {title: Justification and key risks, cards: key_risks, kicker: id, head: title, score: score, body: reason,
        notes: [evidence, gap]}
     - {title: Recommended next step, kv: recommendation}
+  skills: [ter-report, fincrime-guardrails, report-revision]
+  tools: [read]
+  output:
+    title: string
+    verdict: "Agree|Further investigation"
+    reply: "your answer to the analyst (what changed and why)"
+    requests: [{document: string, reason: string}]
+    questions: [string]
+    typology: string
+    executive_narrative: string
+    trigger: {type: string, event: string, primary_discrepancy: string, context_gap: string}
+    background: {entity: string, nature_of_business: string, accounts: string, owners_directors: string,
+                 expected_activity: string, major_counterparty: string}
+    kyc_review: string
+    transactions: [{date: string, from: string, to: string, amount: string, result: string}]
+    key_risks: [{id: "KR-01", score: number, title: string, reason: string, evidence: string, gap: string}]
+    recommendation: {scope: string, rationale: string}
+    confidence: number
+  checks:
+    title: required
+    executive_narrative: [required, max 1400]
+    # Tipping-off guard: requests go to the client, so they may not mention the review or its sources.
+    requests[].document: &client_safe "match (?is)(?!.*\\b(police|alerts?|screening|adverse media|alleg\\w*|charged|investigat\\w*|suspic\\w*|STR|STRO|TER|trigger)\\b).*"
+    requests[].reason: *client_safe
+    key_risks: min 1
+    key_risks[].score: 0..100
+    confidence: 0..100
 
 extras:
   investigation:
-    workflow: investigation-agent
     label: Investigation agent (cross-checks, entity risk ranking)
+    skills: [ter-investigation, fincrime-guardrails]
+    tools: [read]
+    output:
+      cross_checks: [{check: string, result: "CONSISTENT|MISMATCH|UNRESOLVED", detail: string}]
+      entity_ranking: [{rank: number, entity: string, score: number, reason: string}]
+      observations: [string]
+    checks:
+      entity_ranking[].score: 0..100
   # openweb:
   #   url: http://research-host:9000/agent
   #   label: OpenWeb research agent (registry, adverse news)

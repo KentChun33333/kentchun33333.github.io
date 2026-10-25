@@ -18,3 +18,9 @@ agent-company/.pytest_cache/
 kentc-agent/.venv/
 kentc-agent/.pytest_cache/
 .kentc-agent/
+
+# 
+genesys-adam-images/
+downloads/
+data/
+dataset/

@@ -68,6 +68,7 @@ from .adapters.session import Session
 from .adapters.tools import CORE_TOOLS, ToolContext, ToolError, inside, reject_unsupported, rel, resolve
 from .adapters.web_research import run_web_agent
 from .agent import CUT_OFF_NOTE, Aborted, Agent, build_tools
+from .checks import check_rules
 from .config import STATE_DIR
 
 TOP_KEYS = {"name", "description", "inputs", "instructions", "tools", "max_turns", "effort", "steps"}
@@ -126,6 +127,7 @@ class Workflow:
     effort: str | None
     steps: list[Step]
     path: Path
+    skills: str = ""           # skill texts for the system prompt, verbatim (not templated); studio agents
 
 
 # ---------------------------------------------------------------------- loading and validation
@@ -339,7 +341,8 @@ class Runner:
         self.env.filters.update(fromjson=json.loads, json=_pretty_json, slug=_slug)
         log = run_dir / "session.jsonl"
         self.agent = Agent(ctx, tools=[], session=Session.load(log) if log.is_file() else Session(log),
-                           instructions=self.render(wf.instructions), name=wf.name)
+                           instructions="\n\n".join(t for t in (self.render(wf.instructions), wf.skills) if t),
+                           name=wf.name)
 
     # -------------------------------------------------------------- template helpers
     def _glob(self, pattern: str) -> list[str]:
@@ -449,33 +452,44 @@ class Runner:
         return self.state
 
     def _prompt(self, step: Step, n: int, total: int) -> tuple[str, Any]:
-        """One step of the main agent: its tools narrowed to the step's list, its context kept."""
+        """One step of the main agent: its tools narrowed to the step's list, its context kept.
+
+        A JSON step's answer must fit its `schema` and pass its `checks` (parsed rules, checks.py); a failing answer
+        goes back to the agent with what is wrong. `repairs` bounds the attempts (default 2); None repairs until the
+        step's max_turns, counted over the whole step, is spent."""
         spec, wf = step.spec, self.wf
         names = spec.get("tools", wf.tools)
         self.agent.set_tools(build_tools(names))
         self.agent.name = step.id
-        self.agent.max_turns = _first(spec.get("max_turns"), wf.max_turns, self.ctx.settings.max_turns)
+        budget = _first(spec.get("max_turns"), wf.max_turns, self.ctx.settings.max_turns)   # 0: no limit
+        self.agent.max_turns = budget
         self.agent.effort = spec.get("effort", wf.effort)
         allowed = ", ".join(self.agent.tools) or "none - answer from what you already know"
         saved = f"\nYour final reply is saved to {self.render(spec['output'])} for later steps; you do not write it " \
             "yourself." if spec.get("output") else ""
         message = f"## Step {n}/{total}: {step.id}\nTools for this step: {allowed}.{saved}\n\n" + \
             self.render(spec["prompt"])
+        rules = spec.get("checks") or []
         if spec.get("format") == "json":
             shape = f"\nShape:\n{_pretty_json(spec['schema'])}" if spec.get("schema") else ""
             message += "\n\nEnd this step with ONLY one JSON object as your reply (no prose, no code fence)." + \
                 (" Every key of the shape is required, with the type it shows; \"A|B\" means one of A or B." +
                  shape if shape else "")
+            if rules:
+                message += "\nYour answer must also pass these checks:\n" + \
+                    "\n".join(f"- {r.path}: {r.text}" for r in rules)
         output = self._run_agent(step, message)
+        used = self.agent.turns
         self.trace("AGT", step.id, "step answered")
         if spec.get("format") != "json":
             return output, None
-        schema = spec.get("schema")
-        for attempt in range(3):
-            last = attempt == 2
+        schema, repairs = spec.get("schema"), spec.get("repairs", 2)
+        attempt = 0
+        while True:
+            last = (repairs is not None and attempt >= repairs) or (budget > 0 and used >= budget)
             try:
                 data = parse_json_object(output)
-                errors = check_shape(data, schema) if schema else []
+                errors = (check_shape(data, schema) if schema else []) or check_rules(data, rules)
                 cut = CUT_OFF_NOTE in output
                 if not errors and (not cut or last):
                     if cut:
@@ -483,16 +497,19 @@ class Runner:
                     return output, data
                 shown = "; ".join(errors[:MAX_SHAPE_ERRORS]) + \
                     (f"; and {len(errors) - MAX_SHAPE_ERRORS} more" if len(errors) > MAX_SHAPE_ERRORS else "")
-                problem = f"it does not fit the shape: {shown}" if errors else \
+                problem = f"it does not fit the shape and checks: {shown}" if errors else \
                     "it was cut off at the output limit; give a shorter JSON object (fewer items, strings under 200 " \
                     "characters)"
             except ValueError as e:
                 problem = f"it is not one valid JSON object ({e})"
             if last:
                 raise WorkflowError(f"{step.id}: the agent did not return the expected JSON: {problem}")
+            attempt += 1
+            self.trace("SYS", step.id, f"answer sent back ({attempt}): {problem[:200]}")
+            self.agent.max_turns = budget - used if budget > 0 else 0
             output = self._run_agent(step, f"Your reply cannot be used: {problem}. Reply with only the complete JSON "
                                            "object.")
-        raise AssertionError("unreachable")
+            used += self.agent.turns
 
     def _run_agent(self, step: Step, message: str) -> str:
         """The step's agent turn. Running out of model calls is a failure, not an answer: nothing is saved as the

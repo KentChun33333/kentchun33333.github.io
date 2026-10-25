@@ -2,6 +2,8 @@
 # Page 1: the RM's question and settings + source files (CRM / T24 exports, RM notes, trust documents, e-mails,
 # news) · Page 2: per-source facts, relationships (stated vs inferred) and signals to verify · Page 3: the AURA
 # pillar report; each prompt (finetune) is a new version.
+# Each agent is an inline contract (output shape, checks, tools) equipped with skills; the prose lives in
+# kentc-agent/skills/<name>.md.
 
 title: RM insight
 description: Wealth intelligence - CRM, FileNet, T24 and news sources into ranked target clients with evidence chains.
@@ -30,13 +32,25 @@ lanes:
     hint: CRM / T24 exports, RM meeting notes, trust documents, e-mails, news → source agent (facts, links)
     required: true
     sample: ["*"]
-    agent: source-agent                     # one job per file; no view: system + summary, facts, links, signals
+    agent:                                  # one job per file; no view: system + summary, facts, links, signals
+      label: Source agent
+      per: file
+      skills: [rm-sources, document-extraction]
+      tools: [read]
+      output:
+        system: "CRM|FileNet|T24|HELIOS|Other"
+        summary: "two sentences"
+        key_values: [{field: string, value: string, location: string, confidence: number}]
+        relationships: [{from: string, relation: string, to: string, kind: "stated|inferred", location: string}]
+        signals: [string]
+      checks:
+        key_values[].location: required
+        key_values[].confidence: 0..100
 
 sample: ../../../examples/rm-case
 
 report:
   name: Wealth insight
-  workflow: rm-report-agent
   label: Insight agent
   verdicts: {Proceed: ok, Controlled review: warn, Insufficient evidence: bad}
   hide: [confidence]
@@ -47,3 +61,23 @@ report:
     - {title: Pillar 03 · Answer per target, cards: targets, kicker: group, head: name, score: score, body: why,
        notes: [calculation, caveats, actions]}
     - {title: Pillar 04 · Reasoning and evidence chain, table: evidence_chain}
+  skills: [rm-report, report-revision]
+  tools: [read]
+  output:
+    title: string
+    verdict: "Proceed|Controlled review|Insufficient evidence"
+    reply: "your answer to the RM (what changed and why)"
+    requests: [{document: string, reason: string}]
+    questions: [string]
+    summary: string
+    targets: [{rank: number, name: string, region: string, group: string, metric: string, calculation: string,
+               score: number, why: string, caveats: string, actions: string}]
+    relationships: [{from: string, relation: string, to: string, kind: "stated|inferred", source: string}]
+    evidence_chain: [{target: string, system: string, claim: string, source: string, kind: "stated|inferred"}]
+    coordination: [string]
+    provenance: [{system: string, files: string, items: number}]
+    confidence: number
+  checks:
+    targets: max 5
+    targets[].score: 0..100
+    summary: required

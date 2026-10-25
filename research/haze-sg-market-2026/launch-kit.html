@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Haze-Season Launch Kit · Individual Entry · Oct 2026</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+:root {
+  --red:#d71920; --red-dark:#a80f16; --ink:#202124; --muted:#6d7278;
+  --line:#dedfdf; --paper:#fff; --bg:#f4f4f1; --green:#087f5b;
+  --amber:#b76b00; --blue:#3569c8; --navy:#202b3a;
+  --shadow:0 12px 34px rgba(25,25,25,.08);
+}
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:'DM Sans',Arial,sans-serif; }
+.app { max-width:1080px; margin:0 auto; padding:0 18px 40px; }
+header.top { background:var(--navy); color:#fff; padding:14px 18px; }
+header.top .in { max-width:1080px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+.brand { font-weight:700; letter-spacing:.04em; }
+.brand em { color:var(--red); font-style:normal; }
+.tagline { color:#aeb6c2; font-size:13px; }
+.banner { background:#25292d; color:#fff; padding:10px 18px; font-size:13.5px; }
+.banner .in { max-width:1080px; margin:0 auto; display:flex; gap:22px; flex-wrap:wrap; }
+.banner b { color:#ffd7d9; }
+h1 { font-size:30px; margin:26px 0 6px; }
+h2 { font-size:19px; margin:4px 0 12px; }
+h3 { font-size:15.5px; margin:14px 0 8px; }
+.sub { color:var(--muted); margin:0 0 20px; }
+.card { background:var(--paper); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); padding:18px 20px; margin:0 0 18px; }
+.eyebrow { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--red); margin-bottom:4px; }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+@media (max-width:820px){ .grid2{grid-template-columns:1fr;} }
+table { width:100%; border-collapse:collapse; font-size:13.5px; }
+th,td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { background:#f8f8f6; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+.tag { display:inline-block; font-size:11.5px; font-weight:600; padding:2px 8px; border-radius:99px; }
+.tag.go { background:#e3f3ec; color:var(--green); }
+.tag.warn { background:#fdf1e0; color:var(--amber); }
+.tag.no { background:#fbe4e5; color:var(--red-dark); }
+ul.check { list-style:none; margin:0; padding:0; }
+ul.check li { display:flex; gap:10px; align-items:flex-start; padding:7px 0; border-bottom:1px dashed var(--line); font-size:14px; }
+ul.check li:last-child { border-bottom:none; }
+ul.check input { margin-top:3px; width:16px; height:16px; accent-color:var(--red); flex:none; }
+.day { font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; color:#fff; background:var(--navy); padding:2px 8px; border-radius:4px; flex:none; margin-top:2px; }
+.calc { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin:10px 0 14px; }
+.calc label { font-size:11.5px; color:var(--muted); display:block; margin-bottom:3px; }
+.calc input { width:100%; padding:7px 8px; border:1px solid var(--line); border-radius:6px; font-family:'IBM Plex Mono',monospace; font-size:13px; }
+.calc input:focus { outline:none; border-color:var(--red); box-shadow:0 0 0 3px rgba(215,25,32,.08); }
+.out { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.out div { background:#f8f8f6; border:1px solid var(--line); border-radius:8px; padding:10px 12px; }
+.out span { display:block; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+.out b { font-family:'IBM Plex Mono',monospace; font-size:17px; }
+.copybox { position:relative; background:#f8f8f6; border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin:8px 0 16px; font-size:13.5px; white-space:pre-wrap; font-family:'IBM Plex Mono',monospace; line-height:1.5; }
+.copybtn { position:absolute; top:8px; right:8px; border:1px solid var(--line); background:#fff; border-radius:6px; padding:4px 10px; font-size:11.5px; font-weight:600; cursor:pointer; }
+.copybtn:hover { border-color:var(--red); color:var(--red); }
+.rule { border-left:4px solid var(--red); background:#fdf6f6; padding:10px 14px; border-radius:0 8px 8px 0; margin:8px 0; font-size:13.5px; }
+.rule b { color:var(--red-dark); }
+a { color:var(--blue); }
+footer { color:var(--muted); font-size:12.5px; padding:18px 4px; border-top:1px solid var(--line); margin-top:26px; }
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+<div class="brand">HAZE <em>LAUNCH</em> KIT</div>
+<div class="tagline">Individual entry playbook · no manufacturing · Singapore · Oct 2026</div>
+</div></header>
+<div class="banner"><div class="in">
+<span><b>PSI 208–212 West</b> — season high</span>
+<span>Window: <b>~4–6 weeks</b> before Nov monsoon</span>
+<span>Test budget: <b>S$530</b></span>
+<span>Start: <b>today</b> · first import lands: <b>day 5–7</b></span>
+</div></div>
+<div class="app">
+<h1>Do it in 7 days</h1>
+<p class="sub">Tick items as you go — progress saves in this browser. Everything below S$530; nothing here needs a company, a factory, or inventory on day one.</p>
+<div class="card">
+<div class="eyebrow">Execution checklist</div>
+<h2>Day-by-day plan</h2>
+<ul class="check" id="checklist">
+<li><input type="checkbox"><span class="day">DAY 0</span><span>Carousell: register as <b>Personal</b> account (free — Personal accounts are exempt from the 2026 service-fee policy). Post the 3 listings from the copy blocks below with phone photos of your local-sourced stock.</span></li>
+<li><input type="checkbox"><span class="day">DAY 0</span><span>Buy local test stock: weatherstrip + gap tape from HardwareCity/Daiso (~S$30) → assemble 8 seal kits. List at S$15–25/kit.</span></li>
+<li><input type="checkbox"><span class="day">DAY 1</span><span>Shopee Seller: sign up with NRIC/FIN + bank account (no ACRA needed to start). List seal kits + any arbitrage items. Note: Shopee commission applies after 120 days registered — you get a fee-free window.</span></li>
+<li><input type="checkbox"><span class="day">DAY 1</span><span>Arbitrage sweep: check Xiaomi/Lazada official-store promos on filters + Qingping monitors; buy only what's already selling on Carousell at a higher price (check "sold" listings first).</span></li>
+<li><input type="checkbox"><span class="day">DAY 2</span><span>1688: create account (needs CN phone OR use agent). Send product links to consolidator for quote. Order: 20× compatible HEPA+carbon filter sets, 10× universal activated-carbon cabin filters, 10× door-bottom seals.</span></li>
+<li><input type="checkbox"><span class="day">DAY 2</span><span>Consolidator signup: Taobao2SG / Ebaoguo / ImagineShip — air parcel ¥30–55/kg, 4–6 days door-to-door. Declare honestly; budget 9% GST on CIF &gt; S$400.</span></li>
+<li><input type="checkbox"><span class="day">DAY 3</span><span>Facebook Marketplace + Telegram groups (HDB/condo groups): repost seal kits + cabin filter install offer. Free traffic, meet-up friendly.</span></li>
+<li><input type="checkbox"><span class="day">DAY 4</span><span>Pre-write filter + monitor listings (copy blocks below). Photos staged. Ready to publish the moment stock lands.</span></li>
+<li><input type="checkbox"><span class="day">DAY 5–7</span><span>Stock lands → publish filter listings same day. Price at 60–70% of Shopee official-store filter price. Offer "buy 2, save S$5" bundles.</span></li>
+<li><input type="checkbox"><span class="day">DAY 7</span><span>Review: kill SKUs with zero saves/messages after 3 days; double down on what has watchlist traction. Reorder winners by air freight only while PSI &gt; 100.</span></li>
+</ul>
+</div>
+<div class="card">
+<div class="eyebrow">SKU economics</div>
+<h2>Test lot — S$530 total</h2>
+<table>
+<tr><th>SKU</th><th>Source</th><th>COGS/unit</th><th>Freight</th><th>Landed/unit</th><th>SG price</th><th>Margin</th></tr>
+<tr><td><b>Compatible HEPA+carbon filter set</b> (Xiaomi 4/4 Lite/4 Compact/2S/3H)</td><td>1688 generic OEM, MOQ 2–10</td><td>S$3–8</td><td>~S$5 (0.8–1.2 kg)</td><td>S$8–13</td><td>S$18–35</td><td><span class="tag go">60–72%</span></td></tr>
+<tr><td><b>Universal activated-carbon cabin filter</b> (PM2.5)</td><td>1688, MOQ 5</td><td>S$2.5–5</td><td>~S$3</td><td>S$5.5–8</td><td>S$15–28 + install</td><td><span class="tag go">58–70%</span></td></tr>
+<tr><td><b>Haze seal kit</b> (door seal + gap tape + foam, self-made bundle)</td><td>Local: HardwareCity/Daiso</td><td>S$3–5</td><td>—</td><td>S$3–5</td><td>S$15–25</td><td><span class="tag go">65–80%</span></td></tr>
+<tr><td><b>Qingping-class PM2.5 monitor</b> (genuine, parallel import)</td><td>1688 authorized shop / CN retail promo</td><td>S$55–75</td><td>~S$4 + 9% GST</td><td>S$65–88</td><td>S$110–150</td><td><span class="tag warn">38–48%</span></td></tr>
+</table>
+<h3>Landed-cost calculator</h3>
+<div class="calc">
+<div><label>COGS/unit (S$)</label><input id="c1" type="number" value="6" step="0.5"></div>
+<div><label>Weight/unit (kg)</label><input id="c2" type="number" value="1" step="0.1"></div>
+<div><label>Qty</label><input id="c3" type="number" value="20"></div>
+<div><label>Freight (S$/kg)</label><input id="c4" type="number" value="9" step="0.5"></div>
+<div><label>GST on CIF % (0 if &lt;S$400)</label><input id="c5" type="number" value="9" step="1"></div>
+<div><label>Sell price (S$)</label><input id="c6" type="number" value="25" step="1"></div>
+</div>
+<div class="out">
+<div><span>Landed/unit</span><b id="o1">—</b></div>
+<div><span>Total outlay</span><b id="o2">—</b></div>
+<div><span>Margin</span><b id="o3">—</b></div>
+<div><span>Break-even units</span><b id="o4">—</b></div>
+</div>
+</div>
+<div class="grid2">
+<div class="card">
+<div class="eyebrow">Earnings outlook</div>
+<h2>What this run makes</h2>
+<table>
+<tr><th>Scenario</th><th>Trigger</th><th>Net over ~6 weeks</th></tr>
+<tr><td><span class="tag warn">Conservative</span></td><td>Haze ends within ~2 weeks</td><td>S$300–450</td></tr>
+<tr><td><span class="tag go">Base</span></td><td>PSI &gt;130 for 4–6 weeks</td><td>S$1,000–1,600</td></tr>
+<tr><td><span class="tag go">Upside</span></td><td>PSI &gt;150 sustained 6+ weeks</td><td>S$2,500–4,000</td></tr>
+</table>
+<h3>Base case breakdown (capital S$530–900)</h3>
+<table>
+<tr><td>Compatible filters 30–40 sold × S$14–16 margin</td><td>S$450–640</td></tr>
+<tr><td>Seal kits 10–15 × S$15</td><td>S$150–225</td></tr>
+<tr><td>Cabin filter + install 8–12 jobs × S$25–40</td><td>S$200–480 (mostly labour income)</td></tr>
+<tr><td>Monitors 2–3 × S$45</td><td>S$90–135</td></tr>
+<tr><td>Used purifier flips 2–3 × S$50</td><td>S$100–150</td></tr>
+</table>
+<p style="font-size:13px;color:var(--muted)">Time cost: 1–2 h/day + meetups. Estimates from price spreads, not guaranteed sales. Filters are the liquid asset; monitors are the main inventory risk — the kill-switch is not optional.</p>
+</div>
+<div class="card">
+<div class="eyebrow">Forwarder 101</div>
+<h2>Never bought from 1688? Still works</h2>
+<p style="font-size:13.5px">A consolidator gives you a China warehouse address. Sellers ship there domestically; the forwarder flies the parcel to your SG door. No Chinese bank card needed.</p>
+<table>
+<tr><th>Step</th><th>How</th></tr>
+<tr><td>1 · Sign up</td><td>Pick one of Taobao2SG / Ebaoguo / ImagineShip. Email/phone signup → you get a <b>personal member code + warehouse address</b> (e.g. Guangzhou warehouse + your code).</td></tr>
+<tr><td>2 · Use their buying agent (easiest)</td><td>Send the 1688/Taobao product link to their support. They order it for you (~5% service fee); you pay by PayNow/PayPal. No 1688 account, no Alipay needed.</td></tr>
+<tr><td>3 · Or order yourself</td><td>Set the delivery address to the forwarder's warehouse, put your member code in the address notes. Pay via Alipay (international card can be linked).</td></tr>
+<tr><td>4 · Parcel hits warehouse</td><td>Domestic leg 1–3 days (usually free). Enter the seller's tracking number (运单号) in the forwarder's system to link the parcel to your account.</td></tr>
+<tr><td>5 · Pay international leg</td><td>Choose air freight ¥30–55/kg, declare contents honestly, pay by PayNow/PayPal.</td></tr>
+<tr><td>6 · Receive</td><td>4–6 days to your SG door. If CIF &gt; S$400, 9% GST may apply — normal, already priced into your calculator.</td></tr>
+</table>
+<div class="rule"><b>Test order first:</b> run S$200–300 through the forwarder to verify speed and handling before the main lot. All three have Chinese-language support.</div>
+</div>
+</div>
+<div class="grid2">
+<div class="card">
+<div class="eyebrow">Sourcing</div>
+<h2>Supplier entry points</h2>
+<h3>1688 keyword searches (open in CN browser/agent)</h3>
+<table>
+<tr><td>米家空气净化器滤芯 活性炭</td><td><a href="https://s.1688.com/selloffer/offer_search.htm?keywords=%E7%B1%B3%E5%AE%B6%E7%A9%BA%E6%B0%94%E5%87%80%E5%8C%96%E5%99%A8%E6%BB%A4%E8%8A%AF%E6%B4%BB%E6%80%A7%E7%82%AD">s.1688.com search</a></td><td>¥15–45/set</td></tr>
+<tr><td>汽车空调滤芯 活性炭 PM2.5</td><td><a href="https://s.1688.com/selloffer/offer_search.htm?keywords=%E6%B1%BD%E8%BD%A6%E7%A9%BA%E8%B0%83%E6%BB%A4%E8%8A%AF%E6%B4%BB%E6%80%A7%E7%82%AD">s.1688.com search</a></td><td>¥8–25/pc</td></tr>
+<tr><td>门窗密封条 防雾霾</td><td><a href="https://s.1688.com/selloffer/offer_search.htm?keywords=%E9%97%A8%E7%AA%97%E5%AF%86%E5%B0%81%E6%9D%A1%E9%98%B2%E9%9C%BE">s.1688.com search</a></td><td>¥3–10/roll</td></tr>
+</table>
+<h3>Consolidators (CN → SG air, 4–6 days)</h3>
+<table>
+<tr><td><a href="https://www.taobao2sg.com">Taobao2SG</a></td><td>¥30–55/kg air</td><td>door-to-door</td></tr>
+<tr><td><a href="https://ebaoguo.com">Ebaoguo</a></td><td>¥12–25/kg sea · ¥40ish air</td><td>consolidation</td></tr>
+<tr><td><a href="https://imagineship.com">ImagineShip</a></td><td>¥30–55/kg air</td><td>parcel table</td></tr>
+</table>
+<h3>Local same-day (for Day-0 kits)</h3>
+<p style="font-size:13.5px">HardwareCity (Kovan), Daiso, Mr.D.I.Y. — weatherstrip rolls S$2–5, foam gap tape S$1–3. Buy 8 kits' worth = ~S$30.</p>
+</div>
+<div class="card">
+<div class="eyebrow">Channel costs</div>
+<h2>Platform fee comparison</h2>
+<table>
+<tr><th>Channel</th><th>Cost to you</th><th>Notes</th></tr>
+<tr><td><b>Carousell Personal</b></td><td><span class="tag go">0%</span></td><td>Personal accounts exempt from 2026 service fee (2.5% applies to Professional only, ≥S$500/mo or 10+ outbound chats). Meet-up = no fees at all.</td></tr>
+<tr><td><b>Facebook Marketplace</b></td><td><span class="tag go">0%</span></td><td>Meet-up only, no shipping infra. Good for seal kits + install leads.</td></tr>
+<tr><td><b>Shopee SG</b></td><td><span class="tag warn">~10–15%</span></td><td>Commission + service + transaction fees; commission starts 120 days after registration — first ~4 months of this haze run are commission-free. Brand gating: use "compatible with" wording.</td></tr>
+<tr><td><b>Lazada</b></td><td><span class="tag warn">~8–14%</span></td><td>Individual signup possible; UEN needed for some seller types. Lower priority than Shopee for this run.</td></tr>
+</table>
+<h3>Where each SKU sells best</h3>
+<table>
+<tr><td>Seal kits</td><td>Carousell + FB — buyers want same-day meet-up</td></tr>
+<tr><td>Compatible filters</td><td>Shopee (model-name search traffic) + Carousell</td></tr>
+<tr><td>Monitors</td><td>Carousell (branded resale tolerated) — avoid Shopee Mall gating</td></tr>
+<tr><td>Cabin filter + install</td><td>Carousell lead-gen, parts bought per job</td></tr>
+</table>
+</div>
+</div>
+<div class="card">
+<div class="eyebrow">Niche plays</div>
+<h2>Fatter angles than retail</h2>
+<table>
+<tr><th>Play</th><th>Why</th><th>Unit economics</th><th>Effort</th></tr>
+<tr><td><b>1 · B2B bundles to preschools / tuition centres / eldercare</b></td><td>MOE Oct-2026 notice: SCC and KCare centres stay open even when schools close for haze — centres must solve their own air. One B2B order = 10–20 consumer orders.</td><td>4–6 rooms per centre: 4 purifiers + filter pack ≈ charge S$800–1,200, net S$150–250/centre. 3–5 centres = S$500–1,250.</td><td><span class="tag warn">Medium</span> 20 calls/emails a day to centre managers</td></tr>
+<tr><td><b>2 · Sell-out arbitrage (fastest cash)</b></td><td>Bloomberg 2026-10-15: SG purifier retail selling out; multiple Xiaomi listings show sold out on Shopee. Ready stock itself is the selling point.</td><td>Buy at official price (Lazada/Shopee official stores) → relist on Carousell "ready stock, ship today" at +S$40–70/unit. 5–10 units = S$300–700, window is days.</td><td><span class="tag go">Low</span> zero China logistics, act today</td></tr>
+<tr><td><b>3 · Chinese-language content + Shopee affiliate</b></td><td>MissLobang/pixel.sg cover EN reviews; nobody seriously does the CN search "2026 新加坡 空气净化器 推荐 / 滤芯哪里买". Chinese-speaking parents search in Chinese.</td><td>Zero stock, zero cost: one CN review page + Xiaohongshu/Telegram posts with Shopee affiliate links (1–9% by category). Also funnels to your own Carousell store.</td><td><span class="tag go">Low</span> one evening to write a page</td></tr>
+<tr><td><b>4 · Baby-room clean-air bundle</b></td><td>School closures + care centres open → parental anxiety concentrates on infants. Emotional premium, little competition.</td><td>Seal kit + monitor + filter, cost S$90–120 → sell as "婴儿房防霾套装" at S$199–249. Net S$80–120/bundle.</td><td><span class="tag go">Low</span> just a bundle of existing SKUs</td></tr>
+<tr><td><b>5 · AC-servicing broker jobs</b></td><td>Post-haze dust + AC surge → servicing demand spikes. No licence needed — you take the job, a licensed contractor does it.</td><td>List at S$120–160/job, subcontract at S$80–120, keep S$30–50/job. Zero skill, zero stock.</td><td><span class="tag go">Low</span> shares the funnel with the install lead-gen listing</td></tr>
+</table>
+<div class="rule"><b>Priority:</b> this week do #2 (sell-out arbitrage, window measured in days) and #1 (B2B calls, biggest ticket); #3 takes one evening; #4/#5 are re-skins of existing SKUs — no new inventory.</div>
+</div>
+<div class="card">
+<div class="eyebrow">Long-term play</div>
+<h2>Haze is acquisition; subscription is the business</h2>
+<table>
+<tr><th>Phase</th><th>What</th><th>Economics</th></tr>
+<tr><td><b>Now–6 weeks · Haze run</b></td><td>Goal is not just profit — log every buyer: name + purifier model + address. That list seeds everything below.</td><td>The S$1,000–1,600 already modelled + a targeted customer list.</td></tr>
+<tr><td><b>Months 2–6 · Filter subscription</b></td><td>Compatible filters cost S$8–12 → subscription at S$15–20/mo or S$150/yr (2 filters + on-site swap). Sell to haze-season repeat customers first; buy per order, zero stock.</td><td>50 subscribers = S$750–1,000/mo recurring. Dyson officially recommends 12-month filter swaps — replacement demand is calendar-driven, not haze-driven.</td></tr>
+<tr><td><b>Months 3–12 · B2B rental pilot</b></td><td>Preschools / offices / clinics: S$49–69/mo per unit, filters + servicing included. Sterra (11,900+ verified reviews) already proved purifier rental in SG — you take the SME/preschool segment they don't cover + Chinese-language service.</td><td>A S$150 unit pays back in 3–4 months, pure margin after. 20 units = S$800–1,400/mo. Start with 10 units (~S$1,500 capital).</td></tr>
+<tr><td><b>Month 12+ · Own-brand filters</b></td><td>1688 factory OEM + own packaging, sold year-round on Shopee/Lazada. Filters are the razor-blade model: one purifier sold, filters bought every year.</td><td>SG purifier market US$136M (2025) → US$282M (2033); the aftermarket filter slice is its steadiest growth. The Chinese-language content site (niche #3) is its free acquisition channel.</td></tr>
+</table>
+<div class="rule"><b>Why demand persists:</b> allergic rhinitis affects up to 13% of Singapore's population (2020 study); dust mites are a year-round tropical problem — haze season ends, allergy season doesn't. From month 2, reposition from "haze" to "indoor air".<br><b>Sequence rule:</b> subscription before rental — subscription is zero-stock, rental eats capital. Don't start rental until the list passes 100 customers.</div>
+</div>
+<div class="card">
+<div class="eyebrow">Listing copy</div>
+<h2>Paste-ready listings</h2>
+<h3>1 · Compatible filter — Carousell title</h3>
+<div class="copybox"><button class="copybtn">copy</button>HEPA + Activated Carbon Filter for Xiaomi Mi Air Purifier 4 / 4 Lite / 4 Compact / 2S / 3 / 3H — Compatible, Haze-Ready</div>
+<h3>Description (EN)</h3>
+<div class="copybox"><button class="copybtn">copy</button>Haze is back — don't run out of filter.
+
+Compatible replacement filter (H13 HEPA + activated carbon) for Xiaomi Mi Air Purifier:
+4 / 4 Lite / 4 Compact / 2S / 3 / 3H / Pro.
+
+- Catches PM2.5, dust, pollen; carbon layer removes odour
+- Fits like the original, installs in 10 seconds
+- Price is per filter set (HEPA + carbon)
+- Buy 2 save S$5, buy 3 save S$10
+- Same-day meet-up (location on request) or Carousell Buyer Protection shipping
+
+Compatible aftermarket part, not Xiaomi-branded. Stock restocked weekly while haze lasts — earlier posts ship first.</div>
+<h3>Description (中文)</h3>
+<div class="copybox"><button class="copybtn">copy</button>雾霾季必备 — 小米空气净化器滤芯（适配款）
+
+适配机型：小米空气净化器 4 / 4 Lite / 4 Compact / 2S / 3 / 3H / Pro
+H13 HEPA + 活性炭双层过滤，有效过滤 PM2.5、灰尘、异味。
+
+- 适配款（非小米原厂品牌），安装简单
+- 买2省S$5，买3省S$10
+- 面交或 Carousell 买家保障邮寄
+- 雾霾期间每周补货，先订先发</div>
+<h3>2 · Haze seal kit — Carousell</h3>
+<div class="copybox"><button class="copybtn">copy</button>Title: Haze Seal Kit — Door Bottom Seal + Window Gap Tape (keep PM2.5 out, AC in)
+
+Description:
+Haze season kit: 1× door-bottom auto brush seal (up to 92cm, cuts to size) + 3m window gap tape + foam seal strip. Self-adhesive, no tools, 20-min install.
+
+Why: most HDB/condo rooms leak unfiltered air through door and window gaps — a purifier can't win if haze keeps seeping in. Sealing also cuts your AC bill.
+
+Same-day meet-up. Bundle 2 kits for S$25.</div>
+<h3>3 · Cabin filter + mobile install — Carousell lead-gen</h3>
+<div class="copybox"><button class="copybtn">copy</button>Title: Activated Carbon Cabin Filter (PM2.5) + Mobile Install — your carpark, your time
+
+Description:
+Haze gets into your car through the cabin filter. Old filter = you're breathing it all drive.
+
+- Activated-carbon PM2.5 cabin filter, fits most JP/KR/CN models (tell me your model + year, I'll confirm fit)
+- I come to your carpark, install in 10–15 min, most cars need no tools
+- Filter + labour from S$35 (price depends on model)
+- Bring your own filter? Labour only S$15
+
+Message with car model + year for a same-week slot.</div>
+<h3>Shopee title (keyword-stuffed)</h3>
+<div class="copybox"><button class="copybtn">copy</button>Compatible HEPA Activated Carbon Filter for Xiaomi Mi Air Purifier 4 Lite 4 Compact 2S 3 3H Pro | Haze PM2.5 Replacement Filter Set</div>
+</div>
+<div class="card">
+<div class="eyebrow">Hard rules</div>
+<h2>What gets you banned or fined</h2>
+<div class="rule"><b>Never touch masks.</b> N95/FFP respirators are HSA-regulated medical devices — importing/supplying without a dealer's licence is an offence. Free government distribution kills the margin anyway.</div>
+<div class="rule"><b>"Compatible with", never brand logos.</b> Third-party filters: no Xiaomi logo in photos/titles, no "original/genuine" wording. CPFTA false-claim exposure + platform IP takedowns.</div>
+<div class="rule"><b>Real prices, real claims.</b> No fake strikethrough discounts (CCCS price-transparency enforcement); state measured/claimed CADR only from supplier spec sheets.</div>
+<div class="rule"><b>Parallel import is legal</b> for consumer electronics/filters; budget 9% GST on CIF when commercial imports exceed S$400. Declare honestly — consolidators screen parcels.</div>
+<div class="rule"><b>Timing kill-switch.</b> Stop all air-freight reorders the day PSI drops below 100 for 3 consecutive days. Filters stay liquid; monitors do not — exit them at cost if the spell breaks.</div>
+</div>
+<script>
+const fmt = n => 'S$' + n.toFixed(2);
+function calc(){
+  const v = i => parseFloat(document.getElementById(i).value) || 0;
+  const cogs=v('c1'), kg=v('c2'), qty=v('c3'), fr=v('c4'), gst=v('c5'), sell=v('c6');
+  const landed = cogs + kg*fr + (cogs+kg*fr)*gst/100;
+  const outlay = landed*qty;
+  const margin = sell>0 ? (sell-landed)/sell*100 : 0;
+  const be = sell>landed ? Math.ceil(outlay/sell) : Infinity;
+  document.getElementById('o1').textContent = fmt(landed);
+  document.getElementById('o2').textContent = fmt(outlay);
+  document.getElementById('o3').textContent = margin.toFixed(0)+'%';
+  document.getElementById('o4').textContent = be===Infinity ? '—' : be;
+}
+document.querySelectorAll('.calc input').forEach(el=>el.addEventListener('input',calc));
+calc();
+const boxes=[...document.querySelectorAll('#checklist input')];
+const saved=JSON.parse(localStorage.getItem('haze-kit')||'[]');
+boxes.forEach((b,i)=>{ b.checked=!!saved[i]; b.addEventListener('change',()=>{
+  localStorage.setItem('haze-kit',JSON.stringify(boxes.map(x=>x.checked)));
+});});
+document.querySelectorAll('.copybox').forEach(box=>{
+  box.querySelector('.copybtn').addEventListener('click',()=>{
+    const t=box.innerText.replace(/^copy/,'').trim();
+    const done=()=>{ const btn=box.querySelector('.copybtn'); btn.textContent='copied'; setTimeout(()=>btn.textContent='copy',1200); };
+    const fallback=()=>{
+      const ta=document.createElement('textarea'); ta.value=t;
+      ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch(e) {}
+      document.body.removeChild(ta); done();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(done).catch(fallback);
+    } else fallback();
+  });
+});
+</script>
+</div>
+<footer>Haze-Season Launch Kit · compiled 15 Oct 2026 · all figures SGD unless noted · not legal or tax advice</footer>
+</body>
+</html>

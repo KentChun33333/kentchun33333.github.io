@@ -10,13 +10,13 @@
 <header class="topbar">
   <div class="brand">
     <div class="bank-logo" aria-label="BANK"><i aria-hidden="true">B</i><span>BANK</span></div>
-    <div class="mosaic-agents">AI AGENTS</div>
-    <div class="brand-copy" id="brandCopy">Agentic Studio</div>
+    <div class="brand-copy">Agentic Studio</div>
   </div>
   <div class="top-actions">
     <button class="top-action" id="backBtn" hidden>← Case table</button>
     <span class="top-group" id="p3Top" hidden>
-      <button class="top-action" data-goto="2">← Insights</button>
+      <select class="input version-pick" id="versionSel" aria-label="Report version"></select>
+      <button class="btn green small" id="approveBtn" disabled>Approve</button>
       <a class="top-action" id="zipLink" href="#">Case ZIP</a>
       <button class="top-action" id="printBtn">Print</button>
     </span>
@@ -25,40 +25,29 @@
 </header>
 
 <nav class="journey" aria-label="Workflow progress">
-  <button class="journey-step active" data-page="1"><i>1</i><div><b>Intake &amp; track</b><small>Fields, files, data · case table</small></div></button>
-  <button class="journey-step" data-page="2"><i>2</i><div><b>Verify insights</b><small>Flag values, add files</small></div></button>
-  <button class="journey-step" data-page="3"><i>3</i><div><b id="journey3">Report</b><small>Read, prompt, approve</small></div></button>
+  <button class="journey-step active" data-page="1"><i>1</i><b>Cases</b></button>
+  <button class="journey-step" data-page="2"><i>2</i><b>Verify</b></button>
+  <button class="journey-step" data-page="3"><i>3</i><b id="journey3">Report</b></button>
 </nav>
 
 <main class="app">
   <!-- ============================================================ PAGE 1 -->
   <section class="page active" id="page1">
-    <header class="page-heading">
-      <div>
-        <div class="eyebrow">Page 1 · Case table</div>
-        <h1>Start a case and track the agents</h1>
-        <p>Pick an app, fill in its fields, stage files in its lanes and tick the data pulls, then upload. Agents and pulls run asynchronously; the case table shows when insights or a new report version are ready.</p>
-      </div>
-    </header>
-
     <details class="new-case-panel" id="newCasePanel" open>
-      <summary>NEW CASE <span class="summary-meta" id="intakeSummary"></span></summary>
-      <div class="app-pick" id="appPick" role="tablist" aria-label="App"></div>
+      <summary>NEW CASE</summary>
+      <div class="app-pick">
+        <div class="app-tabs" id="appPick" role="tablist" aria-label="App"></div>
+        <button type="button" class="btn secondary small" id="sampleBtn">Sample bundle</button>
+      </div>
       <form class="intake-layout" id="caseForm" autocomplete="off">
         <article class="card">
-          <h2 id="fieldsTitle">CASE</h2>
-          <p class="caption" id="appDescription"></p>
           <div class="form-grid" id="fieldGrid"></div>
         </article>
         <article class="card">
-          <div class="actions" style="justify-content:space-between">
-            <h2>STAGE FILES</h2>
-            <button type="button" class="btn secondary small" id="sampleBtn" title="Fictional sample bundle">Auto · sample bundle</button>
-          </div>
           <div class="lanes" id="intakeLanes"></div>
           <div class="pulls" id="intakePulls"></div>
           <div class="intake-footer">
-            <span class="caption" id="stageCount">Nothing staged.</span>
+            <span class="caption" id="stageCount"></span>
             <button type="submit" class="btn" id="submitCase">Upload &amp; start →</button>
           </div>
         </article>
@@ -67,8 +56,8 @@
 
     <section class="card">
       <div class="history-head">
-        <div><h2>CASE MANAGEMENT</h2><p>Live status of every case and its agent jobs. A new report version shows <span class="chip new">NEW</span> until you open it.</p></div>
-        <label class="history-search">Search <input class="input" id="caseSearch" type="search" placeholder="Case ID or field"></label>
+        <h2>CASES</h2>
+        <input class="input history-search" id="caseSearch" type="search" placeholder="Search case ID or field" aria-label="Search cases">
       </div>
       <div class="table-wrap">
         <table class="grid">
@@ -81,14 +70,6 @@
 
   <!-- ============================================================ PAGE 2 -->
   <section class="page" id="page2">
-    <header class="page-heading">
-      <div>
-        <div class="eyebrow" id="p2Eyebrow">Page 2 · Verify insights</div>
-        <h1>Verify what the agents found</h1>
-        <p>Flag a value that looks wrong or leave a note: that agent runs again with it. Check the data pulled from the bank's systems and add files at any time. Nothing here waits: cards fill in as each job finishes.</p>
-      </div>
-      <div class="actions no-print"><button class="btn small" data-goto="3" id="toReport2">Report →</button></div>
-    </header>
     <div class="case-strip" id="strip2"></div>
     <div class="ready-bar" id="ready2"></div>
     <div class="review-layout">
@@ -113,13 +94,11 @@
         </details>
       </div>
       <aside class="drawer">
-        <header><b>Analyst workspace</b><small>Add files, then ask for the report</small></header>
         <div class="drawer-body">
-          <div><h3>STAGE MORE FILES</h3><div class="lanes compact" id="moreLanes"></div>
+          <div><h3>ADD FILES</h3><div class="lanes compact" id="moreLanes"></div>
             <button class="btn dark" id="uploadMore" style="width:100%;margin-top:9px" disabled>Upload &amp; read</button></div>
           <div><h3 id="reportHead2">REPORT</h3><div class="extra-list" id="extraList2"></div>
-            <button class="btn" id="genReport2" style="width:100%;margin-top:9px">Generate report →</button>
-            <p class="caption" id="genHint2"></p></div>
+            <button class="btn" id="genReport2" style="width:100%;margin-top:9px">Generate report →</button></div>
         </div>
       </aside>
     </div>
@@ -127,17 +106,6 @@
 
   <!-- ============================================================ PAGE 3 -->
   <section class="page" id="page3">
-    <header class="page-heading">
-      <div>
-        <div class="eyebrow" id="p3Eyebrow">Page 3 · Report</div>
-        <h1 id="p3Title">Report</h1>
-        <p>The latest version, with the agent's suggested next steps. A prompt on the right (slide it away for a wider report) becomes the next version in the background - the case table tells you when it is ready.</p>
-      </div>
-      <div class="actions no-print">
-        <label class="version-pick">Version <select class="input" id="versionSel"></select></label>
-        <button class="btn green small" id="approveBtn" disabled>Approve</button>
-      </div>
-    </header>
     <div class="case-strip" id="strip3"></div>
     <div class="review-layout">
       <div class="stack" id="reportStack">
@@ -145,7 +113,7 @@
         <section class="card" id="reportCard"><div id="reportView"></div></section>
       </div>
       <aside class="drawer prompt-panel" id="promptPanel" aria-label="Prompt">
-        <header><div class="ph-text"><b>New prompt</b><small>One prompt → one new version, in the background</small></div>
+        <header><b class="ph-text">Prompt</b>
           <button type="button" class="slide-btn" id="promptToggle" aria-controls="promptBody" aria-expanded="true"><span class="open-icon">⟩</span><span class="closed-label">✎ PROMPT</span></button></header>
         <div class="drawer-body" id="promptBody"></div>
       </aside>

@@ -2,7 +2,7 @@
 
     kentc-studio --workspace ~/studio --effort low        # then open http://127.0.0.1:8090
 
-The apps live in config/apps/<name>/app.yaml and their agent workflows in config/apps/workflows/ (apps.py), the API
+The apps live in config/apps/<name>/app.yaml (agents declared inline, apps.py) and draw on the skills in skills/; the API
 in api/app.py, the case/job service in service/cases.py and the dispatcher in jobs/queue.py.
 """
 

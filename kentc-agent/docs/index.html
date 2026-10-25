@@ -30,9 +30,9 @@
   <div class="grid3">
     <article class="box"><span class="number">CLI 對話</span><h3>人在迴圈中，逐回合確認</h3><p>工具：<code>read</code>、<code>write</code>、<code>edit</code>、<code>bash</code>，再加上<b>經篩選的 <code>web_search</code></b>：結果先經篩選子代理與安全檢查才進入對話；查詢由你的提問觸發。可用 <code>--tools</code> 縮減。</p><p class="why">成果：直接回答、工作區檔案。</p></article>
     <article class="box"><span class="number">工作流程</span><h3>長時間、自主執行</h3><p>主代理只有四個核心工具，<b>沒有</b> <code>web_search</code>（步驟中列出會在載入時被拒絕）。需要外部資料時，安排 <code>web:</code> 步驟，由網路代理負責：篩選、搜尋預算、連結查核、人工核准。</p><p class="why">成果：檔案（<code>research/</code>、<code>notes/</code>、<code>reports/</code>），可 <code>--resume</code>。</p></article>
-    <article class="box"><span class="number">Studio</span><h3>網頁體驗，系統定義輸入與輸出</h3><p>代理讀上傳文件與 SQL 擷取資料，<b>只讀案件資料夾</b>、不給 <code>bash</code>、不允許 <code>web:</code> 步驟。一個 Studio 服務多個應用（<code>config/apps/&lt;name&gt;/app.yaml</code>），代理工作流程放在共用的 <code>config/apps/workflows/</code>，應用以名稱引用：每個代理依 <code>schema</code> 回傳 JSON，由應用的 <code>view</code> 以固定的區塊類型呈現；報告代理另需回傳報告框架欄位（<code>title</code>、<code>verdict</code>、<code>reply</code>、<code>requests</code>、<code>questions</code>）。</p><p class="why">成果：結構化 JSON → 前端區塊（不讓代理直接產生 HTML）。</p></article>
+    <article class="box"><span class="number">Studio</span><h3>網頁體驗，系統定義輸入與輸出</h3><p>代理讀上傳文件與 SQL 擷取資料，<b>只讀案件資料夾</b>、永不給 <code>bash</code>、沒有網路。一個 Studio 服務多個應用（<code>config/apps/&lt;name&gt;/app.yaml</code>），<code>app.yaml</code> 本身就是工作流程：每個代理直接在其中宣告為契約，配備技能（<code>kentc-agent/skills/&lt;name&gt;.md</code>），依 <code>output</code> 回傳 JSON 並通過 <code>checks</code>，由應用的 <code>view</code> 以固定的區塊類型呈現；報告代理另需回傳報告框架欄位（<code>title</code>、<code>verdict</code>、<code>reply</code>、<code>requests</code>、<code>questions</code>）。</p><p class="why">成果：結構化 JSON → 前端區塊（不讓代理直接產生 HTML）。</p></article>
   </div>
-  <div class="callout"><b>Studio 的頁面轉換就是工作流程：</b>第 1 頁 → 第 2 頁（洞察代理逐檔或逐通道讀取）、第 2 頁 → 第 2 頁（標記或備註後重跑該代理）、第 2 頁 → 第 3 頁（產生報告）、第 3 頁 → 第 3 頁（一則提示產生新版本）。每次非同步動作後回到案件表，新版本以 NEW 標示；輸出仍是由系統定義的 JSON，前端只渲染已知的區塊類型，且所有 view 路徑在載入時即對照 schema 檢查。詳見 <a href="#studio">10 · Studio 應用框架</a>。</div>
+  <div class="callout"><b>Studio 的頁面轉換就是工作流程：</b>第 1 頁 → 第 2 頁（洞察代理逐檔或逐通道讀取）、第 2 頁 → 第 2 頁（標記或備註後重跑該代理）、第 2 頁 → 第 3 頁（產生報告）、第 3 頁 → 第 3 頁（一則提示產生新版本）。每次非同步動作後回到案件表，新版本以 NEW 標示；輸出仍是由系統定義的 JSON，前端只渲染已知的區塊類型，且所有 view 路徑在啟動時即對照代理的 <code>output</code> 檢查。詳見 <a href="#studio">10 · Studio 應用框架</a>。</div>
 </section>
 
 <section class="card" id="principles" aria-labelledby="method-title">
@@ -295,7 +295,7 @@ steps:
     <div class="box"><h3>步驟鍵與可恢復性</h3><p><code>web</code>（任務文字，或 <code>plan</code>）、<code>approve</code>（go / skip）、<code>max_items</code>（任務上限，預設 4）、<code>max_turns</code>（預設 8）、<code>max_searches</code>（預設 6）、<code>output</code>（選填，預設存在 <code>research/</code>）、<code>effort</code>、<code>when</code>；進階：<code>foreach</code>（對先前資料逐項研究，不能與 <code>plan</code> 併用）。</p><p>網路代理沒有搜尋、或沒有交出摘要，步驟就失敗、不寫檔，<code>--resume</code> 重跑該步驟；已規劃的任務、已核准的答案與已完成的摘要都會保留，不重問、不重查。<code>steps.&lt;id&gt;.data</code> 記錄 <code>file</code>、<code>searches</code>、<code>sources</code>、<code>removed_links</code>、<code>removed_results</code>。</p></div>
   </div>
   <div class="callout"><b>收集與交付分開：最後一步是通用的 <code>deliver</code>。</b> 兩個流程前段負責收集（文件、網路摘要 → <code>notes/evidence.md</code>），最後都用同一個 <code>deliver</code> 步驟：依使用者的需求決定產出形式。報告預設 <code>reports/insight.md</code>；HTML 頁面或儀表板為單一自含檔案，數字用 python 從資料產生；程式碼放在 <code>project/&lt;name&gt;/</code> 並附 README、實際執行一次；其他指定格式放在 <code>reports/</code>。檔案一律用 write／edit／bash 分段建立（每次約 300 行內，避免超過單次回覆上限），完成後回讀或執行檢查，回覆的摘要存成 <code>reports/summary.md</code>。</div>
-  <div class="callout warn"><b>查詢會離開本機，Studio 一律拒絕網路步驟。</b> Studio 代理處理案件資料與上傳文件；含 <code>web:</code> 步驟（或提供 <code>bash</code>）的工作流程在 Studio 載入應用時就會被拒絕。CLI 工作流程請讓查詢保持通用，模式二的人工核准就是為此而設。</div>
+  <div class="callout warn"><b>查詢會離開本機，Studio 代理沒有網路。</b> Studio 代理處理案件資料與上傳文件；它們宣告在 <code>app.yaml</code> 中，工具只能從已知工具中選、永不含 <code>bash</code>，也沒有 <code>web:</code> 步驟可用，違反者在 Studio 啟動時即被拒絕。CLI 工作流程請讓查詢保持通用，模式二的人工核准就是為此而設。</div>
   <p class="source">實作對照：<a href="../src/kentc_agent/adapters/web_research.py">adapters/web_research.py · run_web_agent / research / screen</a><a href="../src/kentc_agent/adapters/web.py">adapters/web.py · 供應者串鏈</a><a href="../config/cli/workflows/web-first-insight.yaml">web-first-insight.yaml</a><a href="../config/cli/workflows/docs-first-insight.yaml">docs-first-insight.yaml</a></p>
 </section>
 
@@ -334,7 +334,7 @@ steps:
 <section class="card" id="studio" aria-labelledby="studio-title">
   <p class="eyebrow">10 · Studio 應用框架</p>
   <h2 id="studio-title">一個三頁非同步迴圈；換一份 YAML，就是新的應用</h2>
-  <p class="sub">Studio 面對的是分析師與上傳的不可信文件。每個使用情境（TER 審查、RM 財富洞察…）都是同一個模式：<b>第 1 頁</b>輸入參數與檔案，<b>第 2 頁</b>先抽取洞察讓人核對，<b>第 3 頁</b>以固定的報告框架交付，並以提示非同步修訂。差異只寫在應用的 <code>config/apps/&lt;name&gt;/app.yaml</code> 與它以名稱引用的代理工作流程（<code>config/apps/workflows/</code>，各應用共用）；程式碼與前端只有一份。</p>
+  <p class="sub">Studio 面對的是分析師與上傳的不可信文件。每個使用情境（TER 審查、RM 財富洞察…）都是同一個模式：<b>第 1 頁</b>輸入參數與檔案，<b>第 2 頁</b>先抽取洞察讓人核對，<b>第 3 頁</b>以固定的報告框架交付，並以提示非同步修訂。差異只寫在應用的 <code>config/apps/&lt;name&gt;/app.yaml</code>：它<b>就是</b>工作流程，每個代理（通道的 <code>agent:</code>、<code>report:</code>、<code>extras.&lt;name&gt;:</code>）都直接宣告為契約並配備技能（<code>kentc-agent/skills/</code>，各應用共用）；程式碼與前端只有一份。</p>
   <div class="formula">第 1 頁 輸入與追蹤   應用欄位 ＋ 檔案通道 ＋ 資料擷取 ──► 洞察代理（逐檔／逐通道）、SQL 擷取（不用模型、平行）
    ▲                                                              │ 非同步：案件表即時更新狀態
    │ 每次非同步動作後回到案件表                                     ▼
@@ -343,7 +343,7 @@ steps:
    ▼                                                              ▼
 第 3 頁 報告與提示   報告框架 ＋ 應用的 view ＋ 建議的下一步；一則提示 ──► 一個新版本（案件表顯示 NEW vN）</div>
   <ol class="flow" aria-label="頁面轉換即工作流程">
-    <li><b>① 第 1 頁 → 第 2 頁</b><span>每個通道直接指向一個洞察代理工作流程：工作流程的輸入若是 <code>file</code> 就每檔一個工作；若是 <code>lane_file</code> 就整個通道一次（檔案先轉成文字，含附件）。</span></li>
+    <li><b>① 第 1 頁 → 第 2 頁</b><span>每個通道直接宣告一個洞察代理；它的 <code>per</code> 決定工作單位：<code>file</code>（預設）每檔一個工作，<code>lane</code> 整個通道一次（檔案先轉成文字，含附件）。</span></li>
     <li><b>② 第 2 頁 → 第 2 頁</b><span>標記事實或留備註，只重跑該檔（或該通道）的代理；前一次結果與備註一起交給代理。</span></li>
     <li class="special"><b>③ 第 2 頁 → 第 3 頁</b><span>報告代理讀全部材料（洞察、資料擷取關鍵值、額外代理、分析師修正）；未完成的工作先等。</span></li>
     <li><b>④ 第 3 頁 → 第 3 頁</b><span>一則提示就是一個報告工作：取前一版＋提示，產生新版本，以 <code>reply</code> 回答；送出後回到案件表。</span></li>
@@ -358,20 +358,38 @@ fields:                     <span class="comment"># 第 1 頁表單；column: �
 lanes:                      <span class="comment"># 檔案通道 → 讀它的代理 → 第 2 頁如何呈現</span>
   - name: context
     required: true
-    agent: context-agent                  <span class="comment"># 輸入 lane_file：整個通道一次</span>
+    agent:
+      label: Context agent
+      per: lane                          <span class="comment"># 整個通道一次</span>
+      skills: [ter-trigger-context]      <span class="comment"># kentc-agent/skills/&lt;name&gt;.md</span>
+      output: {trigger_type: string, trigger_event: string}
     view: [{title: Trigger context, kv: [trigger_type, trigger_event]}]
   - name: evidence
-    agent: doc-agent                      <span class="comment"># 輸入 file：每檔一次；不寫 view：依 schema 形狀呈現</span>
+    agent:                               <span class="comment"># 不寫 view：依 output 形狀呈現</span>
+      label: Doc agent
+      per: file                          <span class="comment"># 每檔一個工作（預設）</span>
+      skills: [ter-evidence, document-extraction]
+      tools: [read]                      <span class="comment"># 預設 [read]；[] 表示無工具；永不 bash</span>
+      max_turns: 100                     <span class="comment"># 整個工作（含修正）的模型呼叫數；0 = 不限</span>
+      output: {document_type: string, key_values: [{field: string, value: string, location: string, confidence: number}]}
+      checks:                            <span class="comment"># required、A..B、min N / max N、match REGEX</span>
+        key_values[].location: required
+        key_values[].confidence: 0..100
 pulls: [kyc_profile, txn_history]
 report:                     <span class="comment"># 第 3 頁</span>
   name: TER report
-  workflow: ter-report-agent
+  skills: [ter-report, fincrime-guardrails]
+  output: {...}             <span class="comment"># 報告框架欄位 ＋ 應用自己的欄位（節錄略）</span>
   verdicts: {Agree: ok, Further investigation: warn}
-  hide: [confidence]        <span class="comment"># 不呈現的 schema 欄位</span>
+  hide: [confidence]        <span class="comment"># 不呈現的 output 欄位</span>
   view:                     <span class="comment"># 只寫需要自訂的區塊；其餘欄位依預設接在後面</span>
     - {title: Executive narrative, text: executive_narrative}
     - {title: Key risks, cards: key_risks, head: title, score: score}</code></pre>
-    <div class="box"><h3>schema 管內容，view 管呈現</h3><p>代理依工作流程最後一步的 <code>schema</code> 回傳 JSON（形狀不符會被退回重試）；前端與 Markdown 匯出只用固定的區塊類型呈現。代理<b>從不</b>產生 HTML，前端一律跳脫文字。</p><p><code>view</code> 可省略，只寫需要自訂的區塊（順序、標籤、計分卡片）；其餘頂層欄位依 schema 順序與形狀自動呈現：物件 → <code>kv</code>、事實清單 → <code>facts</code>、其他物件清單 → <code>table</code>、字串清單 → <code>list</code>、連續的單值 → 一個 <code>kv</code>。<code>hide</code> 指定不呈現的欄位。Studio 啟動時會把每條路徑、選項與 hide 對照 schema 檢查：打錯字在啟動時就被拒絕並指出位置。</p><p>每個代理收到的一行案件摘要（<code>case_brief</code>）由欄位自動產生：案件、應用，再依欄位順序列出已填的「標籤: 值」；不需要模板，也不會與欄位脫節。</p><p class="why">好處：小模型只需填「領域欄位」（例如 <code>score: number</code>），驗證保持嚴格；新增使用情境多半只需欄位、通道與工作流程。</p></div>
+    <div class="box"><h3>output 管內容，view 管呈現</h3><p>代理依 <code>app.yaml</code> 中宣告的 <code>output</code> 回傳 JSON，並須通過 <code>checks</code>；前端與 Markdown 匯出只用固定的區塊類型呈現。代理<b>從不</b>產生 HTML，前端一律跳脫文字。</p><p><code>view</code> 可省略，只寫需要自訂的區塊（順序、標籤、計分卡片）；其餘頂層欄位依 output 順序與形狀自動呈現：物件 → <code>kv</code>、事實清單 → <code>facts</code>、其他物件清單 → <code>table</code>、字串清單 → <code>list</code>、連續的單值 → 一個 <code>kv</code>。<code>hide</code> 指定不呈現的欄位。Studio 啟動時會把每條路徑、選項與 hide 對照 output 檢查：打錯字在啟動時就被拒絕並指出位置。</p><p>每個代理收到的一行案件摘要（<code>case_brief</code>）由欄位自動產生：案件、應用，再依欄位順序列出已填的「標籤: 值」；不需要模板，也不會與欄位脫節。</p><p class="why">好處：小模型只需填「領域欄位」（例如 <code>score: number</code>），驗證保持嚴格；新增使用情境多半只需欄位、通道、代理契約與技能。</p></div>
+  </div>
+  <div class="grid2" style="margin-top:16px">
+    <div class="box"><span class="tag">技能與契約</span><h3>技能（skills）負責方法、app.yaml 負責契約</h3><p>技能是 <code>kentc-agent/skills/&lt;name&gt;.md</code> 的 Markdown 檔（與 <code>config/</code> 並列；<code>studio.yaml</code> 以 <code>skills: ../skills</code> 指定）。可選的前置資料 <code>description:</code> 給人看，不送給模型；本文原樣（不是 Jinja 模板）放入代理的系統提示，標題為 <code>## Skill: &lt;name&gt;</code>，角色技能排第一。要找什麼、如何判斷、如何撰寫都寫在技能裡；YAML 中沒有任何提示文字，只有 <code>per</code>、<code>skills</code>、<code>tools</code>、<code>max_turns</code>、<code>output</code>、<code>checks</code>。</p><p class="why">內建技能：document-extraction、report-revision、fincrime-guardrails、ter-trigger-context、ter-evidence、ter-investigation、ter-report、rm-sources、rm-report。</p></div>
+    <div class="box"><span class="tag violet">執行</span><h3>做到通過 checks，或用完 max_turns</h3><p>Studio 在記憶體中組出一個單步驟的執行，交給同一個引擎（<code>kentc_agent.workflow.Runner</code>）。任務訊息＝該角色的輸入（空的省略；<code>lane_file</code>、<code>materials_file</code>、<code>previous_report_file</code> 以文字內嵌；<code>file</code> 由代理用 <code>read</code> 自行讀取）＋ output 形狀 ＋ checks。代理自行工作，直到 JSON 答案符合 <code>output</code> 並通過 <code>checks</code>，或用完 <code>max_turns</code>（以整個工作計，含修正）；每個不合格的答案都會連同確切的錯誤退回。</p><p class="why">CLI 工作流程步驟仍維持 2 次修正；Studio 代理已不能從 CLI 以路徑執行（<code>config/cli/workflows/</code> 不變）。</p></div>
   </div>
   <div class="tablewrap"><table><caption>固定的區塊類型（前端 renderBlocks 與 Markdown 匯出共用）</caption><thead><tr><th scope="col">區塊</th><th scope="col">路徑指向</th><th scope="col">選項</th></tr></thead><tbody>
     <tr><td><code>text</code></td><td>字串（或字串清單：分段）</td><td>—</td></tr>
@@ -383,21 +401,21 @@ report:                     <span class="comment"># 第 3 頁</span>
     <tr><td><code>facts</code></td><td><code>{field, value, location, confidence}</code> 清單</td><td>僅限第 2 頁：分析師可逐列標記的事實</td></tr>
   </tbody></table></div>
   <div class="grid2">
-    <div class="box"><span class="tag">報告框架</span><h3>每個報告代理都必須回傳五個欄位</h3><p><code>title</code>；<code>verdict</code>（schema 中 <code>"A|B"</code> 的其中一個，應用以 <code>verdicts</code> 指定色調 ok／warn／bad／info，顯示在案件表）；<code>reply</code>（回答分析師這次的提示）；<code>requests</code>（<code>[{document, reason}]</code>）；<code>questions</code>（未解問題）。其餘欄位屬於應用自己，由 <code>report.view</code> 呈現。</p><p><code>requests</code> 與 <code>questions</code> 直接放在報告末尾的<b>「建議的下一步」</b>（緊接應用自己的建議，例如 TER 的 Recommended next step）：每份待索取文件附上傳按鈕，上傳後回到第 2 頁讓分析師核對代理讀到的內容，再重新產生；每個未解問題可一鍵帶入提示。</p><p class="why">缺任何一個欄位，或 verdicts 與 schema 的選項不一致，Studio 啟動時即拒絕。</p></div>
+    <div class="box"><span class="tag">報告框架</span><h3>每個報告代理都必須回傳五個欄位</h3><p><code>title</code>；<code>verdict</code>（output 中 <code>"A|B"</code> 的其中一個，應用以 <code>verdicts</code> 指定色調 ok／warn／bad／info，顯示在案件表）；<code>reply</code>（回答分析師這次的提示）；<code>requests</code>（<code>[{document, reason}]</code>）；<code>questions</code>（未解問題）。其餘欄位屬於應用自己，由 <code>report.view</code> 呈現。</p><p><code>requests</code> 與 <code>questions</code> 直接放在報告末尾的<b>「建議的下一步」</b>（緊接應用自己的建議，例如 TER 的 Recommended next step）：每份待索取文件附上傳按鈕，上傳後回到第 2 頁讓分析師核對代理讀到的內容，再重新產生；每個未解問題可一鍵帶入提示。</p><p class="why">缺任何一個欄位，或 verdicts 與 output 的選項不一致，Studio 啟動時即拒絕。</p></div>
     <div class="box"><span class="tag violet">非同步提示</span><h3>一則提示＝一個新版本；不是即時對話</h3><p>第 3 頁只呈現報告；右側可滑出收合的提示面板只接收提示。送出後立即回到案件表；該列顯示「Revising … → vN」，完成後顯示 <b>NEW vN</b> 與「Open vN →」。打開新版本時，報告開頭列出這次的提示與代理的 <code>reply</code>；舊版本仍可由版本選單查看。</p><p>第 2 頁的「產生報告」與第 3 頁的「重新產生」同樣是非同步：送出後回到案件表。提示就是報告工作的 <code>instruction</code>，版本記錄它，<code>case.json</code> 不另存對話紀錄；版本與決策軌跡（HUM／AGT／SYS）一一對應。</p></div>
   </div>
-  <div class="tablewrap" style="margin-top:16px"><table><caption>代理契約：Studio 傳給各類代理的輸入（工作流程必須剛好宣告這些，載入時檢查）</caption><thead><tr><th scope="col">代理</th><th scope="col">輸入</th><th scope="col">材料</th></tr></thead><tbody>
-    <tr><td>通道代理 · 輸入 <code>file</code></td><td><code>file</code>（<code>docs/&lt;name&gt;</code>）、<code>case_brief</code>、<code>feedback</code>、<code>previous</code></td><td>每檔一個工作；代理自己 <code>read</code> 該檔；有備註時附上前一次結果</td></tr>
-    <tr><td>通道代理 · 輸入 <code>lane_file</code></td><td><code>lane_file</code>、<code>case_brief</code>、<code>feedback</code></td><td>整個通道一個工作：Studio 先把通道內所有檔案（含附件）轉成文字；通常一次模型呼叫、不用工具</td></tr>
+  <div class="tablewrap" style="margin-top:16px"><table><caption>代理契約：Studio 依角色固定傳給各類代理的輸入（代理不必宣告；逐檔或逐通道由 <code>per</code> 決定）</caption><thead><tr><th scope="col">代理</th><th scope="col">輸入</th><th scope="col">材料</th></tr></thead><tbody>
+    <tr><td>通道代理 · <code>per: file</code></td><td><code>file</code>（<code>docs/&lt;name&gt;</code>）、<code>case_brief</code>、<code>feedback</code>、<code>previous</code></td><td>每檔一個工作；代理自己 <code>read</code> 該檔；有備註時附上前一次結果</td></tr>
+    <tr><td>通道代理 · <code>per: lane</code></td><td><code>lane_file</code>、<code>case_brief</code>、<code>feedback</code></td><td>整個通道一個工作：Studio 先把通道內所有檔案（含附件）轉成文字並內嵌於任務訊息</td></tr>
     <tr><td>報告代理</td><td><code>materials_file</code>、<code>case_brief</code>、<code>instruction</code>、<code>previous_report_file</code></td><td><code>materials.json</code>：案件欄位、逐檔洞察、<code>lane_insights</code>、資料擷取關鍵值與 CSV 路徑、額外代理、分析師修正</td></tr>
     <tr><td>額外代理</td><td><code>materials_file</code>、<code>case_brief</code></td><td>同上；由分析師逐次勾選</td></tr>
   </tbody></table></div>
-  <div class="callout"><b>設定錯誤在啟動時被拒絕，不在畫面上才出錯。</b> 載入每個應用時檢查：工作流程不提供 <code>bash</code>、沒有 <code>web:</code> 步驟、最後一步是 <code>format: json</code> 且有 <code>schema</code>；輸入剛好符合代理契約；每條 view 路徑存在於 schema；報告框架欄位齊全；資料擷取的 SQL 只綁定該應用的欄位（及 <code>:case_id</code>）。外部（<code>url:</code>）代理的形狀只能在執行時得知，缺少的路徑顯示為空白。</div>
+  <div class="callout"><b>設定錯誤在啟動時被拒絕，不在畫面上才出錯。</b> 載入每個應用時檢查：每個技能存在且非空；有 <code>output</code>；工具都是已知工具且不含 <code>bash</code>；每條 check 路徑存在於 <code>output</code> 且符合規則（範圍只用於數字、min／max 用於清單或字串、match 用於字串）；每條 view 路徑對照 output；報告框架欄位齊全；資料擷取的 SQL 只綁定該應用的欄位（及 <code>:case_id</code>）。外部（<code>url:</code>）代理不接受 skills／output／checks，且必須寫 <code>view</code>；其形狀只能在執行時得知，缺少的路徑顯示為空白。</div>
   <div class="tablewrap"><table><caption>設計取捨：代理的成果如何變成畫面</caption><thead><tr><th scope="col">方案</th><th scope="col">小模型負擔</th><th scope="col">驗證與安全</th><th scope="col">新增使用情境的成本</th><th scope="col">結論</th></tr></thead><tbody>
     <tr><td>A · 代理直接產生 HTML 報告</td><td>高：版面與內容一起生成</td><td>上傳文件中的注入文字可能進入頁面；無法驗證結構</td><td>低</td><td>不採用：違反 Studio「輸入與輸出由系統定義」</td></tr>
     <tr><td>B · 代理直接輸出通用區塊</td><td>高：要在抽象版面中填內容</td><td>schema 無法表達「多種區塊之一」；失去領域型別（如 <code>score: number</code>）</td><td>低</td><td>不採用</td></tr>
     <tr><td>C · 每個使用情境複製一份前端</td><td>低</td><td>可行，但每份各自維護</td><td>高：約 750 行 JS／情境</td><td>不採用：即原先 TER 專用的狀態</td></tr>
-    <tr><td>D · 領域 schema ＋ 應用 view ＋ 固定區塊</td><td>低：只填領域欄位</td><td>schema 嚴格驗證；view 載入時對照檢查；前端一律跳脫</td><td>低：一個資料夾＋一行設定</td><td><b>採用</b></td></tr>
+    <tr><td>D · 領域 output ＋ 應用 view ＋ 固定區塊</td><td>低：只填領域欄位</td><td>output 與 checks 嚴格驗證；view 啟動時對照檢查；前端一律跳脫</td><td>低：一個資料夾＋一行設定</td><td><b>採用</b></td></tr>
   </tbody></table></div>
   <div class="grid2" style="margin-top:16px">
     <div class="box"><span class="number">應用 · ter</span><h3>TER review</h3><p>通道：Context（必填）→ context 代理（逐通道，Trigger Context）；Evidence → doc 代理（逐檔，關鍵值與異常）；五項核心銀行資料擷取；額外代理：investigation。</p><p class="why">報告：評估、執行摘要、觸發事件、背景、KYC、交易審查、計分的關鍵風險、建議下一步；verdict：Agree／Further investigation。</p></div>
@@ -410,7 +428,7 @@ report:                     <span class="comment"># 第 3 頁</span>
     <tr><td>RM 範例包＋提示「改寫給 Compliance reviewer」</td><td>六個來源逐檔讀取；v1 verdict Proceed；v2 縮短答案並把每個估算標為 [ESTIMATE] 附算式</td></tr>
     <tr><td>doc 代理讀 <code>account_statement_90d.xlsx</code></td><td>一次在 <code>max_turns</code>（6）內未完成而失敗；Retry 後成功。限制維持不變：失敗明確顯示，不默默給出不完整的結果</td></tr>
   </tbody></table></div>
-  <p class="source">實作對照：<a href="../src/kentc_studio/apps.py">apps.py · AppSpec / check_view / check_envelope / load_app</a><a href="../src/kentc_studio/providers.py">providers.py · make_provider</a><a href="../src/kentc_studio/service/cases.py">service/cases.py · CaseService.request_report / feedback</a><a href="../src/kentc_studio/report.py">report.py · view_markdown</a><a href="../web/assets/js/app.js">web/assets/js/app.js · renderBlocks / renderPrompt</a><a href="../config/apps/ter/app.yaml">config/apps/ter/app.yaml</a><a href="../config/apps/rm/app.yaml">config/apps/rm/app.yaml</a></p>
+  <p class="source">實作對照：<a href="../src/kentc_studio/apps.py">apps.py · AppSpec / check_view / check_envelope / load_app</a><a href="../src/kentc_studio/providers.py">providers.py · LocalAgentProvider / make_provider / task_prompt</a><a href="../src/kentc_agent/skills.py">skills.py · load_skills</a><a href="../src/kentc_agent/checks.py">checks.py · parse_checks / check_rules</a><a href="../src/kentc_studio/service/cases.py">service/cases.py · CaseService.request_report / feedback</a><a href="../src/kentc_studio/report.py">report.py · view_markdown</a><a href="../web/assets/js/app.js">web/assets/js/app.js · renderBlocks / renderPrompt</a><a href="../config/apps/ter/app.yaml">config/apps/ter/app.yaml</a><a href="../config/apps/rm/app.yaml">config/apps/rm/app.yaml</a></p>
 </section>
 
 <section class="card" id="example" aria-labelledby="example-title">
@@ -443,8 +461,9 @@ report:                     <span class="comment"># 第 3 頁</span>
     <tr><td><a href="../src/kentc_agent/ui.py">ui.py</a></td><td>終端顯示；不決定部署能力或文件內容</td><td><code>ConsoleUI</code></td></tr>
   </tbody></table></div>
   <div class="tablewrap"><table><caption>Studio 套件（kentc_studio）</caption><thead><tr><th scope="col">模組</th><th scope="col">負責的邊界</th><th scope="col">主要入口</th></tr></thead><tbody>
-    <tr><td><a href="../src/kentc_studio/apps.py">apps.py</a></td><td>應用 YAML：欄位、通道、代理、報告框架、view 區塊與對照 schema 的檢查</td><td><code>load_app</code>、<code>check_view</code>、<code>check_envelope</code>、<code>App.describe</code></td></tr>
-    <tr><td><a href="../src/kentc_studio/providers.py">providers.py</a> ／ <a href="../src/kentc_studio/config.py">config.py</a></td><td>本機工作流程或外部 HTTP 代理（拒絕 <code>bash</code>／<code>web:</code>、檢查輸入契約）；<code>studio.yaml</code>：應用清單、資料庫與資料擷取</td><td><code>make_provider</code>、<code>load_config</code></td></tr>
+    <tr><td><a href="../src/kentc_studio/apps.py">apps.py</a></td><td>應用 YAML：欄位、通道、內嵌的代理契約（skills、output、checks）、報告框架、view 區塊與對照 output 的檢查</td><td><code>load_app</code>、<code>check_view</code>、<code>check_envelope</code>、<code>App.describe</code></td></tr>
+    <tr><td><a href="../src/kentc_studio/providers.py">providers.py</a> ／ <a href="../src/kentc_studio/config.py">config.py</a></td><td>本機代理：在記憶體中組出單步驟執行、任務訊息（輸入＋output＋checks）；或外部 HTTP 代理；<code>studio.yaml</code>：應用清單、技能資料夾、資料庫與資料擷取</td><td><code>LocalAgentProvider</code>、<code>make_provider</code>、<code>task_prompt</code>、<code>load_config</code></td></tr>
+    <tr><td><a href="../src/kentc_agent/skills.py">kentc_agent/skills.py</a> ／ <a href="../src/kentc_agent/checks.py">kentc_agent/checks.py</a></td><td>載入技能 Markdown（前置資料 <code>description:</code>）；解析與執行確定性 checks</td><td><code>load_skills</code>、<code>parse_checks</code>、<code>check_rules</code></td></tr>
     <tr><td><a href="../src/kentc_studio/service/cases.py">service/cases.py</a> ／ <a href="../src/kentc_studio/jobs/queue.py">jobs/queue.py</a></td><td>案件、檔案通道、洞察／報告工作、狀態、報告版本（含各版提示）；本機模型工作一次一個</td><td><code>CaseService</code>、<code>view</code>、<code>detail</code>、<code>request_report</code>、<code>JobDispatcher</code></td></tr>
     <tr><td><a href="../src/kentc_studio/report.py">report.py</a> ／ <a href="../web/assets/js/app.js">web/assets/js/app.js</a></td><td>同一份 view → Markdown 匯出與瀏覽器畫面；只渲染已知區塊</td><td><code>to_markdown</code>、<code>renderBlocks</code></td></tr>
   </tbody></table></div>

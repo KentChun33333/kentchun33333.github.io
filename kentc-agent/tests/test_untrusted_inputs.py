@@ -151,3 +151,48 @@ def test_negative_max_turns_is_refused_when_the_workflow_loads(tmp_path):
     (tmp_path / "wf.yaml").write_text("steps:\n  - id: s\n    max_turns: -1\n    prompt: hi\n")
     with pytest.raises(WorkflowError, match="max_turns must be a whole number >= 0"):
         load(tmp_path / "wf.yaml")
+
+
+# ---------------------------------------------------------------------- studio agents: skills + contract, checked loop
+def studio_agent(make_ctx, tmp_path, answers: list[dict], max_turns: int):
+    from kentc_studio.apps import AGENT_INPUTS
+    from kentc_studio.providers import make_provider
+
+    (tmp_path / "skills").mkdir()
+    (tmp_path / "skills" / "extraction.md").write_text("---\ndescription: x\n---\nCite {{ the page }} for every value.")
+    spec = {"skills": ["extraction"], "max_turns": max_turns,
+            "output": {"key_values": [{"field": "string", "location": "string", "confidence": "number"}]},
+            "checks": {"key_values": "min 1", "key_values[].location": "required",
+                       "key_values[].confidence": "0..100"}}
+    agent = make_provider("evidence", spec, tmp_path / "skills", AGENT_INPUTS["file"], tmp_path / "app.yaml")
+    it = iter(answers)
+    llm = FakeLLM(lambda messages, tools: Reply(content=json.dumps(next(it)), finish="stop"), window=32000)
+    ctx = make_ctx(llm, reserve_tokens=2000, keep_recent_tokens=2000, max_output_tokens=2000)
+
+    def run():
+        return agent.run(case_dir=tmp_path, job_dir=tmp_path / "job", inputs={"file": "docs/a.pdf", "case_brief": "C-1"},
+                         events=ctx.events, settings=ctx.settings, llm=llm, request={})
+    return run, llm
+
+
+def test_studio_agent_works_until_its_answer_passes_the_checks(make_ctx, tmp_path):
+    no_values = {"key_values": []}
+    no_location = {"key_values": [{"field": "amount", "location": " ", "confidence": 90}]}
+    percent = {"key_values": [{"field": "amount", "location": "p1", "confidence": 900}]}
+    good = {"key_values": [{"field": "amount", "location": "p1", "confidence": 90}]}
+    run, llm = studio_agent(make_ctx, tmp_path, [no_values, no_location, percent, good], max_turns=10)
+    assert run() == good                                       # more repairs than a CLI step allows (2)
+    retries = [r["messages"][-1]["content"] for r in llm.requests[1:]]
+    assert "'key_values' needs min 1 items, has 0" in retries[0]
+    assert "'key_values[0].location' is required (empty)" in retries[1]
+    assert "'key_values[0].confidence' must be within 0..100, got 900" in retries[2]
+    system = llm.requests[0]["messages"][0]["content"]
+    assert "## Skill: extraction\n\nCite {{ the page }} for every value." in system and "description: x" not in system
+
+
+def test_studio_agent_stops_when_its_turn_budget_is_spent(make_ctx, tmp_path):
+    bad = {"key_values": []}
+    run, llm = studio_agent(make_ctx, tmp_path, [bad] * 5, max_turns=3)
+    with pytest.raises(WorkflowError, match=r"did not return the expected JSON: .*'key_values' needs min 1 items"):
+        run()
+    assert len(llm.requests) == 3

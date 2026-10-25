@@ -1,17 +1,18 @@
-# Agentic Studio: the apps it serves, the agent workflows they share, and the bank databases and data pulls.
+# Agentic Studio: the apps it serves, the skill library their agents draw on, and the bank databases and data pulls.
 # Paths are relative to this file.
 #   apps:        name -> app manifest: Page 1 intake (fields, file lanes, pulls), Page 2 insight agents, Page 3
-#                report agent in the report framework (see src/kentc_studio/apps.py)
-#   workflows:   the agent library: an app names its agents (`agent: doc-agent`), so any app can use any agent here.
-#                Studio agents are sandboxed: no bash, no web steps, the studio's fixed inputs, JSON out.
-#                CLI pipelines live in cli/workflows/.
+#                report agent in the report framework (see src/kentc_studio/apps.py). Each agent is declared inline:
+#                a contract (output shape, checks, tools, max_turns) equipped with skills.
+#   skills:      the skill library: <name>.md files of prose (how to do the work) that agents name in `skills:`.
+#                Studio agents are sandboxed: no bash, reads stay in the case folder, the studio's fixed inputs,
+#                JSON out. CLI pipelines live in cli/workflows/.
 #   public_url:  base URL external agents use to download case documents (GET /api/cases/<id>/docs/<name>)
 # A workspace can override this file with <workspace>/studio.yaml.
 
 apps:
   ter: apps/ter/app.yaml
   rm: apps/rm/app.yaml
-workflows: apps/workflows
+skills: ../skills
 
 public_url: http://127.0.0.1:8090
 

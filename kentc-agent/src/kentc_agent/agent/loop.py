@@ -83,6 +83,7 @@ class Agent(BudgetMixin, ToolExecutorMixin):
             if ops.is_dir() else 0
         self.last_finish: str | None = None      # latest model finish in this run; run() still returns text
         self.stopped: str | None = None          # "max_turns" when the latest run ended without a final answer
+        self.turns = 0                           # model calls in the latest run
 
     def set_tools(self, tools: list[Tool]) -> None:
         """The tools offered from the next model call on (a workflow step narrows them; the context stays)."""
@@ -102,13 +103,14 @@ class Agent(BudgetMixin, ToolExecutorMixin):
     # ------------------------------------------------------------------ the loop
     def run(self, prompt: str | list[dict[str, Any]]) -> str:
         """One prompt to an answer. Each turn of the loop is one operation in the trace."""
-        self.last_finish, self.stopped = None, None
+        self.last_finish, self.stopped, self.turns = None, None, 0
         self.ctx.llm.info(refresh=True)
         self.session.append({"role": "user", "content": prompt})
         run = self.trace.next_run() if self.trace else 0
         reply = Reply()
         try:
             for turn in (itertools.count(1) if not self.max_turns else range(1, self.max_turns + 1)):
+                self.turns = turn
                 op = self._begin(run, turn, prompt)
                 calls: list[dict[str, Any]] = []
                 results: list[CallResult] = []

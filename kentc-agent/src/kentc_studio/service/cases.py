@@ -395,7 +395,7 @@ class CaseService:
         return out
 
     def inputs(self, case: Case, job: Job, job_dir: Path, events: Events) -> dict[str, Any]:
-        """The job's workflow inputs (apps.py AGENT_INPUTS / REPORT_INPUTS / EXTRA_INPUTS)."""
+        """The job's agent inputs (apps.py AGENT_INPUTS / REPORT_INPUTS / EXTRA_INPUTS)."""
         def rel(p: Path) -> str:
             return str(p.relative_to(case.dir))
 

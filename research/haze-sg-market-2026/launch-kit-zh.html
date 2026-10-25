@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>雾霾季开店工具包 · 个人入场 · 2026年10月</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+:root {
+  --red:#d71920; --red-dark:#a80f16; --ink:#202124; --muted:#6d7278;
+  --line:#dedfdf; --paper:#fff; --bg:#f4f4f1; --green:#087f5b;
+  --amber:#b76b00; --blue:#3569c8; --navy:#202b3a;
+  --shadow:0 12px 34px rgba(25,25,25,.08);
+}
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:'DM Sans','PingFang SC','Microsoft YaHei',Arial,sans-serif; }
+.app { max-width:1080px; margin:0 auto; padding:0 18px 40px; }
+header.top { background:var(--navy); color:#fff; padding:14px 18px; }
+header.top .in { max-width:1080px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+.brand { font-weight:700; letter-spacing:.04em; }
+.brand em { color:var(--red); font-style:normal; }
+.tagline { color:#aeb6c2; font-size:13px; }
+.banner { background:#25292d; color:#fff; padding:10px 18px; font-size:13.5px; }
+.banner .in { max-width:1080px; margin:0 auto; display:flex; gap:22px; flex-wrap:wrap; }
+.banner b { color:#ffd7d9; }
+h1 { font-size:30px; margin:26px 0 6px; }
+h2 { font-size:19px; margin:4px 0 12px; }
+h3 { font-size:15.5px; margin:14px 0 8px; }
+.sub { color:var(--muted); margin:0 0 20px; }
+.card { background:var(--paper); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); padding:18px 20px; margin:0 0 18px; }
+.eyebrow { font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--red); margin-bottom:4px; }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+@media (max-width:820px){ .grid2{grid-template-columns:1fr;} }
+table { width:100%; border-collapse:collapse; font-size:13.5px; }
+th,td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { background:#f8f8f6; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+.tag { display:inline-block; font-size:11.5px; font-weight:600; padding:2px 8px; border-radius:99px; }
+.tag.go { background:#e3f3ec; color:var(--green); }
+.tag.warn { background:#fdf1e0; color:var(--amber); }
+.tag.no { background:#fbe4e5; color:var(--red-dark); }
+ul.check { list-style:none; margin:0; padding:0; }
+ul.check li { display:flex; gap:10px; align-items:flex-start; padding:7px 0; border-bottom:1px dashed var(--line); font-size:14px; }
+ul.check li:last-child { border-bottom:none; }
+ul.check input { margin-top:3px; width:16px; height:16px; accent-color:var(--red); flex:none; }
+.day { font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; color:#fff; background:var(--navy); padding:2px 8px; border-radius:4px; flex:none; margin-top:2px; }
+.calc { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin:10px 0 14px; }
+.calc label { font-size:11.5px; color:var(--muted); display:block; margin-bottom:3px; }
+.calc input { width:100%; padding:7px 8px; border:1px solid var(--line); border-radius:6px; font-family:'IBM Plex Mono',monospace; font-size:13px; }
+.calc input:focus { outline:none; border-color:var(--red); box-shadow:0 0 0 3px rgba(215,25,32,.08); }
+.out { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.out div { background:#f8f8f6; border:1px solid var(--line); border-radius:8px; padding:10px 12px; }
+.out span { display:block; font-size:11px; color:var(--muted); letter-spacing:.06em; }
+.out b { font-family:'IBM Plex Mono',monospace; font-size:17px; }
+.copybox { position:relative; background:#f8f8f6; border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin:8px 0 16px; font-size:13.5px; white-space:pre-wrap; font-family:'IBM Plex Mono','PingFang SC',monospace; line-height:1.5; }
+.copybtn { position:absolute; top:8px; right:8px; border:1px solid var(--line); background:#fff; border-radius:6px; padding:4px 10px; font-size:11.5px; font-weight:600; cursor:pointer; }
+.copybtn:hover { border-color:var(--red); color:var(--red); }
+.rule { border-left:4px solid var(--red); background:#fdf6f6; padding:10px 14px; border-radius:0 8px 8px 0; margin:8px 0; font-size:13.5px; }
+.rule b { color:var(--red-dark); }
+a { color:var(--blue); }
+footer { color:var(--muted); font-size:12.5px; padding:18px 4px; border-top:1px solid var(--line); margin-top:26px; }
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+<div class="brand">雾霾 <em>开店</em> 工具包</div>
+<div class="tagline">个人入场手册 · 无需工厂 · 新加坡 · 2026年10月</div>
+</div></header>
+<div class="banner"><div class="in">
+<span><b>西区 PSI 208–212</b> — 本季最高</span>
+<span>窗口期：<b>约4–6周</b>（11月季风前）</span>
+<span>试水预算：<b>S$530</b></span>
+<span>今天开卖 · 首批进口到货：<b>第5–7天</b></span>
+</div></div>
+<div class="app">
+<h1>7天开卖</h1>
+<p class="sub">边做边打勾 — 进度自动保存在本浏览器。全部预算 S$530 以内；不需要注册公司、不需要工厂、第一天不需要囤货。</p>
+<div class="card">
+<div class="eyebrow">执行清单</div>
+<h2>每日计划</h2>
+<ul class="check" id="checklist">
+<li><input type="checkbox"><span class="day">第0天</span><span>Carousell：注册<b>个人</b>账户（免费 — 2026年服务费政策只针对专业账户）。用手机拍本地买的货，把下面现成的文案贴进3条刊登。</span></li>
+<li><input type="checkbox"><span class="day">第0天</span><span>本地买测试货：HardwareCity/Daiso 买密封条+缝隙胶带（约S$30）→ 组装8个防雾霾密封套装。定价 S$15–25/套。</span></li>
+<li><input type="checkbox"><span class="day">第1天</span><span>Shopee 卖家：用 NRIC/FIN + 银行账户注册（起步不需要 ACRA 公司注册）。上架密封套装+套利商品。注意：注册满120天才收佣金 — 你有免佣金窗口期。</span></li>
+<li><input type="checkbox"><span class="day">第1天</span><span>套利扫货：查小米/天猫官方店滤芯+青萍监测器的促销价；只买 Carousell 上已经卖得更贵的（先看"已售出"记录）。</span></li>
+<li><input type="checkbox"><span class="day">第2天</span><span>1688：注册账户（需中国手机号，或用代购代理）。把商品链接发给集运商询价。下单：20× 适配 HEPA+活性炭滤芯套装、10× 通用活性炭空调滤芯、10× 门底密封条。</span></li>
+<li><input type="checkbox"><span class="day">第2天</span><span>集运商注册：Taobao2SG / Ebaoguo / ImagineShip — 空运 ¥30–55/kg，4–6天门到门。如实申报；CIF 超过 S$400 预算9% GST。</span></li>
+<li><input type="checkbox"><span class="day">第3天</span><span>Facebook Marketplace + Telegram 组屋/公寓群：转发密封套装+空调滤芯上门安装服务。免费流量，方便面交。</span></li>
+<li><input type="checkbox"><span class="day">第4天</span><span>提前写好滤芯+监测器刊登文案（见下方文案区）。照片拍好。货到当天即上架。</span></li>
+<li><input type="checkbox"><span class="day">第5–7天</span><span>货到 → 当天上架滤芯。定价为 Shopee 官方店滤芯价格的60–70%。推"买2省S$5"组合。</span></li>
+<li><input type="checkbox"><span class="day">第7天</span><span>复盘：3天内零收藏零私信的 SKU 直接砍掉；把有收藏热度的加码。PSI 还在100以上就空运补单。</span></li>
+</ul>
+</div>
+<div class="card">
+<div class="eyebrow">SKU 经济账</div>
+<h2>试水批次 — 总投入 S$530</h2>
+<table>
+<tr><th>SKU</th><th>货源</th><th>单件成本</th><th>运费</th><th>到岸成本</th><th>新加坡售价</th><th>毛利</th></tr>
+<tr><td>适配小米滤芯（HEPA+活性炭）</td><td>1688 官方档口</td><td>S$3–8/套</td><td>约S$4–7</td><td>S$8–15</td><td>S$18–45</td><td><span class="tag go">60–72%</span></td></tr>
+<tr><td>通用活性炭空调滤芯</td><td>1688 / 淘宝</td><td>S$4–9</td><td>约S$5–8</td><td>S$10–17</td><td>S$25–50+安装</td><td><span class="tag go">55–65%</span></td></tr>
+<tr><td>门+窗密封套装</td><td>本地 Daiso/HardwareCity</td><td>S$2–5</td><td>无</td><td>S$2–5</td><td>S$15–25</td><td><span class="tag go">70–80%</span></td></tr>
+<tr><td>青萍空气监测器 Lite</td><td>天猫促销套利</td><td>约S$60–75</td><td>约S$10–15</td><td>S$70–90</td><td>S$120–150</td><td><span class="tag warn">30–40%</span></td></tr>
+<tr><td>二手翻新净化机（小米/Blueair）</td><td>Carousell 低价收</td><td>S$40–90</td><td>自提</td><td>S$40–90</td><td>S$90–200</td><td><span class="tag warn">按单议价</span></td></tr>
+</table>
+<h3>到岸成本计算器</h3>
+<div class="calc">
+<div><label>单件成本（S$）</label><input id="c1" type="number" value="6" step="0.5"></div>
+<div><label>单件重量（kg）</label><input id="c2" type="number" value="0.9" step="0.1"></div>
+<div><label>采购数量</label><input id="c3" type="number" value="20" step="1"></div>
+<div><label>空运（S$/kg）</label><input id="c4" type="number" value="8" step="0.5"></div>
+<div><label>CIF GST %（低于S$400填0）</label><input id="c5" type="number" value="9" step="1"></div>
+<div><label>售价（S$）</label><input id="c6" type="number" value="25" step="1"></div>
+</div>
+<div class="out">
+<div><span>单件到岸</span><b id="o1">-</b></div>
+<div><span>总投入</span><b id="o2">-</b></div>
+<div><span>毛利率</span><b id="o3">-</b></div>
+<div><span>回本件数</span><b id="o4">-</b></div>
+</div>
+</div>
+<div class="grid2">
+<div class="card">
+<div class="eyebrow">预期收益</div>
+<h2>这单能赚多少</h2>
+<table>
+<tr><th>情形</th><th>触发条件</th><th>6周净赚</th></tr>
+<tr><td><span class="tag warn">保守</span></td><td>雾霾2周内结束</td><td>S$300–450</td></tr>
+<tr><td><span class="tag go">基准</span></td><td>PSI &gt;130 持续4–6周</td><td>S$1,000–1,600</td></tr>
+<tr><td><span class="tag go">乐观</span></td><td>PSI &gt;150 持续6周+</td><td>S$2,500–4,000</td></tr>
+</table>
+<h3>基准情形拆解（本金 S$530–900）</h3>
+<table>
+<tr><td>适配滤芯 30–40件 × S$14–16毛利</td><td>S$450–640</td></tr>
+<tr><td>密封套装 10–15套 × S$15</td><td>S$150–225</td></tr>
+<tr><td>空调滤芯+安装 8–12单 × S$25–40</td><td>S$200–480（主要是人工收入）</td></tr>
+<tr><td>监测器 2–3台 × S$45</td><td>S$90–135</td></tr>
+<tr><td>二手净化机 2–3台 × S$50</td><td>S$100–150</td></tr>
+</table>
+<p style="font-size:13px;color:var(--muted)">时间成本：每天1–2小时 + 面交。以上为按价差推算的估计，不是保证销量。滤芯最流动；监测器是最大库存风险 — 止损线必须执行。</p>
+</div>
+<div class="card">
+<div class="eyebrow">集运怎么买</div>
+<h2>不会买1688也能下单</h2>
+<p style="font-size:13.5px">集运商 = 你拿到一个中国仓库地址，卖家发货到仓库，集运商转运到新加坡。全程不用中国银行卡。</p>
+<table>
+<tr><th>步骤</th><th>做法</th></tr>
+<tr><td>1 · 注册集运商</td><td>Taobao2SG / Ebaoguo / ImagineShip 任选其一，邮箱/手机注册 → 获得你的<b>专属会员号 + 国内仓库地址</b>（如：广州仓 + 你的编号）。</td></tr>
+<tr><td>2 · 用代购服务（最简单）</td><td>把1688/淘宝商品链接发给客服，他们代下单（服务费约5%），你用 PayNow/PayPal 付款。不需要1688账户、不需要支付宝。</td></tr>
+<tr><td>3 · 或自己下单</td><td>收货地址填集运商仓库地址，备注写你的会员号。付款用支付宝（可用国际卡绑定）。</td></tr>
+<tr><td>4 · 包裹入仓</td><td>国内段1–3天到仓（多免费）。把卖家给的运单号填进集运商系统，包裹自动关联到你的账户。</td></tr>
+<tr><td>5 · 付国际运费</td><td>选空运 ¥30–55/kg，如实申报品名数量，PayNow/PayPal 付款。</td></tr>
+<tr><td>6 · 收货</td><td>4–6天送到新加坡家门。CIF 超 S$400 可能被征9% GST — 属正常，报价时已计入。</td></tr>
+</table>
+<div class="rule"><b>首单测试：</b>先下 S$200–300 小单验证速度和服务，满意再下主单。三家都支持中文客服。</div>
+</div>
+</div>
+<div class="grid2">
+<div class="card">
+<div class="eyebrow">货源入口</div>
+<h2>供应商直达链接</h2>
+<h3>1688 关键词搜索（用中文浏览器/代理打开）</h3>
+<table>
+<tr><td>米家空气净化器滤芯 活性炭</td><td><a href="https://s.1688.com/selloffer/offer_search.htm?keywords=%E7%B1%B3%E5%AE%B6%E7%A9%BA%E6%B0%94%E5%87%80%E5%8C%96%E5%99%A8%E6%BB%A4%E8%8A%AF%20%E6%B4%BB%E6%80%A7%E7%82%AD">搜索</a></td><td>¥15–45/套</td></tr>
+<tr><td>汽车空调滤芯 活性炭 PM2.5</td><td><a href="https://s.1688.com/selloffer/offer_search.htm?keywords=%E6%B1%BD%E8%BD%A6%E7%A9%BA%E8%B0%83%E6%BB%A4%E8%8A%AF%20%E6%B4%BB%E6%80%A7%E7%82%AD">搜索</a></td><td>¥8–30/个</td></tr>
+<tr><td>门窗密封条 防雾霾 自粘</td><td><a href="https://s.1688.com/selloffer/offer_search.htm?keywords=%E9%97%A8%E7%AA%97%E5%AF%86%E5%B0%81%E6%9D%A1%20%E9%98%B2%E9%9C%BE%20%E8%87%AA%E7%B2%98">搜索</a></td><td>¥3–12/卷</td></tr>
+<tr><td>青萍 空气监测 Lite（比价用）</td><td><a href="https://s.1688.com/selloffer/offer_search.htm?keywords=%E9%9D%92%E8%90%8D%20%E7%A9%BA%E6%B0%94%E7%9B%91%E6%B5%8B">搜索</a></td><td>仅比价；优先天猫官方促销</td></tr>
+</table>
+<h3>集运商（S$0 — 按 kg 计费）</h3>
+<table>
+<tr><td>Taobao2SG</td><td>空运 ¥30–55/kg</td><td>4–6天门到门</td></tr>
+<tr><td>Ebaoguo</td><td>空运 ¥35–50/kg</td><td>敏感货友好</td></tr>
+<tr><td>ImagineShip</td><td>空运 ¥30–55/kg</td><td>可代付淘宝/1688</td></tr>
+</table>
+<h3>本地当天（第0天套装）</h3>
+<p style="font-size:13.5px">HardwareCity（Kovan）、Daiso、Mr.D.I.Y. — 密封条 S$2–5/卷，泡沫缝隙胶带 S$1–3。备8套货 ≈ S$30。</p>
+</div>
+<div class="card">
+<div class="eyebrow">渠道成本</div>
+<h2>平台费率对比</h2>
+<table>
+<tr><th>渠道</th><th>费率</th><th>备注</th></tr>
+<tr><td>Carousell 个人号</td><td><span class="tag go">0%</span></td><td>2026年4月起：2.5%服务费（上限S$30/单）只收专业账户（月流水≥S$500或≥10个出站聊天）。个人号起步免费。</td></tr>
+<tr><td>Facebook Marketplace</td><td><span class="tag go">0%</span></td><td>本地群引流；面交；无保障机制</td></tr>
+<tr><td>Shopee SG</td><td><span class="tag warn">约10–15%</span></td><td>佣金+支付+服务费；注册满120天才开始收佣金 — 现在注册，本季免佣金</td></tr>
+<tr><td>Lazada SG</td><td><span class="tag warn">约10–18%</span></td><td>个人可注册；流程比 Shopee 繁琐</td></tr>
+</table>
+<h3>哪里卖哪个 SKU</h3>
+<table>
+<tr><td>适配滤芯</td><td>Carousell（搜索流量大）+ Shopee（120天免佣窗口）</td></tr>
+<tr><td>密封套装</td><td>Carousell + FB/Telegram 组屋群 — 当天可交付</td></tr>
+<tr><td>空调滤芯+安装</td><td>Carousell 引流，按单买件，零库存</td></tr>
+</table>
+</div>
+</div>
+<div class="card">
+<div class="eyebrow">进阶/细分机会</div>
+<h2>比零售更肥的口子</h2>
+<table>
+<tr><th>机会</th><th>为什么</th><th>单量经济</th><th>难度</th></tr>
+<tr><td><b>1 · B2B 打包给幼儿园/补习中心/安老院</b></td><td>MOE 2026-10 通知：学校因雾霾停课，学生托管中心（SCC）和幼儿园托管（KCare）照常营业 — 中心必须自己搞干净空气。B端一单=10–20个C端订单。</td><td>每中心4–6间房：4台净化机+滤芯包 ≈ 收S$800–1,200，赚S$150–250/中心。3–5家 = S$500–1,250。</td><td><span class="tag warn">中</span> 每天打20个电话/发邮件给中心园长</td></tr>
+<tr><td><b>2 · 断货套利（最快现金）</b></td><td>Bloomberg 2026-10-15：新加坡净化机零售断货；Shopee 小米多款显示 sold out。有现货本身就是卖点。</td><td>官方价买入（Lazada/Shopee官方店）→ Carousell "现货即发" 加价 S$40–70/台转手。5–10台 = S$300–700，窗口只有几天。</td><td><span class="tag go">低</span> 零中国物流，当天可操作</td></tr>
+<tr><td><b>3 · 中文内容 + Shopee 联盟</b></td><td>MissLobang/pixel.sg 已做英文评测，中文端"2026 新加坡 空气净化器 推荐/滤芯哪里买"搜索没人认真做。华人家长用中文搜。</td><td>零库存零成本：一篇中文评测页 + 小红书/Telegram 帖带 Shopee 联盟链接，佣金按类目1–9%。同时给自家 Carousell 店导流。</td><td><span class="tag go">低</span> 一个晚上写一页</td></tr>
+<tr><td><b>4 · 婴儿房防霾套装</b></td><td>停课+托管照开 → 家长焦虑集中在婴幼儿。情感溢价，竞争少。</td><td>密封套装+监测器+滤芯 成本S$90–120 → "婴儿房防霾套装" 卖S$199–249。赚S$80–120/套。</td><td><span class="tag go">低</span> 就是现有SKU的捆绑</td></tr>
+<tr><td><b>5 · 空调保养中介单</b></td><td>雾霾后灰尘+AC使用激增 → 保养需求涨。你不需要执照 — 接单转给持牌师傅。</td><td>Carousell 挂 S$120–160/单，转包给师傅 S$80–120，抽 S$30–50/单。零技能零库存。</td><td><span class="tag go">低</span> 和现有安装引流单共用一个漏斗</td></tr>
+</table>
+<div class="rule"><b>优先级：</b>本周先做 #2（断货套利，窗口以天计）和 #1（B2B 电话，客单价最高）；#3 一个晚上顺手做；#4/#5 是现有 SKU 的换皮，不新增库存。</div>
+</div>
+<div class="card">
+<div class="eyebrow">长期生意</div>
+<h2>雾霾是获客，订阅才是生意</h2>
+<table>
+<tr><th>阶段</th><th>做什么</th><th>经济账</th></tr>
+<tr><td><b>现在–6周 · 雾霾季跑单</b></td><td>目标不只是赚钱 — 每个买家留 姓名+净化机型号+地址。这份名单是后面一切业务的种子。</td><td>前面算过的 S$1,000–1,600 + 一份精准客户名单。</td></tr>
+<tr><td><b>第2–6月 · 滤芯订阅</b></td><td>兼容滤芯成本 S$8–12 → 订阅 S$15–20/月 或 S$150/年（含2个滤芯+上门更换）。先卖给雾霾季老客户，零库存按单采购。</td><td>50个订户 = S$750–1,000/月经常性收入。Dyson 官方建议12个月换芯 — 换芯需求是日历驱动的，不是雾霾驱动的。</td></tr>
+<tr><td><b>第3–12月 · B2B租赁试点</b></td><td>幼儿园/办公室/诊所：S$49–69/月/台，含滤芯+保养。Sterra（11,900+条真实评论）已验证新加坡净化机租赁模式 — 你打它不覆盖的 SME/幼儿园细分 + 中文服务。</td><td>S$150 的机器 3–4 个月回本，之后纯赚。20台 = S$800–1,400/月。先10台（约S$1,500本金）试水。</td></tr>
+<tr><td><b>第12月+ · 自有品牌滤芯</b></td><td>1688工厂 OEM + 自有包装，Shopee/Lazada 全年卖。滤芯是剃须刀刀片模式：净化机卖一台，滤芯年年买。</td><td>新加坡净化机市场 US$136M(2025)→US$282M(2033)，售后滤芯是其中增长最稳的切片。中文内容站（niche #3）就是它的免费获客渠道。</td></tr>
+</table>
+<div class="rule"><b>为什么常年有需求：</b>过敏性鼻炎影响新加坡多达13%人口（2020研究），尘螨是热带常年问题 — 雾霾季会结束，过敏季不会。第2个月起定位从"防霾"改成"室内空气"。<br><b>顺序规则：</b>先订阅后租赁 — 订阅零库存，租赁吃本金。名单不满100人之前不要启动租赁。</div>
+</div>
+<div class="card">
+<div class="eyebrow">刊登文案</div>
+<h2>直接粘贴开卖</h2>
+<h3>1 · 适配滤芯 — Carousell 标题</h3>
+<div class="copybox"><button class="copybtn">复制</button>适配小米空气净化器滤芯 HEPA+活性炭 4 Lite / 4 Compact / 2S / 3 / 3H（非原装 · 防雾霾）</div>
+<h3>描述（中文）</h3>
+<div class="copybox"><button class="copybtn">复制</button>适配小米空气净化器滤芯（非原装，兼容型号见下）。
+H13 HEPA + 活性炭层，有效过滤雾霾 PM2.5、灰尘、异味。
+兼容：Mi Air Purifier 2 / 2S / 3 / 3H / Pro / 4 / 4 Lite / 4 Compact。
+雾霾季现货，每天更新库存。
+单价见标价；买2套省S$5，买4套省S$12。
+可 Carousell 买家保护邮寄，或约面交（岛内）。
+如实描述：第三方兼容滤芯，非小米原装。介意勿拍。</div>
+<h3>描述（英文）</h3>
+<div class="copybox"><button class="copybtn">复制</button>Compatible replacement filter for Xiaomi Mi Air Purifier (NOT original).
+H13 HEPA + activated carbon layer — filters haze PM2.5, dust and odours.
+Fits: Mi Air Purifier 2 / 2S / 3 / 3H / Pro / 4 / 4 Lite / 4 Compact.
+In stock now during haze season; stock updated daily.
+Buy 2 save S$5, buy 4 save S$12.
+Carousell Buyer Protection shipping, or island-wide meetup.
+Honest listing: third-party compatible filter, not Xiaomi genuine.</div>
+<h3>2 · 防雾霾密封套装 — Carousell</h3>
+<div class="copybox"><button class="copybtn">复制</button>标题：防雾霾密封套装 — 门底密封条+窗户缝隙胶带（挡住PM2.5进屋）
+
+描述：
+雾霾天 PSI 200+，屋里比屋外脏？大部分脏空气从门窗缝隙进来。
+套装含：3米门底密封条（自粘）+ 5米窗户缝隙胶带 + 泡沫填充条。
+自己贴，不用工具，10分钟搞定。顺便省空调电费。
+现货，即买即面交/邮寄。
+
+Haze Seal Kit — door bottom + window gap weatherstrip. Keeps PM2.5 out, keeps AC in. Self-adhesive, no tools. Ready stock, meetup or post.</div>
+<h3>3 · 空调滤芯+上门安装 — Carousell 引流</h3>
+<div class="copybox"><button class="copybtn">复制</button>标题：汽车活性炭空调滤芯更换（防雾霾PM2.5）上门安装 — 你报车型，我报价
+
+描述：
+雾霾季开车吸霾？活性炭空调滤芯专挡 PM2.5 和尾气异味。
+流程：私信报车型年份 → 我按车型订件（1–2天到）→ 上门/约定地点安装，30分钟。
+滤芯+人工打包价 S$35–60（视车型）。
+Parts sourced per order — zero markup games, honest pricing. 按单订件，价格透明。</div>
+<h3>Shopee 标题（堆关键词）</h3>
+<div class="copybox"><button class="copybtn">复制</button>Compatible HEPA Activated Carbon Filter for Xiaomi Mi Air Purifier 4 Lite 4 Compact 2S 3 3H Pro | Haze PM2.5 Replacement Filter Set</div>
+</div>
+<div class="card">
+<div class="eyebrow">红线规则</div>
+<h2>什么会被封号或罚款</h2>
+<div class="rule"><b>口罩绝对不碰。</b>N95/FFP 属 HSA 管制医疗器械 — 无经销商牌照进口/销售即违法。政府免费派发也早已杀死利润。</div>
+<div class="rule"><b>只写"适配/兼容"，不放品牌 logo。</b>第三方滤芯：照片和标题不出现小米 logo，不写"原装/genuine"。CPFTA 虚假宣传风险 + 平台知识产权下架。</div>
+<div class="rule"><b>真实价格、真实参数。</b>不做假划线折扣（CCCS 价格透明执法）；CADR 只引用供应商规格表数据。</div>
+<div class="rule"><b>平行进口合法</b>（消费电子/滤芯）；商业进口 CIF 超 S$400 预算9% GST。如实申报 — 集运商会查验包裹。</div>
+<div class="rule"><b>时机止损线。</b>PSI 连续3天低于100当天起停止一切空运补单。滤芯流动性好可留；监测器不行 — 窗口一关就成本价清仓。</div>
+</div>
+<script>
+const fmt = n => 'S$' + n.toFixed(2);
+function calc(){
+  const v = i => parseFloat(document.getElementById(i).value) || 0;
+  const cogs=v('c1'), kg=v('c2'), qty=v('c3'), fr=v('c4'), gst=v('c5'), sell=v('c6');
+  const landed = cogs + kg*fr + (cogs+kg*fr)*gst/100;
+  const outlay = landed*qty;
+  const margin = sell>0 ? (sell-landed)/sell*100 : 0;
+  const be = sell>landed ? Math.ceil(outlay/sell) : Infinity;
+  document.getElementById('o1').textContent = fmt(landed);
+  document.getElementById('o2').textContent = fmt(outlay);
+  document.getElementById('o3').textContent = margin.toFixed(0)+'%';
+  document.getElementById('o4').textContent = be===Infinity ? '—' : be;
+}
+document.querySelectorAll('.calc input').forEach(el=>el.addEventListener('input',calc));
+calc();
+const boxes=[...document.querySelectorAll('#checklist input')];
+const saved=JSON.parse(localStorage.getItem('haze-kit-zh')||'[]');
+boxes.forEach((b,i)=>{ b.checked=!!saved[i]; b.addEventListener('change',()=>{
+  localStorage.setItem('haze-kit-zh',JSON.stringify(boxes.map(x=>x.checked)));
+});});
+document.querySelectorAll('.copybox').forEach(box=>{
+  box.querySelector('.copybtn').addEventListener('click',()=>{
+    const t=box.innerText.replace(/^\s*(copy|复制)/,'').trim();
+    const done=()=>{ const btn=box.querySelector('.copybtn'); btn.textContent='已复制'; setTimeout(()=>btn.textContent='复制',1200); };
+    const fallback=()=>{
+      const ta=document.createElement('textarea'); ta.value=t;
+      ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch(e) {}
+      document.body.removeChild(ta); done();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(done).catch(fallback);
+    } else fallback();
+  });
+});
+</script>
+</div>
+<footer>雾霾季开店工具包 · 编制于2026年10月15日 · 除注明外均为新币 · 非法律或税务建议</footer>
+</body>
+</html>

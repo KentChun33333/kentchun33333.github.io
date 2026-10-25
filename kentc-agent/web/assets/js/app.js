@@ -144,8 +144,7 @@
       Object.assign(this, { lanes, optional, files: [], sample: false });
       this.el.innerHTML = lanes.map(l => `
         <div class="lane" data-lane="${esc(l.name)}">
-          <div class="lane-head"><b>${esc((l.label || l.name).toUpperCase())}</b><span class="chip ${l.required && !optional ? 'ready' : ''}">${l.required && !optional ? 'REQUIRED' : 'OPTIONAL'}</span>
-            <small class="muted">${esc(l.agent_label ? `${l.agent_label}${l.per === 'lane' ? ' · whole lane' : ' · per file'}` : 'read by the report agent')}</small></div>
+          <div class="lane-head"><b>${esc((l.label || l.name).toUpperCase())}</b></div>
           <div class="dropzone ${this.compact ? 'small' : ''}"><span>${esc(l.hint || '')}</span>
             <button type="button" class="btn secondary small">Choose files</button><input type="file" multiple hidden></div>
           <div class="docs"></div>
@@ -178,7 +177,7 @@
         const chips = this.files.map((f, i) => ({ f, i })).filter(x => x.f.lane === l.name).map(({ f, i }) =>
           `<span class="doc-chip"><em>${esc((f.file.name.split('.').pop() || '').toUpperCase())}</em>${esc(f.file.name)}
             ${this.lanes.length > 1 ? `<button type="button" data-move="${i}" title="Move to the next lane">⇄</button>` : ''}<button type="button" data-rm="${i}" title="Remove">×</button></span>`);
-        if (this.sample) chips.unshift('<span class="doc-chip sample"><em>SAMPLE</em>sample bundle files for this lane</span>');
+        if (this.sample) chips.unshift('<span class="doc-chip sample"><em>SAMPLE</em>sample bundle</span>');
         box.innerHTML = chips.join('');
       }
       $$('[data-rm]', this.el).forEach(b => (b.onclick = () => { this.files.splice(+b.dataset.rm, 1); this.render(); }));
@@ -258,10 +257,9 @@
     if (!list.length) { box.innerHTML = ''; return updateStageCount(intake); }
     const words = Object.values(fieldValues()).join(' ').toLowerCase();
     if (!pullPick.touched) pullPick.picked = new Set(list.filter(p => p.default || arr(p.triggers).some(t => words.includes(String(t).toLowerCase()))).map(p => p.name));
-    box.innerHTML = `<div class="lane"><div class="lane-head"><b>DATA PULLS</b><span class="chip pending">NO MODEL · RUN IN PARALLEL</span></div>
-      <p class="caption" style="margin:0 0 8px">SQL on ${esc([...new Set(list.map(p => p.database))].join(', '))} with the fields on the left. Results appear on Page 2; the report waits for them.</p>
-      <div class="pull-list">${list.map(p => `<label class="extra"><input type="checkbox" data-pull="${esc(p.name)}" ${pullPick.picked.has(p.name) ? 'checked' : ''}>
-        <span><b>${esc(p.label)}</b><small>${esc(p.description)}</small></span></label>`).join('')}</div></div>`;
+    box.innerHTML = `<div class="lane"><div class="lane-head"><b>DATA PULLS</b></div>
+      <div class="pull-list">${list.map(p => `<label class="extra" title="${esc(`${p.database} · ${p.description}`)}"><input type="checkbox" data-pull="${esc(p.name)}" ${pullPick.picked.has(p.name) ? 'checked' : ''}>
+        <span><b>${esc(p.label)}</b></span></label>`).join('')}</div></div>`;
     $$('[data-pull]', box).forEach(c => (c.onchange = () => {
       pullPick.touched = true;
       c.checked ? pullPick.picked.add(c.dataset.pull) : pullPick.picked.delete(c.dataset.pull);
@@ -278,15 +276,13 @@
     const input = f.type === 'textarea' ? `<textarea ${common} rows="3">${esc(f.default)}</textarea>`
       : f.type === 'select' ? `<select ${common}>${arr(f.options).map(o => `<option ${o === f.default ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select>`
         : `<input ${common} type="${f.type === 'date' ? 'date' : 'text'}" value="${esc(f.default)}">`;
-    return `<div class="field ${f.wide || f.type === 'textarea' ? 'wide' : ''}"><label for="${id}">${esc(f.label || humanize(f.name))}${f.required || f.type === 'select' ? '' : ' <small class="muted">(optional)</small>'}</label>${input}</div>`;
+    return `<div class="field ${f.wide || f.type === 'textarea' ? 'wide' : ''}"><label for="${id}">${esc(f.label || humanize(f.name))}</label>${input}</div>`;
   }
   function pickApp(name) {
     const app = S.apps[name];
     if (!app) return;
     S.intakeApp = name;
     $$('#appPick .seg').forEach(b => b.classList.toggle('active', b.dataset.app === name));
-    $('#fieldsTitle').textContent = app.title.toUpperCase();
-    $('#appDescription').textContent = app.description;
     $('#fieldGrid').innerHTML = `<div class="field"><label for="f-case-id">${esc(app.case.label)}</label><input class="input" id="f-case-id" name="case_id" required value="${esc(nextCaseId(app.case.prefix))}"></div>` +
       app.fields.map(fieldInput).join('');
     $$('[data-field]', $('#fieldGrid')).forEach(x => x.addEventListener('input', renderIntakePulls));
@@ -296,7 +292,7 @@
     renderIntakePulls();
   }
   function renderAppPick() {
-    $('#appPick').innerHTML = S.appOrder.length > 1 ? S.appOrder.map(n => `<button type="button" class="seg" data-app="${esc(n)}" role="tab" title="${esc(S.apps[n].description)}">${esc(S.apps[n].title)}</button>`).join('') : '';
+    $('#appPick').innerHTML = S.appOrder.map(n => `<button type="button" class="seg" data-app="${esc(n)}" role="tab" title="${esc(S.apps[n].description)}">${esc(S.apps[n].title)}</button>`).join('');
     $$('#appPick .seg').forEach(b => (b.onclick = () => pickApp(b.dataset.app)));
   }
   $('#sampleBtn').onclick = () => { intake.sample = true; intake.render(); };
@@ -315,24 +311,21 @@
     btn.disabled = true; btn.textContent = 'Uploading…';
     try {
       const c = await api('/api/cases', { method: 'POST', body: fd });
-      const q = app.pulls.length ? pullPick.picked.size : 0;
-      toast(`${c.id}: ${c.documents} files uploaded · agents started${q ? ` with ${q} data pull(s)` : ''}`);
+      toast(`${c.id}: ${c.documents} files uploaded · agents started`);
       $('#newCasePanel').open = false;
-      $('#intakeSummary').textContent = `last submitted ${c.id} · open for another case`;
       await refreshQueue(c.id);
       pickApp(app.name);
     } catch (err) { toast(err.message, true); }
     finally { btn.disabled = false; btn.textContent = 'Upload & start →'; }
   };
-  $('#newCasePanel').addEventListener('toggle', () => { if ($('#newCasePanel').open) $('#intakeSummary').textContent = ''; });
 
   // ---------------------------------------------------------------- page 1: case table
   const REC = { 'PENDING REVIEW': 'pending', APPROVED: 'approved', ERROR: 'error', 'IN PROGRESS': 'progress', REGENERATE: 'ready' };
-  const TONE = { ok: 'approved', warn: 'extra', bad: 'error', info: 'pending' };
+  const TONE = { ok: 'approved', warn: 'warn', bad: 'error', info: 'pending' };
   function rowHtml(c, fresh) {
     const live = c.status === 'running' || c.status === 'queued';
     const fresh3 = c.versions > (seen[seenKey(c)] || 0);
-    const sub = live ? `${c.documents} files · ${clock(c.elapsed)} agent time` : c.versions ? `${c.versions} report version(s)` : `${c.documents} files`;
+    const sub = live ? `${c.documents} files · ${clock(c.elapsed)}` : '';
     const work = `<button class="work-btn" data-work="${esc(c.id)}">${live ? '<span class="spinner"></span>' : '<span class="stage-dot"></span>'}${esc(c.stage || 'Agent work')}</button>`;
     const subject = columnFields(S.apps[c.app], c.fields).map(([, v]) => v);
     let act = '';
@@ -344,7 +337,7 @@
       <td><span class="case-id">${esc(c.id)}</span><span class="case-sub">${esc(when(c.created))}</span></td>
       <td><span class="chip">${esc(c.app_title)}</span></td>
       <td class="subject" title="${esc(subject.join(' · '))}"><b>${esc(subject[0] || '—')}</b><small>${esc(subject.slice(1).join(' · '))}</small></td>
-      <td><span class="status ${esc(c.status)}"><i></i><div>${esc(c.label)}${fresh3 ? ` <span class="chip new">NEW v${c.versions}</span>` : ''}<small>${esc(sub)}</small></div></span></td>
+      <td><span class="status ${esc(c.status)}"><i></i><div>${esc(c.label)}${fresh3 ? ` <span class="chip new">NEW v${c.versions}</span>` : ''}${sub ? `<small>${esc(sub)}</small>` : ''}</div></span></td>
       <td><span class="chip ${TONE[c.tone] || REC[c.recommendation] || ''}">${esc(c.recommendation)}</span></td>
       <td>${work}</td><td><div class="actions">${act}</div></td></tr>`;
   }
@@ -352,7 +345,7 @@
     const q = $('#caseSearch').value.trim().toLowerCase();
     const rows = S.cases.filter(c => !q || c.id.toLowerCase().includes(q) || Object.values(obj(c.fields)).some(v => String(v).toLowerCase().includes(q)));
     $('#queueBody').innerHTML = rows.length ? rows.map(c => rowHtml(c, c.id === freshId)).join('')
-      : `<tr><td colspan="7" class="empty">${S.cases.length ? 'No case matches this search.' : 'No cases yet. Start one above - the sample bundle is a quick start.'}</td></tr>`;
+      : `<tr><td colspan="7" class="empty">${S.cases.length ? 'No case matches this search.' : 'No cases yet.'}</td></tr>`;
   }
   $('#caseSearch').oninput = () => renderQueue();
   $('#queueBody').addEventListener('click', async e => {
@@ -437,27 +430,27 @@
     return rows;
   }
 
-  function noteForm(key, label, placeholder, button) {
-    return `<div class="inline-form" data-note="${esc(key)}"><label>${label}</label>
-      <div class="row"><textarea class="input" rows="2" placeholder="${esc(placeholder)}"></textarea><button class="btn dark small" data-send-note="${esc(key)}">${esc(button)}</button></div></div>`;
+  function noteForm(key, placeholder) {
+    return `<div class="inline-form" data-note="${esc(key)}">
+      <div class="row"><textarea class="input" rows="2" placeholder="${esc(placeholder)}" aria-label="${esc(placeholder)}"></textarea><button class="btn dark small" data-send-note="${esc(key)}">Run again</button></div></div>`;
   }
 
   function renderPage2(d, scroll = true) {
     const app = appOf(d);
     if (!app) return toast(`App ${d.app} is not configured`, true);
     if (moreApp !== app.name) { more.setLanes(app.lanes, { optional: true }); moreApp = app.name; }
-    $('#p2Eyebrow').textContent = `Page 2 · ${app.title} · verify insights`;
+    $('#journey3').textContent = app.report.name;
     caseStrip($('#strip2'), d, ['Status', d.label]);
     renderReady(d, app);
 
     // per-lane agents: one fold each
     $('#laneFolds').innerHTML = arr(d.lanes).map(ln => {
       const busy = BUSY(ln.status), res = obj(ln.insight), key = `lane:${ln.name}`;
-      return `<details class="card fold" open><summary>${esc((ln.label || ln.name).toUpperCase())} · ${esc(ln.agent_label)} <span class="summary-meta">${busy ? `<span class="spinner"></span> ${esc(ln.status.toUpperCase())}` : ln.insight ? `UPDATED ${esc(when(res.updated))}` : ''}</span></summary>
+      return `<details class="card fold" open><summary>${esc((ln.label || ln.name).toUpperCase())} <span class="summary-meta">${busy ? `<span class="spinner"></span> ${esc(ln.status.toUpperCase())}` : ln.insight ? `UPDATED ${esc(when(res.updated))}` : ''}</span></summary>
         <div class="fold-body">${ln.insight ? renderBlocks(obj(app.agents[ln.agent]).view, res.result, { d, facts: 'skip' })
           : `<div class="placeholder">${busy ? `${esc(ln.agent_label)} is reading ${esc(arr(ln.files).join(', '))}…` : ln.status === 'failed' ? `${esc(ln.agent_label)} failed: ${esc(ln.error)}` : 'No result yet.'}</div>`}
           ${arr(ln.corrections).length ? `<div class="corrections">${arr(ln.corrections).map(c => `<div>✎ ${esc(c.field ? `${c.field}: ` : '')}${esc(c.analyst_value || c.note)}</div>`).join('')}</div>` : ''}
-          ${noteForm(key, `Note for the ${esc(ln.agent_label)} <small>(${esc(arr(ln.files).join(', ') || 'no files')})</small>`, 'e.g. the matched person is the UBO, not a former director', 'Run again with note')}</div></details>`;
+          ${noteForm(key, `Note for the ${ln.agent_label}`)}</div></details>`;
     }).join('');
     bindNotes($('#laneFolds'));
 
@@ -501,13 +494,13 @@
     $('#docMeta').textContent = `${arr(d.docs).length} FILES`;
     $('#docGrid').innerHTML = arr(d.docs).map(x => {
       const lane = app.lanes.find(l => l.name === x.lane) || {}, res = obj(x.insight), key = `doc:${x.name}`;
-      const state = x.per === 'file' ? jobState(x.status) : x.per === 'lane' ? `<span class="muted">Read with the ${esc(lane.label || x.lane)} lane by the ${esc(lane.agent_label)}</span>` : '<span class="muted">Read by the report agent</span>';
+      const state = x.per === 'file' ? jobState(x.status) : '';
       return `<article class="doc-card"><header><div><b>${docLink(d, x.name)}</b><small>${esc(when(x.uploaded))}</small></div>
           <span class="chip ${x.per === 'lane' ? 'pending' : ''}">${esc((lane.label || x.lane).toUpperCase())}</span></header>
-        <div class="doc-state">${state}${x.error ? ` <span class="flag">${esc(x.error)}</span>` : ''}</div>
+        ${state || x.error ? `<div class="doc-state">${state}${x.error ? ` <span class="flag">${esc(x.error)}</span>` : ''}</div>` : ''}
         ${x.insight ? `<div class="doc-body">${renderBlocks(obj(app.agents[x.agent]).view, res.result, { d, facts: 'dl' })}</div>` : ''}
         ${arr(x.corrections).length ? `<div class="corrections">${arr(x.corrections).map(cc => `<div>✎ ${esc(cc.field ? `${cc.field}: ` : '')}${esc(cc.analyst_value || cc.note)}</div>`).join('')}</div>` : ''}
-        ${x.per ? `<footer>${noteForm(key, 'Note for the agent', 'What did the agent miss or get wrong in this file?', 'Run again with note')}</footer>` : ''}</article>`;
+        ${x.per ? `<footer>${noteForm(key, 'Note for the agent')}</footer>` : ''}</article>`;
     }).join('') || '<div class="placeholder">No files.</div>';
     bindNotes($('#docGrid'));
 
@@ -515,9 +508,6 @@
     const pending = arr(d.jobs).filter(j => BUSY(j.status) && ['insight', 'query'].includes(j.role)).length;
     const name = app.report.name;
     $('#reportHead2').textContent = name.toUpperCase();
-    $('#toReport2').textContent = `${name} →`;
-    $('#genHint2').textContent = (pending ? `${pending} insight / data job(s) still running - ask now and the ${app.report.label.toLowerCase()} starts when they finish. ` : d.reports.length ? `Latest: v${d.reports[d.reports.length - 1].version}${d.stale ? ' (out of date)' : ''}. ` : '') +
-      'It runs in the background: you go back to the case table, which shows when the version is ready.';
     $('#genReport2').textContent = pending ? `Generate ${name} when ready →` : d.reports.length ? `Regenerate ${name} (v${d.reports.length + 1}) →` : `Generate ${name} →`;
     if (scroll) show(2);
   }
@@ -538,24 +528,20 @@
   function renderReady(d, app) {
     const item = (label, state, text) => `<div class="ready ${state}"><i>${state === 'busy' ? '<span class="spinner"></span>' : state === 'ok' ? '✓' : state === 'bad' ? '✕' : '·'}</i><span>${esc(label)}</span><b>${esc(text)}</b></div>`;
     const items = [];
-    let n = 0;
     for (const lane of app.lanes.filter(l => l.agent)) {
       if (lane.per === 'lane') {
         const ln = arr(d.lanes).find(x => x.name === lane.name) || {};
-        if (BUSY(ln.status)) n++;
         items.push(BUSY(ln.status) ? item(lane.label, 'busy', 'reading') : ln.insight ? item(lane.label, 'ok', 'ready') : item(lane.label, ln.status === 'failed' ? 'bad' : '', ln.status === 'failed' ? 'failed' : 'none'));
       } else {
         const files = arr(d.docs).filter(x => x.lane === lane.name), busy = files.filter(x => BUSY(x.status)).length;
-        n += busy;
         items.push(item(lane.label, busy ? 'busy' : files.some(x => x.status === 'failed') ? 'bad' : files.length ? 'ok' : '', files.length ? `${files.length - busy}/${files.length} done` : 'none'));
       }
     }
     if (app.pulls.length) {
       const data = arr(d.data).filter(p => p.status), dBusy = data.filter(p => BUSY(p.status)), run = dBusy.find(p => p.status === 'running');
-      n += dBusy.length;
       items.push(item('Data', dBusy.length ? 'busy' : data.some(p => p.status === 'failed') ? 'bad' : data.length ? 'ok' : '', data.length ? `${data.length - dBusy.length}/${data.length} done${run ? ` · ${run.label} ${shortProgress(run.progress)}` : ''}` : 'none'));
     }
-    $('#ready2').innerHTML = items.join('') + `<div class="ready-note">${n ? `${n} job(s) running. Review what is here; the ${esc(app.report.name)} can be asked for now and starts when they finish.` : `All inputs are in: ready for the ${esc(app.report.name)}.`}</div>`;
+    $('#ready2').innerHTML = items.join('');
   }
 
   const miniTable = (title, cols, rows) => `<div class="mini">${title ? `<b>${esc(title)}</b>` : ''}<div class="table-wrap"><table class="grid mini-grid">
@@ -568,7 +554,7 @@
     const shown = { ...obj(r.params), ...obj(p.params) };
     const fieldOf = b => app.fields.find(f => f.name === b) || { name: b };
     return `<article class="data-card ${p.result || live ? '' : 'idle'}">
-      <header><div><b>${esc(p.label)}</b><small>${esc(p.database)} · ${esc(p.description)}</small></div>${p.status ? jobState(p.status) : '<span class="jstate">not run</span>'}</header>
+      <header title="${esc(`${p.database} · ${p.description}`)}"><b>${esc(p.label)}</b>${p.status ? jobState(p.status) : '<span class="jstate">not run</span>'}</header>
       ${live ? `<div class="data-progress"><span class="spinner"></span> ${esc(p.status === 'queued' ? 'queued' : p.progress || 'querying…')}</div>` : ''}
       ${p.error && !live ? `<div class="data-progress"><span class="flag">${esc(p.error)}</span></div>` : ''}
       ${p.result ? `<div class="data-params mono">${esc(params)} · ${esc(String(r.rows))} rows${r.truncated ? ` (capped at ${esc(String(r.row_cap))})` : ''} · ${esc(when(r.updated))}</div>
@@ -612,14 +598,14 @@
 
   async function runPull(body, btn) {
     btn.disabled = true;
-    try { await post(`/api/cases/${enc(S.current)}/data`, body); toast(`${body.pull}: data pull queued - it runs alongside the agents`); refreshDetail(true); }
+    try { await post(`/api/cases/${enc(S.current)}/data`, body); toast(`${body.pull}: data pull queued`); refreshDetail(true); }
     catch (e) { toast(e.message, true); btn.disabled = false; }
   }
 
   function flagForm(i, key) {
     return `<div class="inline-form flag-form"><div class="row">
-      <input class="input" name="value" placeholder="Correct value (if you know it)">
-      <input class="input" name="note" placeholder="What is wrong? e.g. amount is per carton, not the total">
+      <input class="input" name="value" placeholder="Correct value" aria-label="Correct value">
+      <input class="input" name="note" placeholder="What is wrong?" aria-label="What is wrong?">
       <button class="btn dark small" data-send-flag="${i}">Send to the agent</button><button class="btn secondary small" data-cancel="${esc(key)}">Cancel</button></div></div>`;
   }
 
@@ -639,9 +625,8 @@
   function renderExtras(el, d) {
     const ex = obj(d.extras);
     if (S.extrasPicked === null) S.extrasPicked = new Set(Object.entries(ex).filter(([, v]) => v.default).map(([k]) => k));
-    el.innerHTML = Object.keys(ex).length ? Object.entries(ex).map(([k, v]) => `<label class="extra"><input type="checkbox" data-extra="${esc(k)}" ${S.extrasPicked.has(k) ? 'checked' : ''}>
-      <span><b>${esc(v.label)}</b><small>${esc(v.remote ? 'external agent' : 'local agent')}${v.status ? ` · last run ${esc(v.status)}` : ''}</small></span></label>`).join('')
-      : '<p class="caption">No extra agents for this app.</p>';
+    el.innerHTML = Object.entries(ex).map(([k, v]) => `<label class="extra"><input type="checkbox" data-extra="${esc(k)}" ${S.extrasPicked.has(k) ? 'checked' : ''}>
+      <span><b>${esc(v.label)}</b>${v.status ? `<small>last run ${esc(v.status)}</small>` : ''}</span></label>`).join('');
     $$('[data-extra]', el).forEach(c => (c.onchange = () => (c.checked ? S.extrasPicked.add(c.dataset.extra) : S.extrasPicked.delete(c.dataset.extra))));
   }
 
@@ -651,7 +636,7 @@
     const app = appOf(S.detail), id = S.current;
     try {
       await post(`/api/cases/${enc(id)}/report`, { extras: instruction ? [] : [...(S.extrasPicked || [])], instruction });
-      toast(`${id}: ${instruction ? 'prompt' : app.report.name} queued - the case table shows when the new version is in`);
+      toast(`${id}: ${instruction ? 'prompt' : app.report.name} queued`);
       show(1);
       refreshQueue();
     } catch (e) { toast(e.message, true); }
@@ -682,10 +667,8 @@
     if (last) markSeen(d, last);                    // the analyst has the latest version in front of them
 
     $('#journey3').textContent = rep3.name;
-    $('#p3Eyebrow').textContent = `Page 3 · ${app.title} · ${rep3.name}`;
     $('#versionSel').innerHTML = reports.map(x => `<option value="${x.version}" ${x.version === S.version ? 'selected' : ''}>v${x.version}${d.approved && d.approved.version === x.version ? ' · approved' : ''}</option>`).join('') || '<option>—</option>';
     $('#versionSel').disabled = !reports.length;
-    $('#p3Title').textContent = rep ? `${rep3.name} v${rep.version}${d.approved && d.approved.version === rep.version ? ' · approved' : ''}` : rep3.name;
     caseStrip($('#strip3'), d, ['Verdict', r.verdict ? txt(r.verdict) : '—']);
     const approvedThis = d.approved && rep && d.approved.version === rep.version;
     $('#approveBtn').disabled = !rep || approvedThis || busy.length > 0;
@@ -698,8 +681,7 @@
       const inputs = arr(d.jobs).filter(j => BUSY(j.status) && ['insight', 'query'].includes(j.role)).length;
       banner.hidden = false;
       banner.className = 'banner working';
-      banner.innerHTML = `<span class="spinner"></span><div><b>${esc(run ? run.label : `${rep3.name} jobs queued`)}</b> ${run && run.params.instruction ? `working on the prompt: “${esc(run.params.instruction)}”` : run ? 'drafting the next version' : inputs ? `waiting for ${inputs} insight / data job(s)` : `waiting for ${busy.length} job(s)`}
-        <small>It runs in the background - the case table shows when the version is ready.</small></div>`;
+      banner.innerHTML = `<span class="spinner"></span><div><b>${esc(run ? run.label : `${rep3.name} jobs queued`)}</b> ${run && run.params.instruction ? `working on the prompt: “${esc(run.params.instruction)}”` : run ? 'drafting the next version' : inputs ? `waiting for ${inputs} insight / data job(s)` : `waiting for ${busy.length} job(s)`}</div>`;
     } else if (d.stale && rep && rep.version === last) {
       banner.hidden = false;
       banner.className = 'banner';
@@ -707,9 +689,9 @@
       $('#regenBtn').onclick = () => requestReport();
     } else banner.hidden = true;
 
-    $('#reportView').innerHTML = rep ? reportHtml(d, app, rep, r) : `<div class="placeholder">${busy.length ? `The ${esc(rep3.label.toLowerCase())} is drafting the first version - the case table shows when it is ready.` : 'No version yet. Generate it from Page 2.'}</div>`;
+    $('#reportView').innerHTML = rep ? reportHtml(d, app, rep, r) : `<div class="placeholder">${busy.length ? `The ${esc(rep3.label.toLowerCase())} is drafting the first version.` : 'No version yet. Generate it from Verify.'}</div>`;
     if (rep) bindNextSteps(d, app, r);
-    renderPrompt(d, app, busy.length > 0);
+    renderPrompt(d, busy.length > 0);
     if (scroll) show(3);
   }
   $('#versionSel').onchange = e => { S.version = +e.target.value; renderPage3(S.detail, false); };
@@ -723,28 +705,27 @@
   function reportHtml(d, app, rep, r) {
     const tone = obj(app.report.verdicts)[Object.keys(obj(app.report.verdicts)).find(k => k.toLowerCase() === String(r.verdict || '').toLowerCase())] || 'info';
     return `<div class="report">
-      <div class="report-head"><div><span class="eyebrow">${esc(app.report.name)} · ${esc(app.title)}</span><h1>${esc(r.title || d.id)}</h1>
+      <div class="report-head"><div><h1>${esc(r.title || d.id)}</h1>
         ${r.verdict ? `<span class="chip ${TONE[tone] || ''}">${esc(String(r.verdict).toUpperCase())}</span>` : ''}</div>
         <div class="report-meta"><span>${esc(d.id)}</span><span>v${rep.version} · ${esc(when(rep.created))}</span></div></div>
       ${rep.instruction ? `<div class="fold-note"><b>Prompt:</b> ${esc(rep.instruction)}${r.reply ? `<br><b>Reply:</b> ${esc(txt(r.reply))}` : ''}</div>` : ''}
       ${renderBlocks(app.report.view, r, { d, h: 'h2', facts: 'skip' })}
-      ${nextStepsHtml(app, r)}
+      ${nextStepsHtml(r)}
     </div>`;
   }
 
   // requested documents go to the lane read file by file (evidence), else the first lane with an agent
   const requestLane = app => app.lanes.find(l => l.per === 'file') || app.lanes.find(l => l.agent) || app.lanes[0];
 
-  /* The agent's suggestions, on the report itself: documents to request (upload → Page 2 to review them) and
+  /* The agent's suggestions, on the report itself: documents to request (upload → Verify to review them) and
      open questions (each can start a prompt). */
-  function nextStepsHtml(app, r) {
-    const reqs = arr(r.requests), qs = arr(r.questions), lane = requestLane(app);
+  function nextStepsHtml(r) {
+    const reqs = arr(r.requests), qs = arr(r.questions);
     return `<section class="next-steps"><h2>Suggested next steps</h2>
       <h3>Request from the client</h3>
       ${reqs.length ? `<ul class="req-list">${reqs.map((q, i) => `<li><div><b>${esc(obj(q).document || txt(q))}</b><small>${esc(obj(q).reason || '')}</small></div>
         <label class="btn secondary small no-print">Upload<input type="file" multiple hidden data-req="${i}"></label></li>`).join('')}</ul>` : '<p class="caption">No documents requested.</p>'}
-      <div class="req-other no-print"><label class="btn secondary small">Upload other files<input type="file" multiple hidden data-req="other"></label>
-        <span class="caption">Uploads go to the ${esc(lane.label || lane.name)} lane and open Page 2 to review what the agents read; regenerate from there.</span></div>
+      <div class="req-other no-print"><label class="btn secondary small">Upload other files<input type="file" multiple hidden data-req="other"></label></div>
       ${qs.length ? `<h3>Open questions</h3><ul class="q-list">${qs.map((q, i) => `<li><span>${esc(txt(q))}</span><button type="button" class="btn link no-print" data-q="${i}">Use as prompt</button></li>`).join('')}</ul>` : ''}
     </section>`;
   }
@@ -768,7 +749,7 @@
       }
       try {
         const res = await api(`/api/cases/${enc(d.id)}/documents`, { method: 'POST', body: fd });
-        toast(`${res.added.join(', ')} uploaded · review them on Page 2 while the agents read`);
+        toast(`${res.added.join(', ')} uploaded`);
         await refreshDetail(true);
         renderPage2(S.detail);
       } catch (e) { toast(e.message, true); }
@@ -776,13 +757,11 @@
   }
 
   /* The prompt panel only takes a prompt: one prompt → one new version, asynchronously. */
-  function renderPrompt(d, app, busy) {
+  function renderPrompt(d, busy) {
     const reports = arr(d.reports), last = reports.length ? reports[reports.length - 1].version : 0;
     const can = last > 0 && !busy, keep = $('#prompt') ? $('#prompt').value : '';
     $('#promptBody').innerHTML = `
-      <p class="caption">${can ? `Tell the ${esc(app.report.label.toLowerCase())} what to change or explain. It revises v${last} into <b>v${last + 1}</b> in the background: you go back to the case table, and the row shows <span class="chip new">NEW v${last + 1}</span> when it is ready.`
-        : busy ? 'A version is being written. Open it from the case table when it is ready, then prompt again.' : 'Generate the first version from Page 2, then prompt here.'}</p>
-      <textarea class="input" id="prompt" rows="9" ${can ? '' : 'disabled'} placeholder="e.g. explain the evidence for the top risk; shorten the narrative; correct the counterparty name"></textarea>
+      <textarea class="input" id="prompt" rows="9" ${can ? '' : 'disabled'} aria-label="Prompt" placeholder="${esc(can ? `What should change in v${last + 1}?` : busy ? 'A version is being written.' : 'Generate the first version from Verify.')}"></textarea>
       <button class="btn dark" id="sendPrompt" ${can ? '' : 'disabled'}>Send prompt → v${last + 1}</button>`;
     const p = $('#prompt');
     p.value = can ? keep : '';
@@ -853,7 +832,6 @@
     const apps = await api('/api/apps');
     S.appOrder = apps.map(a => a.name);
     S.apps = Object.fromEntries(apps.map(a => [a.name, a]));
-    $('#brandCopy').textContent = `Agentic Studio · ${apps.map(a => a.title).join(' · ')}`;
     await refreshHealth();
     await refreshQueue();
     renderAppPick();
