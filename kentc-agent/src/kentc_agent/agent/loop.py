@@ -191,7 +191,7 @@ class Agent(BudgetMixin, ToolExecutorMixin):
                 raise IncompleteReply(f"model-call budget exhausted: {problem}")
             self.turns += 1
             rejected += 1
-            correction = ("The previous attempt was rejected and was not added to the conversation. "
+            correction = (f"The previous attempt was rejected and was not added to the conversation ({problem}). "
                           "Start again from the original evidence, obey all output requirements and checks, "
                           "and return one complete response within the output budget. Do not continue a partial reply.")
             self.ctx.events.status(self.name, f"discarding invalid output; clean retry {rejected}: {problem}")

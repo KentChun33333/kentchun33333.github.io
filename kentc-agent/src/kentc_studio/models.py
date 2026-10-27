@@ -106,7 +106,8 @@ class Case:
 
     def audit(self, actor: str, event: str) -> None:
         """Decision trace: HUM (analyst), AGT (agent job), SYS."""
-        self.trace.append({"time": time.strftime("%Y-%m-%d %H:%M:%S"), "actor": actor, "event": event})
+        with self.lock:
+            self.trace.append({"time": time.strftime("%Y-%m-%d %H:%M:%S"), "actor": actor, "event": event})
 
     def last_job(self, role: str, target: str | None = None) -> Job | None:
         js = [j for j in self.jobs if j.role == role and (target is None or j.target == target)]
@@ -132,10 +133,11 @@ class JobEvents(Events):
         if kind == "tool":
             return
         who = "parsing sub-agent" if agent == "document" else self.label
-        live = self.case.live
-        if live.get("job") != self.job.id or live.get("kind") != kind or live.get("agent") != who:
-            self.case.live = live = {"agent": who, "kind": kind, "job": self.job.id, "text": ""}
-        live["text"] = (live["text"] + text)[-1500:]
+        with self.case.lock:
+            live = self.case.live
+            if live.get("job") != self.job.id or live.get("kind") != kind or live.get("agent") != who:
+                self.case.live = live = {"agent": who, "kind": kind, "job": self.job.id, "text": ""}
+            live["text"] = (live["text"] + text)[-1500:]
 
     def tool_start(self, agent: str, name: str, args: dict[str, Any]) -> None:
         self._check()
@@ -155,9 +157,11 @@ class JobEvents(Events):
         self._check()
         who = "parsing sub-agent" if agent == "document" else self.label
         if self.job.role == "query":
-            self.case.progress[self.job.id] = text
+            with self.case.lock:
+                self.case.progress[self.job.id] = text
         self.case.event("status", who, text, self.job.id)
 
     def turn_end(self, agent: str, tokens: int, window: int) -> None:
         if agent != "document":
-            self.case.tokens = {"used": tokens, "window": window}
+            with self.case.lock:
+                self.case.tokens = {"used": tokens, "window": window}

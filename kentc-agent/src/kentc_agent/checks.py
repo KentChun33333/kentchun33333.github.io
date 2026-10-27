@@ -120,7 +120,7 @@ def _broken(rule: Rule, value: Any) -> str | None:
         return None if ok else f"needs {rule.kind} {int(rule.low)} {what}, has {n}"
     if rule.kind == "match":
         ok = isinstance(value, str) and rule.pattern is not None and rule.pattern.fullmatch(value.strip())
-        return None if ok else f"must match {rule.pattern.pattern if rule.pattern else ''}, got {value!r}"
+        return None if ok else f"must match {rule.pattern.pattern if rule.pattern else ''}"
     return None
 
 

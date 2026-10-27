@@ -67,13 +67,15 @@ def resolve(ctx: ToolContext, path: str) -> Path:
 
 def inside(ctx: ToolContext, path: str, what: str = "writes") -> Path:
     p = resolve(ctx, path)
-    if not p.is_relative_to(ctx.workspace):
+    if not p.is_relative_to(ctx.workspace.resolve()):
         raise ToolError(f"{path}: outside the workspace {ctx.workspace}; {what} are limited to the workspace")
     return p
 
 
 def rel(ctx: ToolContext, p: Path) -> str:
-    return str(p.relative_to(ctx.workspace)) if p.is_relative_to(ctx.workspace) else str(p)
+    ws = ctx.workspace.resolve()
+    return str(p.relative_to(ws)) if p.is_relative_to(ws) else \
+        str(p.relative_to(ctx.workspace)) if p.is_relative_to(ctx.workspace) else str(p)
 
 
 def truncate_head(text: str, max_lines: int, max_bytes: int) -> tuple[str, int, bool]:

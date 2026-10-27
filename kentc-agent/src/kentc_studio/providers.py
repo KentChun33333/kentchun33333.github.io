@@ -29,6 +29,8 @@ from kentc_agent.ports import Events
 from kentc_agent.skills import SkillError, load_skills
 from kentc_agent.workflow import Runner, Step, Workflow
 
+from .models import LANE_MAX_CHARS
+
 # Studio agents read uploaded (untrusted) documents: a prompt injected into a document must not reach a shell.
 UNTRUSTED_INPUT_DENY = {"bash"}
 EFFORTS = ("none", "low", "medium", "high")
@@ -82,7 +84,8 @@ def task_prompt(inputs: set[str]) -> str:
     lines = ["Do the task your skills describe, with these inputs."]
     lines += [f"{{% if inputs.{k} %}}- {k} ({INPUT_NOTES.get(k, 'input')}): {{{{ inputs.{k} }}}}\n{{% endif %}}"
               for k in order]
-    lines += [f"{{% if inputs.{k} %}}\n### {k} ({INPUT_NOTES[k]})\n{{{{ read_file(inputs.{k}) }}}}\n{{% endif %}}"
+    lines += [f"{{% if inputs.{k} %}}\n### {k} ({INPUT_NOTES[k]})\n"
+              f"{{{{ read_file(inputs.{k}, {LANE_MAX_CHARS}) }}}}\n{{% endif %}}"
               for k in INLINED if k in inputs]
     return "\n".join(lines[:1]) + "\n" + "".join(lines[1:])
 

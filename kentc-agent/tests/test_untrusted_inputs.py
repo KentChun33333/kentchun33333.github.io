@@ -182,6 +182,9 @@ def test_studio_agent_works_until_its_answer_passes_the_checks(make_ctx, tmp_pat
     assert run() == good
     accepted = [m for r in llm.requests[1:] for m in r["messages"] if m["role"] == "assistant"]
     assert accepted == []
+    assert "'key_values' needs min 1 items, has 0" in llm.requests[1]["messages"][-1]["content"]
+    assert "'key_values[0].location' is required (empty)" in llm.requests[2]["messages"][-1]["content"]
+    assert "'key_values[0].confidence' must be within 0..100, got 900" in llm.requests[3]["messages"][-1]["content"]
 
 
 def test_studio_agent_stops_after_bounded_invalid_output_retries(make_ctx, tmp_path):
@@ -193,3 +196,44 @@ def test_studio_agent_stops_after_bounded_invalid_output_retries(make_ctx, tmp_p
     state = json.loads((tmp_path / "job" / "state.json").read_text())
     assert state["steps"]["evidence"]["status"] == "failed"
     assert "data" not in state["steps"]["evidence"]
+
+
+def test_workflow_template_helpers_respect_confine_reads_and_max_chars(make_ctx, tmp_path):
+    secret = tmp_path.parent / f"{tmp_path.name}-outside.txt"
+    secret.write_text("outside secret")
+    (tmp_path / "inside.txt").write_text("A" * 200)
+    (tmp_path / "link.txt").symlink_to(secret)
+    (tmp_path / "wf.yaml").write_text("steps:\n  - id: s\n    prompt: hi\n")
+
+    ctx = make_ctx(FakeLLM(no_llm))
+    ctx.confine_reads = True
+    runner = Runner(load(tmp_path / "wf.yaml"), ctx, {}, tmp_path / "run")
+
+    assert runner._glob("*.txt") == ["inside.txt"]
+    for bad in (str(secret), f"../{secret.name}", "link.txt"):
+        with pytest.raises(ToolError, match="reads are limited to the workspace"):
+            runner._read_file(bad)
+    with pytest.raises(ToolError, match="reads are limited to the workspace"):
+        runner._documents("..")
+
+    truncated = runner._read_file("inside.txt", 50)
+    assert truncated.startswith("A" * 50)
+    assert "150 chars truncated; read inside.txt with offset/limit" in truncated
+
+
+def test_office_media_skips_oversized_embedded_files(make_ctx, tmp_path, monkeypatch):
+    import zipfile
+    import kentc_agent.adapters.documents.loaders as loaders_mod
+    from kentc_agent.adapters.documents.common import Source
+
+    monkeypatch.setattr(loaders_mod, "MAX_MEDIA_BYTES", 100)
+    docx_path = tmp_path / "sample.docx"
+    with zipfile.ZipFile(docx_path, "w") as z:
+        z.writestr("word/media/small.png", b"x" * 50)
+        z.writestr("word/media/huge.png", b"y" * 250)
+
+    src = Source(docx_path, "docx", "sample.docx")
+    loaders_mod.office_media(make_ctx(FakeLLM(no_llm)), docx_path, src)
+    assert [p.name for p in src.attachments] == ["small.png"]
+    assert "1 embedded image(s) saved as attachments" in src.notes
+    assert "1 embedded image(s) skipped (exceeded size limit)" in src.notes

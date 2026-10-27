@@ -156,3 +156,19 @@ def test_cases_created_before_apps_are_skipped_not_deleted(tmp_path):
     cases = CaseStore(tmp_path).load_all(Case, {"test"})
     assert list(cases) == ["C-2"] and old.is_file()
     assert cases["C-2"].jobs[0].status == "stopped"                    # interrupted by the restart
+
+
+def test_read_uploads_rejects_oversized_file(monkeypatch):
+    import asyncio
+    import io
+    from fastapi import HTTPException, UploadFile
+    import kentc_studio.api.app as app_mod
+
+    monkeypatch.setattr(app_mod, "MAX_UPLOAD_BYTES", 10)
+    small = UploadFile(filename="ok.txt", file=io.BytesIO(b"hello"))
+    assert asyncio.run(app_mod.read_uploads([small], ["files"])) == [("ok.txt", "files", b"hello")]
+
+    big = UploadFile(filename="huge.txt", file=io.BytesIO(b"x" * 20))
+    with pytest.raises(HTTPException) as exc:
+        asyncio.run(app_mod.read_uploads([big], ["files"]))
+    assert exc.value.status_code == 413

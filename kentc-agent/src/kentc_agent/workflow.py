@@ -347,15 +347,22 @@ class Runner:
 
     # -------------------------------------------------------------- template helpers
     def _glob(self, pattern: str) -> list[str]:
-        ws = self.ctx.workspace
-        return sorted(str(p.relative_to(ws)) for p in ws.glob(pattern) if p.is_file())
+        ws = self.ctx.workspace.resolve()
+        return sorted(str(p.relative_to(self.ctx.workspace)) for p in self.ctx.workspace.glob(pattern)
+                      if p.is_file() and (not self.ctx.confine_reads or p.resolve().is_relative_to(ws)))
 
-    def _read_file(self, path: str) -> str:
-        return resolve(self.ctx, path).read_text(encoding="utf-8")
+    def _read_file(self, path: str, max_chars: int = 0) -> str:
+        p = inside(self.ctx, path, "reads") if self.ctx.confine_reads else resolve(self.ctx, path)
+        text = p.read_text(encoding="utf-8")
+        if max_chars > 0 and len(text) > max_chars:
+            shown = rel(self.ctx, p)
+            return (text[:max_chars]
+                    + f"\n\n[... {len(text) - max_chars:,} chars truncated; read {shown} with offset/limit for the rest ...]")
+        return text
 
     def _documents(self, folder: str) -> list[str]:
         """Supported files directly in `folder` (no hidden files, no video/legacy formats), sorted."""
-        root = resolve(self.ctx, folder)
+        root = inside(self.ctx, folder, "reads") if self.ctx.confine_reads else resolve(self.ctx, folder)
         if not root.is_dir():
             raise WorkflowError(f"documents({folder!r}): no such folder in {self.ctx.workspace}; fix the workflow "
                                 "input that names it (with --resume latest -i KEY=VALUE to continue)")

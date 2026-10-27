@@ -54,24 +54,25 @@ class JobDispatcher:
     def _start_ready(self) -> bool:
         service = self.service
         for case in list(service.cases.values()):
-            status = {j.id: j.status for j in case.jobs}
-            for job in case.jobs:
-                if job.status != "queued" or any(status.get(a, "done") not in SETTLED for a in job.after):
-                    continue
-                try:
-                    local = service.provider(case, job).local
-                except KeyError:
-                    job.status, job.error = "failed", f"{job.agent} is no longer configured in its app"
+            with case.lock:
+                status = {j.id: j.status for j in case.jobs}
+                for job in case.jobs:
+                    if job.status != "queued" or any(status.get(a, "done") not in SETTLED for a in job.after):
+                        continue
+                    try:
+                        local = service.provider(case, job).local
+                    except KeyError:
+                        job.status, job.error = "failed", f"{job.agent} is no longer configured in its app"
+                        case.save()
+                        return True
+                    if local and self.local_busy:
+                        continue
+                    job.status, job.started = "running", time.time()
+                    if local:
+                        self.local_busy = True
                     case.save()
+                    self.pool.submit(self._run, case, job, local)
                     return True
-                if local and self.local_busy:
-                    continue
-                job.status, job.started = "running", time.time()
-                if local:
-                    self.local_busy = True
-                case.save()
-                self.pool.submit(self._run, case, job, local)
-                return True
         return False
 
     def _run(self, case: Any, job: Job, local: bool) -> None:
@@ -103,11 +104,13 @@ class JobDispatcher:
             case.audit("SYS", f"{label} crashed: {job.error}")
             case.event("error", label, job.error, job.id)
         finally:
-            job.finished = time.time()
-            case.stopping.discard(job.id)
-            case.progress.pop(job.id, None)
-            case.live = {"agent": "", "kind": "", "text": ""}
-            case.save()
+            with case.lock:
+                job.finished = time.time()
+                case.stopping.discard(job.id)
+                case.progress.pop(job.id, None)
+                if case.live.get("job") == job.id:
+                    case.live = {"agent": "", "kind": "", "text": ""}
+                case.save()
             with self.cv:
                 if local:
                     self.local_busy = False

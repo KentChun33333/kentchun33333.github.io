@@ -51,10 +51,20 @@ class PullRequest(BaseModel):
     params: dict[str, str] = {}     # case-field overrides for this pull, e.g. {"lookback_date": "2026-03-01"}
 
 
+MAX_UPLOAD_BYTES = 50 * 1024 * 1024
+
+
 async def read_uploads(files: list[UploadFile], lanes: list[str]) -> list[tuple[str, str, bytes]]:
     if len(lanes) != len(files):
         raise HTTPException(400, "give one lane per file")
-    return [(f.filename or "", lanes[i], await f.read()) for i, f in enumerate(files)]
+    out: list[tuple[str, str, bytes]] = []
+    for i, f in enumerate(files):
+        data = await f.read(MAX_UPLOAD_BYTES + 1)
+        if len(data) > MAX_UPLOAD_BYTES:
+            raise HTTPException(413, f"{f.filename or 'file'}: exceeds maximum upload size "
+                                     f"({MAX_UPLOAD_BYTES // (1024 * 1024)} MB)")
+        out.append((f.filename or "", lanes[i], data))
+    return out
 
 
 def create_app(studio: CaseService, token: str = "") -> FastAPI:

@@ -38,14 +38,33 @@ def save_attachment(folder: Path, name: str, data: bytes) -> Path:
     return target
 
 
+MAX_MEDIA_BYTES = 25 * 1024 * 1024
+MAX_TOTAL_MEDIA_BYTES = 100 * 1024 * 1024
+
+
 def office_media(ctx: ToolContext, path: Path, src: Source) -> None:
     """Images embedded in .docx/.xlsx/.pptx (word/media/, xl/media/, ppt/media/) are saved as attachments."""
     with zipfile.ZipFile(path) as z:
-        media = [n for n in z.namelist() if re.match(r"^(word|xl|ppt)/media/", n)]
-        if media:
-            folder = attachment_dir(ctx, path)
-            src.attachments += [save_attachment(folder, Path(n).name, z.read(n)) for n in media]
-            src.notes.append(f"{len(media)} embedded image(s) saved as attachments")
+        media = [i for i in z.infolist() if re.match(r"^(word|xl|ppt)/media/", i.filename) and not i.is_dir()]
+        if not media:
+            return
+        folder = attachment_dir(ctx, path)
+        saved = skipped = total = 0
+        for info in media:
+            if info.file_size > MAX_MEDIA_BYTES or total + info.file_size > MAX_TOTAL_MEDIA_BYTES:
+                skipped += 1
+                continue
+            data = z.read(info.filename)
+            if len(data) > MAX_MEDIA_BYTES or total + len(data) > MAX_TOTAL_MEDIA_BYTES:
+                skipped += 1
+                continue
+            total += len(data)
+            src.attachments.append(save_attachment(folder, Path(info.filename).name, data))
+            saved += 1
+        if saved:
+            src.notes.append(f"{saved} embedded image(s) saved as attachments")
+        if skipped:
+            src.notes.append(f"{skipped} embedded image(s) skipped (exceeded size limit)")
 
 
 # ---------------------------------------------------------------------- loaders
