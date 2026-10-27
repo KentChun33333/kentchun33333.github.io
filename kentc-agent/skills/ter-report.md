@@ -72,8 +72,8 @@ The `materials_file` input holds the case materials:
   "Unexplained - documents requested", followed by a short reason.
 - `key_risks`: each `title` is a finding stated as a fact ("Inward funds paid out within one business day"),
   not a question. `reason` says what happened and why it matters. `evidence` cites [file, location].
-  `gap` says what would confirm or dismiss it. Score each key risk with the rubric below. One key risk per
-  finding; list the highest score first.
+  `gap` says what would confirm or dismiss it. Score each finding with the rubric below, then list only the
+  findings the listing rule keeps, one key risk per finding, highest score first.
 - `recommendation`: `scope` lists the next actions as short numbered steps ("1. Obtain the supply
   contracts with ... 2. ..."); `rationale` ties them to the key risks by id. Internal steps (bank records,
   alert details, screening results, police or STRO references, other teams) belong here, and only here.
@@ -103,6 +103,16 @@ Move down when:
 
 Never score above 84 on an allegation alone: adverse media or police intelligence without a matching finding in
 the bank's own records or the documents is at most Elevated.
+
+## Which key risks to list
+
+Keep the section short: list what drives the verdict, not every finding.
+- List every High and Elevated finding (70 or more), and nothing below 70.
+- When no finding reaches 70, list the Moderate findings (50-69) instead.
+- When no finding reaches 50, list the single highest-scoring finding, so the section is never empty.
+
+A finding left out is not lost: when it needs action, it still appears as a step under `recommendation.scope`
+or as a document under `requests`.
 
 ## Verdict and requests
 

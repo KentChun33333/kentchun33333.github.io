@@ -554,7 +554,9 @@ High 85-100 (a documented red flag), Elevated 70-84 (an evidenced inconsistency 
 explanation), Moderate 50-69 (a gap documents must resolve), Low 0-49 (context). Corroboration, size against
 the profile, repetition and a tie to the trigger move a score up; a single source or a supported explanation
 moves it down; an allegation alone caps at 84. Any key risk at 70 or more means "Further investigation". The
-bands match the colours on the report cards (red from 85, amber from 70).
+bands match the colours on the report cards (red from 85, amber from 70). To keep the report short, it lists
+only High and Elevated findings; Moderate ones only when nothing reaches 70, and the single highest finding when
+nothing reaches 50. Findings left out still show up as next steps or client requests when they need action.
 
 What a Studio agent cannot do, and why:
 
