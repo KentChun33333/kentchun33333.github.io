@@ -48,7 +48,7 @@
   <div class="grid3">
     <article class="box"><span class="number">原則 01</span><h3>一個主代理，一條任務脈絡</h3><p>一次對話或整個 YAML 工作流程使用同一個 <code>Agent</code>。文件解析子代理只處理交給它的材料與問題。</p><p class="why">避免：多次交接造成資訊散落、責任不清。</p></article>
     <article class="box"><span class="number">原則 02</span><h3>少量工具，明確權責</h3><p><code>read</code>、<code>write</code>、<code>edit</code>、<code>bash</code>，與 pi 相同的四個工具。列檔、搜尋與精確計算都透過 <code>bash</code>（<code>python3 -c</code>）。網路依使用層而定：CLI 對話另有經篩選的 <code>web_search</code>；工作流程與 Studio 的主代理沒有網路工具。</p><p class="why">避免：工具選擇過多、同一件事有兩種做法、每次請求都背著用不到的工具說明、模型自行猜測數字。</p></article>
-    <article class="box"><span class="number">原則 03</span><h3>能力靠偵測，策略才設定</h3><p>部署中的上下文視窗來自伺服器；輸出預算、保留範圍與分塊上限才是代理的策略。</p><p class="why">避免：同一個端點換了部署，代理仍套用舊的硬上限。</p></article>
+    <article class="box"><span class="number">原則 03</span><h3>部署能力與代理策略分開</h3><p>OpenAI／Strata 從伺服器偵測部署視窗；Qwen38 使用依目前部署提供的內建 60k 設定或明確覆寫值。輸出預算、保留範圍與分塊上限是代理策略。</p><p class="why">避免：把模型名稱當成視窗保證；換部署後應重新核實上限。</p></article>
     <article class="box"><span class="number">原則 04</span><h3>大型內容先保存，再導讀</h3><p>主上下文不必承載每一行原文。保留摘要、來源位置與完整內容的路徑，需要時再讀取。</p><p class="why">避免：單次工具輸出擠掉整個任務脈絡。</p></article>
     <article class="box"><span class="number">原則 05</span><h3>中斷也要維持協定完整</h3><p>每個已保存的工具呼叫都要有對應結果。參數錯誤讓模型修正；取消時補齊結果，不重跑已完成工具。</p><p class="why">避免：下一輪對話夾帶未解決的工具呼叫。</p></article>
     <article class="box"><span class="number">原則 06</span><h3>先證據，後解釋</h3><p>工作階段保存對話；追蹤紀錄串起模型回覆、工具、解析子代理與大型結果。查問題時回到實際紀錄。</p><p class="why">避免：只根據最後一段回答猜測代理做過什麼。</p></article>
@@ -59,7 +59,7 @@
   <p class="eyebrow">02 · 任務如何真的往前走</p>
   <h2 id="loop-title">一次 run 可以包含多個 operation</h2>
   <p class="sub"><code>Agent.run(prompt)</code> 代表處理一個輸入。每次主迴圈會建立一個 operation，送出模型請求、處理回覆與工具批次；若還需要工具，便進入下一個 operation。一次請求可能在內部重試，因此 operation 不等於一次 HTTP 請求。</p>
-  <div class="formula">重新偵測部署 → 加入使用者訊息 → [ 準備上下文 → 呼叫模型 → 保存回覆 → 工具執行／結果整理 ]
+  <div class="formula">更新部署能力 → 加入使用者訊息 → [ 準備上下文 → 呼叫模型 → 驗證完整性與輸出契約 → 保存回覆 → 工具執行／結果整理 ]
                                                         └─ 無工具呼叫：回傳答案
                                                         └─ 有工具呼叫：保存工具結果 → 下一個 operation</div>
   <div class="widget">
@@ -69,7 +69,7 @@
   </div>
   <div class="grid2" style="margin-top:16px">
     <div class="box"><h3>四個核心工具的責任</h3><p><code>read</code>：讀取檔案、分頁或解析文件。<br><code>write</code>：建立或覆寫檔案。<br><code>edit</code>：以精確文字比對修改內容。<br><code>bash</code>：執行命令、搜尋、列檔與精確計算。<br>CLI 對話另加 <code>web_search</code>（經篩選）。</p><p class="why">Studio 代理沒有 <code>bash</code>：總額來自資料擷取（SQL）的關鍵值，其他數字須列出算式供分析師核對。</p></div>
-    <div class="box"><h3>正常停止與異常停止要分清楚</h3><p>模型不再要求工具時回傳文字。輸出達上限會標示截斷；超過 <code>max_turns</code> 會明確停止；取消或錯誤會盡可能修復已保存呼叫的結果，再結束本次執行。</p><p class="why">「回傳了文字」不保證成果已完成；文件解析還會另外檢查完成原因。</p></div>
+    <div class="box"><h3>正常停止與異常停止要分清楚</h3><p>串流內容先顯示，通過驗證才保存。截斷或無效輸出先丟棄，再有限次乾淨重試；重試耗盡、超過 <code>max_turns</code> 或拒絕回覆會明確停止。取消或錯誤盡可能補齊已保存工具呼叫的結果。</p><p class="why">未通過的回覆不當成證據，也不拿其中的工具呼叫執行；格式正確仍不代表事實正確。</p></div>
   </div>
   <div class="callout warn"><b>取消不是交易回滾。</b> 已寫出的檔案或已執行的命令不會自動撤銷。修復的目的是保持工具訊息配對及工作階段可繼續，不是把外部世界恢復原狀；磁碟本身無法寫入時也不能保證持久化成功。</div>
   <div class="callout"><b>每個工具結果進入上下文前都會做安全檢查。</b> <code>context/safety.py</code> 以規則（不呼叫模型）標記針對代理的文字：覆寫指示、角色切換、「不要告訴使用者」、要求外傳資料或讀取密鑰、<code>curl | sh</code> 等（中英文），並移除零寬字元、雙向覆寫與 Unicode 標籤等隱藏字元。被標記的結果仍保留資料，但前面加上警告，提醒模型把它當成不可信的資料；追蹤紀錄寫入 <code>safety</code>。它是警報線，不是邊界；真正的控制仍是工具權限。</div>
@@ -79,23 +79,48 @@
 <section class="card" id="capabilities" aria-labelledby="cap-title">
   <p class="eyebrow">03 · 誰決定上限，誰決定用法</p>
   <h2 id="cap-title">伺服器能力 ≠ 代理設定</h2>
-  <div class="callout"><b>上下文視窗 W 是部署的事實，不是模型名稱的常數，也不是 config.py 的設定。</b> 同一個 URL、同一個模型 ID，可以因重新部署而有不同視窗；代理必須重新偵測。</div>
+  <div class="callout"><b>上下文視窗 W 是部署的事實，不是模型名稱的常數。</b> OpenAI／Strata 從伺服器取得；Qwen38 預設 60,000 tokens，依使用者描述的部署設定，不是即時偵測。換部署時必須確認兩個後端都放得下，必要時覆寫；輸出與分塊設定不能把 W 變大。</div>
   <div class="tablewrap"><table>
     <caption>能力、連線與策略的分工</caption>
     <thead><tr><th scope="col">類別</th><th scope="col">內容</th><th scope="col">目前的來源與規則</th></tr></thead>
     <tbody>
-      <tr><td>連線與模型選擇</td><td><code>base_url</code>、<code>api_key</code>、<code>model</code></td><td>由 <code>Settings</code> 指定。未指定模型時使用伺服器清單第一筆；指定模型則必須找到對應項目。</td></tr>
-      <tr><td>部署上下文視窗</td><td><code>ModelInfo.context_window</code></td><td>讀取 <code>/models</code> 中所選模型的 <code>meta.n_ctx</code> 或 <code>max_model_len</code>，必須是正整數；沒有本地設定值或程式預設值。</td></tr>
-      <tr><td>影像輸入能力</td><td><code>ModelInfo.vision</code></td><td>若有 <code>architecture.input_modalities</code> 就依它判斷；未提供時樂觀假設支援影像。這是相容性假設，不是能力已驗證。</td></tr>
+      <tr><td>連線與模型選擇</td><td><code>provider</code>、<code>base_url</code>、<code>api_key</code>、<code>model</code></td><td><code>openai</code> 預設本機 Strata。<code>qwen38</code> 內建原客戶端的 coordinator／LiteLLM 端點、金鑰與模型；不需額外 YAML 或端點／金鑰環境變數。兩個 Qwen 後端各自解析覆寫或預設值，不把 Strata 當備援。</td></tr>
+      <tr><td>部署上下文視窗</td><td><code>ModelInfo.context_window</code></td><td>OpenAI 路徑讀取 <code>/models</code> 的正整數 <code>meta.n_ctx</code> 或 <code>max_model_len</code>。Qwen 的 <code>qwen_context_window</code> 預設 60,000，依使用者提供的部署資訊；不同部署應明確覆寫，不從模型家族名稱推定。</td></tr>
+      <tr><td>影像輸入能力</td><td><code>ModelInfo.vision</code></td><td>OpenAI 依 <code>architecture.input_modalities</code> 判斷；未宣告時樂觀假設支援。Qwen 預設不開影像，只有兩個後端都確認支援時才啟用 <code>qwen_vision</code>。能力設定不保證辨識正確。</td></tr>
       <tr><td>每次輸出怎麼用</td><td><code>max_output_tokens</code>、<code>reasoning_effort</code></td><td>代理的請求策略，不代表伺服器能力。輸出請求還會依剩餘空間調整；超限時依伺服器回報重試。</td></tr>
       <tr><td>上下文與文件策略</td><td><code>reserve_tokens</code>、<code>keep_recent_tokens</code>、<code>doc_chunk_tokens</code></td><td>可設定的上限或目標；有效值受偵測到的 W 限制，不能把伺服器視窗變大。</td></tr>
     </tbody>
   </table></div>
   <div class="grid2">
-    <div class="box"><h3>什麼時候重新偵測？</h3><p>每次 <code>Agent.run</code> 開始、文件預算規劃，以及上下文超限後。其餘一般讀取使用已取得的能力快照，避免每個屬性查詢都重送 HTTP。</p></div>
-    <div class="box"><h3>偵測失敗時怎麼辦？</h3><p>缺少、無效的視窗，或找不到所選模型，會明確報錯；不偷偷用 32k，也不借用另一個模型的資料。只列模型 ID 的相容端點，目前不足以運行。</p></div>
+    <div class="box"><h3>什麼時候更新能力？</h3><p>每次 <code>Agent.run</code> 開始、文件預算規劃，以及上下文超限後。OpenAI 路徑重新偵測部署；Qwen 重新取得明確設定的能力。其餘一般讀取使用能力快照。</p></div>
+    <div class="box"><h3>無法取得有效視窗？</h3><p>OpenAI 缺少有效視窗或找不到所選模型會報錯。Qwen 不要求模型清單，直接採用內建 60k 或覆寫值；覆寫成 0、負值等無效值仍會報錯。內建值不等於伺服器已驗證接受。</p></div>
   </div>
-  <p class="source">實作對照：<a href="../src/kentc_agent/adapters/llm.py">adapters/llm.py · LLMClient.info</a><a href="../src/kentc_agent/config.py">config.py · Settings</a>舊的 <code>context_window</code> 設定與 <code>--context-window</code> 旗標已移除。</p>
+  <div class="widget" id="direct-run">
+    <h3>兩個環境直接啟動，不需另填主機或金鑰</h3>
+    <pre><code># 本機 Strata，保留原本預設
+uv run kentc-agent "Your task"
+
+# Qwen coordinator 優先，串流開始前失敗可切 LiteLLM
+uv run kentc-agent --provider qwen38 "Your task"
+
+# Qwen LiteLLM 優先，備援為 coordinator
+uv run kentc-agent --provider qwen38 --qwen-backend litellm "Your task"</code></pre>
+    <p>Qwen 的主機、API key 與模型名稱集中在 <code>config/qwen38.yaml</code>，分為 <code>coordinator</code> 與 <code>litellm</code>，各含 <code>base_url</code>、<code>api_key</code>、<code>model</code>。修改後重啟 CLI/Studio；不需修改 Python。wheel 會將同一檔案打包到 <code>kentc_agent/deployment_config/qwen38.yaml</code>，部署設定更新後應重新建置／安裝。明確連線設定優先於後端環境變數，環境變數優先於此檔案；切換環境時不要保留過時的通用覆寫。Studio 使用同一套設定，以 <code>KENTC_AGENT_PROVIDER=qwen38</code> 選擇 Qwen。</p>
+    <p class="hint"><b>部署與憑證限制：</b>YAML 含復原的 coordinator token，移出 Python 不等於秘密管理。設定檔及包含它的建置產物都應保持私有，並在憑證外洩或到期時輪替；不把 token 複製到本頁。LiteLLM 沿用原客戶端的預設 key。TLS 驗證保持啟用，內網連線、企業 CA 信任與伺服器接受憑證仍是實際執行前提。設定檔不保證憑證永久有效。</p>
+  </div>
+  <div class="widget" id="recovery">
+    <h3>共享 TPM 與乾淨串流重試</h3>
+    <p>串流保持啟用，但畫面上的 delta 只是暫時內容。長度截斷、中斷串流與無效工具 JSON，在保存或執行前就拒絕；工作流程／Studio 的 JSON 另檢查 schema 與 checks。不修補截斷 JSON、不接受重複鍵或非 JSON 常數。</p>
+    <div class="tablewrap"><table><caption>恢復策略與預設值</caption><thead><tr><th scope="col">設定</th><th scope="col">預設</th><th scope="col">邊界</th></tr></thead><tbody>
+      <tr><td><code>tokens_per_minute</code></td><td><code>0</code></td><td>0 停用本地 token 入場估算，不停用 429 等待。若已配給 100k TPM，可設為 <code>100000</code>；預留約略輸入加請求輸出，完整 usage 可校正。</td></tr>
+      <tr><td><code>rate_limit_max_wait</code></td><td><code>120</code> 秒</td><td>單次 client 呼叫的入場與 429 等待共用上限，包含 Qwen 備援。尊重 <code>Retry-After</code> 秒數或 HTTP 日期；缺少時使用有限退避。耗盡等待或重試次數就報錯，Ctrl-C 可中斷。</td></tr>
+      <tr><td><code>output_retries</code></td><td><code>2</code></td><td>最多額外兩次乾淨輸出嘗試；設 0 不重試。原始證據與已接受上下文保留，拒絕的文字不放入新請求或修正提示；工作流程／Studio 的 <code>max_turns</code> 也限制這些嘗試。</td></tr>
+    </tbody></table></div>
+    <p>同一個 <code>LLMClient</code> 的主代理、文件子代理、壓縮呼叫與 Qwen 備援共享 60 秒滾動預算及冷卻。缺少 usage 或中斷的請求保守保留預留量，直到到期。這是 client／程序內估算，不是供應者精確帳本，也不跨獨立程序共享。</p>
+    <p>Qwen 每次請求先用 <code>qwen_backend</code>，串流開始前失敗才有限切換 coordinator ↔ LiteLLM。任何 chunk 開始後不在傳輸層重播或切換；中斷輸出整份丟棄，代理才可重新乾淨嘗試。Qwen 必須有 finish reason，單獨 <code>[DONE]</code> 不算完整。上下文超限仍交給預算／壓縮處理。</p>
+    <p class="hint">CLI 可用 <code>--tokens-per-minute</code>、<code>--rate-limit-max-wait</code>；三項設定皆可用 YAML 或 <code>KENTC_AGENT_</code> 環境變數。文件重試另開新 session；拒絕回覆與無關錯誤不做通用重試。既有舊 session 不會自動清洗，文件分塊也尚非可跨中斷續跑的工作檢查點。</p>
+  </div>
+  <p class="source">實作對照：<a href="../src/kentc_agent/adapters/llm.py">adapters/llm.py · LLMClient</a><a href="../src/kentc_agent/adapters/qwen38.py">adapters/qwen38.py · connection / fallback_settings</a><a href="../src/kentc_agent/adapters/rate_limit.py">adapters/rate_limit.py · RollingTokenBudget</a><a href="../src/kentc_agent/config.py">config.py · Settings</a>通用 <code>context_window</code> 與 <code>--context-window</code> 已移除；Qwen 使用專屬的 <code>qwen_context_window</code>。</p>
 </section>
 
 <section class="card" id="vertical" aria-labelledby="context-title">
@@ -151,17 +176,27 @@ max_tokens = max(512, min(O, room))   主迴圈初步請求值；之後還可能
 <section class="card" id="documents" aria-labelledby="doc-title">
   <p class="eyebrow">05 · 文件不是一般文字，也不是另一個任務團隊</p>
   <h2 id="doc-title">先轉換，再依預算解析；只接受完整結果</h2>
-  <p class="sub">文件子代理使用同一個模型、同一個伺服器，但每次建立新的 session、不提供工具，也看不到主對話。它只讀本次材料與問題，回傳自足的結果，讓主代理繼續原任務。</p>
+  <p class="sub">文件子代理共用模型 client、預算與 Qwen 備援策略，但每次建立新的 session、不提供工具，也看不到主對話。它只讀本次材料與問題，回傳自足的結果；失敗重試不帶入前一次的半截輸出。</p>
   <div class="tablewrap"><table><thead><tr><th scope="col">輸入類型</th><th scope="col">如何取得材料</th><th scope="col">主代理通常收到什麼</th></tr></thead><tbody>
     <tr><td>原生 PDF</td><td>取得頁面文字；依 <code>doc_render</code>、文字量與視覺內容決定是否附頁面影像。</td><td>解析後的摘要與全文路徑；<code>question</code> 可改問特定問題，<code>pages</code> 可選頁。</td></tr>
     <tr><td>掃描 PDF／獨立影像</td><td>掃描頁轉為影像；獨立圖片可直接讀，不必包成 PDF。影像內容需要模型端的視覺能力。</td><td>轉錄內容的摘要與全文路徑，或附來源位置的問題答案。</td></tr>
     <tr><td>Office／郵件／CSV／HTML</td><td>先轉成 Markdown；保留表格位置，將附件或內嵌影像另存供後續讀取。</td><td>小文件直接回傳文字；大型文件走摘要路徑，大型且帶 <code>question</code> 時交給解析子代理。</td></tr>
     <tr><td>影片／舊式 Office 二進位檔</td><td>影片不支援；<code>.doc</code>、<code>.xls</code>、<code>.ppt</code> 要先轉成新版格式。</td><td>明確錯誤，不假裝已讀取。</td></tr>
   </tbody></table></div>
-  <ol class="flow" aria-label="文件解析的四個階段"><li><b>① 轉成來源單位</b><span>頁面、工作表列區段、投影片、郵件內容；文字與影像保留位置。</span></li><li><b>② 依有效預算分塊</b><span>不是固定 12k；還要放得下提示、影像及回覆。過長文字再拆分。</span></li><li class="special"><b>③ 分別解析與合併</b><span>每塊用乾淨 session；需要時分組合併，不能強塞兩份超大筆記。</span></li><li><b>④ 檢查完成再保存</b><span>非正常 stop 的結果不當作完整轉錄快取；成功後才回傳或建立摘要。</span></li></ol>
+  <div class="widget" id="pdf-safeguards">
+    <h3>PDF 覆蓋防線：有文字，不等於讀到真正表單</h3>
+    <div class="tablewrap"><table><caption>XFA／佔位訊息的處理</caption><thead><tr><th scope="col">情況</th><th scope="col">處理</th><th scope="col">不能宣稱什麼</th></tr></thead><tbody>
+      <tr><td>已知 viewer placeholder</td><td>辨識「Please wait… If this message is not eventually replaced… your PDF viewer may not be able to display…」及要求較新版 PDF viewer 的完整訊息；在模型呼叫或快取前報錯。一般「Adobe Reader」字樣不會單獨觸發。</td><td>佔位訊息再長也不是文件內容；渲染同一頁只會重現佔位畫面，不是成功回復。</td></tr>
+      <tr><td><code>/AcroForm/XFA</code> 表單</td><td>支援直接／間接 AcroForm 與 XFA stream／packet array 的偵測。只交付靜態頁面的渲染影像，不把擷取文字當證據；無視覺能力或 <code>doc_render: never</code> 就明確報錯。</td><td><b>動態 XFA 資料未檢視，可能缺漏。</b> 限制保留在來源 notes、轉錄成果與快取摘要 metadata，不能把靜態影像當成完整表單覆蓋。</td></tr>
+      <tr><td>明確選擇 <code>pages</code></td><td>只檢查並處理所選頁面。文件快取命名空間已更新，舊的佔位訊息快取不能繞過檢查。</td><td>不能把「所選頁面可讀」說成「整份文件已檢視」。</td></tr>
+    </tbody></table></div>
+    <p><b>恢復方式：</b>保留原檔，用支援 XFA 且能顯示實際表單的 viewer 開啟，另存／列印成獨立的 flattened PDF，再核對頁面與關鍵值後重新讀取。改副檔名或渲染原來的佔位頁不會找回資料。</p>
+    <p class="hint">這是已知佔位訊息與 XFA 的覆蓋防線，不是完整的動態 XFA 渲染器，也不是所有 PDF 都能正確解析的保證。</p>
+  </div>
+  <ol class="flow" aria-label="文件解析的四個階段"><li><b>① 轉成來源單位</b><span>頁面、工作表列區段、投影片、郵件內容；先檢查 PDF 佔位訊息與 XFA 覆蓋限制。</span></li><li><b>② 依有效預算分塊</b><span>不是固定 12k；還要放得下提示、影像及回覆。過長文字再拆分。</span></li><li class="special"><b>③ 分別解析與合併</b><span>每塊及重試都用乾淨 session；合併採有限分組，JSON 摘要在重用前驗證。</span></li><li><b>④ 驗證後才保存</b><span>完整完成且格式有效才接受／快取；截斷或無效輸出有限次重試，耗盡就報錯。</span></li></ol>
   <div class="grid2">
     <div class="box"><h3>轉錄與問答，輸出需求不同</h3><p>轉錄要盡量重現原文與表格，所以還要檢查 <code>ceil(user × density × 1.25) ≤ output</code>；一般問答不套這條擴展估算。</p><p class="why">影像 token 量不等於圖片內文字長度；預留餘裕仍不是完整性的數學保證，必須檢查完成原因。</p></div>
-    <div class="box"><h3>放不下時，不默默省略證據</h3><p>文字可再切，影像不能由文字分塊器安全切開。單張影像超出預算、筆記無法合併或回覆截斷時，明確報錯；可縮小頁面範圍、調整影像尺寸或輸出策略。</p><p class="why">若要增加硬視窗，必須調整伺服器部署；本地策略無法創造容量。</p></div>
+    <div class="box"><h3>放不下時，不默默省略證據</h3><p>文字可再切，影像不能由文字分塊器安全切開。單張影像超出預算或筆記無法合併就報錯；回覆截斷先以相同證據乾淨重試，耗盡才失敗。可縮小頁面範圍、調整影像尺寸或輸出策略。</p><p class="why">增加硬視窗需調整部署；重試、視覺輸入與格式驗證都不保證內容完整或正確。</p></div>
   </div>
   <div class="widget">
     <div class="widget-head"><h3>為什麼 12k 分塊上限，不代表一次就能讀 12k？</h3><span class="tag amber">預算示意 · 不是 tokenizer</span></div>
@@ -175,7 +210,7 @@ ceil((fixed + user) × density) ≤ input
 user ≤ doc_chunk_tokens（預設 12,000）
 轉錄另需 ceil(user × density × 1.25) ≤ output</div><p class="hint">還需符合影像張數上限（預設每塊 4 張）。程式會對實際完整提示做估算與分塊，不使用本頁示意的 fixed = 100。這裡的 output 是規劃用保留量，不保證模型一定產出那麼多 tokens。</p></details>
   </div>
-  <p class="source">實作對照：<a href="../src/kentc_agent/adapters/documents/policy.py">adapters/documents/policy.py · read_document</a><a href="../src/kentc_agent/adapters/documents/budget.py">adapters/documents/budget.py · document_budget / map_chunks / reduce_notes / ask</a></p>
+  <p class="source">實作對照：<a href="../src/kentc_agent/adapters/documents/loaders.py">adapters/documents/loaders.py · load_pdf</a><a href="../src/kentc_agent/adapters/documents/policy.py">adapters/documents/policy.py · read_document / parse_digest</a><a href="../src/kentc_agent/adapters/documents/budget.py">adapters/documents/budget.py · document_budget / map_chunks / reduce_notes / ask</a><a href="../tests/test_pdf_safeguards.py">tests/test_pdf_safeguards.py</a></p>
 </section>
 
 <section class="card" id="folders" aria-labelledby="memory-title">
@@ -436,7 +471,7 @@ report:                     <span class="comment"># 第 3 頁</span>
   <h2 id="example-title">一份掃描發票，從檔案到可核對的回答</h2>
   <p class="sub">以下是教學情境，不是模型實際執行紀錄。重點在資料經過哪些邊界，而不是假設模型只要看到圖片就一定讀對。</p>
   <div class="example"><p class="who">輸入與目標</p><p>工作區有 <code>evidence/invoice.pdf</code>。使用者要確認發票編號與總額，並將摘要保存到 <code>reports/brief.md</code>。</p></div>
-  <div class="example"><p class="who">能力邊界</p><p>先從伺服器取得部署視窗。若沒有有效視窗，停止並回報；若影像能力沒有宣告，採樂觀假設，但不把假設當成辨識正確的證據。</p></div>
+  <div class="example"><p class="who">能力邊界</p><p>OpenAI 路徑從伺服器取得部署視窗；Qwen 採內建 60k 或部署覆寫值。無效視窗就停止；影像能力依 provider 規則處理，不把設定或相容性假設當成部署實測或辨識正確的證據。</p></div>
   <div class="example"><p class="who">證據邊界</p><p>主代理呼叫 <code>read</code>。掃描頁沒有可用文字層，因此在預設自動渲染且模型可收影像的情況下，附上頁面影像；文件子代理以預算內的材料轉錄，保留頁碼。</p></div>
   <div class="example"><p class="who">上下文邊界</p><p>完整轉錄與摘要保存後，主代理先收到摘要與全文路徑。需要原句時再讀全文分頁，或以 <code>question</code> 向原 PDF 詢問特定事實；不是把所有頁面反覆塞回主對話。</p></div>
   <div class="example"><p class="who">核對與交付邊界</p><p>主代理核對引用位置；如需加總，使用工具計算。若數字模糊或互相矛盾，明確保留疑點。最後保存成果，並以實際工具結果或 Runner 輸出確認檔案已寫出。</p></div>
@@ -449,7 +484,8 @@ report:                     <span class="comment"># 第 3 頁</span>
   <div class="tablewrap"><table><caption>僅列 kentc_agent 核心套件</caption><thead><tr><th scope="col">模組</th><th scope="col">負責的邊界</th><th scope="col">主要入口</th></tr></thead><tbody>
     <tr><td><a href="../src/kentc_agent/agent/loop.py">agent/loop.py</a> ／ <a href="../src/kentc_agent/agent/executor.py">executor.py</a> ／ <a href="../src/kentc_agent/agent/budget.py">budget.py</a></td><td>代理迴圈、預算檢查、工具批次、結果整理與中斷修復</td><td><code>Agent.run</code>、<code>_call</code>、<code>_settle</code>、<code>_repair</code></td></tr>
     <tr><td><a href="../src/kentc_agent/adapters/llm.py">adapters/llm.py</a></td><td>部署能力快照、串流請求與超限錯誤</td><td><code>LLMClient.info</code>、<code>chat</code>、<code>ModelInfo</code></td></tr>
-    <tr><td><a href="../src/kentc_agent/config.py">config.py</a></td><td>連線與代理策略；不定義部署視窗</td><td><code>Settings</code>、<code>load_settings</code></td></tr>
+    <tr><td><a href="../src/kentc_agent/adapters/qwen38.py">adapters/qwen38.py</a> ／ <a href="../src/kentc_agent/adapters/rate_limit.py">rate_limit.py</a></td><td>Qwen 端點隔離與備援、共享 TPM 入場估算及 429 等待</td><td><code>connection</code>、<code>fallback_settings</code>、<code>RollingTokenBudget</code>、<code>RateWait</code></td></tr>
+    <tr><td><a href="../src/kentc_agent/config.py">config.py</a></td><td>連線與代理策略、Qwen 的預設部署視窗；不覆蓋 OpenAI 路徑的部署偵測</td><td><code>Settings</code>、<code>load_settings</code></td></tr>
     <tr><td><a href="../src/kentc_agent/context/compaction.py">context/compaction.py</a></td><td>舊對話切點、摘要與必要時縮短工具結果</td><td><code>find_cut</code>、<code>summarize</code></td></tr>
     <tr><td><a href="../src/kentc_agent/context/bigcontext.py">context/bigcontext.py</a></td><td>大型結果路由、規則摘要與 operation 外存</td><td><code>limits</code>、<code>route_turn</code>、<code>store</code></td></tr>
     <tr><td><a href="../src/kentc_agent/context/safety.py">context/safety.py</a></td><td>每個工具結果的注入規則（中英文）與隱藏字元移除</td><td><code>scan</code>、<code>guard</code></td></tr>

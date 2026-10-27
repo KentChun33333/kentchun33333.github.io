@@ -1,0 +1,10 @@
+# Private deployment defaults. Do not publish this file or wheels containing it.
+# Environment variables and explicit connection settings override these values.
+coordinator:
+  base_url: ""
+  api_key: ""
+  model: "Qwen3.8-27B-FP8"
+litellm:
+  base_url: ""
+  api_key: ""
+  model: "qwen3-8"

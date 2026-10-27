@@ -14,9 +14,9 @@
   const budget = w => ({reserve:Math.min(16384,Math.floor(w/4)),keep:Math.min(20000,Math.floor(w/3)),margin:Math.max(256,Math.floor(w/20)),result:Math.min(3000,Math.floor(w/20)),turn:Math.min(12000,Math.floor(w/5)),digest:Math.min(1500,Math.floor(w/40))});
   let W = 15536, O = 8192;
   const STEPS = [
-    ['準備上下文','Agent._call → _try_compact / room',['先前已重新偵測部署；本輪用該能力快照計算 W。','計數由伺服器 usage 與經 density 校準的新訊息估算構成。','超過門檻先壓縮；回覆空間太少時嘗試強制壓縮。']],
-    ['呼叫模型','LLMClient.chat',['送出系統提示、目前有效上下文，以及本步驟的工具 schema。','輸出請求受 O 與剩餘空間限制；超限時重新偵測，再依伺服器數字調整或壓縮。','僅有思考、沒有可用內容時，主迴圈允許再試一次。']],
-    ['保存回覆','Session.append / Agent.last_finish',['保存 assistant 回覆、推理欄位與工具呼叫；usage 用於後續估算。','沒有工具呼叫時回傳答案；length 會標示截斷，不冒充正常完成。','有工具呼叫時繼續處理；中斷修復涵蓋這之後的執行與結果整理。']],
+    ['準備上下文','Agent._call → _try_compact / room',['OpenAI 已重新偵測部署；Qwen 使用內建 60k 或明確覆寫值。本輪依能力快照計算 W。','計數由伺服器 usage 與經 density 校準的新訊息估算構成。','超過門檻先壓縮；回覆空間太少時嘗試強制壓縮。']],
+    ['呼叫模型','LLMClient.chat',['送出系統提示、有效上下文與工具 schema；同一 client 的主代理、子代理及 Qwen 備援共享 TPM 估算與冷卻。','429 尊重 Retry-After 並有限等待；上下文超限仍由預算／壓縮處理。','串流 delta 是暫時顯示，不是已接受證據；Qwen 開始串流後不在傳輸層重播或切換。']],
+    ['驗證後保存','Agent._call → Session.append',['先拒絕截斷、中斷串流與無效工具 JSON；結構化結果另檢查 JSON、schema 與 checks。','有限次乾淨重試不帶入被拒輸出；文件重試另開新 session，使用原始證據。','通過後才保存回覆、usage 與工具呼叫；無工具呼叫時回傳答案，否則繼續執行工具。']],
     ['執行工具','Agent._execute → _tool',['依序處理呼叫，先檢查 JSON、必要欄位與 schema 宣告的基本型別。','錯誤型別回傳可修正的工具錯誤，不讓 content=123 進入 write。','ctx.operation 指向目前工具；文件子代理與外存結果可回連到來源操作。']],
     ['整理結果','bigcontext.route_turn → Agent._settle',['一般路徑先按 file / result / turn 三道規則決定外存內容。','完整結果或原檔參照留在工作區，主上下文接收摘要與再讀取路徑。','已完成的工具不因結果路由失敗而重新執行。']],
     ['配對與繼續','Agent._persist_result / _repair / _end',['每個已保存的工具呼叫補齊一個結果；部分已保存的批次不重複附加。','取消或例外時直接修復配對，可能保留尚未路由的原始結果，不假裝正常路由已完成。','追蹤紀錄收尾；一般工具回合繼續下一個 operation，或因上限／取消／錯誤停止。']]

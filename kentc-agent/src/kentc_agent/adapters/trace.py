@@ -20,7 +20,7 @@ went in, what came out, which files were touched, how long each part took, where
                                                             big result's operation folder (bigcontext.py)
    "children": [{"session_id", "tool_call_id"}]}            sub-agent sessions started by those tool calls
 
-end: tool_results | answer | cut_off (reply hit max_output_tokens) | max_turns | aborted | error.
+end: tool_results | answer | max_turns | aborted | error. Rejected output is recorded in model.retries.
 `run` counts Agent.run calls in the session (a prompt, a workflow step, a retry), `turn` the operations within it.
 A sub-agent's trace has `parent: {session_id, operation_id, tool_call_id}` of the tool call that started it.
 """

@@ -55,17 +55,40 @@ def load_pdf(ctx: ToolContext, path: Path, pages: str | None) -> Source:
     with pymupdf.open(path) as doc:
         numbers = parse_pages(pages, doc.page_count)
         src = Source(path, "pdf", f"{path.name} (PDF, {doc.page_count} pages)")
+        xfa = doc.xref_get_key(doc.pdf_catalog(), "AcroForm/XFA")[0] != "null"
+        if xfa:
+            if s.doc_render == "never" or not vision:
+                raise ToolError(f"{path.name}: XFA content not inspected; visual inspection of static pages "
+                                "requires rendering and a vision-capable model. Supply a flattened PDF "
+                                "exported from an XFA-capable viewer.")
+            src.notes.append("XFA form detected: only rendered static pages are inspected; dynamic XFA data "
+                             "is not inspected and may be missing. Supply a flattened PDF for complete coverage.")
         if pages:
             src.notes.append(f"pages {pages} only")
         for n in numbers:
             page = doc[n - 1]
             text = page.get_text("text").strip()
+            if _pdf_placeholder(text):
+                raise ToolError(f"{path.name}, page {n}: PDF viewer placeholder detected; document content "
+                                "not inspected. Rendering this page would reproduce the placeholder. "
+                                "Supply a flattened PDF exported from a viewer that displays the actual form.")
             mode = s.doc_render
-            want = mode == "always" or (mode == "auto" and (len(text) < TEXT_RICH_CHARS or has_visuals(page)))
+            want = xfa or mode == "always" or (mode == "auto" and
+                                             (len(text) < TEXT_RICH_CHARS or has_visuals(page)))
             image = render(page, s.doc_image_px) if want and vision else None
-            src.units += [Unit(f"page {n}", u.text, image if i == 0 else None)
-                          for i, u in enumerate(split_text(f"page {n}", text or "[no text layer]"))]
+            if xfa:
+                src.units.append(Unit(f"page {n}", "", image))
+            else:
+                src.units += [Unit(f"page {n}", u.text, image if i == 0 else None)
+                              for i, u in enumerate(split_text(f"page {n}", text or "[no text layer]"))]
     return src
+
+
+def _pdf_placeholder(text: str) -> bool:
+    text = " ".join(text.casefold().split())
+    return (("if this message is not eventually replaced" in text and
+             "your pdf viewer may not be able to display" in text) or
+            "to view the full contents of this document, you need a later version of the pdf viewer" in text)
 
 
 def has_visuals(page: pymupdf.Page) -> bool:

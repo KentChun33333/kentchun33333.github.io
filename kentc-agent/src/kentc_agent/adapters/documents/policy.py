@@ -16,7 +16,7 @@ from .budget import map_chunks, merge_notes, reduce_notes
 from .common import DIGEST_MERGE, DIGEST_TASK, TRANSCRIBE_TASK, Source, kind_of, split_text
 from .loaders import load_source
 
-CACHE_VERSION = "7"
+CACHE_VERSION = "9"
 
 
 def answer(ctx: ToolContext, path: Path, question: str, pages: str | None = None) -> str:
@@ -61,15 +61,28 @@ def document_digest(ctx: ToolContext, path: Path, pages: str | None = None) -> t
 def structured_digest(ctx: ToolContext, text: str, name: str) -> dict[str, Any]:
     """The parsing sub-agent's JSON digest of `text`: one reply per part, merged when there are several."""
     src = Source(Path(name), "text", name, split_text(name, text))
-    replies = map_chunks(ctx, src, DIGEST_TASK, "digesting")
-    final = reduce_notes(ctx, replies, name, "", lambda _t, body: f"{DIGEST_MERGE}\n\n{body}")
-    try:
-        data = parse_json_object(final)
-    except ValueError:                          # not JSON after all: keep the text as the summary
-        data = {"summary": final.strip()[:1200]}
-    return {"summary": str(data.get("summary") or ""),
-            "key_insights": [str(x) for x in data.get("key_insights") or []][:12],
-            "key_values": [kv for kv in data.get("key_values") or [] if isinstance(kv, dict)][:40]}
+    replies = map_chunks(ctx, src, DIGEST_TASK, "digesting", validate=parse_digest)
+    final = reduce_notes(ctx, replies, name, "", lambda _t, body: f"{DIGEST_MERGE}\n\n{body}",
+                         validate=parse_digest)
+    return parse_digest(final)
+
+
+def parse_digest(text: str) -> dict[str, Any]:
+    """Require a complete JSON digest with typed, evidence-addressable values."""
+    data = parse_json_object(text)
+    if not isinstance(data.get("summary"), str):
+        raise ValueError("Document digest summary must be a string.")
+    insights = data.get("key_insights")
+    if not isinstance(insights, list) or any(not isinstance(item, str) for item in insights):
+        raise ValueError("Document digest key_insights must be a list of strings.")
+    values = data.get("key_values")
+    if not isinstance(values, list) or any(
+        not isinstance(item, dict) or any(not isinstance(item.get(key), str)
+                                         for key in ("field", "value", "location"))
+        for item in values
+    ):
+        raise ValueError("Document digest key_values must contain field, value and location strings.")
+    return {"summary": data["summary"], "key_insights": insights, "key_values": values}
 
 
 def route_document(ctx: ToolContext, path: Path, pages: str | None = None) -> str:

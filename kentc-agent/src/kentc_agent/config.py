@@ -19,10 +19,16 @@ ENV_PREFIX = "KENTC_AGENT_"
 
 @dataclass(frozen=True)
 class Settings:
-    """Connection and agent policy; deployed model capabilities are inspected by LLMClient."""
-    base_url: str = "http://127.0.0.1:8081/v1"   # any OpenAI-compatible server; default: a local Strata
+    """Connection and agent policy; capabilities are inspected or explicitly verified for Qwen."""
+    provider: str = "openai"       # openai | qwen38; Qwen fails over only between its two backends
+    qwen_backend: str = "coordinator"  # preferred backend per request: coordinator | litellm
+    qwen_context_window: int = 60_000  # user's reported deployment limit; override for different deployments
+    qwen_vision: bool = False      # enable only when both Qwen deployments support image input
+    verify_tls: bool = True
+    trust_env: bool = True         # honor HTTP(S)_PROXY and NO_PROXY; TLS uses standard CA settings
+    base_url: str = "http://127.0.0.1:8081/v1"   # default: local Strata; explicit override for either provider
     api_key: str = ""               # sent as "Authorization: Bearer ..." (e.g. a LiteLLM proxy key)
-    model: str = ""                 # "" -> the first model the server lists
+    model: str = ""                 # "" -> server discovery (OpenAI) or backend default (Qwen)
     max_output_tokens: int = 8192   # requested per-reply budget, thinking included; clamped to available room
     reserve_tokens: int = 16384     # compact when context > window - reserve
     keep_recent_tokens: int = 20000 # recent history kept verbatim by a compaction
@@ -31,6 +37,9 @@ class Settings:
     temperature: float | None = None
     max_turns: int = 60             # model calls per prompt; 0 = no limit
     request_timeout: float = 900.0
+    tokens_per_minute: int = 0      # shared client rolling quota; 0 disables local admission estimates
+    rate_limit_max_wait: float = 120.0  # total rate-limit sleep per call, including Qwen failover
+    output_retries: int = 2         # bounded fresh attempts after incomplete or invalid structured output
     bash_timeout: float = 120.0
     web_search_timeout: float = 10.0   # seconds per web_search provider call (ddgs proxy: $DDGS_PROXY)
     web_search_providers: str = "ddgs,searxng"  # tried in order until one has results (adapters/web.py)

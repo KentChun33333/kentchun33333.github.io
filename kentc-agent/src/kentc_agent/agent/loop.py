@@ -7,13 +7,13 @@ executor.py (context/safety.py).
 
 from __future__ import annotations
 
-import itertools
 import json
 import time
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from ..adapters.llm import ContextOverflow, Reply
+from ..adapters.llm import ContextOverflow, IncompleteReply, LLMError, Reply
 from ..adapters.session import Session, estimate_tokens, loggable
 from ..adapters.tools import Tool, ToolContext
 from ..adapters.trace import Operation, Trace
@@ -23,7 +23,6 @@ from .budget import BudgetMixin
 from .executor import ToolExecutorMixin, _defer_interrupt
 
 MIN_REPLY_TOKENS = 1024
-CUT_OFF_NOTE = "[Reply cut off at max_output_tokens.]"
 
 BASE_PROMPT = """You are kentc-agent, a capable general-purpose agent running on a local model. You complete the \
 user's task by thinking briefly, calling tools, checking results, and answering.
@@ -84,6 +83,8 @@ class Agent(BudgetMixin, ToolExecutorMixin):
         self.last_finish: str | None = None      # latest model finish in this run; run() still returns text
         self.stopped: str | None = None          # "max_turns" when the latest run ended without a final answer
         self.turns = 0                           # model calls in the latest run
+        self.output_retries = ctx.settings.output_retries
+        self.validate_reply: Callable[[str], Any] | None = None
 
     def set_tools(self, tools: list[Tool]) -> None:
         """The tools offered from the next model call on (a workflow step narrows them; the context stays)."""
@@ -109,8 +110,9 @@ class Agent(BudgetMixin, ToolExecutorMixin):
         run = self.trace.next_run() if self.trace else 0
         reply = Reply()
         try:
-            for turn in (itertools.count(1) if not self.max_turns else range(1, self.max_turns + 1)):
-                self.turns = turn
+            while not self.max_turns or self.turns < self.max_turns:
+                self.turns += 1
+                turn = self.turns
                 op = self._begin(run, turn, prompt)
                 calls: list[dict[str, Any]] = []
                 results: list[CallResult] = []
@@ -125,15 +127,12 @@ class Agent(BudgetMixin, ToolExecutorMixin):
                         op.reply(reply.content, reply.reasoning, calls)
                     self.ctx.events.turn_end(self.name, self.context_tokens(), self.window)
                     if not reply.tool_calls:
-                        if reply.finish == "length":
-                            self._end("cut_off")
-                            return reply.content + "\n\n" + CUT_OFF_NOTE
                         self._end("answer")
                         return reply.content
                     for call in calls:
-                        results.append(self._execute(call, truncated=reply.finish == "length"))
+                        results.append(self._execute(call))
                     self._settle(results, start=start)
-                    self._end("max_turns" if turn == self.max_turns else "tool_results")
+                    self._end("max_turns" if self.turns == self.max_turns else "tool_results")
                 except BaseException as e:
                     if calls:
                         self._repair(calls, results, start, e)
@@ -181,12 +180,32 @@ class Agent(BudgetMixin, ToolExecutorMixin):
         op = self._op
         overflows, empty = 0, False
         cap: int | None = None                   # after a server overflow: the max_tokens the server said fits
+        rejected = 0
+        correction = ""
+
+        def retry_invalid(problem: str) -> None:
+            nonlocal rejected, correction
+            if rejected >= self.output_retries:
+                raise IncompleteReply(problem)
+            if self.max_turns and self.turns >= self.max_turns:
+                raise IncompleteReply(f"model-call budget exhausted: {problem}")
+            self.turns += 1
+            rejected += 1
+            correction = ("The previous attempt was rejected and was not added to the conversation. "
+                          "Start again from the original evidence, obey all output requirements and checks, "
+                          "and return one complete response within the output budget. Do not continue a partial reply.")
+            self.ctx.events.status(self.name, f"discarding invalid output; clean retry {rejected}: {problem}")
+            if op is not None:
+                op.model["retries"].append(f"invalid output: {problem}")
+
         while True:
             self._try_compact()
             if self.room() < MIN_REPLY_TOKENS:
                 self._try_compact(force=True)
             context = self.session.context()
             messages = [{"role": "system", "content": self.system}] + self._wire(context)
+            if correction:
+                messages.append({"role": "user", "content": correction})
             max_tokens = max(MIN_REPLY_TOKENS // 2, min(self.ctx.settings.max_output_tokens, self.room()))
             if cap is not None:
                 max_tokens = min(max_tokens, cap)
@@ -201,6 +220,9 @@ class Agent(BudgetMixin, ToolExecutorMixin):
             try:
                 reply = self.ctx.llm.chat(messages, tools=self.tool_schemas or None, effort=self.effort,
                                           max_tokens=max_tokens, on_delta=on_delta)
+            except IncompleteReply as e:
+                retry_invalid(str(e))
+                continue
             except ContextOverflow as e:
                 self.ctx.llm.info(refresh=True)
                 overflows += 1
@@ -226,6 +248,26 @@ class Agent(BudgetMixin, ToolExecutorMixin):
                 op.model.update(prompt_tokens=u.prompt_tokens if u else None,
                                 completion_tokens=u.completion_tokens if u else None, finish=reply.finish,
                                 ms=round((time.monotonic() - t0) * 1000))
+            problem = ""
+            if reply.finish and reply.finish not in ("stop", "tool_calls", "length"):
+                raise LLMError(f"response did not finish normally (finish={reply.finish!r})")
+            if reply.finish == "length":
+                problem = "The reply hit max_output_tokens; generate a complete response within the output budget."
+            else:
+                try:
+                    for call in reply.tool_calls:
+                        fn = call["function"]
+                        if not fn.get("name") or not isinstance(json.loads(fn.get("arguments") or "{}"), dict):
+                            raise ValueError("tool arguments must be one complete JSON object with a function name")
+                    if not reply.tool_calls and self.validate_reply is not None:
+                        if reply.finish != "stop":
+                            raise LLMError(f"structured response did not finish normally (finish={reply.finish!r})")
+                        self.validate_reply(reply.content)
+                except (ValueError, KeyError, TypeError) as e:
+                    problem = f"The response failed validation: {e}"
+            if problem:
+                retry_invalid(problem)
+                continue
             if reply.content or reply.tool_calls or empty:
                 return reply
             empty = True                         # an empty turn (ended inside its thinking): ask once more

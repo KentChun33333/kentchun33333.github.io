@@ -13,7 +13,6 @@ dependencies = [
     "extract-msg>=0.56.1",
     "python-pptx>=1.0.2",
     "beautifulsoup4>=4.15.0",
-    "json-repair>=0.64.0",
     "fastapi>=0.143.3",
     "uvicorn[standard]>=0.54.0",
     "python-multipart>=0.0.32",
@@ -34,6 +33,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/kentc_agent", "src/kentc_studio"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"config/qwen38.yaml" = "kentc_agent/deployment_config/qwen38.yaml"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

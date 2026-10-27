@@ -45,9 +45,10 @@ uv sync
 ```
 
 Start the LLM server first; by default the agent talks to a local Strata (`~/Developer/Strata`, port 8081). For
-another server see *LLM servers* under Settings. The deployed context window must be reported by the server:
-it is inspected at each agent run, not configured or inferred from a model name. Image input is assumed when
-the server omits modality metadata; an explicit text-only declaration is respected.
+another server see *LLM servers* under Settings. The default OpenAI-compatible transport inspects the deployed
+context window at each agent run, never inferring it from a model name. It assumes image input when modality
+metadata is absent and respects explicit text-only declarations. The opt-in Qwen38 transport instead requires
+an explicitly configured, verified deployed context limit and enables image input only when explicitly requested.
 
 ```sh
 uv run kentc-agent                                          # chat; workspace = current directory
@@ -87,8 +88,8 @@ refuse paths outside it. `AGENTS.md` in the workspace is added to the system pro
 Every session with a log also writes `traces/<session id>.jsonl` (`trace: false` turns it off). The session log
 is the resumable conversation; the trace shows what the local agent did, one line per **operation**. An operation
 is one turn of the loop: the context goes to the model, the reply comes back, and its tool calls run until their
-results are in the context. It ends as `tool_results` (next turn follows), `answer`, `cut_off`
-(`max_output_tokens`), `max_turns`, `aborted` or `error`.
+results are in the context. It ends as `tool_results` (next turn follows), `answer`, `max_turns`, `aborted` or
+`error`. Rejected output attempts are recorded as retries, not accepted assistant messages.
 
 | Field | Content |
 | --- | --- |
@@ -281,13 +282,35 @@ the document folder, outputs go to fixed places, and one limit has one knob.
 | .docx, .xlsx, .csv, .pptx, .eml, .msg, .html | markdown (tables with row numbers, e-mail headers + body) | the markdown if ≤ `big_result_tokens` (3k); else the big-result route (`full.md` = the markdown, digest by the parsing sub-agent) |
 | .mp4 … / .doc .xls .ppt | — | rejected (video unsupported / save as .docx/.xlsx/.pptx) |
 
+PDF coverage safeguards:
+- Known viewer-placeholder messages (for example, “Please wait… your PDF viewer may not be able to display…”)
+  fail before model calls or caching, even when the placeholder has a long text layer. Rendering the same
+  placeholder is not recovery; export a flattened PDF from a viewer that displays the actual form.
+- PDFs with `/AcroForm/XFA` use rendered static pages, not extracted text, and require vision with rendering
+  enabled. Dynamic XFA data is **not inspected** and may be missing. This limitation accompanies the source,
+  transcription and cached digest metadata; a rendered page does not establish complete XFA coverage.
+- Explicit `pages` selection checks only the selected pages. Old document-cache entries are invalidated by
+  the updated cache namespace so previously cached placeholders cannot bypass these safeguards.
+
+If a PDF is rejected:
+1. Keep the original file. Open it in an XFA-capable viewer and confirm that the actual form and values appear.
+2. Export or print a **separate flattened PDF** with the visible form values, then read that file. Renaming the
+   original or rendering its placeholder does not recover the content.
+3. Check the exported pages and key values against the viewer. Selecting `pages` limits inspection; it does
+   not establish that unselected pages were read. Do not treat static XFA fallback as complete form coverage.
+
+The [HTML architecture guide](docs/index.html#pdf-safeguards) explains the same coverage boundary;
+its [recovery section](docs/index.html#recovery) covers shared TPM admission and clean streamed-output retries.
+
 The parsing sub-agent splits a document into chunks and reads each chunk in a fresh session. `doc_chunk_tokens`
-(12k) and `doc_max_images` (4) are ceilings: effective chunks also fit the inspected context window, prompt
-overhead, token density and reply allowance. Transcription reserves output room for reproducing the source;
+(12k) and `doc_max_images` (4) are ceilings: effective chunks also fit the deployed context window (inspected,
+or explicitly verified for Qwen), prompt overhead, token density and reply allowance. Transcription reserves output room for reproducing the source;
 oversized text is split while preserving page labels and image association. An image that cannot fit is an
 explicit error, not silently omitted. Several parts are merged in bounded groups; if no pair fits, parsing
-reports an error rather than forcing an oversized request. Incomplete replies, including length cutoffs, are
-not cached as complete results.
+reports an error rather than forcing an oversized request. Incomplete replies and malformed/schema-invalid
+digests are discarded before session acceptance or caching. Each retry gets a fresh sub-agent session with the
+same original evidence; both map and reduction calls validate their results. `output_retries` bounds extra
+attempts (default 2); persistent failure reports an error rather than repairing or caching partial evidence.
 
 With `question` the sub-agent returns relevant facts with locations (page, sheet + row, slide, e-mail).
 `offset`/`limit` pages the converted text (for a PDF: its transcription). Complete results are cached.
@@ -865,14 +888,24 @@ Where to look when something is off:
 ## Settings
 
 Defaults < `~/.config/kentc-agent/config.yaml` < `<workspace>/.kentc-agent/config.yaml` < `KENTC_AGENT_<NAME>`
-environment variables < flags. Empty values keep the default; unknown keys are errors. `uv run kentc-agent --info`
-prints inspected model capabilities separately from connection settings and agent policy.
+environment variables < flags. Null YAML values keep the default; unknown keys are errors. `uv run kentc-agent --info`
+prints the effective endpoint and model capabilities separately from connection settings and agent policy,
+without printing API keys.
 
 `context_window` and `--context-window` are no longer supported: remove old overrides from YAML, environment
-and command lines. The server is the only authority for the deployed limit. `max_output_tokens` remains a
-requested reply budget, while reserve/retention/chunk settings remain agent policy, bounded by available room.
+and command lines. For the default `provider: openai`, the server reports the deployed limit. The opt-in
+`provider: qwen38` defaults to the user's reported 60,000-token deployment window; override
+`qwen_context_window` for a different deployment. This is not a discovered or model-family limit.
+`max_output_tokens` remains a requested reply budget, while
+reserve/retention/chunk settings remain agent policy, bounded by available room.
 
 ```yaml
+provider: openai              # openai | qwen38; default keeps the local Strata path
+qwen_backend: coordinator     # coordinator | litellm; only used by qwen38
+qwen_context_window: 60000    # reported deployment limit; override when using a different deployment
+qwen_vision: false            # enable only after verifying Qwen image support
+verify_tls: true              # secure default for both providers
+trust_env: true               # honor environment proxy and CA settings
 base_url: http://127.0.0.1:8081/v1
 reasoning_effort: medium      # none | low | medium | high (empty = server default)
 sub_effort: low               # compaction summaries and the parsing sub-agent
@@ -880,34 +913,168 @@ max_output_tokens: 8192
 reserve_tokens: 16384
 keep_recent_tokens: 20000
 max_turns: 60                 # model calls per prompt or workflow step; 0 = no limit
+tokens_per_minute: 0          # 0 disables local admission; set to your provisioned TPM quota, e.g. 100000
+rate_limit_max_wait: 120     # cumulative seconds of quota/cooldown waiting per client call
+output_retries: 2           # extra clean attempts after incomplete/invalid output; 0 disables
 big_result_tokens: 3000       # one tool result above this -> operation folder + digest
 big_turn_tokens: 12000        # one turn's tool results above this -> largest routed first until it fits
 big_digest_tokens: 1500       # the most a digest takes in the context
-doc_chunk_tokens: 12000       # ceiling; actual chunks fit inspected input/output room
+doc_chunk_tokens: 12000       # ceiling; actual chunks fit deployed input/output room
 doc_render: auto              # auto | always | never (PDF page images)
 trace: true                   # operation trace per session in .kentc-agent/traces/
 ```
 
+### Rate limits and streamed-output acceptance
+
+One `LLMClient` shares a rolling 60-second token budget and provider cooldown across the coordinator,
+document sub-agents, compaction calls and its Qwen fallback. Admission reserves an estimated prompt plus
+requested output; successful responses with complete usage counters reconcile that estimate. Missing usage
+or interrupted requests conservatively retain the reservation until it expires. This is **process/client-local
+estimation**, not provider-authoritative accounting or coordination across separate Studio/CLI processes.
+
+HTTP 429 responses honor `Retry-After` (seconds or HTTP date), otherwise bounded exponential backoff.
+Admission and 429 cooldowns share `rate_limit_max_wait` across primary and fallback. Exhausted wait or retry
+allowances produce an explicit rate-limit error; Ctrl-C interrupts waiting. A single request exceeding the
+configured TPM reservation fails rather than waiting indefinitely. CLI overrides: `--tokens-per-minute` and
+`--rate-limit-max-wait`; YAML and the usual `KENTC_AGENT_` variables work for all three settings above.
+
+Streaming remains enabled. Deltas are **provisional UI output**, not accepted evidence. Length cutoffs,
+interrupted streams and malformed tool-call JSON are rejected before persistence or execution. JSON workflow
+and Studio results additionally validate JSON, schema and configured checks before entering the conversation.
+There is no JSON repair: truncated objects, duplicate keys and non-JSON constants are rejected. Clean retries
+start from accepted context and original evidence, without rejected text in the request or its correction.
+Document retries use fresh sub-agent sessions. `output_retries` bounds retries, and workflow/Studio `max_turns`
+also bounds clean output attempts; refusals and unrelated errors are not blanket-retried.
+
+Validation prevents accepting malformed output; it does not establish factual accuracy. Failed document work
+is not a resumable per-chunk job, and these guards do not retrospectively cleanse older session logs.
+
+
 ### LLM servers
 
-`LLMClient` speaks the OpenAI chat API (streaming, tool calls, `usage`). Context discovery is mandatory:
-`/models` must report a positive deployed `meta.n_ctx` or `max_model_len` for the selected model.
-The agent refreshes the deployment at each run, during document budget planning, and after a context overflow;
-the Studio health endpoint also refreshes it. A changed window at the same endpoint is therefore not pinned
-by local configuration. Missing/invalid limits or an unlisted selected model fail explicitly; no coded context
-default or another model's metadata is substituted.
+`LLMClient(Settings)` selects one transport explicitly. With the default `provider: openai`, it speaks the
+OpenAI chat API (streaming, tool calls, `usage`) and context discovery is mandatory: `/models` must report a
+positive deployed `meta.n_ctx` or `max_model_len` for the selected model. The agent refreshes the deployment
+at each run, during document budget planning, and after a context overflow; the Studio health endpoint also
+refreshes it. A changed window at the same endpoint is therefore not pinned by local configuration.
+Missing/invalid limits or an unlisted selected model fail explicitly; no coded context default or another
+model's metadata is substituted. Qwen38 is the deployment-default exception described below.
 
 | Server | Connection settings | Discovery requirement |
 | --- | --- | --- |
 | **Strata** (default) | `base_url: http://127.0.0.1:8081/v1` | deployed `meta.n_ctx` from `/models`; parsing sub-agents run sequentially |
 | **vLLM / llama.cpp** | `base_url`, `model`, `api_key` as needed | `/models` must expose deployed `max_model_len` or `meta.n_ctx` |
 | **LiteLLM / other proxies / OpenAI-compatible endpoints** | `base_url`, `api_key`, `model` as needed | the endpoint must expose the selected deployment's actual limit; endpoints listing only model IDs are insufficient |
+| **Qwen38 coordinator / LiteLLM** (opt-in) | `--provider qwen38`; recovered endpoint/key/model defaults are built in | 60,000-token configured default from the user's reported deployment; does not require `/models` |
 
-Image support is read from `architecture.input_modalities` when supplied, otherwise assumed. Requested
-`reasoning_effort` is sent only when set. Streamed replies should include `usage` for token calibration.
+For `provider: openai`, image support is read from `architecture.input_modalities` when supplied, otherwise
+assumed, and requested `reasoning_effort` is sent only when set. Qwen38 uses explicit `qwen_vision` (default
+false), normalizes system messages and omits unsupported `reasoning_effort` and `stream_options`.
+Streamed replies should include `usage` for token calibration.
 
 Overflow errors are read in each server's wording (Strata, vLLM/LiteLLM, OpenAI, llama.cpp), so the agent retries
 with the server's own numbers.
+
+### Qwen38 switching and automatic failover
+
+Set `KENTC_AGENT_PROVIDER=qwen38` to opt in; merely setting Qwen endpoint variables does not change the
+default Strata transport. Each chat request first tries `qwen_backend` (default: coordinator), then automatically
+tries the other Qwen backend if the preferred one fails before any streamed chunk is received. Strata is never
+a fallback target. Both Qwen backends have built-in endpoint, credential and model defaults recovered from
+the original client; no endpoint/key environment variables or YAML file are required for these deployments.
+
+Failover is bounded: the preferred backend retains bounded connection-open retries, and the backup gets
+one connection-open attempt; both use bounded rate-limit retries and the same wait allowance. A healthy
+preferred backend never contacts the backup, and each new chat request starts with the preferred backend
+again. Failover emits a warning naming the two backends without logging credentials.
+After any chunk (including reasoning, tool-call fragments or role-only chunks), the transport does not replay
+or fail over that stream. An interrupted stream is discarded; the agent may start a bounded clean attempt
+without its partial content. Qwen requires a finish reason: `[DONE]` alone does not prove completion.
+Context-overflow errors stay with the agent's budget/compaction recovery; they do not trigger failover.
+
+The Qwen38 connection/message policy is implemented inside the existing stdlib streaming client. It does not
+import the recovered `qwen38_client.py`, require the recovered folder at runtime, or add an OpenAI SDK dependency.
+
+### Run directly in either environment
+
+From `kentc-agent/`, no extra configuration file or endpoint/key environment variables are required:
+
+```sh
+# Local Strata (unchanged default).
+uv run kentc-agent "Your task"
+
+# Qwen coordinator first, automatic LiteLLM fallback before streamed output begins.
+uv run kentc-agent --provider qwen38 "Your task"
+
+# Qwen LiteLLM first, automatic coordinator fallback.
+uv run kentc-agent --provider qwen38 --qwen-backend litellm "Your task"
+
+# Inspect resolved Qwen settings without printing API keys.
+uv run kentc-agent --provider qwen38 --info
+```
+
+Studio uses the same defaults. Select its provider per process:
+
+```sh
+uv run kentc-studio --workspace /path/to/workspace
+KENTC_AGENT_PROVIDER=qwen38 uv run kentc-studio --workspace /path/to/workspace
+```
+
+The Qwen hosts, API keys, and model names live in **`config/qwen38.yaml`**, under separate
+`coordinator` and `litellm` mappings with `base_url`, `api_key`, and `model` fields. Edit this file
+to update either deployment; no Python edits or extra startup flags are needed. Existing clients retain
+their resolved settings, so restart CLI/Studio after changing it. Source checkouts load the file
+relative to the installation, not the current workspace. Wheels bundle the same file at
+`kentc_agent/deployment_config/qwen38.yaml`; rebuild/reinstall to distribute YAML changes.
+Explicit connection settings override backend environment variables, which override this file.
+Strata's `http://127.0.0.1:8081/v1` default is unchanged. Qwen's configured context window defaults to **60,000**
+tokens, based on the user's reported deployment, not live discovery. Override it if either backend has a
+different deployed limit. TLS verification stays enabled. The hosts must be reachable from the current
+network, and corporate CA trust and valid credentials remain runtime prerequisites.
+
+**Credential warning:** `config/qwen38.yaml` contains the recovered coordinator token.
+Its payload states an expiry of **2026-12-01 09:00:51** (timezone not specified);
+the server may revoke it earlier. The LiteLLM default is the original client's ``.
+These defaults do not establish that either credential is currently accepted by the server. Do not publish
+this file or build archives containing it, or duplicate the token into documentation/logs; rotate it if
+exposed and replace/override it when expired. Moving credentials out of Python is not secret management:
+the YAML and packaged copies remain private deployment configuration, not a portable public distribution.
+
+Environment variables remain **optional overrides**:
+
+| Preferred backend (`KENTC_AGENT_QWEN_BACKEND`) | Endpoint override | Credential override | Model override |
+| --- | --- | --- | --- |
+| `coordinator` (default) | `QWEN38_COORDINATOR_ENDPOINT` | `VLM_API_KEY` | `QWEN38_COORDINATOR_MODEL` (default `Qwen3.8-27B-FP8`) |
+| `litellm` | `GATEWAY_URL` (gateway root; transport adds `/v1`) | `LITELLM_MASTER_KEY` | `QWEN38_LITELLM_MODEL` (default `qwen3-8`) |
+
+A non-default `base_url` / `KENTC_AGENT_BASE_URL` / `--base-url` overrides the preferred backend's endpoint.
+An explicit `api_key` / `KENTC_AGENT_API_KEY` and `model` / `KENTC_AGENT_MODEL` / `--model` override its
+credential and model. The backup **never inherits these overrides**: it resolves its own backend-specific
+environment variables or built-in defaults. Selection uses `qwen_backend`, `KENTC_AGENT_QWEN_BACKEND`, or
+`--qwen-backend`, not a switch-file or `QWEN38_BACKEND`.
+
+Generic overrides still apply to either selected provider. For direct Strata/Qwen switching, leave
+generic `base_url`, `api_key` and `model` unset or at their defaults; remove stale overrides if previously
+configured. Qwen settings do not replace OpenAI-compatible deployment discovery.
+
+Optional deployment overrides in `<workspace>/.kentc-agent/config.yaml`:
+
+```yaml
+qwen_backend: coordinator
+qwen_context_window: 60000  # must fit BOTH backends; change for a different deployment
+qwen_vision: false         # enable only when BOTH backends support image input
+```
+
+Qwen image input remains disabled unless both deployments are confirmed to support it; opt in with
+`KENTC_AGENT_QWEN_VISION=true` or CLI `--qwen-vision`. CLI `--no-qwen-vision` overrides an enabled
+configuration. CLI also accepts `--provider`, `--qwen-backend`, and `--qwen-context-window`.
+
+TLS verification is **enabled by default** for both providers. Use `SSL_CERT_FILE` for a custom trusted CA
+bundle (or standard `SSL_CERT_DIR`). With the default `trust_env: true`, standard `HTTP_PROXY`, `HTTPS_PROXY`
+and `NO_PROXY` variables control routing. CLI `--no-trust-env` ignores environment proxies; `--trust-env`
+restores them. CA settings still apply regardless of proxy selection. `--no-verify-tls` disables certificate
+verification and is unsafe outside isolated diagnostics; restore it with `--verify-tls`. The corresponding
+environment settings are `KENTC_AGENT_VERIFY_TLS` and `KENTC_AGENT_TRUST_ENV`.
 
 ## Layout
 
@@ -930,7 +1097,7 @@ with the server's own numbers.
 | `skills/` | skill library: one Markdown file per skill, named by Studio agents |
 | `src/kentc_agent/skills.py`, `src/kentc_agent/checks.py` | skill loading (front matter stripped, verbatim bodies); declared checks on a JSON answer (`parse_checks`, `check_rules`) |
 | `src/kentc_agent/workflow.py` | YAML workflows: validation, Jinja, steps, human gates, resume |
-| `src/kentc_agent/adapters/llm.py` | OpenAI-compatible client (Strata, LiteLLM, vLLM): streaming, tool calls, usage, overflow detection |
+| `src/kentc_agent/adapters/llm.py`, `src/kentc_agent/adapters/qwen38.py` | explicit OpenAI-compatible / Qwen38 transport selection, streaming, tool calls, usage, overflow detection |
 | `src/kentc_agent/adapters/web.py` | web search providers (ddgs, SearXNG) and the fallback chain |
 | `src/kentc_agent/adapters/web_research.py` | the web agent behind workflow `web:` steps and the screened `web_search` tool (private to the web agent, or in CLI chat): screening sub-agent, fail-closed re-check, search budget, link check |
 | `src/kentc_agent/context/safety.py` | safety check on every tool result: injection rules (English/Chinese), hidden-character removal |

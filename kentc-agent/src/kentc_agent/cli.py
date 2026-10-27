@@ -47,12 +47,26 @@ def parser() -> argparse.ArgumentParser:
     ap.add_argument("-w", "--workspace", default=".", help="workspace folder (default: current directory)")
 
     g = ap.add_argument_group("model")
+    g.add_argument("--provider", choices=["openai", "qwen38"], help="LLM transport (default: openai)")
+    g.add_argument("--qwen-backend", choices=["coordinator", "litellm"],
+                   help="preferred Qwen backend (default: coordinator; automatic fallback before streamed output)")
+    g.add_argument("--qwen-context-window", type=int, help="verified context limit safe for both Qwen backends")
+    g.add_argument("--qwen-vision", action=argparse.BooleanOptionalAction, default=None,
+                   help="explicitly enable or disable Qwen image input (default: disabled)")
+    g.add_argument("--verify-tls", action=argparse.BooleanOptionalAction, default=None,
+                   help="verify server TLS certificates (default: enabled)")
+    g.add_argument("--trust-env", action=argparse.BooleanOptionalAction, default=None,
+                   help="honor environment proxy settings (default: enabled)")
     g.add_argument("--base-url", help="OpenAI-compatible LLM server URL: Strata, a LiteLLM proxy, vLLM "
                                       "(default http://127.0.0.1:8081/v1, a local Strata)")
     g.add_argument("--model", help="model id (default: the server's)")
     g.add_argument("--effort", choices=["none", "low", "medium", "high"], help="reasoning effort")
     g.add_argument("--max-turns", type=int, help="model calls per prompt (or per workflow step) before stopping; "
                    "0 = no limit")
+    g.add_argument("--tokens-per-minute", type=int,
+                   help="shared rolling token quota for all agents (default: 0, admission disabled)")
+    g.add_argument("--rate-limit-max-wait", type=float,
+                   help="maximum total rate-limit waiting seconds per call (default: 120)")
     g.add_argument("--quiet", action="store_true", help="hide the model's reasoning")
 
     g = ap.add_argument_group("chat / prompt")
@@ -98,7 +112,12 @@ def workspace(args: argparse.Namespace) -> Path:
 def make_context(args: argparse.Namespace, ui: ConsoleUI) -> ToolContext:
     ws = workspace(args)
     settings = load_settings(ws, {"base_url": args.base_url, "model": args.model,
+                                  "provider": args.provider, "qwen_backend": args.qwen_backend,
+                                  "qwen_context_window": args.qwen_context_window, "qwen_vision": args.qwen_vision,
+                                  "verify_tls": args.verify_tls, "trust_env": args.trust_env,
                                   "reasoning_effort": args.effort,
+                                  "tokens_per_minute": args.tokens_per_minute,
+                                  "rate_limit_max_wait": args.rate_limit_max_wait,
                                   "max_turns": args.max_turns, "show_reasoning": False if args.quiet else None})
     ui.show_reasoning = settings.show_reasoning
     return ToolContext(ws, settings, LLMClient(settings), ui)
@@ -300,7 +319,7 @@ def list_workflows(args: argparse.Namespace) -> int:
 def show_info(args: argparse.Namespace) -> int:
     ctx = make_context(args, ConsoleUI())
     info, s = ctx.llm.info(), ctx.settings
-    print(f"server          {s.base_url}")
+    print(f"server          {ctx.llm.base}")
     print(f"model           {info.id}  (images: {'yes' if info.vision else 'no'})")
     print(f"context window  {info.context_window}  (compact above "
           f"{info.context_window - min(s.reserve_tokens, info.context_window // 4)})")

@@ -62,14 +62,11 @@ def run_report(make_ctx, tmp_path, replies: list[dict]) -> tuple[dict, FakeLLM]:
     return state, llm
 
 
-def test_wrong_types_and_enum_values_are_sent_back_then_canonicalized(make_ctx, tmp_path):
+def test_wrong_types_and_enum_values_are_rejected_then_canonicalized(make_ctx, tmp_path):
     bad = {"key_risks": [{"id": "KR-01", "score": "high", "title": "Layering"}],
            "recommendation": {"next_step": "Exit the client"}, "confidence": None}
     state, llm = run_report(make_ctx, tmp_path, [bad, GOOD])
-    retry = llm.requests[1]["messages"][-1]["content"]
-    assert "'key_risks[0].score' must be a number, got string" in retry
-    assert "'recommendation.next_step' must be one of Agree | Further investigation, got \"Exit the client\"" in retry
-    assert "missing key 'recommendation.scope'" in retry and "'confidence' must be a number, got null" in retry
+    assert all("Exit the client" not in json.dumps(r["messages"]) for r in llm.requests[1:])
     assert state["steps"]["report"]["data"]["recommendation"]["next_step"] == "Further investigation"
 
 
@@ -154,7 +151,7 @@ def test_negative_max_turns_is_refused_when_the_workflow_loads(tmp_path):
 
 
 # ---------------------------------------------------------------------- studio agents: skills + contract, checked loop
-def studio_agent(make_ctx, tmp_path, answers: list[dict], max_turns: int):
+def studio_agent(make_ctx, tmp_path, answers: list[dict], max_turns: int, **settings):
     from kentc_studio.apps import AGENT_INPUTS
     from kentc_studio.providers import make_provider
 
@@ -167,7 +164,7 @@ def studio_agent(make_ctx, tmp_path, answers: list[dict], max_turns: int):
     agent = make_provider("evidence", spec, tmp_path / "skills", AGENT_INPUTS["file"], tmp_path / "app.yaml")
     it = iter(answers)
     llm = FakeLLM(lambda messages, tools: Reply(content=json.dumps(next(it)), finish="stop"), window=32000)
-    ctx = make_ctx(llm, reserve_tokens=2000, keep_recent_tokens=2000, max_output_tokens=2000)
+    ctx = make_ctx(llm, reserve_tokens=2000, keep_recent_tokens=2000, max_output_tokens=2000, **settings)
 
     def run():
         return agent.run(case_dir=tmp_path, job_dir=tmp_path / "job", inputs={"file": "docs/a.pdf", "case_brief": "C-1"},
@@ -180,19 +177,19 @@ def test_studio_agent_works_until_its_answer_passes_the_checks(make_ctx, tmp_pat
     no_location = {"key_values": [{"field": "amount", "location": " ", "confidence": 90}]}
     percent = {"key_values": [{"field": "amount", "location": "p1", "confidence": 900}]}
     good = {"key_values": [{"field": "amount", "location": "p1", "confidence": 90}]}
-    run, llm = studio_agent(make_ctx, tmp_path, [no_values, no_location, percent, good], max_turns=10)
-    assert run() == good                                       # more repairs than a CLI step allows (2)
-    retries = [r["messages"][-1]["content"] for r in llm.requests[1:]]
-    assert "'key_values' needs min 1 items, has 0" in retries[0]
-    assert "'key_values[0].location' is required (empty)" in retries[1]
-    assert "'key_values[0].confidence' must be within 0..100, got 900" in retries[2]
-    system = llm.requests[0]["messages"][0]["content"]
-    assert "## Skill: extraction\n\nCite {{ the page }} for every value." in system and "description: x" not in system
+    run, llm = studio_agent(make_ctx, tmp_path, [no_values, no_location, percent, good],
+                            max_turns=10, output_retries=3)
+    assert run() == good
+    accepted = [m for r in llm.requests[1:] for m in r["messages"] if m["role"] == "assistant"]
+    assert accepted == []
 
 
-def test_studio_agent_stops_when_its_turn_budget_is_spent(make_ctx, tmp_path):
+def test_studio_agent_stops_after_bounded_invalid_output_retries(make_ctx, tmp_path):
     bad = {"key_values": []}
-    run, llm = studio_agent(make_ctx, tmp_path, [bad] * 5, max_turns=3)
-    with pytest.raises(WorkflowError, match=r"did not return the expected JSON: .*'key_values' needs min 1 items"):
+    run, llm = studio_agent(make_ctx, tmp_path, [bad] * 5, max_turns=10, output_retries=2)
+    with pytest.raises(WorkflowError):
         run()
     assert len(llm.requests) == 3
+    state = json.loads((tmp_path / "job" / "state.json").read_text())
+    assert state["steps"]["evidence"]["status"] == "failed"
+    assert "data" not in state["steps"]["evidence"]

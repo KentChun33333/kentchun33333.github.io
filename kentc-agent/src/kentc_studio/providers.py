@@ -111,8 +111,7 @@ class LocalAgentProvider(Provider):
 
     def workflow(self) -> Workflow:
         step = Step(self.name, "prompt", {"prompt": task_prompt(self.inputs), "tools": self.tools,
-                                          "format": "json", "schema": self.output, "checks": self.checks,
-                                          "repairs": None})
+                                          "format": "json", "schema": self.output, "checks": self.checks})
         return Workflow(self.label, "", {k: {"default": ""} for k in sorted(self.inputs)}, "", self.tools,
                         self.max_turns, self.effort, [step], self.source, self.skills)
 

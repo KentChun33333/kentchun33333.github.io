@@ -51,24 +51,39 @@ def document_budget(ctx: ToolContext) -> DocumentBudget:
     return budget
 
 
-def ask(ctx: ToolContext, parts: list[dict[str, Any]], label: str) -> str:
-    """One sub-agent: same model, a new session of its own (logged), no tools, one reply."""
+def ask(ctx: ToolContext, parts: list[dict[str, Any]], label: str, *,
+        validate: Callable[[str], Any] | None = None) -> str:
+    """Accept one complete reply, retrying invalid output in isolated, individually logged sessions."""
     from ...agent import Agent
-    ctx.events.status("document", label)
+    from ..llm import IncompleteReply, LLMError
+
+    retries = ctx.settings.output_retries
     slug = re.sub(r"[^A-Za-z0-9._-]+", "-", label)[:60].strip("-")
-    session = _new_session()
-    session.path = ctx.state_dir / "subagents" / f"{session.id}-doc-{slug}.jsonl"   # unique: one log per call
-    agent = Agent(ctx, tools=[], session=session, system=SUB_SYSTEM, name="document",
-                  effort=ctx.settings.sub_effort, max_turns=1)
-    agent.density = max(1.0, ctx.density)
-    result = agent.run(parts)
-    if agent.last_finish == "length":
-        raise ToolError(f"{label}: document reply hit max_output_tokens; incomplete content was not cached. "
-                        "Use a smaller page range or increase max_output_tokens.")
-    if agent.last_finish != "stop":
-        raise ToolError(f"{label}: document reply did not complete (finish={agent.last_finish!r}); "
-                        "incomplete content was not cached.")
-    return result
+    for attempt in range(retries + 1):
+        ctx.events.status("document", label if attempt == 0 else f"{label}: retry {attempt}/{retries}")
+        session = _new_session()
+        session.path = ctx.state_dir / "subagents" / f"{session.id}-doc-{slug}.jsonl"
+        agent = Agent(ctx, tools=[], session=session, system=SUB_SYSTEM, name="document",
+                      effort=ctx.settings.sub_effort, max_turns=1)
+        agent.output_retries = 0
+        agent.validate_reply = validate
+        agent.density = max(1.0, ctx.density)
+        try:
+            result = agent.run(parts)
+            if agent.last_finish == "length":
+                raise IncompleteReply("document reply hit max_output_tokens")
+        except IncompleteReply as exc:
+            if attempt < retries:
+                continue
+            raise ToolError(f"{label}: document reply remained incomplete or invalid after "
+                            f"{attempt + 1} attempts; incomplete content was not cached.") from exc
+        except LLMError as exc:
+            raise ToolError(f"{label}: document request failed; incomplete content was not cached. {exc}") from exc
+        if agent.last_finish != "stop":
+            raise ToolError(f"{label}: document reply did not complete (finish={agent.last_finish!r}); "
+                            "incomplete content was not cached.")
+        return result
+    raise ToolError(f"{label}: no document reply attempts were allowed.")
 
 
 def _new_session():
@@ -88,7 +103,8 @@ def chunk_parts(src: Source, c: Chunk, n: int, total: int, task: str) -> list[di
     return parts
 
 
-def map_chunks(ctx: ToolContext, src: Source, task: str, verb: str) -> list[tuple[str, str]]:
+def map_chunks(ctx: ToolContext, src: Source, task: str, verb: str, *,
+               validate: Callable[[str], Any] | None = None) -> list[tuple[str, str]]:
     budget = document_budget(ctx)
     transcribe = task == TRANSCRIBE_TASK
     # The character count bounds the eventual number of chunks, including splits, so even the
@@ -142,12 +158,13 @@ def map_chunks(ctx: ToolContext, src: Source, task: str, verb: str) -> list[tupl
             chunks.append(Chunk())
         chunks[-1].units.append(unit)
     return [(c.span, ask(ctx, chunk_parts(src, c, i, len(chunks), task),
-                         f"{src.path.name}: {verb} {c.span} ({i}/{len(chunks)})"))
+                         f"{src.path.name}: {verb} {c.span} ({i}/{len(chunks)})", validate=validate))
             for i, c in enumerate(chunks, 1)]
 
 
 def reduce_notes(ctx: ToolContext, notes: list[tuple[str, str]], name: str, task: str,
-                 merge: Callable[[str, str], str]) -> str:
+                 merge: Callable[[str, str], str], *,
+                 validate: Callable[[str], Any] | None = None) -> str:
     """Fold consecutive results only when their complete labeled evidence fits."""
     if not notes:
         return ""
@@ -176,7 +193,7 @@ def reduce_notes(ctx: ToolContext, notes: list[tuple[str, str]], name: str, task
                 merged.append(group[0])
                 continue
             span = f"{group[0][0]} .. {group[-1][0]}"
-            merged.append((span, ask(ctx, parts(group), f"{name}: merging ({span})")))
+            merged.append((span, ask(ctx, parts(group), f"{name}: merging ({span})", validate=validate)))
         notes = merged
     return notes[0][1]
 

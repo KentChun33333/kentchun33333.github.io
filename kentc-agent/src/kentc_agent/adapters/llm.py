@@ -1,12 +1,16 @@
 """OpenAI-compatible chat client (stdlib only, streaming SSE).
 
-Connection and request policy are configuration; deployed context limits come only from server inspection.
+Connection and request policy are configuration. OpenAI deployments are inspected; Qwen38
+coordinators use an explicitly configured deployed limit when discovery is unavailable.
 """
 
 from __future__ import annotations
 
+import http.client
 import json
+import logging
 import re
+import ssl
 import time
 import urllib.error
 import urllib.request
@@ -15,6 +19,8 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from ..config import Settings
+from .qwen38 import connection, fallback_settings, normalise_messages
+from .rate_limit import RateLimitExceeded, RateWait, RollingTokenBudget, retry_after
 
 # kind is "reasoning" | "content" | "tool" (a tool call's name, once per call)
 DeltaHandler = Callable[[str, str], None]
@@ -22,6 +28,19 @@ DeltaHandler = Callable[[str, str], None]
 
 class LLMError(RuntimeError):
     pass
+
+
+class IncompleteReply(LLMError):
+    """A streamed reply is incomplete and must not be accepted as conversation evidence."""
+
+
+class RateLimitError(LLMError):
+    """Provider throttling or exhausted local admission/wait allowance."""
+
+    def __init__(self, message: str, *, retry_after: float | None = None, local: bool = False) -> None:
+        super().__init__(message)
+        self.retry_after = retry_after
+        self.local = local
 
 
 class ContextOverflow(LLMError):
@@ -95,17 +114,35 @@ class ModelInfo:
 
 
 class LLMClient:
-    def __init__(self, settings: Settings) -> None:
-        self.settings = settings
-        self.base = settings.base_url.rstrip("/")
+    def __init__(self, settings: Settings, *, _rate_limit: RollingTokenBudget | None = None) -> None:
+        if settings.provider not in ("openai", "qwen38"):
+            raise LLMError("provider must be openai or qwen38")
+        try:
+            self.settings = connection(settings) if settings.provider == "qwen38" else settings
+            self._rate_limit = _rate_limit or RollingTokenBudget(settings.tokens_per_minute,
+                                                                settings.rate_limit_max_wait)
+        except ValueError as e:
+            raise LLMError(str(e)) from None
+        self.base = self.settings.base_url.rstrip("/")
         self._info: ModelInfo | None = None
+        self._opener = None
+        if not settings.verify_tls or not settings.trust_env:
+            context = ssl.create_default_context() if settings.verify_tls else ssl._create_unverified_context()
+            handlers: list[Any] = [urllib.request.HTTPSHandler(context=context)]
+            if not settings.trust_env:
+                handlers.append(urllib.request.ProxyHandler({}))
+            self._opener = urllib.request.build_opener(*handlers)
 
     # ------------------------------------------------------------------ discovery
     def info(self, *, refresh: bool = False) -> ModelInfo:
-        """Inspect the selected deployment; callers refresh at each run, then reuse its snapshot."""
+        """Refresh deployment metadata, or the explicit Qwen38 capability configuration."""
         if refresh:
             self._info = None
         if self._info is None:
+            if self.settings.provider == "qwen38":
+                self._info = ModelInfo(self.settings.model, self.settings.qwen_context_window,
+                                       self.settings.qwen_vision)
+                return self._info
             data = self._get("/models").get("data") or []
             if not data:
                 raise LLMError(f"{self.base}/models lists no loaded model")
@@ -133,10 +170,15 @@ class LLMClient:
             h["Authorization"] = f"Bearer {self.settings.api_key}"
         return h
 
+    def _open(self, request: urllib.request.Request, timeout: float) -> Any:
+        if self._opener is not None:
+            return self._opener.open(request, timeout=timeout)
+        return urllib.request.urlopen(request, timeout=timeout)
+
     def _get(self, path: str) -> dict[str, Any]:
         req = urllib.request.Request(self.base + path, headers=self._headers())
         try:
-            with urllib.request.urlopen(req, timeout=10) as resp:
+            with self._open(req, timeout=10) as resp:
                 return json.loads(resp.read())
         except (TimeoutError, urllib.error.URLError, ConnectionError) as e:
             raise LLMError(f"cannot reach the LLM server at {self.base}: {e}. Is it running?") from None
@@ -144,6 +186,63 @@ class LLMClient:
     # ------------------------------------------------------------------ chat
     def chat(self, messages: list[dict[str, Any]], *, tools: list[dict[str, Any]] | None = None,
              max_tokens: int, effort: str | None = None, on_delta: DeltaHandler | None = None) -> Reply:
+        if self.settings.provider != "qwen38":
+            waiting = self._rate_limit.new_wait()
+            return self._chat(messages, tools=tools, max_tokens=max_tokens, effort=effort, on_delta=on_delta,
+                              waiting=waiting)
+        try:
+            messages = normalise_messages(messages)
+        except ValueError as e:
+            raise LLMError(str(e)) from None
+        started = False
+        waiting = self._rate_limit.new_wait()
+
+        def mark_started() -> None:
+            nonlocal started
+            started = True
+
+        try:
+            return self._chat(messages, tools=tools, max_tokens=max_tokens, effort=effort, on_delta=on_delta,
+                              on_chunk=mark_started, waiting=waiting)
+        except ContextOverflow:
+            raise                       # the agent adjusts its budget; switching is not a context fix
+        except (LLMError, OSError, http.client.HTTPException, ValueError) as e:
+            if isinstance(e, RateLimitError) and (e.local or started):
+                raise
+            if isinstance(e, IncompleteReply) and started:
+                raise
+            if started:
+                raise LLMError(f"{self.settings.qwen_backend} stream failed after output began; "
+                               "automatic replay is unsafe") from e
+            primary_error = e
+        try:
+            backup = LLMClient(fallback_settings(self.settings), _rate_limit=self._rate_limit)
+        except LLMError as e:
+            if isinstance(primary_error, RateLimitError):
+                raise RateLimitError(f"{self.settings.qwen_backend} was rate limited ({primary_error}); "
+                                     f"Qwen38 fallback is unavailable: {e}",
+                                     retry_after=primary_error.retry_after) from e
+            raise LLMError(f"{self.settings.qwen_backend} failed ({primary_error}); "
+                           f"Qwen38 fallback is unavailable: {e}") from e
+        logging.warning("Qwen38 %s failed before output; failing over to %s",
+                        self.settings.qwen_backend, backup.settings.qwen_backend)
+        try:
+            return backup._chat(messages, tools=tools, max_tokens=max_tokens, effort=effort, on_delta=on_delta,
+                                on_chunk=mark_started, attempts=1, waiting=waiting)
+        except ContextOverflow:
+            raise
+        except (LLMError, OSError, http.client.HTTPException, ValueError) as e:
+            if isinstance(e, IncompleteReply) and started:
+                raise
+            if isinstance(e, RateLimitError):
+                raise
+            detail = "stream failed after output began; automatic replay is unsafe" if started else "failed"
+            raise LLMError(f"{backup.settings.qwen_backend} fallback {detail}: {e}") from e
+
+    def _chat(self, messages: list[dict[str, Any]], *, tools: list[dict[str, Any]] | None,
+              max_tokens: int, effort: str | None, on_delta: DeltaHandler | None,
+              on_chunk: Callable[[], None] | None = None, attempts: int = 3,
+              waiting: RateWait | None = None) -> Reply:
         s = self.settings
         body: dict[str, Any] = {
             "model": self.info().id,
@@ -152,28 +251,80 @@ class LLMClient:
             "stream": True,
             "stream_options": {"include_usage": True},
         }
+        if s.provider == "qwen38":
+            body.pop("stream_options")
         if tools:
             body["tools"] = tools
         effort = effort if effort is not None else s.reasoning_effort
-        if effort:
+        if effort and s.provider != "qwen38":
             body["reasoning_effort"] = effort
         if s.temperature is not None:
             body["temperature"] = s.temperature
         data = json.dumps(body, ensure_ascii=False).encode()
-        for attempt in range(3):
+        reserved_tokens = 0
+        if self._rate_limit.limit:
+            # Session imports Usage, so reuse its estimator only after module initialization.
+            from .session import estimate_tokens
+
+            reserved_tokens = max_tokens + sum(estimate_tokens(message) for message in messages)
+            if tools:
+                reserved_tokens += estimate_tokens({"content": json.dumps(tools, ensure_ascii=False)})
+        waiting = waiting or self._rate_limit.new_wait()
+        network_failures = rate_retries = 0
+        started = False
+
+        def mark_started() -> None:
+            nonlocal started
+            started = True
+            if on_chunk:
+                on_chunk()
+
+        while True:
+            try:
+                reservation = self._rate_limit.reserve(reserved_tokens, waiting)
+            except RateLimitExceeded as e:
+                raise RateLimitError(str(e), local=True) from None
             req = urllib.request.Request(self.base + "/chat/completions", data=data, headers=self._headers())
             try:
-                resp = urllib.request.urlopen(req, timeout=s.request_timeout)
+                resp = self._open(req, timeout=s.request_timeout)
             except urllib.error.HTTPError as e:
-                raise self._http_error(e) from None
+                error = self._http_error(e)
+                if not isinstance(error, RateLimitError):
+                    raise error from None
             except (TimeoutError, urllib.error.URLError, ConnectionError) as e:
-                if attempt == 2:
+                network_failures += 1
+                if network_failures >= attempts:
                     raise LLMError(f"cannot reach the LLM server at {self.base}: {e}") from None
-                time.sleep(2 * (attempt + 1))
+                time.sleep(2 * network_failures)
                 continue
-            with resp:
-                return self._read_stream(resp, on_delta)
-        raise AssertionError("unreachable")
+            else:
+                try:
+                    with resp:
+                        reply = self._read_stream(resp, on_delta, on_chunk=mark_started,
+                                                  require_complete=s.provider == "qwen38")
+                except RateLimitError as e:
+                    error = e
+                except (OSError, http.client.HTTPException, ValueError) as e:
+                    if started:
+                        raise IncompleteReply("stream failed after output began; automatic replay is unsafe") from e
+                    raise LLMError(f"stream failed before output began: {e}") from e
+                except IncompleteReply as e:
+                    if started:
+                        raise IncompleteReply("stream failed after output began; automatic replay is unsafe: "
+                                              f"{e}") from e
+                    raise
+                else:
+                    if reply.usage is not None and reply.usage.total >= 0:
+                        self._rate_limit.reconcile(reservation, reply.usage.total)
+                    return reply
+            delay = error.retry_after if error.retry_after is not None else min(30.0, 2.0 ** rate_retries)
+            self._rate_limit.defer(delay)
+            if started:
+                raise RateLimitError(f"rate limited after output began; automatic replay is unsafe: {error}",
+                                     retry_after=error.retry_after) from error
+            if rate_retries >= 2:
+                raise error
+            rate_retries += 1
 
     @staticmethod
     def _http_error(e: urllib.error.HTTPError) -> LLMError:
@@ -184,10 +335,13 @@ class LLMClient:
             msg = raw[:500]
         if e.code in (400, 413) and any(k in raw.lower() for k in OVERFLOW_MARKERS):
             return ContextOverflow(msg, raw)
+        if e.code == 429:
+            return RateLimitError(f"HTTP 429: {msg}", retry_after=retry_after((e.headers or {}).get("Retry-After")))
         return LLMError(f"HTTP {e.code}: {msg}")
 
     @staticmethod
-    def _read_stream(resp: Any, on_delta: DeltaHandler | None) -> Reply:
+    def _read_stream(resp: Any, on_delta: DeltaHandler | None, *,
+                     on_chunk: Callable[[], None] | None = None, require_complete: bool = False) -> Reply:
         reply = Reply()
         content: list[str] = []
         reasoning: list[str] = []
@@ -200,11 +354,23 @@ class LLMClient:
             if payload == "[DONE]":
                 break
             chunk = json.loads(payload)
+            if not isinstance(chunk, dict):
+                raise IncompleteReply("stream event must be a JSON object")
             if chunk.get("error"):
-                raise LLMError(str(chunk["error"].get("message", chunk["error"])))
-            if chunk.get("usage"):
-                u = chunk["usage"]
-                reply.usage = Usage(int(u.get("prompt_tokens") or 0), int(u.get("completion_tokens") or 0))
+                error = chunk["error"]
+                message = str(error.get("message", error))
+                if str(error.get("code", "")).lower() in ("429", "rate_limit_exceeded") or \
+                        error.get("type") == "rate_limit_exceeded":
+                    raise RateLimitError(message)
+                raise LLMError(message)
+            if on_chunk:
+                on_chunk()
+            u = chunk.get("usage")
+            if isinstance(u, dict) and all(
+                isinstance(u.get(key), int) and not isinstance(u[key], bool) and u[key] >= 0
+                for key in ("prompt_tokens", "completion_tokens")
+            ):
+                reply.usage = Usage(u["prompt_tokens"], u["completion_tokens"])
             for choice in chunk.get("choices") or []:
                 delta = choice.get("delta") or {}
                 if delta.get("reasoning_content"):
@@ -228,6 +394,8 @@ class LLMClient:
                         cur["function"]["arguments"] += fn["arguments"]
                 if choice.get("finish_reason"):
                     reply.finish = choice["finish_reason"]
+        if require_complete and not reply.finish:
+            raise IncompleteReply("stream ended before a finish reason")
         reply.content = "".join(content).strip()
         reply.reasoning = "".join(reasoning).strip()
         for n, i in enumerate(sorted(calls)):

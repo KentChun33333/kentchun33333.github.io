@@ -55,7 +55,7 @@ class ToolExecutorMixin:
             out.append(m)
         return out
 
-    def _execute(self, call: dict[str, Any], truncated: bool) -> CallResult:
+    def _execute(self, call: dict[str, Any]) -> CallResult:
         """Run one tool call. While it runs, ctx.operation names it, so a sub-agent it starts links back here and
         the tool can leave notes for the big-context route."""
         name = call["function"]["name"]
@@ -69,7 +69,7 @@ class ToolExecutorMixin:
         self.ctx.density = self.density          # the tool and the router size results in real tokens
         t0 = time.monotonic()
         try:
-            result, error = self._tool(name, args, truncated)
+            result, error = self._tool(name, args)
         finally:
             self.ctx.operation = prev
         return CallResult(call["id"], name, args, result, error, round((time.monotonic() - t0) * 1000), ref)
@@ -118,12 +118,11 @@ class ToolExecutorMixin:
                     result = CallResult(call["id"], call["function"]["name"], None, text, True, 0, None)
                 self._persist_result(result, resolved)
 
-    def _tool(self, name: str, args: Any, truncated: bool) -> tuple[str, bool]:
+    def _tool(self, name: str, args: Any) -> tuple[str, bool]:
         """-> (result for the context, is it an error)."""
         tool = self.tools.get(name)
         if args is None:
-            why = "the reply hit max_output_tokens mid-call" if truncated else "invalid JSON"
-            return f"Error: arguments for {name} could not be parsed ({why}). Retry with smaller arguments.", True
+            return f"Error: arguments for {name} could not be parsed (invalid JSON). Retry with complete arguments.", True
         if tool is None:
             return f"Error: unknown tool {name!r}. Available: {', '.join(self.tools)}", True
         if not isinstance(args, dict):

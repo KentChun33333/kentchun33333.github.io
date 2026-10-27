@@ -62,12 +62,11 @@ from typing import Any
 import yaml
 from jinja2 import StrictUndefined, TemplateError
 from jinja2.sandbox import SandboxedEnvironment
-from json_repair import repair_json
 
 from .adapters.session import Session
 from .adapters.tools import CORE_TOOLS, ToolContext, ToolError, inside, reject_unsupported, rel, resolve
 from .adapters.web_research import run_web_agent
-from .agent import CUT_OFF_NOTE, Aborted, Agent, build_tools
+from .agent import Aborted, Agent, build_tools
 from .checks import check_rules
 from .config import STATE_DIR
 
@@ -224,22 +223,24 @@ def resolve_inputs(wf: Workflow, given: dict[str, str]) -> dict[str, Any]:
 
 
 def parse_json_object(text: str) -> dict[str, Any]:
-    """The JSON object in a model reply: tolerates prose, code fences, trailing commas and a reply cut off at the
-    output limit (json-repair closes it; the caller decides whether a cut-off reply is acceptable)."""
-    text = text.replace(CUT_OFF_NOTE, "").strip()
-    fence = re.search(r"```(?:json)?\s*(.*?)```", text, re.DOTALL)
+    """Accept a complete JSON object, optionally in one whole code fence; never repair missing evidence."""
+    text = text.strip()
+    fence = re.fullmatch(r"```(?:json)?\s*(.*?)\s*```", text, re.DOTALL)
     if fence:
         text = fence.group(1)
-    start, end = text.find("{"), text.rfind("}")
-    if start < 0:
-        raise ValueError("no JSON object in the reply")
-    try:
-        data = json.loads(text[start:end + 1]) if end > start else None
-    except json.JSONDecodeError:
-        data = None
-    if data is None:
-        data = repair_json(text[start:], return_objects=True)
-    if not isinstance(data, dict) or not data:
+    def object_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("duplicate JSON object key")
+            result[key] = value
+        return result
+
+    def invalid_constant(value: str) -> Any:
+        raise ValueError(f"invalid JSON constant {value}")
+
+    data = json.loads(text, object_pairs_hook=object_pairs, parse_constant=invalid_constant)
+    if not isinstance(data, dict):
         raise ValueError("the reply is not a JSON object")
     return data
 
@@ -300,7 +301,7 @@ def _check(value: Any, shape: Any, where: str, errors: list[str]) -> Any:
         match = [o for o in options if isinstance(value, str) and o.lower() == value.strip().lower()]
         if match:
             return match[0]
-        errors.append(f"{label} must be one of {' | '.join(options)}, got {json.dumps(value, ensure_ascii=False)}")
+        errors.append(f"{label} must be one of {' | '.join(options)}, got {_kind(value)}")
         return value
     elif isinstance(shape, str):
         expected, name = str, "string"
@@ -452,11 +453,7 @@ class Runner:
         return self.state
 
     def _prompt(self, step: Step, n: int, total: int) -> tuple[str, Any]:
-        """One step of the main agent: its tools narrowed to the step's list, its context kept.
-
-        A JSON step's answer must fit its `schema` and pass its `checks` (parsed rules, checks.py); a failing answer
-        goes back to the agent with what is wrong. `repairs` bounds the attempts (default 2); None repairs until the
-        step's max_turns, counted over the whole step, is spent."""
+        """One step of the main agent, with final JSON validated before it enters the live context."""
         spec, wf = step.spec, self.wf
         names = spec.get("tools", wf.tools)
         self.agent.set_tools(build_tools(names))
@@ -478,38 +475,21 @@ class Runner:
             if rules:
                 message += "\nYour answer must also pass these checks:\n" + \
                     "\n".join(f"- {r.path}: {r.text}" for r in rules)
+        accepted: dict[str, Any] | None = None
+
+        def validate(text: str) -> None:
+            nonlocal accepted
+            data = parse_json_object(text)
+            errors = (check_shape(data, spec.get("schema")) if spec.get("schema") else []) or check_rules(data, rules)
+            if errors:
+                raise ValueError("; ".join(errors[:MAX_SHAPE_ERRORS]))
+            accepted = data
+
+        self.agent.validate_reply = validate if spec.get("format") == "json" else None
+        self.agent.output_retries = self.ctx.settings.output_retries
         output = self._run_agent(step, message)
-        used = self.agent.turns
         self.trace("AGT", step.id, "step answered")
-        if spec.get("format") != "json":
-            return output, None
-        schema, repairs = spec.get("schema"), spec.get("repairs", 2)
-        attempt = 0
-        while True:
-            last = (repairs is not None and attempt >= repairs) or (budget > 0 and used >= budget)
-            try:
-                data = parse_json_object(output)
-                errors = (check_shape(data, schema) if schema else []) or check_rules(data, rules)
-                cut = CUT_OFF_NOTE in output
-                if not errors and (not cut or last):
-                    if cut:
-                        self.trace("SYS", step.id, "JSON reply was cut off at the output limit and repaired")
-                    return output, data
-                shown = "; ".join(errors[:MAX_SHAPE_ERRORS]) + \
-                    (f"; and {len(errors) - MAX_SHAPE_ERRORS} more" if len(errors) > MAX_SHAPE_ERRORS else "")
-                problem = f"it does not fit the shape and checks: {shown}" if errors else \
-                    "it was cut off at the output limit; give a shorter JSON object (fewer items, strings under 200 " \
-                    "characters)"
-            except ValueError as e:
-                problem = f"it is not one valid JSON object ({e})"
-            if last:
-                raise WorkflowError(f"{step.id}: the agent did not return the expected JSON: {problem}")
-            attempt += 1
-            self.trace("SYS", step.id, f"answer sent back ({attempt}): {problem[:200]}")
-            self.agent.max_turns = budget - used if budget > 0 else 0
-            output = self._run_agent(step, f"Your reply cannot be used: {problem}. Reply with only the complete JSON "
-                                           "object.")
-            used += self.agent.turns
+        return output, accepted
 
     def _run_agent(self, step: Step, message: str) -> str:
         """The step's agent turn. Running out of model calls is a failure, not an answer: nothing is saved as the
