@@ -57,7 +57,7 @@ def test_programming_type_error_propagates_but_resolves_every_call(make_ctx, tmp
         agent.run("run the tool")
     results = persisted_results(agent)
     assert [r["tool_call_id"] for r in results] == ["first", "second"]
-    assert all("implementation bug" in r["content"] for r in results)
+    assert all(r["content"] == "Error: tool turn failed (TypeError)." for r in results)   # no raw exception text
     record = trace_operation(agent)
     assert record["end"] == "error"
     assert [r["id"] for r in record["output_context"]["tool_results"]] == ["first", "second"]

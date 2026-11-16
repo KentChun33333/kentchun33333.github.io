@@ -1,6 +1,6 @@
 """OpenAI-compatible chat client (stdlib only, streaming SSE).
 
-Connection and request policy are configuration. OpenAI deployments are inspected; Qwen38
+Connection and request policy are configuration. OpenAI and OpenRouter deployments are inspected; Qwen38
 coordinators use an explicitly configured deployed limit when discovery is unavailable.
 """
 
@@ -9,18 +9,22 @@ from __future__ import annotations
 import http.client
 import json
 import logging
+import os
 import re
 import ssl
 import time
 import urllib.error
 import urllib.request
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 from ..config import Settings
 from .qwen38 import connection, fallback_settings, normalise_messages
 from .rate_limit import RateLimitExceeded, RateWait, RollingTokenBudget, retry_after
+
+OPENROUTER_URL = "https://openrouter.ai/api/v1"
+OPENROUTER_MODEL = "qwen/qwen3.8-flash"     # default when `model` is unset; any OpenRouter model id works
 
 # kind is "reasoning" | "content" | "tool" (a tool call's name, once per call)
 DeltaHandler = Callable[[str, str], None]
@@ -115,8 +119,13 @@ class ModelInfo:
 
 class LLMClient:
     def __init__(self, settings: Settings, *, _rate_limit: RollingTokenBudget | None = None) -> None:
-        if settings.provider not in ("openai", "qwen38"):
-            raise LLMError("provider must be openai or qwen38")
+        if settings.provider not in ("openai", "qwen38", "openrouter"):
+            raise LLMError("provider must be openai, qwen38 or openrouter")
+        if settings.provider == "openrouter":
+            settings = replace(settings,
+                               base_url=OPENROUTER_URL if settings.base_url == Settings.base_url else settings.base_url,
+                               api_key=settings.api_key or os.getenv("OPENROUTER_API_KEY", ""),
+                               model=settings.model or OPENROUTER_MODEL)
         try:
             self.settings = connection(settings) if settings.provider == "qwen38" else settings
             self._rate_limit = _rate_limit or RollingTokenBudget(settings.tokens_per_minute,
@@ -154,10 +163,16 @@ class LLMClient:
             raw = (entry.get("meta") or {}).get("n_ctx")
             if raw is None:
                 raw = entry.get("max_model_len")
+            if self.settings.provider == "openrouter":
+                # the routed endpoint may allow less than the model maximum; use the smaller verified limit
+                limits = [v for v in ((entry.get("top_provider") or {}).get("context_length"),
+                                      entry.get("context_length"))
+                          if isinstance(v, int) and not isinstance(v, bool) and v > 0]
+                raw = min(limits) if limits else None
             if isinstance(raw, bool) or not isinstance(raw, (int, str)) or not str(raw).isdigit() or int(raw) <= 0:
                 raise LLMError(
-                    f"{self.base}/models must report a positive deployed context limit "
-                    f"(meta.n_ctx or max_model_len) for {model!r}; no config override or default is used"
+                    f"{self.base}/models must report a positive deployed context limit (meta.n_ctx, max_model_len, "
+                    f"or OpenRouter context_length) for {model!r}; no config override or default is used"
                 )
             modalities = (entry.get("architecture") or {}).get("input_modalities")
             vision = True if modalities is None else "image" in modalities
@@ -256,7 +271,9 @@ class LLMClient:
         if tools:
             body["tools"] = tools
         effort = effort if effort is not None else s.reasoning_effort
-        if effort and s.provider != "qwen38":
+        if effort and s.provider == "openrouter":
+            body["reasoning"] = {"effort": effort}
+        elif effort and s.provider != "qwen38":
             body["reasoning_effort"] = effort
         if s.temperature is not None:
             body["temperature"] = s.temperature
@@ -301,7 +318,7 @@ class LLMClient:
                 try:
                     with resp:
                         reply = self._read_stream(resp, on_delta, on_chunk=mark_started,
-                                                  require_complete=s.provider == "qwen38")
+                                                  require_complete=s.provider in ("qwen38", "openrouter"))
                 except RateLimitError as e:
                     error = e
                 except (OSError, http.client.HTTPException, ValueError) as e:
@@ -373,10 +390,11 @@ class LLMClient:
                 reply.usage = Usage(u["prompt_tokens"], u["completion_tokens"])
             for choice in chunk.get("choices") or []:
                 delta = choice.get("delta") or {}
-                if delta.get("reasoning_content"):
-                    reasoning.append(delta["reasoning_content"])
+                thought = delta.get("reasoning_content") or delta.get("reasoning")  # OpenRouter: "reasoning"
+                if thought:
+                    reasoning.append(thought)
                     if on_delta:
-                        on_delta("reasoning", delta["reasoning_content"])
+                        on_delta("reasoning", thought)
                 if delta.get("content"):
                     content.append(delta["content"])
                     if on_delta:

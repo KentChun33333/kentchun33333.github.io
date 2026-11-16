@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="舊版（v1）把舊歷史壓成單一摘要；長任務的精確細節在壓縮中流失，代理被迫重找證據。">
+<title>07 · 長任務記憶：摘要 → 主題筆記｜kentc_agent 核心方法論</title>
+<link rel="stylesheet" href="../asset/css/core.css">
+<link rel="stylesheet" href="../asset/css/shell.css">
+</head>
+<body class="topic-page">
+<a class="sr-only" href="#topic">跳至主要內容</a>
+<header class="top"><div class="top-in">
+  <a class="brand" href="../index.html">kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
+  <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
+</div></header>
+<div class="reader">
+<aside class="sidebar" aria-label="主題目錄"><nav class="side-nav" id="sideNav" aria-label="主題"></nav></aside>
+<main id="topic" data-slug="eval">
+<article class="topic">
+<section class="card" id="eval" aria-labelledby="eval-title">
+  <p class="eyebrow">07 · 長任務的上下文：摘要 → 主題筆記</p>
+  <h2 id="eval-title">摘要會遺失細節：從單一摘要壓縮到主題筆記</h2>
+  <div class="psd">
+    <div class="psd-item problem"><span>問題</span><p>舊版（v1，已移除）把舊歷史壓成單一摘要。長任務的精確細節（帳號、金額、版本、關聯）在壓縮中遺失 → 代理被迫重找證據。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>壓縮時分流：短 checkpoint 記進度，細節寫入可回讀的<b>本地主題筆記</b>，寫入並驗證後才丟棄舊歷史。無新工具、無配額、無背景程序。</p></div>
+    <div class="psd-item data"><span>依據</span><p>歷史 A/B（v1 已移除）4 次重複、同模型同任務：STR 中位數 v1 0.65、v2 0.60，不分勝負；v2 交檔較穩（HTML 3/4 對 1/4），v1 較守格式（B 1.00 對 0.68）。記憶回復實質皆 8/8，v2 呼叫與 tokens 在 failed_repair 減半（見 ④）。</p></div>
+  </div>
+  <h3 class="part problem" id="problem" data-step="1">問題：單一摘要在長任務中遺失細節的三個位置</h3>
+  <p>舊版 v1（單一摘要壓縮，統一後已移除）的縱向壓縮與橫向外存（見 <a href="vertical.html">04 · 上下文視窗</a>）夠用於短任務。長任務（如審查案：數十位客戶、上百筆交易）的細節須撐過多次壓縮，v1 在三處流失：</p>
+  <ul class="problem-list">
+    <li><b>單一摘要</b>：細節與進度爭篇幅 → 越壓越粗。</li>
+    <li><b>摘要模型視野受限</b>：每筆舊工具結果只送前 2,000 字 → 後段證據（帳號、修訂版本）進不了摘要。</li>
+    <li><b>失敗即截短</b>：壓縮失敗時截短舊工具結果 → 細節消失。</li>
+  </ul>
+  <p>遺失後只能重讀原始檔；呼叫次數有限時，重讀擠掉寫報告的次數。</p>
+  <h3 class="part explored" id="explored" data-step="2">先嘗試過的方案：分層記憶（已移除）</h3>
+  <p>第一版 v2：熱／冷兩層、SQLite、背景整理（curator）、檢索帳本與配額、專用 <code>context_search</code>／<code>context_read</code>。小模型上反而引入新失敗：</p>
+  <div class="tablewrap"><table><caption>分層記憶版本的實測紀錄（歷史資料，已不代表目前的 v2）</caption><thead><tr><th scope="col">實測</th><th scope="col">結果</th><th scope="col">原因</th></tr></thead><tbody>
+    <tr><td>記憶回復，2 案例 × 2 次</td><td>4/4 於首個工具前失敗（<code>CapacityConflict</code>）</td><td>檢索帳本在匯入歷史上找不到最低配額；不需模型即可重現</td></tr>
+    <tr><td>STR，2 次</td><td>皆 0 分，32–40 秒結束</td><td>單回合配額用完 → 讀檔工具被收回 → 模型以純文字寫工具呼叫 → 被當最終答案</td></tr>
+    <tr><td>STR 修正後，5 次</td><td>皆 0 分、用完 80 次；每次 16.8 秒（v1 4.9 秒）</td><td>[推論] 逐出舊結果改寫歷史 → 前綴快取失效；未記錄快取統計</td></tr>
+    <tr><td>STR 1,000 次呼叫</td><td>同一 18 字元 <code>grep</code> 結果連續 353 次；加防重複後仍 0 分</td><td>重複偵測僅對長結果觸發；收尾提示要「最終答案」→ 對話回答、不寫檔</td></tr>
+  </tbody></table></div>
+  <p><b>教訓：</b>每多一個工具、配額或背景機制，小模型就多一種失敗，且常在記憶派上用場前 → 目前的 runtime 做減法。紀錄見 <a href="../str-benchmark.md">str-benchmark.md</a>、<a href="../memory-comparison.md">memory-comparison.md</a>。</p>
+  <h3 class="part idea" id="solution" data-step="3">核心想法：checkpoint ＋ 主題筆記，只用一般工具回想</h3>
+  <p class="sub">目前唯一 runtime＝<code>src/kentc_agent/</code>（即原 v2，主題筆記壓縮）。<b>v1</b>（單一摘要）已移除，下方 v1 欄與 ④ 的數據僅為歷史對照。細節見 <a href="../session-memory-design.md">session-memory-design.md</a>。</p>
+  <h3>流程差異</h3>
+  <p>迴圈（準備上下文 → 呼叫模型＋剩餘次數提醒 → 驗證／執行工具 → 回答）詳見 <a href="loop.html">02 · 執行迴圈</a>，壓縮觸發門檻詳見 <a href="vertical.html">04 · 上下文視窗</a>。歷史上兩版只差壓縮：</p>
+  <div class="grid2">
+    <div class="box"><span class="tag">v1 · 摘要壓縮（已移除）</span><div class="formula">舊歷史
+  ▼
+摘要模型（1 次呼叫）
+  ▼
+一份 Markdown checkpoint
+（更新上一份，長度依視窗）
+  ▼
+上下文 = 系統提示
+       + checkpoint
+       + 最近訊息
+
+需要細節：重讀原始檔案
+壓縮失敗：可截短舊工具結果</div></div>
+    <div class="box"><span class="tag violet">目前 · checkpoint＋主題筆記</span><div class="formula">舊歷史
+  ▼
+摘要模型 → CompactionResult
+  checkpoint（≤ 600 字）＋ topics
+  ▼
+已存在的主題：帶完整舊筆記再合併
+（額外模型呼叫）
+  ▼
+發布不可變筆記世代 + _index.md
+（SHA-256 驗證）→ 寫入 journal
+→ 才丟棄舊歷史
+  ▼
+上下文 = 系統提示
+       + 短 checkpoint
+       + 索引路徑 + 主題名稱（≤ 8）
+       + 最近訊息
+
+需要細節：read／bash 讀筆記或原始檔
+壓縮失敗：保留完整歷史，不截短</div></div>
+  </div>
+  <div class="tablewrap"><table><caption>主要實作差異（v1 欄為已移除版本；歷史對照見 <a href="../compare.md">compare.md</a>）</caption><thead><tr><th scope="col">面向</th><th scope="col">v1（已移除）</th><th scope="col">目前（原 v2）</th></tr></thead><tbody>
+    <tr><td>壓縮產物</td><td>一份 Markdown checkpoint</td><td>短 checkpoint（≤ 600 字）＋主題筆記；既有主題會合併</td></tr>
+    <tr><td>回想方式</td><td>重讀原始檔</td><td>另可 <code>read</code>／<code>bash</code> 讀筆記；無專用記憶工具</td></tr>
+    <tr><td>持久化</td><td>session JSONL</td><td>journal＋不可變筆記世代與索引；先寫後丟</td></tr>
+    <tr><td>壓縮失敗</td><td>截短工具結果續跑</td><td>不截短 → 上下文可能用盡而停止</td></tr>
+    <tr><td>系統提示的上下文說明</td><td>「舊回合會被摘要：在回覆中記下重點，<b>讓工具輸出保持精簡</b>」</td><td>「舊回合壓縮成 checkpoint 與主題檔；需要細節時用 read／bash 讀取」</td></tr>
+    <tr><td>回覆防護</td><td>早期重試行為</td><td>有上限的空白／無效回覆重試；偵測純文字工具呼叫</td></tr>
+    <tr><td>重複呼叫 <span class="tag amber">實測後新增</span></td><td>無偵測</td><td>同工具＋同參數＋同結果、且前次結果仍在上下文 → 指向前次結果，不再重送</td></tr>
+    <tr><td>長指令輸出 <span class="tag amber">實測後新增</span></td><td>保留結尾</td><td>搜尋型輸出 → 前 K 筆＋各檔筆數；其他 → 結尾＋總行數</td></tr>
+    <tr><td>工具呼叫中途截斷 <span class="tag amber">實測後新增</span></td><td>一般重試</td><td>重試指示：大內容分段寫（≤ ~300 行，再追加）</td></tr>
+    <tr><td>交付前查核 <span class="tag amber">實測後新增</span></td><td>「能驗證就驗證」</td><td>產出檔案或數字時：工具重算關鍵數字、交付物互相比對、衍生檔由結構化資料產生、同一查核不重複；最後一次作答，僅明確要求的輸出檔未寫時先寫</td></tr>
+  </tbody></table></div>
+  <p class="hint">標「實測後新增」的列在早期 smoke 之後才加入 v2；下方「4 次重複比較」量的就是含這些改動的 v2。</p>
+  <h3 id="ported">統一後新增：固定需求、分段寫檔、送出前檢查、Evidence</h3>
+  <p>以下機制在統一 runtime 時加入，晚於 ④ 的所有實測；<b>尚無實機紀錄</b>，目前依據只有回歸測試 <a href="../../tests/test_requirements_and_file_writes.py">test_requirements_and_file_writes.py</a>、<a href="../../tests/test_topic_compaction.py">test_topic_compaction.py</a>。</p>
+  <div class="tablewrap"><table><caption>機制與邊界</caption><thead><tr><th scope="col">機制</th><th scope="col">作法</th><th scope="col">實作／測試</th></tr></thead><tbody>
+    <tr><td>固定需求 Pinned requirements</td><td><code>--requirement TEXT</code>（可重複）、對話 <code>/require</code>、<code>/requirements</code>、<code>/unrequire N</code>。原文逐字放在 checkpoint 之後、每次請求都送，不經摘要模型；journal 記 <code>requirement</code> → 撐過壓縮與續跑。總長 ≤ 4,000 字元；工作流程拒用（需求寫進工作流程指示）。</td><td><a href="../../src/kentc_agent/adapters/session.py">adapters/session.py · set_requirement</a>、<a href="../../src/kentc_agent/cli.py">cli.py</a>；<code>test_pinned_requirement_survives_compactions_and_resume_verbatim</code></td></tr>
+    <tr><td>分段寫檔 Incremental file writes</td><td>主代理有核心 <code>write</code>＋<code>edit</code> → 系統提示要求長檔先寫骨架（唯一區段標記），每回合 <code>edit</code> 一段；每次請求附提示：新文字 ≤ <code>max_tokens / 4</code>（只隨請求送、不存）。<code>write</code>／<code>edit</code> 在輸出上限被截斷或參數無法解析 → 丟棄，從已接受對話乾淨重試（已存區段保留），除數 /8 → /16。</td><td><a href="../../src/kentc_agent/agent/loop.py">agent/loop.py · FILE_CHUNK_HINT / FILE_RETRY / _call</a>；<code>test_cut_off_file_edit_retries_smaller_and_keeps_saved_sections</code>、<code>test_file_hint_only_with_the_core_write_and_edit_tools</code></td></tr>
+    <tr><td>送出前檢查 Preflight</td><td>送出前估算整個請求（系統提示、工具 schema、上下文、單次提示）；扣安全邊際後回覆空間 &lt; 512 tokens → 壓縮一次，仍不足 → 本機拋 <code>ContextOverflow</code>，不送伺服器。</td><td><a href="../../src/kentc_agent/agent/loop.py">agent/loop.py · _call</a>；<code>test_request_without_reply_room_is_rejected_before_the_network_call</code></td></tr>
+    <tr><td>Evidence 區段與事實來源</td><td>checkpoint 格式加 <code>## Evidence</code>（已驗證／未驗證＋確切路徑／範圍、工具呼叫或紀錄 ID）；主題事實保留來源與是否經工具結果驗證，宣稱與假設不算證據。</td><td><a href="../../src/kentc_agent/context/compaction.py">context/compaction.py · FORMAT / EXTRACT / MERGE</a>；<a href="../../tests/test_topic_compaction.py">test_topic_compaction.py</a></td></tr>
+  </tbody></table></div>
+  <div class="callout warn"><b>邊界：</b>固定需求保證原文在每次請求中，不保證模型遵守；分段寫檔降低單次輸出被截斷的機率，不保證檔案正確；Evidence 欄由模型填寫，仍可能遺漏或誤標。</div>
+  <div class="tablewrap"><table><caption>改動的研究依據（原文 PDF 存於 <code>docs/papers/</code>）</caption><thead><tr><th scope="col">改動</th><th scope="col">論文</th><th scope="col">狀態與實測</th></tr></thead><tbody>
+    <tr><td>交付前查核</td><td><a href="../papers/2305.11738-CRITIC.pdf">CRITIC</a>、<a href="../papers/2309.11495-Chain-of-Verification.pdf">Chain-of-Verification</a></td><td>已實作；可能造成 <code>findings.json</code> 格式失守（2/4），待單一變因實驗</td></tr>
+    <tr><td>分段寫檔、搜尋輸出摘要</td><td><a href="../papers/2405.15793-SWE-agent.pdf">SWE-agent</a></td><td>已實作；STR 無一次因輸出上限中止</td></tr>
+    <tr><td>重複呼叫防護</td><td>無論文，依自身實測（56／14／353 次重複）</td><td>已實作；v2 第 2 次觸發 13 次</td></tr>
+    <tr><td>主題提示置於尾端</td><td><a href="../papers/2307.03172-Lost-in-the-Middle.pdf">Lost in the Middle</a>、<a href="../papers/2310.08560-MemGPT.pdf">MemGPT</a></td><td>已移除：多耗呼叫、筆記讀取無變化</td></tr>
+    <tr><td>壓縮前挑重點</td><td><a href="../papers/LongLLMLingua-ACL2024.pdf">LongLLMLingua</a></td><td>未實作</td></tr>
+    <tr><td>以失敗案例改寫壓縮指令</td><td><a href="../papers/2510.00615-ACON.pdf">ACON</a></td><td>未實作</td></tr>
+  </tbody></table></div>
+
+  <h3 class="part data" id="data" data-step="4">依據：同一模型、同一任務的實測（歷史 A/B，v1 已移除）</h3>
+  <h3>兩組測試任務：為什麼這樣設計</h3>
+  <div class="grid2">
+    <div class="box"><span class="tag">短任務 · <a href="../../examples/compare_memory.py">compare_memory.py</a></span><h3>記憶回復：壓縮後能否找回細節</h3><p>預匯入 32 批、66 則讀檔紀錄（≈ 65k tokens &gt; 62,536 − reserve）→ 首次請求即壓縮。關鍵證據放在每筆結果前 2,000 字之外（摘要模型看不到）。</p><p><b>buried_revision</b>：在舊核准版、核准版＋簽署修訂、未核准提案間，找出生效版本、配額、區域與完整 rollback SHA。<b>failed_repair</b>：須實跑 <code>verify.py --strict</code>，區分兩次相同 decoder 錯誤、同代碼異路徑的 cache 錯誤、一則未驗證的「已修好」。</p><p class="why">限制：8 次呼叫、僅 read／bash、只評 JSON 欄位、無部分分數。兩版皆可重讀 <code>evidence.log</code> → 測找回證據，非純記憶。</p></div>
+    <div class="box"><span class="tag violet">長任務 · <a href="../../examples/str_benchmark.py">str_benchmark.py</a></span><h3>STR 審查：從空 session 做完一件真實規模的工作</h3><p>40 位客戶、121 檔、≈ 242,000 字元（≈ 6 萬 tokens，讀一遍近滿視窗）：KYC、RM 筆記、公司登記、信託契據、交易明細、媒體報導 → 必然壓縮。洗錢網路藏在縮寫名稱、帳號、共用聯絡資料後；干擾項（同名者、無關報導、正當信託、有合理說明的現金存款）測精準度。</p><p>交付 <code>report/findings.json</code>、<code>report/index.html</code>，確定性評分：A 整體判斷 0.25、B 交叉辨識 0.45、C 報告 0.30。</p><p class="why">限制：80 次呼叫、單次回覆 ≤ 4,096 tokens；未交檔 → C = 0。詳見 <a href="../str-benchmark.md">str-benchmark.md</a>。</p></div>
+  </div>
+  <div class="tablewrap"><table><caption>共同設定（兩版完全相同）</caption><thead><tr><th scope="col">項目</th><th scope="col">記憶回復</th><th scope="col">STR</th></tr></thead><tbody>
+    <tr><td>模型／視窗</td><td colspan="2"><code>huihui-v2-swift-qwen3.8-flash-next-iq3_s</code> · <code>n_ctx</code> 62,536（本機 <code>127.0.0.1:8081</code>）</td></tr>
+    <tr><td>取樣</td><td colspan="2">temperature 0 · reasoning effort <code>none</code> · 依序執行，第二輪對調先後</td></tr>
+    <tr><td>呼叫上限／輸出上限</td><td>8 次／2,048 tokens</td><td>80 次／4,096 tokens</td></tr>
+    <tr><td>工具</td><td>read、bash</td><td>read、bash、write、edit</td></tr>
+    <tr><td>重複次數</td><td>每案例 4 次（早期 smoke 1 次）</td><td>4 次（早期 smoke 2 次）</td></tr>
+  </tbody></table></div>
+
+  <h3 id="four-rep">4 次重複比較（歷史紀錄：統一前的 v1 對 v2）</h3>
+  <div class="tablewrap"><table><caption>記憶回復（各 4 次；依現行評分規則）</caption><thead><tr><th scope="col">案例</th><th scope="col">v1 通過</th><th scope="col">v2 通過</th><th scope="col">呼叫中位數 v1／v2</th><th scope="col">prompt tokens 中位數 v1／v2</th></tr></thead><tbody>
+    <tr><td>buried_revision</td><td>4/4</td><td>4/4</td><td>7.5／8</td><td>176,252／190,803</td></tr>
+    <tr><td>failed_repair</td><td>1/4</td><td>4/4</td><td>8／4</td><td>181,700／<b>98,681</b></td></tr>
+  </tbody></table></div>
+  <p>v1 的 3 次失敗只因評分格式：實際跑了 <code>verify.py --strict</code> 並看到 exit 1，但印成 <code>EXIT:1</code>／<code>EXIT_CODE=1</code>，規則只收 <code>EXIT=1</code>。<b>實質皆 8/8</b>；差異在效率。</p>
+  <div class="tablewrap"><table><caption>STR（各 4 次；總分與 A／B／C）</caption><thead><tr><th scope="col">次</th><th scope="col">v1</th><th scope="col">v2</th><th scope="col">配對</th></tr></thead><tbody>
+    <tr><td>1</td><td>0.931（0.72／1.00／1.00）</td><td>0.933（0.83／1.00／0.92）</td><td>平</td></tr>
+    <tr><td>2</td><td>0.642（0.67／1.00／0.08）無 HTML</td><td>0.812（0.72／0.96／0.67）</td><td>v2</td></tr>
+    <tr><td>3</td><td>0.663（0.75／1.00／0.08）<code>IncompleteReply</code>，無 HTML</td><td>0.380（0.33／0.25／0.61）key actor 誤判為公司 C07</td><td>v1</td></tr>
+    <tr><td>4</td><td>0.000，未交檔</td><td>0.310（0.50／0.39／0.03）key actor 寫成句子、角色自由文字，無 HTML</td><td>v2</td></tr>
+    <tr><td><b>中位數</b></td><td><b>0.652</b>（0.69／1.00／0.08）</td><td><b>0.596</b>（0.61／0.68／0.64）</td><td>v2 2 · v1 1 · 平 1</td></tr>
+  </tbody></table></div>
+  <div class="callout warn"><b>結論：不分勝負，取捨明確。</b> v2 交付較穩：HTML 3/4 對 1/4、無一次因輸出上限而死、C 中位數 0.64 對 0.08。v1 較守 <code>findings.json</code> 契約與 key actor：B 1.00 對 0.68。成本相近（呼叫 82／83.5、時間 1,597／1,801 s、prompt 2.30M／2.26M）。早期 v2 的大幅領先（下方 0.96 對 0.32）在 4 次重複下未重現。[推論] 查核指引中「衍生檔由結構化資料產生」可能促使模型自訂 schema（改動前 v2 契約 2/2 守住，現在 2/4 失守）；待只移除該項的單一變因實驗。<a href="../compare-run-4rep-1zpd8yum/report.md">完整報告</a></div>
+  <h3>早期 smoke（改動前的 v2；各 1–2 次；歷史紀錄）</h3>
+  <div class="tablewrap"><table><caption>記憶回復（加剩餘次數提醒後；加之前 0/4，皆用完 8 次無答案）</caption><thead><tr><th scope="col">案例</th><th scope="col">版本</th><th scope="col">結果</th><th scope="col">模型呼叫</th><th scope="col">回答時間</th><th scope="col">prompt tokens（含摘要）</th></tr></thead><tbody>
+    <tr><td rowspan="2">buried_revision</td><td>v1</td><td><span class="tag green">通過</span></td><td>8（最後一次才答）</td><td>131.9 s</td><td>202,491</td></tr>
+    <tr><td>v2</td><td><span class="tag green">通過</span></td><td>5</td><td>78.9 s</td><td>119,367</td></tr>
+    <tr><td rowspan="2">failed_repair</td><td>v1</td><td><span class="tag red">未通過</span> 答案全對；<code>evidence_ids</code> 夾說明文字，且印 <code>EXIT_CODE=</code>（評分只收 <code>EXIT=</code>）</td><td>8（最後一次才答）</td><td>101.0 s</td><td>181,690</td></tr>
+    <tr><td>v2</td><td><span class="tag green">通過</span></td><td>4</td><td>80.1 s</td><td>97,405</td></tr>
+    <tr><td colspan="2"><b>合計</b></td><td>v1 1/2 · <b>v2 2/2</b></td><td colspan="3">每 trial 壓縮一次；從未讀主題筆記或 <code>_index.md</code></td></tr>
+  </tbody></table></div>
+  <div class="tablewrap"><table><caption>STR 長任務（滿分 1.0；A 整體判斷／B 交叉辨識／C 報告）</caption><thead><tr><th scope="col">版本 · trial</th><th scope="col">總分</th><th scope="col">A</th><th scope="col">B</th><th scope="col">C</th><th scope="col">模型呼叫（摘要）</th><th scope="col">時間</th><th scope="col">prompt tokens</th><th scope="col">完全相同的重複呼叫</th><th scope="col">結束方式與交付</th></tr></thead><tbody>
+    <tr><td>v1 · 1</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>81（1）</td><td>1,234 s</td><td>2,399,460</td><td>56</td><td>第 80 次對話回答；無報告檔</td></tr>
+    <tr><td>v1 · 2</td><td>0.64</td><td>0.67</td><td>1.00</td><td>0.08</td><td>76（1）</td><td>1,336 s</td><td>1,971,941</td><td>14</td><td>有 <code>findings.json</code>；HTML 一次寫完 &gt; 4,096 tokens → <code>IncompleteReply</code></td></tr>
+    <tr><td>v2 · 1</td><td>0.95</td><td>0.92</td><td>1.00</td><td>0.92</td><td>86（6，含主題合併）</td><td>1,502 s</td><td>2,386,776</td><td>0</td><td>兩檔皆交；第 80 次被停止</td></tr>
+    <tr><td>v2 · 2</td><td><b>0.98</b></td><td>1.00</td><td>1.00</td><td>0.92</td><td>63（1）</td><td>1,156 s</td><td>1,771,478</td><td>0</td><td>兩檔皆交並自行核對；第 62 次回答</td></tr>
+    <tr><td><b>中位數</b></td><td>v1 0.32 · <b>v2 0.96</b></td><td>0.33 · 0.96</td><td>0.50 · 1.00</td><td>0.04 · 0.92</td><td>78.5 · 74.5</td><td>1,285 · 1,329 s</td><td>2.19M · 2.08M</td><td>35 · 0</td><td>HTML：v2 2/2、v1 0/2</td></tr>
+  </tbody></table></div>
+  <div class="callout warn"><b>高分 ≠ 報告全對。</b> v2 · 1 的 HTML 把有合理說明的干擾項 P012 列入現金存入名單，總額 SGD 305,895.94（正確 286,095.94）；評分只查字面，不比對 HTML 與 <code>findings.json</code>。每組 1–2 次 → smoke 結論，非統計證據。</div>
+  <p class="source">早期 smoke 的原始結果檔已於 2026-11-02 移除；以上數字僅供歷史參考，現行比較見 <a href="../compare-run-4rep-1zpd8yum/report.md">4 次重複報告</a>。</p>
+
+  <h3>早期 smoke 的分數差距從哪裡來</h3>
+  <div class="tablewrap"><table><caption>依證據強弱排列；[推論] 表示沒有做單一變因的實驗</caption><thead><tr><th scope="col">因素</th><th scope="col">觀察到的證據</th><th scope="col">判斷</th></tr></thead><tbody>
+    <tr><td><b>剩餘呼叫次數提醒</b><br><span class="tag">流程設計 · 兩版共用</span></td><td>記憶回復 0/4 → 3/4，4 次皆有答案；v1 兩次最後一次才答，v2 第 4、5 次收斂。STR v1 · 1 最後一次對話回答、未寫檔。</td><td><b>短任務效果最大、證據最直接。</b>只保證最後必答，不促成提早收斂；需交檔任務的最後一次措辭應改為「先寫出交付檔案」。</td></tr>
+    <tr><td><b>不重複執行同一指令</b><br><span class="tag violet">v2 整體 runtime</span></td><td>v1 完全相同呼叫 56、14 次（同一 docx 解析跑 39 次，每次回傳同樣 184 字空欄位）；v2 0。v1 重複落在第 18–74、22–35 次，<b>皆在壓縮前</b>。</td><td><b>STR 分差主因</b>：v1 原地打轉 → 沒次數寫報告。發生於壓縮前 → 與主題筆記無關。兩版皆無重複偵測。[推論] 源於系統提示差異（v1「工具輸出保持精簡」→ temperature 0 下軌跡分岔，v1 確實反覆跑小輸出指令）；未驗證。</td></tr>
+    <tr><td><b>較早開始交付</b><br><span class="tag violet">v2 整體 runtime</span></td><td>v2 · 2 第 47 次開始寫 <code>report/</code>，最後自查證據路徑；v1 · 2 第 69 次才開始，HTML 一次寫完 &gt; 4,096 tokens 而失敗。</td><td>C 軸 0.92 對 0.04，幾乎全由是否交檔決定；是不打轉的結果，非獨立機制。</td></tr>
+    <tr><td><b>主題筆記</b><br><span class="tag violet">v2 記憶設計</span></td><td>STR 每次 5 個主題；直接讀索引 0 次，讀主題 0、1 次，bash 觸及筆記路徑各 4 次。記憶回復從未讀筆記，證據皆來自重讀 <code>evidence.log</code>。</td><td><b>貢獻未確立。</b>筆記有寫、少回讀；答案多來自原始檔 → 不能把 v2 勝出歸功於主題記憶。</td></tr>
+    <tr><td><b>壓縮成本</b><br><span class="tag violet">v2 記憶設計</span></td><td>v2 · 1 的 2 次壓縮共 6 次摘要／合併呼叫，v1 每次壓縮 1 次；STR 時間、tokens 中位數相近（1,329 對 1,285 s；2.08M 對 2.19M）。</td><td>額外合併呼叫目前被不打轉省下的抵銷；任務更長、主題更多 → 成本上升。</td></tr>
+  </tbody></table></div>
+  <div class="callout"><b>早期 smoke 的結論：</b>可確定的貢獻＝剩餘次數提醒＋v2 不打轉；筆記價值未量到。4 次重複比較未重現 v2 的領先（見上方）。待做單一變因實驗：只換系統提示的上下文說明；只移除查核指引；設計答案只在筆記、無法從原始檔重讀的案例。</div>
+</section>
+</article>
+<nav class="pager" aria-label="上一篇與下一篇" data-pager></nav>
+</main>
+</div>
+<script src="../asset/js/topics.js"></script>
+<script src="../asset/js/core.js"></script>
+</body>
+</html>

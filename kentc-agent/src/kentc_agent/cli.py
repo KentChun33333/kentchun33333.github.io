@@ -1,10 +1,10 @@
-"""kentc-agent: one simple main agent on any OpenAI-compatible LLM server (a local Strata by default).
+"""kentc-agent: v1-style compaction with consolidated local topic files.
 
     kentc-agent                                      chat in the current directory
-    kentc-agent --workspace ~/cases/ter              chat with that folder as the workspace
-    kentc-agent -w ~/cases/ter "summarize the evidence folder"         one prompt, print the answer
-    kentc-agent -w ~/cases/ter --workflow ter-case-review -i case_id=TER-1 ...   run a YAML workflow
-    kentc-agent -w ~/cases/ter --resume latest --answer next_step=Agree
+    kentc-agent --workspace ~/cases/review             use an explicit workspace
+    kentc-agent -w ~/cases/review "inspect the evidence folder"
+    kentc-agent --persona personas/assistant.md --continue
+    kentc-agent --workflow case-review -i case_id=CASE-1
     kentc-agent --list-workflows | --validate <workflow> | --info
 """
 
@@ -17,20 +17,23 @@ import time
 from pathlib import Path
 from typing import Any
 
-from kentc_agent.adapters.documents import attach_document
-from kentc_agent.adapters.llm import LLMClient, LLMError
-from kentc_agent.adapters.session import Session
-from kentc_agent.adapters.tools import CORE_TOOLS, ToolContext, ToolError, resolve
-from kentc_agent.adapters.web_research import web_search_tool
-from kentc_agent.agent import Aborted, Agent, build_tools, new_session_path
-from kentc_agent.config import STATE_DIR, load_settings
-from kentc_agent.context.compaction import CompactionError
-from kentc_agent.ui import ConsoleUI, fmt_tokens
-from kentc_agent.workflow import Runner, WorkflowError, find_workflow, load, resolve_inputs, workflow_dirs
+from .adapters.documents import attach_document
+from .adapters.llm import LLMClient, LLMError
+from .adapters.session import Session
+from .adapters.tools import CORE_TOOLS, ToolContext, ToolError, resolve
+from .adapters.web_research import web_search_tool
+from .agent import Aborted, Agent, build_tools, new_session_path
+from .config import STATE_DIR, load_settings
+from .context.compaction import CompactionError
+from .ui import ConsoleUI, fmt_tokens
+from .workflow import Runner, WorkflowError, find_workflow, load, resolve_inputs, workflow_dirs
 
 CHAT_HELP = """Commands:
   /attach <file> [question]  add a file to your next message (PDFs/images/large documents via the parsing sub-agent)
-  /compact [focus]           summarize older history now
+  /compact [focus]           compress old context into a checkpoint and local topic files
+  /require <text>            pin an exact requirement for this session (kept verbatim across compaction/resume)
+  /requirements              list the active pins
+  /unrequire <number>        remove a pin
   /tokens                    context usage
   /new                       start a new session
   /tools                     list tools
@@ -40,14 +43,14 @@ Ctrl-C stops the current run; the conversation stays usable."""
 
 # ---------------------------------------------------------------------- arguments
 def parser() -> argparse.ArgumentParser:
-    ap = argparse.ArgumentParser(prog="kentc-agent", description="Agent runtime for an OpenAI-compatible LLM server.",
+    ap = argparse.ArgumentParser(prog="kentc-agent", description="Agent with file-backed topic compaction.",
                                  formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__)
     ap.add_argument("prompt", nargs="*", help="run this one prompt and print the answer ('-' reads stdin); "
                                               "without it: interactive chat")
     ap.add_argument("-w", "--workspace", default=".", help="workspace folder (default: current directory)")
 
     g = ap.add_argument_group("model")
-    g.add_argument("--provider", choices=["openai", "qwen38"], help="LLM transport (default: openai)")
+    g.add_argument("--provider", choices=["openai", "qwen38", "openrouter"], help="LLM transport (default: openai)")
     g.add_argument("--qwen-backend", choices=["coordinator", "litellm"],
                    help="preferred Qwen backend (default: coordinator; automatic fallback before streamed output)")
     g.add_argument("--qwen-context-window", type=int, help="verified context limit safe for both Qwen backends")
@@ -73,9 +76,13 @@ def parser() -> argparse.ArgumentParser:
     g.add_argument("--tools", help="comma-separated tool allowlist (default: all)")
     g.add_argument("-c", "--continue", dest="cont", action="store_true", help="continue the latest session")
     g.add_argument("--session", help="session file to continue or create")
-    g.add_argument("--no-session", action="store_true", help="do not save the conversation")
+    g.add_argument("--no-session", action="store_true",
+                   help="do not save the conversation journal; compression still writes topic files")
+    g.add_argument("--requirement", action="append", default=[], metavar="TEXT",
+                   help="pin an exact chat requirement across compaction and resume; repeatable")
     g.add_argument("-a", "--attach", action="append", default=[], help="file to add to the first message")
     g.add_argument("-s", "--instructions", help="extra system instructions (text or @file)")
+    g.add_argument("--persona", help="persona file kept in the main agent's protected system context")
 
     g = ap.add_argument_group("workflow")
     g.add_argument("--workflow", nargs="?", const="", metavar="NAME|PATH",
@@ -118,7 +125,8 @@ def make_context(args: argparse.Namespace, ui: ConsoleUI) -> ToolContext:
                                   "reasoning_effort": args.effort,
                                   "tokens_per_minute": args.tokens_per_minute,
                                   "rate_limit_max_wait": args.rate_limit_max_wait,
-                                  "max_turns": args.max_turns, "show_reasoning": False if args.quiet else None})
+                                  "max_turns": args.max_turns, "show_reasoning": False if args.quiet else None,
+                                  "persona_path": args.persona})
     ui.show_reasoning = settings.show_reasoning
     return ToolContext(ws, settings, LLMClient(settings), ui)
 
@@ -140,8 +148,8 @@ def open_session(args: argparse.Namespace, ws: Path) -> Session:
 def make_agent(args: argparse.Namespace, ctx: ToolContext, session: Session) -> Agent:
     """The chat / one-shot agent: the core tools plus screened web_search, since a human is in the loop here.
     Workflow steps and studio agents get only the core tools (web through `web:` steps)."""
-    instructions = args.instructions or ""
-    if instructions.startswith("@"):
+    instructions = args.instructions
+    if instructions and instructions.startswith("@"):
         instructions = resolve(ctx, instructions[1:]).read_text(encoding="utf-8")
     tools = [t.strip() for t in args.tools.split(",") if t.strip()] if args.tools else None
     return Agent(ctx, tools=build_tools(tools, {**CORE_TOOLS, "web_search": web_search_tool()}), session=session,
@@ -158,8 +166,10 @@ def run_prompt(args: argparse.Namespace) -> int:
     ui = ConsoleUI(stream_content=sys.stdout.isatty())
     ctx = make_context(args, ui)
     prompt = sys.stdin.read() if args.prompt == ["-"] else " ".join(args.prompt)
-    agent = make_agent(args, ctx, open_session(args, ctx.workspace))
-    answer = agent.run("\n\n".join([*(attachment(ctx, a) for a in args.attach), prompt]))
+    with make_agent(args, ctx, open_session(args, ctx.workspace)) as agent:
+        for requirement in args.requirement:
+            agent.session.set_requirement(requirement)
+        answer = agent.run("\n\n".join([*(attachment(ctx, a) for a in args.attach), prompt]))
     ui.finish()
     if not ui.stream_content:
         print(answer)
@@ -177,6 +187,8 @@ def run_chat(args: argparse.Namespace) -> int:
     info = ctx.llm.info()
     session = open_session(args, ctx.workspace)
     agent = make_agent(args, ctx, session)
+    for requirement in args.requirement:
+        session.set_requirement(requirement)
     history = ctx.state_dir / "history"
     if readline is not None:
         history.parent.mkdir(parents=True, exist_ok=True)
@@ -210,13 +222,25 @@ def run_chat(args: argparse.Namespace) -> int:
                 elif cmd == "/help":
                     print(CHAT_HELP)
                 elif cmd == "/tokens":
-                    print(f"context {fmt_tokens(agent.context_tokens())}/{fmt_tokens(agent.window)}; compacts above "
-                          f"{fmt_tokens(agent.window - agent.reserve)}; {len(session.messages)} messages"
-                          + ("; has a summary" if session.summary else ""))
+                    print(f"context {fmt_tokens(agent.context_tokens())}/{fmt_tokens(agent.window)}; compact above "
+                          f"{fmt_tokens(agent.window - agent.reserve)}; {len(session.messages)} messages")
                 elif cmd == "/compact":
-                    if not agent.compact(rest or None, force=True):
+                    if not agent.compact(rest.strip() or None, force=True):
                         print("nothing to compact")
+                elif cmd == "/require":
+                    session.set_requirement(rest.strip())
+                    print("requirement pinned")
+                elif cmd == "/requirements":
+                    print("\n".join(f"{i}. {text}" for i, text in enumerate(session.requirements, 1))
+                          or "no active requirements")
+                elif cmd == "/unrequire":
+                    number = int(rest) if rest.strip().isdigit() else 0
+                    if not 1 <= number <= len(session.requirements):
+                        raise ValueError("use a pin number from /requirements")
+                    session.set_requirement(session.requirements[number - 1], active=False)
+                    print("requirement unpinned")
                 elif cmd == "/new":
+                    agent.close()
                     session = Session(None if args.no_session else new_session_path(ctx.workspace))
                     agent = make_agent(args, ctx, session)
                     print("new session" + (f": {session.path}" if session.path else ""))
@@ -243,6 +267,7 @@ def run_chat(args: argparse.Namespace) -> int:
         except (LLMError, ToolError, CompactionError, OSError, ValueError) as e:
             ui.finish()
             print(f"\nerror: {e}", file=sys.stderr)
+    agent.close()
     return 0
 
 
@@ -268,8 +293,12 @@ def run_workflow(args: argparse.Namespace) -> int:
         inputs = resolve_inputs(wf, pairs(args.input, "--input"))
         run_dir = runs / f"{time.strftime('%Y%m%d-%H%M%S')}-{wf.name}"
     ui.status("workflow", f"{wf.name}: {len(wf.steps)} steps → {run_dir}")
-    state = Runner(wf, ctx, inputs, run_dir, answers=pairs(args.answer, "--answer"),
-                   ask_user=ui.ask if sys.stdin.isatty() else None).run()
+    runner = Runner(wf, ctx, inputs, run_dir, answers=pairs(args.answer, "--answer"),
+                    ask_user=ui.ask if sys.stdin.isatty() else None)
+    try:
+        state = runner.run()
+    finally:
+        runner.agent.close()
     ui.finish()
     last = wf.steps[-1]
     if not ui.stream_content or last.kind != "prompt":
@@ -341,6 +370,8 @@ def main(argv: list[str] | None = None) -> int:
         if args.validate:
             return validate(args)
         if args.workflow is not None or args.resume:
+            if args.requirement:
+                raise ValueError("--requirement is for chat; put workflow requirements in the workflow instructions")
             return run_workflow(args)
         if args.prompt:
             return run_prompt(args)

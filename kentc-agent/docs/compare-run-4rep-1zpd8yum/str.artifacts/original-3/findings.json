@@ -1,0 +1,79 @@
+{
+  "persons_reviewed": 40,
+  "key_actor": "P006",
+  "subjects": [
+    {
+      "id": "P006",
+      "role": "key_actor",
+      "reason": "Sole documented beneficiary of the Harbour Light Trust (T01), which received SGD 209,712.93 of beneficiary distributions funded by the cash placements, and the person to whom the funds ultimately flowed.",
+      "evidence": [
+        "case/profiles/P006_Marcus_Tan_Wei_Ming.docx",
+        "case/trusts/T01_Harbour_Light_Trust.txt",
+        "case/statements/T01_statement.csv",
+        "case/statements/P006_statement.csv",
+        "case/rm_notes/P006_call_note.eml",
+        "case/media/MEDIA-01_marcus_tan_charged.html"
+      ]
+    },
+    {
+      "id": "P013",
+      "role": "money_mule",
+      "reason": "Retired customer with declared income of SGD 14,400.00 received five unexplained cash deposits totalling SGD 93,499.39, each paid out the same or next day by FAST to C08.",
+      "evidence": [
+        "case/profiles/P013_Michelle_Chua_Jia_Hui.md",
+        "case/statements/P013_statement.csv",
+        "case/rm_notes/P013_call_note.eml"
+      ]
+    },
+    {
+      "id": "P020",
+      "role": "money_mule",
+      "reason": "Food delivery rider with declared income of SGD 26,000.00 received five cash deposits totalling SGD 96,485.00, each transferred out the same day by FAST to C07.",
+      "evidence": [
+        "case/profiles/P020_Daniel_Ng_Zhi_Hao.json",
+        "case/statements/P020_statement.csv",
+        "case/registry/C08_Brightpath_Trading_Pte_Ltd.json"
+      ]
+    },
+    {
+      "id": "P036",
+      "role": "money_mule",
+      "reason": "Full-time student with declared income of SGD 9,600.00, employed by C08, received five cash deposits totalling SGD 96,111.55 and forwarded them to C08 as 'client payments'.",
+      "evidence": [
+        "case/profiles/P036_Wong_Mei_Ling.json",
+        "case/statements/P036_statement.csv",
+        "case/rm_notes/P036_call_note.eml",
+        "case/registry/C08_Brightpath_Trading_Pte_Ltd.json"
+      ]
+    },
+    {
+      "id": "P016",
+      "role": "nominee_director",
+      "reason": "Corporate secretarial executive who is director of C07 and C08, sole shareholder of C08 and Protector of T01, and receives a flat fee per directorship, indicating a nominee role.",
+      "evidence": [
+        "case/profiles/P016_Kavitha_d_o_Krishnan.json",
+        "case/registry/C07_Northwind_Advisory_Pte_Ltd.json",
+        "case/registry/C08_Brightpath_Trading_Pte_Ltd.json",
+        "case/trusts/T01_Harbour_Light_Trust.txt",
+        "case/rm_notes/P016_call_note.eml"
+      ]
+    }
+  ],
+  "linked_entities": [
+    "C07",
+    "C08",
+    "T01"
+  ],
+  "typologies": [
+    "structuring",
+    "rapid_pass_through",
+    "shell_company",
+    "nominee_director",
+    "layering_via_trust"
+  ],
+  "placement_total_sgd": 286095.94,
+  "period": {
+    "start": "2026-03-10",
+    "end": "2026-05-21"
+  }
+}

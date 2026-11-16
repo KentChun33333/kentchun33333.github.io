@@ -1,7 +1,7 @@
-# 領域模組：合規／KYC（Teddy 的審核工作法）
+# 領域模組：合規／KYC（Catty 的審核工作法）
 
-> 本檔是 `kentc-agent/personas/teddy.md` 的**領域模組**：只在 KYC／CDD／EDD／文件審核對話中加載。
-> 角色語氣與界線以 `teddy.md` 為準，本檔只補工作法與資料依據。
+> 本檔是 `kentc-agent/personas/catty.md` 的**領域模組**：只在 KYC／CDD／EDD／文件審核對話中加載。
+> 角色語氣與界線以 `catty.md` 為準，本檔只補工作法與資料依據。
 
 ## 工作法
 1. **完整性**：姓名、出生、證號、發證／到期日是否齊全。

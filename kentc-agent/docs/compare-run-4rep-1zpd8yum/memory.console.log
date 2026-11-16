@@ -1,0 +1,86 @@
+{"case": "buried_revision", "variant": "original", "trial": 1, "passed": true, "answer_s": 98.777, "close_s": 98.778, "usage": {"foreground": {"calls": 7, "prompt_tokens": 150948, "completion_tokens": 497, "usage_missing_calls": 0, "request_wall_s": 73.46878258604556}, "summary": {"calls": 1, "prompt_tokens": 12849, "completion_tokens": 508, "usage_missing_calls": 0, "request_wall_s": 25.159819334046915}}}
+{"case": "buried_revision", "variant": "topics", "trial": 1, "passed": true, "answer_s": 118.711, "close_s": 118.712, "usage": {"foreground": {"calls": 8, "prompt_tokens": 182297, "completion_tokens": 791, "usage_missing_calls": 0, "request_wall_s": 96.71009558369406}, "summary": {"calls": 1, "prompt_tokens": 12952, "completion_tokens": 353, "usage_missing_calls": 0, "request_wall_s": 21.74171783402562}}}
+{"case": "buried_revision", "variant": "topics", "trial": 2, "passed": true, "answer_s": 105.921, "close_s": 105.921, "usage": {"foreground": {"calls": 8, "prompt_tokens": 173405, "completion_tokens": 689, "usage_missing_calls": 0, "request_wall_s": 83.94340666639619}, "summary": {"calls": 1, "prompt_tokens": 12952, "completion_tokens": 353, "usage_missing_calls": 0, "request_wall_s": 21.752518334193155}}}
+{"case": "buried_revision", "variant": "original", "trial": 2, "passed": true, "answer_s": 75.286, "close_s": 75.288, "usage": {"foreground": {"calls": 4, "prompt_tokens": 85670, "completion_tokens": 337, "usage_missing_calls": 0, "request_wall_s": 51.093733416870236}, "summary": {"calls": 1, "prompt_tokens": 12849, "completion_tokens": 508, "usage_missing_calls": 0, "request_wall_s": 24.06997779197991}}}
+{"case": "buried_revision", "variant": "original", "trial": 3, "passed": true, "answer_s": 109.683, "close_s": 109.684, "usage": {"foreground": {"calls": 8, "prompt_tokens": 176072, "completion_tokens": 558, "usage_missing_calls": 0, "request_wall_s": 85.3853032081388}, "summary": {"calls": 1, "prompt_tokens": 12849, "completion_tokens": 508, "usage_missing_calls": 0, "request_wall_s": 24.090555750066414}}}
+{"case": "buried_revision", "variant": "topics", "trial": 3, "passed": true, "answer_s": 63.333, "close_s": 63.333, "usage": {"foreground": {"calls": 3, "prompt_tokens": 62697, "completion_tokens": 280, "usage_missing_calls": 0, "request_wall_s": 41.54991945880465}, "summary": {"calls": 1, "prompt_tokens": 12952, "completion_tokens": 353, "usage_missing_calls": 0, "request_wall_s": 21.703700582962483}}}
+{"case": "buried_revision", "variant": "topics", "trial": 4, "passed": true, "answer_s": 127.372, "close_s": 127.373, "usage": {"foreground": {"calls": 8, "prompt_tokens": 185410, "completion_tokens": 1118, "usage_missing_calls": 0, "request_wall_s": 105.33614879101515}, "summary": {"calls": 1, "prompt_tokens": 12952, "completion_tokens": 353, "usage_missing_calls": 0, "request_wall_s": 21.733024708926678}}}
+{"case": "buried_revision", "variant": "original", "trial": 4, "passed": true, "answer_s": 111.958, "close_s": 111.959, "usage": {"foreground": {"calls": 8, "prompt_tokens": 175859, "completion_tokens": 706, "usage_missing_calls": 0, "request_wall_s": 87.5883722519502}, "summary": {"calls": 1, "prompt_tokens": 12849, "completion_tokens": 508, "usage_missing_calls": 0, "request_wall_s": 24.112580792047083}}}
+{"case": "failed_repair", "variant": "original", "trial": 1, "passed": false, "answer_s": 101.477, "close_s": 101.478, "usage": {"foreground": {"calls": 8, "prompt_tokens": 169422, "completion_tokens": 447, "usage_missing_calls": 0, "request_wall_s": 75.81416058307514}, "summary": {"calls": 1, "prompt_tokens": 12870, "completion_tokens": 610, "usage_missing_calls": 0, "request_wall_s": 25.423396666068584}}}
+{"case": "failed_repair", "variant": "topics", "trial": 1, "passed": true, "answer_s": 66.732, "close_s": 66.734, "usage": {"foreground": {"calls": 3, "prompt_tokens": 60996, "completion_tokens": 264, "usage_missing_calls": 0, "request_wall_s": 38.99096370791085}, "summary": {"calls": 1, "prompt_tokens": 12973, "completion_tokens": 754, "usage_missing_calls": 0, "request_wall_s": 27.667754916939884}}}
+{"case": "failed_repair", "variant": "topics", "trial": 2, "passed": true, "answer_s": 82.903, "close_s": 82.905, "usage": {"foreground": {"calls": 4, "prompt_tokens": 87023, "completion_tokens": 554, "usage_missing_calls": 0, "request_wall_s": 55.312831623945385}, "summary": {"calls": 1, "prompt_tokens": 12973, "completion_tokens": 754, "usage_missing_calls": 0, "request_wall_s": 27.45723137492314}}}
+{"case": "failed_repair", "variant": "original", "trial": 2, "passed": true, "answer_s": 82.078, "close_s": 82.078, "usage": {"foreground": {"calls": 5, "prompt_tokens": 104125, "completion_tokens": 560, "usage_missing_calls": 0, "request_wall_s": 56.55590358376503}, "summary": {"calls": 1, "prompt_tokens": 12870, "completion_tokens": 610, "usage_missing_calls": 0, "request_wall_s": 25.397282999940217}}}
+{"case": "failed_repair", "variant": "original", "trial": 3, "passed": false, "answer_s": 107.597, "close_s": 107.599, "usage": {"foreground": {"calls": 8, "prompt_tokens": 172078, "completion_tokens": 615, "usage_missing_calls": 0, "request_wall_s": 82.00329183414578}, "summary": {"calls": 1, "prompt_tokens": 12870, "completion_tokens": 610, "usage_missing_calls": 0, "request_wall_s": 25.35288987495005}}}
+{"case": "failed_repair", "variant": "topics", "trial": 3, "passed": true, "answer_s": 79.4, "close_s": 79.401, "usage": {"foreground": {"calls": 4, "prompt_tokens": 84393, "completion_tokens": 517, "usage_missing_calls": 0, "request_wall_s": 51.67764574987814}, "summary": {"calls": 1, "prompt_tokens": 12973, "completion_tokens": 754, "usage_missing_calls": 0, "request_wall_s": 27.590767542133108}}}
+{"case": "failed_repair", "variant": "topics", "trial": 4, "passed": true, "answer_s": 114.977, "close_s": 114.978, "usage": {"foreground": {"calls": 8, "prompt_tokens": 172216, "completion_tokens": 1009, "usage_missing_calls": 0, "request_wall_s": 87.20709058153443}, "summary": {"calls": 1, "prompt_tokens": 12973, "completion_tokens": 754, "usage_missing_calls": 0, "request_wall_s": 27.589972542133182}}}
+{"case": "failed_repair", "variant": "original", "trial": 4, "passed": false, "answer_s": 102.334, "close_s": 102.336, "usage": {"foreground": {"calls": 8, "prompt_tokens": 168239, "completion_tokens": 630, "usage_missing_calls": 0, "request_wall_s": 76.7500314579811}, "summary": {"calls": 1, "prompt_tokens": 12870, "completion_tokens": 610, "usage_missing_calls": 0, "request_wall_s": 25.399373166961595}}}
+[
+  {
+    "case": "buried_revision",
+    "variant": "original",
+    "trials": 4,
+    "passed": 4,
+    "median_answer_wall_s": 104.23020139546134,
+    "median_answer_first_content_s": 102.7132455415558,
+    "median_answer_plus_close_s": 104.23084500001278,
+    "median_peak_rss_mib": 40.1328125,
+    "median_seed_append_s": 0.003597645554691553,
+    "median_foreground_calls": 7.5,
+    "median_foreground_prompt_tokens": 163403.5,
+    "median_foreground_completion_tokens": 527.5,
+    "median_summary_calls": 1.0,
+    "median_summary_prompt_tokens": 12849.0,
+    "median_summary_completion_tokens": 508.0
+  },
+  {
+    "case": "buried_revision",
+    "variant": "topics",
+    "trials": 4,
+    "passed": 4,
+    "median_answer_wall_s": 112.31564956204966,
+    "median_answer_first_content_s": 110.78576989553403,
+    "median_answer_plus_close_s": 112.3163278750144,
+    "median_peak_rss_mib": 41.3359375,
+    "median_seed_append_s": 0.006179083487950265,
+    "median_foreground_calls": 8.0,
+    "median_foreground_prompt_tokens": 177851.0,
+    "median_foreground_completion_tokens": 740.0,
+    "median_summary_calls": 1.0,
+    "median_summary_prompt_tokens": 12952.0,
+    "median_summary_completion_tokens": 353.0
+  },
+  {
+    "case": "failed_repair",
+    "variant": "original",
+    "trials": 4,
+    "passed": 1,
+    "median_answer_wall_s": 101.90562041662633,
+    "median_answer_first_content_s": 99.62764531257562,
+    "median_answer_plus_close_s": 101.90720733301714,
+    "median_peak_rss_mib": 40.265625,
+    "median_seed_append_s": 0.0035538130905479193,
+    "median_foreground_calls": 8.0,
+    "median_foreground_prompt_tokens": 168830.5,
+    "median_foreground_completion_tokens": 587.5,
+    "median_summary_calls": 1.0,
+    "median_summary_prompt_tokens": 12870.0,
+    "median_summary_completion_tokens": 610.0
+  },
+  {
+    "case": "failed_repair",
+    "variant": "topics",
+    "trials": 4,
+    "passed": 4,
+    "median_answer_wall_s": 81.15130845853128,
+    "median_answer_first_content_s": 79.49195177096408,
+    "median_answer_plus_close_s": 81.1525596040301,
+    "median_peak_rss_mib": 40.4765625,
+    "median_seed_append_s": 0.006586457951925695,
+    "median_foreground_calls": 4.0,
+    "median_foreground_prompt_tokens": 85708.0,
+    "median_foreground_completion_tokens": 535.5,
+    "median_summary_calls": 1.0,
+    "median_summary_prompt_tokens": 12973.0,
+    "median_summary_completion_tokens": 754.0
+  }
+]

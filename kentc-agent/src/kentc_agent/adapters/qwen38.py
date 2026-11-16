@@ -21,11 +21,10 @@ def _backend_defaults(backend: str) -> dict[str, str]:
     except OSError:
         raise ValueError(f"Cannot read Qwen deployment configuration: {_CONFIG_PATH}") from None
     if not isinstance(data, dict) or any(
-        not isinstance(data.get(key), str) or not data[key].strip()
-        for key in ("base_url", "api_key", "model")
+        not isinstance(data.get(key), str) for key in ("base_url", "api_key", "model")
     ):
         raise ValueError(f"{_CONFIG_PATH}: {backend} requires non-empty base_url, api_key and model strings")
-    return data
+    return {key: data[key].strip() for key in ("base_url", "api_key", "model")}
 
 
 def connection(settings: Settings) -> Settings:
@@ -47,6 +46,8 @@ def connection(settings: Settings) -> Settings:
         defaults["api_key"]
     model = settings.model or os.getenv("QWEN38_COORDINATOR_MODEL" if coordinator else "QWEN38_LITELLM_MODEL") or \
         defaults["model"]
+    if not endpoint or not key or not model:
+        raise ValueError(f"{_CONFIG_PATH}: {backend} requires non-empty base_url, api_key and model strings")
     return replace(settings, base_url=endpoint, api_key=key, model=model)
 
 

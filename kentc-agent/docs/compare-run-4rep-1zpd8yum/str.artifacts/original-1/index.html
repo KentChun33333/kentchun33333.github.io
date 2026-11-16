@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>Transaction monitoring review - internal report for the MLRO</title>
+<style>
+body { font-family: Georgia, "Times New Roman", serif; color: #1a1a1a; margin: 2em auto; max-width: 60em; line-height: 1.5; }
+h1 { font-size: 1.4em; border-bottom: 2px solid #333; padding-bottom: 0.3em; }
+h2 { font-size: 1.1em; margin-top: 1.6em; color: #1f3a5f; }
+h3 { font-size: 1em; margin-bottom: 0.2em; }
+section { margin-bottom: 2em; }
+table { border-collapse: collapse; width: 100%; font-family: Helvetica, Arial, sans-serif; font-size: 0.85em; }
+th, td { border: 1px solid #bbb; padding: 0.4em 0.5em; text-align: left; vertical-align: top; }
+th { background: #eef2f7; }
+td.num { text-align: right; white-space: nowrap; }
+p, li { font-size: 0.95em; }
+ul { margin-top: 0.3em; }
+.src { font-family: "Courier New", monospace; font-size: 0.8em; color: #444; }
+.note { font-family: Helvetica, Arial, sans-serif; font-size: 0.78em; color: #333; }
+svg { font-family: Helvetica, Arial, sans-serif; }
+.node { fill: #1f3a5f; }
+.node-p { fill: #14532d; }
+.node-t { fill: #6b3f00; }
+text.lbl { fill: #ffffff; font-size: 12px; font-weight: bold; }
+text.cap { fill: #1a1a1a; font-size: 10px; }
+text.edge { fill: #333; font-size: 10px; }
+line.flow { stroke: #7a1f1f; stroke-width: 1.8; }
+line.own { stroke: #555; stroke-width: 1.2; stroke-dasharray: 5 3; }
+line.link { stroke: #444; stroke-width: 1.2; stroke-dasharray: 2 3; }
+header p { font-family: Helvetica, Arial, sans-serif; font-size: 0.85em; color: #333; }
+</style>
+</head>
+<body>
+<header>
+<h1>Transaction monitoring review: cash deposits, two corporate service provider companies and the Harbour Light Trust</h1>
+<p>Review period: 01 Jan 2026 to 30 Jun 2026. Customers reviewed: 40 (P001 to P040). Prepared for the Money Lending and Reporting Officer (MLRO), Singapore. All amounts are Singapore dollars. Persons and entities are identified by NRIC/FIN, account number, address or contact number rather than by name alone.</p>
+</header>
+
+<section id="summary">
+<h2>Summary</h2>
+<p>Three personal customers - P013 Michelle Chua Jia Hui, P020 Daniel Ng Zhi Hao and P036 Wong Mei Ling - received 15 branch cash deposits between 10 Mar 2026 and 21 May 2026, each below SGD 20,000.00, made at five different branches and totalling SGD 286,095.94. Each deposit was followed within one to three days by an electronic transfer of a similar amount described as INV PAYMENT to one of two recently incorporated companies, Northwind Advisory Pte. Ltd. (C07) or Brightpath Trading Pte. Ltd. (C08), leaving the personal accounts close to nil.</p>
+<p>C08 paid C07 six identical consultancy fees of SGD 28,168.34, totalling SGD 169,010.04. C07 paid the trustee of the Harbour Light Trust (T01) four capital distributions of SGD 58,253.59, totalling SGD 233,014.36. T01 paid the sole named beneficiary, P006 Marcus Tan Wei Ming, three beneficiary distributions of SGD 69,904.31, totalling SGD 209,712.93, between 20 Apr 2026 and 24 May 2026. On 08 Jun 2026 P006 transferred SGD 139,808.62 to a conveyancing account as a property downpayment.</p>
+<p>The cash therefore moved from three personal accounts, through two companies with a common nominee director, into a trust settled in November 2024, and out to a single beneficiary whose declared annual income is SGD 96,000.00. This suggests placement of cash followed by layering through corporate and trust structures, with the funds ultimately benefiting P006, who is treated as the key actor.</p>
+<p>One further cash deposit of SGD 19,800.00 on 14 Apr 2026 into the account of P012 Muhammad Faizal bin Rahman is recorded and documented by the relationship manager as the private sale of a motor vehicle; it is included in the placement total but is not treated as part of the onward flow.</p>
+</section>
+
+<section id="subjects">
+<h2>Subjects and linked entities</h2>
+<h3>Customers</h3>
+<table>
+<tr><th>ID</th><th>Particulars</th><th>Role in the review</th><th>Basis</th></tr>
+<tr><td>P006</td><td>Marcus Tan Wei Ming, S9734264A, born 12 Apr 1979, business consultant (self-employed), declared annual income SGD 96,000.00, account 913-288499-3, address Blk 537 Clementi Avenue 2, #16-309, Singapore 794149, mobile +65 9470 5911</td><td>Key actor</td><td>Sole named beneficiary of T01 (NRIC S9734264A stated in the deed); received SGD 209,712.93 in three distributions; paid SGD 139,808.62 property downpayment on 08 Jun 2026; shares the residential address recorded for P020; the mobile number on his profile is the alternate contact number recorded for P013 for a nephew who assists with banking.</td></tr>
+<tr><td>P013</td><td>Michelle Chua Jia Hui, S6148619G, born 05 Nov 1958, retiree, declared annual income SGD 14,400.00, account 774-344670-0, address Blk 467 Bukit Batok Street 31, #14-128, Singapore 389126</td><td>Money mule</td><td>Five cash deposits totalling SGD 93,499.39 at five branches; five INV PAYMENT transfers of SGD 92,559.39 to C08; call note records that she could not explain the purpose of the deposits.</td></tr>
+<tr><td>P020</td><td>Daniel Ng Zhi Hao, S8097523Z, born 23 Mar 1985, food delivery rider (self-employed), declared annual income SGD 26,000.00, account 206-604913-6, address Blk 537 Clementi Avenue 2, #16-309, Singapore 794149</td><td>Money mule</td><td>Five cash deposits totalling SGD 96,485.00 at five branches; five INV PAYMENT transfers of SGD 95,779.00 to C07; residential address identical to that recorded for P006.</td></tr>
+<tr><td>P036</td><td>Wong Mei Ling, S8738305E, born 17 Feb 2004, full-time student and part-time administrative assistant, employer Brightpath Trading Pte. Ltd., declared annual income SGD 9,600.00, account 232-874230-3, address Blk 572 Clementi Avenue 2, #07-322, Singapore 371391</td><td>Money mule</td><td>Five cash deposits totalling SGD 96,111.55 at four branches; five INV PAYMENT transfers of SGD 95,229.55 to C08, the recorded employer; call note records that the employer asked her to receive client payments into the personal account and forward them.</td></tr>
+<tr><td>P016</td><td>Kavitha d/o Krishnan, S5922145F, born 01 Feb 1968, corporate secretarial executive, employer Apex Corporate Services Pte. Ltd., declared annual income SGD 58,000.00, account 485-255766-4, address Blk 254 Sengkang East Way, #05-196, Singapore 631775</td><td>Nominee director</td><td>Sole director of C07 and C08 and protector of T01; call note records that she is a director of several client companies of the corporate service provider and receives a flat fee per directorship; her own account shows only a monthly salary credit of SGD 4,830.00 from the employer and no part of the flow.</td></tr>
+</table>
+<h3>Linked companies and trusts</h3>
+<table>
+<tr><th>ID</th><th>Entity</th><th>Role in the flow</th><th>Registry and deed particulars</th></tr>
+<tr><td>C07</td><td>Northwind Advisory Pte. Ltd., UEN 202561014W, account 608-708064-7</td><td>Receives INV PAYMENT credits from P020 (SGD 95,779.00) and consultancy fees from C08 (SGD 169,010.04); pays four capital distributions to the trustee of T01 (SGD 233,014.36).</td><td>Incorporated 07 Jan 2025; management consultancy; paid-up capital SGD 10,000.00; sole director Kavitha d/o Krishnan (S5922145F); 100 per cent shareholder Meridian Trustees Pte. Ltd. as trustee of T01; secretary Apex Corporate Services Pte. Ltd.; registered address 10 Anson Road, #22-05, Singapore 079903.</td></tr>
+<tr><td>C08</td><td>Brightpath Trading Pte. Ltd., UEN 202465802K, account 811-467188-9</td><td>Receives INV PAYMENT credits from P013 and P036 (SGD 187,788.94); pays C07 six consultancy fees of SGD 28,168.34 (SGD 169,010.04).</td><td>Incorporated 19 Aug 2024; general wholesale trade; paid-up capital SGD 1,000.00; sole director and 100 per cent shareholder Kavitha d/o Krishnan (S5922145F); secretary Apex Corporate Services Pte. Ltd.; registered address Blk 537 Clementi Avenue 2, #16-309, Singapore 794149, the address recorded for P006 and P020.</td></tr>
+<tr><td>T01</td><td>Harbour Light Trust, trust account 170-980770-1</td><td>Receives the four capital distributions from C07 (SGD 233,014.36); pays three beneficiary distributions to P006 (SGD 209,712.93).</td><td>Discretionary trust settled 02 Nov 2024; settlor Lim Siew Hoon; trustee Meridian Trustees Pte. Ltd.; protector Kavitha d/o Krishnan; beneficiary TAN WEI MING MARCUS (S9734264A); purpose general family purposes; source of wealth recorded in the deed as not documented.</td></tr>
+</table>
+<p class="note">For comparison, the Lim Family Trust (T02) paid two quarterly income distributions of SGD 18,500.00 to P022 Lim Jia Hui, is supported by a 2011 settlement and a 2010 business sale agreement, and shows no connection with the accounts described above.</p>
+</section>
+
+<section id="network">
+<h2>Network</h2>
+<p>Solid lines are fund flows identified from account numbers in the statements; dashed lines are ownership, control and personal links. Node labels are the case IDs.</p>
+<svg viewBox="0 0 900 560" width="900" height="560" role="img" aria-label="Network graph of subjects and linked entities">
+<defs>
+<marker id="arw" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+<path d="M0,0 L7,3 L0,6 Z" fill="#7a1f1f"/>
+</marker>
+</defs>
+<line class="flow" x1="150" y1="100" x2="390" y2="100" marker-end="url(#arw)"/>
+<line class="flow" x1="150" y1="200" x2="390" y2="200" marker-end="url(#arw)"/>
+<line class="flow" x1="150" y1="300" x2="640" y2="300" marker-end="url(#arw)"/>
+<line class="flow" x1="440" y1="220" x2="640" y2="280" marker-end="url(#arw)"/>
+<line class="flow" x1="690" y1="280" x2="440" y2="180" marker-end="url(#arw)"/>
+<line class="flow" x1="440" y1="120" x2="690" y2="380" marker-end="url(#arw)"/>
+<line class="flow" x1="740" y1="400" x2="490" y2="440" marker-end="url(#arw)"/>
+<line class="own" x1="740" y1="320" x2="440" y2="150"/>
+<line class="own" x1="690" y1="320" x2="440" y2="150"/>
+<line class="own" x1="740" y1="420" x2="740" y2="340"/>
+<line class="link" x1="440" y1="440" x2="440" y2="180"/>
+<line class="link" x1="150" y1="180" x2="440" y2="420"/>
+<circle class="node-p" cx="100" cy="100" r="26"/>
+<circle class="node-p" cx="100" cy="200" r="26"/>
+<circle class="node-p" cx="100" cy="300" r="26"/>
+<circle class="node" cx="400" cy="100" r="26"/>
+<circle class="node" cx="690" cy="300" r="26"/>
+<circle class="node-t" cx="740" cy="420" r="26"/>
+<circle class="node-p" cx="440" cy="460" r="26"/>
+<circle class="node-p" cx="740" cy="320" r="26"/>
+<text class="lbl" x="100" y="104" text-anchor="middle">P013</text>
+<text class="lbl" x="100" y="204" text-anchor="middle">P020</text>
+<text class="lbl" x="100" y="304" text-anchor="middle">P036</text>
+<text class="lbl" x="400" y="104" text-anchor="middle">C07</text>
+<text class="lbl" x="690" y="304" text-anchor="middle">C08</text>
+<text class="lbl" x="740" y="424" text-anchor="middle">T01</text>
+<text class="lbl" x="440" y="464" text-anchor="middle">P006</text>
+<text class="lbl" x="740" y="324" text-anchor="middle">P016</text>
+<text class="cap" x="100" y="140" text-anchor="middle">cash in, 5 deposits</text>
+<text class="cap" x="100" y="240" text-anchor="middle">cash in, 5 deposits</text>
+<text class="cap" x="100" y="340" text-anchor="middle">cash in, 5 deposits</text>
+<text class="cap" x="400" y="140" text-anchor="middle">Northwind Advisory</text>
+<text class="cap" x="690" y="266" text-anchor="middle">Brightpath Trading</text>
+<text class="cap" x="740" y="460" text-anchor="middle">Harbour Light Trust</text>
+<text class="cap" x="440" y="500" text-anchor="middle">Marcus Tan (key actor)</text>
+<text class="cap" x="806" y="324" text-anchor="middle">director of C07, C08;</text>
+<text class="cap" x="806" y="338" text-anchor="middle">protector of T01</text>
+<text class="edge" x="250" y="92" text-anchor="middle">INV PAYMENT SGD 92,559.39</text>
+<text class="edge" x="250" y="192" text-anchor="middle">INV PAYMENT SGD 95,779.00</text>
+<text class="edge" x="395" y="288" text-anchor="middle">INV PAYMENT SGD 95,229.55</text>
+<text class="edge" x="560" y="240" text-anchor="middle">consultancy fee SGD 169,010.04</text>
+<text class="edge" x="520" y="200" text-anchor="middle">six instalments of SGD 28,168.34</text>
+<text class="edge" x="530" y="270" text-anchor="middle">capital distribution SGD 233,014.36</text>
+<text class="edge" x="640" y="452" text-anchor="middle">beneficiary distribution SGD 209,712.93</text>
+<text class="edge" x="300" y="330" text-anchor="middle">property downpayment SGD 139,808.62 (08 Jun 2026)</text>
+<text class="edge" x="590" y="120" text-anchor="middle">C07 100% held by trustee of T01</text>
+<text class="edge" x="600" y="360" text-anchor="middle">C08 100% owned by P016</text>
+<text class="edge" x="470" y="320" text-anchor="middle">P006 and P020 share the same address</text>
+<text class="edge" x="250" y="300" text-anchor="middle">P006 mobile is P013 alternate contact</text>
+</svg>
+</section>
+
+<section id="transactions">
+<h2>Material transactions</h2>
+<h3>Placement: branch cash credits into the personal accounts</h3>
+<table>
+<tr><th>Customer</th><th>Date(s)</th><th>Branch(es)</th><th class="num">Cash credits (SGD)</th><th class="num">Onward INV PAYMENT (SGD)</th><th>Recipient account</th></tr>
+<tr><td>P020</td><td>10 Mar, 24 Mar (two), 03 Apr, 14 May 2026</td><td>Jurong East; Ang Mo Kio (two); Raffles Place; Tampines</td><td class="num">96,485.00</td><td class="num">95,779.00</td><td>C07, 608-708064-7</td></tr>
+<tr><td>P036</td><td>14 Mar (two), 30 Mar, 30 Apr, 21 May 2026</td><td>Raffles Place (three); Jurong East; Bedok</td><td class="num">96,111.55</td><td class="num">95,229.55</td><td>C08, 811-467188-9</td></tr>
+<tr><td>P013</td><td>21 Mar, 26 Apr (two), 01 May, 05 May 2026</td><td>Raffles Place (two); Ang Mo Kio; Jurong East; Tampines</td><td class="num">93,499.39</td><td class="num">92,559.39</td><td>C08, 811-467188-9</td></tr>
+<tr><td>P012</td><td>14 Apr 2026</td><td>one deposit</td><td class="num">19,800.00</td><td class="num">not applicable</td><td>no onward transfer recorded</td></tr>
+<tr><th>Total cash credits</th><td></td><td></td><td class="num">305,895.94</td><td class="num">283,567.94</td><td></td></tr>
+</table>
+<p class="note">Each of the 15 deposits relating to P013, P020 and P036 was below SGD 20,000.00 and was followed within one to three days by an electronic transfer of a similar amount, leaving the account close to nil. The five branches used were Ang Mo Kio, Bedok, Jurong East, Raffles Place and Tampines.</p>
+<h3>Layering: company, trust and beneficiary legs</h3>
+<table>
+<tr><th>Date</th><th>From</th><th>To</th><th>Description</th><th class="num">Amount (SGD)</th></tr>
+<tr><td>20 Mar, 31 Mar, 11 Apr, 22 Apr, 03 May, 14 May 2026</td><td>C08 (811-467188-9)</td><td>C07 (608-708064-7)</td><td>CONSULTANCY FEE, six identical instalments</td><td class="num">28,168.34 each; 169,010.04 total</td></tr>
+<tr><td>02 Apr, 20 Apr, 08 May, 26 May 2026</td><td>C07 (608-708064-7)</td><td>Meridian Trustees, Harbour Light Trust account (170-980770-1)</td><td>CAPITAL DISTRIBUTION TO TRUSTEE, four identical telegraphic transfers</td><td class="num">58,253.59 each; 233,014.36 total</td></tr>
+<tr><td>20 Apr, 07 May, 24 May 2026</td><td>T01 (170-980770-1)</td><td>P006 (913-288499-3)</td><td>BENEFICIARY DISTRIBUTION, three identical telegraphic transfers</td><td class="num">69,904.31 each; 209,712.93 total</td></tr>
+<tr><td>08 Jun 2026</td><td>P006 (913-288499-3)</td><td>PropNex conveyancing</td><td>TT - PROPERTY DOWNPAYMENT</td><td class="num">139,808.62</td></tr>
+</table>
+<p class="note">The INV PAYMENT credits received by C07 from P020 (SGD 95,779.00) and by C08 from P013 and P036 (SGD 187,788.94) are the same transfers shown in the personal account columns above. The suspicious flow runs from 10 Mar 2026, the first cash deposit, to 08 Jun 2026, the property downpayment.</p>
+</section>
+
+<section id="grounds">
+<h2>Grounds for suspicion</h2>
+<ol>
+<li><strong>Structured cash deposits.</strong> Fifteen deposits to three personal accounts, each below SGD 20,000.00, spread over five branches, totalling SGD 286,095.94, against declared annual incomes of SGD 14,400.00, SGD 26,000.00 and SGD 9,600.00. Source: <span class="src">case/statements/P013_statement.csv, P020_statement.csv, P036_statement.csv</span>; <span class="src">case/profiles/</span> for the same IDs.</li>
+<li><strong>Rapid pass-through.</strong> Each deposit was transferred out within one to three days and the personal accounts were left close to nil, which is not consistent with the use of a personal account for ordinary living expenses. Source: <span class="src">case/statements/P013_statement.csv, P020_statement.csv, P036_statement.csv</span>.</li>
+<li><strong>Customer explanation absent or inconsistent.</strong> P013 could not explain the purpose of the cash deposits; P036 stated that her employer asked her to receive client payments into the personal account. Source: <span class="src">case/rm_notes/P013_call_note.eml, P036_call_note.eml</span>.</li>
+<li><strong>Companies with the characteristics of shells.</strong> C07 was incorporated on 07 Jan 2025 with paid-up capital of SGD 10,000.00 and C08 on 19 Aug 2024 with paid-up capital of SGD 1,000.00; both have a single director and a corporate secretarial company as secretary, and neither shows payroll or supplier payments of the size expected of trading activity. Source: <span class="src">case/registry/C07_Northwind_Advisory_Pte_Ltd.json, C08_Brightpath_Trading_Pte_Ltd.json</span>; <span class="src">case/statements/C07_statement.csv, C08_statement.csv</span>.</li>
+<li><strong>Nominee directorship.</strong> One individual, P016, is the sole director of both companies and the protector of the trust, and is recorded as a director of several client companies of her corporate service provider for a flat fee per directorship. Source: <span class="src">case/registry/C07_Northwind_Advisory_Pte_Ltd.json, C08_Brightpath_Trading_Pte_Ltd.json</span>; <span class="src">case/trusts/T01_Harbour_Light_Trust.txt</span>; <span class="src">case/rm_notes/P016_call_note.eml</span>.</li>
+<li><strong>Round-tripping between the two companies.</strong> C08 paid C07 six identical consultancy fees of SGD 28,168.34, a total of SGD 169,010.04, which is close to the SGD 187,788.94 C08 received from the personal accounts; the fee is described as consultancy although C08 is recorded as a general wholesale trading company. Source: <span class="src">case/statements/C08_statement.csv, C07_statement.csv</span>; <span class="src">case/registry/C08_Brightpath_Trading_Pte_Ltd.json</span>.</li>
+<li><strong>Layering through a trust with undocumented source of wealth.</strong> C07, whose 100 per cent shareholder is the trustee of T01, paid SGD 233,014.36 of capital distributions into the trust account and the trust paid SGD 209,712.93 to the sole beneficiary; the deed records the source of wealth as not documented. Source: <span class="src">case/trusts/T01_Harbour_Light_Trust.txt</span>; <span class="src">case/statements/T01_statement.csv, C07_statement.csv, P006_statement.csv</span>.</li>
+<li><strong>Value in the key actor's account out of proportion to declared income.</strong> P006 declared annual income of SGD 96,000.00 and received SGD 209,712.93 in trust distributions in five weeks, followed by a property downpayment of SGD 139,808.62. Source: <span class="src">case/profiles/P006_Marcus_Tan_Wei_Ming.docx</span>; <span class="src">case/statements/P006_statement.csv</span>.</li>
+<li><strong>Address and contact links between the parties.</strong> The residential address recorded for P020, Blk 537 Clementi Avenue 2, #16-309, Singapore 794149, is the address recorded for P006 and is also the registered address of C08; the mobile number on P006's profile, +65 9470 5911, is the alternate contact number recorded for P013 for a nephew who assists with banking. Source: <span class="src">case/profiles/P006_Marcus_Tan_Wei_Ming.docx, P020_Daniel_Ng_Zhi_Hao.json</span>; <span class="src">case/registry/C08_Brightpath_Trading_Pte_Ltd.json</span>; <span class="src">case/rm_notes/P013_call_note.eml</span>.</li>
+<li><strong>Adverse media, treated as an allegation.</strong> A report dated 18 May 2026 states that a person named Marcus Tan, a former property agent, was charged in court with cheating. The report does not state an identity card number, so the match with P006 is not confirmed. Source: <span class="src">case/media/MEDIA-01_marcus_tan_charged.html</span>.</li>
+<li><strong>Thematic media context.</strong> A report on corporate service providers notes regulatory attention to nominee directors and newly incorporated companies with a single director. Source: <span class="src">case/media/MEDIA-02_corporate_service_providers.html</span>.</li>
+</ol>
+<h3>Inferences</h3>
+<p>This suggests that the three personal accounts were used to place cash in amounts below the reporting threshold and to pass it to the two companies. This suggests that the consultancy fees between C08 and C07 and the capital distributions to the trustee moved the funds through two further entities before they reached P006. This suggests that P016 acts as a nominee rather than as a decision-maker, given the flat fee arrangement and the absence of the funds from her own account. This suggests that P006 is the person who benefits from the funds, given the trust deed, the distributions and the property payment. It remains to be established whether the cash has a legitimate origin; the case file does not record a documented source of wealth for the trust.</p>
+</section>
+
+<section id="recommendation">
+<h2>Recommendation</h2>
+<ul>
+<li>Consider filing a suspicious transaction report with the Suspicious Transaction Reporting Office (STRO). The cash placement of SGD 305,895.94, the pass-through pattern, the company and trust layering and the undocumented source of wealth provide reasonable grounds to suspect that the funds may represent the proceeds of an offence. The report should not be disclosed to the customers or to any other person outside the bank.</li>
+<li>Escalate the relationship of P006, P013, P020, P036, P016, C07, C08 and T01 to enhanced due diligence and treat them as a single linked group for monitoring purposes.</li>
+<li>Request from P013, P020 and P036 the identity of the person who made each cash deposit, the origin of the cash and supporting documents, and confirm whether the deposits were made in person.</li>
+<li>Request from C07 and C08 the underlying contracts and invoices for the consultancy fees, the financial statements and tax filings, particulars of the beneficial owners, and confirmation of the business rationale for the payments received from the personal accounts.</li>
+<li>Request from the trustee of T01 the trust accounts, the settlement date and asset records, and a documented source of wealth for the trust; obtain confirmation of the trustee's own due diligence on the settlor, Lim Siew Hoon.</li>
+<li>Obtain from P006 the option to purchase, the conveyancing invoice and the property particulars for the downpayment of SGD 139,808.62, and confirm the source of the balance of the purchase price.</li>
+<li>Confirm the identity of the person named in the media report by identity card number before relying on it, and record the outcome in the customer file.</li>
+<li>Review the relationship of P012 (cash deposit of SGD 19,800.00 on 14 Apr 2026) and retain the vehicle sale documentation on file; no further action is recommended at this stage.</li>
+<li>Continue transaction monitoring for a further three months, with attention to further cash deposits below SGD 20,000.00 and to any further distributions from T01.</li>
+</ul>
+<p class="note">Prepared from the case file only. No information outside <span class="src">case/</span> was used and no changes were made to the case file.</p>
+</section>
+</body>
+</html>

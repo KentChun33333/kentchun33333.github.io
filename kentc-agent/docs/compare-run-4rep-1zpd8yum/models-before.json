@@ -1,0 +1,1 @@
+{"object": "list", "data": [{"id": "huihui-v2-swift-qwen3.8-flash-next-iq3_s", "object": "model", "status": {"value": "loaded"}, "meta": {"n_ctx": 62536}, "architecture": {"input_modalities": ["text"], "output_modalities": ["text"]}}]}

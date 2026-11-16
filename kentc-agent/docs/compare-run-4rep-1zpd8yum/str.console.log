@@ -1,0 +1,50 @@
+{"variant": "original", "trial": 1, "overall": 0.9306, "axes": {"A_overall_picture": 0.7222, "B_cross_identification": 1.0, "C_report": 1.0}, "wall_s": 1634.0, "error": null}
+{"variant": "topics", "trial": 1, "overall": 0.9333, "axes": {"A_overall_picture": 0.8333, "B_cross_identification": 1.0, "C_report": 0.9167}, "wall_s": 1918.7, "error": null}
+{"variant": "topics", "trial": 2, "overall": 0.8119, "axes": {"A_overall_picture": 0.7222, "B_cross_identification": 0.9584, "C_report": 0.6667}, "wall_s": 2101.7, "error": null}
+{"variant": "original", "trial": 2, "overall": 0.6417, "axes": {"A_overall_picture": 0.6667, "B_cross_identification": 1.0, "C_report": 0.0833}, "wall_s": 1566.2, "error": null}
+{"variant": "original", "trial": 3, "overall": 0.6625, "axes": {"A_overall_picture": 0.75, "B_cross_identification": 1.0, "C_report": 0.0833}, "wall_s": 1516.0, "error": "IncompleteReply: The reply hit max_output_tokens; generate a complete response within the output budget."}
+{"variant": "topics", "trial": 3, "overall": 0.3804, "axes": {"A_overall_picture": 0.3333, "B_cross_identification": 0.2527, "C_report": 0.6111}, "wall_s": 1519.7, "error": null}
+{"variant": "topics", "trial": 4, "overall": 0.3099, "axes": {"A_overall_picture": 0.5, "B_cross_identification": 0.3923, "C_report": 0.0278}, "wall_s": 1682.3, "error": null}
+{"variant": "original", "trial": 4, "overall": 0.0, "axes": {"A_overall_picture": 0.0, "B_cross_identification": 0.0, "C_report": 0.0}, "wall_s": 1626.8, "error": null}
+[
+  {
+    "variant": "original",
+    "trials": 4,
+    "median_overall": 0.6521,
+    "median_A_overall_picture": 0.69445,
+    "median_B_cross_identification": 1.0,
+    "median_C_report": 0.0833,
+    "median_answer_wall_s": 1596.507803562563,
+    "median_file_coverage": 0.26444999999999996,
+    "median_repeated_reads": 0.0,
+    "median_peak_rss_mib": 136.0625,
+    "median_foreground_calls": 80.0,
+    "median_foreground_prompt_tokens": 2241474.5,
+    "median_foreground_completion_tokens": 39322.5,
+    "median_summary_calls": 2.0,
+    "median_summary_prompt_tokens": 46754.5,
+    "median_summary_completion_tokens": 4092.0,
+    "errors": [
+      "IncompleteReply: The reply hit max_output_tokens; generate a complete response within the output budget."
+    ]
+  },
+  {
+    "variant": "topics",
+    "trials": 4,
+    "median_overall": 0.59615,
+    "median_A_overall_picture": 0.6111,
+    "median_B_cross_identification": 0.67535,
+    "median_C_report": 0.6389,
+    "median_answer_wall_s": 1800.5162727920106,
+    "median_file_coverage": 0.3347,
+    "median_repeated_reads": 0.0,
+    "median_peak_rss_mib": 129.9609375,
+    "median_foreground_calls": 80.0,
+    "median_foreground_prompt_tokens": 2181967.0,
+    "median_foreground_completion_tokens": 36201.0,
+    "median_summary_calls": 6.5,
+    "median_summary_prompt_tokens": 74823.0,
+    "median_summary_completion_tokens": 7716.5,
+    "errors": []
+  }
+]

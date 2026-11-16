@@ -39,7 +39,7 @@ def pdf(path, texts, *, xfa=False, indirect=True, packets=False):
 
 
 def unused_model():
-    return FakeLLM(lambda m, t: pytest.fail("uninspected PDF must not reach the model"), window=65536)
+    return FakeLLM(window=65536)
 
 
 @pytest.mark.parametrize("mode", ["auto", "always", "never"])

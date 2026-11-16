@@ -1,6 +1,6 @@
 # Project agent instructions (kentc-agent/)
 
-Persona for **all** replies: [`personas/teddy.md`](personas/teddy.md) — Teddy.
+Persona for **all** replies: [`personas/catty.md`](personas/catty.md) — Catty.
 
 - Applies to every task type (code, terminal, data, documents, writing, chat);
   tone intensity follows the persona's dial — drop to fully neutral for
@@ -10,11 +10,13 @@ Persona for **all** replies: [`personas/teddy.md`](personas/teddy.md) — Teddy.
   generated artifacts stay neutral and professional.
 - Language follows the user; default 繁體中文.
 - Compliance / KYC work additionally loads
-  [`personas/teddy-kyc.md`](personas/teddy-kyc.md). The screening script and
+  [`personas/catty-kyc.md`](personas/catty-kyc.md). The screening script and
   the synthetic datasets live in the sibling workspace:
   `../data/kyc_review.py` (output: `../data/kyc_review_output.txt`) and
   `../data/document-datasets/` — outputs are process demos, not real
   compliance decisions.
-- Install the persona into other CLI agents: `./personas/install_teddy.sh`
+- Install the persona into other CLI agents: `./personas/install_catty.sh`
   (`--dry-run` to preview, `--remove` to undo; only the marked block is
   touched, existing content preserved, backups kept as `*.bak-*`).
+  Applying it replaces previously installed Teddy blocks with Catty; removal
+  recognizes both marker names and preserves instructions outside those blocks.

@@ -3,511 +3,63 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="kentc_agent 核心方法論：單一主代理、伺服器能力偵測、上下文預算、文件解析、工具結果安全檢查、工作流程中的網路研究子代理，以及工作區與工作階段的清楚分工。">
+<meta name="description" content="kentc_agent 核心方法論：單一主代理、伺服器能力偵測、上下文預算、文件解析、工具結果安全檢查、工作流程中的網路研究子代理、工作區與工作階段的分工，以及主題筆記壓縮與歷史 A/B 實測。">
 <title>kentc_agent｜核心方法論與執行設計</title>
 <link rel="stylesheet" href="asset/css/core.css">
+<link rel="stylesheet" href="asset/css/shell.css">
 </head>
-<body>
-<a class="sr-only" href="#main">跳至主要內容</a>
+<body class="shell">
+<div class="progress" aria-hidden="true"><span id="progress"></span></div>
+<a class="sr-only" href="#view">跳至主要內容</a>
 <header class="top"><div class="top-in">
-  <a class="brand" href="#main">kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
-  <nav aria-label="章節導覽"><a href="#layers">三種使用層</a><a href="#principles">方法論</a><a href="#loop">執行迴圈</a><a href="#capabilities">能力與策略</a><a href="#vertical">上下文</a><a href="#documents">文件解析</a><a href="#folders">記憶分工</a><a href="#workflows">工作流程</a><a href="#web">網路研究</a><a href="#web-design">設計思考</a><a href="#studio">Studio 應用</a><a href="#reference">實作索引</a></nav>
+  <a class="brand" href="#" data-home>kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
+  <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
 </div></header>
-<main id="main">
+<div class="reader">
+  <aside class="sidebar" id="sidebar" aria-label="主題目錄"><nav class="side-nav" id="sideNav" aria-label="主題"></nav></aside>
+  <main id="view" tabindex="-1">
+  <noscript>
+  <p class="noscript">閱讀器需要 JavaScript；每個主題也都是獨立頁面，可直接開啟：</p>
+  <ol>
+    <li><a href="topics/layers.html">00 · 三種使用層</a> — 越無人看管，權限越收斂</li>
+    <li><a href="topics/principles.html">01 · 方法論</a> — 把任務拆成「證據、行動、控制、紀錄」</li>
+    <li><a href="topics/loop.html">02 · 執行迴圈</a> — 一次 run 可以包含多個 operation</li>
+    <li><a href="topics/capabilities.html">03 · 能力與策略</a> — 伺服器能力 ≠ 代理設定</li>
+    <li><a href="topics/vertical.html">04 · 上下文視窗</a> — 跨回合壓縮歷史；單回合控制新資料</li>
+    <li><a href="topics/documents.html">05 · 文件解析</a> — 先轉換，再依預算解析；只接受完整結果</li>
+    <li><a href="topics/folders.html">06 · 記憶分工</a> — 「存在哪裡」與「模型看得到什麼」是兩個問題</li>
+    <li><a href="topics/eval.html">07 · 長任務記憶：摘要 → 主題筆記</a> — 舊版（v1）把舊歷史壓成單一摘要；長任務的精確細節在壓縮中流失，代理被迫重找證據。</li>
+    <li><a href="topics/workflows.html">08 · 工作流程</a> — 同一個 Agent，依階段改變指示與工具清單</li>
+    <li><a href="topics/web.html">09 · 網路研究</a> — 網路資料以「步驟」取得，像文件一樣交付</li>
+    <li><a href="topics/studio.html">10 · Studio 應用</a> — 一個三頁非同步迴圈；換一份 YAML，就是新的應用</li>
+    <li><a href="topics/example.html">11 · 完整範例</a> — 一份掃描發票，從檔案到可核對的回答</li>
+    <li><a href="topics/reference.html">12 · 實作索引</a> — 責任索引與閱讀檢查表</li>
+  </ol>
+  </noscript>
+  </main>
+  <aside class="outline" id="outline" aria-label="本頁內容"></aside>
+</div>
+<template id="homeTpl">
 <section class="hero" aria-labelledby="title">
   <p class="eyebrow">核心設計說明 · 依目前程式實作整理</p>
   <h1 id="title">不是堆疊更多代理，<br>而是讓每一步都<em>有邊界、有依據、可追查。</em></h1>
-  <p class="lead"><b>kentc_agent</b> 的方法是：以一個主代理持續處理任務；工具負責取得證據與產生實際變更；執行環境負責控制上下文、保存大型結果與修復中斷。文件解析另開乾淨的工作階段，但不把整個任務交給另一組代理。</p>
-  <div class="pills"><span class="pill">1 個主代理迴圈</span><span class="pill">4 個核心工具</span><span class="pill">2 種上下文控制</span><span class="pill">CLI · 工作流程 · Studio 三層</span><span class="pill">Studio：1 個三頁迴圈 · N 個應用</span><span class="pill">工作區 ＋ 工作階段記憶</span></div>
-  <p class="scope"><b>本文範圍：</b><code>kentc-agent/src/kentc_agent/</code> 核心套件，以及它在三種使用層（CLI 對話、工作流程、Studio）中的權限差異。工作流程用來說明如何編排同一個代理，以及網路研究子代理如何以「步驟」的形式加入；Studio 說明應用框架（<code>src/kentc_studio/</code>：應用 YAML、區塊、報告框架、非同步提示），不展開各應用的業務判斷或長期記憶系統。</p>
+  <p class="lead">目標：以<b>小型本機模型</b>完成需讀取上百份文件、上百次工具往返的<b>長任務</b>，且每個結論可回溯來源。三個約束貫穿全部設計：視窗有限、模型會出錯、輸入不可信。</p>
+  <div class="psd">
+    <div class="psd-item problem"><span>問題</span><p>W = 62,536 tokens。一件 40 人審查案：121 檔、約 242,000 字元，原始資料 ≈ 一個視窗；執行期累積 ≈ 200 萬 prompt tokens。模型會漏步、心算錯、重複指令、誤把注入文字當指令。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>單一主代理、四個工具。上下文由執行環境控制：縱向壓縮歷史、橫向外存大型結果、文件交隔離子代理；外部資料走受控步驟；權限隨看管程度收斂。</p></div>
+    <div class="psd-item data"><span>依據</span><p>歷史 A/B（舊版 v1 已移除），同模型、同任務各 4 次：STR 中位數 v1 0.65、v2（現行 runtime 前身）0.60，不分勝負（v2 交檔較穩、v1 較守格式）；剩餘次數提醒使記憶回復 0/4 → 3/4。見 <a href="topics/eval.html" data-slug="eval">07 · 長任務記憶：摘要 → 主題筆記</a>。</p></div>
+  </div>
+  <div class="pills"><span class="pill">1 個主代理迴圈</span><span class="pill">4 個核心工具</span><span class="pill">2 個上下文方向：縱向／橫向</span><span class="pill">CLI · 工作流程 · Studio 三層</span><span class="pill">checkpoint ＋ 主題筆記壓縮</span><span class="pill">工作區 ＋ 工作階段記憶</span></div>
+  <p class="scope"><b>範圍：</b><code>kentc-agent/src/kentc_agent/</code>（唯一 runtime，主題筆記壓縮；舊版摘要壓縮 v1 已移除），及其在 CLI 對話、工作流程、Studio 三種使用層的權限差異；含工作流程編排、網路研究步驟、Studio 應用框架（<code>src/kentc_studio/</code>）。不涵蓋各應用的業務判斷。</p>
 </section>
-<noscript><p class="noscript">此頁的架構與方法論可直接閱讀；互動計算器及流程切換需要啟用 JavaScript。它們只做本機教學模擬，不會呼叫模型或修改設定。</p></noscript>
-
-<section class="card" id="layers" aria-labelledby="layers-title">
-  <p class="eyebrow">00 · 同一個代理，三種使用層</p>
-  <h2 id="layers-title">越無人看管，權限越收斂</h2>
-  <p class="sub">核心代理只有一個；差別在於誰在旁邊看、能用哪些工具、成果長什麼樣子。人在迴圈中時給最多工具；長時間自主執行時，網路只能透過受控的網路代理；Studio 面對上傳的不可信文件，輸入與輸出都由系統定義。</p>
-  <div class="grid3">
-    <article class="box"><span class="number">CLI 對話</span><h3>人在迴圈中，逐回合確認</h3><p>工具：<code>read</code>、<code>write</code>、<code>edit</code>、<code>bash</code>，再加上<b>經篩選的 <code>web_search</code></b>：結果先經篩選子代理與安全檢查才進入對話；查詢由你的提問觸發。可用 <code>--tools</code> 縮減。</p><p class="why">成果：直接回答、工作區檔案。</p></article>
-    <article class="box"><span class="number">工作流程</span><h3>長時間、自主執行</h3><p>主代理只有四個核心工具，<b>沒有</b> <code>web_search</code>（步驟中列出會在載入時被拒絕）。需要外部資料時，安排 <code>web:</code> 步驟，由網路代理負責：篩選、搜尋預算、連結查核、人工核准。</p><p class="why">成果：檔案（<code>research/</code>、<code>notes/</code>、<code>reports/</code>），可 <code>--resume</code>。</p></article>
-    <article class="box"><span class="number">Studio</span><h3>網頁體驗，系統定義輸入與輸出</h3><p>代理讀上傳文件與 SQL 擷取資料，<b>只讀案件資料夾</b>、永不給 <code>bash</code>、沒有網路。一個 Studio 服務多個應用（<code>config/apps/&lt;name&gt;/app.yaml</code>），<code>app.yaml</code> 本身就是工作流程：每個代理直接在其中宣告為契約，配備技能（<code>kentc-agent/skills/&lt;name&gt;.md</code>），依 <code>output</code> 回傳 JSON 並通過 <code>checks</code>，由應用的 <code>view</code> 以固定的區塊類型呈現；報告代理另需回傳報告框架欄位（<code>title</code>、<code>verdict</code>、<code>reply</code>、<code>requests</code>、<code>questions</code>）。</p><p class="why">成果：結構化 JSON → 前端區塊（不讓代理直接產生 HTML）。</p></article>
-  </div>
-  <div class="callout"><b>Studio 的頁面轉換就是工作流程：</b>第 1 頁 → 第 2 頁（洞察代理逐檔或逐通道讀取）、第 2 頁 → 第 2 頁（標記或備註後重跑該代理）、第 2 頁 → 第 3 頁（產生報告）、第 3 頁 → 第 3 頁（一則提示產生新版本）。每次非同步動作後回到案件表，新版本以 NEW 標示；輸出仍是由系統定義的 JSON，前端只渲染已知的區塊類型，且所有 view 路徑在啟動時即對照代理的 <code>output</code> 檢查。詳見 <a href="#studio">10 · Studio 應用框架</a>。</div>
+<section class="topic-index" id="topicIndex" aria-label="全部主題">
+  <h2>依問題閱讀</h2>
+  <p>每個主題依序：<b>問題</b>（缺此設計時的失效）→ <b>核心想法</b>（機制與取捨）→ <b>依據</b>（實測或程式與測試）。<kbd>←</kbd> <kbd>→</kbd> 依序閱讀，<kbd>/</kbd> 搜尋。</p>
 </section>
-
-<section class="card" id="principles" aria-labelledby="method-title">
-  <p class="eyebrow">01 · 先理解方法，再看模組</p>
-  <h2 id="method-title">把任務拆成「證據、行動、控制、紀錄」</h2>
-  <p class="sub">模型提出下一步；工具接觸真實資料；執行環境判斷能否安全送出請求並維持訊息一致性。這三者不能混為一談：模型說「已完成」不等於檔案真的寫出，檔案已存入磁碟也不等於模型已讀到它。</p>
-  <ol class="flow" aria-label="方法論的四個步驟">
-    <li><b>① 定義交付成果</b><span>先確定要回答什麼、使用哪些檔案、產出存在哪裡。</span></li>
-    <li><b>② 按需取得證據</b><span>先讀摘要與來源位置，再針對問題讀頁面、行號或明細。</span></li>
-    <li><b>③ 讓工具完成行動</b><span>數值用工具計算；檔案用工具寫入；推論與原文分開表達。</span></li>
-    <li><b>④ 以結果收尾</b><span>檢查工具結果與交付檔案；保留來源、對話及必要的操作紀錄。</span></li>
-  </ol>
-  <div class="grid3">
-    <article class="box"><span class="number">原則 01</span><h3>一個主代理，一條任務脈絡</h3><p>一次對話或整個 YAML 工作流程使用同一個 <code>Agent</code>。文件解析子代理只處理交給它的材料與問題。</p><p class="why">避免：多次交接造成資訊散落、責任不清。</p></article>
-    <article class="box"><span class="number">原則 02</span><h3>少量工具，明確權責</h3><p><code>read</code>、<code>write</code>、<code>edit</code>、<code>bash</code>，與 pi 相同的四個工具。列檔、搜尋與精確計算都透過 <code>bash</code>（<code>python3 -c</code>）。網路依使用層而定：CLI 對話另有經篩選的 <code>web_search</code>；工作流程與 Studio 的主代理沒有網路工具。</p><p class="why">避免：工具選擇過多、同一件事有兩種做法、每次請求都背著用不到的工具說明、模型自行猜測數字。</p></article>
-    <article class="box"><span class="number">原則 03</span><h3>部署能力與代理策略分開</h3><p>OpenAI／Strata 從伺服器偵測部署視窗；Qwen38 使用依目前部署提供的內建 60k 設定或明確覆寫值。輸出預算、保留範圍與分塊上限是代理策略。</p><p class="why">避免：把模型名稱當成視窗保證；換部署後應重新核實上限。</p></article>
-    <article class="box"><span class="number">原則 04</span><h3>大型內容先保存，再導讀</h3><p>主上下文不必承載每一行原文。保留摘要、來源位置與完整內容的路徑，需要時再讀取。</p><p class="why">避免：單次工具輸出擠掉整個任務脈絡。</p></article>
-    <article class="box"><span class="number">原則 05</span><h3>中斷也要維持協定完整</h3><p>每個已保存的工具呼叫都要有對應結果。參數錯誤讓模型修正；取消時補齊結果，不重跑已完成工具。</p><p class="why">避免：下一輪對話夾帶未解決的工具呼叫。</p></article>
-    <article class="box"><span class="number">原則 06</span><h3>先證據，後解釋</h3><p>工作階段保存對話；追蹤紀錄串起模型回覆、工具、解析子代理與大型結果。查問題時回到實際紀錄。</p><p class="why">避免：只根據最後一段回答猜測代理做過什麼。</p></article>
-  </div>
-</section>
-
-<section class="card" id="loop" aria-labelledby="loop-title">
-  <p class="eyebrow">02 · 任務如何真的往前走</p>
-  <h2 id="loop-title">一次 run 可以包含多個 operation</h2>
-  <p class="sub"><code>Agent.run(prompt)</code> 代表處理一個輸入。每次主迴圈會建立一個 operation，送出模型請求、處理回覆與工具批次；若還需要工具，便進入下一個 operation。一次請求可能在內部重試，因此 operation 不等於一次 HTTP 請求。</p>
-  <div class="formula">更新部署能力 → 加入使用者訊息 → [ 準備上下文 → 呼叫模型 → 驗證完整性與輸出契約 → 保存回覆 → 工具執行／結果整理 ]
-                                                        └─ 無工具呼叫：回傳答案
-                                                        └─ 有工具呼叫：保存工具結果 → 下一個 operation</div>
-  <div class="widget">
-    <div class="widget-head"><h3>逐步看一次代理迴圈</h3><span class="tag">可點選 · 非實際執行</span></div>
-    <div class="steps" id="stepBtns" role="group" aria-label="代理迴圈階段"></div>
-    <div class="step-panel" id="stepPanel" aria-live="polite"></div>
-  </div>
-  <div class="grid2" style="margin-top:16px">
-    <div class="box"><h3>四個核心工具的責任</h3><p><code>read</code>：讀取檔案、分頁或解析文件。<br><code>write</code>：建立或覆寫檔案。<br><code>edit</code>：以精確文字比對修改內容。<br><code>bash</code>：執行命令、搜尋、列檔與精確計算。<br>CLI 對話另加 <code>web_search</code>（經篩選）。</p><p class="why">Studio 代理沒有 <code>bash</code>：總額來自資料擷取（SQL）的關鍵值，其他數字須列出算式供分析師核對。</p></div>
-    <div class="box"><h3>正常停止與異常停止要分清楚</h3><p>串流內容先顯示，通過驗證才保存。截斷或無效輸出先丟棄，再有限次乾淨重試；重試耗盡、超過 <code>max_turns</code> 或拒絕回覆會明確停止。取消或錯誤盡可能補齊已保存工具呼叫的結果。</p><p class="why">未通過的回覆不當成證據，也不拿其中的工具呼叫執行；格式正確仍不代表事實正確。</p></div>
-  </div>
-  <div class="callout warn"><b>取消不是交易回滾。</b> 已寫出的檔案或已執行的命令不會自動撤銷。修復的目的是保持工具訊息配對及工作階段可繼續，不是把外部世界恢復原狀；磁碟本身無法寫入時也不能保證持久化成功。</div>
-  <div class="callout"><b>每個工具結果進入上下文前都會做安全檢查。</b> <code>context/safety.py</code> 以規則（不呼叫模型）標記針對代理的文字：覆寫指示、角色切換、「不要告訴使用者」、要求外傳資料或讀取密鑰、<code>curl | sh</code> 等（中英文），並移除零寬字元、雙向覆寫與 Unicode 標籤等隱藏字元。被標記的結果仍保留資料，但前面加上警告，提醒模型把它當成不可信的資料；追蹤紀錄寫入 <code>safety</code>。它是警報線，不是邊界；真正的控制仍是工具權限。</div>
-  <p class="source">實作對照：<a href="../src/kentc_agent/agent/loop.py">agent/loop.py</a><a href="../src/kentc_agent/agent/executor.py">agent/executor.py</a><a href="../src/kentc_agent/adapters/tools.py">adapters/tools.py</a><a href="../src/kentc_agent/context/safety.py">context/safety.py</a></p>
-</section>
-
-<section class="card" id="capabilities" aria-labelledby="cap-title">
-  <p class="eyebrow">03 · 誰決定上限，誰決定用法</p>
-  <h2 id="cap-title">伺服器能力 ≠ 代理設定</h2>
-  <div class="callout"><b>上下文視窗 W 是部署的事實，不是模型名稱的常數。</b> OpenAI／Strata 從伺服器取得；Qwen38 預設 60,000 tokens，依使用者描述的部署設定，不是即時偵測。換部署時必須確認兩個後端都放得下，必要時覆寫；輸出與分塊設定不能把 W 變大。</div>
-  <div class="tablewrap"><table>
-    <caption>能力、連線與策略的分工</caption>
-    <thead><tr><th scope="col">類別</th><th scope="col">內容</th><th scope="col">目前的來源與規則</th></tr></thead>
-    <tbody>
-      <tr><td>連線與模型選擇</td><td><code>provider</code>、<code>base_url</code>、<code>api_key</code>、<code>model</code></td><td><code>openai</code> 預設本機 Strata。<code>qwen38</code> 內建原客戶端的 coordinator／LiteLLM 端點、金鑰與模型；不需額外 YAML 或端點／金鑰環境變數。兩個 Qwen 後端各自解析覆寫或預設值，不把 Strata 當備援。</td></tr>
-      <tr><td>部署上下文視窗</td><td><code>ModelInfo.context_window</code></td><td>OpenAI 路徑讀取 <code>/models</code> 的正整數 <code>meta.n_ctx</code> 或 <code>max_model_len</code>。Qwen 的 <code>qwen_context_window</code> 預設 60,000，依使用者提供的部署資訊；不同部署應明確覆寫，不從模型家族名稱推定。</td></tr>
-      <tr><td>影像輸入能力</td><td><code>ModelInfo.vision</code></td><td>OpenAI 依 <code>architecture.input_modalities</code> 判斷；未宣告時樂觀假設支援。Qwen 預設不開影像，只有兩個後端都確認支援時才啟用 <code>qwen_vision</code>。能力設定不保證辨識正確。</td></tr>
-      <tr><td>每次輸出怎麼用</td><td><code>max_output_tokens</code>、<code>reasoning_effort</code></td><td>代理的請求策略，不代表伺服器能力。輸出請求還會依剩餘空間調整；超限時依伺服器回報重試。</td></tr>
-      <tr><td>上下文與文件策略</td><td><code>reserve_tokens</code>、<code>keep_recent_tokens</code>、<code>doc_chunk_tokens</code></td><td>可設定的上限或目標；有效值受偵測到的 W 限制，不能把伺服器視窗變大。</td></tr>
-    </tbody>
-  </table></div>
-  <div class="grid2">
-    <div class="box"><h3>什麼時候更新能力？</h3><p>每次 <code>Agent.run</code> 開始、文件預算規劃，以及上下文超限後。OpenAI 路徑重新偵測部署；Qwen 重新取得明確設定的能力。其餘一般讀取使用能力快照。</p></div>
-    <div class="box"><h3>無法取得有效視窗？</h3><p>OpenAI 缺少有效視窗或找不到所選模型會報錯。Qwen 不要求模型清單，直接採用內建 60k 或覆寫值；覆寫成 0、負值等無效值仍會報錯。內建值不等於伺服器已驗證接受。</p></div>
-  </div>
-  <div class="widget" id="direct-run">
-    <h3>兩個環境直接啟動，不需另填主機或金鑰</h3>
-    <pre><code># 本機 Strata，保留原本預設
-uv run kentc-agent "Your task"
-
-# Qwen coordinator 優先，串流開始前失敗可切 LiteLLM
-uv run kentc-agent --provider qwen38 "Your task"
-
-# Qwen LiteLLM 優先，備援為 coordinator
-uv run kentc-agent --provider qwen38 --qwen-backend litellm "Your task"</code></pre>
-    <p>Qwen 的主機、API key 與模型名稱集中在 <code>config/qwen38.yaml</code>，分為 <code>coordinator</code> 與 <code>litellm</code>，各含 <code>base_url</code>、<code>api_key</code>、<code>model</code>。修改後重啟 CLI/Studio；不需修改 Python。wheel 會將同一檔案打包到 <code>kentc_agent/deployment_config/qwen38.yaml</code>，部署設定更新後應重新建置／安裝。明確連線設定優先於後端環境變數，環境變數優先於此檔案；切換環境時不要保留過時的通用覆寫。Studio 使用同一套設定，以 <code>KENTC_AGENT_PROVIDER=qwen38</code> 選擇 Qwen。</p>
-    <p class="hint"><b>部署與憑證限制：</b>YAML 含復原的 coordinator token，移出 Python 不等於秘密管理。設定檔及包含它的建置產物都應保持私有，並在憑證外洩或到期時輪替；不把 token 複製到本頁。LiteLLM 沿用原客戶端的預設 key。TLS 驗證保持啟用，內網連線、企業 CA 信任與伺服器接受憑證仍是實際執行前提。設定檔不保證憑證永久有效。</p>
-  </div>
-  <div class="widget" id="recovery">
-    <h3>共享 TPM 與乾淨串流重試</h3>
-    <p>串流保持啟用，但畫面上的 delta 只是暫時內容。長度截斷、中斷串流與無效工具 JSON，在保存或執行前就拒絕；工作流程／Studio 的 JSON 另檢查 schema 與 checks。不修補截斷 JSON、不接受重複鍵或非 JSON 常數。</p>
-    <div class="tablewrap"><table><caption>恢復策略與預設值</caption><thead><tr><th scope="col">設定</th><th scope="col">預設</th><th scope="col">邊界</th></tr></thead><tbody>
-      <tr><td><code>tokens_per_minute</code></td><td><code>0</code></td><td>0 停用本地 token 入場估算，不停用 429 等待。若已配給 100k TPM，可設為 <code>100000</code>；預留約略輸入加請求輸出，完整 usage 可校正。</td></tr>
-      <tr><td><code>rate_limit_max_wait</code></td><td><code>120</code> 秒</td><td>單次 client 呼叫的入場與 429 等待共用上限，包含 Qwen 備援。尊重 <code>Retry-After</code> 秒數或 HTTP 日期；缺少時使用有限退避。耗盡等待或重試次數就報錯，Ctrl-C 可中斷。</td></tr>
-      <tr><td><code>output_retries</code></td><td><code>2</code></td><td>最多額外兩次乾淨輸出嘗試；設 0 不重試。原始證據與已接受上下文保留，拒絕的文字不放入新請求或修正提示；工作流程／Studio 的 <code>max_turns</code> 也限制這些嘗試。</td></tr>
-    </tbody></table></div>
-    <p>同一個 <code>LLMClient</code> 的主代理、文件子代理、壓縮呼叫與 Qwen 備援共享 60 秒滾動預算及冷卻。缺少 usage 或中斷的請求保守保留預留量，直到到期。這是 client／程序內估算，不是供應者精確帳本，也不跨獨立程序共享。</p>
-    <p>Qwen 每次請求先用 <code>qwen_backend</code>，串流開始前失敗才有限切換 coordinator ↔ LiteLLM。任何 chunk 開始後不在傳輸層重播或切換；中斷輸出整份丟棄，代理才可重新乾淨嘗試。Qwen 必須有 finish reason，單獨 <code>[DONE]</code> 不算完整。上下文超限仍交給預算／壓縮處理。</p>
-    <p class="hint">CLI 可用 <code>--tokens-per-minute</code>、<code>--rate-limit-max-wait</code>；三項設定皆可用 YAML 或 <code>KENTC_AGENT_</code> 環境變數。文件重試另開新 session；拒絕回覆與無關錯誤不做通用重試。既有舊 session 不會自動清洗，文件分塊也尚非可跨中斷續跑的工作檢查點。</p>
-  </div>
-  <p class="source">實作對照：<a href="../src/kentc_agent/adapters/llm.py">adapters/llm.py · LLMClient</a><a href="../src/kentc_agent/adapters/qwen38.py">adapters/qwen38.py · connection / fallback_settings</a><a href="../src/kentc_agent/adapters/rate_limit.py">adapters/rate_limit.py · RollingTokenBudget</a><a href="../src/kentc_agent/config.py">config.py · Settings</a>通用 <code>context_window</code> 與 <code>--context-window</code> 已移除；Qwen 使用專屬的 <code>qwen_context_window</code>。</p>
-</section>
-
-<section class="card" id="vertical" aria-labelledby="context-title">
-  <p class="eyebrow">04 · 上下文管理的兩個尺度</p>
-  <h2 id="context-title">跨回合壓縮歷史；單回合控制新資料</h2>
-  <div class="grid2">
-    <div class="box"><span class="tag">縱向 · compaction.py</span><h3>歷史太長：壓縮舊對話</h3><p>保留最近訊息，把較舊內容整理成結構化摘要。摘要與保留訊息組成下一次請求；磁碟上的原始對話仍在。</p><p class="why">解決「談太久」；不是刪除工作區檔案，也不是把資料訓練進模型。</p></div>
-    <div class="box"><span class="tag violet">橫向 · bigcontext.py</span><h3>本輪太大：大型結果外存</h3><p>工具結果超過單筆或批次預算時，保留完整內容或來源參照，給模型摘要與可再讀取的路徑。</p><p class="why">解決「一次讀太多」；不能只靠壓縮歷史處理巨量的新結果。</p></div>
-  </div>
-  <h3>不是把字數除以四就當成真實 token</h3>
-  <p>下一次輸入的估算是 <code>C + ceil(E × density)</code>：C 是最新一次伺服器 usage 所錨定的已計數部分，E 是其後新訊息的估算。沒有可用計數時，系統提示、工具 schema、摘要與對話都需估算。伺服器回報的實際輸入量會校準 density；影像仍有模型相關的估算誤差。</p>
-  <div class="widget" id="budgetWidget">
-    <div class="widget-head"><h3>上下文預算教學計算器</h3><span class="tag amber">示意參數，不是代理設定</span></div>
-    <p class="hint" style="margin:0 0 13px">這裡手動填 W，只是模擬「伺服器可能回報的視窗」。頁面不連線、不偵測模型，也不修改 config。其餘保留策略採程式預設值。</p>
-    <div class="controls">
-      <label class="field wide" for="wPreset">教學情境<select id="wPreset"><option value="15536">較小視窗 · 15,536</option><option value="32768">中型視窗 · 32,768</option><option value="65536">較大視窗 · 65,536</option></select></label>
-      <label class="field" for="wInput">假設偵測到 W<input type="number" id="wInput" value="15536" min="1024" max="2000000" step="1"></label>
-      <label class="field" for="outputInput">請求輸出上限 O<input type="number" id="outputInput" value="8192" min="512" max="2000000" step="1"></label>
-      <label class="field range" for="ctxRange">目前估算上下文 T：<b id="ctxVal">9,000</b><input type="range" id="ctxRange" value="9000" min="0" max="18643" step="1"></label>
-    </div>
-    <div class="bar" id="budgetBar" aria-hidden="true"></div><p class="bar-label">藍色：壓縮門檻前的範圍 · 紅色：保留區 · 黑線：目前估算位置（超過 W 時停在右緣）</p>
-    <div class="kv" id="budgetKV"></div>
-    <div class="verdict" id="budgetVerdict" aria-live="polite"></div>
-    <details><summary>展開預算公式與限制</summary><div class="formula">R = min(16,384, floor(W / 4))          壓縮保留量
-K = min(20,000, floor(W / 3))          最近訊息保留目標
-M = max(256, floor(W / 20))           請求安全餘裕
-room = W − T − M                     回覆可用空間
-T > W − R                            先嘗試壓縮
-room < 1,024                         嘗試強制壓縮
-max_tokens = max(512, min(O, room))   主迴圈初步請求值；之後還可能依超限回覆調整</div><p class="hint">最低 512 的請求值不代表一定放得下。若壓縮仍無法騰出空間，伺服器仍可能拒絕；計算器不把這種情況標示為「已安全送出」。摘要也只有篇幅目標與輸出預算，不是固定長度。</p></details>
-  </div>
-  <h3>壓縮的輸入、處理與輸出</h3>
-  <ol class="recipe"><li><b>找切點</b>從最近訊息往回估算，切在使用者或 assistant 訊息；不把工具結果留在沒有呼叫的那一側。</li><li><b>更新摘要</b>將較舊訊息與上一份摘要整理成目標、限制、進度、決策、下一步及關鍵資訊。</li><li><b>重建工作上下文</b>使用「摘要 ＋ 最近訊息」繼續；原始訊息留在 session 日誌，不會全部再次送給模型。</li><li><b>摘要失敗不假裝成功</b>回報問題；需要強制騰空間時可縮短舊工具結果，仍不足則可能在後續模型請求失敗。</li></ol>
-  <details><summary>density 如何校準？</summary><p class="hint">當 E ≥ 300、伺服器輸入 P &gt; C 時，觀測值為 <code>min(3, (P − C) / E)</code>。比目前更密時立即採用；較稀疏時用 <code>max(1, 0.8 × 舊值 + 0.2 × 觀測值)</code> 平滑更新。它修正估算，不是伺服器 tokenizer 的替代品。</p></details>
-
-  <h3 id="horizontal">單回合結果的三道判斷</h3>
-  <div class="tablewrap"><table><thead><tr><th scope="col">規則</th><th scope="col">觸發情況</th><th scope="col">處理方式</th></tr></thead><tbody>
-    <tr><td><span class="tag red">file</span></td><td>讀取大型檔案；PDF／影像固定走文件路徑</td><td><code>read</code> 先處理。一般文字以規則摘要；文件由解析子代理處理。</td></tr>
-    <tr><td><span class="tag red">result</span></td><td>其他單筆工具結果超過預算</td><td>例如大量命令輸出或搜尋結果，即使本輪總量尚小也先外存。</td></tr>
-    <tr><td><span class="tag violet">turn</span></td><td>多筆結果合計超過本輪預算</td><td>從尚未外存、仍大於摘要預算的候選中，優先處理最大筆；實際摘要大小仍受估算影響。</td></tr>
-  </tbody></table></div>
-  <div class="widget">
-    <div class="widget-head"><h3>大型結果路由示意</h3><span class="tag">沿用上方 W · density 示意為 1</span></div>
-    <div class="controls"><button type="button" class="btn" data-preset="small">少量結果</button><button type="button" class="btn" data-preset="mixed">混合檔案</button><button type="button" class="btn" data-preset="batch">多筆分頁</button><button type="button" class="btn" id="rClear">清空</button></div>
-    <div class="controls" style="margin-top:12px"><label class="field wide" for="rType">新增工具結果<select id="rType"><option value="text">read · 文字／程式檔</option><option value="page">read · 分頁</option><option value="pdf">read · PDF／影像</option><option value="office">read · Office／郵件／CSV</option><option value="bash">bash · 命令輸出</option></select></label><label class="field" for="rTok">結果 token 估算<input type="number" id="rTok" value="2500" min="1" max="2000000" step="1"></label><button type="button" class="btn" id="rAdd">加入結果</button></div>
-    <div class="tablewrap"><table><caption class="sr-only">結果如何進入主上下文</caption><thead><tr><th scope="col">工具結果</th><th scope="col">原始量</th><th scope="col">路由規則</th><th scope="col">摘要來源</th><th scope="col">進入上下文</th><th scope="col">操作</th></tr></thead><tbody id="rBody"></tbody></table></div>
-    <div class="verdict" id="rVerdict" aria-live="polite"></div>
-    <p class="hint">僅示意規則順序。摘要長度採假設值；不執行解析、快取、規則摘要或真實 token 計數，也不保證實際批次一定符合預算。一般文字檔可直接參照原檔，未必複製成 full.md。</p>
-  </div>
-  <p class="source">實作對照：<a href="../src/kentc_agent/context/compaction.py">context/compaction.py</a><a href="../src/kentc_agent/context/bigcontext.py">context/bigcontext.py</a><a href="../src/kentc_agent/adapters/session.py">adapters/session.py</a></p>
-</section>
-
-<section class="card" id="documents" aria-labelledby="doc-title">
-  <p class="eyebrow">05 · 文件不是一般文字，也不是另一個任務團隊</p>
-  <h2 id="doc-title">先轉換，再依預算解析；只接受完整結果</h2>
-  <p class="sub">文件子代理共用模型 client、預算與 Qwen 備援策略，但每次建立新的 session、不提供工具，也看不到主對話。它只讀本次材料與問題，回傳自足的結果；失敗重試不帶入前一次的半截輸出。</p>
-  <div class="tablewrap"><table><thead><tr><th scope="col">輸入類型</th><th scope="col">如何取得材料</th><th scope="col">主代理通常收到什麼</th></tr></thead><tbody>
-    <tr><td>原生 PDF</td><td>取得頁面文字；依 <code>doc_render</code>、文字量與視覺內容決定是否附頁面影像。</td><td>解析後的摘要與全文路徑；<code>question</code> 可改問特定問題，<code>pages</code> 可選頁。</td></tr>
-    <tr><td>掃描 PDF／獨立影像</td><td>掃描頁轉為影像；獨立圖片可直接讀，不必包成 PDF。影像內容需要模型端的視覺能力。</td><td>轉錄內容的摘要與全文路徑，或附來源位置的問題答案。</td></tr>
-    <tr><td>Office／郵件／CSV／HTML</td><td>先轉成 Markdown；保留表格位置，將附件或內嵌影像另存供後續讀取。</td><td>小文件直接回傳文字；大型文件走摘要路徑，大型且帶 <code>question</code> 時交給解析子代理。</td></tr>
-    <tr><td>影片／舊式 Office 二進位檔</td><td>影片不支援；<code>.doc</code>、<code>.xls</code>、<code>.ppt</code> 要先轉成新版格式。</td><td>明確錯誤，不假裝已讀取。</td></tr>
-  </tbody></table></div>
-  <div class="widget" id="pdf-safeguards">
-    <h3>PDF 覆蓋防線：有文字，不等於讀到真正表單</h3>
-    <div class="tablewrap"><table><caption>XFA／佔位訊息的處理</caption><thead><tr><th scope="col">情況</th><th scope="col">處理</th><th scope="col">不能宣稱什麼</th></tr></thead><tbody>
-      <tr><td>已知 viewer placeholder</td><td>辨識「Please wait… If this message is not eventually replaced… your PDF viewer may not be able to display…」及要求較新版 PDF viewer 的完整訊息；在模型呼叫或快取前報錯。一般「Adobe Reader」字樣不會單獨觸發。</td><td>佔位訊息再長也不是文件內容；渲染同一頁只會重現佔位畫面，不是成功回復。</td></tr>
-      <tr><td><code>/AcroForm/XFA</code> 表單</td><td>支援直接／間接 AcroForm 與 XFA stream／packet array 的偵測。只交付靜態頁面的渲染影像，不把擷取文字當證據；無視覺能力或 <code>doc_render: never</code> 就明確報錯。</td><td><b>動態 XFA 資料未檢視，可能缺漏。</b> 限制保留在來源 notes、轉錄成果與快取摘要 metadata，不能把靜態影像當成完整表單覆蓋。</td></tr>
-      <tr><td>明確選擇 <code>pages</code></td><td>只檢查並處理所選頁面。文件快取命名空間已更新，舊的佔位訊息快取不能繞過檢查。</td><td>不能把「所選頁面可讀」說成「整份文件已檢視」。</td></tr>
-    </tbody></table></div>
-    <p><b>恢復方式：</b>保留原檔，用支援 XFA 且能顯示實際表單的 viewer 開啟，另存／列印成獨立的 flattened PDF，再核對頁面與關鍵值後重新讀取。改副檔名或渲染原來的佔位頁不會找回資料。</p>
-    <p class="hint">這是已知佔位訊息與 XFA 的覆蓋防線，不是完整的動態 XFA 渲染器，也不是所有 PDF 都能正確解析的保證。</p>
-  </div>
-  <ol class="flow" aria-label="文件解析的四個階段"><li><b>① 轉成來源單位</b><span>頁面、工作表列區段、投影片、郵件內容；先檢查 PDF 佔位訊息與 XFA 覆蓋限制。</span></li><li><b>② 依有效預算分塊</b><span>不是固定 12k；還要放得下提示、影像及回覆。過長文字再拆分。</span></li><li class="special"><b>③ 分別解析與合併</b><span>每塊及重試都用乾淨 session；合併採有限分組，JSON 摘要在重用前驗證。</span></li><li><b>④ 驗證後才保存</b><span>完整完成且格式有效才接受／快取；截斷或無效輸出有限次重試，耗盡就報錯。</span></li></ol>
-  <div class="grid2">
-    <div class="box"><h3>轉錄與問答，輸出需求不同</h3><p>轉錄要盡量重現原文與表格，所以還要檢查 <code>ceil(user × density × 1.25) ≤ output</code>；一般問答不套這條擴展估算。</p><p class="why">影像 token 量不等於圖片內文字長度；預留餘裕仍不是完整性的數學保證，必須檢查完成原因。</p></div>
-    <div class="box"><h3>放不下時，不默默省略證據</h3><p>文字可再切，影像不能由文字分塊器安全切開。單張影像超出預算或筆記無法合併就報錯；回覆截斷先以相同證據乾淨重試，耗盡才失敗。可縮小頁面範圍、調整影像尺寸或輸出策略。</p><p class="why">增加硬視窗需調整部署；重試、視覺輸入與格式驗證都不保證內容完整或正確。</p></div>
-  </div>
-  <div class="widget">
-    <div class="widget-head"><h3>為什麼 12k 分塊上限，不代表一次就能讀 12k？</h3><span class="tag amber">預算示意 · 不是 tokenizer</span></div>
-    <p class="hint" style="margin:0 0 12px">沿用上方 W 與 O。下方 user 值是假設的單一請求內容估算，已含任務、標題、文字與影像；固定提示另外以 100 tokens 示範，並非從實際文件計算。</p>
-    <div class="controls"><label class="field" for="docUser">user 估算 tokens<input type="number" id="docUser" value="6000" min="1" max="2000000" step="1"></label><label class="field" for="docDensity">density<input type="number" id="docDensity" value="1" min="1" max="3" step="0.05"></label><label class="field wide" for="docMode">解析目的<select id="docMode"><option value="transcribe">忠實轉錄 · 預留 25% 擴展量</option><option value="extract">問題擷取／摘要</option></select></label></div>
-    <div class="kv" id="docKV"></div><div class="verdict" id="docVerdict" aria-live="polite"></div>
-    <details><summary>展開文件預算公式</summary><div class="formula">output = min(O, floor(W / 2))
-reserve = max(max(output, 1,024) + M, min(16,384, floor(W / 4)))
-input = W − reserve
-ceil((fixed + user) × density) ≤ input
-user ≤ doc_chunk_tokens（預設 12,000）
-轉錄另需 ceil(user × density × 1.25) ≤ output</div><p class="hint">還需符合影像張數上限（預設每塊 4 張）。程式會對實際完整提示做估算與分塊，不使用本頁示意的 fixed = 100。這裡的 output 是規劃用保留量，不保證模型一定產出那麼多 tokens。</p></details>
-  </div>
-  <p class="source">實作對照：<a href="../src/kentc_agent/adapters/documents/loaders.py">adapters/documents/loaders.py · load_pdf</a><a href="../src/kentc_agent/adapters/documents/policy.py">adapters/documents/policy.py · read_document / parse_digest</a><a href="../src/kentc_agent/adapters/documents/budget.py">adapters/documents/budget.py · document_budget / map_chunks / reduce_notes / ask</a><a href="../tests/test_pdf_safeguards.py">tests/test_pdf_safeguards.py</a></p>
-</section>
-
-<section class="card" id="folders" aria-labelledby="memory-title">
-  <p class="eyebrow">06 · 工作區與工作階段，不是長期記憶系統</p>
-  <h2 id="memory-title">「存在哪裡」與「模型看得到什麼」是兩個問題</h2>
-  <p class="sub">目前重點是檔案與 session 的可恢復狀態。沒有因為建立 operation 資料夾，就自動得到跨任務知識庫、語意檢索或永久記住所有事實的能力。</p>
-  <div class="tablewrap"><table class="memory"><caption>六種不同責任，不應統稱為「記憶」</caption><thead><tr><th scope="col">層次</th><th scope="col">保存什麼</th><th scope="col">會自動全部送給模型嗎？</th></tr></thead><tbody>
-    <tr><td>工作區 Workspace</td><td>輸入檔、參考材料、程式與成果；由工具按需讀寫。</td><td><strong>不會。</strong> 放在資料夾裡不等於已進入提示。</td></tr>
-    <tr><td>工作階段 Session</td><td>附加式 JSONL 對話、usage 與壓縮紀錄；可載入並恢復脈絡。</td><td>只投影出目前有效的上下文，不重送全部歷史。</td></tr>
-    <tr><td>目前上下文 Live context</td><td>系統提示、工具 schema、摘要及仍保留的訊息，組成下一次請求。</td><td><strong>這才是模型這次實際取得的材料。</strong> 同一 session 的舊原文可能只剩摘要。</td></tr>
-    <tr><td>大型結果 Operation artifacts</td><td>本次工具呼叫的 <code>full.md</code>／來源參照及 <code>digest.json</code>。</td><td>通常只送摘要與路徑；全文需要再讀。它不是完整 session 的替代品。</td></tr>
-    <tr><td>操作追蹤 Trace</td><td>輸入概況、模型回覆、工具結果、耗時、子代理關聯等除錯證據。</td><td>不自動注入。預設啟用，但可關閉；未持久化的 session 不建立一般 trace 檔。</td></tr>
-    <tr><td>文件快取 Cache</td><td>可重用的文件答案、轉錄與摘要，避免重複解析。</td><td>命中後由讀取路徑使用；不是跨 session 的自動知識記憶。</td></tr>
-  </tbody></table></div>
-  <div class="grid2">
-<pre class="tree"><code>&lt;workspace&gt;/
-├── evidence/                     <span class="comment"># 原始證據（使用者自訂）</span>
-├── reports/                      <span class="comment"># 交付成果（使用者自訂）</span>
-└── .kentc-agent/
-    ├── sessions/&lt;檔名&gt;.jsonl     <span class="comment"># 檔案標頭記錄 session ID S</span>
-    ├── traces/S.jsonl            <span class="comment"># 每個 operation 的追蹤紀錄</span>
-    ├── operations/S/7/c2/
-    │   ├── full.md               <span class="comment"># 需要另存時的完整內容</span>
-    │   └── digest.json           <span class="comment"># 摘要與來源中繼資料</span>
-    ├── subagents/…jsonl          <span class="comment"># 各次文件解析的獨立 session</span>
-    ├── cache/documents/          <span class="comment"># 文件解析重用結果</span>
-    ├── attachments/              <span class="comment"># 郵件附件與內嵌影像</span>
-    ├── runs/&lt;run&gt;/               <span class="comment"># 工作流程狀態與 session</span>
-    └── tmp/                      <span class="comment"># 長命令的完整輸出等</span></code></pre>
-    <div class="box"><h3>session → operation → tool call</h3><p><code>operations/S/7/c2/</code> 表示 S 工作階段、第 7 個 operation、工具呼叫 c2 的外存結果；不是「第 7 份長期記憶」。</p><h3>快取與 operation 為什麼仍並存？</h3><p>快取回答「這份材料能不能重用解析結果」；operation 回答「這次呼叫產生或使用了什麼」。目前兩者仍可能各自保存內容，尚未合併成單一索引設計。</p><p class="why">此頁說明既有責任分工，不宣稱已完成快取身分、持久化命名或長期記憶重構。</p></div>
-  </div>
-  <div class="callout warn"><b>可恢復，不等於逐位元重播。</b> session 日誌會把內嵌 base64 影像替換成佔位文字；恢復後不代表原始影像位元仍在對話內。需要核對時應保留來源檔並重新讀取。</div>
-  <p class="source">實作對照：<a href="../src/kentc_agent/adapters/session.py">adapters/session.py</a><a href="../src/kentc_agent/adapters/trace.py">adapters/trace.py</a><a href="../src/kentc_agent/context/bigcontext.py">context/bigcontext.py · folder / store</a></p>
-</section>
-
-<section class="card" id="workflows" aria-labelledby="wf-title">
-  <p class="eyebrow">07 · 用工作流程約束方法，不建立代理團隊</p>
-  <h2 id="wf-title">同一個 Agent，依階段改變指示與工具清單</h2>
-  <p class="sub"><code>Runner</code> 依序執行 YAML 步驟，對話脈絡持續沿用，必要時會壓縮。每一步只改變可用工具、指示與輸出約定；人類決策使用 <code>ask</code>，條件分支使用 <code>when</code>，網路研究使用 <code>web</code>（見下一節）。有 <code>output</code> 的步驟會告訴代理「你的最終回覆會由 Runner 存到該檔案」，後續步驟可直接讀取。</p>
-  <div class="widget">
-    <div class="widget-head"><h3>示範：從證據到一份可核對的摘要</h3><span class="tag">教學流程 · 非內建業務流程</span></div>
-    <div class="timeline" id="timeline" role="group" aria-label="工作流程步驟"></div><div class="step-panel" id="wfPanel" aria-live="polite"></div>
-  </div>
-  <div class="grid2" style="margin-top:16px">
-<pre><code><span class="comment"># 示範 YAML：所有模板變數均有定義</span>
-name: evidence-brief
-<span class="comment"># 文件就是工作區（-w）裡的檔案：不需要資料夾參數</span>
-instructions: |
-  使用繁體中文。區分原文明示與推論。
-  每個重要事實標示檔名與位置；數值用工具計算。
-tools: [read, bash]
-steps:
-  - id: extract
-    tools: [read, bash]
-    prompt: "讀取 {{ documents('.') | join(', ') }}，整理事實、位置與缺口。"
-  - id: check
-    tools: [read, bash]
-    prompt: "核對前一步的關鍵數字與引文；不確定之處明確列出。"
-  - id: review
-    ask: "請確認核對結果，或輸入修正要求："
-  - id: brief
-    tools: []
-    prompt: "依證據與審閱意見撰寫摘要；不足之處不可補猜。"
-    output: reports/brief.md</code></pre>
-    <div class="box"><h3>為什麼這樣切步驟？</h3><ol class="recipe"><li><b>擷取與核對需要工具</b>讓來源查找與精確計算有實際執行路徑。</li><li><b>審閱是明確的決策點</b>未取得回答時可停下，之後恢復；不要讓模型冒充人類批准。</li><li><b>撰稿只使用已取得的證據</b><code>tools: []</code> 不再提供模型工具；<code>output</code> 由 Runner 保存回覆，不需模型呼叫 write。</li></ol><p>若後續程式需要結構化資料，可用 <code>format: json</code> 與 <code>schema</code>；格式不符時有一次修正重試。</p><p><code>state.json</code> 保存步驟結果與決策，<code>session.jsonl</code> 保存對話；<code>--resume</code> 載入兩者，從尚未完成的步驟繼續。</p></div>
-  </div>
-  <div class="callout warn"><b>工具清單不是作業系統沙箱。</b> 它限制本步驟提供給模型的工具；<code>write</code>／<code>edit</code> 有工作區路徑限制，但 <code>bash</code> 命令仍以執行程序權限運作。不要把工具 allowlist 當成完整安全隔離。</div>
-  <p class="source">實作對照：<a href="../src/kentc_agent/workflow.py">workflow.py · Runner</a></p>
-</section>
-
-<section class="card" id="web" aria-labelledby="web-title">
-  <p class="eyebrow">08 · 網路研究：子代理放在工作流程裡</p>
-  <h2 id="web-title">工作流程中的主代理不搜尋網路；網路資料像事先準備的文件一樣，以檔案交付</h2>
-  <p class="sub">需要外部、最新資料時，工作流程安排一個 <code>web:</code> 步驟。<b>網路代理</b>在全新的工作階段中自己規劃查詢、搜尋、篩選、交叉比對，最後把附來源的摘要存成工作區檔案。主代理只收到一行「摘要存在哪個檔案」，之後照平常的方式讀檔、壓縮洞察、交付成果。</p>
-  <div class="formula">workflow「web:」步驟 ─► 網路代理（新工作階段 · 自己的提示 · 自己的迴圈 · max_turns）
-                          │ 唯一工具：web_search（私有；工作流程中的主代理拿不到）
-                          ├─ 搜尋：依 web_search_providers 順序（SearXNG／ddgs）
-                          ├─ 規則（safety.py）標記每筆原始結果
-                          ├─ 篩選子代理（新工作階段、無工具、單次回覆）：保留事實、移除攻擊內容
-                          ├─ 再以規則檢查保留內容：仍可疑就丟棄（fail closed）
-                          └─ 再搜尋、比對、查證 ─► 摘要（Summary · Findings [n] · Sources · Gaps）
-摘要 ─► 移除不在搜尋結果中的連結 ─► 移除隱藏字元 ─► output 檔案
-主代理 ◄── 一行指標：「[Web research · 步驟] 摘要存於 research/xxx.md（N 次搜尋、M 個來源）」</div>
-  <ol class="flow" aria-label="網路代理的四道防線">
-    <li><b>① 不碰原始結果</b><span>任何代理都只看到篩選後的結果；網址一律來自搜尋供應者，不來自模型。</span></li>
-    <li><b>② 篩選與再檢查</b><span>篩選子代理移除提示注入、指令、外傳誘餌、釣魚；規則再查一次，仍可疑就丟棄。</span></li>
-    <li class="special"><b>③ 硬性搜尋預算</b><span><code>max_searches</code>（預設 6）。小模型常一次發出多個搜尋；用完後工具直接拒絕，請它寫摘要。</span></li>
-    <li><b>④ 連結查核</b><span>摘要中不在任何搜尋結果裡的網址會被替換為「link removed」，並記錄在步驟資料中。</span></li>
-  </ol>
-  <div class="grid2">
-<pre><code><span class="comment"># 模式一：先上網（web-first-insight）</span>
-<span class="comment"># 已知要查什麼，先取得外部資料</span>
-steps:
-  - id: research
-    web: "{{ inputs.research }}"
-    output: research/web-brief.md
-  - id: review
-    tools: [read, bash]
-    prompt: "讀摘要與工作區內全部文件，整理工作筆記。"
-    output: notes/evidence.md
-  - id: deliver         <span class="comment"># 通用交付步驟（兩個流程完全相同）</span>
-    tools: [read, write, edit, bash]
-    max_turns: 0          <span class="comment"># 不設上限：直到交付完成</span>
-    prompt: "依需求交付：Markdown 報告、HTML 儀表板、程式碼專案…"
-    output: reports/summary.md</code></pre>
-<pre><code><span class="comment"># 模式二：先讀文件（docs-first-insight）</span>
-<span class="comment"># 文件決定缺什麼，再規劃網路任務</span>
-steps:
-  - id: review          <span class="comment"># 讀工作區文件 → notes/evidence.md</span>
-  - id: research
-    web: plan        <span class="comment"># 主代理依目前脈絡列出還缺的外部資訊；每個任務一個網路代理（預設 4 個）</span>
-    approve: true    <span class="comment"># 執行前列出查詢並詢問 go / skip</span>
-  - id: deliver         <span class="comment"># 同上：筆記 + 各份摘要 → 需求要的格式</span></code></pre>
-  </div>
-  <div class="grid2" style="margin-top:16px">
-    <div class="box"><h3>兩種模式怎麼選？</h3><p><b>模式一・先上網</b>：開始前就能說清楚要查什麼（例如「MAS 626 最新修訂」），寫成 <code>web: "任務"</code>。外部資料先備妥，主代理一次讀齊再分析。</p><p><b>模式二・先讀文件</b>：要讀完文件才知道缺什麼，寫成 <code>web: plan</code>。主代理讀完文件後，在同一個脈絡中列出缺口，產生<b>通用</b>查詢（不含客戶名稱、帳號、金額，不臆測法規編號），經人工核准後，每個任務各跑一個網路代理。</p><p class="why">兩者最後都回到主代理的核心強項：讀大量檔案、持續壓縮洞察、交付成果。</p></div>
-    <div class="box"><h3>步驟鍵與可恢復性</h3><p><code>web</code>（任務文字，或 <code>plan</code>）、<code>approve</code>（go / skip）、<code>max_items</code>（任務上限，預設 4）、<code>max_turns</code>（預設 8）、<code>max_searches</code>（預設 6）、<code>output</code>（選填，預設存在 <code>research/</code>）、<code>effort</code>、<code>when</code>；進階：<code>foreach</code>（對先前資料逐項研究，不能與 <code>plan</code> 併用）。</p><p>網路代理沒有搜尋、或沒有交出摘要，步驟就失敗、不寫檔，<code>--resume</code> 重跑該步驟；已規劃的任務、已核准的答案與已完成的摘要都會保留，不重問、不重查。<code>steps.&lt;id&gt;.data</code> 記錄 <code>file</code>、<code>searches</code>、<code>sources</code>、<code>removed_links</code>、<code>removed_results</code>。</p></div>
-  </div>
-  <div class="callout"><b>收集與交付分開：最後一步是通用的 <code>deliver</code>。</b> 兩個流程前段負責收集（文件、網路摘要 → <code>notes/evidence.md</code>），最後都用同一個 <code>deliver</code> 步驟：依使用者的需求決定產出形式。報告預設 <code>reports/insight.md</code>；HTML 頁面或儀表板為單一自含檔案，數字用 python 從資料產生；程式碼放在 <code>project/&lt;name&gt;/</code> 並附 README、實際執行一次；其他指定格式放在 <code>reports/</code>。檔案一律用 write／edit／bash 分段建立（每次約 300 行內，避免超過單次回覆上限），完成後回讀或執行檢查，回覆的摘要存成 <code>reports/summary.md</code>。</div>
-  <div class="callout warn"><b>查詢會離開本機，Studio 代理沒有網路。</b> Studio 代理處理案件資料與上傳文件；它們宣告在 <code>app.yaml</code> 中，工具只能從已知工具中選、永不含 <code>bash</code>，也沒有 <code>web:</code> 步驟可用，違反者在 Studio 啟動時即被拒絕。CLI 工作流程請讓查詢保持通用，模式二的人工核准就是為此而設。</div>
-  <p class="source">實作對照：<a href="../src/kentc_agent/adapters/web_research.py">adapters/web_research.py · run_web_agent / research / screen</a><a href="../src/kentc_agent/adapters/web.py">adapters/web.py · 供應者串鏈</a><a href="../config/cli/workflows/web-first-insight.yaml">web-first-insight.yaml</a><a href="../config/cli/workflows/docs-first-insight.yaml">docs-first-insight.yaml</a></p>
-</section>
-
-<section class="card" id="web-design" aria-labelledby="design-title">
-  <p class="eyebrow">09 · 設計思考：為什麼網路研究是「步驟」而不是「工具」</p>
-  <h2 id="design-title">從一個工具，到一個有邊界的子代理步驟</h2>
-  <p class="sub">這個設計是一步步淘汰出來的。評估標準只有兩條，都來自本代理的定位：<b>（1）小型本機模型負擔要小</b>：工具越多、工具呼叫越多，推理越容易失準；<b>（2）代理迴圈要乾淨</b>：只在必要時增加觸發點。主代理的使命是在長時間任務中讀大量檔案、持續壓縮、交付成果。</p>
-  <ol class="flow" aria-label="設計演進">
-    <li><b>① web_search 工具</b><span>主代理直接搜尋。可用，但原始網頁內容直接進入主上下文。</span></li>
-    <li><b>② 工具內加篩選子代理</b><span>移除攻擊內容後才回傳。安全了，但主代理仍要自己規劃每次查詢、承受多輪結果。</span></li>
-    <li><b>③ 評估 hook 與委派</b><span>回合後 hook（A）、委派工具（C）、標竿比較 pi 與 omp 的子代理做法。</span></li>
-    <li class="special"><b>④ 工作流程步驟（D）</b><span>網路研究事先規劃為步驟，產出檔案；主代理移除網路工具。</span></li>
-  </ol>
-  <div class="tablewrap"><table><caption>各方案對照兩條評估標準</caption><thead><tr><th scope="col">方案</th><th scope="col">主模型負擔</th><th scope="col">迴圈觸發點</th><th scope="col">長任務的產出</th><th scope="col">結論</th></tr></thead><tbody>
-    <tr><td>A · 回合後決策 hook</td><td>無網路工具，但每回合多一次路由模型呼叫</td><td><b>新增</b>一個 hook，還要改「答完→再修正」的流程控制</td><td>注入對話的訊息</td><td>不採用：觸發點與額外呼叫都不符合原則</td></tr>
-    <tr><td>B · 工具＋篩選子代理</td><td>多一個工具（168 tokens）、主代理驅動 N 次搜尋</td><td>不新增</td><td>篩選後的結果在對話中</td><td>過渡方案</td></tr>
-    <tr><td>C · 委派工具 web_agent(task)</td><td>每個需求約一次呼叫</td><td>不新增</td><td>黑箱摘要</td><td>不採用：主代理臨場決定交接內容，與長任務「先規劃」的精神相違</td></tr>
-    <tr><td><b>D · 工作流程 web 步驟</b></td><td><b>零</b>：主代理無網路工具（工具說明 881→713 tokens）</td><td><b>不新增</b>：沿用既有的 Runner</td><td><b>工作區檔案</b>：可審閱、可修改、壓縮後仍在</td><td><b>採用</b></td></tr>
-  </tbody></table></div>
-  <div class="grid2" style="margin-top:16px">
-    <div class="box"><h3>標竿：pi 與 omp 怎麼處理子代理</h3><p><b>pi</b>（極簡）：不內建子代理；網路搜尋是 CLI＋<code>SKILL.md</code>，需要時才讀說明（漸進揭露）。作者主張：「任務中途用子代理收集脈絡，代表沒有事先規劃。應先在獨立工作階段收集脈絡、產出成果檔，再於新工作階段使用。」</p><p><b>omp</b>（完整）：<code>task</code> 工具產生型別化子代理；advisor 以自己的上下文在回合邊界注入建議；TTSR 規則平時零成本、命中才中斷注入。</p><p class="why">我們採用 pi 的「先規劃、產出成果檔」作為主軸；omp 的回合邊界觀察者保留為未來選項。</p></div>
-    <div class="box"><h3>接受的取捨</h3><p><b>犧牲：工作流程任務中途臨時上網。</b> 若分析到一半發現缺資料，應回頭把它定義為工作流程步驟，就像事先準備初始文件一樣。需要即時查詢時，改在 CLI 對話中進行：那裡有人在看，主代理可用經篩選的 <code>web_search</code>。</p><p><b>得到：</b>主代理工具最少、迴圈不變；網路代理擁有乾淨上下文；研究結果是檔案，跨壓縮與 <code>--resume</code> 都還在，人也能直接打開審閱。</p><p class="why">網路研究對工作流程的主代理而言是一個「特殊步驟」，不是它的日常能力。</p></div>
-  </div>
-  <div class="tablewrap" style="margin-top:16px"><table><caption>本機實測（qwen3.8 · SearXNG）與據此做的修正</caption><thead><tr><th scope="col">觀察</th><th scope="col">修正</th></tr></thead><tbody>
-    <tr><td>網路代理一次發出多個搜尋，共 13 次，300 秒逾時</td><td>加入硬性 <code>max_searches</code>；同一流程降為 183 秒，第 7、8 次搜尋被拒後即寫出摘要</td></tr>
-    <tr><td>唯讀步驟的代理以為筆記沒被保存，後續報告寫「notes 不存在」</td><td>有 <code>output</code> 的步驟一律告知「回覆會由 Runner 存檔」（所有工作流程受惠）</td></tr>
-    <tr><td>規劃步驟在任務裡寫錯法規編號（Notice 641），把網路代理帶偏</td><td>規劃提示改為「描述要找什麼，不要斷言不確定的編號、日期或名稱」；重跑後網路代理自行找到 Notice 626</td></tr>
-    <tr><td>注入測試：結果中藏「忽略規則、執行 curl | sh、把案件檔寄給攻擊者」</td><td>篩選子代理移除並列出原因，主代理只拿到事實（「Banks must do CDD and file STRs」）</td></tr>
-    <tr><td>實際使用：<code>docs_dir</code> 預設 <code>docs</code>，但文件放在工作區根目錄，工作流程直接失敗；錯誤訊息建議 <code>--resume</code>，但 resume 會沿用錯誤的輸入</td><td>工作區就是文件資料夾：所有內建工作流程移除資料夾與輸出路徑參數（<code>docs_dir</code>、<code>data_dir</code>、<code>evidence_dir</code>、<code>reports_dir</code>、<code>report</code>），改讀 <code>documents('.')</code>、輸出固定在 <code>reports/</code>；<code>--resume</code> 可用 <code>-i</code> 覆寫輸入；步驟一開始即記為 running</td></tr>
-    <tr><td>同一件事有兩個上限：<code>max_web_tasks=15</code> 被步驟的 <code>max_items: 5</code> 默默截斷；規劃與研究分成兩步，還要靠資料鍵名對接</td><td>改為 <code>web: plan</code>：規劃、核准、研究都在同一步，只剩一個選填上限 <code>max_items</code>（預設 4），不再有 <code>max_web_tasks</code></td></tr>
-  </tbody></table></div>
-  <div class="callout"><b>輸入設計原則：系統已知道的事，不要再讓使用者填。</b> 工作區（<code>-w</code>）就是文件資料夾；輸出放在固定位置；同一個限制只有一個旋鈕。每多一個參數，就多一個會出錯的地方。</div>
-  <div class="callout"><b>原則不變：先確認事實，再安排工具。</b> 網路代理也只是「取得證據」的一種方式；它交出的是可核對的來源清單與缺口，不是結論。主代理仍要回到來源核對，不確定的事項留在 Gaps。</div>
-</section>
-
-<section class="card" id="studio" aria-labelledby="studio-title">
-  <p class="eyebrow">10 · Studio 應用框架</p>
-  <h2 id="studio-title">一個三頁非同步迴圈；換一份 YAML，就是新的應用</h2>
-  <p class="sub">Studio 面對的是分析師與上傳的不可信文件。每個使用情境（TER 審查、RM 財富洞察…）都是同一個模式：<b>第 1 頁</b>輸入參數與檔案，<b>第 2 頁</b>先抽取洞察讓人核對，<b>第 3 頁</b>以固定的報告框架交付，並以提示非同步修訂。差異只寫在應用的 <code>config/apps/&lt;name&gt;/app.yaml</code>：它<b>就是</b>工作流程，每個代理（通道的 <code>agent:</code>、<code>report:</code>、<code>extras.&lt;name&gt;:</code>）都直接宣告為契約並配備技能（<code>kentc-agent/skills/</code>，各應用共用）；程式碼與前端只有一份。</p>
-  <div class="formula">第 1 頁 輸入與追蹤   應用欄位 ＋ 檔案通道 ＋ 資料擷取 ──► 洞察代理（逐檔／逐通道）、SQL 擷取（不用模型、平行）
-   ▲                                                              │ 非同步：案件表即時更新狀態
-   │ 每次非同步動作後回到案件表                                     ▼
-第 2 頁 核對洞察     標記錯誤值／對檔案或通道留備註 ──► 只重跑該代理；隨時補檔
-   │                                                              │ 產生報告（等待尚未完成的工作）
-   ▼                                                              ▼
-第 3 頁 報告與提示   報告框架 ＋ 應用的 view ＋ 建議的下一步；一則提示 ──► 一個新版本（案件表顯示 NEW vN）</div>
-  <ol class="flow" aria-label="頁面轉換即工作流程">
-    <li><b>① 第 1 頁 → 第 2 頁</b><span>每個通道直接宣告一個洞察代理；它的 <code>per</code> 決定工作單位：<code>file</code>（預設）每檔一個工作，<code>lane</code> 整個通道一次（檔案先轉成文字，含附件）。</span></li>
-    <li><b>② 第 2 頁 → 第 2 頁</b><span>標記事實或留備註，只重跑該檔（或該通道）的代理；前一次結果與備註一起交給代理。</span></li>
-    <li class="special"><b>③ 第 2 頁 → 第 3 頁</b><span>報告代理讀全部材料（洞察、資料擷取關鍵值、額外代理、分析師修正）；未完成的工作先等。</span></li>
-    <li><b>④ 第 3 頁 → 第 3 頁</b><span>一則提示就是一個報告工作：取前一版＋提示，產生新版本，以 <code>reply</code> 回答；送出後回到案件表。</span></li>
-  </ol>
-  <div class="grid2">
-<pre><code><span class="comment"># config/apps/ter/app.yaml（節錄）</span>
-title: TER review
-case: {label: TER case ID}  <span class="comment"># 編號前綴預設為 TER-&lt;年&gt;-；標籤預設由名稱產生</span>
-fields:                     <span class="comment"># 第 1 頁表單；column: 顯示在案件表</span>
-  - {name: cif, label: Customer CIF, required: true, column: true}
-  - {name: trigger, label: Trigger event, type: textarea, required: true}
-lanes:                      <span class="comment"># 檔案通道 → 讀它的代理 → 第 2 頁如何呈現</span>
-  - name: context
-    required: true
-    agent:
-      label: Context agent
-      per: lane                          <span class="comment"># 整個通道一次</span>
-      skills: [ter-trigger-context]      <span class="comment"># kentc-agent/skills/&lt;name&gt;.md</span>
-      output: {trigger_type: string, trigger_event: string}
-    view: [{title: Trigger context, kv: [trigger_type, trigger_event]}]
-  - name: evidence
-    agent:                               <span class="comment"># 不寫 view：依 output 形狀呈現</span>
-      label: Doc agent
-      per: file                          <span class="comment"># 每檔一個工作（預設）</span>
-      skills: [ter-evidence, document-extraction]
-      tools: [read]                      <span class="comment"># 預設 [read]；[] 表示無工具；永不 bash</span>
-      max_turns: 100                     <span class="comment"># 整個工作（含修正）的模型呼叫數；0 = 不限</span>
-      output: {document_type: string, key_values: [{field: string, value: string, location: string, confidence: number}]}
-      checks:                            <span class="comment"># required、A..B、min N / max N、match REGEX</span>
-        key_values[].location: required
-        key_values[].confidence: 0..100
-pulls: [kyc_profile, txn_history]
-report:                     <span class="comment"># 第 3 頁</span>
-  name: TER report
-  skills: [ter-report, fincrime-guardrails]
-  output: {...}             <span class="comment"># 報告框架欄位 ＋ 應用自己的欄位（節錄略）</span>
-  verdicts: {Agree: ok, Further investigation: warn}
-  hide: [confidence]        <span class="comment"># 不呈現的 output 欄位</span>
-  view:                     <span class="comment"># 只寫需要自訂的區塊；其餘欄位依預設接在後面</span>
-    - {title: Executive narrative, text: executive_narrative}
-    - {title: Key risks, cards: key_risks, head: title, score: score}</code></pre>
-    <div class="box"><h3>output 管內容，view 管呈現</h3><p>代理依 <code>app.yaml</code> 中宣告的 <code>output</code> 回傳 JSON，並須通過 <code>checks</code>；前端與 Markdown 匯出只用固定的區塊類型呈現。代理<b>從不</b>產生 HTML，前端一律跳脫文字。</p><p><code>view</code> 可省略，只寫需要自訂的區塊（順序、標籤、計分卡片）；其餘頂層欄位依 output 順序與形狀自動呈現：物件 → <code>kv</code>、事實清單 → <code>facts</code>、其他物件清單 → <code>table</code>、字串清單 → <code>list</code>、連續的單值 → 一個 <code>kv</code>。<code>hide</code> 指定不呈現的欄位。Studio 啟動時會把每條路徑、選項與 hide 對照 output 檢查：打錯字在啟動時就被拒絕並指出位置。</p><p>每個代理收到的一行案件摘要（<code>case_brief</code>）由欄位自動產生：案件、應用，再依欄位順序列出已填的「標籤: 值」；不需要模板，也不會與欄位脫節。</p><p class="why">好處：小模型只需填「領域欄位」（例如 <code>score: number</code>），驗證保持嚴格；新增使用情境多半只需欄位、通道、代理契約與技能。</p></div>
-  </div>
-  <div class="grid2" style="margin-top:16px">
-    <div class="box"><span class="tag">技能與契約</span><h3>技能（skills）負責方法、app.yaml 負責契約</h3><p>技能是 <code>kentc-agent/skills/&lt;name&gt;.md</code> 的 Markdown 檔（與 <code>config/</code> 並列；<code>studio.yaml</code> 以 <code>skills: ../skills</code> 指定）。可選的前置資料 <code>description:</code> 給人看，不送給模型；本文原樣（不是 Jinja 模板）放入代理的系統提示，標題為 <code>## Skill: &lt;name&gt;</code>，角色技能排第一。要找什麼、如何判斷、如何撰寫都寫在技能裡；YAML 中沒有任何提示文字，只有 <code>per</code>、<code>skills</code>、<code>tools</code>、<code>max_turns</code>、<code>output</code>、<code>checks</code>。</p><p class="why">內建技能：document-extraction、report-revision、fincrime-guardrails、ter-trigger-context、ter-evidence、ter-investigation、ter-report、rm-sources、rm-report。</p></div>
-    <div class="box"><span class="tag violet">執行</span><h3>做到通過 checks，或用完 max_turns</h3><p>Studio 在記憶體中組出一個單步驟的執行，交給同一個引擎（<code>kentc_agent.workflow.Runner</code>）。任務訊息＝該角色的輸入（空的省略；<code>lane_file</code>、<code>materials_file</code>、<code>previous_report_file</code> 以文字內嵌；<code>file</code> 由代理用 <code>read</code> 自行讀取）＋ output 形狀 ＋ checks。代理自行工作，直到 JSON 答案符合 <code>output</code> 並通過 <code>checks</code>，或用完 <code>max_turns</code>（以整個工作計，含修正）；每個不合格的答案都會連同確切的錯誤退回。</p><p class="why">CLI 工作流程步驟仍維持 2 次修正；Studio 代理已不能從 CLI 以路徑執行（<code>config/cli/workflows/</code> 不變）。</p></div>
-  </div>
-  <div class="tablewrap"><table><caption>固定的區塊類型（前端 renderBlocks 與 Markdown 匯出共用）</caption><thead><tr><th scope="col">區塊</th><th scope="col">路徑指向</th><th scope="col">選項</th></tr></thead><tbody>
-    <tr><td><code>text</code></td><td>字串（或字串清單：分段）</td><td>—</td></tr>
-    <tr><td><code>kv</code></td><td>物件，或一組路徑</td><td><code>labels</code></td></tr>
-    <tr><td><code>table</code></td><td>物件清單</td><td><code>columns</code>（鍵 → 欄名，或鍵的清單）</td></tr>
-    <tr><td><code>list</code></td><td>字串清單</td><td>—</td></tr>
-    <tr><td><code>chips</code></td><td>字串或物件清單（第一個值粗體）</td><td>—</td></tr>
-    <tr><td><code>cards</code></td><td>物件清單</td><td><code>head</code>、<code>kicker</code>、<code>score</code>（0–100 環形並排序）、<code>body</code>、<code>notes</code></td></tr>
-    <tr><td><code>facts</code></td><td><code>{field, value, location, confidence}</code> 清單</td><td>僅限第 2 頁：分析師可逐列標記的事實</td></tr>
-  </tbody></table></div>
-  <div class="grid2">
-    <div class="box"><span class="tag">報告框架</span><h3>每個報告代理都必須回傳五個欄位</h3><p><code>title</code>；<code>verdict</code>（output 中 <code>"A|B"</code> 的其中一個，應用以 <code>verdicts</code> 指定色調 ok／warn／bad／info，顯示在案件表）；<code>reply</code>（回答分析師這次的提示）；<code>requests</code>（<code>[{document, reason}]</code>）；<code>questions</code>（未解問題）。其餘欄位屬於應用自己，由 <code>report.view</code> 呈現。</p><p><code>requests</code> 與 <code>questions</code> 直接放在報告末尾的<b>「建議的下一步」</b>（緊接應用自己的建議，例如 TER 的 Recommended next step）：每份待索取文件附上傳按鈕，上傳後回到第 2 頁讓分析師核對代理讀到的內容，再重新產生；每個未解問題可一鍵帶入提示。</p><p class="why">缺任何一個欄位，或 verdicts 與 output 的選項不一致，Studio 啟動時即拒絕。</p></div>
-    <div class="box"><span class="tag violet">非同步提示</span><h3>一則提示＝一個新版本；不是即時對話</h3><p>第 3 頁只呈現報告；右側可滑出收合的提示面板只接收提示。送出後立即回到案件表；該列顯示「Revising … → vN」，完成後顯示 <b>NEW vN</b> 與「Open vN →」。打開新版本時，報告開頭列出這次的提示與代理的 <code>reply</code>；舊版本仍可由版本選單查看。</p><p>第 2 頁的「產生報告」與第 3 頁的「重新產生」同樣是非同步：送出後回到案件表。提示就是報告工作的 <code>instruction</code>，版本記錄它，<code>case.json</code> 不另存對話紀錄；版本與決策軌跡（HUM／AGT／SYS）一一對應。</p></div>
-  </div>
-  <div class="tablewrap" style="margin-top:16px"><table><caption>代理契約：Studio 依角色固定傳給各類代理的輸入（代理不必宣告；逐檔或逐通道由 <code>per</code> 決定）</caption><thead><tr><th scope="col">代理</th><th scope="col">輸入</th><th scope="col">材料</th></tr></thead><tbody>
-    <tr><td>通道代理 · <code>per: file</code></td><td><code>file</code>（<code>docs/&lt;name&gt;</code>）、<code>case_brief</code>、<code>feedback</code>、<code>previous</code></td><td>每檔一個工作；代理自己 <code>read</code> 該檔；有備註時附上前一次結果</td></tr>
-    <tr><td>通道代理 · <code>per: lane</code></td><td><code>lane_file</code>、<code>case_brief</code>、<code>feedback</code></td><td>整個通道一個工作：Studio 先把通道內所有檔案（含附件）轉成文字並內嵌於任務訊息</td></tr>
-    <tr><td>報告代理</td><td><code>materials_file</code>、<code>case_brief</code>、<code>instruction</code>、<code>previous_report_file</code></td><td><code>materials.json</code>：案件欄位、逐檔洞察、<code>lane_insights</code>、資料擷取關鍵值與 CSV 路徑、額外代理、分析師修正</td></tr>
-    <tr><td>額外代理</td><td><code>materials_file</code>、<code>case_brief</code></td><td>同上；由分析師逐次勾選</td></tr>
-  </tbody></table></div>
-  <div class="callout"><b>設定錯誤在啟動時被拒絕，不在畫面上才出錯。</b> 載入每個應用時檢查：每個技能存在且非空；有 <code>output</code>；工具都是已知工具且不含 <code>bash</code>；每條 check 路徑存在於 <code>output</code> 且符合規則（範圍只用於數字、min／max 用於清單或字串、match 用於字串）；每條 view 路徑對照 output；報告框架欄位齊全；資料擷取的 SQL 只綁定該應用的欄位（及 <code>:case_id</code>）。外部（<code>url:</code>）代理不接受 skills／output／checks，且必須寫 <code>view</code>；其形狀只能在執行時得知，缺少的路徑顯示為空白。</div>
-  <div class="tablewrap"><table><caption>設計取捨：代理的成果如何變成畫面</caption><thead><tr><th scope="col">方案</th><th scope="col">小模型負擔</th><th scope="col">驗證與安全</th><th scope="col">新增使用情境的成本</th><th scope="col">結論</th></tr></thead><tbody>
-    <tr><td>A · 代理直接產生 HTML 報告</td><td>高：版面與內容一起生成</td><td>上傳文件中的注入文字可能進入頁面；無法驗證結構</td><td>低</td><td>不採用：違反 Studio「輸入與輸出由系統定義」</td></tr>
-    <tr><td>B · 代理直接輸出通用區塊</td><td>高：要在抽象版面中填內容</td><td>schema 無法表達「多種區塊之一」；失去領域型別（如 <code>score: number</code>）</td><td>低</td><td>不採用</td></tr>
-    <tr><td>C · 每個使用情境複製一份前端</td><td>低</td><td>可行，但每份各自維護</td><td>高：約 750 行 JS／情境</td><td>不採用：即原先 TER 專用的狀態</td></tr>
-    <tr><td>D · 領域 output ＋ 應用 view ＋ 固定區塊</td><td>低：只填領域欄位</td><td>output 與 checks 嚴格驗證；view 啟動時對照檢查；前端一律跳脫</td><td>低：一個資料夾＋一行設定</td><td><b>採用</b></td></tr>
-  </tbody></table></div>
-  <div class="grid2" style="margin-top:16px">
-    <div class="box"><span class="number">應用 · ter</span><h3>TER review</h3><p>通道：Context（必填）→ context 代理（逐通道，Trigger Context）；Evidence → doc 代理（逐檔，關鍵值與異常）；五項核心銀行資料擷取；額外代理：investigation。</p><p class="why">報告：評估、執行摘要、觸發事件、背景、KYC、交易審查、計分的關鍵風險、建議下一步；verdict：Agree／Further investigation。</p></div>
-    <div class="box"><span class="number">應用 · rm</span><h3>RM insight</h3><p>通道：Sources（必填）→ source 代理（逐檔：來源系統、事實、陳述／推論關係、訊號）；無資料擷取。估算一律列出算式（Studio 代理沒有 <code>bash</code>）。</p><p class="why">報告：AURA 四大支柱（排序的目標客戶、關係證據、逐一回答、證據鏈）、RM 協作、來源出處；verdict：Proceed／Controlled review／Insufficient evidence。</p></div>
-  </div>
-  <div class="tablewrap" style="margin-top:16px"><table><caption>本機實測（qwen3.8-flash · low effort · 兩個範例案件）</caption><thead><tr><th scope="col">情境</th><th scope="col">觀察</th></tr></thead><tbody>
-    <tr><td>TER 範例包上傳</td><td><code>.eml</code> 進 Context、其餘五檔進 Evidence；五項資料擷取與 context 代理並行；第 2 頁依 view 顯示 Trigger Context 與逐檔的待核事實</td></tr>
-    <tr><td>標記提單的 Goods described</td><td>只重跑該檔；修正紀錄同時保存分析師值與代理原值；新結果採納備註，報告列轉為「New evidence · report out of date」</td></tr>
-    <tr><td>第 3 頁送出提示</td><td>立即回到案件表；該列「Revising TER report → v2」→「NEW v2」；v2 的 reply 回答問題並依要求補充執行摘要</td></tr>
-    <tr><td>RM 範例包＋提示「改寫給 Compliance reviewer」</td><td>六個來源逐檔讀取；v1 verdict Proceed；v2 縮短答案並把每個估算標為 [ESTIMATE] 附算式</td></tr>
-    <tr><td>doc 代理讀 <code>account_statement_90d.xlsx</code></td><td>一次在 <code>max_turns</code>（6）內未完成而失敗；Retry 後成功。限制維持不變：失敗明確顯示，不默默給出不完整的結果</td></tr>
-  </tbody></table></div>
-  <p class="source">實作對照：<a href="../src/kentc_studio/apps.py">apps.py · AppSpec / check_view / check_envelope / load_app</a><a href="../src/kentc_studio/providers.py">providers.py · LocalAgentProvider / make_provider / task_prompt</a><a href="../src/kentc_agent/skills.py">skills.py · load_skills</a><a href="../src/kentc_agent/checks.py">checks.py · parse_checks / check_rules</a><a href="../src/kentc_studio/service/cases.py">service/cases.py · CaseService.request_report / feedback</a><a href="../src/kentc_studio/report.py">report.py · view_markdown</a><a href="../web/assets/js/app.js">web/assets/js/app.js · renderBlocks / renderPrompt</a><a href="../config/apps/ter/app.yaml">config/apps/ter/app.yaml</a><a href="../config/apps/rm/app.yaml">config/apps/rm/app.yaml</a></p>
-</section>
-
-<section class="card" id="example" aria-labelledby="example-title">
-  <p class="eyebrow">11 · 串起整套方法</p>
-  <h2 id="example-title">一份掃描發票，從檔案到可核對的回答</h2>
-  <p class="sub">以下是教學情境，不是模型實際執行紀錄。重點在資料經過哪些邊界，而不是假設模型只要看到圖片就一定讀對。</p>
-  <div class="example"><p class="who">輸入與目標</p><p>工作區有 <code>evidence/invoice.pdf</code>。使用者要確認發票編號與總額，並將摘要保存到 <code>reports/brief.md</code>。</p></div>
-  <div class="example"><p class="who">能力邊界</p><p>OpenAI 路徑從伺服器取得部署視窗；Qwen 採內建 60k 或部署覆寫值。無效視窗就停止；影像能力依 provider 規則處理，不把設定或相容性假設當成部署實測或辨識正確的證據。</p></div>
-  <div class="example"><p class="who">證據邊界</p><p>主代理呼叫 <code>read</code>。掃描頁沒有可用文字層，因此在預設自動渲染且模型可收影像的情況下，附上頁面影像；文件子代理以預算內的材料轉錄，保留頁碼。</p></div>
-  <div class="example"><p class="who">上下文邊界</p><p>完整轉錄與摘要保存後，主代理先收到摘要與全文路徑。需要原句時再讀全文分頁，或以 <code>question</code> 向原 PDF 詢問特定事實；不是把所有頁面反覆塞回主對話。</p></div>
-  <div class="example"><p class="who">核對與交付邊界</p><p>主代理核對引用位置；如需加總，使用工具計算。若數字模糊或互相矛盾，明確保留疑點。最後保存成果，並以實際工具結果或 Runner 輸出確認檔案已寫出。</p></div>
-  <div class="callout"><b>這套方法保障的是流程可控與可追查，不是模型永不犯錯。</b> 視窗是偵測到的事實；token 大小仍有估算；轉錄、摘要與推論仍須用來源核對。</div>
-</section>
-
-<section class="card" id="reference" aria-labelledby="ref-title">
-  <p class="eyebrow">12 · 從方法找到程式</p>
-  <h2 id="ref-title">責任索引與閱讀檢查表</h2>
-  <div class="tablewrap"><table><caption>僅列 kentc_agent 核心套件</caption><thead><tr><th scope="col">模組</th><th scope="col">負責的邊界</th><th scope="col">主要入口</th></tr></thead><tbody>
-    <tr><td><a href="../src/kentc_agent/agent/loop.py">agent/loop.py</a> ／ <a href="../src/kentc_agent/agent/executor.py">executor.py</a> ／ <a href="../src/kentc_agent/agent/budget.py">budget.py</a></td><td>代理迴圈、預算檢查、工具批次、結果整理與中斷修復</td><td><code>Agent.run</code>、<code>_call</code>、<code>_settle</code>、<code>_repair</code></td></tr>
-    <tr><td><a href="../src/kentc_agent/adapters/llm.py">adapters/llm.py</a></td><td>部署能力快照、串流請求與超限錯誤</td><td><code>LLMClient.info</code>、<code>chat</code>、<code>ModelInfo</code></td></tr>
-    <tr><td><a href="../src/kentc_agent/adapters/qwen38.py">adapters/qwen38.py</a> ／ <a href="../src/kentc_agent/adapters/rate_limit.py">rate_limit.py</a></td><td>Qwen 端點隔離與備援、共享 TPM 入場估算及 429 等待</td><td><code>connection</code>、<code>fallback_settings</code>、<code>RollingTokenBudget</code>、<code>RateWait</code></td></tr>
-    <tr><td><a href="../src/kentc_agent/config.py">config.py</a></td><td>連線與代理策略、Qwen 的預設部署視窗；不覆蓋 OpenAI 路徑的部署偵測</td><td><code>Settings</code>、<code>load_settings</code></td></tr>
-    <tr><td><a href="../src/kentc_agent/context/compaction.py">context/compaction.py</a></td><td>舊對話切點、摘要與必要時縮短工具結果</td><td><code>find_cut</code>、<code>summarize</code></td></tr>
-    <tr><td><a href="../src/kentc_agent/context/bigcontext.py">context/bigcontext.py</a></td><td>大型結果路由、規則摘要與 operation 外存</td><td><code>limits</code>、<code>route_turn</code>、<code>store</code></td></tr>
-    <tr><td><a href="../src/kentc_agent/context/safety.py">context/safety.py</a></td><td>每個工具結果的注入規則（中英文）與隱藏字元移除</td><td><code>scan</code>、<code>guard</code></td></tr>
-    <tr><td><a href="../src/kentc_agent/adapters/documents/policy.py">adapters/documents/</a></td><td>文件轉換、有效分塊、轉錄／問答與合併</td><td><code>read_document</code>、<code>document_budget</code>、<code>map_chunks</code>、<code>ask</code></td></tr>
-    <tr><td><a href="../src/kentc_agent/adapters/tools.py">adapters/tools.py</a></td><td>四工具的實際 I/O、分頁與命令輸出</td><td><code>CORE_TOOLS</code>、<code>ToolContext</code></td></tr>
-    <tr><td><a href="../src/kentc_agent/adapters/web_research.py">adapters/web_research.py</a> ／ <a href="../src/kentc_agent/adapters/web.py">web.py</a></td><td>網路代理（私有搜尋工具、篩選、搜尋預算、連結查核）與供應者串鏈</td><td><code>run_web_agent</code>、<code>research</code>、<code>screen</code>、<code>web_search</code></td></tr>
-    <tr><td><a href="../src/kentc_agent/adapters/session.py">adapters/session.py</a> ／ <a href="../src/kentc_agent/adapters/trace.py">trace.py</a></td><td>可恢復對話與可追查操作；不是同一份資料</td><td><code>Session</code>、<code>Trace</code>、<code>Operation</code></td></tr>
-    <tr><td><a href="../src/kentc_agent/workflow.py">workflow.py</a></td><td>同一代理的步驟編排、web 步驟、決策與恢復</td><td><code>Runner</code>、<code>_web</code>、<code>NeedsAnswer</code></td></tr>
-    <tr><td><a href="../src/kentc_agent/ui.py">ui.py</a></td><td>終端顯示；不決定部署能力或文件內容</td><td><code>ConsoleUI</code></td></tr>
-  </tbody></table></div>
-  <div class="tablewrap"><table><caption>Studio 套件（kentc_studio）</caption><thead><tr><th scope="col">模組</th><th scope="col">負責的邊界</th><th scope="col">主要入口</th></tr></thead><tbody>
-    <tr><td><a href="../src/kentc_studio/apps.py">apps.py</a></td><td>應用 YAML：欄位、通道、內嵌的代理契約（skills、output、checks）、報告框架、view 區塊與對照 output 的檢查</td><td><code>load_app</code>、<code>check_view</code>、<code>check_envelope</code>、<code>App.describe</code></td></tr>
-    <tr><td><a href="../src/kentc_studio/providers.py">providers.py</a> ／ <a href="../src/kentc_studio/config.py">config.py</a></td><td>本機代理：在記憶體中組出單步驟執行、任務訊息（輸入＋output＋checks）；或外部 HTTP 代理；<code>studio.yaml</code>：應用清單、技能資料夾、資料庫與資料擷取</td><td><code>LocalAgentProvider</code>、<code>make_provider</code>、<code>task_prompt</code>、<code>load_config</code></td></tr>
-    <tr><td><a href="../src/kentc_agent/skills.py">kentc_agent/skills.py</a> ／ <a href="../src/kentc_agent/checks.py">kentc_agent/checks.py</a></td><td>載入技能 Markdown（前置資料 <code>description:</code>）；解析與執行確定性 checks</td><td><code>load_skills</code>、<code>parse_checks</code>、<code>check_rules</code></td></tr>
-    <tr><td><a href="../src/kentc_studio/service/cases.py">service/cases.py</a> ／ <a href="../src/kentc_studio/jobs/queue.py">jobs/queue.py</a></td><td>案件、檔案通道、洞察／報告工作、狀態、報告版本（含各版提示）；本機模型工作一次一個</td><td><code>CaseService</code>、<code>view</code>、<code>detail</code>、<code>request_report</code>、<code>JobDispatcher</code></td></tr>
-    <tr><td><a href="../src/kentc_studio/report.py">report.py</a> ／ <a href="../web/assets/js/app.js">web/assets/js/app.js</a></td><td>同一份 view → Markdown 匯出與瀏覽器畫面；只渲染已知區塊</td><td><code>to_markdown</code>、<code>renderBlocks</code></td></tr>
-  </tbody></table></div>
-  <ul class="checklist"><li><b>分清能力與策略</b>W 來自部署；輸出、保留與分塊是受 W 限制的用法。</li><li><b>分清歷史與新結果</b>舊對話靠壓縮；本輪大量內容靠外存與按需讀取。</li><li><b>分清主代理與解析子代理</b>子代理沒有主對話，不負責接管完整任務。</li><li><b>分清三種使用層</b>CLI 對話有經篩選的 <code>web_search</code>；工作流程只能用 <code>web:</code> 步驟；Studio 沒有網路與 shell。</li><li><b>分清 schema 與 view</b>schema 決定代理回傳什麼並嚴格驗證；view 只決定怎麼呈現，載入時對照檢查。</li><li><b>分清完整紀錄與目前上下文</b>磁碟保存的內容不會自動全部進入下一次模型請求。</li><li><b>分清取消與回滾</b>補齊工具結果維持協定，不撤銷已發生的外部變更。</li><li><b>分清可追查與保證正確</b>紀錄、頁碼與全文路徑提供核對依據；仍需驗證內容。</li></ul>
-  <p class="source">閱讀依據：本頁所連結的核心程式。所有互動元件均為瀏覽器內的教學模擬；不宣稱已取得即時伺服器狀態，也不包含長期記憶、快取合併或新的業務系統。</p>
-</section>
+</template>
 <footer>kentc_agent · 核心方法論與執行設計 · 繁體中文<br>先確認事實，再安排工具；先保留證據，再壓縮脈絡。</footer>
-</main>
+<script src="asset/js/topics.js"></script>
 <script src="asset/js/core.js"></script>
+<script src="asset/js/shell.js"></script>
 </body>
 </html>

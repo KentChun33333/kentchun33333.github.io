@@ -1,0 +1,81 @@
+{
+  "persons_reviewed": 40,
+  "key_actor": "P006",
+  "subjects": [
+    {
+      "id": "P006",
+      "role": "key_actor",
+      "reason": "Marcus Tan Wei Ming (S9734264A), a self-employed business consultant with declared annual income of SGD 96,000.00, is the sole named beneficiary of the Harbour Light Trust (T01), received three beneficiary distributions totalling SGD 209,712.93 between 20 Apr 2026 and 24 May 2026 and paid SGD 139,808.62 as a property downpayment on 08 Jun 2026, and is linked to P020 by residential address and to P013 by the contact number recorded for a nephew who assists with banking.",
+      "evidence": [
+        "case/profiles/P006_Marcus_Tan_Wei_Ming.docx",
+        "case/statements/P006_statement.csv",
+        "case/trusts/T01_Harbour_Light_Trust.txt",
+        "case/rm_notes/P006_call_note.eml",
+        "case/rm_notes/P013_call_note.eml",
+        "case/media/MEDIA-01_marcus_tan_charged.html"
+      ]
+    },
+    {
+      "id": "P013",
+      "role": "money_mule",
+      "reason": "Michelle Chua Jia Hui (S6148619G), a retiree with declared annual income of SGD 14,400.00, received five cash deposits below SGD 20,000.00 each at five different branches totalling SGD 93,499.39 between 21 Mar 2026 and 05 May 2026 and paid out five corresponding amounts described as INV PAYMENT to Brightpath Trading Pte. Ltd. (C08), and the relationship manager recorded that she could not explain the purpose of the cash deposits.",
+      "evidence": [
+        "case/profiles/P013_Michelle_Chua_Jia_Hui.md",
+        "case/statements/P013_statement.csv",
+        "case/rm_notes/P013_call_note.eml"
+      ]
+    },
+    {
+      "id": "P020",
+      "role": "money_mule",
+      "reason": "Daniel Ng Zhi Hao (S8097523Z), a self-employed food delivery rider with declared annual income of SGD 26,000.00, received five cash deposits totalling SGD 96,485.00 between 10 Mar 2026 and 14 May 2026 and paid out five corresponding INV PAYMENT amounts to Northwind Advisory Pte. Ltd. (C07), leaving the account near nil after each cycle.",
+      "evidence": [
+        "case/profiles/P020_Daniel_Ng_Zhi_Hao.json",
+        "case/statements/P020_statement.csv",
+        "case/profiles/P006_Marcus_Tan_Wei_Ming.docx"
+      ]
+    },
+    {
+      "id": "P036",
+      "role": "money_mule",
+      "reason": "Wong Mei Ling (S8738305E), a full-time student and part-time administrative assistant with declared annual income of SGD 9,600.00, received five cash deposits totalling SGD 96,111.55 between 14 Mar 2026 and 21 May 2026 and paid out five corresponding INV PAYMENT amounts to Brightpath Trading Pte. Ltd. (C08), which is recorded as her employer and which the relationship manager recorded as having asked her to receive client payments into the personal account and forward them.",
+      "evidence": [
+        "case/profiles/P036_Wong_Mei_Ling.json",
+        "case/statements/P036_statement.csv",
+        "case/rm_notes/P036_call_note.eml"
+      ]
+    },
+    {
+      "id": "P016",
+      "role": "nominee_director",
+      "reason": "Kavitha d/o Krishnan (S5922145F), a corporate secretarial executive of Apex Corporate Services Pte. Ltd., is the sole director of both Northwind Advisory Pte. Ltd. (C07) and Brightpath Trading Pte. Ltd. (C08) and the protector of the Harbour Light Trust (T01), and the relationship manager recorded that she acts as director of several client companies of the corporate service provider for a flat fee per directorship.",
+      "evidence": [
+        "case/profiles/P016_Kavitha_d_o_Krishnan.json",
+        "case/registry/C07_Northwind_Advisory_Pte_Ltd.json",
+        "case/registry/C08_Brightpath_Trading_Pte_Ltd.json",
+        "case/trusts/T01_Harbour_Light_Trust.txt",
+        "case/rm_notes/P016_call_note.eml",
+        "case/statements/P016_statement.csv",
+        "case/media/MEDIA-02_corporate_service_providers.html"
+      ]
+    }
+  ],
+  "linked_entities": [
+    "C07",
+    "C08",
+    "T01"
+  ],
+  "typologies": [
+    "structuring",
+    "rapid_pass_through",
+    "shell_company",
+    "nominee_director",
+    "layering_via_trust",
+    "round_tripping"
+  ],
+  "placement_total_sgd": 305895.94,
+  "period": {
+    "start": "2026-03-10",
+    "end": "2026-06-08"
+  }
+}

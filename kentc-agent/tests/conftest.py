@@ -19,7 +19,15 @@ def call(name: str, args: str, cid: str = "c1") -> dict[str, Any]:
 class FakeLLM:
     """Scripted model: `script(messages, tools)` returns the next Reply. Records every request."""
 
-    def __init__(self, script: Callable[[list[dict[str, Any]], Any], Reply], window: int = 4000) -> None:
+    def __init__(
+        self,
+        script: Callable[[list[dict[str, Any]], Any], Reply] | None = None,
+        window: int = 4000,
+    ) -> None:
+        if script is None:
+            def unexpected(messages, tools):
+                raise AssertionError("no model call expected")
+            script = unexpected
         self.script = script
         self.requests: list[dict[str, Any]] = []
         self._info = ModelInfo("fake", window, True)
@@ -49,6 +57,6 @@ class RecordingEvents(Events):
 
 @pytest.fixture
 def make_ctx(tmp_path: Path):
-    def make(llm: FakeLLM, **settings: Any) -> ToolContext:
-        return ToolContext(tmp_path, Settings(**settings), llm, RecordingEvents())  # type: ignore[arg-type]
+    def make(llm: FakeLLM | None = None, **settings: Any) -> ToolContext:
+        return ToolContext(tmp_path, Settings(**settings), llm or FakeLLM(), RecordingEvents())  # type: ignore[arg-type]
     return make

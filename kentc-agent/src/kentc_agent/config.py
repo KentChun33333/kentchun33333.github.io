@@ -1,5 +1,4 @@
-"""Settings, layered: defaults < ~/.config/kentc-agent/config.yaml < <workspace>/.kentc-agent/config.yaml
-< KENTC_AGENT_* environment variables < CLI flags."""
+"""File-backed compaction settings: config files < KENTC_AGENT_* < CLI flags."""
 
 from __future__ import annotations
 
@@ -20,7 +19,7 @@ ENV_PREFIX = "KENTC_AGENT_"
 @dataclass(frozen=True)
 class Settings:
     """Connection and agent policy; capabilities are inspected or explicitly verified for Qwen."""
-    provider: str = "openai"       # openai | qwen38; Qwen fails over only between its two backends
+    provider: str = "openai"       # openai | qwen38 | openrouter; Qwen fails over only between its two backends
     qwen_backend: str = "coordinator"  # preferred backend per request: coordinator | litellm
     qwen_context_window: int = 60_000  # user's reported deployment limit; override for different deployments
     qwen_vision: bool = False      # enable only when both Qwen deployments support image input
@@ -31,9 +30,9 @@ class Settings:
     model: str = ""                 # "" -> server discovery (OpenAI) or backend default (Qwen)
     max_output_tokens: int = 8192   # requested per-reply budget, thinking included; clamped to available room
     reserve_tokens: int = 16384     # compact when context > window - reserve
-    keep_recent_tokens: int = 20000 # recent history kept verbatim by a compaction
+    keep_recent_tokens: int = 20000 # recent history retained verbatim during compaction
     reasoning_effort: str = ""      # "" -> server default; none | low | medium | high
-    sub_effort: str = "low"         # effort for summaries and the parsing sub-agent
+    sub_effort: str = "low"         # effort for the parsing sub-agent
     temperature: float | None = None
     max_turns: int = 60             # model calls per prompt; 0 = no limit
     request_timeout: float = 900.0
@@ -50,12 +49,15 @@ class Settings:
     big_result_tokens: int = 3000      # one tool result above this -> stored in the operation folder + digest
     big_turn_tokens: int = 12_000      # one turn's tool results above this -> largest stored first until it fits
     big_digest_tokens: int = 1500      # the most a stored result's digest takes in the context
+    big_args_tokens: int = 500         # a successful call's string argument above this -> head + pointer + tail in the
+                                       # context; the session journal keeps the original (0: keep arguments verbatim)
     doc_chunk_tokens: int = 12_000     # upper bound; effective document chunks also fit inspected input/output room
     doc_max_images: int = 4            # page images per sub-agent call
     doc_image_px: int = 1400           # longest side of a rendered PDF page / downscaled image
     doc_render: str = "auto"           # auto | always | never: render PDF pages as images
     show_reasoning: bool = True
-    trace: bool = True                 # operation trace per session: .kentc-agent/traces/<session id>.jsonl
+    trace: bool = True              # operation trace: .kentc-agent/traces/<session id>.jsonl
+    persona_path: str = ""           # explicit protected persona file; parsing workers do not inherit it
 
     def with_overrides(self, **values: Any) -> Settings:
         return replace(self, **{k: v for k, v in values.items() if v is not None})

@@ -20,7 +20,8 @@ you / workflow step ─► main agent ─► LLM server /v1/chat/completions (st
 - **Helpers** (one reply each, no tools): the parsing sub-agent for PDFs, images and large documents, and the web
   screener. Video is rejected.
 
-Design explainer (Traditional Chinese): [`docs/index.html`](docs/index.html).
+Design explainer (Traditional Chinese): [`docs/index.html`](docs/index.html), a reader that loads one topic page at
+a time from [`docs/topics/`](docs/topics/); each topic page also opens on its own.
 
 ### Three layers, one agent
 
@@ -74,13 +75,14 @@ refuse paths outside it. `AGENTS.md` in the workspace is added to the system pro
 | Path | Content |
 | --- | --- |
 | `config.yaml` | per-workspace settings |
-| `sessions/*.jsonl` | chat sessions (append-only, compactions recorded; the first line names the session id) |
+| `sessions/*.jsonl` | chat sessions (append-only; compactions, pinned requirements and argument shortenings recorded; the first line names the session id) |
 | `runs/<run>/` | workflow runs: `state.json` (step outputs, decision trace) and `session.jsonl` (the agent) |
 | `subagents/<session id>-doc-*.jsonl` | each parsing sub-agent's session (images replaced by placeholders) |
 | `traces/<session id>.jsonl` | the operation trace of each session, for debugging (see below) |
 | `attachments/<file>-<hash>/` | e-mail attachments and images embedded in Office files |
 | `cache/documents/*` | parsing results (answers; transcriptions + digests), keyed by file content + request |
-| `operations/<session id>/<operation id>/<tool call id>/` | big tool results: `full.md` (when not already a workspace file) and `digest.json` (see *Big tool results*) |
+| `operations/<session id>/<operation id>/<tool call id>/` | big tool results: an immutable `full.md` snapshot and `digest.json` (see *Big tool results*) |
+| `memory/<session id>/<generation>/` | committed topic notes and their `_index.md` (see *Topic notes*) |
 | `tmp/` | full output of truncated `bash` commands |
 
 ### Operation trace (debugging)
@@ -299,8 +301,8 @@ If a PDF is rejected:
 3. Check the exported pages and key values against the viewer. Selecting `pages` limits inspection; it does
    not establish that unselected pages were read. Do not treat static XFA fallback as complete form coverage.
 
-The [HTML architecture guide](docs/index.html#pdf-safeguards) explains the same coverage boundary;
-its [recovery section](docs/index.html#recovery) covers shared TPM admission and clean streamed-output retries.
+The [HTML architecture guide](docs/topics/documents.html#pdf-safeguards) explains the same coverage boundary;
+its [recovery section](docs/topics/capabilities.html#recovery) covers shared TPM admission and clean streamed-output retries.
 
 The parsing sub-agent splits a document into chunks and reads each chunk in a fresh session. `doc_chunk_tokens`
 (12k) and `doc_max_images` (4) are ceilings: effective chunks also fit the deployed context window (inspected,
@@ -368,16 +370,74 @@ The CLI shows both context controls in color (stderr). Hosts get the same throug
   safety margin (5% of the window, at least 256).
 - Before each call, if context > `window − reserve_tokens` (65536 − 16384; the reserve is at most a quarter of the
   window): keep the newest ~`keep_recent_tokens` (20000, at most a third of the window) verbatim, cut at a
-  user/assistant message (never between a tool call and its result), and summarize the rest into a structured
-  checkpoint (Goal / Constraints / Progress / Decisions / Next steps / Critical context) of at most ~window/16
-  tokens, so a compaction frees real room. An existing summary is updated, not replaced. A summary cut off at its
-  limit (thinking used the budget) is retried once without thinking.
+  user/assistant message (never between a tool call and its result), and compress the rest into a short
+  checkpoint (Goal / Constraints / Progress / Key Decisions / Evidence / Next Steps / Critical Context) plus
+  consolidated local Markdown notes by topic. A cut-off compression reply is retried once without thinking.
+- **Preflight:** before sending, the whole request (system prompt, tool schemas, context, per-request notices) is
+  estimated. Without room for a reply (at least 512 tokens after the safety margin), the agent compacts once; if
+  it still does not fit, the request fails locally with `ContextOverflow` instead of reaching the server.
 - When the server refuses a request as too long: retry with the `max_tokens` that fits, then compact, then give up.
   The numbers are read from the error: Strata ("at most N"), vLLM directly or behind LiteLLM ("maximum context
   length is W … (P in the messages, …)"), OpenAI and llama.cpp. The prompt size they report also corrects the
-  density; a prompt that alone is over the window goes straight to compaction.
-- A compaction never ends the run: when it fails, it is reported, and if room is needed anyway, older tool results
-  are shortened instead.
+  density.
+- A failed compression never ends the run and never destroys history: it is reported and live context stays as it
+  was. The run can still fail if the unchanged context cannot fit.
+
+### Topic notes
+
+- Context contains the checkpoint, recent messages, and a topic index path—not every topic's contents.
+  The main agent decides when details matter and uses ordinary `read` or `bash` to retrieve them.
+- Compression extracts topic updates from older messages. For an existing topic, a foreground model call
+  consolidates its complete old note with the new facts; if that complete request cannot fit, compression fails
+  rather than dropping old facts. Unchanged topics remain unchanged. Each fact keeps its evidence: source path and
+  range, tool call or record ID, and whether a tool result verified it; claims and hypotheses are not evidence.
+- Compression prompts treat conversation, tool results, checkpoints and notes as historical data, never as
+  instructions; the checkpoint enters context labelled as data, not system policy.
+- Notes live under `.kentc-agent/memory/<session-id>/<generation>/`; the checkpoint advertises the current
+  `_index.md`, which lists each topic's Markdown path. Generations are immutable snapshots. Files and the
+  checkpoint journal are committed before old messages leave live context.
+- Workflow tool allowlists remain exact; a step without `read`/`bash` cannot recall notes. Parsing workers do not
+  create topic memory.
+- Keep committed topic files with their workspace: restart verifies their paths and SHA-256 digests, and fails
+  rather than silently ignoring missing or edited notes. Former tiered-memory journals are rejected without
+  rewriting them; start a new session instead.
+
+### Pinned requirements
+
+Exact user text can be pinned for a chat session. Pins enter every request verbatim, right after the checkpoint,
+independent of the model-written summary, and survive compaction and resume (journal `requirement` records).
+Active pins are limited to 4,000 characters in total.
+
+```sh
+uv run kentc-agent --requirement "Cite page numbers for every figure." -w /path/to/workspace
+```
+
+In chat: `/require <text>`, `/requirements`, `/unrequire <number>`. `/new` starts without pins. Workflows reject
+`--requirement`: put workflow requirements in the workflow instructions.
+
+### Long tool arguments and incremental file writes
+
+- Long arguments of successful tool calls leave live context once the turn is persisted. A string argument
+  over `big_args_tokens` (500), such as a `write` body, an `edit` text or a bash heredoc, becomes its first
+  200 characters, a marker with its length, SHA-256 and the journal path, and its last 400 characters, so
+  a next part can continue. Failed calls, including bash with a non-zero exit, keep their arguments so the
+  model can correct them. The journal keeps the original message and appends an `arguments` record that
+  replay applies. `big_args_tokens: 0` keeps arguments verbatim.
+- While the core `write` and `edit` tools are offered to the main agent, the system prompt asks for long files
+  as a skeleton with unique section markers, filled one section per turn with `edit`. Each request carries a
+  per-turn target (`max_tokens / 4` estimated tokens of new text), sent with the request and never stored.
+- A `write`/`edit` call cut off at `max_output_tokens` or with unparsable arguments is discarded; the clean
+  retry continues from the accepted conversation (saved sections stay), asks for one smaller complete call, and
+  halves the per-turn target (`/8`, then `/16`) until the turn succeeds.
+
+### Commands and configuration
+
+- `/compact [focus]` forces compaction; `/tokens` reports context usage. `--no-session` disables the
+  conversation journal, not topic-file writes.
+- `--persona` and `-s` instructions remain in the main system prompt and are saved for restart.
+  Current workspace `AGENTS.md` is reloaded; explicit inputs override saved values.
+
+Design and limits: [session memory](docs/session-memory-design.md).
 
 ## Workflows
 
@@ -416,7 +476,7 @@ steps:
 | --- | --- |
 | `prompt` / `ask` / `web` | an agent step / a human gate / web research by the web agent (exactly one). `web: "<task>"` researches that task; `web: plan` lets the main agent list what is still missing, one web agent per task |
 | `tools` | tools allowed in this step (`[]` = none; default: the workflow's `tools`, else all) |
-| `max_turns`, `effort` | per-step limits. `max_turns` is model calls for the step (step → workflow → setting, default 60); `0` = no limit, until the final answer (Ctrl-C stops it). Running out of turns fails the step without writing its `output`; `--resume` continues in the same context |
+| `max_turns`, `effort` | per-step limits. `max_turns` is model calls for the step (step → workflow → setting, default 60); `0` = no limit, until the final answer (Ctrl-C stops it). With a limit, each request of an agent that has tools ends with a transient note of the calls left (the last one asks for the final answer now); the note is not stored in the session. Running out of turns fails the step without writing its `output`; `--resume` continues in the same context |
 | `max_searches` | `web` only: the web agent's hard search budget (default 6) |
 | `max_items`, `approve`, `foreach` | `web` only. `max_items`: most web tasks (default 4; a number or a template). `approve: true`: the step lists its queries and asks go / skip first (`--answer <step>=go`; kept across `--resume`). `foreach` (advanced; not with `plan`): an expression giving a list of tasks from earlier data, e.g. `data.suppliers`; one web agent per item, `item` and `index` usable in `web` and `output`; missing or empty = nothing to do. Briefs already written survive a failed task, so `--resume` continues with the rest |
 | `format: json`, `schema` | answer must be one JSON object of the schema's shape: every key required (at every level), `string` / `number` / `integer` / `boolean` types, `"A\|B"` one of (case-insensitive, stored as written in the schema), `[shape]` lists, any other string a described string. Mismatches are sent back with their paths and retried (3 attempts, then the step fails); cut-off replies are retried shorter |
@@ -469,6 +529,37 @@ uv run kentc-agent -w ~/cases/ter --workflow ter-case-review \
 ```
 
 `ter-case-review` has no web step: open-web / news searches from the demos become "open checks" in the outputs.
+
+## Breezeman chat (web UI over kentc-agent)
+
+A three-pane chat UI where every chat is a fresh `kentc_agent` main agent. One command runs the web
+server and the agent runtime in the same process (no separate backend to start):
+
+```sh
+uv run kentc-breezeman --workspace ~/work --effort low      # open http://127.0.0.1:9001
+# also: --base-url, --model, --persona FILE, --max-turns; non-loopback bind needs --token (or KENTC_BREEZEMAN_TOKEN)
+```
+
+- **Left, foldable: workspace.** Lazy folder tree of the workspace (`.kentc-agent/`, `.git`,
+  `__pycache__` hidden). Drop files on the panel or on a folder, or use ⇪: uploads stay inside the workspace,
+  max 50 MB each, and never overwrite (`name (1).ext`). Click a file to preview it; `+ attach` (or drag it onto
+  the composer) sends it with the next message through the same document policy as `/attach` in the CLI.
+- **Middle: chat** over a WebSocket (`/ws/<chat>`). Answers stream as Markdown; each turn shows its tool
+  calls (click a tool chip for arguments and result). Thinking is shown only in the *Live* panel. **Stop** ends the run at the next streamed token
+  or tool start, and the conversation stays usable, as with Ctrl-C in the CLI. A bash command that is already
+  running finishes or times out first. **Compact** forces topic compaction.
+  **+ New chat** creates a new session and a new main agent. The chat list resumes any saved session in
+  `.kentc-agent/sessions/`, including CLI sessions, with a fresh agent replayed from the journal.
+- **Right, foldable: agent.** *Live* shows every event: thinking, writing, tool calls with results,
+  compaction, big-result routing, and sub-agents (`document`, `web`). Late or reloaded tabs get the
+  buffered events of the chat. *Context* shows what the next model call sees: system prompt, persona,
+  checkpoint, topic notes, live messages and tool schemas. The view is searchable (⌘K; Enter / Shift+Enter
+  step through matches) and filterable by group. It shows tool-call arguments shortened, as the model
+  sees them; the chat transcript replays the originals from the journal.
+
+Settings load as for `kentc-agent` (`~/.config/kentc-agent/config.yaml`,
+`<workspace>/.kentc-agent/config.yaml`, `KENTC_AGENT_*`). The tools are the CLI chat's core
+tools plus `web_search`. Chats run concurrently, and each chat runs one prompt at a time.
 
 ## Agentic Studio (web UI)
 
@@ -900,7 +991,7 @@ and command lines. For the default `provider: openai`, the server reports the de
 reserve/retention/chunk settings remain agent policy, bounded by available room.
 
 ```yaml
-provider: openai              # openai | qwen38; default keeps the local Strata path
+provider: openai              # openai | qwen38 | openrouter; default keeps the local Strata path
 qwen_backend: coordinator     # coordinator | litellm; only used by qwen38
 qwen_context_window: 60000    # reported deployment limit; override when using a different deployment
 qwen_vision: false            # enable only after verifying Qwen image support
@@ -958,7 +1049,8 @@ positive deployed `meta.n_ctx` or `max_model_len` for the selected model. The ag
 at each run, during document budget planning, and after a context overflow; the Studio health endpoint also
 refreshes it. A changed window at the same endpoint is therefore not pinned by local configuration.
 Missing/invalid limits or an unlisted selected model fail explicitly; no coded context default or another
-model's metadata is substituted. Qwen38 is the deployment-default exception described below.
+model's metadata is substituted. `provider: openrouter` uses the same discovery against OpenRouter's catalog;
+Qwen38 is the deployment-default exception described below.
 
 | Server | Connection settings | Discovery requirement |
 | --- | --- | --- |
@@ -966,11 +1058,20 @@ model's metadata is substituted. Qwen38 is the deployment-default exception desc
 | **vLLM / llama.cpp** | `base_url`, `model`, `api_key` as needed | `/models` must expose deployed `max_model_len` or `meta.n_ctx` |
 | **LiteLLM / other proxies / OpenAI-compatible endpoints** | `base_url`, `api_key`, `model` as needed | the endpoint must expose the selected deployment's actual limit; endpoints listing only model IDs are insufficient |
 | **Qwen38 coordinator / LiteLLM** (opt-in) | `--provider qwen38`; recovered endpoint/key/model defaults are built in | 60,000-token configured default from the user's reported deployment; does not require `/models` |
+| **OpenRouter** (opt-in alternative) | `--provider openrouter`; `base_url` defaults to `https://openrouter.ai/api/v1`, an unset `api_key` falls back to `OPENROUTER_API_KEY`, `model` defaults to `qwen/qwen3.8-flash` | the smaller of the model's `context_length` and `top_provider.context_length` from `/models` |
 
 For `provider: openai`, image support is read from `architecture.input_modalities` when supplied, otherwise
-assumed, and requested `reasoning_effort` is sent only when set. Qwen38 uses explicit `qwen_vision` (default
-false), normalizes system messages and omits unsupported `reasoning_effort` and `stream_options`.
+assumed, and requested `reasoning_effort` is sent only when set. OpenRouter reads image support the same way,
+sends effort as `reasoning: {effort}`, streams its `reasoning` deltas as thinking, and rejects streams that end
+without a finish reason. Qwen38 uses explicit `qwen_vision` (default false), normalizes system messages and
+omits unsupported `reasoning_effort` and `stream_options`.
 Streamed replies should include `usage` for token calibration.
+
+```sh
+export OPENROUTER_API_KEY=...        # queries and documents leave the machine
+uv run kentc-agent --provider openrouter --info
+uv run kentc-agent --provider openrouter --model qwen/qwen3.8-flash "Your task"
+```
 
 Overflow errors are read in each server's wording (Strata, vLLM/LiteLLM, OpenAI, llama.cpp), so the agent retries
 with the server's own numbers.
@@ -1082,7 +1183,7 @@ environment settings are `KENTC_AGENT_VERIFY_TLS` and `KENTC_AGENT_TRUST_ENV`.
 | --- | --- |
 | `src/kentc_agent/cli.py` | command line: chat, one prompt, workflows, `--workspace` (entry point `kentc-agent`) |
 | `src/kentc_agent/agent/` | the agent loop, compaction budget, tool execution and settlement |
-| `src/kentc_agent/context/` | token-aware compaction and big-result routing |
+| `src/kentc_agent/context/` | token-aware compaction into a checkpoint + topic notes, and big-result routing |
 | `src/kentc_agent/adapters/` | LLM client, sessions, traces, tools, file types and document loaders/policy |
 | `src/kentc_agent/ports.py` | protocols shared by the core and its adapters (`LLM`, `Events`) |
 | `src/kentc_studio/server.py` | studio entry point (`kentc-studio`): CLI, workspace/config resolution, auth guard |
@@ -1092,6 +1193,8 @@ environment settings are `KENTC_AGENT_VERIFY_TLS` and `KENTC_AGENT_TRUST_ENV`.
 | `src/kentc_studio/apps.py` | app manifests: fields, lanes, inline agents (contract + skills), report framework, view blocks and their checks against the outputs |
 | `src/kentc_studio/{providers,store,models,config,data,report}.py` | local (skills + contract, run on the workflow engine) / HTTP agents, atomic persistence, domain model, studio config, SQL pulls, view → Markdown |
 | `web/` | studio front end: `index.html`, `assets/css/app.css`, `assets/js/app.js` (one block renderer for every app) |
+| `src/kentc_breezeman/` | Breezeman chat (`kentc-breezeman`): `runtime.py` chats (one main agent each, worker-thread runs, event fan-out, stop), `workspace.py` tree/uploads/previews, `app.py` REST + WebSocket |
+| `web/breezeman/` | Breezeman front end: `index.html`, `assets/breezeman.{css,js}` (studio palette, no build step) |
 | `docs/` | design explainer in Traditional Chinese: `index.html`, `asset/css/core.css`, `asset/js/core.js` (interactive calculators run in the browser only) |
 | `config/studio.yaml`, `config/apps/`, `config/cli/workflows/`, `queries/` | studio config (apps, skill library, databases, data pulls); app manifests with their agents; CLI workflows; the pull SQL |
 | `skills/` | skill library: one Markdown file per skill, named by Studio agents |
@@ -1101,6 +1204,6 @@ environment settings are `KENTC_AGENT_VERIFY_TLS` and `KENTC_AGENT_TRUST_ENV`.
 | `src/kentc_agent/adapters/web.py` | web search providers (ddgs, SearXNG) and the fallback chain |
 | `src/kentc_agent/adapters/web_research.py` | the web agent behind workflow `web:` steps and the screened `web_search` tool (private to the web agent, or in CLI chat): screening sub-agent, fail-closed re-check, search budget, link check |
 | `src/kentc_agent/context/safety.py` | safety check on every tool result: injection rules (English/Chinese), hidden-character removal |
-| `src/kentc_agent/adapters/session.py`, `src/kentc_agent/context/compaction.py` | session log (with session id), token accounting, summarization |
+| `src/kentc_agent/adapters/session.py`, `src/kentc_agent/context/compaction.py` | session journal (with session id, pinned requirements, committed topic notes), token accounting, checkpoint/topic compression |
 | `src/kentc_agent/adapters/trace.py` | operation trace: one debug record per loop turn, sub-agents linked to their tool call |
 | `src/kentc_agent/config.py`, `src/kentc_agent/ui.py` | YAML settings, terminal rendering |

@@ -1,0 +1,137 @@
+{
+  "review_title": "Transaction monitoring review — cash placement and pass-through network",
+  "period": {
+    "start": "2026-01-01",
+    "end": "2026-06-30",
+    "label": "01 Jan 2026 to 30 Jun 2026"
+  },
+  "persons_reviewed": 40,
+  "key_actor": {
+    "id": "C07",
+    "name": "Northwind Advisory Pte. Ltd.",
+    "uen": "202561014W",
+    "role": "Central receiving and distributing entity: receives cash-derived transfers from P020 and consultancy fees from C08, and distributes to the Harbour Light Trust (T01). Wholly owned by T01; sole director Kavitha d/o Krishnan (P016)."
+  },
+  "subjects": [
+    {
+      "id": "P013",
+      "name": "Michelle Chua Jia Hui",
+      "nric": "S6148619G",
+      "account": "774-344670-0",
+      "profile": "Retiree; declared annual income SGD 14,400.00.",
+      "role": "Cash placer into Brightpath Trading (C08).",
+      "observations": "Five cash deposits of SGD 18,267.04-19,226.18 between 21 Mar 2026 and 05 May 2026 totalling SGD 93,499.39, each followed within one day by a FAST transfer marked INV PAYMENT to C08 totalling SGD 92,559.39. No other credits above SGD 1,000.00 in the period; closing balance negative at SGD -2,637.04. RM note (08 Jun 2026): customer could not explain the purpose of the cash deposits and ended the call; gave an alternate contact number +65 9470 5911 described as a nephew who helps with banking.",
+      "linked": "Alternate contact number +65 9470 5911 is the mobile number on P006's profile; the number is not stated by either customer to identify a specific person, so the link is unconfirmed."
+    },
+    {
+      "id": "P020",
+      "name": "Daniel Ng Zhi Hao",
+      "nric": "S8097523Z",
+      "account": "206-604913-6",
+      "profile": "Food delivery rider; declared annual income SGD 26,000.00; monthly salary credits of SGD 2,170.00.",
+      "role": "Cash placer into Northwind Advisory (C07).",
+      "observations": "Five cash deposits of SGD 18,347.11-19,916.59 between 10 Mar 2026 and 14 May 2026 totalling SGD 96,485.00, each followed by a same-day or next-day FAST transfer marked INV PAYMENT to C07 totalling SGD 95,779.00. Deposits are 3.7-7.5 times the monthly salary."
+    },
+    {
+      "id": "P036",
+      "name": "Wong Mei Ling",
+      "nric": "S8738305E",
+      "account": "232-874230-3",
+      "profile": "Full-time student, part-time admin assistant; declared annual income SGD 9,600.00; monthly salary of SGD 800.00 paid by Brightpath Trading Pte. Ltd.",
+      "role": "Cash placer into Brightpath Trading (C08).",
+      "observations": "Five cash deposits of SGD 18,473.23-19,770.31 between 14 Mar 2026 and 21 May 2026 totalling SGD 96,111.55, each followed by a same-day or next-day FAST transfer marked INV PAYMENT to C08 totalling SGD 95,229.55. RM note (08 Jun 2026): part-time employer asked the customer to receive client payments into the personal account and forward them.",
+      "linked": "Salary payer is C08, a subject entity in the network."
+    },
+    {
+      "id": "C07",
+      "name": "Northwind Advisory Pte. Ltd.",
+      "uen": "202561014W",
+      "account": "608-708064-7",
+      "profile": "Incorporated 07 Jan 2025; management consultancy; paid-up capital SGD 10,000.00; registered address 10 Anson Road, #22-05; sole director Kavitha d/o Krishnan; 100% shareholder Meridian Trustees Pte. Ltd. as trustee of the Harbour Light Trust; company secretary Apex Corporate Services Pte. Ltd.",
+      "role": "Hub of the network.",
+      "observations": "Statement period 11 Mar 2026 to 26 May 2026. Credits: SGD 95,779.00 from P020 (INV PAYMENT) and SGD 169,010.04 from C08 (six equal consultancy fees of SGD 28,168.34). Debits: four equal capital distributions of SGD 58,253.59 to Meridian Trustees a/c Harbour Light Trust (T01) totalling SGD 233,014.36. No supplier, payroll or operating cost outflows in the statement."
+    },
+    {
+      "id": "C08",
+      "name": "Brightpath Trading Pte. Ltd.",
+      "uen": "202465802K",
+      "account": "811-467188-9",
+      "profile": "Incorporated 19 Aug 2024; general wholesale trade; paid-up capital SGD 1,000.00; registered address Blk 537 Clementi Avenue 2, #16-309, Singapore 794149; sole director and 100% shareholder Kavitha d/o Krishnan; secretary Apex Corporate Services Pte. Ltd.",
+      "role": "Receiving entity for P013 and P036 cash; pays consultancy fees to C07.",
+      "observations": "Statement period 14 Mar 2026 to 30 May 2026. Credits: SGD 187,788.94 from P013 and P036 (INV PAYMENT). Debits: SGD 169,010.04 consultancy fees to C07 and SGD 1,250.00 office expenses. Registered address is the residential address on P006's profile."
+    },
+    {
+      "id": "T01",
+      "name": "Harbour Light Trust",
+      "account": "170-980770-1 (trustee account)",
+      "profile": "Discretionary trust settled 02 Nov 2024; settlor Lim Siew Hoon; trustee Meridian Trustees Pte. Ltd.; protector Kavitha d/o Krishnan; beneficiary TAN WEI MING MARCUS (NRIC S9734264A, matches P006); source of wealth not documented in the deed.",
+      "role": "Trust layer between C07 and P006.",
+      "observations": "Received four capital distributions from C07 totalling SGD 233,014.36 (02 Apr 2026 to 26 May 2026) and paid three beneficiary distributions of SGD 69,904.31 to M TAN totalling SGD 209,712.93 (20 Apr 2026 to 24 May 2026)."
+    },
+    {
+      "id": "P006",
+      "name": "Marcus Tan Wei Ming",
+      "nric": "S9734264A",
+      "account": "913-288499-3",
+      "profile": "Business consultant (self-employed); declared annual income SGD 96,000.00; monthly credits of SGD 8,000.00; residential address Blk 537 Clementi Avenue 2, #16-309, Singapore 794149; mobile +65 9470 5911.",
+      "role": "Ultimate individual recipient in the chain.",
+      "observations": "Received three beneficiary distributions of SGD 69,904.31 from Meridian Trustees a/c HLT (20 Apr, 07 May, 24 May 2026) totalling SGD 209,712.93, against declared annual income of SGD 96,000.00. Paid SGD 139,808.62 to Propnex Conveyancing on 08 Jun 2026 described as a property down payment. RM note (08 Jun 2026): declared consultancy income, said a family trust may pay distributions; no trust documents provided at the last review.",
+      "linked": "NRIC matches the T01 beneficiary. Adverse media MEDIA-01 (18 May 2026) reports a Marcus Tan, 58, charged with cheating in relation to two property buyers and about SGD 240,000; the reported age does not match the profile date of birth 12 Apr 1979, so the identification is not confirmed by identifier."
+    },
+    {
+      "id": "P016",
+      "name": "Kavitha d/o Krishnan",
+      "nric": "S5922145F",
+      "account": "485-255766-4",
+      "profile": "Corporate secretarial executive at Apex Corporate Services Pte. Ltd.; monthly salary SGD 4,830.00.",
+      "role": "Common director of C07 and C08; protector of T01.",
+      "observations": "Sole director of both C07 and C08 and protector of T01. RM note (08 Jun 2026): director of several client companies of the corporate service provider and receives a flat fee per directorship, consistent with a nominee arrangement. Personal account activity is limited to salary and small PAYNOW transfers."
+    }
+  ],
+  "linked_entities": [
+    {
+      "id": "C04",
+      "name": "Chua Precision Engineering Pte. Ltd.",
+      "relationship": "Pays dividends to P031 Rachel Koh Xin Yi (SGD 120,000.00 on 30 Mar 2026 and 30 Jun 2026).",
+      "assessment": "Consistent with P031's profile as managing director; no link to the network identified."
+    },
+    {
+      "id": "T02",
+      "name": "Lim Family Trust",
+      "relationship": "Pays quarterly trust income of SGD 18,500.00 to P022 Lim Jia Hui (NRIC S5763451E matches).",
+      "assessment": "Documented trust with source of wealth on file; no link to the network identified."
+    },
+    {
+      "id": "P012",
+      "name": "Muhammad Faizal bin Rahman",
+      "relationship": "Cash deposit SGD 19,800.00 on 14 Apr 2026 within the same value band as the placements.",
+      "assessment": "Explained by the private sale of a vehicle per RM note; sale agreement and LTA record on file; excluded from the placement total."
+    },
+    {
+      "id": "P031",
+      "name": "Rachel Koh Xin Yi",
+      "relationship": "Managing director; receives salary of SGD 40,000.00 monthly and dividends from C04.",
+      "assessment": "Activity consistent with profile; no link to the network identified."
+    },
+    {
+      "id": "P022",
+      "name": "Lim Jia Hui",
+      "relationship": "Architect; receives T02 trust income.",
+      "assessment": "Activity consistent with profile; no link to the network identified."
+    }
+  ],
+  "typologies": [
+    "Placement of structured cash below SGD 20,000.00 per deposit",
+    "Layering through related corporate entities and a trust",
+    "Pass-through / nominee arrangements"
+  ],
+  "placement_total_sgd": 286095.94,
+  "placement_detail": {
+    "cash_deposits_count": 15,
+    "cash_deposits_min_sgd": 18267.04,
+    "cash_deposits_max_sgd": 19916.59,
+    "transfers_out_total_sgd": 283567.94,
+    "cash_to_transfer_retained_sgd": 2528.0
+  },
+  "period_transactions": "01 Jan 2026 to 30 Jun 2026"
+}

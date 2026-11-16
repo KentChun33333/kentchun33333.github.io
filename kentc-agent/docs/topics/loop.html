@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="任務需數十次模型－工具往返；任一步可能截斷、無效或中斷，也可能用盡次數仍未作答。">
+<title>02 · 執行迴圈｜kentc_agent 核心方法論</title>
+<link rel="stylesheet" href="../asset/css/core.css">
+<link rel="stylesheet" href="../asset/css/shell.css">
+</head>
+<body class="topic-page">
+<a class="sr-only" href="#topic">跳至主要內容</a>
+<header class="top"><div class="top-in">
+  <a class="brand" href="../index.html">kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
+  <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
+</div></header>
+<div class="reader">
+<aside class="sidebar" aria-label="主題目錄"><nav class="side-nav" id="sideNav" aria-label="主題"></nav></aside>
+<main id="topic" data-slug="loop">
+<article class="topic">
+<section class="card" id="loop" aria-labelledby="loop-title">
+  <p class="eyebrow">02 · 任務如何真的往前走</p>
+  <h2 id="loop-title">一次 run 可以包含多個 operation</h2>
+  <div class="psd">
+    <div class="psd-item problem"><span>問題</span><p>任務需多次「模型 → 工具 → 模型」來回，任一回覆都可能截斷、無效或中斷；模型也可能查到呼叫次數用盡仍無答案。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>每次來回是可追查的 operation：先驗證再保存、無效則乾淨重試、中斷時補齊工具結果；每次請求附剩餘呼叫次數，促使提早收斂。</p></div>
+    <div class="psd-item data"><span>依據</span><p>加提醒前，記憶回復 4 次 trial 全用完 8 次呼叫、無答案；加入後 4 次皆有答案、3 次通過（見 ③）。</p></div>
+  </div>
+  <h3 class="part problem" id="problem" data-step="1">問題：每一步都可能出錯</h3>
+  <ul class="problem-list">
+    <li><b>輸出不完整</b>：串流中斷、超出輸出上限、工具參數非合法 JSON → 照收則下一輪帶半截內容或不可執行的呼叫。</li>
+    <li><b>協定被打斷</b>：取消或例外 → 已送出的工具呼叫缺結果 → 下次請求對話不合法。</li>
+    <li><b>不會收尾</b>：不知剩餘次數＋提示要求「多查證」→ 有答案仍搜尋，撞上限，成果全數作廢。</li>
+    <li><b>不可信的工具結果</b>：文件或命令輸出可含「忽略之前的指示」類文字。</li>
+  </ul>
+  <h3 class="part idea" id="solution" data-step="2">核心想法：可驗證、可修復、知道剩多少</h3>
+  <p class="sub"><code>Agent.run(prompt)</code> 處理一個輸入；每輪一個 operation（模型請求＋回覆與工具批次）。請求可內部重試 → operation ≠ 一次 HTTP 請求。</p>
+  <div class="formula">更新部署能力 → 加入使用者訊息 → [ 準備上下文 → 呼叫模型 → 驗證完整性與輸出契約 → 保存回覆 → 工具執行／結果整理 ]
+                                                        └─ 無工具呼叫：回傳答案
+                                                        └─ 有工具呼叫：保存工具結果 → 下一個 operation</div>
+  <div class="widget">
+    <div class="widget-head"><h3>逐步看一次代理迴圈</h3><span class="tag">可點選 · 非實際執行</span></div>
+    <div class="steps" id="stepBtns" role="group" aria-label="代理迴圈階段"></div>
+    <div class="step-panel" id="stepPanel" aria-live="polite"></div>
+  </div>
+  <div class="grid2" style="margin-top:16px">
+    <div class="box"><h3>四個核心工具的責任</h3><p><code>read</code>：讀檔、分頁、解析文件。<br><code>write</code>：建立／覆寫。<br><code>edit</code>：精確比對替換。<br><code>bash</code>：命令、搜尋、列檔、精確計算。<br>CLI 另加經篩選的 <code>web_search</code>（見 <a href="layers.html">00 · 三種使用層</a>）。</p><p class="why">Studio 無 <code>bash</code>：總額取自 SQL 擷取關鍵值，其餘數字列算式供分析師核對（詳見 <a href="studio.html">10 · Studio 應用</a>）。</p></div>
+    <div class="box"><h3>正常停止與異常停止要分清楚</h3><p>串流先顯示，驗證通過才保存。截斷／無效 → 丟棄，有限次乾淨重試；重試耗盡、超過 <code>max_turns</code>、拒絕回覆 → 明確停止。取消或錯誤 → 盡量補齊已保存工具呼叫的結果。</p><p class="why">未通過的回覆不當證據、其工具呼叫不執行；格式正確 ≠ 事實正確。</p></div>
+  </div>
+  <div class="box" style="margin-top:16px"><h3>剩餘呼叫次數提醒</h3><p>有次數上限且有工具的代理，每次請求尾端附暫時提示，如：<code>Model-call budget: call 3 of 8; 5 left after this one. Plan to finish within them: once the requested facts are supported by evidence, answer instead of searching further.</code> 最後一次改為「立即以已收集證據回答」。只隨該次請求送出、<b>不寫入 session</b> → 不累積、不進摘要；置於末端 → 前綴不變，本機前綴快取仍有效。無工具單次代理（如篩選子代理）不附。</p><p class="why">程式：<code>Agent._budget_notice</code>（v1、v2 相同）。</p></div>
+  <div class="callout warn"><b>取消不是交易回滾。</b> 已寫檔、已執行命令不撤銷；修復只保工具訊息配對與工作階段可續。磁碟不可寫時不保證持久化。</div>
+  <div class="callout"><b>工具結果進上下文前皆經安全檢查。</b> <code>context/safety.py</code> 純規則（不呼叫模型，中英文）標記：覆寫指示、角色切換、「不要告訴使用者」、外傳資料或讀密鑰、<code>curl | sh</code> 等；移除零寬、雙向覆寫、Unicode 標籤等隱藏字元。標記結果保留資料、前置不可信警告，追蹤記 <code>safety</code>。警報線，非邊界；控制靠工具權限。</div>
+  <h3 class="part data" id="data" data-step="3">依據：提醒前後實測</h3>
+  <div class="tablewrap"><table><caption>記憶回復（歷史紀錄：統一前 v1／v2，v1 已移除；各案例 1 次；同一模型、上限 8 次呼叫）</caption><thead><tr><th scope="col">版本 · 案例</th><th scope="col">加入提醒前</th><th scope="col">加入提醒後</th></tr></thead><tbody>
+    <tr><td>v1 · buried_revision</td><td>用盡，無答案</td><td><span class="tag green">通過</span>，第 8 次（最後）回答</td></tr>
+    <tr><td>v1 · failed_repair</td><td>用盡，無答案</td><td>有答案；欄位全對，格式不合評分</td></tr>
+    <tr><td>v2 · buried_revision</td><td>用盡，無答案</td><td><span class="tag green">通過</span>，第 5 次回答</td></tr>
+    <tr><td>v2 · failed_repair</td><td>用盡，無答案</td><td><span class="tag green">通過</span>，第 4 次回答</td></tr>
+  </tbody></table></div>
+  <div class="callout warn"><b>限制：提醒確保最後必回答，不保證交出檔案。</b> 歷史 STR v1 最後一次以對話作答，報告檔未寫成。更早實驗：最後一次「不提供工具」對寫檔任務無效，模型仍想呼叫工具。現行最後一次措辭（源自 v2，實測後新增）加上唯一例外：任務明確要求的輸出檔尚未寫出 → 先寫。措辭須收窄：較寬的版本讓無檔案任務的模型在最後一次去找交付檔。數據詳見 <a href="eval.html">07 · 長任務記憶：摘要 → 主題筆記</a>。</div>
+  <p class="source">實作對照：<a href="../../src/kentc_agent/agent/loop.py">agent/loop.py</a><a href="../../src/kentc_agent/agent/executor.py">agent/executor.py</a><a href="../../src/kentc_agent/adapters/tools.py">adapters/tools.py</a><a href="../../src/kentc_agent/context/safety.py">context/safety.py</a></p>
+</section>
+</article>
+<nav class="pager" aria-label="上一篇與下一篇" data-pager></nav>
+</main>
+</div>
+<script src="../asset/js/topics.js"></script>
+<script src="../asset/js/core.js"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="「記憶」被混指檔案、對話紀錄與目前上下文；混用導致誤以為存過即可見。">
+<title>06 · 記憶分工｜kentc_agent 核心方法論</title>
+<link rel="stylesheet" href="../asset/css/core.css">
+<link rel="stylesheet" href="../asset/css/shell.css">
+</head>
+<body class="topic-page">
+<a class="sr-only" href="#topic">跳至主要內容</a>
+<header class="top"><div class="top-in">
+  <a class="brand" href="../index.html">kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
+  <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
+</div></header>
+<div class="reader">
+<aside class="sidebar" aria-label="主題目錄"><nav class="side-nav" id="sideNav" aria-label="主題"></nav></aside>
+<main id="topic" data-slug="folders">
+<article class="topic">
+<section class="card" id="folders" aria-labelledby="memory-title">
+  <p class="eyebrow">06 · 工作區與工作階段，不是長期記憶系統</p>
+  <h2 id="memory-title">「存在哪裡」與「模型看得到什麼」是兩個問題</h2>
+  <div class="psd">
+    <div class="psd-item problem"><span>問題</span><p>「記憶」同時指工作區檔案、對話紀錄、目前上下文、外存結果與快取。混用 → 誤以為「存過」＝「模型看得到」，或多一個資料夾＝多一種長期記憶。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>每層明確界定：<b>保存什麼</b>、<b>是否自動送進模型</b>。只有「目前上下文」是模型本次所見；其餘層皆由工具按需讀回。</p></div>
+    <div class="psd-item data"><span>依據</span><p>歷史實測（現行 runtime 前身 v2）：每次 STR 任務寫出 5 份主題筆記，模型直接讀索引 0 次、讀主題筆記 0 或 1 次：存於磁碟 ≠ 被使用（見 ③）。</p></div>
+  </div>
+  <h3 class="part problem" id="problem" data-step="1">問題：「存過」與「看得到」常被混為一談</h3>
+  <p>視窗有限 → 舊對話、大型結果、文件解析、追蹤紀錄移到磁碟，下一次請求只帶一小部分。統稱「記憶」導致兩種錯誤：以為模型知道（實際只在磁碟），或「記憶不夠」再加一層儲存（實際是模型不回讀）。</p>
+  <h3 class="part idea" id="solution" data-step="2">核心想法：每一層只負責一件事</h3>
+  <p class="sub">目標是檔案與 session 的可恢復狀態；operation 資料夾不帶來跨任務知識庫、語意檢索或永久記憶。</p>
+  <div class="tablewrap"><table class="memory"><caption>各層責任不同，不應統稱「記憶」</caption><thead><tr><th scope="col">層次</th><th scope="col">保存什麼</th><th scope="col">是否自動送入模型</th></tr></thead><tbody>
+    <tr><td>工作區 Workspace</td><td>輸入檔、參考材料、程式、成果；工具按需讀寫</td><td><strong>否。</strong> 在資料夾 ≠ 在提示中</td></tr>
+    <tr><td>工作階段 Session</td><td>附加式 JSONL 對話、usage、壓縮紀錄、固定需求（<code>requirement</code> 紀錄）；可載入恢復</td><td>只投影目前有效上下文，不重送全歷史；固定需求原文每次請求都送</td></tr>
+    <tr><td>目前上下文 Live context</td><td>系統提示、工具 schema、摘要、保留訊息 → 下一次請求</td><td><strong>即模型本次所見。</strong> 同 session 舊原文可能只剩摘要</td></tr>
+    <tr><td>大型結果 Operation artifacts</td><td>單次工具呼叫的 <code>full.md</code>／來源參照、<code>digest.json</code></td><td>通常只送摘要＋路徑，全文需再讀；不取代完整 session</td></tr>
+    <tr><td>操作追蹤 Trace</td><td>輸入概況、模型回覆、工具結果、耗時、子代理關聯等除錯證據</td><td>否。預設啟用、可關閉；未持久化 session 不建一般 trace 檔</td></tr>
+    <tr><td>文件快取 Cache</td><td>可重用的文件答案、轉錄、摘要，免重複解析</td><td>命中時由讀取路徑使用；非跨 session 知識記憶</td></tr>
+    <tr><td>主題筆記 Topic notes</td><td>壓縮時寫出的 Markdown 筆記＋<code>_index.md</code>，位於 <code>.kentc-agent/memory/&lt;session&gt;/&lt;世代&gt;/</code>；每世代不可變、SHA-256 驗證</td><td><strong>否。</strong> 上下文只帶索引路徑＋≤ 8 個主題名；內容須模型自行 <code>read</code>／<code>bash</code></td></tr>
+  </tbody></table></div>
+  <div class="grid2">
+<pre class="tree"><code>&lt;workspace&gt;/
+├── evidence/                     <span class="comment"># 原始證據（使用者自訂）</span>
+├── reports/                      <span class="comment"># 交付成果（使用者自訂）</span>
+└── .kentc-agent/
+    ├── sessions/&lt;檔名&gt;.jsonl     <span class="comment"># 檔案標頭記錄 session ID S</span>
+    ├── traces/S.jsonl            <span class="comment"># 每個 operation 的追蹤紀錄</span>
+    ├── operations/S/7/c2/
+    │   ├── full.md               <span class="comment"># 需要另存時的完整內容</span>
+    │   └── digest.json           <span class="comment"># 摘要與來源中繼資料</span>
+    ├── memory/S/&lt;世代&gt;/          <span class="comment"># 主題筆記＋_index.md（不可變世代）</span>
+    ├── subagents/…jsonl          <span class="comment"># 各次文件解析的獨立 session</span>
+    ├── cache/documents/          <span class="comment"># 文件解析重用結果</span>
+    ├── attachments/              <span class="comment"># 郵件附件與內嵌影像</span>
+    ├── runs/&lt;run&gt;/               <span class="comment"># 工作流程狀態與 session</span>
+    └── tmp/                      <span class="comment"># 長命令的完整輸出等</span></code></pre>
+    <div class="box"><h3>session → operation → tool call</h3><p><code>operations/S/7/c2/</code>＝session S、第 7 個 operation、工具呼叫 c2 的外存結果；≠「第 7 份長期記憶」。</p><h3>快取與 operation 並存的原因</h3><p>快取答「此材料能否重用解析結果」；operation 答「本次呼叫產生或使用了什麼」。兩者可能各存內容，尚未合併為單一索引。</p><p class="why">本頁僅描述既有分工；快取身分、持久化命名、長期記憶重構皆未完成。</p></div>
+  </div>
+  <div class="callout warn"><b>可恢復 ≠ 逐位元重播。</b> session 日誌把內嵌 base64 影像換成佔位文字 → 恢復後對話內無原始影像位元；需核對則保留來源檔重讀。</div>
+  <h3 class="part data" id="data" data-step="3">依據：評測中「存過」與「用到」的落差</h3>
+  <div class="tablewrap"><table><caption>主題筆記在實測中的使用情況（歷史紀錄：統一前的 v2）</caption><thead><tr><th scope="col">實測</th><th scope="col">寫出的筆記</th><th scope="col">模型讀回筆記</th><th scope="col">答案從哪裡來</th></tr></thead><tbody>
+    <tr><td>STR · trial 1（0.95 分）</td><td>5 主題／2 次壓縮</td><td>直接讀索引 0、主題 0；bash 觸及筆記路徑 4</td><td>多為重讀原始案件檔</td></tr>
+    <tr><td>STR · trial 2（0.98 分）</td><td>5 主題／1 次壓縮</td><td>直接讀索引 0、主題 1；bash 觸及筆記路徑 4</td><td>多為重讀原始案件檔</td></tr>
+    <tr><td>記憶回復（2 個案例）</td><td>各 1 次壓縮</td><td>0</td><td>全為重讀 <code>evidence.log</code></td></tr>
+  </tbody></table></div>
+  <p>反例：記憶回復測試的 session 檔放在工作區 → 代理把自身對話紀錄當資料 <code>grep</code>，輸出截斷、浪費呼叫；層次不清同樣誤導模型。歷史 v1/v2 結果與貢獻分析詳見 <a href="eval.html">07 · 長任務記憶：摘要 → 主題筆記</a>。</p>
+  <p class="source">實作對照：<a href="../../src/kentc_agent/adapters/session.py">adapters/session.py · journal / 主題筆記 / set_requirement</a><a href="../../src/kentc_agent/adapters/trace.py">adapters/trace.py</a><a href="../../src/kentc_agent/context/bigcontext.py">context/bigcontext.py · folder / store</a></p>
+</section>
+</article>
+<nav class="pager" aria-label="上一篇與下一篇" data-pager></nav>
+</main>
+</div>
+<script src="../asset/js/topics.js"></script>
+<script src="../asset/js/core.js"></script>
+</body>
+</html>

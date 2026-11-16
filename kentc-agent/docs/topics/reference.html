@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="從方法定位到負責模組與測試，並避開常見概念混淆。">
+<title>12 · 實作索引｜kentc_agent 核心方法論</title>
+<link rel="stylesheet" href="../asset/css/core.css">
+<link rel="stylesheet" href="../asset/css/shell.css">
+</head>
+<body class="topic-page">
+<a class="sr-only" href="#topic">跳至主要內容</a>
+<header class="top"><div class="top-in">
+  <a class="brand" href="../index.html">kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
+  <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
+</div></header>
+<div class="reader">
+<aside class="sidebar" aria-label="主題目錄"><nav class="side-nav" id="sideNav" aria-label="主題"></nav></aside>
+<main id="topic" data-slug="reference">
+<article class="topic">
+<section class="card" id="reference" aria-labelledby="ref-title">
+  <p class="eyebrow">12 · 從方法找到程式</p>
+  <h2 id="ref-title">責任索引與閱讀檢查表</h2>
+  <div class="psd">
+    <div class="psd-item problem"><span>問題</span><p>從方法找到負責的程式與測試，並避開常見混淆：存過≠看得到、能力≠設定。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>以「問題 → 主題 → 程式」串起文件，再列每個模組的邊界與入口。</p></div>
+    <div class="psd-item data"><span>依據</span><p>各主題實測可用 repo 內評測腳本重跑；行為由對應回歸測試覆蓋（見 ③）。</p></div>
+  </div>
+  <h3 class="part problem" id="problem" data-step="1">問題：方法與程式之間需要一張地圖</h3>
+  <p>文件以問題為軸，程式以模組為軸；改行為前先確定問題、負責模組與保護它的測試，否則只修表面。</p>
+  <h3 class="part idea" id="solution" data-step="2">核心想法：問題 → 主題 → 程式</h3>
+  <div class="tablewrap"><table><caption>問題地圖</caption><thead><tr><th scope="col">問題</th><th scope="col">主題</th><th scope="col">主要程式</th></tr></thead><tbody>
+    <tr><td>同一代理在不同看管程度下的權限</td><td><a href="layers.html">00 · 三種使用層</a></td><td><code>workflow.py</code>、<code>kentc_studio/apps.py</code></td></tr>
+    <tr><td>模型說法 ≠ 事實</td><td><a href="principles.html">01 · 方法論</a></td><td><code>adapters/tools.py</code>、<code>adapters/trace.py</code></td></tr>
+    <tr><td>多步驟任務的驗證、修復、收尾</td><td><a href="loop.html">02 · 執行迴圈</a></td><td><code>agent/loop.py</code>、<code>agent/executor.py</code>、<code>context/safety.py</code></td></tr>
+    <tr><td>各部署的視窗、速率、連線</td><td><a href="capabilities.html">03 · 能力與策略</a></td><td><code>adapters/llm.py</code>、<code>adapters/qwen38.py</code>、<code>adapters/rate_limit.py</code></td></tr>
+    <tr><td>歷史累積 vs 單次大型結果</td><td><a href="vertical.html">04 · 上下文視窗</a></td><td><code>context/compaction.py</code>、<code>context/bigcontext.py</code></td></tr>
+    <tr><td>超出視窗的文件與影像</td><td><a href="documents.html">05 · 文件解析</a></td><td><code>adapters/documents/</code></td></tr>
+    <tr><td>「存過」≠「看得到」</td><td><a href="folders.html">06 · 記憶分工</a></td><td><code>adapters/session.py</code>、<code>adapters/trace.py</code></td></tr>
+    <tr><td>長任務摘要遺失細節</td><td><a href="eval.html">07 · 長任務記憶：摘要 → 主題筆記</a></td><td><code>context/compaction.py</code>、<code>adapters/session.py</code>、<code>agent/loop.py</code></td></tr>
+    <tr><td>步驟、審核、續跑</td><td><a href="workflows.html">08 · 工作流程</a></td><td><code>workflow.py</code></td></tr>
+    <tr><td>外部與即時資料</td><td><a href="web.html">09 · 網路研究</a></td><td><code>adapters/web_research.py</code>、<code>adapters/web.py</code></td></tr>
+    <tr><td>不可信輸入的網頁應用</td><td><a href="studio.html">10 · Studio 應用</a></td><td><code>kentc_studio/</code></td></tr>
+  </tbody></table></div>
+  <div class="tablewrap"><table><caption>kentc_agent 核心套件（唯一 runtime，主題筆記壓縮）</caption><thead><tr><th scope="col">模組</th><th scope="col">負責的邊界</th><th scope="col">主要入口</th></tr></thead><tbody>
+    <tr><td><a href="../../src/kentc_agent/agent/loop.py">agent/loop.py</a> ／ <a href="../../src/kentc_agent/agent/executor.py">executor.py</a></td><td>代理迴圈、送出前檢查（回覆空間 &lt; 512 tokens → 壓縮一次 → 本機 <code>ContextOverflow</code>）、分段寫檔提示與截斷重試、工具批次、結果整理、中斷修復</td><td><code>Agent.run</code>、<code>_call</code>、<code>FILE_CHUNK_HINT</code>、<code>FILE_RETRY</code>、<code>_settle</code>、<code>_repair</code></td></tr>
+    <tr><td><a href="../../src/kentc_agent/agent/budget.py">agent/budget.py</a></td><td>前景壓縮政策；失敗 → 保留歷史，不截短</td><td><code>_try_compact</code></td></tr>
+    <tr><td><a href="../../src/kentc_agent/adapters/llm.py">adapters/llm.py</a></td><td>部署能力快照、串流請求、超限錯誤</td><td><code>LLMClient.info</code>、<code>chat</code>、<code>ModelInfo</code></td></tr>
+    <tr><td><a href="../../src/kentc_agent/adapters/qwen38.py">adapters/qwen38.py</a> ／ <a href="../../src/kentc_agent/adapters/rate_limit.py">rate_limit.py</a></td><td>Qwen 端點隔離與備援；共享 TPM 入場估算、429 等待</td><td><code>connection</code>、<code>fallback_settings</code>、<code>RollingTokenBudget</code>、<code>RateWait</code></td></tr>
+    <tr><td><a href="../../src/kentc_agent/config.py">config.py</a></td><td>連線與代理策略、Qwen 預設部署視窗；不覆蓋 OpenAI 路徑的部署偵測</td><td><code>Settings</code>、<code>load_settings</code></td></tr>
+    <tr><td><a href="../../src/kentc_agent/context/compaction.py">context/compaction.py</a></td><td>舊對話切點；壓縮 → 短 checkpoint（含 Evidence 區段）＋主題更新；合併既有主題，事實保留來源與驗證狀態</td><td><code>find_cut</code>、<code>summarize</code>、<code>CompactionResult</code>、<code>FORMAT</code>／<code>EXTRACT</code>／<code>MERGE</code></td></tr>
+    <tr><td><a href="../../src/kentc_agent/context/bigcontext.py">context/bigcontext.py</a></td><td>大型結果路由、規則摘要、operation 外存</td><td><code>limits</code>、<code>route_turn</code>、<code>store</code></td></tr>
+    <tr><td><a href="../../src/kentc_agent/context/safety.py">context/safety.py</a></td><td>工具結果注入規則（中英）、隱藏字元移除</td><td><code>scan</code>、<code>guard</code></td></tr>
+    <tr><td><a href="../../src/kentc_agent/adapters/documents/policy.py">adapters/documents/</a></td><td>文件轉換、有效分塊、轉錄／問答、合併</td><td><code>read_document</code>、<code>document_budget</code>、<code>map_chunks</code>、<code>ask</code></td></tr>
+    <tr><td><a href="../../src/kentc_agent/adapters/tools.py">adapters/tools.py</a></td><td>四工具 I/O、分頁、命令輸出</td><td><code>CORE_TOOLS</code>、<code>ToolContext</code></td></tr>
+    <tr><td><a href="../../src/kentc_agent/adapters/web_research.py">adapters/web_research.py</a> ／ <a href="../../src/kentc_agent/adapters/web.py">web.py</a></td><td>網路代理（私有搜尋工具、篩選、搜尋預算、連結查核）；供應者串鏈</td><td><code>run_web_agent</code>、<code>research</code>、<code>screen</code>、<code>web_search</code></td></tr>
+    <tr><td><a href="../../src/kentc_agent/adapters/session.py">adapters/session.py</a> ／ <a href="../../src/kentc_agent/adapters/trace.py">trace.py</a></td><td>可恢復對話 vs 可追查操作；journal、不可變筆記世代與索引、SHA-256 驗證、先寫入再丟棄；固定需求（<code>requirement</code> 紀錄，總長 ≤ 4,000 字元）</td><td><code>Session</code>、<code>Session.compact</code>、<code>bind_memory</code>、<code>read_topics</code>、<code>set_requirement</code>、<code>Trace</code>、<code>Operation</code></td></tr>
+    <tr><td><a href="../../src/kentc_agent/cli.py">cli.py</a></td><td>CLI 與對話指令；<code>--requirement</code>（工作流程拒用）、<code>/require</code>、<code>/requirements</code>、<code>/unrequire N</code></td><td><code>kentc-agent</code></td></tr>
+    <tr><td><a href="../../src/kentc_agent/workflow.py">workflow.py</a></td><td>同一代理的步驟編排、web 步驟、決策、恢復</td><td><code>Runner</code>、<code>_web</code>、<code>NeedsAnswer</code></td></tr>
+    <tr><td><a href="../../src/kentc_agent/ui.py">ui.py</a></td><td>終端顯示；不定部署能力或文件內容</td><td><code>ConsoleUI</code></td></tr>
+  </tbody></table></div>
+  <div class="tablewrap"><table><caption>Studio 套件（kentc_studio）</caption><thead><tr><th scope="col">模組</th><th scope="col">負責的邊界</th><th scope="col">主要入口</th></tr></thead><tbody>
+    <tr><td><a href="../../src/kentc_studio/apps.py">apps.py</a></td><td>應用 YAML：欄位、通道、代理契約（skills、output、checks）、報告框架、view 區塊及其對照 output 檢查</td><td><code>load_app</code>、<code>check_view</code>、<code>check_envelope</code>、<code>App.describe</code></td></tr>
+    <tr><td><a href="../../src/kentc_studio/providers.py">providers.py</a> ／ <a href="../../src/kentc_studio/config.py">config.py</a></td><td>本機代理（記憶體內單步驟執行；任務訊息＝輸入＋output＋checks）或外部 HTTP 代理；<code>studio.yaml</code>：應用清單、技能資料夾、資料庫、資料擷取</td><td><code>LocalAgentProvider</code>、<code>make_provider</code>、<code>task_prompt</code>、<code>load_config</code></td></tr>
+    <tr><td><a href="../../src/kentc_agent/skills.py">kentc_agent/skills.py</a> ／ <a href="../../src/kentc_agent/checks.py">kentc_agent/checks.py</a></td><td>技能 Markdown 載入（前置資料 <code>description:</code>）；確定性 checks 解析與執行</td><td><code>load_skills</code>、<code>parse_checks</code>、<code>check_rules</code></td></tr>
+    <tr><td><a href="../../src/kentc_studio/service/cases.py">service/cases.py</a> ／ <a href="../../src/kentc_studio/jobs/queue.py">jobs/queue.py</a></td><td>案件、檔案通道、洞察／報告工作、狀態、報告版本（含各版提示）；本機模型一次一工作</td><td><code>CaseService</code>、<code>view</code>、<code>detail</code>、<code>request_report</code>、<code>JobDispatcher</code></td></tr>
+    <tr><td><a href="../../src/kentc_studio/report.py">report.py</a> ／ <a href="../../web/assets/js/app.js">web/assets/js/app.js</a></td><td>同一 view → Markdown 匯出＋瀏覽器畫面；只渲染已知區塊</td><td><code>to_markdown</code>、<code>renderBlocks</code></td></tr>
+  </tbody></table></div>
+  <ul class="checklist"><li><b>分清能力與策略</b>W 來自部署；輸出、保留、分塊＝W 內的用法。</li><li><b>分清歷史與新結果</b>舊對話 → 壓縮；本輪大量內容 → 外存＋按需讀取。</li><li><b>分清主代理與解析子代理</b>子代理無主對話，不接管完整任務。</li><li><b>分清三種使用層</b>CLI 對話：篩選過的 <code>web_search</code>；工作流程：只有 <code>web:</code> 步驟；Studio：無網路、無 shell。</li><li><b>分清 schema 與 view</b>schema 定回傳內容、嚴格驗證；view 只管呈現，載入時對照。</li><li><b>分清完整紀錄與目前上下文</b>磁碟內容不會自動全數進入下次請求。</li><li><b>分清取消與回滾</b>補齊工具結果只維持協定，不撤銷已發生的外部變更。</li><li><b>分清可追查與保證正確</b>紀錄、頁碼、全文路徑供核對；內容仍需驗證。</li></ul>
+  <h3 class="part data" id="data" data-step="3">依據：可重跑的評測與回歸測試</h3>
+  <ul class="problem-list">
+    <li><b>評測腳本</b>：<a href="../../examples/compare_memory.py">examples/compare_memory.py</a>（記憶回復）、<a href="../../examples/str_benchmark.py">examples/str_benchmark.py</a>（STR 長任務；<code>--self-check</code> 不呼叫模型即驗證評分）。步驟與規則見 <a href="../compare.md">compare.md</a>。</li>
+    <li><b>壓縮與記憶測試</b>：<a href="../../tests/test_topic_compaction.py">test_topic_compaction.py</a>、<a href="../../tests/test_new_memory_runtime.py">test_new_memory_runtime.py</a>、<a href="../../tests/test_requirements_and_file_writes.py">test_requirements_and_file_writes.py</a>（固定需求、分段寫檔重試、送出前檢查）。</li>
+    <li><b>其他測試</b>：<a href="../../tests/test_context.py">test_context.py</a>（迴圈、壓縮、剩餘次數提醒）、<a href="../../tests/test_document_budgets.py">test_document_budgets.py</a>、<a href="../../tests/test_pdf_safeguards.py">test_pdf_safeguards.py</a>、<a href="../../tests/test_rate_limits.py">test_rate_limits.py</a>、<a href="../../tests/test_untrusted_inputs.py">test_untrusted_inputs.py</a>、<a href="../../tests/test_web_search.py">test_web_search.py</a>、<a href="../../tests/test_openrouter.py">test_openrouter.py</a>。</li>
+  </ul>
+  <p class="source">閱讀依據：本頁連結的程式。互動元件皆為瀏覽器內教學模擬，非即時伺服器狀態。</p>
+</section>
+</article>
+<nav class="pager" aria-label="上一篇與下一篇" data-pager></nav>
+</main>
+</div>
+<script src="../asset/js/topics.js"></script>
+<script src="../asset/js/core.js"></script>
+</body>
+</html>

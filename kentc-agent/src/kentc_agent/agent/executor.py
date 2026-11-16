@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import signal
 import time
 from contextlib import contextmanager
+from dataclasses import dataclass
 from pathlib import Path
 from threading import current_thread, main_thread
 from typing import Any
@@ -42,6 +44,14 @@ def _defer_interrupt():
             previous(signal.SIGINT, None)
 
 
+@dataclass
+class SeenCall:
+    """The first tool call of a run with given name and arguments, and its result's digest."""
+    call_id: str
+    digest: str
+    repeats: int = 0
+
+
 class ToolExecutorMixin:
     """Mixed into Agent; expects ctx, session, tools, name, density and _op."""
 
@@ -72,7 +82,27 @@ class ToolExecutorMixin:
             result, error = self._tool(name, args)
         finally:
             self.ctx.operation = prev
+        result = self._unrepeated(call["id"], name, args, result)
         return CallResult(call["id"], name, args, result, error, round((time.monotonic() - t0) * 1000), ref)
+
+    def _unrepeated(self, call_id: str, name: str, args: Any, result: str) -> str:
+        """An identical call returning an identical result while the first result is still in the live context is
+        answered with a pointer to it: the model is told it is repeating itself instead of reading the copy again."""
+        if not isinstance(args, dict):
+            return result
+        key = name + "\0" + json.dumps(args, sort_keys=True, ensure_ascii=False)
+        digest = hashlib.sha256(result.encode()).hexdigest()
+        seen = self._seen_calls.get(key)
+        live = seen is not None and any(m.get("tool_call_id") == seen.call_id for m in self.session.messages)
+        if seen is None or seen.digest != digest or not live:
+            self._seen_calls[key] = SeenCall(call_id, digest)
+            return result
+        seen.repeats += 1
+        self.ctx.events.status(self.name, f"repeated {name} call (same arguments, same result as {seen.call_id}): "
+                                          "sent a pointer instead of the copy")
+        return (f"[Repeat {seen.repeats + 1}: this {name} call has the same arguments and returned exactly the same "
+                f"result as tool call {seen.call_id}, which is still in this conversation. Use that result; if it is "
+                "not enough, change the approach instead of repeating the call.]")
 
     def _persist_result(self, r: CallResult, resolved: set[str]) -> None:
         """Append once, keeping persistence and its trace indivisible with respect to Ctrl-C."""
@@ -102,24 +132,59 @@ class ToolExecutorMixin:
             if r.routed:
                 self.ctx.events.big_result(self.name, r.name, r.args, r.routed, real_tokens(self.ctx, r.text))
             self._persist_result(r, resolved)
+        self._shorten_arguments(start, results)
+
+    def _shorten_arguments(self, start: int, results: list[CallResult]) -> None:
+        """Once a turn's results are persisted, a successful call's long string arguments (a written file, a
+        heredoc) leave the live context as head + pointer + tail; the journal keeps the original message.
+        A failed call keeps its arguments, so the model can correct them."""
+        limit = self.ctx.settings.big_args_tokens
+        if not limit or start >= len(self.session.messages):
+            return
+        ok = {r.call_id: r for r in results
+              if not r.error and (r.name != "bash" or "[exit code 0" in r.text)}
+        where = rel_path(self.ctx.workspace, self.session.path) if self.session.path else ""
+        replaced: dict[str, str] = {}
+        for call in self.session.messages[start].get("tool_calls") or []:
+            if call.get("id") not in ok:
+                continue
+            try:
+                args = json.loads(call["function"]["arguments"] or "{}")
+            except json.JSONDecodeError:
+                continue
+            if not isinstance(args, dict):
+                continue
+            short = {k: pointer(v, k, call["function"]["name"], where)
+                     if isinstance(v, str) and len(v) > 2 * (POINTER_HEAD + POINTER_TAIL)
+                     and real_tokens(self.ctx, v) > limit else v for k, v in args.items()}
+            if short != args:
+                replaced[call["id"]] = json.dumps(short, ensure_ascii=False)
+        if replaced:
+            with _defer_interrupt():
+                self.session.replace_arguments(self.session.ids[start], replaced)
+            self.ctx.events.status(self.name, f"shortened the arguments of {len(replaced)} successful call(s) in the "
+                                              "context; the session journal keeps the originals")
 
     def _repair(self, calls: list[dict[str, Any]], results: list[CallResult], start: int,
                 failure: BaseException) -> None:
-        """Resolve every persisted call, without re-running tools, routing, or fallible UI callbacks."""
+        """Resolve every persisted call without re-running tools, routing, or fallible UI callbacks."""
         by_id = {r.call_id: r for r in results}
         aborted = isinstance(failure, (KeyboardInterrupt, Aborted))
-        text = "Aborted by the user." if aborted else \
-            f"Error: tool turn failed ({type(failure).__name__}: {failure})."
+        # Exception messages can contain arbitrarily large or unsafe external
+        # text. Only the bounded failure class belongs in an incomplete status.
+        text = "Aborted by the user." if aborted else f"Error: tool turn failed ({type(failure).__name__})."
         with _defer_interrupt():
             resolved = self._resolved(start)
             for call in calls:
                 result = by_id.get(call["id"])
                 if result is None:
                     result = CallResult(call["id"], call["function"]["name"], None, text, True, 0, None)
-                self._persist_result(result, resolved)
+                if call["id"] not in resolved and self.ctx.settings.safety_check:
+                    result.text, result.safety = guard(result.name, result.text)
+                self._persist_result(result, resolved)   # already-persisted calls still get their trace entry
 
     def _tool(self, name: str, args: Any) -> tuple[str, bool]:
-        """-> (result for the context, is it an error)."""
+        """Return the tool result and error flag."""
         tool = self.tools.get(name)
         if args is None:
             return f"Error: arguments for {name} could not be parsed (invalid JSON). Retry with complete arguments.", True
@@ -149,6 +214,23 @@ class ToolExecutorMixin:
             result, error = f"Error: {type(e).__name__}: {e}", True
         self.ctx.events.tool_end(self.name, name, result, error)
         return result, error
+
+
+POINTER_HEAD, POINTER_TAIL = 200, 400
+
+
+def pointer(value: str, key: str, tool: str, journal: str) -> str:
+    """A long argument after its call succeeded: the start, a marker, and the end (where a next part continues)."""
+    digest = hashlib.sha256(value.encode()).hexdigest()[:16]
+    omitted = len(value) - POINTER_HEAD - POINTER_TAIL
+    origin = f" in the session journal {journal}" if journal else ""
+    return (f"{value[:POINTER_HEAD]}\n[... {omitted:,} characters of this {key} omitted from the context after the "
+            f"{tool} call succeeded (sha256 {digest}); the exact original is{origin}. Read the file it changed for the "
+            f"current text; never copy this marker ...]\n{value[-POINTER_TAIL:]}")
+
+
+def rel_path(workspace: Path, path: Path) -> str:
+    return str(path.relative_to(workspace)) if path.is_relative_to(workspace) else str(path)
 
 
 # ---------------------------------------------------------------------- tool registry

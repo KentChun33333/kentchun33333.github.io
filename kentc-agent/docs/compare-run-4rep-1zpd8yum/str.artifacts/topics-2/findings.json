@@ -1,0 +1,89 @@
+{
+  "persons_reviewed": 40,
+  "key_actor": "P006",
+  "network_total_sgd": 305895.94,
+  "subjects": [
+    {
+      "id": "P006",
+      "role": "key_actor",
+      "reason": "Sole documented beneficiary of the Harbour Light Trust, which owns Northwind Advisory, and the recipient of SGD 209,712.93 of trust distributions that trace to the cash placed by the mule accounts.",
+      "evidence": [
+        "case/profiles/P006_Marcus_Tan_Wei_Ming.docx",
+        "case/trusts/T01_Harbour_Light_Trust.txt",
+        "case/registry/C07_Northwind_Advisory_Pte_Ltd.json",
+        "case/statements/T01_statement.csv",
+        "case/statements/P006_statement.csv",
+        "case/rm_notes/P006_call_note.eml"
+      ]
+    },
+    {
+      "id": "P020",
+      "role": "money_mule",
+      "reason": "Declared income of SGD 26,000.00 as a food delivery rider against SGD 96,485.00 of cash deposits in ten-day intervals, each followed within one day by a same-amount transfer to Northwind Advisory.",
+      "evidence": [
+        "case/profiles/P020_Daniel_Ng_Zhi_Hao.json",
+        "case/statements/P020_statement.csv",
+        "case/statements/C07_statement.csv"
+      ]
+    },
+    {
+      "id": "P036",
+      "role": "money_mule",
+      "reason": "Full-time student with declared income of SGD 9,600.00 who received SGD 96,111.55 of cash across five branches and forwarded it to Brightpath Trading, described on the call note as client payments received for the employer.",
+      "evidence": [
+        "case/profiles/P036_Wong_Mei_Ling.json",
+        "case/statements/P036_statement.csv",
+        "case/statements/C08_statement.csv",
+        "case/rm_notes/P036_call_note.eml"
+      ]
+    },
+    {
+      "id": "P013",
+      "role": "money_mule",
+      "reason": "Retiree with declared income of SGD 14,400.00 who received SGD 93,499.39 of cash at five branches and forwarded it to Brightpath Trading, and could not explain the deposits when contacted.",
+      "evidence": [
+        "case/profiles/P013_Michelle_Chua_Jia_Hui.md",
+        "case/statements/P013_statement.csv",
+        "case/statements/C08_statement.csv",
+        "case/rm_notes/P013_call_note.eml"
+      ]
+    },
+    {
+      "id": "P012",
+      "role": "money_mule",
+      "reason": "Single cash deposit of SGD 19,800.00 on 14 Apr 2026 within the sub-SGD 20,000 pattern, explained on the call note as a private car sale with a signed agreement sighted, and therefore of lower weight.",
+      "evidence": [
+        "case/profiles/P012_Muhammad_Faizal_bin_Rahman.json",
+        "case/statements/P012_statement.csv",
+        "case/rm_notes/P012_call_note.eml"
+      ]
+    },
+    {
+      "id": "P016",
+      "role": "nominee_director",
+      "reason": "Corporate secretarial executive of the service provider who acts as director of both Brightpath Trading and Northwind Advisory for a flat fee per directorship and is the trust protector.",
+      "evidence": [
+        "case/profiles/P016_Kavitha_d_o_Krishnan.json",
+        "case/registry/C08_Brightpath_Trading_Pte_Ltd.json",
+        "case/registry/C07_Northwind_Advisory_Pte_Ltd.json",
+        "case/trusts/T01_Harbour_Light_Trust.txt",
+        "case/rm_notes/P016_call_note.eml",
+        "case/media/MEDIA-02_corporate_service_providers.html"
+      ]
+    }
+  ],
+  "linked_entities": ["C07", "C08", "T01"],
+  "typologies": [
+    "structuring",
+    "cuckoo_smurfing",
+    "rapid_pass_through",
+    "shell_company",
+    "nominee_director",
+    "layering_via_trust"
+  ],
+  "placement_total_sgd": 305895.94,
+  "period": {
+    "start": "2026-03-10",
+    "end": "2026-05-26"
+  }
+}

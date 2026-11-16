@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="單一 PDF、掃描檔或 Office 檔即可超過剩餘視窗；部分 PDF 只有佔位文字。直接注入不是放不下，就是讀錯。">
+<title>05 · 文件解析｜kentc_agent 核心方法論</title>
+<link rel="stylesheet" href="../asset/css/core.css">
+<link rel="stylesheet" href="../asset/css/shell.css">
+</head>
+<body class="topic-page">
+<a class="sr-only" href="#topic">跳至主要內容</a>
+<header class="top"><div class="top-in">
+  <a class="brand" href="../index.html">kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
+  <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
+</div></header>
+<div class="reader">
+<aside class="sidebar" aria-label="主題目錄"><nav class="side-nav" id="sideNav" aria-label="主題"></nav></aside>
+<main id="topic" data-slug="documents">
+<article class="topic">
+<section class="card" id="documents" aria-labelledby="doc-title">
+  <p class="eyebrow">05 · 橫向的極端：大型文件與影像</p>
+  <h2 id="doc-title">先轉換，再依預算解析；只接受完整結果</h2>
+  <div class="psd">
+    <div class="psd-item problem"><span>問題</span><p>單一 PDF、掃描影像或 Office 檔即可超過剩餘視窗；掃描頁無文字層，部分 PDF 只有「請用新版閱讀器」佔位文字。直接塞入 → 放不下或以錯誤內容為證據。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>轉成來源單位（頁、表格列、投影片），依<b>當下有效預算</b>分塊，交給<b>隔離的解析子代理</b>（無工具、不見主對話、每塊一個乾淨 session）。主代理只收摘要與全文路徑；不完整結果不保存。</p></div>
+    <div class="psd-item data"><span>依據</span><p>本機 W = 62,536、輸出上限 4,096：輸入預算 46,902，容得下 12k 分塊；忠實轉錄需 1.25 倍輸出，每塊實際 ≈ 3,276 tokens（見 ③）。</p></div>
+  </div>
+  <h3 class="part problem" id="problem" data-step="1">問題：一份文件就可能超過整個視窗</h3>
+  <ul class="problem-list">
+    <li><b>放不下</b>：大型 PDF／試算表 → 單一工具結果超過剩餘空間；即 <a href="vertical.html">04 · 上下文視窗</a>「橫向」問題的極端。</li>
+    <li><b>讀錯</b>：XFA 表單 PDF 可能只抽得出「Please wait… your PDF viewer may not be able to display」佔位文字 → 當內容即全錯。</li>
+    <li><b>影像不能切</b>：文字可再分塊；頁面影像無法由文字分塊器切開。</li>
+    <li><b>輸出也有上限</b>：忠實轉錄輸出 ≈ 輸入或更多 → 輸入放得下 ≠ 回覆放得下。</li>
+  </ul>
+  <h3 class="part idea" id="solution" data-step="2">核心想法：轉換、依預算分塊、隔離解析、驗證後才保存</h3>
+  <p class="sub">文件子代理與主代理共用模型 client、預算與 Qwen 備援；只讀本次材料與問題、回傳自足結果；重試不帶入前次半截輸出。</p>
+  <div class="tablewrap"><table><thead><tr><th scope="col">輸入類型</th><th scope="col">如何取得材料</th><th scope="col">主代理通常收到什麼</th></tr></thead><tbody>
+    <tr><td>原生 PDF</td><td>頁面文字；依 <code>doc_render</code>、文字量、視覺內容決定是否附頁面影像</td><td>摘要＋全文路徑；<code>question</code> 指定問題、<code>pages</code> 選頁</td></tr>
+    <tr><td>掃描 PDF／獨立影像</td><td>掃描頁轉影像；圖片直接讀，免包成 PDF；需視覺能力</td><td>轉錄摘要＋全文路徑，或附來源位置的答案</td></tr>
+    <tr><td>Office／郵件／CSV／HTML</td><td>轉 Markdown、保留表格位置；附件與內嵌影像另存待讀</td><td>小 → 直接回文字；大 → 摘要路徑；大＋<code>question</code> → 解析子代理</td></tr>
+    <tr><td>影片／舊式 Office 二進位檔</td><td>影片不支援；<code>.doc</code>、<code>.xls</code>、<code>.ppt</code> 須先轉新版</td><td>明確錯誤，不假裝已讀</td></tr>
+  </tbody></table></div>
+  <div class="widget" id="pdf-safeguards">
+    <h3>PDF 覆蓋防線：有文字，不等於讀到真正表單</h3>
+    <div class="tablewrap"><table><caption>XFA／佔位訊息的處理</caption><thead><tr><th scope="col">情況</th><th scope="col">處理</th><th scope="col">不能宣稱什麼</th></tr></thead><tbody>
+      <tr><td>已知 viewer placeholder</td><td>辨識「Please wait… If this message is not eventually replaced… your PDF viewer may not be able to display…」等要求新版 viewer 的完整訊息 → 模型呼叫／快取前報錯；單獨「Adobe Reader」字樣不觸發</td><td>佔位訊息不論長度皆非內容；渲染同頁只重現佔位畫面 ≠ 回復</td></tr>
+      <tr><td><code>/AcroForm/XFA</code> 表單</td><td>偵測直接／間接 AcroForm 與 XFA stream／packet array；只交付靜態頁面渲染影像，擷取文字不作證據；無視覺能力或 <code>doc_render: never</code> → 報錯</td><td><b>動態 XFA 資料未檢視，可能缺漏。</b> 限制記於來源 notes、轉錄成果、快取摘要 metadata；靜態影像 ≠ 完整表單覆蓋</td></tr>
+      <tr><td>明確選擇 <code>pages</code></td><td>只檢查、處理所選頁；快取命名空間已更新 → 舊佔位快取無法繞過檢查</td><td>「所選頁可讀」≠「整份已檢視」</td></tr>
+    </tbody></table></div>
+    <p><b>恢復：</b>保留原檔，以支援 XFA 的 viewer 開啟實際表單，另存／列印為獨立 flattened PDF，核對頁面與關鍵值後重讀；改副檔名或渲染佔位頁無效。</p>
+    <p class="hint">僅涵蓋已知佔位訊息與 XFA；非動態 XFA 渲染器，不保證所有 PDF 正確解析。</p>
+  </div>
+  <ol class="flow" aria-label="文件解析的四個階段"><li><b>① 轉成來源單位</b><span>頁、工作表列區段、投影片、郵件內容；先查佔位訊息與 XFA。</span></li><li><b>② 依有效預算分塊</b><span>非固定 12k；須容下提示、影像與回覆；過長文字再拆。</span></li><li class="special"><b>③ 分別解析與合併</b><span>每塊、每次重試皆乾淨 session；有限分組合併；JSON 摘要重用前驗證。</span></li><li><b>④ 驗證後才保存</b><span>完整且格式有效才接受／快取；截斷或無效 → 有限次重試，耗盡即報錯。</span></li></ol>
+  <div class="grid2">
+    <div class="box"><h3>轉錄與問答，輸出需求不同</h3><p>轉錄須重現原文與表格 → 另檢 <code>ceil(user × density × 1.25) ≤ output</code>；問答不套用。</p><p class="why">影像 token ≠ 圖中文字長度；餘裕非完整性保證，仍須檢查完成原因。</p></div>
+    <div class="box"><h3>放不下時，不默默省略證據</h3><p>單張影像超出預算或筆記無法合併 → 報錯；回覆截斷 → 以相同證據乾淨重試。對策：縮小頁面範圍、調整影像尺寸或輸出策略。</p><p class="why">加大硬視窗需改部署；重試、視覺輸入、格式驗證皆不保證內容完整或正確。</p></div>
+  </div>
+  <div class="widget">
+    <div class="widget-head"><h3>12k 分塊上限 ≠ 單次可讀 12k</h3><span class="tag amber">預算示意 · 不是 tokenizer</span></div>
+    <p class="hint" style="margin:0 0 12px">W、O 預設取「上下文」計算器最後設定值，可改。user：假設的單一請求內容（任務、標題、文字、影像）；fixed 以 100 tokens 示範，非由實際文件計算。</p>
+    <div class="controls"><label class="field" for="docW">假設偵測到 W<input type="number" id="docW" value="15536" min="1024" max="2000000" step="1"></label><label class="field" for="docO">請求輸出上限 O<input type="number" id="docO" value="8192" min="512" max="2000000" step="1"></label><label class="field" for="docUser">user 估算 tokens<input type="number" id="docUser" value="6000" min="1" max="2000000" step="1"></label><label class="field" for="docDensity">density<input type="number" id="docDensity" value="1" min="1" max="3" step="0.05"></label><label class="field wide" for="docMode">解析目的<select id="docMode"><option value="transcribe">忠實轉錄 · 預留 25% 擴展量</option><option value="extract">問題擷取／摘要</option></select></label></div>
+    <div class="kv" id="docKV"></div><div class="verdict" id="docVerdict" aria-live="polite"></div>
+    <details><summary>展開文件預算公式</summary><div class="formula">output = min(O, floor(W / 2))
+reserve = max(max(output, 1,024) + M, min(16,384, floor(W / 4)))
+input = W − reserve
+ceil((fixed + user) × density) ≤ input
+user ≤ doc_chunk_tokens（預設 12,000）
+轉錄另需 ceil(user × density × 1.25) ≤ output</div><p class="hint">另受每塊影像張數上限（預設 4）約束。程式以實際完整提示估算分塊，不用 fixed = 100。output 為規劃保留量，不保證實際產出。</p></details>
+  </div>
+  <h3 class="part data" id="data" data-step="3">依據：預算計算與實際執行</h3>
+  <div class="tablewrap"><table><caption>以本機部署代入上方公式（density = 1）</caption><thead><tr><th scope="col">項目</th><th scope="col">算式</th><th scope="col">結果</th></tr></thead><tbody>
+    <tr><td>輸出保留 output</td><td>min(4,096, floor(62,536 / 2))</td><td>4,096</td></tr>
+    <tr><td>安全餘裕 M</td><td>max(256, floor(62,536 / 20))</td><td>3,126</td></tr>
+    <tr><td>保留量 reserve</td><td>max(4,096 + 3,126, min(16,384, floor(62,536 / 4)))</td><td>15,634</td></tr>
+    <tr><td>輸入預算 input</td><td>62,536 − 15,634</td><td>46,902 → 容得下 12k 分塊</td></tr>
+    <tr><td>忠實轉錄的每塊上限</td><td>ceil(user × 1.25) ≤ 4,096</td><td>user ≤ 3,276 ≪ 12k</td></tr>
+  </tbody></table></div>
+  <ul class="problem-list">
+    <li><b>Studio 實測</b>：文件代理讀 <code>account_statement_90d.xlsx</code> 一次超出呼叫上限而失敗、重試成功；失敗明確顯示。詳見 <a href="studio.html">10 · Studio 應用</a>。</li>
+    <li><b>回歸測試</b>：<a href="../../tests/test_pdf_safeguards.py">test_pdf_safeguards.py</a>（佔位訊息／XFA 於模型呼叫或快取前報錯）、<a href="../../tests/test_document_budgets.py">test_document_budgets.py</a>（依有效預算分塊；無效摘要不入快取）。</li>
+  </ul>
+  <p class="source">實作對照：<a href="../../src/kentc_agent/adapters/documents/loaders.py">adapters/documents/loaders.py · load_pdf</a><a href="../../src/kentc_agent/adapters/documents/policy.py">adapters/documents/policy.py · read_document / parse_digest</a><a href="../../src/kentc_agent/adapters/documents/budget.py">adapters/documents/budget.py · document_budget / map_chunks / reduce_notes / ask</a><a href="../../tests/test_pdf_safeguards.py">tests/test_pdf_safeguards.py</a></p>
+</section>
+</article>
+<nav class="pager" aria-label="上一篇與下一篇" data-pager></nav>
+</main>
+</div>
+<script src="../asset/js/topics.js"></script>
+<script src="../asset/js/core.js"></script>
+</body>
+</html>

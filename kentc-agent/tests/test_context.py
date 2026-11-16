@@ -80,14 +80,32 @@ def test_agent_runs_tools_until_answer(make_ctx, tmp_path):
     llm = FakeLLM(lambda m, t: next(replies))
     agent = Agent(make_ctx(llm), tools=[CORE_TOOLS["read"]])
     assert agent.run("read a.txt") == "it says hello world"
-    tool_msg = llm.requests[1]["messages"][-1]
+    tool_msg = llm.requests[1]["messages"][-2]          # the budget notice follows the tool result
     assert tool_msg == {"role": "tool", "tool_call_id": "c1", "content": "hello world"}
+
+
+def test_budget_notice_counts_down_to_the_last_call_and_is_never_stored(make_ctx, tmp_path):
+    (tmp_path / "a.txt").write_text("hello")
+    llm = FakeLLM(lambda m, t: Reply(tool_calls=[call("read", '{"path": "a.txt"}')], finish="tool_calls"))
+    agent = Agent(make_ctx(llm), tools=[CORE_TOOLS["read"]], max_turns=3)
+    assert "Stopped after 3 model calls" in agent.run("read a.txt")
+    notices = [r["messages"][-1]["content"] for r in llm.requests]
+    assert ["2 left" in notices[0], "1 left" in notices[1], "the last one" in notices[2]] == [True, True, True]
+    assert not any("Model-call budget" in str(m.get("content")) for m in agent.session.messages)
+
+    plain = FakeLLM(lambda m, t: Reply(content="ok", finish="stop"))
+    Agent(make_ctx(plain), tools=[], max_turns=1).run("answer")
+    assert plain.requests[0]["messages"][-1] == {"role": "user", "content": "answer"}
+
+
+def checkpoint(text: str) -> Reply:
+    return Reply(content=json.dumps({"checkpoint": text, "topics": {}}), finish="stop")
 
 
 def test_agent_compacts_when_over_budget_and_keeps_pairs(make_ctx):
     def script(messages, tools):
-        if "context checkpoint" in str(messages[-1]["content"]) or "<previous-summary>" in str(messages[-1]["content"]):
-            return Reply(content="## Goal\nsummarized", finish="stop")
+        if "<historical-data>" in str(messages[-1]["content"]):
+            return checkpoint("## Goal\nsummarized")
         return Reply(content="ok " + "r" * 800, finish="stop")
     llm = FakeLLM(script, window=4000)
     agent = Agent(make_ctx(llm, reserve_tokens=1000, keep_recent_tokens=800), tools=[])
@@ -106,7 +124,7 @@ def overflowing(n: int, summary: Reply):
 
     def script(messages, tools):
         last = str(messages[-1]["content"])
-        if "context checkpoint" in last:
+        if "<historical-data>" in last:
             return summary
         if last.startswith("final") and state["overflows"] < n:
             state["overflows"] += 1
@@ -116,7 +134,7 @@ def overflowing(n: int, summary: Reply):
 
 
 def test_server_overflow_first_shrinks_the_reply_then_compacts(make_ctx):
-    llm = FakeLLM(overflowing(2, Reply(content="## Goal\nS", finish="stop")), window=100_000)
+    llm = FakeLLM(overflowing(2, checkpoint("## Goal\nS")), window=100_000)
     agent = Agent(make_ctx(llm), tools=[])
     for i in range(4):
         agent.run(f"q{i}")

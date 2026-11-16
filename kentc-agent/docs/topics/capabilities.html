@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="各部署的視窗、影像能力、速率限制與連線行為不同；寫死數值或盲目重送會超限、重複或卡死。">
+<title>03 · 能力與策略｜kentc_agent 核心方法論</title>
+<link rel="stylesheet" href="../asset/css/core.css">
+<link rel="stylesheet" href="../asset/css/shell.css">
+</head>
+<body class="topic-page">
+<a class="sr-only" href="#topic">跳至主要內容</a>
+<header class="top"><div class="top-in">
+  <a class="brand" href="../index.html">kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
+  <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
+</div></header>
+<div class="reader">
+<aside class="sidebar" aria-label="主題目錄"><nav class="side-nav" id="sideNav" aria-label="主題"></nav></aside>
+<main id="topic" data-slug="capabilities">
+<article class="topic">
+<section class="card" id="capabilities" aria-labelledby="cap-title">
+  <p class="eyebrow">03 · 誰決定上限，誰決定用法</p>
+  <h2 id="cap-title">伺服器能力 ≠ 代理設定</h2>
+  <div class="psd">
+    <div class="psd-item problem"><span>問題</span><p>上下文視窗、影像能力、速率限制與連線行為因部署而異。寫死數字 → 換部署即超限；盲目重送 → 重複輸出或卡住。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p><b>能力</b>（視窗 W、影像）是部署事實，向伺服器查詢；<b>策略</b>（輸出量、保留量、分塊）恆受 W 限制。速率共用一份預算，失敗僅做有限次乾淨重試。</p></div>
+    <div class="psd-item data"><span>依據</span><p>本機 <code>/models</code> 回報 <code>n_ctx = 62,536</code>，Qwen 設定 60,000：同為本機小模型，視窗不同。恢復行為有回歸測試（③）。</p></div>
+  </div>
+  <h3 class="part problem" id="problem" data-step="1">問題：同一份程式跑在不同部署</h3>
+  <ul class="problem-list">
+    <li><b>視窗不同</b>：模型名稱不決定 W。寫死 60k → 32k 部署長任務中途超限，反之浪費。壓縮門檻、保留量、文件分塊皆由 W 推算 → W 錯則全錯。</li>
+    <li><b>速率限制</b>：主代理、文件子代理、壓縮呼叫共用供應者配額 → 各自重試同時撞 429。</li>
+    <li><b>串流中斷</b>：傳輸層重播或換後端 → 輸出重複或拼接；半截回覆可能被當成完整答案。</li>
+  </ul>
+  <h3 class="part idea" id="solution" data-step="2">核心想法：查詢能力、共用預算、乾淨重試</h3>
+  <div class="callout"><b>W 是部署事實，非模型名稱常數。</b> OpenAI／Strata 向伺服器查；Qwen38 預設 60,000，取自使用者提供的部署設定，非即時偵測。換部署須確認兩後端都放得下，必要時覆寫。</div>
+  <div class="tablewrap"><table>
+    <caption>能力、連線與策略的分工</caption>
+    <thead><tr><th scope="col">類別</th><th scope="col">內容</th><th scope="col">目前的來源與規則</th></tr></thead>
+    <tbody>
+      <tr><td>連線與模型選擇</td><td><code>provider</code>、<code>base_url</code>、<code>api_key</code>、<code>model</code></td><td><code>openai</code>：預設本機 Strata。<code>qwen38</code>：內建原客戶端 coordinator／LiteLLM 端點、金鑰、模型，免額外 YAML 或端點／金鑰環境變數。兩 Qwen 後端各自解析覆寫或預設，不以 Strata 備援。<code>openrouter</code>：替代雲端路徑，預設 <code>https://openrouter.ai/api/v1</code>、金鑰 <code>OPENROUTER_API_KEY</code>、模型 <code>qwen/qwen3.8-flash</code>；資料離開本機。</td></tr>
+      <tr><td>部署上下文視窗</td><td><code>ModelInfo.context_window</code></td><td>OpenAI：<code>/models</code> 的正整數 <code>meta.n_ctx</code> 或 <code>max_model_len</code>。OpenRouter：<code>context_length</code> 與 <code>top_provider.context_length</code> 取小。Qwen：<code>qwen_context_window</code> 預設 60,000（使用者提供）；換部署明確覆寫，不依模型家族推定。</td></tr>
+      <tr><td>影像輸入能力</td><td><code>ModelInfo.vision</code></td><td>OpenAI／OpenRouter：<code>architecture.input_modalities</code>；未宣告 → 樂觀視為支援。Qwen：預設關，兩後端皆確認支援才開 <code>qwen_vision</code>。不保證辨識正確。</td></tr>
+      <tr><td>每次輸出怎麼用</td><td><code>max_output_tokens</code>、<code>reasoning_effort</code></td><td>請求策略，非伺服器能力。輸出量依剩餘空間調整；超限 → 依伺服器回報重試。</td></tr>
+      <tr><td>上下文與文件策略</td><td><code>reserve_tokens</code>、<code>keep_recent_tokens</code>、<code>doc_chunk_tokens</code></td><td>上限或目標；有效值受偵測到的 W 限制，不能放大 W。</td></tr>
+    </tbody>
+  </table></div>
+  <div class="grid2">
+    <div class="box"><h3>能力更新時機</h3><p><code>Agent.run</code> 開始、文件預算規劃、上下文超限後：OpenAI 重新偵測，Qwen 重讀明確設定。其餘讀快照。</p></div>
+    <div class="box"><h3>無有效視窗時</h3><p>OpenAI 缺有效視窗或找不到所選模型 → 報錯。Qwen 不需模型清單，用內建 60k 或覆寫；無效覆寫（0、負值）→ 報錯。內建值 ≠ 伺服器已驗證接受。</p></div>
+  </div>
+  <div class="widget" id="direct-run">
+    <h3>兩個環境直接啟動，無需另填主機或金鑰</h3>
+    <pre><code># 本機 Strata，保留原本預設
+uv run kentc-agent "Your task"
+
+# Qwen coordinator 優先，串流開始前失敗可切 LiteLLM
+uv run kentc-agent --provider qwen38 "Your task"
+
+# Qwen LiteLLM 優先，備援為 coordinator
+uv run kentc-agent --provider qwen38 --qwen-backend litellm "Your task"</code></pre>
+    <p>主機、API key、模型名稱集中於 <code>config/qwen38.yaml</code> 的 <code>coordinator</code>／<code>litellm</code> 兩段（各含 <code>base_url</code>、<code>api_key</code>、<code>model</code>）；改後重啟 CLI/Studio，免改 Python。wheel 內為 <code>kentc_agent/deployment_config/qwen38.yaml</code> → 更新須重建／重裝。優先序：明確連線設定 &gt; 後端環境變數 &gt; 此檔；切換環境時移除過時通用覆寫。Studio 共用，以 <code>KENTC_AGENT_PROVIDER=qwen38</code> 選 Qwen。</p>
+    <p class="hint"><b>部署與憑證限制：</b>YAML 含復原的 coordinator token；移出 Python ≠ 秘密管理 → 設定檔與建置產物須私有，外洩或到期即輪替，token 不抄到本頁。LiteLLM 沿用原客戶端預設 key。TLS 驗證不關；前提：內網、企業 CA 信任、伺服器接受憑證（不保證永久有效）。</p>
+  </div>
+  <div class="widget" id="recovery">
+    <h3>共享 TPM 與乾淨串流重試</h3>
+    <p>串流保持啟用，畫面 delta 僅暫時。截斷、中斷串流、無效工具 JSON 於保存／執行前拒絕；工作流程／Studio JSON 另驗 schema 與 checks。不修補截斷 JSON，拒絕重複鍵與非 JSON 常數。</p>
+    <div class="tablewrap"><table><caption>恢復策略與預設值</caption><thead><tr><th scope="col">設定</th><th scope="col">預設</th><th scope="col">邊界</th></tr></thead><tbody>
+      <tr><td><code>tokens_per_minute</code></td><td><code>0</code></td><td>0 = 停用本地 token 入場估算，429 等待仍有效。配給 100k TPM → 設 <code>100000</code>；預留 ≈ 輸入 + 請求輸出，以完整 usage 校正。</td></tr>
+      <tr><td><code>rate_limit_max_wait</code></td><td><code>120</code> 秒</td><td>單次 client 呼叫的入場 + 429 等待共用上限（含 Qwen 備援）。依 <code>Retry-After</code>（秒或 HTTP 日期），缺則有限退避。耗盡 → 報錯；Ctrl-C 可中斷。</td></tr>
+      <tr><td><code>output_retries</code></td><td><code>2</code></td><td>最多額外 2 次乾淨嘗試；0 = 不重試。保留原始證據與已接受上下文；被拒文字不進新請求或修正提示。工作流程／Studio 另受 <code>max_turns</code> 限制。</td></tr>
+    </tbody></table></div>
+    <p>同一 <code>LLMClient</code> 的主代理、文件子代理、壓縮呼叫、Qwen 備援共享 60 秒滾動預算與冷卻。缺 usage 或中斷的請求保留預留量至到期。屬 client／程序內估算，非供應者帳本，不跨程序共享。</p>
+    <p>Qwen 每次請求先用 <code>qwen_backend</code>；僅串流開始前失敗才有限切換 coordinator ↔ LiteLLM。首個 chunk 後不重播、不切換；中斷輸出整份丟棄，由代理乾淨重試。須有 finish reason，單獨 <code>[DONE]</code> 不算完整。上下文超限交給預算／壓縮。</p>
+    <p class="hint">CLI：<code>--tokens-per-minute</code>、<code>--rate-limit-max-wait</code>；三項皆可經 YAML 或 <code>KENTC_AGENT_</code> 環境變數設定。文件重試另開 session；拒絕回覆、無關錯誤不通用重試。舊 session 不自動清洗；文件分塊尚無跨中斷續跑的檢查點。</p>
+  </div>
+  <h3 class="part data" id="data" data-step="3">依據：實際部署數值與回歸測試</h3>
+  <div class="tablewrap"><table><caption>部署能力實例</caption><thead><tr><th scope="col">部署</th><th scope="col">視窗來源</th><th scope="col">數值</th></tr></thead><tbody>
+    <tr><td>本機 OpenAI 相容伺服器（<code>huihui-v2-swift-qwen3.8-flash-next-iq3_s</code>）</td><td><code>/models</code> 的 <code>meta.n_ctx</code>，每次 run 開始查</td><td>62,536（評測前後各記一次：<a href="../compare-run-4rep-1zpd8yum/models-before.json">models-before.json</a>）</td></tr>
+    <tr><td>Qwen38（coordinator／LiteLLM）</td><td><code>qwen_context_window</code> 設定值，非即時偵測</td><td>60,000（預設，可覆寫）</td></tr>
+  </tbody></table></div>
+  <p>兩部署差 2,536 tokens → 直接傳到壓縮門檻（W − R）與文件分塊預算。恢復行為測試：<a href="../../tests/test_rate_limits.py">test_rate_limits.py</a>（共享 TPM、429 等待）、<a href="../../tests/test_qwen38.py">test_qwen38.py</a>（後端備援、串流開始後不切換）、<a href="../../tests/test_document_budgets.py">test_document_budgets.py</a>（預算依 W 計算）。</p>
+  <p class="source">實作對照：<a href="../../src/kentc_agent/adapters/llm.py">adapters/llm.py · LLMClient</a><a href="../../src/kentc_agent/adapters/qwen38.py">adapters/qwen38.py · connection / fallback_settings</a><a href="../../src/kentc_agent/adapters/rate_limit.py">adapters/rate_limit.py · RollingTokenBudget</a><a href="../../src/kentc_agent/config.py">config.py · Settings</a>通用 <code>context_window</code> 與 <code>--context-window</code> 已移除；Qwen 使用專屬的 <code>qwen_context_window</code>。</p>
+</section>
+</article>
+<nav class="pager" aria-label="上一篇與下一篇" data-pager></nav>
+</main>
+</div>
+<script src="../asset/js/topics.js"></script>
+<script src="../asset/js/core.js"></script>
+</body>
+</html>

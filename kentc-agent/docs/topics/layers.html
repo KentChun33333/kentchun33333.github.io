@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="同一代理服務三種場合：有人逐回合看管、無人看管的長流程、處理不可信上傳的網頁。單一權限組不是過寬就是過窄。">
+<title>00 · 三種使用層｜kentc_agent 核心方法論</title>
+<link rel="stylesheet" href="../asset/css/core.css">
+<link rel="stylesheet" href="../asset/css/shell.css">
+</head>
+<body class="topic-page">
+<a class="sr-only" href="#topic">跳至主要內容</a>
+<header class="top"><div class="top-in">
+  <a class="brand" href="../index.html">kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
+  <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
+</div></header>
+<div class="reader">
+<aside class="sidebar" aria-label="主題目錄"><nav class="side-nav" id="sideNav" aria-label="主題"></nav></aside>
+<main id="topic" data-slug="layers">
+<article class="topic">
+<section class="card" id="layers" aria-labelledby="layers-title">
+  <p class="eyebrow">00 · 同一個代理，三種使用層</p>
+  <h2 id="layers-title">越無人看管，權限越收斂</h2>
+  <div class="psd">
+    <div class="psd-item problem"><span>問題</span><p>同一代理服務三種場合：終端逐回合確認、無人看管的長流程、處理他人上傳文件的網頁應用。單一權限組不是過寬就是過窄。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>單一核心代理，依看管程度決定工具、網路與輸出格式。越無人看管 → 工具越少、網路越受控、輸出越結構化。</p></div>
+    <div class="psd-item data"><span>依據</span><p>限制在載入檢查強制，不靠提示：工作流程步驟列出 <code>web_search</code>、Studio 代理宣告 <code>bash</code>，載入即拒絕。</p></div>
+  </div>
+  <h3 class="part problem" id="problem" data-step="1">問題：三種風險</h3>
+  <p><b>CLI 對話</b>：逐回合有人看，錯誤即時可中止 → 工具可最多。<b>工作流程</b>：長時間無人看管 → 一次錯誤查詢或網頁注入可無聲污染後續多步。<b>Studio</b>：輸入為他人上傳文件，可夾帶「忽略之前的指示」；輸出直達分析師。</p>
+  <p>例：Studio 有 <code>bash</code> → 注入可觸及 shell；CLI 降到 Studio 權限 → 互動處處受限。</p>
+  <h3 class="part idea" id="solution" data-step="2">核心想法：權限隨看管程度收斂</h3>
+  <div class="grid3">
+    <article class="box"><span class="number">CLI 對話</span><h3>人在迴圈中，逐回合確認</h3><p><code>read</code>、<code>write</code>、<code>edit</code>、<code>bash</code> ＋ <b>經篩選的 <code>web_search</code></b>（提問觸發；結果經篩選子代理與安全檢查才進對話）。<code>--tools</code> 可縮減。</p><p class="why">成果：直接回答、工作區檔案。</p></article>
+    <article class="box"><span class="number">工作流程</span><h3>長時間、自主執行</h3><p>主代理僅四個核心工具，<b>無</b> <code>web_search</code>；外部資料走 <code>web:</code> 步驟，由網路代理篩選、限搜尋預算、查核連結、人工核准。</p><p class="why">成果：檔案（<code>research/</code>、<code>notes/</code>、<code>reports/</code>），可 <code>--resume</code>。</p></article>
+    <article class="box"><span class="number">Studio</span><h3>網頁體驗，系統定義輸入與輸出</h3><p>讀上傳文件與 SQL 擷取資料；<b>只讀案件資料夾</b>、永無 <code>bash</code>、無網路。每應用一份 <code>config/apps/&lt;name&gt;/app.yaml</code> 即工作流程：宣告代理契約、技能、<code>output</code> 與 <code>checks</code>，由 <code>view</code> 以固定區塊呈現。</p><p class="why">成果：結構化 JSON → 前端區塊（代理不產生 HTML）。</p></article>
+  </div>
+  <div class="callout">頁面流程、技能路徑、報告框架欄位、view 檢查：詳見 <a href="studio.html">10 · Studio 應用</a>。</div>
+  <h3 class="part data" id="data" data-step="3">依據：載入時強制，不靠提示</h3>
+  <ul class="problem-list">
+    <li><b>工作流程</b>：外部資料只經 <code>web:</code> 步驟（詳見 <a href="web.html">09 · 網路研究</a>）。</li>
+    <li><b>Studio</b>：無 <code>web:</code> 步驟；其餘設定錯誤亦於啟動時拒絕，不延到畫面（詳見 <a href="studio.html">10 · Studio 應用</a>）。</li>
+    <li><b>邊界</b>：工具清單 ≠ OS 沙箱。<code>write</code>／<code>edit</code> 限工作區路徑，<code>bash</code> 仍具執行程序權限（見 <a href="workflows.html">08 · 工作流程</a>）。</li>
+  </ul>
+</section>
+</article>
+<nav class="pager" aria-label="上一篇與下一篇" data-pager></nav>
+</main>
+</div>
+<script src="../asset/js/topics.js"></script>
+<script src="../asset/js/core.js"></script>
+</body>
+</html>

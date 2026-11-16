@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="W ≈ 6 萬 tokens，單件審查案原始資料 ≈ 一個視窗；歷史逐輪累積（縱向），單次結果可一次塞滿（橫向）。">
+<title>04 · 上下文視窗｜kentc_agent 核心方法論</title>
+<link rel="stylesheet" href="../asset/css/core.css">
+<link rel="stylesheet" href="../asset/css/shell.css">
+</head>
+<body class="topic-page">
+<a class="sr-only" href="#topic">跳至主要內容</a>
+<header class="top"><div class="top-in">
+  <a class="brand" href="../index.html">kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
+  <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
+</div></header>
+<div class="reader">
+<aside class="sidebar" aria-label="主題目錄"><nav class="side-nav" id="sideNav" aria-label="主題"></nav></aside>
+<main id="topic" data-slug="vertical">
+<article class="topic">
+<section class="card" id="vertical" aria-labelledby="context-title">
+  <p class="eyebrow">04 · 上下文視窗的兩個方向</p>
+  <h2 id="context-title">跨回合壓縮歷史；單回合控制新資料</h2>
+  <div class="psd">
+    <div class="psd-item problem"><span>問題</span><p>視窗約 6 萬 tokens，一件審查案的原始資料就接近一整個視窗。指令輸出與推理逐輪累積（縱向）；單次讀檔或搜尋也可能一次塞滿（橫向）。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p><b>縱向</b>：超過門檻前將舊歷史壓成摘要，保留最近訊息。<b>橫向</b>：結果進入上下文前判斷大小，大型結果存磁碟，只給模型摘要與可再讀路徑。</p></div>
+    <div class="psd-item data"><span>依據</span><p>歷史實測（舊版 v1，已移除）一次 STR 任務：prompt 從 2,136 長到 45,533 tokens，第 74 次呼叫觸發壓縮，全程送出約 240 萬 prompt tokens。記憶回復一次壓縮 65,594 → 19,764（③）。</p></div>
+  </div>
+  <h3 class="part problem" id="problem" data-step="1">問題：視窗固定，資料量不固定</h3>
+  <p>本機 W = 62,536 tokens，須扣回覆空間、系統提示、工具說明；超過 <code>W − R</code>（R：壓縮保留量）須先騰空間。預設值下可累積對話上限 ≈ 46,902 tokens。</p>
+  <div class="grid2">
+    <div class="box"><span class="tag">縱向問題</span><h3>談得越久，歷史越長</h3><p>每次「呼叫工具 → 讀結果 → 推理」都留在對話。80 次呼叫、每次僅增數百 tokens，幾十次後即撞門檻。直接截掉舊訊息 → 遺忘已查過、已決定的事。</p></div>
+    <div class="box"><span class="tag violet">橫向問題</span><h3>一次讀太多，當下就放不下</h3><p>大檔 <code>read</code>、數千行 <code>grep</code>、多頁 PDF：單回合結果即可能超過剩餘空間。</p></div>
+  </div>
+  <h3 class="part idea" id="solution" data-step="2">核心想法：縱向壓縮歷史，橫向外存大型結果</h3>
+  <div class="grid2">
+    <div class="box"><span class="tag">縱向 · compaction.py</span><h3>歷史太長：壓縮舊對話</h3><p>保留最近訊息，較舊內容整理成短 checkpoint＋本地主題筆記，合組下一次請求；磁碟原始對話保留。</p><p class="why">不刪工作區檔案，不把資料訓練進模型。</p></div>
+    <div class="box"><span class="tag violet">橫向 · bigcontext.py</span><h3>本輪太大：大型結果外存</h3><p>單筆或批次超預算 → 保留完整內容或來源參照，給模型摘要 + 可再讀路徑。</p><p class="why">壓縮舊歷史救不了：問題在新進資料。</p></div>
+  </div>
+  <h3>token 估算不是字數 ÷ 4</h3>
+  <p>下一次輸入估算 = <code>C + ceil(E × density)</code>：C 為最新伺服器 usage 錨定的已計數部分，E 為其後新訊息估算。無計數時，系統提示、工具 schema、摘要、對話皆估算。伺服器實際輸入量校準 density；影像仍有模型相關誤差。</p>
+  <div class="widget" id="budgetWidget">
+    <div class="widget-head"><h3>上下文預算教學計算器</h3><span class="tag amber">示意參數，不是代理設定</span></div>
+    <p class="hint" style="margin:0 0 13px">W 僅模擬伺服器回報值；頁面不連線、不偵測模型、不改 config，其餘保留策略用程式預設值。</p>
+    <div class="controls">
+      <label class="field wide" for="wPreset">教學情境<select id="wPreset"><option value="15536">較小視窗 · 15,536</option><option value="32768">中型視窗 · 32,768</option><option value="65536">較大視窗 · 65,536</option></select></label>
+      <label class="field" for="wInput">假設偵測到 W<input type="number" id="wInput" value="15536" min="1024" max="2000000" step="1"></label>
+      <label class="field" for="outputInput">請求輸出上限 O<input type="number" id="outputInput" value="8192" min="512" max="2000000" step="1"></label>
+      <label class="field range" for="ctxRange">目前估算上下文 T：<b id="ctxVal">9,000</b><input type="range" id="ctxRange" value="9000" min="0" max="18643" step="1"></label>
+    </div>
+    <div class="bar" id="budgetBar" aria-hidden="true"></div><p class="bar-label">藍色：壓縮門檻前的範圍 · 紅色：保留區 · 黑線：目前估算位置（超過 W 時停在右緣）</p>
+    <div class="kv" id="budgetKV"></div>
+    <div class="verdict" id="budgetVerdict" aria-live="polite"></div>
+    <details><summary>展開預算公式與限制</summary><div class="formula">R = min(16,384, floor(W / 4))          壓縮保留量
+K = min(20,000, floor(W / 3))          最近訊息保留目標
+M = max(256, floor(W / 20))           請求安全餘裕
+room = W − T − M                     回覆可用空間
+T > W − R                            先嘗試壓縮
+room < 1,024                         嘗試強制壓縮
+max_tokens = max(512, min(O, room))   主迴圈初步請求值；之後還可能依超限回覆調整</div><p class="hint">最低 512 不保證放得下：壓縮仍騰不出空間 → 伺服器可能拒絕；計算器不標為「已安全送出」。摘要只有篇幅目標與輸出預算，無固定長度。</p></details>
+  </div>
+  <h3>壓縮的輸入、處理與輸出</h3>
+  <ol class="recipe"><li><b>找切點</b>從最近訊息往回估算，切在使用者或 assistant 訊息；工具結果不與其呼叫分開。</li><li><b>更新 checkpoint 與主題</b>舊訊息 + 上份 checkpoint → Goal／Constraints／Progress／Key Decisions／Evidence／Next Steps／Critical Context，細節寫入主題筆記（見 <a href="eval.html">07</a>）。</li><li><b>重建工作上下文</b>以「checkpoint ＋ 固定需求 ＋ 筆記索引 ＋ 最近訊息」繼續；原始訊息留 session 日誌，不全部重送。</li><li><b>壓縮失敗不假裝成功</b>回報問題、保留完整歷史，不截短舊工具結果；送出前估算回覆空間不足 512 tokens → 壓縮一次，仍不足 → 本機 <code>ContextOverflow</code>。</li></ol>
+  <details><summary>density 校準規則</summary><p class="hint">E ≥ 300 且伺服器輸入 P &gt; C → 觀測值 = <code>min(3, (P − C) / E)</code>。比目前密 → 立即採用；較稀 → <code>max(1, 0.8 × 舊值 + 0.2 × 觀測值)</code> 平滑。只修正估算，不取代伺服器 tokenizer。</p></details>
+
+  <h3 id="horizontal">橫向：單回合結果的三道判斷</h3>
+  <div class="tablewrap"><table><thead><tr><th scope="col">規則</th><th scope="col">觸發情況</th><th scope="col">處理方式</th></tr></thead><tbody>
+    <tr><td><span class="tag red">file</span></td><td>讀大型檔案；PDF／影像一律走文件路徑</td><td><code>read</code> 先處理：一般文字 → 規則摘要；文件 → 解析子代理。</td></tr>
+    <tr><td><span class="tag red">result</span></td><td>其他單筆工具結果超預算</td><td>如大量命令輸出、搜尋結果；本輪總量小也先外存。</td></tr>
+    <tr><td><span class="tag violet">turn</span></td><td>多筆合計超本輪預算</td><td>從未外存且大於摘要預算者中，最大筆優先；實際摘要大小受估算影響。</td></tr>
+  </tbody></table></div>
+  <div class="widget">
+    <div class="widget-head"><h3>大型結果路由示意</h3><span class="tag">沿用上方 W · density 示意為 1</span></div>
+    <div class="controls"><button type="button" class="btn" data-preset="small">少量結果</button><button type="button" class="btn" data-preset="mixed">混合檔案</button><button type="button" class="btn" data-preset="batch">多筆分頁</button><button type="button" class="btn" id="rClear">清空</button></div>
+    <div class="controls" style="margin-top:12px"><label class="field wide" for="rType">新增工具結果<select id="rType"><option value="text">read · 文字／程式檔</option><option value="page">read · 分頁</option><option value="pdf">read · PDF／影像</option><option value="office">read · Office／郵件／CSV</option><option value="bash">bash · 命令輸出</option></select></label><label class="field" for="rTok">結果 token 估算<input type="number" id="rTok" value="2500" min="1" max="2000000" step="1"></label><button type="button" class="btn" id="rAdd">加入結果</button></div>
+    <div class="tablewrap"><table><caption class="sr-only">結果如何進入主上下文</caption><thead><tr><th scope="col">工具結果</th><th scope="col">原始量</th><th scope="col">路由規則</th><th scope="col">摘要來源</th><th scope="col">進入上下文</th><th scope="col">操作</th></tr></thead><tbody id="rBody"></tbody></table></div>
+    <div class="verdict" id="rVerdict" aria-live="polite"></div>
+    <p class="hint">僅示意規則順序；摘要長度為假設，不執行解析、快取、規則摘要或真實 token 計數，不保證實際批次符合預算。一般文字檔可直接參照原檔，未必複製為 full.md。</p>
+  </div>
+  <div class="callout warn"><b>舊版 v1（已移除）的缺口：</b>單一摘要、每筆舊結果只看前 2,000 字、失敗時截短 → 長任務壓縮後流失細節。現行 runtime 改為主題筆記、失敗不截短；2,000 字前綴限制仍在。詳見 <a href="eval.html">07 · 長任務記憶：摘要 → 主題筆記</a>。</div>
+  <h3 class="part data" id="data" data-step="3">依據：實際任務中的上下文變化</h3>
+  <div class="tablewrap"><table><caption>歷史實測：舊版 v1（已移除；同一本機模型，W = 62,536）</caption><thead><tr><th scope="col">觀察</th><th scope="col">數值</th><th scope="col">說明</th></tr></thead><tbody>
+    <tr><td>STR 審查案原始資料</td><td>121 個檔案、約 242,000 字元（≈ 6 萬 tokens）</td><td>讀一遍即近滿視窗</td></tr>
+    <tr><td>v1 STR 每次壓縮（4 次 trial）</td><td>每 trial 2–3 次；47,003–47,942 → 23,011–26,999 tokens</td><td>縱向累積到門檻 → 壓縮</td></tr>
+    <tr><td>v1 STR 整個任務送出的 prompt 總量</td><td>約 216 萬～236 萬 tokens（4 次 trial，含摘要請求）</td><td>同份資料反覆送出 → 壓縮與外存缺一不可</td></tr>
+    <tr><td>記憶回復：匯入 66 則歷史後一次壓縮</td><td>65,594 → 19,741 tokens（failed_repair：65,577 → 19,867）</td><td>超門檻歷史在首次請求前即壓縮</td></tr>
+  </tbody></table></div>
+  <p class="hint">數值來源：<a href="../compare-run-4rep-1zpd8yum/str.json">STR 原始結果</a>、<a href="../compare-run-4rep-1zpd8yum/memory.json">記憶回復原始結果</a>。字元→token 為粗估；以伺服器 usage 為準。</p>
+  <p class="source">實作對照：<a href="../../src/kentc_agent/context/compaction.py">context/compaction.py</a><a href="../../src/kentc_agent/context/bigcontext.py">context/bigcontext.py</a><a href="../../src/kentc_agent/adapters/session.py">adapters/session.py</a></p>
+</section>
+</article>
+<nav class="pager" aria-label="上一篇與下一篇" data-pager></nav>
+</main>
+</div>
+<script src="../asset/js/topics.js"></script>
+<script src="../asset/js/core.js"></script>
+</body>
+</html>

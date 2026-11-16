@@ -8,10 +8,10 @@ Three rules, nothing else (settings, scaled down for a small window: see `limits
 3. a turn's tool results together over `big_turn_tokens` (12000): after the tool calls, the largest results are
    stored first until the turn fits.
 Sizes are chars/4 × the density learned from the server's own token counts (`ToolContext.density`), so the
-checks follow the real tokenizer of the model behind the server.
+checks adapt to observed usage but are estimates, not an exact provider tokenizer.
 
-A routed result keeps its full text in .kentc-agent/operations/<session id>/<operation id>/<tool call id>/:
-    full.md       the full text (not written when it is already a workspace file, e.g. a text file that was read)
+A routed result keeps an immutable full-text snapshot in .kentc-agent/operations/<session id>/<operation id>/<tool call id>/:
+    full.md       exact full text, including a snapshot when the source was a workspace file
     digest.json   {summary, key_insights, key_values: [{field, value, location}], metadata, preview?}
 and the context gets the rendered digest (at most `big_digest_tokens`), with where the full text is and how to
 read more of it: `read` with offset/limit (pages that always fit), bash (rg / grep), or for a document `read` with a
@@ -121,6 +121,9 @@ def store(ctx: ToolContext, d: Path, *, what: str, full: str | None, source: str
     `what`: the call, for the header ('read(path=a.log)'); `full`: the full text to keep (None when `source`, a
     workspace file, already holds it); `size`: tokens of the full result; `also`: another way to read more."""
     d.mkdir(parents=True, exist_ok=True)
+    # A workspace path can change after this observation. Keep the observed version.
+    if full is None and source:
+        full = (ctx.workspace / source).read_text(encoding="utf-8", errors="replace")
     if full is not None:
         (d / "full.md").write_text(full, encoding="utf-8")
     full_ref = _rel(ctx, d / "full.md") if full is not None else (source or "")

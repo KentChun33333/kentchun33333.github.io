@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Breezeman · kentc-agent</title>
+<link rel="stylesheet" href="/assets/breezeman.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="bank-logo" aria-label="Breezeman"><i aria-hidden="true">B</i><span>Breezeman</span></div>
+    <div class="brand-copy">kentc-agent<br><small id="wsName" class="mono"></small></div>
+  </div>
+  <div class="top-actions">
+    <div class="chat-picker" id="chatPicker">
+      <button class="top-action picker-btn" id="chatPickerBtn" aria-haspopup="listbox" aria-expanded="false">
+        <span id="chatTitle">New chat</span><span class="caret">▾</span>
+      </button>
+      <div class="picker-menu" id="chatMenu" hidden>
+        <input class="input" id="chatFilter" type="search" placeholder="Search chats" aria-label="Search chats">
+        <div class="picker-list" id="chatList" role="listbox"></div>
+      </div>
+    </div>
+    <button class="btn small" id="newChatBtn" title="Start a new chat with a fresh main agent">+ New chat</button>
+    <span class="pill" id="modelPill" title="LLM server"><span class="dot"></span><span>connecting…</span></span>
+  </div>
+</header>
+
+<main class="shell" id="shell">
+  <!-- ============================================================ workspace -->
+  <aside class="side left" id="leftPanel" aria-label="Workspace">
+    <div class="side-head">
+      <button class="fold" id="leftFold" title="Fold workspace panel" aria-label="Fold workspace panel">«</button>
+      <h2>WORKSPACE</h2>
+      <div class="side-actions">
+        <button class="icon-btn" id="treeRefresh" title="Refresh">↻</button>
+        <label class="icon-btn" title="Upload files"><input type="file" id="uploadInput" multiple hidden>⇪</label>
+      </div>
+    </div>
+    <div class="side-body" id="treeZone">
+      <div class="upload-target caption" id="uploadTarget"></div>
+      <div class="tree" id="tree" role="tree"></div>
+      <div class="dropzone" id="dropzone"><b>Drop files to upload</b><span>or use ⇪ · max 50 MB each · never overwrites</span></div>
+    </div>
+    <div class="rail-label" aria-hidden="true">WORKSPACE</div>
+  </aside>
+
+  <!-- ============================================================ chat -->
+  <section class="chat" aria-label="Chat">
+    <div class="messages" id="messages">
+      <div class="empty" id="emptyState">
+        <div class="empty-logo">B</div>
+        <h1>What should the agent work on?</h1>
+        <p class="muted">Each chat is a fresh main agent over this workspace. Attach files from the tree, watch its thinking and tools on the right.</p>
+        <div class="suggestions" id="suggestions">
+          <button class="seg">List the documents in this workspace and summarise each in one line</button>
+          <button class="seg">What changed most recently in this workspace?</button>
+        </div>
+      </div>
+    </div>
+    <form class="composer" id="composer" autocomplete="off">
+      <div class="attach-row" id="attachRow"></div>
+      <div class="composer-box">
+        <textarea id="prompt" rows="1" placeholder="Message the agent… (Enter to send, Shift+Enter for a new line)" aria-label="Message"></textarea>
+        <div class="composer-actions">
+          <button type="button" class="btn secondary small" id="compactBtn" title="Compress older history into topic notes">Compact</button>
+          <button type="button" class="btn dark" id="stopBtn" hidden>■ Stop</button>
+          <button type="submit" class="btn" id="sendBtn">Send ↵</button>
+        </div>
+      </div>
+      <div class="meter-row">
+        <span class="conn" id="connState"><span class="dot"></span><span>offline</span></span>
+        <div class="meter" title="Context used by the main agent"><i id="meterBar"></i></div>
+        <span class="mono caption" id="meterText">context –</span>
+      </div>
+    </form>
+  </section>
+
+  <!-- ============================================================ agent -->
+  <aside class="side right" id="rightPanel" aria-label="Agent">
+    <div class="side-head">
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="live" role="tab">Live <span class="badge" id="liveBadge" hidden></span></button>
+        <button class="tab" data-tab="context" role="tab">Context</button>
+      </div>
+      <button class="fold" id="rightFold" title="Fold agent panel" aria-label="Fold agent panel">»</button>
+    </div>
+    <div class="tab-body" id="liveTab">
+      <div class="filter-row" id="liveFilters">
+        <button class="seg active" data-f="all">All</button>
+        <button class="seg" data-f="thinking">Thinking</button>
+        <button class="seg" data-f="tool">Tools</button>
+        <button class="seg" data-f="status">Status</button>
+        <button class="icon-btn" id="liveClear" title="Clear the panel (the agent is not affected)">⌫</button>
+      </div>
+      <div class="feed" id="feed"><div class="placeholder" id="feedEmpty">Agent activity appears here: thinking, tool calls, compaction, sub-agents.</div></div>
+    </div>
+    <div class="tab-body" id="contextTab" hidden>
+      <div class="ctx-search">
+        <input class="input" id="ctxSearch" type="search" placeholder="Search the agent context  (⌘K)" aria-label="Search context">
+        <button class="icon-btn" id="ctxRefresh" title="Reload context">↻</button>
+      </div>
+      <div class="filter-row" id="ctxFilters">
+        <button class="seg active" data-f="all">All</button>
+        <button class="seg" data-f="system">System</button>
+        <button class="seg" data-f="memory">Memory</button>
+        <button class="seg" data-f="messages">Messages</button>
+        <button class="seg" data-f="tools">Tools</button>
+      </div>
+      <div class="caption ctx-summary" id="ctxSummary"></div>
+      <div class="ctx-list" id="ctxList"></div>
+    </div>
+    <div class="rail-label" aria-hidden="true">AGENT</div>
+  </aside>
+</main>
+
+<dialog class="preview" id="preview">
+  <div class="preview-head">
+    <div><small class="mono" id="pvMeta"></small><h2 id="pvName"></h2></div>
+    <div class="actions">
+      <button class="btn small" id="pvAttach">Attach to message</button>
+      <button class="btn secondary small" id="pvClose">Close</button>
+    </div>
+  </div>
+  <div class="preview-body" id="pvBody"></div>
+</dialog>
+
+<div class="toast" id="toast" role="status"></div>
+<script src="/assets/breezeman.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="長任務需固定順序、人工審核與斷點續跑；單一大提示會漏步、權限不分、失敗即全部重來。">
+<title>08 · 工作流程｜kentc_agent 核心方法論</title>
+<link rel="stylesheet" href="../asset/css/core.css">
+<link rel="stylesheet" href="../asset/css/shell.css">
+</head>
+<body class="topic-page">
+<a class="sr-only" href="#topic">跳至主要內容</a>
+<header class="top"><div class="top-in">
+  <a class="brand" href="../index.html">kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
+  <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
+</div></header>
+<div class="reader">
+<aside class="sidebar" aria-label="主題目錄"><nav class="side-nav" id="sideNav" aria-label="主題"></nav></aside>
+<main id="topic" data-slug="workflows">
+<article class="topic">
+<section class="card" id="workflows" aria-labelledby="wf-title">
+  <p class="eyebrow">08 · 用工作流程約束方法，不建立代理團隊</p>
+  <h2 id="wf-title">同一個 Agent，依階段改變指示與工具清單</h2>
+  <div class="psd">
+    <div class="psd-item problem"><span>問題</span><p>長任務需要固定順序、人工審核與中斷續跑。單一大提示 → 步驟遺漏、權限無法分段、失敗只能重來。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>YAML 定義步驟，Runner 依序執行<b>同一個</b>代理，每步只換指示、工具與輸出約定。人類決策用 <code>ask</code>；狀態存檔，可從未完成步驟續跑；不建多代理團隊。</p></div>
+    <div class="psd-item data"><span>依據</span><p>回歸測試涵蓋：呼叫次數用盡即失敗且不寫 <code>output</code>；輸入錯誤明確報錯，<code>--resume</code> 可覆寫輸入。實際使用問題已修正（見 ③）。</p></div>
+  </div>
+  <h3 class="part problem" id="problem" data-step="1">問題：單一大提示撐不起長任務</h3>
+  <ul class="problem-list">
+    <li><b>順序與完整性</b>：「讀文件、核對數字、等人確認、寫報告」交由模型安排 → 小模型常跳過核對直接撰寫。</li>
+    <li><b>權限不分</b>：撰寫不需 <code>bash</code>，擷取不需寫檔；全程同一組工具 → 敏感階段無法收緊。</li>
+    <li><b>人工審核</b>：模型不得自稱「已獲批准」→ 需要真正停下等人的點。</li>
+    <li><b>中斷</b>：一小時的任務在第四步失敗，不應從第一步重來。</li>
+  </ul>
+  <p>多代理分工 → 每次交接重傳脈絡，資訊散落、責任不清，小模型更吃力（見 <a href="principles.html">01 · 方法論</a>）。</p>
+  <h3 class="part idea" id="solution" data-step="2">核心想法：步驟化的同一個代理</h3>
+  <p class="sub">對話脈絡全程沿用，必要時壓縮。分支用 <code>when</code>，網路研究用 <code>web</code>（見下一篇）。有 <code>output</code> 的步驟告知代理「最終回覆由 Runner 存檔」，後續步驟直接讀。</p>
+  <div class="widget">
+    <div class="widget-head"><h3>示範：從證據到一份可核對的摘要</h3><span class="tag">教學流程 · 非內建業務流程</span></div>
+    <div class="timeline" id="timeline" role="group" aria-label="工作流程步驟"></div><div class="step-panel" id="wfPanel" aria-live="polite"></div>
+  </div>
+  <div class="grid2" style="margin-top:16px">
+<pre><code><span class="comment"># 示範 YAML：所有模板變數均有定義</span>
+name: evidence-brief
+<span class="comment"># 文件就是工作區（-w）裡的檔案：不需要資料夾參數</span>
+instructions: |
+  使用繁體中文。區分原文明示與推論。
+  每個重要事實標示檔名與位置；數值用工具計算。
+tools: [read, bash]
+steps:
+  - id: extract
+    tools: [read, bash]
+    prompt: "讀取 {{ documents('.') | join(', ') }}，整理事實、位置與缺口。"
+  - id: check
+    tools: [read, bash]
+    prompt: "核對前一步的關鍵數字與引文；不確定之處明確列出。"
+  - id: review
+    ask: "請確認核對結果，或輸入修正要求："
+  - id: brief
+    tools: []
+    prompt: "依證據與審閱意見撰寫摘要；不足之處不可補猜。"
+    output: reports/brief.md</code></pre>
+    <div class="box"><h3>步驟切分的理由</h3><ol class="recipe"><li><b>擷取與核對需要工具</b>查找與精確計算有實際執行路徑。</li><li><b>審閱是明確決策點</b>未答即停、之後恢復；模型不得冒充批准。</li><li><b>撰稿只用已得證據</b><code>tools: []</code>；<code>output</code> 由 Runner 存，無需 write。</li></ol><p>結構化輸出：<code>format: json</code> ＋ <code>schema</code>；不符重試一次。</p><p><code>state.json</code>（步驟結果、決策）＋ <code>session.jsonl</code>（對話）→ <code>--resume</code> 從未完成步驟續跑。</p></div>
+  </div>
+  <div class="callout warn"><b>工具清單不是作業系統沙箱。</b> 只限本步驟可用工具；<code>write</code>／<code>edit</code> 受工作區路徑限制，<code>bash</code> 仍具執行程序權限。</div>
+  <h3 class="part data" id="data" data-step="3">依據：測試與實際使用後的修正</h3>
+  <ul class="problem-list">
+    <li><b>失敗不留半成品</b>：用完 <code>max_turns</code> → 「no final answer within max_turns」失敗，不寫 <code>output</code>（<a href="../../tests/test_untrusted_inputs.py">test_untrusted_inputs.py</a>）。</li>
+    <li><b>輸入錯誤可修正續跑</b>：文件資料夾不存在 → 明確報錯；<code>--resume latest -i KEY=VALUE</code> 覆寫輸入，已完成步驟保留（同上）。</li>
+    <li><b>實際使用的修正</b>：「工作區即文件資料夾」（移除 <code>docs_dir</code> 等路徑參數）、有 <code>output</code> 步驟告知「回覆由 Runner 存檔」。詳見 <a href="web.html">09 · 網路研究</a>。</li>
+  </ul>
+  <p class="source">實作對照：<a href="../../src/kentc_agent/workflow.py">workflow.py · Runner</a><a href="../../tests/test_tools_workflow.py">tests/test_tools_workflow.py</a><a href="../../tests/test_untrusted_inputs.py">tests/test_untrusted_inputs.py</a></p>
+</section>
+</article>
+<nav class="pager" aria-label="上一篇與下一篇" data-pager></nav>
+</main>
+</div>
+<script src="../asset/js/topics.js"></script>
+<script src="../asset/js/core.js"></script>
+</body>
+</html>

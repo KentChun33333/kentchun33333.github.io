@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="各機制單獨看過於抽象；需一個案例展示資料如何依序通過各道邊界。">
+<title>11 · 完整範例｜kentc_agent 核心方法論</title>
+<link rel="stylesheet" href="../asset/css/core.css">
+<link rel="stylesheet" href="../asset/css/shell.css">
+</head>
+<body class="topic-page">
+<a class="sr-only" href="#topic">跳至主要內容</a>
+<header class="top"><div class="top-in">
+  <a class="brand" href="../index.html">kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
+  <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
+</div></header>
+<div class="reader">
+<aside class="sidebar" aria-label="主題目錄"><nav class="side-nav" id="sideNav" aria-label="主題"></nav></aside>
+<main id="topic" data-slug="example">
+<article class="topic">
+<section class="card" id="example" aria-labelledby="example-title">
+  <p class="eyebrow">11 · 串起整套方法</p>
+  <h2 id="example-title">一份掃描發票，從檔案到可核對的回答</h2>
+  <div class="psd">
+    <div class="psd-item problem"><span>問題</span><p>各主題分別解一個問題；實際任務同時觸及所有限制：視窗、影像能力、不完整文件、需計算的數字、須寫出的檔案。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>以一份掃描發票走完能力、證據、上下文、核對、交付五道邊界，標出每道由哪個機制負責。</p></div>
+    <div class="psd-item data"><span>依據</span><p>教學情境，非實際執行紀錄；各邊界的實測或測試見對應主題「依據」段（見 ③）。</p></div>
+  </div>
+  <h3 class="part problem" id="problem" data-step="1">問題：一個小任務就同時碰到所有限制</h3>
+  <p>「確認發票編號與總額，寫成摘要」：掃描檔無文字層 → 需影像能力；多頁 → 可能超出預算；總額需加總 → 不能心算；摘要須實際存檔 → 不能只宣稱完成。任一步交模型自行判斷都可能無聲出錯。</p>
+  <h3 class="part idea" id="solution" data-step="2">核心想法：一份掃描發票，依序通過五道邊界</h3>
+  <p class="sub">重點在資料經過的邊界；不假設模型看到圖片就讀對。</p>
+  <div class="example"><p class="who">輸入與目標</p><p><code>evidence/invoice.pdf</code> → 摘要存至 <code>reports/brief.md</code>。</p></div>
+  <div class="example"><p class="who">能力邊界</p><p>OpenAI 路徑由伺服器取得部署視窗；Qwen 用內建 60k 或部署覆寫值；視窗無效即停止。影像能力依 provider 規則；設定或相容性假設 ≠ 部署實測或辨識正確的證據。</p></div>
+  <div class="example"><p class="who">證據邊界</p><p>主代理呼叫 <code>read</code>；掃描頁無可用文字層 → 預設自動渲染，模型可收影像時附頁面影像；文件子代理以預算內材料轉錄，保留頁碼。</p></div>
+  <div class="example"><p class="who">上下文邊界</p><p>轉錄與摘要保存後，主代理先收摘要＋全文路徑；需原句 → 讀全文分頁，或以 <code>question</code> 向原 PDF 查特定事實；不把所有頁面反覆塞回主對話。</p></div>
+  <div class="example"><p class="who">核對與交付邊界</p><p>核對引用位置；加總用工具；數字模糊或矛盾 → 明確保留疑點。保存成果後，以實際工具結果或 Runner 輸出確認檔案已寫出。</p></div>
+  <div class="callout"><b>保障的是流程可控、可追查，不是模型永不犯錯。</b> 視窗為偵測值；token 大小為估算；轉錄、摘要、推論仍須對照來源。</div>
+  <h3 class="part data" id="data" data-step="3">依據：每一道邊界由哪個主題支撐</h3>
+  <div class="tablewrap"><table><thead><tr><th scope="col">邊界</th><th scope="col">負責的機制</th><th scope="col">實測或測試</th></tr></thead><tbody>
+    <tr><td>能力</td><td>部署視窗與影像能力查詢</td><td><a href="capabilities.html">03 · 能力與策略</a>：本機 <code>n_ctx</code> 62,536 vs Qwen 60,000</td></tr>
+    <tr><td>證據</td><td>文件轉換、佔位訊息與 XFA 防線、隔離解析</td><td><a href="documents.html">05 · 文件解析</a>：<code>test_pdf_safeguards.py</code>、轉錄分塊上限計算</td></tr>
+    <tr><td>上下文</td><td>大型結果外存、只給摘要與路徑</td><td><a href="vertical.html">04 · 上下文視窗</a>：實際任務的 prompt 成長與壓縮</td></tr>
+    <tr><td>核對</td><td>工具計算、推論與原文分開</td><td><a href="principles.html">01 · 方法論</a>：高分報告仍被核對出總額錯誤</td></tr>
+    <tr><td>交付</td><td>Runner 保存 <code>output</code>、失敗不留半成品</td><td><a href="workflows.html">08 · 工作流程</a>：<code>test_untrusted_inputs.py</code></td></tr>
+  </tbody></table></div>
+</section>
+</article>
+<nav class="pager" aria-label="上一篇與下一篇" data-pager></nav>
+</main>
+</div>
+<script src="../asset/js/topics.js"></script>
+<script src="../asset/js/core.js"></script>
+</body>
+</html>

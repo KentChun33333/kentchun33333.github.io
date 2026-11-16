@@ -1,7 +1,7 @@
 """Workflows: one main agent works through YAML steps in order, keeping one context for the whole run.
 
 A workflow is a plan for the main agent, not a team of agents. Each step narrows the tools the agent may use for
-that step and gives it the step's instructions; the conversation (with compaction) carries every earlier finding
+that step and gives it the step's instructions; context checkpoints and local topic files carry findings
 forward. Human gates sit between steps. Web research is a step of its own: a web agent (adapters/web_research.py)
 researches the task in a fresh session and saves a cited brief as a file the main agent reads like any other.
 

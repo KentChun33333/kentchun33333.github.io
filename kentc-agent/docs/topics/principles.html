@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="小模型會宣稱已完成卻未寫檔、心算出錯、把推論寫成原文；只看回覆無法核對。">
+<title>01 · 方法論｜kentc_agent 核心方法論</title>
+<link rel="stylesheet" href="../asset/css/core.css">
+<link rel="stylesheet" href="../asset/css/shell.css">
+</head>
+<body class="topic-page">
+<a class="sr-only" href="#topic">跳至主要內容</a>
+<header class="top"><div class="top-in">
+  <a class="brand" href="../index.html">kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
+  <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
+</div></header>
+<div class="reader">
+<aside class="sidebar" aria-label="主題目錄"><nav class="side-nav" id="sideNav" aria-label="主題"></nav></aside>
+<main id="topic" data-slug="principles">
+<article class="topic">
+<section class="card" id="principles" aria-labelledby="method-title">
+  <p class="eyebrow">01 · 先理解方法，再看模組</p>
+  <h2 id="method-title">把任務拆成「證據、行動、控制、紀錄」</h2>
+  <div class="psd">
+    <div class="psd-item problem"><span>問題</span><p>小型本機模型會謊稱「已完成」、心算出錯、把推論寫成原文。只看最後回覆，無從分辨真偽。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>任務拆成四種責任：<b>證據</b>由工具讀取、<b>行動</b>由工具執行、<b>控制</b>歸執行環境、<b>紀錄</b>寫入工作階段與追蹤。模型提出下一步，不負責自證。</p></div>
+    <div class="psd-item data"><span>依據</span><p>評測放入一則未驗證的「已修好」歷史說法，須附實際執行 <code>verify.py --strict</code> 的工具紀錄才通過；高分報告也被核出錯誤總額（見 ③）。</p></div>
+  </div>
+  <h3 class="part problem" id="problem" data-step="1">問題：模型說法 ≠ 事實</h3>
+  <p>長任務錯誤多不當機，而是看似合理的回覆：稱已寫實未寫、總額靠心算、「可能是同一人」→「是同一人」。模型兼任執行與自證 → 只剩無法核對的文字。</p>
+  <h3 class="part idea" id="solution" data-step="2">核心想法：證據、行動、控制、紀錄分開</h3>
+  <p class="sub">模型稱「已完成」≠ 檔案已寫出；檔案在磁碟 ≠ 模型已讀到。執行環境另判斷請求能否安全送出、維持訊息一致。</p>
+  <ol class="flow" aria-label="方法論的四個步驟">
+    <li><b>① 定義交付成果</b><span>問題、輸入檔、產出位置。</span></li>
+    <li><b>② 按需取得證據</b><span>先摘要與來源位置，再按問題讀頁、行或明細。</span></li>
+    <li><b>③ 讓工具完成行動</b><span>數值與檔案由工具產生；推論與原文分開。</span></li>
+    <li><b>④ 以結果收尾</b><span>核對工具結果與交付檔；保留來源、對話、必要操作紀錄。</span></li>
+  </ol>
+  <div class="grid3">
+    <article class="box"><span class="number">原則 01</span><h3>一個主代理，一條任務脈絡</h3><p>一次對話或整個 YAML 工作流程共用一個 <code>Agent</code>；文件解析子代理只處理交付的材料與問題。</p><p class="why">避免：多次交接 → 資訊散落、權責不清。</p></article>
+    <article class="box"><span class="number">原則 02</span><h3>少量工具，明確權責</h3><p><code>read</code>、<code>write</code>、<code>edit</code>、<code>bash</code>（同 pi）。列檔、搜尋、精確計算皆經 <code>bash</code>（<code>python3 -c</code>）。網路工具依使用層（詳見 <a href="layers.html">00 · 三種使用層</a>）。</p><p class="why">避免：工具過多、一事兩法、無用工具說明佔請求、模型自猜數字。</p></article>
+    <article class="box"><span class="number">原則 03</span><h3>部署能力與代理策略分開</h3><p>OpenAI／Strata 由伺服器偵測視窗；Qwen38 用內建 60k（依目前部署）或明確覆寫。輸出預算、保留範圍、分塊上限屬代理策略。</p><p class="why">避免：以模型名當視窗保證；換部署須重核上限。</p></article>
+    <article class="box"><span class="number">原則 04</span><h3>大型內容先保存，再導讀</h3><p>主上下文只留摘要、來源位置、全文路徑；需要再讀。</p><p class="why">避免：單次工具輸出擠掉任務脈絡。</p></article>
+    <article class="box"><span class="number">原則 05</span><h3>中斷也要維持協定完整</h3><p>每個已保存工具呼叫必有結果。參數錯誤交模型修正；取消時補齊結果，不重跑已完成者。</p><p class="why">避免：下一輪帶未配對的工具呼叫。</p></article>
+    <article class="box"><span class="number">原則 06</span><h3>先證據，後解釋</h3><p>工作階段存對話；追蹤串起模型回覆、工具、解析子代理、大型結果；除錯看紀錄。</p><p class="why">避免：憑最後回答猜代理做過什麼。</p></article>
+  </div>
+  <h3 class="part data" id="data" data-step="3">依據：評測實例</h3>
+  <ul class="problem-list">
+    <li><b>未驗證的「已修好」</b>：failed_repair 歷史含「已修好、冒煙測試通過」（CLAIM-B）；僅宣稱不算（詳見 <a href="eval.html">07 · 長任務記憶：摘要 → 主題筆記</a>）。</li>
+    <li><b>高分報告仍有錯</b>：歷史 v2 STR 0.95 分報告總額寫成 SGD 305,895.94（正確 286,095.94）→ 分數不能取代回源核對（詳見 <a href="eval.html">07 · 長任務記憶：摘要 → 主題筆記</a>）。</li>
+    <li><b>「沒存到」誤判</b>：唯讀步驟誤以為筆記未保存 → 報告寫「notes 不存在」（修正詳見 <a href="web.html">09 · 網路研究</a>）。</li>
+  </ul>
+</section>
+</article>
+<nav class="pager" aria-label="上一篇與下一篇" data-pager></nav>
+</main>
+</div>
+<script src="../asset/js/topics.js"></script>
+<script src="../asset/js/core.js"></script>
+</body>
+</html>

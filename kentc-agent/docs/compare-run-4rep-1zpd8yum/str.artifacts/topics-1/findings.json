@@ -1,0 +1,78 @@
+{
+  "persons_reviewed": 40,
+  "key_actor": "P006",
+  "subjects": [
+    {
+      "id": "P006",
+      "role": "key_actor",
+      "reason": "Sole documented beneficiary of the Harbour Light Trust, which wholly owns Northwind Advisory; received SGD 209,712.93 of trust distributions between 20 Apr and 24 May 2026, and shares the residential address and contact number used in the flow.",
+      "evidence": [
+        "case/profiles/P006_Marcus_Tan_Wei_Ming.docx",
+        "case/trusts/T01_Harbour_Light_Trust.txt",
+        "case/statements/P006_statement.csv",
+        "case/rm_notes/P006_call_note.eml",
+        "case/media/MEDIA-01_marcus_tan_charged.html"
+      ]
+    },
+    {
+      "id": "P013",
+      "role": "money_mule",
+      "reason": "Retiree with declared annual income of SGD 14,400.00 who received five cash deposits totalling SGD 93,499.39 and paid SGD 92,559.39 onward to Brightpath Trading between 21 Mar and 05 May 2026, and could not explain the deposits when contacted.",
+      "evidence": [
+        "case/statements/P013_statement.csv",
+        "case/profiles/P013_Michelle_Chua_Jia_Hui.md",
+        "case/rm_notes/P013_call_note.eml"
+      ]
+    },
+    {
+      "id": "P020",
+      "role": "money_mule",
+      "reason": "Self-employed delivery rider with declared annual income of SGD 26,000.00 who received five cash deposits totalling SGD 96,485.00 and paid SGD 95,779.00 onward to Northwind Advisory between 10 Mar and 14 May 2026, and is registered at the same address as the key actor.",
+      "evidence": [
+        "case/statements/P020_statement.csv",
+        "case/profiles/P020_Daniel_Ng_Zhi_Hao.json",
+        "case/registry/C08_Brightpath_Trading_Pte_Ltd.json"
+      ]
+    },
+    {
+      "id": "P036",
+      "role": "money_mule",
+      "reason": "Full-time student with declared annual income of SGD 9,600.00 who received five cash deposits totalling SGD 96,111.55 and paid SGD 95,229.55 onward to Brightpath Trading between 14 Mar and 21 May 2026, stating the employer asked her to receive and forward client payments.",
+      "evidence": [
+        "case/statements/P036_statement.csv",
+        "case/profiles/P036_Wong_Mei_Ling.json",
+        "case/rm_notes/P036_call_note.eml"
+      ]
+    },
+    {
+      "id": "P016",
+      "role": "nominee_director",
+      "reason": "Corporate secretarial executive at Apex Corporate Services who is the sole director of both Northwind Advisory and Brightpath Trading, is the protector of the Harbour Light Trust, and receives the monthly consultancy fee of SGD 28,168.34 from Brightpath Trading.",
+      "evidence": [
+        "case/registry/C07_Northwind_Advisory_Pte_Ltd.json",
+        "case/registry/C08_Brightpath_Trading_Pte_Ltd.json",
+        "case/trusts/T01_Harbour_Light_Trust.txt",
+        "case/profiles/P016_Kavitha_d_o_Krishnan.json",
+        "case/statements/C07_statement.csv",
+        "case/media/MEDIA-02_corporate_service_providers.html"
+      ]
+    }
+  ],
+  "linked_entities": [
+    "C07",
+    "C08",
+    "T01"
+  ],
+  "typologies": [
+    "structuring",
+    "rapid_pass_through",
+    "shell_company",
+    "nominee_director",
+    "layering_via_trust"
+  ],
+  "placement_total_sgd": 286095.94,
+  "period": {
+    "start": "2026-03-10",
+    "end": "2026-06-08"
+  }
+}

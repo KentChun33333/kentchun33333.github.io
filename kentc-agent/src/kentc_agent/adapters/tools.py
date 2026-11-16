@@ -106,6 +106,30 @@ def truncate_tail(text: str, max_lines: int, max_bytes: int) -> tuple[str, bool]
     return "\n".join(reversed(out)), len(out) < len(lines)
 
 
+_GREP_LINE = re.compile(r"[^\s:][^:\n]*:\d+[:-]")
+
+
+def search_matches(ctx: ToolContext, lines: list[str]) -> tuple[int, list[tuple[str, int]]] | None:
+    """grep/rg-shaped output ('path:line:text', or 'path:text' for an existing file): (matching lines, per-file
+    counts, most first). None when under 60% of the non-empty lines look like matches."""
+    counts: dict[str, int] = {}
+    is_file: dict[str, bool] = {}
+    nonempty = [line for line in lines if line]
+    for line in nonempty:
+        head = line.split(":", 1)[0]
+        if head not in is_file:
+            try:
+                is_file[head] = len(is_file) < 500 and (ctx.workspace / head).is_file()
+            except (OSError, ValueError):
+                is_file[head] = False
+        if is_file[head] or _GREP_LINE.match(line):
+            counts[head] = counts.get(head, 0) + 1
+    matched = sum(counts.values())
+    if not nonempty or matched < 0.6 * len(nonempty):
+        return None
+    return matched, sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+
+
 # ---------------------------------------------------------------------- read / write / edit
 PAGE_NOTE_CHARS = 160      # room kept for the "[Showing lines ...]" note at the end of a page
 
@@ -188,7 +212,7 @@ def _edit(ctx: ToolContext, a: dict[str, Any]) -> str:
 # ---------------------------------------------------------------------- bash
 @dataclass(frozen=True)
 class ShellResult:
-    output: str            # tail-truncated, with a pointer to the full log when cut
+    output: str            # truncated (search hits: first matches + per-file counts; else the end), log pointer when cut
     code: int | None       # None: timed out
     timeout: float
     log: str = ""          # the full output's file (workspace-relative) when the output was cut
@@ -222,14 +246,28 @@ def run_shell(ctx: ToolContext, command: str, timeout: float | None = None) -> S
         proc.wait()
         raise
     text = out.decode("utf-8", "replace").rstrip("\n")
-    shown, cut = truncate_tail(text, s.tool_output_max_lines, s.tool_output_max_bytes)
+    lines = text.split("\n")
+    over = len(lines) > s.tool_output_max_lines or len(text.encode()) > s.tool_output_max_bytes
+    search = search_matches(ctx, lines) if over else None
+    if search:                                  # search hits: the first matches and where they are, not the last
+        shown, kept, cut = truncate_head(text, s.tool_output_max_lines, s.tool_output_max_bytes)
+    else:                                       # other output: errors and results come last
+        shown, cut = truncate_tail(text, s.tool_output_max_lines, s.tool_output_max_bytes)
+        kept = shown.count("\n") + 1
     log = ""
     if cut:
         path = ctx.state_dir / "tmp" / f"bash-{time.strftime('%Y%m%d-%H%M%S')}-{proc.pid}.log"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8")
         log = rel(ctx, path)
-        shown = f"[Output truncated: showing the end. Full output: {log}]\n" + shown
+        if search:
+            matched, files = search
+            by_file = ", ".join(f"{name} ({n})" for name, n in files[:10]) + \
+                (f", … ({len(files)} files)" if len(files) > 10 else "")
+            shown = (f"[Search output truncated: {matched} matching lines in {len(files)} files; showing the first "
+                     f"{kept}. By file: {by_file}. Full output: {log}]\n" + shown)
+        else:
+            shown = f"[Output truncated: {len(lines)} lines; showing the last {kept}. Full output: {log}]\n" + shown
     return ShellResult(shown, None if timed_out else proc.returncode, timeout, log)
 
 

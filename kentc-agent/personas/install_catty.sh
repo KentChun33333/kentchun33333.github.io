@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
-# Fan the Teddy persona out to the CLI agents installed on this machine.
+# Fan the Catty persona out to the CLI agents installed on this machine.
 #
-#   ./kentc-agent/personas/install_teddy.sh            # write (DEFAULT; backs up each file first)
-#   ./kentc-agent/personas/install_teddy.sh --dry-run  # preview only, writes nothing
-#   ./kentc-agent/personas/install_teddy.sh --remove   # strip the marked block (backs up too)
+#   ./kentc-agent/personas/install_catty.sh            # write (DEFAULT; backs up each file first)
+#   ./kentc-agent/personas/install_catty.sh --dry-run  # preview only, writes nothing
+#   ./kentc-agent/personas/install_catty.sh --remove   # strip the marked block (backs up too)
 #
 # Only the marked block is touched; existing content is preserved.
 set -euo pipefail
 
-PERSONA="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/teddy.md"
-BEGIN="# BEGIN teddy-persona"
-END="# END teddy-persona"
+PERSONA="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/catty.md"
+BEGIN="# BEGIN catty-persona"
+END="# END catty-persona"
+# Recognize previously installed blocks only to migrate or remove them.
+LEGACY_BEGIN="# BEGIN teddy-persona"
+LEGACY_END="# END teddy-persona"
 MODE="apply"
 case "${1:-}" in
   --apply)   MODE="apply" ;;
@@ -22,6 +25,18 @@ esac
 [ -f "$PERSONA" ] || { echo "persona not found: $PERSONA"; exit 1; }
 
 stamp() { date +%Y%m%d%H%M%S; }
+
+has_block() {
+  grep -qFx -e "$BEGIN" -e "$LEGACY_BEGIN" "$1"
+}
+
+strip_blocks() {
+  awk -v b="$BEGIN" -v e="$END" -v lb="$LEGACY_BEGIN" -v le="$LEGACY_END" '
+    $0 == b || $0 == lb {skip=1; next}
+    skip && ($0 == e || $0 == le) {skip=0; next}
+    !skip {print}
+  ' "$1"
+}
 
 # file | agent | style (import = "@path", pointer = plain instruction line)
 TARGETS=(
@@ -53,11 +68,11 @@ for entry in "${TARGETS[@]}"; do
   [ -n "$bin" ] || printf '   (binary not on PATH - still configurable)\n'
 
   if [ "$MODE" = "remove" ]; then
-    if [ -f "$file" ] && grep -qF "$BEGIN" "$file"; then
+    if [ -f "$file" ] && has_block "$file"; then
       printf '   strip block from %s\n' "$file"
       changed=$((changed+1))
       cp "$file" "$file.bak-$(stamp)"
-      awk -v b="$BEGIN" 'index($0,b){skip=1} skip{next} {print}' "$file" > "$file.tmp"
+      strip_blocks "$file" > "$file.tmp"
       mv "$file.tmp" "$file"
     else
       printf '   no block present in %s\n' "$file"
@@ -67,7 +82,7 @@ for entry in "${TARGETS[@]}"; do
 
   if [ ! -f "$file" ]; then
     printf '   file does not exist yet: %s\n' "$file"
-  elif grep -qF "$BEGIN" "$file"; then
+  elif grep -qFx "$BEGIN" "$file" && ! grep -qFx "$LEGACY_BEGIN" "$file"; then
     printf '   block already present in %s (idempotent, skipping)\n' "$file"
     continue
   fi
@@ -78,6 +93,10 @@ for entry in "${TARGETS[@]}"; do
   if [ "$MODE" = "apply" ]; then
     mkdir -p "$(dirname "$file")"
     [ -f "$file" ] && cp "$file" "$file.bak-$(stamp)"
+    if [ -f "$file" ] && has_block "$file"; then
+      strip_blocks "$file" > "$file.tmp"
+      mv "$file.tmp" "$file"
+    fi
     printf '\n%s\n' "$(block "$style")" >> "$file"
     printf '   done (backup kept if the file existed)\n'
   fi
@@ -89,6 +108,6 @@ if [ "$MODE" = "dry-run" ]; then
 elif [ "$MODE" = "remove" ]; then
   printf 'block removed where present; backups kept as *.bak-*\n'
 else
-  printf 'persona installed; backups kept as *.bak-* (undo: ./kentc-agent/personas/install_teddy.sh --remove)\n'
+  printf 'persona installed; backups kept as *.bak-* (undo: ./kentc-agent/personas/install_catty.sh --remove)\n'
 fi
 exit 0
