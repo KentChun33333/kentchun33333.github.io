@@ -64,11 +64,12 @@ from jinja2 import StrictUndefined, TemplateError
 from jinja2.sandbox import SandboxedEnvironment
 
 from .adapters.session import Session
-from .adapters.tools import CORE_TOOLS, ToolContext, ToolError, inside, reject_unsupported, rel, resolve
+from .adapters.tools import CORE_TOOLS, Tool, ToolContext, ToolError, inside, reject_unsupported, rel, resolve
 from .adapters.web_research import run_web_agent
 from .agent import Aborted, Agent, build_tools
 from .checks import check_rules
 from .config import STATE_DIR
+from .context.memory import atomic_text
 
 TOP_KEYS = {"name", "description", "inputs", "instructions", "tools", "max_turns", "effort", "steps"}
 STEP_KEYS = {"id", "prompt", "ask", "web", "tools", "max_turns", "max_searches", "foreach", "max_items", "approve",
@@ -328,6 +329,8 @@ def _pretty_json(value: Any) -> str:
 
 # ---------------------------------------------------------------------- running
 class Runner:
+    agent_type = Agent
+
     def __init__(self, wf: Workflow, ctx: ToolContext, inputs: dict[str, Any], run_dir: Path, *,
                  ask_user: AskUser | None = None, answers: dict[str, str] | None = None) -> None:
         self.wf, self.ctx, self.inputs, self.dir = wf, ctx, inputs, run_dir
@@ -341,9 +344,17 @@ class Runner:
         self.env.globals.update(glob=self._glob, read_file=self._read_file, documents=self._documents)
         self.env.filters.update(fromjson=json.loads, json=_pretty_json, slug=_slug)
         log = run_dir / "session.jsonl"
-        self.agent = Agent(ctx, tools=[], session=Session.load(log) if log.is_file() else Session(log),
-                           instructions="\n\n".join(t for t in (self.render(wf.instructions), wf.skills) if t),
-                           name=wf.name)
+        self.agent = self.agent_type(ctx, tools=[], session=Session.load(log) if log.is_file() else Session(log),
+                                     instructions="\n\n".join(t for t in (self.render(wf.instructions), wf.skills) if t),
+                                     name=wf.name)
+
+    def _tools(self, names: list[str] | None) -> list[Tool]:
+        return build_tools(names)
+
+    def _write_output(self, path: str, text: str) -> None:
+        target = inside(self.ctx, path)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text, encoding="utf-8")
 
     # -------------------------------------------------------------- template helpers
     def _glob(self, pattern: str) -> list[str]:
@@ -404,9 +415,7 @@ class Runner:
 
     # -------------------------------------------------------------- execution
     def save(self) -> None:
-        self.dir.mkdir(parents=True, exist_ok=True)
-        (self.dir / "state.json").write_text(json.dumps(self.state, indent=2, ensure_ascii=False, default=str),
-                                             encoding="utf-8")
+        atomic_text(self.dir / "state.json", json.dumps(self.state, indent=2, ensure_ascii=False, default=str))
 
     def trace(self, actor: str, step: str, event: str) -> None:
         """Decision trace for audit: HUM (human gate), AGT (agent step), SYS."""
@@ -438,9 +447,7 @@ class Runner:
                 else:
                     rec["output"] = self._ask(step)
                 if step.spec.get("output") and step.kind != "web":   # a web step writes its own brief file(s)
-                    target = inside(self.ctx, self.render(step.spec["output"]))
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    target.write_text(rec["output"], encoding="utf-8")
+                    self._write_output(self.render(step.spec["output"]), rec["output"])
                 rec.update(status="done", finished=time.time())
             except NeedsAnswer as e:
                 rec.update(status="waiting")
@@ -463,8 +470,14 @@ class Runner:
         """One step of the main agent, with final JSON validated before it enters the live context."""
         spec, wf = step.spec, self.wf
         names = spec.get("tools", wf.tools)
-        self.agent.set_tools(build_tools(names))
+        self.agent.set_tools(self._tools(names))
         self.agent.name = step.id
+        steps = self.state["steps"].values()
+        done = sum(record["status"] == "done" for record in steps)
+        skipped = sum(record["status"] == "skipped" for record in steps)
+        self.agent.workflow_status = (f"Workflow step {n}/{total}: {step.id} (running). "
+                                      f"Completed={done}; skipped={skipped}. "
+                                      f"Workflow state: {rel(self.ctx, self.dir / 'state.json')}.")
         budget = _first(spec.get("max_turns"), wf.max_turns, self.ctx.settings.max_turns)   # 0: no limit
         self.agent.max_turns = budget
         self.agent.effort = spec.get("effort", wf.effort)

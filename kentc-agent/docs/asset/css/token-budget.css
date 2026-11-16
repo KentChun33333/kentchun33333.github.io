@@ -1,0 +1,36 @@
+.token-doc .usage-field{margin-top:22px}
+.token-doc .usage-field input{width:100%;border:0;padding:0}
+.token-doc .advanced{margin-top:16px}
+.token-doc .field small{font-size:11px}
+.token-doc [hidden]{display:none!important}
+.token-doc .metrics{margin-top:18px}
+.token-doc dl{margin:0}
+.token-doc dl div{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:8px 0;border-bottom:1px solid var(--line)}
+.token-doc dl div:last-child{border-bottom:0}
+.token-doc dt{font-size:13px}
+.token-doc dd{margin:0;font:650 15px var(--mono);text-align:right}
+.token-doc .budget-track{position:relative;height:20px;margin-top:22px;border:1px solid var(--line);border-radius:5px;background:var(--redsoft);overflow:hidden}
+.token-doc .threshold-track{display:block;height:100%;background:var(--blue)}
+.token-doc .usage-marker{position:absolute;top:0;height:100%;width:3px;background:var(--ink)}
+.token-doc .limit-value{font:650 14px var(--mono);white-space:nowrap}
+.token-doc .limit-kind{display:block;margin:4px 0;font-size:11px;color:var(--muted);font-weight:400}
+.token-doc #limits td:last-child code{font-size:11px}
+@media(max-width:640px){
+  .token-doc table{min-width:0;table-layout:fixed;overflow-wrap:anywhere}
+  .token-doc th,.token-doc td{padding:8px;white-space:normal}
+  .token-doc #limits table{table-layout:auto}
+  .token-doc #limits thead{display:none}
+  .token-doc #limits tbody{display:block}
+  .token-doc #limits tr{display:grid;grid-template-columns:1fr 1fr;padding:12px;border-bottom:1px solid var(--line);gap:6px 10px}
+  .token-doc #limits tr:last-child{border-bottom:0}
+  .token-doc #limits th,.token-doc #limits td{border:0;padding:0;background:none}
+  .token-doc #limits th{grid-column:1 / -1;color:var(--ink);font-size:14px}
+  .token-doc #limits td:last-child{grid-column:1 / -1}
+  .token-doc #limits td[data-label]::before{content:attr(data-label);display:block;font-size:11px;color:var(--muted);font-weight:400}
+  .token-doc .field{max-width:100%}
+  .token-doc #boundaries th:first-child{width:27%}
+}
+@media print{
+  .token-doc details{display:block}
+  .token-doc .budget-track{print-color-adjust:exact}
+}

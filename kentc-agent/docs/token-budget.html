@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="KentC Agent token 額度互動總覽。比較工作視窗、壓縮保留量、輸出、工具結果與大型寫入參數門檻。">
+<title>KentC Agent｜Token 額度總覽</title>
+<link rel="stylesheet" href="asset/css/core.css">
+<link rel="stylesheet" href="asset/css/token-budget.css">
+<link rel="stylesheet" href="asset/css/token-diagrams.css">
+<script src="asset/js/token-diagrams.js" defer></script>
+<script src="asset/js/token-budget.js" defer></script>
+</head>
+<body class="token-doc">
+<a class="sr-only" href="#main">跳至主要內容</a>
+<header class="top"><div class="top-in">
+  <a class="brand" href="index.html#budgetWidget">kentc_agent</a>
+  <nav aria-label="章節導覽"><a href="#diagrams">架構圖解</a><a href="#simulator">互動試算</a><a href="#limits">額度明細</a><a href="#boundaries">固定與獨立限制</a></nav>
+</div></header>
+<main id="main">
+<section class="hero" aria-labelledby="title">
+  <p class="eyebrow">依目前程式實作 · 主代理請求前的預算</p>
+  <h1 id="title">Token 額度如何調整？</h1>
+  <p class="lead">有效額度由部署能力、設定上限、當輪用量一起決定。壓縮 buffer 隨工作視窗縮放，工具結果隨剩餘空間調整。各項設定上限、最低門檻及子代理的獨立預算也會影響結果。</p>
+  <div class="grid3">
+    <div class="box"><span class="tag">隨視窗縮放</span><h3>保留量與安全餘裕</h3><p>改變工作視窗，就會重新計算壓縮門檻、近期保留目標和安全餘裕。</p></div>
+    <div class="box"><span class="tag violet">依剩餘空間</span><h3>回覆與工具額度</h3><p>用量增加時，回覆空間、單筆工具結果、整批結果與摘要額度可能縮小。</p></div>
+    <div class="box"><span class="tag amber">保留設定邊界</span><h3>固定上限與下限</h3><p>設定值限定可用範圍。部分門檻有最低值，最後仍需通過完整請求的容量檢查。</p></div>
+  </div>
+  <p class="scope"><a href="index.html#budgetWidget">← 回核心文件</a> · <a href="context-compaction.html">閱讀上下文壓縮流程</a></p>
+</section>
+
+<section class="card" id="diagrams" aria-labelledby="diagrams-title">
+  <p class="eyebrow">可探索的圖解 · 選節點或逐步閱讀</p>
+  <h2 id="diagrams-title">從額度分配，走到存檔與接續</h2>
+  <p class="sub">四張圖說明不同階段。點選節點查看直接關係與程式來源，或按「下一步」沿主要路徑閱讀。<a href="#simulator">調整下方試算</a>時，圖中的額度也會更新。</p>
+  <noscript><p class="noscript">互動圖解需要 JavaScript。可繼續閱讀下方的額度規則與壓縮詳解。</p></noscript>
+  <div class="diagram-tabs" role="tablist" aria-label="選擇圖解">
+    <button type="button" id="tab-window" role="tab" aria-selected="true" aria-controls="diagram-panel" tabindex="0" data-diagram="window"><span>01</span> 視窗與 buffer</button>
+    <button type="button" id="tab-capacity" role="tab" aria-selected="false" aria-controls="diagram-panel" tabindex="-1" data-diagram="capacity"><span>02</span> 回覆與工具額度</button>
+    <button type="button" id="tab-write" role="tab" aria-selected="false" aria-controls="diagram-panel" tabindex="-1" data-diagram="write"><span>03</span> 寫入後的捷徑</button>
+    <button type="button" id="tab-history" role="tab" aria-selected="false" aria-controls="diagram-panel" tabindex="-1" data-diagram="history"><span>04</span> 歷史壓縮與回讀</button>
+  </div>
+  <div id="diagram-panel" role="tabpanel" aria-labelledby="tab-window">
+    <div class="diagram-heading"><div><p class="eyebrow" id="diagram-kind">額度關係</p><h3 id="diagram-title">部署上限如何變成工作額度</h3></div><span class="tag" id="diagram-live">連動試算</span></div>
+    <p class="hint" id="diagram-description"></p>
+    <div class="diagram-toolbar">
+      <button type="button" class="btn" id="diagram-reset">查看全圖</button>
+      <div class="diagram-journey" role="group" aria-label="主路徑導讀">
+        <button type="button" class="btn" id="diagram-previous" disabled>← 上一步</button>
+        <span id="diagram-position" aria-live="polite">全圖</span>
+        <button type="button" class="btn" id="diagram-next">下一步 →</button>
+      </div>
+      <label class="diagram-zoom">縮放<select id="diagram-zoom"><option value="1">100%</option><option value="1.25">125%</option><option value="1.5">150%</option></select></label>
+    </div>
+    <p class="verdict warn" id="diagram-invalid" hidden>請先修正試算欄位，圖解會在數值有效後更新。</p>
+    <div id="diagram-content">
+      <div class="diagram-canvas" id="diagram-canvas" tabindex="0" aria-label="圖解畫布，可橫向捲動"></div>
+      <div class="diagram-legend" aria-label="圖例"><span class="legend-blue">額度與執行</span><span class="legend-amber">門檻與檢查</span><span class="legend-violet">工作區存檔</span><span class="legend-green">接續處理</span><span class="legend-red">保留原參數</span></div>
+      <p class="hint">手機可橫向捲動圖面。節點支援 Tab 與 Enter，導讀按鈕可帶你依序查看。</p>
+      <aside class="diagram-inspector" id="diagram-inspector" aria-labelledby="diagram-node-title">
+        <div><p class="eyebrow" id="diagram-node-label">圖解導讀</p><h3 id="diagram-node-title">選一個節點，查看它如何影響下一步</h3></div>
+        <div class="diagram-inspector-body"><p id="diagram-node-detail"></p><code id="diagram-node-formula" hidden></code><a id="diagram-node-source" hidden></a></div>
+      </aside>
+    </div>
+    <p class="source">圖解呈現參考 <a href="https://tt-a1i.github.io/archify/" target="_blank" rel="noopener">Archify 的節點與路徑探索</a>，配色沿用本文件。數值為本頁試算，流程依本分支程式整理。</p>
+  </div>
+</section>
+
+<section class="card" id="simulator" aria-labelledby="sim-title">
+  <p class="eyebrow">01 · 改變視窗與用量，觀察有效值</p>
+  <h2 id="sim-title">主代理預算試算</h2>
+  <p class="sub">初始值採程式預設上限，工作視窗設為 60,000。數值為本頁的教學模擬，調整欄位只會更新頁面。</p>
+  <noscript><p class="noscript">試算需啟用 JavaScript。下方固定與獨立限制仍可閱讀，壓縮詳解另有完整公式與 60,000-token 範例。</p></noscript>
+  <form id="budget-form">
+    <div class="controls">
+      <label class="field wide" for="scenario">試算情境
+        <select id="scenario">
+          <option value="normal">60k · 空間充足</option>
+          <option value="near">60k · 接近壓縮</option>
+          <option value="small">12k · 小視窗</option>
+          <option value="large">120k · 保留量達設定上限</option>
+        </select>
+      </label>
+      <label class="field" for="deployment">部署上限 D<input id="deployment" type="number" min="1024" max="2000000" step="1" value="1000000"></label>
+      <label class="field" for="working">工作上限 B<input id="working" type="number" min="0" max="2000000" step="1" value="60000"><small>0 沿用部署上限</small></label>
+      <label class="field" for="density">密度 density<input id="density" type="number" min="1" max="3" step="0.05" value="1"></label>
+    </div>
+    <label class="field usage-field" for="usage">本輪上下文估算 T <strong id="usage-value">24,000 tokens</strong>
+      <input id="usage" type="range" min="0" max="72000" step="1" value="24000">
+    </label>
+    <details>
+      <summary>調整設定上限與完整請求估算</summary>
+      <div class="controls advanced">
+        <label class="field" for="reserve">reserve_tokens<input id="reserve" type="number" min="0" max="2000000" step="1" value="16384"></label>
+        <label class="field" for="recent">keep_recent_tokens<input id="recent" type="number" min="0" max="2000000" step="1" value="20000"></label>
+        <label class="field" for="output">max_output_tokens<input id="output" type="number" min="512" max="2000000" step="1" value="8192"></label>
+        <label class="field" for="result">big_result_tokens<input id="result" type="number" min="1" max="2000000" step="1" value="3000"></label>
+        <label class="field" for="turn">big_turn_tokens<input id="turn" type="number" min="1" max="2000000" step="1" value="12000"></label>
+        <label class="field" for="digest">big_digest_tokens<input id="digest" type="number" min="1" max="2000000" step="1" value="1500"></label>
+        <label class="field" for="prompt">完整請求估算 Q<input id="prompt" type="number" min="0" max="4000000" step="1" placeholder="預設 T + F"><small>可留空，數值已含 density</small></label>
+      </div>
+    </details>
+  </form>
+  <p id="validation" class="verdict bad" role="status" hidden></p>
+  <div id="results">
+    <div class="kv" id="summary" aria-label="主要額度"></div>
+    <div class="budget-track" aria-hidden="true">
+      <span class="threshold-track" id="threshold-track"></span>
+      <span class="usage-marker" id="usage-marker"></span>
+    </div>
+    <p class="hint">藍色範圍到一般壓縮門檻，右側為 R。黑線是 T + F，超出視窗時停在右緣。R 是觸發策略，K 是保留目標，這兩項會影響同一份歷史的處理。</p>
+    <p class="verdict" id="decision" role="status" aria-live="polite"></p>
+    <p class="hint">以下皆是本輪壓縮前的值。壓縮、工具回傳或伺服器回報 usage 後，程式會重新計算。若 Q 留空，本頁以 T + F 近似完整請求；實際預檢會重估每條訊息、狀態提示與重試指示。</p>
+    <div class="grid2 metrics">
+      <div class="box"><h3>回覆與工具空間</h3><dl id="capacity"></dl></div>
+      <div class="box"><h3>文件解析子代理</h3><dl id="document"></dl><p class="hint">以同一個 D 和設定上限示範獨立預算。文件實際能否放入，還會檢查固定提示、影像和轉錄擴展量。</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="card" id="limits" aria-labelledby="limits-title">
+  <p class="eyebrow">02 · 設定上限與有效值分開看</p>
+  <h2 id="limits-title">這一輪每項額度是多少？</h2>
+  <p class="sub">改動上方欄位即可更新。D 是部署上限，W 是主代理工作視窗。A 是可分配給工具結果的額度。所有除法會取整數，表中的 words、字元與 tokens 各自標示。</p>
+  <div class="tablewrap"><table>
+    <caption>主代理額度與觸發條件</caption>
+    <thead><tr><th scope="col">項目</th><th scope="col">設定或邊界</th><th scope="col">本輪有效值</th><th scope="col">如何決定</th></tr></thead>
+    <tbody id="limits-body"></tbody>
+  </table></div>
+  <p class="hint">工具外存判斷採「超過」門檻。寫入成功後會按當時的剩餘空間再判斷參數門檻。A 至少為 128 是程式採用的分配下限，即使當輪已接近超限也可能顯示這個值。能否送出仍由完整請求預檢決定。</p>
+  <details><summary>字數與 token 是如何估算？</summary>
+    <p>T 使用最新可用的伺服器 usage 作錨點，再估算其後訊息。沒有錨點時，一起估算固定提示、工具 schema 和有效訊息。density 由伺服器輸入量校準。工具文字大小用字元數除以四，再乘上 density。程式也會估入圖片與工具參數。</p>
+    <p>完整請求預檢另外計算 Q，並扣除安全餘裕 M。Q 太大時，會嘗試強制壓縮；仍無法提供最低回覆空間就回報超限。伺服器另有自己的 tokenizer 與容量限制。</p>
+  </details>
+  <p class="source">實作對照 <a href="../src/kentc_agent/agent/budget.py">工作視窗與 buffer</a><a href="../src/kentc_agent/agent/loop.py">輸入及回覆預檢</a><a href="../src/kentc_agent/context/bigcontext.py">工具結果</a><a href="../src/kentc_agent/agent/executor.py">成功寫入參數</a><a href="../src/kentc_agent/context/compaction.py">歷史摘要</a></p>
+</section>
+
+<section class="card" id="boundaries" aria-labelledby="boundaries-title">
+  <p class="eyebrow">03 · 調整 context_budget_tokens 時</p>
+  <h2 id="boundaries-title">哪些額度另有自己的規則？</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th scope="col">限制</th><th scope="col">目前行為</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">設定上限</th><td><code>max_output_tokens</code>、<code>big_result_tokens</code> 等設定保留原值，有效值在使用時依空間縮小。各額度有自己的公式，增加視窗後可能先碰到設定上限。</td></tr>
+      <tr><th scope="row">最低門檻</th><td>回覆空間低於 1,024 tokens 時先嘗試強制壓縮，完整請求預檢低於 512 時再走恢復判斷。成功寫入參數的外存門檻最低為 512 tokens。</td></tr>
+      <tr><th scope="row">固定要求與摘要輸入</th><td>有效的固定要求合計上限為 4,000 字元。摘要器接收單筆工具結果的開頭最多 2,000 字元，保留省略量標示。這兩個字元限制保持固定。</td></tr>
+      <tr><th scope="row">文件解析子代理</th><td>文件預算採部署上限 D，自行保留輸出與安全空間。<code>doc_chunk_tokens</code> 預設 12,000 是分塊上限，還需檢查整份請求與轉錄擴展。主代理的工作上限 B 適用於有 runtime context feedback 的代理。</td></tr>
+      <tr><th scope="row">TPM、點數與供應者限制</th><td><code>tokens_per_minute</code>、供應者的輸出與速率限制、可用點數各自生效。工作視窗變動時，這些配額維持自己的設定和供應者規則。</td></tr>
+    </tbody>
+  </table></div>
+  <p class="source">實作對照 <a href="../src/kentc_agent/config.py">設定</a><a href="../src/kentc_agent/adapters/session.py">固定要求</a><a href="../src/kentc_agent/adapters/documents/budget.py">文件預算</a><a href="../src/kentc_agent/adapters/llm.py">請求傳輸</a></p>
+  <p><a href="context-compaction.html">繼續閱讀壓縮輸入、checkpoint 模板與回讀流程 →</a></p>
+</section>
+</main>
+<footer>KentC Agent · Token 額度總覽 · 互動試算依目前實作公式</footer>
+</body>
+</html>

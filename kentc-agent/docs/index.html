@@ -11,7 +11,7 @@
 <a class="sr-only" href="#main">跳至主要內容</a>
 <header class="top"><div class="top-in">
   <a class="brand" href="#main">kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
-  <nav aria-label="章節導覽"><a href="#layers">三種使用層</a><a href="#principles">方法論</a><a href="#loop">執行迴圈</a><a href="#capabilities">能力與策略</a><a href="#vertical">上下文</a><a href="#documents">文件解析</a><a href="#folders">記憶分工</a><a href="#workflows">工作流程</a><a href="#web">網路研究</a><a href="#web-design">設計思考</a><a href="#studio">Studio 應用</a><a href="#reference">實作索引</a></nav>
+  <nav aria-label="章節導覽"><a href="#new-memory">新版優化</a><a href="#layers">三種使用層</a><a href="#principles">方法論</a><a href="#loop">執行迴圈</a><a href="#capabilities">能力與策略</a><a href="#vertical">上下文</a><a href="#documents">文件解析</a><a href="#folders">記憶分工</a><a href="#workflows">工作流程</a><a href="#web">網路研究</a><a href="#web-design">設計思考</a><a href="#studio">Studio 應用</a><a href="#reference">實作索引</a></nav>
 </div></header>
 <main id="main">
 <section class="hero" aria-labelledby="title">
@@ -22,6 +22,35 @@
   <p class="scope"><b>本文範圍：</b><code>kentc-agent/src/kentc_agent/</code> 核心套件，以及它在三種使用層（CLI 對話、工作流程、Studio）中的權限差異。工作流程用來說明如何編排同一個代理，以及網路研究子代理如何以「步驟」的形式加入；Studio 說明應用框架（<code>src/kentc_studio/</code>：應用 YAML、區塊、報告框架、非同步提示），不展開各應用的業務判斷或長期記憶系統。</p>
 </section>
 <noscript><p class="noscript">此頁的架構與方法論可直接閱讀；互動計算器及流程切換需要啟用 JavaScript。它們只做本機教學模擬，不會呼叫模型或修改設定。</p></noscript>
+
+<section class="card" id="new-memory" aria-labelledby="new-memory-title">
+  <p class="eyebrow">新版優化 · codex/kentc-agent-new-mem</p>
+  <h2 id="new-memory-title">控制每輪輸入，保留回讀原文的路徑</h2>
+  <ol class="flow" aria-label="新版上下文與檔案的流向">
+    <li><b>1．計算本輪額度</b><span>工作視窗取部署上限與設定上限的較小值。主代理每輪收到使用量、剩餘空間及工具結果門檻。</span></li>
+    <li class="special"><b>2．保存大型結果</b><span>超過門檻的工具結果保存成 <code>full.md</code>，以摘要與索引 ID 進入上下文。</span></li>
+    <li class="special"><b>3．先存歷史，再壓縮</b><span>將要移出的訊息與上一份摘要存檔，再更新 checkpoint。下一輪保留近期訊息和索引提示。</span></li>
+    <li><b>4．按需回讀</b><span>透過 <code>index.md</code> 找到全文，按行或字元讀取所需片段。繼續同一 session 時仍可使用索引。</span></li>
+  </ol>
+  <div class="tablewrap"><table><caption>原版與新版的行為差異</caption><thead><tr><th scope="col">情境</th><th scope="col">原版</th><th scope="col">新版</th></tr></thead><tbody>
+    <tr><th scope="row">上下文接近上限</th><td>依部署視窗觸發壓縮。</td><td>可獨立設定主代理的工作視窗。模型每輪看到預算提示，程式在送出前再檢查請求大小。</td></tr>
+    <tr><th scope="row">一次讀到大量內容</th><td>依部署視窗與設定決定摘要門檻，文字結果可指向原檔。</td><td>結果門檻隨剩餘空間縮小。大型結果保留當時的快照，單行文字也能按字元回讀。</td></tr>
+    <tr><th scope="row">壓縮後需要細節</th><td>續用摘要、近期訊息與 session 日誌。</td><td>每個 session 有自己的索引和歷史存檔。緊急縮短工具結果時，保留原文與可回讀的指標。</td></tr>
+    <tr><th scope="row">更換模型部署</th><td>OpenAI 相容端點與 Qwen38 專用連線。</td><td>加入 OpenRouter 模型目錄與 Ollama 執行中視窗的讀取方式。</td></tr>
+  </tbody></table></div>
+  <div class="widget">
+    <div class="widget-head"><h3>真實模型驗證</h3><span class="tag">OpenRouter · Qwen3.8 Flash · 合成資料</span></div>
+    <ol class="flow" aria-label="已驗證的大檔回讀流程">
+      <li><b>4,096 tokens</b><span>本次測試的工作視窗</span></li>
+      <li><b>約 660 KB</b><span>完整工具結果保存在工作區</span></li>
+      <li><b>3 次壓縮</b><span>原文與 session 索引仍可取用</span></li>
+      <li><b>第 9,001 行</b><span>模型透過分頁讀取取回答案，重新載入後的有效上下文與原 session 相符</span></li>
+    </ol>
+    <p class="hint">以上是一次實際測試。下方計算器使用本機 60,000-token 設定作為起始情境，可拖動用量觀察壓縮門檻與工具預算。</p>
+    <a href="#budgetWidget">試算上下文預算 ↓</a>
+  </div>
+  <p class="source">實作對照 <a href="../src/kentc_agent/agent/budget.py">工作視窗與壓縮</a><a href="../src/kentc_agent/context/memory.py">工作區索引</a><a href="../src/kentc_agent/context/bigcontext.py">工具結果路由</a><a href="../src/kentc_agent/adapters/tools.py">分頁讀取</a></p>
+</section>
 
 <section class="card" id="layers" aria-labelledby="layers-title">
   <p class="eyebrow">00 · 同一個代理，三種使用層</p>
@@ -79,14 +108,14 @@
 <section class="card" id="capabilities" aria-labelledby="cap-title">
   <p class="eyebrow">03 · 誰決定上限，誰決定用法</p>
   <h2 id="cap-title">伺服器能力 ≠ 代理設定</h2>
-  <div class="callout"><b>上下文視窗 W 是部署的事實，不是模型名稱的常數。</b> OpenAI／Strata 從伺服器取得；Qwen38 預設 60,000 tokens，依使用者描述的部署設定，不是即時偵測。換部署時必須確認兩個後端都放得下，必要時覆寫；輸出與分塊設定不能把 W 變大。</div>
+  <div class="callout"><b>部署上限 D 與主代理工作視窗 W 各自計算。</b> 有設定 <code>context_budget_tokens</code> 時，W 取部署上限與設定上限的較小值。Qwen38 的 <code>qwen_context_window</code> 則是部署額度，由使用者確認兩個後端的可用容量。</div>
   <div class="tablewrap"><table>
     <caption>能力、連線與策略的分工</caption>
     <thead><tr><th scope="col">類別</th><th scope="col">內容</th><th scope="col">目前的來源與規則</th></tr></thead>
     <tbody>
-      <tr><td>連線與模型選擇</td><td><code>provider</code>、<code>base_url</code>、<code>api_key</code>、<code>model</code></td><td><code>openai</code> 預設本機 Strata。<code>qwen38</code> 內建原客戶端的 coordinator／LiteLLM 端點、金鑰與模型；不需額外 YAML 或端點／金鑰環境變數。兩個 Qwen 後端各自解析覆寫或預設值，不把 Strata 當備援。</td></tr>
-      <tr><td>部署上下文視窗</td><td><code>ModelInfo.context_window</code></td><td>OpenAI 路徑讀取 <code>/models</code> 的正整數 <code>meta.n_ctx</code> 或 <code>max_model_len</code>。Qwen 的 <code>qwen_context_window</code> 預設 60,000，依使用者提供的部署資訊；不同部署應明確覆寫，不從模型家族名稱推定。</td></tr>
-      <tr><td>影像輸入能力</td><td><code>ModelInfo.vision</code></td><td>OpenAI 依 <code>architecture.input_modalities</code> 判斷；未宣告時樂觀假設支援。Qwen 預設不開影像，只有兩個後端都確認支援時才啟用 <code>qwen_vision</code>。能力設定不保證辨識正確。</td></tr>
+      <tr><td>連線與模型選擇</td><td><code>provider</code>、<code>base_url</code>、<code>api_key</code>、<code>model</code></td><td><code>openai</code> 預設本機 Strata。<code>qwen38</code> 內建原客戶端的 coordinator／LiteLLM 端點與模型設定，連線憑證由部署設定或環境變數提供。新版可用 <code>openrouter</code> 與 <code>ollama</code>，由各自的模型資料取得額度。</td></tr>
+      <tr><td>部署上下文視窗</td><td><code>ModelInfo.context_window</code></td><td>OpenAI 路徑讀取 <code>/models</code> 的正整數 <code>meta.n_ctx</code> 或 <code>max_model_len</code>。Qwen 的 <code>qwen_context_window</code> 預設 60,000，依使用者提供的部署資訊；不同部署應明確覆寫。OpenRouter 讀取模型目錄的 <code>context_length</code>，並考量主要供應商的上限。Ollama 讀取 <code>/api/ps</code> 的執行中配置，或使用明確設定的 <code>ollama_context_window</code>。</td></tr>
+      <tr><td>影像輸入能力</td><td><code>ModelInfo.vision</code></td><td>OpenAI 依 <code>architecture.input_modalities</code> 判斷；未宣告時樂觀假設支援。Qwen 預設不開影像，只有兩個後端都確認支援時才啟用 <code>qwen_vision</code>。Ollama 透過 <code>ollama_vision</code> 明確開啟影像輸入。</td></tr>
       <tr><td>每次輸出怎麼用</td><td><code>max_output_tokens</code>、<code>reasoning_effort</code></td><td>代理的請求策略，不代表伺服器能力。輸出請求還會依剩餘空間調整；超限時依伺服器回報重試。</td></tr>
       <tr><td>上下文與文件策略</td><td><code>reserve_tokens</code>、<code>keep_recent_tokens</code>、<code>doc_chunk_tokens</code></td><td>可設定的上限或目標；有效值受偵測到的 W 限制，不能把伺服器視窗變大。</td></tr>
     </tbody>
@@ -96,17 +125,14 @@
     <div class="box"><h3>無法取得有效視窗？</h3><p>OpenAI 缺少有效視窗或找不到所選模型會報錯。Qwen 不要求模型清單，直接採用內建 60k 或覆寫值；覆寫成 0、負值等無效值仍會報錯。內建值不等於伺服器已驗證接受。</p></div>
   </div>
   <div class="widget" id="direct-run">
-    <h3>兩個環境直接啟動，不需另填主機或金鑰</h3>
-    <pre><code># 本機 Strata，保留原本預設
-uv run kentc-agent "Your task"
+    <h3>切換供應商與工作視窗</h3>
+    <pre><code>uv run kentc-agent --provider openrouter --model qwen/qwen3.8-flash \
+  --context-budget-tokens 60000 "整理工作區資料並列出來源"
 
-# Qwen coordinator 優先，串流開始前失敗可切 LiteLLM
-uv run kentc-agent --provider qwen38 "Your task"
-
-# Qwen LiteLLM 優先，備援為 coordinator
-uv run kentc-agent --provider qwen38 --qwen-backend litellm "Your task"</code></pre>
-    <p>Qwen 的主機、API key 與模型名稱集中在 <code>config/qwen38.yaml</code>，分為 <code>coordinator</code> 與 <code>litellm</code>，各含 <code>base_url</code>、<code>api_key</code>、<code>model</code>。修改後重啟 CLI/Studio；不需修改 Python。wheel 會將同一檔案打包到 <code>kentc_agent/deployment_config/qwen38.yaml</code>，部署設定更新後應重新建置／安裝。明確連線設定優先於後端環境變數，環境變數優先於此檔案；切換環境時不要保留過時的通用覆寫。Studio 使用同一套設定，以 <code>KENTC_AGENT_PROVIDER=qwen38</code> 選擇 Qwen。</p>
-    <p class="hint"><b>部署與憑證限制：</b>YAML 含復原的 coordinator token，移出 Python 不等於秘密管理。設定檔及包含它的建置產物都應保持私有，並在憑證外洩或到期時輪替；不把 token 複製到本頁。LiteLLM 沿用原客戶端的預設 key。TLS 驗證保持啟用，內網連線、企業 CA 信任與伺服器接受憑證仍是實際執行前提。設定檔不保證憑證永久有效。</p>
+KENTC_AGENT_API_KEY=ollama uv run kentc-agent --provider ollama \
+  --base-url http://127.0.0.1:11434/v1 --model qwen3.8-flash-next:125b-mlx \
+  --context-budget-tokens 60000 "整理工作區資料並列出來源"</code></pre>
+    <p>OpenRouter 使用本機設定或 <code>OPENROUTER_API_KEY</code>。Ollama 需先準備模型，並讓模型的實際配置支援所需額度。Qwen38 專用連線可用 <code>--qwen-backend</code> 選擇 coordinator 或 LiteLLM。</p>
   </div>
   <div class="widget" id="recovery">
     <h3>共享 TPM 與乾淨串流重試</h3>
@@ -128,33 +154,39 @@ uv run kentc-agent --provider qwen38 --qwen-backend litellm "Your task"</code></
   <h2 id="context-title">跨回合壓縮歷史；單回合控制新資料</h2>
   <div class="grid2">
     <div class="box"><span class="tag">縱向 · compaction.py</span><h3>歷史太長：壓縮舊對話</h3><p>保留最近訊息，把較舊內容整理成結構化摘要。摘要與保留訊息組成下一次請求；磁碟上的原始對話仍在。</p><p class="why">解決「談太久」；不是刪除工作區檔案，也不是把資料訓練進模型。</p></div>
-    <div class="box"><span class="tag violet">橫向 · bigcontext.py</span><h3>本輪太大：大型結果外存</h3><p>工具結果超過單筆或批次預算時，保留完整內容或來源參照，給模型摘要與可再讀取的路徑。</p><p class="why">解決「一次讀太多」；不能只靠壓縮歷史處理巨量的新結果。</p></div>
+    <div class="box"><span class="tag violet">橫向 · bigcontext.py</span><h3>本輪太大：大型結果外存</h3><p>工具結果超過單筆或批次預算時，保存完整結果快照，給模型摘要與可再讀取的路徑。</p><p class="why">解決「一次讀太多」；不能只靠壓縮歷史處理巨量的新結果。</p></div>
   </div>
   <h3>不是把字數除以四就當成真實 token</h3>
   <p>下一次輸入的估算是 <code>C + ceil(E × density)</code>：C 是最新一次伺服器 usage 所錨定的已計數部分，E 是其後新訊息的估算。沒有可用計數時，系統提示、工具 schema、摘要與對話都需估算。伺服器回報的實際輸入量會校準 density；影像仍有模型相關的估算誤差。</p>
   <div class="widget" id="budgetWidget">
     <div class="widget-head"><h3>上下文預算教學計算器</h3><span class="tag amber">示意參數，不是代理設定</span></div>
-    <p class="hint" style="margin:0 0 13px">這裡手動填 W，只是模擬「伺服器可能回報的視窗」。頁面不連線、不偵測模型，也不修改 config。其餘保留策略採程式預設值。</p>
+    <p><a href="token-budget.html" target="_blank" rel="noopener">開啟 Token 額度總覽、架構圖解與互動試算（新分頁） ↗</a></p>
+    <p class="hint" style="margin:0 0 13px">部署上限與工作上限可分別調整。此試算採主代理的預設保留策略、density = 1，以及本機 60,000-token 工作上限作為起始情境。</p>
     <div class="controls">
-      <label class="field wide" for="wPreset">教學情境<select id="wPreset"><option value="15536">較小視窗 · 15,536</option><option value="32768">中型視窗 · 32,768</option><option value="65536">較大視窗 · 65,536</option></select></label>
-      <label class="field" for="wInput">假設偵測到 W<input type="number" id="wInput" value="15536" min="1024" max="2000000" step="1"></label>
+      <label class="field wide" for="wPreset">教學情境<select id="wPreset"><option value="1000000">OpenRouter · 工作上限 60,000</option><option value="4096">小視窗 · 4,096</option><option value="32768">中型視窗 · 32,768</option></select></label>
+      <label class="field" for="wInput">部署上限 D<input type="number" id="wInput" value="1000000" min="1024" max="2000000" step="1"></label>
+      <label class="field" for="workingInput">工作上限（0 沿用部署）<input type="number" id="workingInput" value="60000" min="0" max="2000000" step="1"></label>
       <label class="field" for="outputInput">請求輸出上限 O<input type="number" id="outputInput" value="8192" min="512" max="2000000" step="1"></label>
-      <label class="field range" for="ctxRange">目前估算上下文 T：<b id="ctxVal">9,000</b><input type="range" id="ctxRange" value="9000" min="0" max="18643" step="1"></label>
+      <label class="field range" for="ctxRange">歷史與固定輸入估算 T <b id="ctxVal">24,000</b><input type="range" id="ctxRange" value="24000" min="0" max="72000" step="1"></label>
     </div>
-    <div class="bar" id="budgetBar" aria-hidden="true"></div><p class="bar-label">藍色：壓縮門檻前的範圍 · 紅色：保留區 · 黑線：目前估算位置（超過 W 時停在右緣）</p>
+    <div class="bar" id="budgetBar" aria-hidden="true"></div><p class="bar-label">藍色：壓縮門檻前的範圍 · 紅色：保留區 · 黑線：T 加狀態提示的預留量（超過 W 時停在右緣）</p>
     <div class="kv" id="budgetKV"></div>
     <div class="verdict" id="budgetVerdict" aria-live="polite"></div>
-    <details><summary>展開預算公式與限制</summary><div class="formula">R = min(16,384, floor(W / 4))          壓縮保留量
+    <details><summary>展開主代理的預算公式</summary><div class="formula">W = min(D, 設定的工作上限)            工作上限為 0 時採 D
+R = min(16,384, floor(W / 4))          壓縮保留量
 K = min(20,000, floor(W / 3))          最近訊息保留目標
-M = max(256, floor(W / 20))           請求安全餘裕
-room = W − T − M                     回覆可用空間
-T > W − R                            先嘗試壓縮
-room < 1,024                         嘗試強制壓縮
-max_tokens = max(512, min(O, room))   主迴圈初步請求值；之後還可能依超限回覆調整</div><p class="hint">最低 512 的請求值不代表一定放得下。若壓縮仍無法騰出空間，伺服器仍可能拒絕；計算器不把這種情況標示為「已安全送出」。摘要也只有篇幅目標與輸出預算，不是固定長度。</p></details>
+M = max(256, floor(W / 20))            請求安全餘裕
+F = ceil(512 × density)               狀態提示預留量
+room = W − T − M − F                  回覆可用空間
+T + F &gt; W − R                        先嘗試壓縮
+room &lt; 1,024                          嘗試強制壓縮
+A = max(128, room − R)                 目前可分配給工具結果的預算
+單筆 = min(3,000, floor(D / 20), max(64, floor(A / 4)))
+整批 = min(12,000, floor(D / 5), A)
+摘要 = min(1,500, floor(D / 40), max(32, floor(A / 8)))</div><p class="hint">圖中的數值是壓縮前估算。程式會以組好的完整提示再次計算可用輸出空間。強制壓縮後若仍低於最低回覆空間，會在本機回報超限。</p></details>
   </div>
-  <h3>壓縮的輸入、處理與輸出</h3>
-  <ol class="recipe"><li><b>找切點</b>從最近訊息往回估算，切在使用者或 assistant 訊息；不把工具結果留在沒有呼叫的那一側。</li><li><b>更新摘要</b>將較舊訊息與上一份摘要整理成目標、限制、進度、決策、下一步及關鍵資訊。</li><li><b>重建工作上下文</b>使用「摘要 ＋ 最近訊息」繼續；原始訊息留在 session 日誌，不會全部再次送給模型。</li><li><b>摘要失敗不假裝成功</b>回報問題；需要強制騰空間時可縮短舊工具結果，仍不足則可能在後續模型請求失敗。</li></ol>
-  <details><summary>density 如何校準？</summary><p class="hint">當 E ≥ 300、伺服器輸入 P &gt; C 時，觀測值為 <code>min(3, (P − C) / E)</code>。比目前更密時立即採用；較稀疏時用 <code>max(1, 0.8 × 舊值 + 0.2 × 觀測值)</code> 平滑更新。它修正估算，不是伺服器 tokenizer 的替代品。</p></details>
+  <p class="callout">舊訊息先存檔，再交由模型更新 checkpoint。下一輪使用摘要、近期訊息、有效的使用者原文要求與索引提示。<br>
+    <a href="context-compaction.html" target="_blank" rel="noopener">閱讀上下文壓縮詳解（新分頁） ↗</a></p>
 
   <h3 id="horizontal">單回合結果的三道判斷</h3>
   <div class="tablewrap"><table><thead><tr><th scope="col">規則</th><th scope="col">觸發情況</th><th scope="col">處理方式</th></tr></thead><tbody>
@@ -163,12 +195,12 @@ max_tokens = max(512, min(O, room))   主迴圈初步請求值；之後還可能
     <tr><td><span class="tag violet">turn</span></td><td>多筆結果合計超過本輪預算</td><td>從尚未外存、仍大於摘要預算的候選中，優先處理最大筆；實際摘要大小仍受估算影響。</td></tr>
   </tbody></table></div>
   <div class="widget">
-    <div class="widget-head"><h3>大型結果路由示意</h3><span class="tag">沿用上方 W · density 示意為 1</span></div>
+    <div class="widget-head"><h3>大型結果路由示意</h3><span class="tag">沿用上方估算 · density = 1</span></div>
     <div class="controls"><button type="button" class="btn" data-preset="small">少量結果</button><button type="button" class="btn" data-preset="mixed">混合檔案</button><button type="button" class="btn" data-preset="batch">多筆分頁</button><button type="button" class="btn" id="rClear">清空</button></div>
     <div class="controls" style="margin-top:12px"><label class="field wide" for="rType">新增工具結果<select id="rType"><option value="text">read · 文字／程式檔</option><option value="page">read · 分頁</option><option value="pdf">read · PDF／影像</option><option value="office">read · Office／郵件／CSV</option><option value="bash">bash · 命令輸出</option></select></label><label class="field" for="rTok">結果 token 估算<input type="number" id="rTok" value="2500" min="1" max="2000000" step="1"></label><button type="button" class="btn" id="rAdd">加入結果</button></div>
     <div class="tablewrap"><table><caption class="sr-only">結果如何進入主上下文</caption><thead><tr><th scope="col">工具結果</th><th scope="col">原始量</th><th scope="col">路由規則</th><th scope="col">摘要來源</th><th scope="col">進入上下文</th><th scope="col">操作</th></tr></thead><tbody id="rBody"></tbody></table></div>
     <div class="verdict" id="rVerdict" aria-live="polite"></div>
-    <p class="hint">僅示意規則順序。摘要長度採假設值；不執行解析、快取、規則摘要或真實 token 計數，也不保證實際批次一定符合預算。一般文字檔可直接參照原檔，未必複製成 full.md。</p>
+    <p class="hint">僅示意規則順序。摘要長度採假設值；不執行解析、快取、規則摘要或真實 token 計數，也不保證實際批次一定符合預算。外存項目會保存 full.md 與摘要，並登記到 session 索引。</p>
   </div>
   <p class="source">實作對照：<a href="../src/kentc_agent/context/compaction.py">context/compaction.py</a><a href="../src/kentc_agent/context/bigcontext.py">context/bigcontext.py</a><a href="../src/kentc_agent/adapters/session.py">adapters/session.py</a></p>
 </section>
@@ -200,7 +232,7 @@ max_tokens = max(512, min(O, room))   主迴圈初步請求值；之後還可能
   </div>
   <div class="widget">
     <div class="widget-head"><h3>為什麼 12k 分塊上限，不代表一次就能讀 12k？</h3><span class="tag amber">預算示意 · 不是 tokenizer</span></div>
-    <p class="hint" style="margin:0 0 12px">沿用上方 W 與 O。下方 user 值是假設的單一請求內容估算，已含任務、標題、文字與影像；固定提示另外以 100 tokens 示範，並非從實際文件計算。</p>
+    <p class="hint" style="margin:0 0 12px">文件子代理採用上方部署上限 D 與輸出上限 O。下方 user 值包含任務、標題、文字與影像的估算，固定提示另以 100 tokens 示意。</p>
     <div class="controls"><label class="field" for="docUser">user 估算 tokens<input type="number" id="docUser" value="6000" min="1" max="2000000" step="1"></label><label class="field" for="docDensity">density<input type="number" id="docDensity" value="1" min="1" max="3" step="0.05"></label><label class="field wide" for="docMode">解析目的<select id="docMode"><option value="transcribe">忠實轉錄 · 預留 25% 擴展量</option><option value="extract">問題擷取／摘要</option></select></label></div>
     <div class="kv" id="docKV"></div><div class="verdict" id="docVerdict" aria-live="polite"></div>
     <details><summary>展開文件預算公式</summary><div class="formula">output = min(O, floor(W / 2))
@@ -217,11 +249,12 @@ user ≤ doc_chunk_tokens（預設 12,000）
   <p class="eyebrow">06 · 工作區與工作階段，不是長期記憶系統</p>
   <h2 id="memory-title">「存在哪裡」與「模型看得到什麼」是兩個問題</h2>
   <p class="sub">目前重點是檔案與 session 的可恢復狀態。沒有因為建立 operation 資料夾，就自動得到跨任務知識庫、語意檢索或永久記住所有事實的能力。</p>
-  <div class="tablewrap"><table class="memory"><caption>六種不同責任，不應統稱為「記憶」</caption><thead><tr><th scope="col">層次</th><th scope="col">保存什麼</th><th scope="col">會自動全部送給模型嗎？</th></tr></thead><tbody>
+  <div class="tablewrap"><table class="memory"><caption>工作區、索引與目前上下文</caption><thead><tr><th scope="col">層次</th><th scope="col">保存什麼</th><th scope="col">會自動全部送給模型嗎？</th></tr></thead><tbody>
     <tr><td>工作區 Workspace</td><td>輸入檔、參考材料、程式與成果；由工具按需讀寫。</td><td><strong>不會。</strong> 放在資料夾裡不等於已進入提示。</td></tr>
     <tr><td>工作階段 Session</td><td>附加式 JSONL 對話、usage 與壓縮紀錄；可載入並恢復脈絡。</td><td>只投影出目前有效的上下文，不重送全部歷史。</td></tr>
-    <tr><td>目前上下文 Live context</td><td>系統提示、工具 schema、摘要及仍保留的訊息，組成下一次請求。</td><td><strong>這才是模型這次實際取得的材料。</strong> 同一 session 的舊原文可能只剩摘要。</td></tr>
-    <tr><td>大型結果 Operation artifacts</td><td>本次工具呼叫的 <code>full.md</code>／來源參照及 <code>digest.json</code>。</td><td>通常只送摘要與路徑；全文需要再讀。它不是完整 session 的替代品。</td></tr>
+    <tr><td>目前上下文 Live context</td><td>系統提示、工具 schema、當輪狀態提示、摘要及仍保留的訊息，組成下一次請求。</td><td><strong>這才是模型這次實際取得的材料。</strong> 同一 session 的舊原文可能只剩摘要。</td></tr>
+    <tr><td>大型結果 Operation artifacts</td><td>本次工具呼叫的 <code>full.md</code> 快照、<code>digest.json</code> 與索引 ID。</td><td>通常只送摘要與路徑；全文需要再讀。它不是完整 session 的替代品。</td></tr>
+    <tr><td>工作區索引</td><td><code>memory/S/index.md</code> 由個別記錄重建，列出大型輸入、工具結果與歷史存檔。</td><td>每輪提示包含索引路徑和最近三筆 ID。需要完整清單時可按需讀取。</td></tr>
     <tr><td>操作追蹤 Trace</td><td>輸入概況、模型回覆、工具結果、耗時、子代理關聯等除錯證據。</td><td>不自動注入。預設啟用，但可關閉；未持久化的 session 不建立一般 trace 檔。</td></tr>
     <tr><td>文件快取 Cache</td><td>可重用的文件答案、轉錄與摘要，避免重複解析。</td><td>命中後由讀取路徑使用；不是跨 session 的自動知識記憶。</td></tr>
   </tbody></table></div>
@@ -233,17 +266,21 @@ user ≤ doc_chunk_tokens（預設 12,000）
     ├── sessions/&lt;檔名&gt;.jsonl     <span class="comment"># 檔案標頭記錄 session ID S</span>
     ├── traces/S.jsonl            <span class="comment"># 每個 operation 的追蹤紀錄</span>
     ├── operations/S/7/c2/
-    │   ├── full.md               <span class="comment"># 需要另存時的完整內容</span>
+    │   ├── full.md               <span class="comment"># 當時的完整工具結果</span>
     │   └── digest.json           <span class="comment"># 摘要與來源中繼資料</span>
+    ├── memory/S/
+    │   ├── index.md              <span class="comment"># 回讀索引表</span>
+    │   ├── entries/*.json        <span class="comment"># 個別索引記錄</span>
+    │   └── archives/*.txt        <span class="comment"># 大型輸入、歷史與緊急外存結果</span>
     ├── subagents/…jsonl          <span class="comment"># 各次文件解析的獨立 session</span>
     ├── cache/documents/          <span class="comment"># 文件解析重用結果</span>
     ├── attachments/              <span class="comment"># 郵件附件與內嵌影像</span>
     ├── runs/&lt;run&gt;/               <span class="comment"># 工作流程狀態與 session</span>
     └── tmp/                      <span class="comment"># 長命令的完整輸出等</span></code></pre>
-    <div class="box"><h3>session → operation → tool call</h3><p><code>operations/S/7/c2/</code> 表示 S 工作階段、第 7 個 operation、工具呼叫 c2 的外存結果；不是「第 7 份長期記憶」。</p><h3>快取與 operation 為什麼仍並存？</h3><p>快取回答「這份材料能不能重用解析結果」；operation 回答「這次呼叫產生或使用了什麼」。目前兩者仍可能各自保存內容，尚未合併成單一索引設計。</p><p class="why">此頁說明既有責任分工，不宣稱已完成快取身分、持久化命名或長期記憶重構。</p></div>
+    <div class="box"><h3>session → operation → tool call</h3><p><code>operations/S/7/c2/</code> 表示 S 工作階段、第 7 個 operation、工具呼叫 c2 的外存結果；不是「第 7 份長期記憶」。</p><h3>快取與 operation 為什麼仍並存？</h3><p>快取回答「這份材料能不能重用解析結果」；operation 回答「這次呼叫產生或使用了什麼」。工作區索引列出代理可回讀的外存項目。文件快取另按文件與解析請求管理。</p><p class="why">同一 session 重新載入後，可循索引查看先前的存檔。</p></div>
   </div>
   <div class="callout warn"><b>可恢復，不等於逐位元重播。</b> session 日誌會把內嵌 base64 影像替換成佔位文字；恢復後不代表原始影像位元仍在對話內。需要核對時應保留來源檔並重新讀取。</div>
-  <p class="source">實作對照：<a href="../src/kentc_agent/adapters/session.py">adapters/session.py</a><a href="../src/kentc_agent/adapters/trace.py">adapters/trace.py</a><a href="../src/kentc_agent/context/bigcontext.py">context/bigcontext.py · folder / store</a></p>
+  <p class="source">實作對照：<a href="../src/kentc_agent/adapters/session.py">adapters/session.py</a><a href="../src/kentc_agent/adapters/trace.py">adapters/trace.py</a><a href="../src/kentc_agent/context/bigcontext.py">context/bigcontext.py · folder / store</a><a href="../src/kentc_agent/context/memory.py">context/memory.py · index</a></p>
 </section>
 
 <section class="card" id="workflows" aria-labelledby="wf-title">
@@ -488,6 +525,7 @@ report:                     <span class="comment"># 第 3 頁</span>
     <tr><td><a href="../src/kentc_agent/config.py">config.py</a></td><td>連線與代理策略、Qwen 的預設部署視窗；不覆蓋 OpenAI 路徑的部署偵測</td><td><code>Settings</code>、<code>load_settings</code></td></tr>
     <tr><td><a href="../src/kentc_agent/context/compaction.py">context/compaction.py</a></td><td>舊對話切點、摘要與必要時縮短工具結果</td><td><code>find_cut</code>、<code>summarize</code></td></tr>
     <tr><td><a href="../src/kentc_agent/context/bigcontext.py">context/bigcontext.py</a></td><td>大型結果路由、規則摘要與 operation 外存</td><td><code>limits</code>、<code>route_turn</code>、<code>store</code></td></tr>
+    <tr><td><a href="../src/kentc_agent/context/memory.py">context/memory.py</a></td><td>session 索引、原文存檔與每輪狀態提示</td><td><code>WorkspaceMemory</code></td></tr>
     <tr><td><a href="../src/kentc_agent/context/safety.py">context/safety.py</a></td><td>每個工具結果的注入規則（中英文）與隱藏字元移除</td><td><code>scan</code>、<code>guard</code></td></tr>
     <tr><td><a href="../src/kentc_agent/adapters/documents/policy.py">adapters/documents/</a></td><td>文件轉換、有效分塊、轉錄／問答與合併</td><td><code>read_document</code>、<code>document_budget</code>、<code>map_chunks</code>、<code>ask</code></td></tr>
     <tr><td><a href="../src/kentc_agent/adapters/tools.py">adapters/tools.py</a></td><td>四工具的實際 I/O、分頁與命令輸出</td><td><code>CORE_TOOLS</code>、<code>ToolContext</code></td></tr>

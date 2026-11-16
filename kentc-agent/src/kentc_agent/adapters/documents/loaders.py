@@ -70,7 +70,7 @@ def office_media(ctx: ToolContext, path: Path, src: Source) -> None:
 # ---------------------------------------------------------------------- loaders
 def load_pdf(ctx: ToolContext, path: Path, pages: str | None) -> Source:
     s = ctx.settings
-    vision = ctx.llm.info().vision
+    vision = s.doc_render != "never" and ctx.llm.info().vision
     with pymupdf.open(path) as doc:
         numbers = parse_pages(pages, doc.page_count)
         src = Source(path, "pdf", f"{path.name} (PDF, {doc.page_count} pages)")

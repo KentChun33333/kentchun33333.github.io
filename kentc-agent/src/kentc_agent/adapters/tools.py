@@ -37,6 +37,7 @@ class ToolContext:
     operation: OpRef | None = None   # the tool call running now (trace.py): a sub-agent's parent
     density: float = 1.0             # server tokens per chars/4 token, from the agent whose tools run (agent.py)
     confine_reads: bool = False      # read refuses paths outside the workspace (studio agents on uploaded documents)
+    available_context_tokens: int | None = None  # current agent's room for the next batch of tool results
 
     @property
     def state_dir(self) -> Path:
@@ -119,15 +120,28 @@ def page(text: str, offset: int | None, limit: int | None, ctx: ToolContext, wha
     if start > total:
         raise ToolError(f"offset {start} is past the end of {what} ({total} lines)")
     s = ctx.settings
-    room = limits(ctx).result * CHARS_PER_TOKEN - PAGE_NOTE_CHARS
+    room = max(1, int(limits(ctx).result * CHARS_PER_TOKEN / max(1.0, ctx.density)) - PAGE_NOTE_CHARS)
     body, kept, cut = truncate_head("\n".join(lines[start - 1:start - 1 + int(limit or s.tool_output_max_lines)]),
                                     s.tool_output_max_lines, min(s.tool_output_max_bytes, room))
     end = start + kept - 1
     if end < total:
         body += f"\n\n[Showing lines {start}-{end} of {total} of {what}. Use offset={end + 1} to continue.]"
     elif cut:
-        body += "\n\n[Line truncated to the output limit.]"
+        body += "\n\n[Line truncated to the output limit. Use start_char/max_chars to inspect long lines.]"
     return body
+
+
+def character_page(text: str, start: int, requested: int | None, ctx: ToolContext) -> str:
+    """A bounded character window also supports minified JSON and other single-line files."""
+    if start < 0 or start > len(text) or requested is not None and requested <= 0:
+        raise ToolError("start_char must be within the file and max_chars must be positive")
+    budget = min(ctx.settings.tool_output_max_bytes // 4,
+                 int(limits(ctx).result * CHARS_PER_TOKEN / max(1.0, ctx.density)))
+    footer_size = len(f"\n\n[Chars {start}:{len(text)}/{len(text)}; next={len(text)}]")
+    if budget <= footer_size:
+        raise ToolError("not enough read capacity for a character window; save progress and compact first")
+    end = min(len(text), start + min(requested or budget, budget - footer_size))
+    return text[start:end] + f"\n\n[Chars {start}:{end}/{len(text)}; next={end}]"
 
 
 def _read(ctx: ToolContext, a: dict[str, Any]) -> str:
@@ -137,6 +151,8 @@ def _read(ctx: ToolContext, a: dict[str, Any]) -> str:
     if p.is_dir():
         raise ToolError(f"{a['path']}: is a directory; list it with bash (ls)")
     if p.suffix.lower() in DOC_SUFFIXES:
+        if "start_char" in a or "max_chars" in a:
+            raise ToolError("character windows read text files; use the document's stored full.md text")
         from .documents import read_document
         offset, limit = a.get("offset"), a.get("limit")
         return read_document(ctx, p, a.get("question") or None, a.get("pages") or None,
@@ -146,6 +162,10 @@ def _read(ctx: ToolContext, a: dict[str, Any]) -> str:
     if b"\0" in raw[:8192]:
         raise ToolError(f"{a['path']}: binary file ({len(raw)} bytes)")
     text = raw.decode("utf-8", "replace")
+    if "start_char" in a or "max_chars" in a:
+        if a.get("offset") or a.get("limit"):
+            raise ToolError("choose either line offset/limit or character start_char/max_chars")
+        return character_page(text, a.get("start_char", 0), a.get("max_chars"), ctx)
     if a.get("offset") or a.get("limit"):
         return page(text, a.get("offset"), a.get("limit"), ctx, "the file")
     if real_tokens(ctx, text) > limits(ctx).result:        # condition 1, a single big file: digest + pointer
@@ -245,13 +265,15 @@ CORE_TOOLS: dict[str, Tool] = {t.name: t for t in [
     Tool("read", "Read a file. Small text files and documents (Word, Excel, CSV, PowerPoint, e-mail .eml/.msg, "
          "HTML; converted to markdown) come back whole. PDFs, images and large files are stored instead, and you get "
          "a digest (summary, key insights, key values, metadata) with the path of the full text: read that path "
-         "with offset/limit for exact lines (pages always fit), search it with bash, or read a document with "
-         "question for "
-         "specific facts with their locations, or pages for PDF ranges. E-mail attachments are saved and listed; "
+         "with offset/limit for exact lines, or search it with bash. For long lines in stored text, use "
+         "start_char/max_chars for a bounded character window. Read a document with question for specific facts "
+         "with their locations, or pages for PDF ranges. E-mail attachments are saved and listed; "
          "read them the same way. Video is not supported.",
          params(["path"], path={"type": "string"},
                 offset={"type": "integer", "description": "1-based start line"},
                 limit={"type": "integer", "description": "max lines"},
+                start_char={"type": "integer", "description": "0-based character offset for text files"},
+                max_chars={"type": "integer", "description": "max characters; capped to available read capacity"},
                 question={"type": "string", "description": "for PDFs/images/large documents: what to extract"},
                 pages={"type": "string", "description": "PDF page ranges, e.g. '1-5,9'"}), _read),
     Tool("write", "Create or overwrite a file with the full content. Parent directories are created.",

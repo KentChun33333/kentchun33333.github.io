@@ -11,14 +11,15 @@
   };
   const showVerdict = (id, tone, text) => { const el = $(id); el.className = 'verdict ' + tone; el.textContent = text; };
   const renderKV = (id, rows) => { $(id).innerHTML = rows.map(([label, value]) => `<div><span>${escape(label)}</span><b>${escape(typeof value === 'number' ? fmt(value) : value)}</b></div>`).join(''); };
-  const budget = w => ({reserve:Math.min(16384,Math.floor(w/4)),keep:Math.min(20000,Math.floor(w/3)),margin:Math.max(256,Math.floor(w/20)),result:Math.min(3000,Math.floor(w/20)),turn:Math.min(12000,Math.floor(w/5)),digest:Math.min(1500,Math.floor(w/40))});
-  let W = 15536, O = 8192;
+  const budget = w => ({reserve:Math.min(16384,Math.floor(w/4)),keep:Math.min(20000,Math.floor(w/3)),margin:Math.max(256,Math.floor(w/20))});
+  const feedbackReserve = 512; // This teaching model uses density = 1.
+  let D = 1000000, W = 60000, O = 8192;
   const STEPS = [
-    ['準備上下文','Agent._call → _try_compact / room',['OpenAI 已重新偵測部署；Qwen 使用內建 60k 或明確覆寫值。本輪依能力快照計算 W。','計數由伺服器 usage 與經 density 校準的新訊息估算構成。','超過門檻先壓縮；回覆空間太少時嘗試強制壓縮。']],
+    ['準備上下文','Agent._call → _try_compact / room',['主代理依部署能力及設定的工作上限計算 W。','計數由伺服器 usage 與經 density 校準的新訊息估算構成。','超過門檻先存檔與壓縮，再生成當輪狀態提示。']],
     ['呼叫模型','LLMClient.chat',['送出系統提示、有效上下文與工具 schema；同一 client 的主代理、子代理及 Qwen 備援共享 TPM 估算與冷卻。','429 尊重 Retry-After 並有限等待；上下文超限仍由預算／壓縮處理。','串流 delta 是暫時顯示，不是已接受證據；Qwen 開始串流後不在傳輸層重播或切換。']],
     ['驗證後保存','Agent._call → Session.append',['先拒絕截斷、中斷串流與無效工具 JSON；結構化結果另檢查 JSON、schema 與 checks。','有限次乾淨重試不帶入被拒輸出；文件重試另開新 session，使用原始證據。','通過後才保存回覆、usage 與工具呼叫；無工具呼叫時回傳答案，否則繼續執行工具。']],
     ['執行工具','Agent._execute → _tool',['依序處理呼叫，先檢查 JSON、必要欄位與 schema 宣告的基本型別。','錯誤型別回傳可修正的工具錯誤，不讓 content=123 進入 write。','ctx.operation 指向目前工具；文件子代理與外存結果可回連到來源操作。']],
-    ['整理結果','bigcontext.route_turn → Agent._settle',['一般路徑先按 file / result / turn 三道規則決定外存內容。','完整結果或原檔參照留在工作區，主上下文接收摘要與再讀取路徑。','已完成的工具不因結果路由失敗而重新執行。']],
+    ['整理結果','bigcontext.route_turn → Agent._settle',['依剩餘空間調整單筆、整批和摘要預算。','外存結果保留快照及索引 ID，主上下文接收摘要與回讀路徑。','已完成的工具不因結果路由失敗而重新執行。']],
     ['配對與繼續','Agent._persist_result / _repair / _end',['每個已保存的工具呼叫補齊一個結果；部分已保存的批次不重複附加。','取消或例外時直接修復配對，可能保留尚未路由的原始結果，不假裝正常路由已完成。','追蹤紀錄收尾；一般工具回合繼續下一個 operation，或因上限／取消／錯誤停止。']]
   ];
   const stepButtons = $('#stepBtns');
@@ -30,33 +31,53 @@
   STEPS.forEach(([title],index) => { const button=document.createElement('button'); button.type='button'; button.className='btn'; button.textContent=`${index+1} ${title}`; button.onclick=()=>showStep(index); stepButtons.appendChild(button); });
   showStep(0);
 
+  function toolLimits(count) {
+    const {reserve, margin} = budget(W);
+    const available = Math.max(128, W - count - margin - feedbackReserve - reserve);
+    return {
+      result: Math.min(3000, Math.floor(D / 20), Math.max(64, Math.floor(available / 4))),
+      turn: Math.min(12000, Math.floor(D / 5), available),
+      digest: Math.min(1500, Math.floor(D / 40), Math.max(32, Math.floor(available / 8)))
+    };
+  }
+
+  const invalidBudget = () => ['#wInput', '#workingInput', '#outputInput']
+    .some(id => $(id).getAttribute('aria-invalid') === 'true');
+
   function renderBudget() {
-    const w=integer('#wInput',1024), o=integer('#outputInput',512);
-    if (w===null || o===null) {
+    const deployed=integer('#wInput',1024), working=integer('#workingInput',0), o=integer('#outputInput',512);
+    if (deployed===null || working===null || o===null) {
       $('#budgetKV').replaceChildren(); $('#budgetBar').replaceChildren(); $('#docKV').replaceChildren();
-      showVerdict('#budgetVerdict','bad','請輸入有效整數：W 為 1,024～2,000,000；O 為 512～2,000,000。這是教學元件的輸入範圍，不是伺服器能力範圍。');
+      showVerdict('#budgetVerdict','bad','請輸入欄位範圍內的整數。工作上限填 0 時會沿用部署上限。');
       showVerdict('#docVerdict','bad','請先修正上方視窗或輸出參數，文件示意暫停更新。');
-      $('#rBody').replaceChildren(); showVerdict('#rVerdict','bad','請先修正上方 W 或 O，避免以舊參數誤讀路由示意。'); return;
+      $('#rBody').replaceChildren(); showVerdict('#rVerdict','bad','請先修正上方預算欄位。'); return;
     }
-    W=w; O=o;
-    const range=$('#ctxRange'); range.max=Math.floor(W*1.2); const count=Number(range.value), b=budget(W), threshold=W-b.reserve, room=W-count-b.margin;
+    D=deployed; W=Math.min(D, working || D); O=o;
+    const range=$('#ctxRange'); range.max=Math.floor(W*1.2);
+    const count=Number(range.value), used=count+feedbackReserve, b=budget(W), threshold=W-b.reserve;
+    const room=W-used-b.margin, lim=toolLimits(count);
     $('#ctxVal').textContent=fmt(count);
-    $('#budgetBar').innerHTML=`<div style="width:${threshold/W*100}%;background:var(--blue)">${fmt(threshold)}</div><div style="width:${b.reserve/W*100}%;background:var(--red)">${fmt(b.reserve)}</div><span class="marker" style="left:calc(${Math.min(count/W*100,100)}% - 2px)"></span>`;
-    renderKV('#budgetKV',[['壓縮保留量 R',b.reserve],['超過此值先壓縮',threshold],['最近訊息保留目標 K',b.keep],['安全餘裕 M',b.margin],['壓縮前回覆空間 room',room],['壓縮前初步 max_tokens',Math.max(512,Math.min(O,room))],['單筆結果門檻',b.result],['本輪結果預算',b.turn]]);
-    if(count>threshold) showVerdict('#budgetVerdict','warn',`${fmt(count)} > ${fmt(threshold)}：先嘗試壓縮舊對話，保留最近約 ${fmt(b.keep)} tokens 與結構化摘要。上列是壓縮前數值，不能當成壓縮後請求的保證。`);
-    else if(room<1024) showVerdict('#budgetVerdict','bad',`room = ${fmt(room)}，低於 1,024：嘗試強制壓縮；不能宣稱目前輸入與回覆都放得下。`);
-    else showVerdict('#budgetVerdict','ok',`依此估算尚有空間：初步請求 max_tokens = ${fmt(Math.max(512,Math.min(O,room)))}。這是估算，不是伺服器已接受；實際仍以部署回覆與 usage 校準。`);
+    $('#budgetBar').innerHTML=`<div style="width:${threshold/W*100}%;background:var(--blue)">${fmt(threshold)}</div><div style="width:${b.reserve/W*100}%;background:var(--red)">${fmt(b.reserve)}</div><span class="marker" style="left:clamp(0px, calc(${Math.min(used/W*100,100)}% - 2px), calc(100% - 3px))"></span>`;
+    renderKV('#budgetKV',[['有效工作視窗 W',W],['超過此值先壓縮',threshold],['含狀態提示的用量估算',used],['壓縮前回覆空間',Math.max(0,room)],['最近訊息保留目標 K',b.keep],['壓縮保留量 R',b.reserve],['單筆結果門檻',lim.result],['本輪結果預算',lim.turn]]);
+    if(used>threshold) showVerdict('#budgetVerdict','warn',`估算用量 ${fmt(used)} 超過門檻 ${fmt(threshold)}。先存檔並嘗試壓縮舊對話，再重新計算工具與回覆預算。`);
+    else if(room<1024) showVerdict('#budgetVerdict','bad',`回覆空間低於 1,024 tokens，嘗試強制壓縮。`);
+    else showVerdict('#budgetVerdict','ok',`初步回覆上限為 ${fmt(Math.min(O,room))} tokens。送出前會依完整提示再檢查。`);
     renderRouter(); renderDocument();
   }
-  $('#wPreset').onchange=()=>{ $('#wInput').value=$('#wPreset').value; $('#ctxRange').value=Math.min(Number($('#ctxRange').value),Math.floor(Number($('#wPreset').value)*.6)); renderBudget(); };
-  $('#wInput').oninput=renderBudget; $('#outputInput').oninput=renderBudget; $('#ctxRange').oninput=renderBudget;
+  $('#wPreset').onchange=()=>{
+    const deployed=Number($('#wPreset').value), working=deployed===1000000 ? 60000 : deployed;
+    $('#wInput').value=deployed; $('#workingInput').value=working;
+    $('#ctxRange').max=Math.floor(working*1.2); $('#ctxRange').value=Math.floor(working*.4);
+    renderBudget();
+  };
+  ['#wInput', '#workingInput', '#outputInput', '#ctxRange'].forEach(id => { $(id).oninput=renderBudget; });
 
   const LABEL={text:'文字／程式檔',page:'分頁讀取',pdf:'PDF／影像',office:'Office／郵件／CSV',bash:'命令輸出'};
   const PRESETS={small:[['bash',300],['text',200],['bash',150]],mixed:[['text',23700],['pdf',5600],['office',900],['bash',1100],['text',400]],batch:[['page',2900],['page',2900],['page',2900],['page',2900],['page',2900]]};
   let rows=PRESETS.mixed.map(row=>[...row]);
   function renderRouter() {
-    if($('#wInput').getAttribute('aria-invalid')==='true' || $('#outputInput').getAttribute('aria-invalid')==='true') return;
-    const lim=budget(W), digestOf=t=>Math.min(lim.digest,Math.round(150+t*.03));
+    if(invalidBudget()) return;
+    const lim=toolLimits(Number($('#ctxRange').value)), digestOf=t=>Math.min(lim.digest,Math.round(150+t*.03));
     const out=rows.map(([type,requested])=>({type,requested,t:type==='page'?Math.min(requested,lim.result):requested,rule:'',by:'',ctx:type==='page'?Math.min(requested,lim.result):requested}));
     const store=(row,rule)=>Object.assign(row,{rule,by:['pdf','office'].includes(row.type)?'文件子代理':'規則摘要',ctx:digestOf(row.t)});
     out.forEach(row=>{if(row.type==='pdf'||(['text','office'].includes(row.type)&&row.t>lim.result))store(row,'file');});
@@ -73,12 +94,12 @@
   $('#rAdd').onclick=()=>{const value=integer('#rTok',1);if(value===null){showVerdict('#rVerdict','bad','新增結果須為 1～2,000,000 的整數 token 估算。');return;}rows.push([$('#rType').value,value]);renderRouter();};
 
   function renderDocument() {
-    if($('#wInput').getAttribute('aria-invalid')==='true'||$('#outputInput').getAttribute('aria-invalid')==='true')return;
+    if(invalidBudget()) return;
     const user=integer('#docUser',1), field=$('#docDensity'), density=Number(field.value);
     const valid=field.value.trim()!==''&&Number.isFinite(density)&&density>=1&&density<=3;
     field.setAttribute('aria-invalid',String(!valid));
     if(user===null||!valid){$('#docKV').replaceChildren();showVerdict('#docVerdict','bad','請輸入有效 user 整數及 1～3 的 density。');return;}
-    const b=budget(W), output=Math.min(O,Math.floor(W/2)), reserve=Math.max(Math.max(output,1024)+b.margin,b.reserve), input=W-reserve;
+    const b=budget(D), output=Math.min(O,Math.floor(D/2)), reserve=Math.max(Math.max(output,1024)+b.margin,b.reserve), input=D-reserve;
     const prompt=Math.ceil((100+user)*density), expansion=Math.ceil(user*density*1.25), transcribe=$('#docMode').value==='transcribe';
     renderKV('#docKV',[['規劃用輸入預算',input],['規劃用輸出保留量',output],['示意完整提示估算',prompt],['示意轉錄輸出需求',expansion]]);
     const problems=[];if(prompt>input)problems.push(`提示 ${fmt(prompt)} 超過輸入預算 ${fmt(input)}`);if(user>12000)problems.push('user 超過 12,000 的分塊策略上限');if(transcribe&&expansion>output)problems.push(`轉錄需求 ${fmt(expansion)} 超過輸出保留量 ${fmt(output)}`);

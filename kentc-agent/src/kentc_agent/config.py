@@ -20,7 +20,10 @@ ENV_PREFIX = "KENTC_AGENT_"
 @dataclass(frozen=True)
 class Settings:
     """Connection and agent policy; capabilities are inspected or explicitly verified for Qwen."""
-    provider: str = "openai"       # openai | qwen38; Qwen fails over only between its two backends
+    provider: str = "openai"       # openai | qwen38 | openrouter | ollama
+    ollama_context_window: int = 0  # optional verified num_ctx; otherwise inspect the running model via /api/ps
+    ollama_vision: bool = False     # explicitly enable when the selected Ollama model accepts images
+    context_budget_tokens: int = 0  # optional working-context ceiling; 0 uses the discovered deployment limit
     qwen_backend: str = "coordinator"  # preferred backend per request: coordinator | litellm
     qwen_context_window: int = 60_000  # user's reported deployment limit; override for different deployments
     qwen_vision: bool = False      # enable only when both Qwen deployments support image input
@@ -56,6 +59,12 @@ class Settings:
     doc_render: str = "auto"           # auto | always | never: render PDF pages as images
     show_reasoning: bool = True
     trace: bool = True                 # operation trace per session: .kentc-agent/traces/<session id>.jsonl
+
+    def __post_init__(self) -> None:
+        for name in ("context_budget_tokens", "ollama_context_window"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ValueError(f"{name} must be a non-negative integer")
 
     def with_overrides(self, **values: Any) -> Settings:
         return replace(self, **{k: v for k, v in values.items() if v is not None})

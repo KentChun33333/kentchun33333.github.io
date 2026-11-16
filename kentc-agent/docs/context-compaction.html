@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="KentC Agent 的上下文壓縮實作，涵蓋輸入路由、觸發條件、checkpoint 模板、失敗處理與原文回讀。">
+<title>KentC Agent｜上下文壓縮詳解</title>
+<link rel="stylesheet" href="asset/css/core.css">
+</head>
+<body class="compaction-doc">
+<a class="sr-only" href="#main">跳至主要內容</a>
+<header class="top"><div class="top-in">
+  <a class="brand" href="index.html#vertical">kentc_agent</a><span class="top-note">實作詳解</span>
+  <nav aria-label="章節導覽">
+    <a href="#inputs">輸入條件</a><a href="#triggers">觸發時機</a><a href="#pipeline">壓縮流程</a>
+    <a href="#checkpoint">摘要模板</a><a href="#recovery">重啟與回讀</a>
+  </nav>
+</div></header>
+<main id="main">
+<section class="hero" aria-labelledby="title">
+  <p class="eyebrow">codex/kentc-agent-new-mem · 依目前程式實作整理</p>
+  <h1 id="title">上下文壓縮詳解</h1>
+  <p class="lead">舊對話累積到門檻時，KentC 先存檔，再請模型寫一份供下輪接手的 checkpoint。過大的新輸入或工具結果會另外外存。每輪只把當下需要的訊息、摘要與索引提示送給模型。</p>
+  <div class="pills"><span class="pill">工作視窗可設 60,000 tokens</span><span class="pill">近期訊息原樣保留</span><span class="pill">原文可按需回讀</span></div>
+  <p class="scope"><a href="index.html#vertical">← 回核心文件</a> · <a href="token-budget.html">查看 Token 額度總覽與互動試算</a></p>
+</section>
+
+<section class="card" id="inputs" aria-labelledby="inputs-title">
+  <p class="eyebrow">01 · 進入上下文之前</p>
+  <h2 id="inputs-title">不同輸入會走哪一條路？</h2>
+  <div class="tablewrap"><table>
+    <caption>使用者輸入、文件、工具結果與累積歷史</caption>
+    <thead><tr><th scope="col">輸入情境</th><th scope="col">模型先收到什麼</th><th scope="col">完整資料在哪裡</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">一般 prompt 或對話</th><td>原文作為 user 訊息。第一則 prompt 也遵循同一規則，日後可能被摘要。</td><td>啟用 session 紀錄時寫入 JSONL。移出有效對話時也會寫入歷史存檔。</td></tr>
+      <tr><th scope="row">很長的貼文或文字附件</th><td>有 <code>read</code> 或 <code>bash</code> 的主代理會比較每個文字輸入部分的大小與門檻 <code>max(512, min(big_turn_tokens, floor(W / 5)))</code>。超過時改送首尾預覽和回讀路徑。CLI 文字附件與 prompt 組合後再做這個判斷。</td><td>全文寫入 <code>input</code> 存檔，索引來源標為 user 訊息 ID。缺少回讀工具時，程式直接保留輸入，交由請求預檢判斷能否送出。</td></tr>
+      <tr><th scope="row">明確固定的要求</th><td><code>--requirement</code> 或 <code>/require</code> 固定的文字，每輪原樣送出，佔用上下文。可用 <code>/requirements</code> 檢視並用 <code>/unrequire</code> 移除。</td><td>與對話分開記錄的 session 事件。一般聊天可以直接下 prompt，只有希望某條要求始終原樣帶入時才需要固定。</td></tr>
+      <tr><th scope="row">讀取一般文字檔</th><td>小檔回傳文字。指定 <code>offset/limit</code> 或 <code>start_char/max_chars</code> 時只回傳限量片段。整檔結果超過單筆預算時，回傳規則摘要與回讀位置。</td><td>原檔仍在。大型結果另保存讀取當下的 <code>full.md</code> 和 <code>digest.json</code>，索引列出快照。</td></tr>
+      <tr><th scope="row">PDF、圖片、Office 等文件</th><td>PDF、圖片走解析路徑，支援提問或轉錄。Office 等文件先轉文字，小結果直接返回，大結果可交給解析子代理整理。</td><td>文件原檔與解析輸出分開。可用 <code>question</code> 查具體事實、用 PDF <code>pages</code> 限定頁面，或在轉換後的 <code>full.md</code> 按行回讀。</td></tr>
+      <tr><th scope="row">大量命令、搜尋或錯誤輸出</th><td>單筆超限先外存。整批仍超限時，優先外存尚可縮小的最大筆結果。大型錯誤也走外存，保留錯誤標示。</td><td>結果檔和索引仍可回讀。一般結果使用規則摘要。批次超限本身不會啟動通用子代理，有文件來源的候選可走文件解析。</td></tr>
+      <tr><th scope="row">模型寫入或編輯長文件</th><td><code>write</code> 或 <code>edit</code> 仍須先在單輪輸出額度內產生完整 JSON。執行成功後，超過 <code>max(512, 單筆結果預算)</code> 的大型參數會以歷史參照取代，保留目標路徑、呼叫 ID 和成功回傳。寫檔失敗時保留原參數。</td><td>原始參數寫入 <code>arguments</code> 存檔，可從索引找回。回讀目前的正文則使用目標檔。重開 session 時會恢復捷徑。</td></tr>
+      <tr><th scope="row">對話歷史累積</th><td>較舊的訊息由 checkpoint 接手，近期訊息留在有效對話中。</td><td><code>history</code> 存檔保存這次移出的訊息與上一份摘要。若訊息本身已是外存指標，可再沿索引找原文。</td></tr>
+    </tbody>
+  </table></div>
+  <p class="source">實作對照 <a href="../src/kentc_agent/agent/loop.py">輸入準備</a><a href="../src/kentc_agent/adapters/tools.py">分頁讀檔</a><a href="../src/kentc_agent/adapters/documents/policy.py">文件策略</a><a href="../src/kentc_agent/context/bigcontext.py">工具結果路由</a><a href="../src/kentc_agent/agent/executor.py">寫入參數存檔</a></p>
+</section>
+
+<section class="card" id="triggers" aria-labelledby="triggers-title">
+  <p class="eyebrow">02 · 每次主模型請求前</p>
+  <h2 id="triggers-title">何時觸發歷史壓縮？</h2>
+  <p>工作視窗 <code>W</code> 取部署上限和已啟用的工作上限中的較小值。<code>R</code> 是壓縮保留量，<code>K</code> 是保留近期訊息的目標。以下採程式預設的保留量和輸出設定，並以 <code>density = 1</code> 示範。</p>
+  <div class="kv">
+    <div><span>示例工作視窗 W</span><b>60,000</b></div>
+    <div><span>壓縮保留量 R</span><b>15,000</b></div>
+    <div><span>一般壓縮門檻 W − R</span><b>45,000</b></div>
+    <div><span>近期保留目標 K</span><b>20,000</b></div>
+  </div>
+  <div class="tablewrap"><table>
+    <caption>依照當下的預算或錯誤選擇處理</caption>
+    <thead><tr><th scope="col">觸發情境</th><th scope="col">判斷與動作</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">正常累積</th><td><code>T + F &gt; W − R</code> 就嘗試壓縮。以本例而言，<code>T = 44,500</code> 加上狀態提示的預留量 <code>F = 512</code> 已達 45,012，會先嘗試壓縮。</td></tr>
+      <tr><th scope="row">回覆空間偏小</th><td>若 <code>room = W − T − M − F</code> 小於 1,024，嘗試強制壓縮。<code>M = max(256, floor(W / 20))</code> 是安全餘裕。</td></tr>
+      <tr><th scope="row">組好完整請求後仍太大</th><td>用系統提示、工具 schema、有效訊息、當輪狀態與可能的重試指示再估算。扣除安全餘裕後低於 512 tokens 時，這道預檢額外嘗試一次強制壓縮，仍不足則在本機報超限。</td></tr>
+      <tr><th scope="row">伺服器回報超限</th><td>若只是輸出額度太大且仍有足夠空間，先縮減 <code>max_tokens</code> 重試。若輸入本身過長或再次超限，強制壓縮。第三次超限時回報錯誤。</td></tr>
+      <tr><th scope="row">手動操作</th><td>CLI <code>/compact [focus]</code> 強制嘗試壓縮。可加焦點提示，指定這次摘要應特別保留的資訊。若沒有合法切點，可能沒有新的 checkpoint。</td></tr>
+    </tbody>
+  </table></div>
+  <details><summary>估算 T 與 density 的細節</summary>
+    <p><code>T = C + ceil(E × density)</code>。<code>C</code> 是最近有 usage 的有效回覆所回報的輸入與輸出總量。<code>E</code> 估算其後的訊息。若沒有可用 usage，例如剛壓縮完，則一起估算固定提示、工具 schema 和全部有效訊息。</p>
+    <p>文字從每四字元約一個 token 起算，還會估入工具參數、推理內容與圖片配額。當 <code>E ≥ 300</code> 且伺服器輸入量 <code>P &gt; C</code> 時，觀測值是 <code>min(3, (P − C) / E)</code>。較高的密度立即採用，較低的值用 <code>max(1, 0.8 × 舊值 + 0.2 × 觀測值)</code> 平滑更新。</p>
+    <p>主代理的 <code>F = ceil(512 × density)</code>。保留量 <code>R = min(reserve_tokens, floor(W / 4))</code>，近期保留目標 <code>K = min(keep_recent_tokens, floor(W / 3))</code>。</p>
+  </details>
+  <p class="source">實作對照 <a href="../src/kentc_agent/agent/budget.py">預算及觸發</a><a href="../src/kentc_agent/agent/loop.py">預檢及重試</a><a href="../src/kentc_agent/adapters/session.py">token 估算</a></p>
+</section>
+
+<section class="card" id="pipeline" aria-labelledby="pipeline-title">
+  <p class="eyebrow">03 · 歷史如何移出有效對話</p>
+  <h2 id="pipeline-title">找切點 → 存檔 → 寫摘要 → 重建</h2>
+  <ol class="flow">
+    <li><b>1．保留近期訊息</b><span>從尾端往回累加估算，目標約為 K。切點落在 user 或 assistant 訊息的開頭，維持工具呼叫與回傳的配對。</span></li>
+    <li><b>2．保存將移出的訊息</b><span>先存上一份 checkpoint 與切點前的訊息，保留現有的參數或外存路徑。索引標明存檔涵蓋到哪個訊息 ID。</span></li>
+    <li class="special"><b>3．生成或更新 checkpoint</b><span>第一次從舊訊息寫摘要。已有摘要時，把上一份摘要與本次移出的訊息一起交給模型。</span></li>
+    <li><b>4．確認摘要可用後提交</b><span>寫入 compaction 事件，記錄摘要與第一個保留訊息的 ID。重新載入時由 JSONL 重建有效對話。</span></li>
+  </ol>
+  <p>強制模式在一般切點找不到時，可改在最後一個 user 或 assistant 訊息前切分。如果保留內容仍超過強制壓縮的預算，而且最新訊息的角色不是 user，程式也可將整段有效對話移出，只留下新的 checkpoint。</p>
+  <div class="callout warn">
+    <strong>摘要失敗或空間仍不足</strong>
+    <p>摘要回傳空白或因長度截斷時，同一批資料以 <code>effort=none</code> 再試一次。仍失敗就保留原本的有效對話與摘要。自動流程遇到摘要錯誤或上下文超限時會記錄狀態。強制騰空時，可把過大的舊工具結果另存，再以回讀指標取代 live 內容。這項替換寫入 session log，重開後也會套用。</p>
+  </div>
+  <p class="source">實作對照 <a href="../src/kentc_agent/context/compaction.py">切點與摘要呼叫</a><a href="../src/kentc_agent/agent/budget.py">歷史存檔與緊急外存</a><a href="../src/kentc_agent/adapters/session.py">事件與重建</a></p>
+</section>
+
+<section class="card" id="checkpoint" aria-labelledby="checkpoint-title">
+  <p class="eyebrow">04 · 模型怎麼寫 checkpoint</p>
+  <h2 id="checkpoint-title">摘要使用固定的 Markdown 章節</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3>模型讀到的資料</h3>
+      <p><code>&lt;conversation&gt;</code> 包住本次移出的舊訊息，標記使用者、助理、工具呼叫與工具結果。單筆工具結果最多提供開頭 2,000 字元，再標記省略量。圖片部分以 <code>[image]</code> 表示。摘要輸入不包含助理的推理欄位。</p>
+      <p>有上一份摘要時另加 <code>&lt;previous-summary&gt;</code>。如果序列化後仍太長，就依預算切成多塊，優先找段落邊界。每塊用前一塊生成的摘要繼續更新。</p>
+    </div>
+    <div class="box">
+      <h3>模型收到的寫作指示</h3>
+      <p>系統提示要求模型只寫交接摘要。已有 checkpoint 時，保留仍相關的內容，補上進度與新發現，有完成檢查才移入 Done，並更新下一步。手動壓縮指定的 <code>focus</code> 也會加進提示。</p>
+      <p>輸出上限是 <code>min(floor(0.8 × R), max_output_tokens)</code>。另外以提示要求字數低於 <code>floor(3 × clamp(floor(W / 16), 300, 4000) / 4)</code>。本頁的 60,000 視窗示例是 8,192 輸出 tokens 和 2,812 words。</p>
+    </div>
+  </div>
+  <div class="tablewrap"><table>
+    <caption>程式要求的八個章節</caption>
+    <thead><tr><th scope="col">章節</th><th scope="col">寫入內容</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Goal</th><td>使用者想達成的任務。若同一 session 含多個任務，可以分項。</td></tr>
+      <tr><th scope="row">Constraints &amp; Preferences</th><td>使用者提出的要求與偏好。盡量保存會影響結果的原句。</td></tr>
+      <tr><th scope="row">Completion Requirements</th><td>要稱為完成之前，必須滿足的條件和檢查。</td></tr>
+      <tr><th scope="row">Progress</th><td>分成 Done、In Progress、Blocked。已完成事項附上確認依據。</td></tr>
+      <tr><th scope="row">Evidence</th><td>觀察結果、驗證狀態、精確檔案與範圍，或工作區索引 ID。</td></tr>
+      <tr><th scope="row">Decisions &amp; Exploration</th><td>決策與短理由、應避開的失敗嘗試，以及標明仍待驗證的假設。</td></tr>
+      <tr><th scope="row">Next Steps</th><td>下一輪應先做哪些動作。</td></tr>
+      <tr><th scope="row">Critical Context</th><td>接手需要的路徑、函式名、識別碼、數值與錯誤訊息。</td></tr>
+    </tbody>
+  </table></div>
+  <details><summary>展開一份示意 checkpoint</summary>
+<pre class="tree">## Goal
+交付交易匯入核對報告。
+
+## Constraints &amp; Preferences
+- 每筆異常須附來源檔與行號。
+
+## Completion Requirements
+- 核對全部紀錄，逐筆查明無法匯入的原因。
+
+## Progress
+### Done
+- [x] 已確認匯入日誌中第一筆失敗及其來源。
+### In Progress
+- [ ] 查剩餘失敗紀錄，整理核對報告。
+### Blocked
+- 無。
+
+## Evidence
+- import.log:146 顯示 INVALID_DATE。已核對原文。
+
+## Decisions &amp; Exploration
+- 用 rg 搜尋錯誤碼並回讀命中區段，因為日誌有許多重複行。
+- 待驗證假設：其他失敗也可能和日期格式有關。
+
+## Next Steps
+1. 搜尋其他 INVALID_DATE，再檢查是否有不同錯誤碼。
+
+## Critical Context
+- 匯入結果原檔 import.log，報告預定輸出 audit.md。</pre>
+  </details>
+  <p class="callout">章節與字數是寫作提示。程式接受摘要時會檢查是否有內容、是否因長度截斷。原文、證據與完成條件仍以存檔及實際檢查為準。</p>
+  <p class="source">實作對照 <a href="../src/kentc_agent/context/compaction.py">SYSTEM、FORMAT、NEW_PROMPT、UPDATE_PROMPT 與 summarize()</a></p>
+</section>
+
+<section class="card" id="recovery" aria-labelledby="recovery-title">
+  <p class="eyebrow">05 · 壓縮後如何接手</p>
+  <h2 id="recovery-title">模型看見摘要，精確資料從磁碟取回</h2>
+  <p>下一輪請求依序帶入系統提示、當輪狀態提示、最新 checkpoint、有效的固定要求與近期對話。工具定義也會佔用預算。狀態提示顯示索引路徑與最近三筆記錄，完整索引按需讀取。</p>
+  <div class="tablewrap"><table>
+    <caption>重開 session 時從哪裡找回資料</caption>
+    <thead><tr><th scope="col">需要的資料</th><th scope="col">回讀位置</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">使用者原始 prompt</th><td>短文字可從 JSONL 或歷史存檔找回。超長文字查 <code>input</code> 索引。現行實作會把早期 prompt 納入一般壓縮，沒有自動把第一則 prompt 原樣注入每一輪。</td></tr>
+      <tr><th scope="row">完整工具結果</th><td>透過索引 ID 或來源找到 <code>full.md</code> 或緊急外存結果。用行範圍或字元範圍回讀。</td></tr>
+      <tr><th scope="row">進度和完成條件</th><td>CLI 聊天可用 <code>task_state</code> 的 <code>show</code> 取回已保存的里程碑。Workflow 從該次執行的 <code>state.json</code> 恢復狀態，仍由設定的檢查判定完成。</td></tr>
+      <tr><th scope="row">已記錄的證據</th><td>沿里程碑的證據 ID 到索引找引文快照及來源範圍。程式確認引文曾在指定位置，證據是否足以滿足完成條件仍由 agent 判斷。</td></tr>
+    </tbody>
+  </table></div>
+  <p class="source">實作對照 <a href="../src/kentc_agent/context/memory.py">工作區索引</a><a href="../src/kentc_agent/context/task_state.py">里程碑與證據</a><a href="../src/kentc_agent/workflow.py">Workflow 狀態</a></p>
+</section>
+</main>
+<footer>KentC Agent · 上下文壓縮詳解 · 繁體中文</footer>
+</body>
+</html>

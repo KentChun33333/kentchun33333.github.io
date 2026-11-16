@@ -11,7 +11,7 @@ Sizes are chars/4 × the density learned from the server's own token counts (`To
 checks follow the real tokenizer of the model behind the server.
 
 A routed result keeps its full text in .kentc-agent/operations/<session id>/<operation id>/<tool call id>/:
-    full.md       the full text (not written when it is already a workspace file, e.g. a text file that was read)
+    full.md       a complete snapshot, including when the source is already a workspace file
     digest.json   {summary, key_insights, key_values: [{field, value, location}], metadata, preview?}
 and the context gets the rendered digest (at most `big_digest_tokens`), with where the full text is and how to
 read more of it: `read` with offset/limit (pages that always fit), bash (rg / grep), or for a document `read` with a
@@ -23,6 +23,7 @@ everything else (code, logs, command output, listings, matches) -> the rules bel
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import re
@@ -33,6 +34,7 @@ from typing import TYPE_CHECKING, Any
 
 from ..config import STATE_DIR
 from ..adapters.session import CHARS_PER_TOKEN, new_session_id
+from .memory import WorkspaceMemory, atomic_text
 
 if TYPE_CHECKING:
     from ..adapters.tools import ToolContext
@@ -84,7 +86,10 @@ def limits(ctx: ToolContext) -> Limits:
     """The big_* settings, scaled down for a small context window, where a 12k turn budget could not fit: at most
     1/20 (result), 1/5 (turn) and 1/40 (digest) of the window. At 65,536 tokens the settings apply unchanged."""
     s, w = ctx.settings, ctx.llm.info().context_window
-    return Limits(min(s.big_result_tokens, w // 20), min(s.big_turn_tokens, w // 5), min(s.big_digest_tokens, w // 40))
+    available = w if ctx.available_context_tokens is None else max(128, ctx.available_context_tokens)
+    return Limits(min(s.big_result_tokens, w // 20, max(64, available // 4)),
+                  min(s.big_turn_tokens, w // 5, available),
+                  min(s.big_digest_tokens, w // 40, max(32, available // 8)))
 
 
 
@@ -107,7 +112,10 @@ def folder(ctx: ToolContext) -> Path:
     base = ctx.workspace / STATE_DIR / "operations"
     if op is None:                              # called outside an agent turn (e.g. a host pre-reading a document)
         return base / "direct" / new_session_id()
-    call = re.sub(r"[^A-Za-z0-9._-]+", "_", op.tool_call_id or "call")[:60]
+    identifier = op.tool_call_id or "call"
+    call = re.sub(r"[^A-Za-z0-9._-]+", "_", identifier)[:60]
+    if call != identifier:
+        call = call[:40] + "-" + hashlib.sha256(identifier.encode()).hexdigest()[:16]
     return base / op.session_id / str(op.operation_id) / call
 
 
@@ -118,33 +126,45 @@ def _rel(ctx: ToolContext, p: Path) -> str:
 def store(ctx: ToolContext, d: Path, *, what: str, full: str | None, source: str | None, digest: dict[str, Any],
           by: str, size: int, also: str = "") -> str:
     """Write the folder `d`, mark the call as routed, and return what goes to the context.
-    `what`: the call, for the header ('read(path=a.log)'); `full`: the full text to keep (None when `source`, a
-    workspace file, already holds it); `size`: tokens of the full result; `also`: another way to read more."""
+    `what`: the call, for the header ('read(path=a.log)'); `full`: the text to snapshot, or None to read `source`;
+    `size`: tokens of the full result; `also`: another way to read more."""
     d.mkdir(parents=True, exist_ok=True)
-    if full is not None:
-        (d / "full.md").write_text(full, encoding="utf-8")
-    full_ref = _rel(ctx, d / "full.md") if full is not None else (source or "")
-    digest = {**digest, "metadata": {**digest.get("metadata", {}), "full_text": full_ref, "digest_by": by}}
-    (d / "digest.json").write_text(json.dumps(digest, ensure_ascii=False, indent=1), encoding="utf-8")
+    if full is None:
+        full = (ctx.workspace / source).read_text(encoding="utf-8", errors="replace") if source else ""
+    atomic_text(d / "full.md", full)
+    full_ref = _rel(ctx, d / "full.md")
+    digest = {**digest, "metadata": {**digest.get("metadata", {}), "full_text": full_ref,
+                                    "source_file": source, "digest_by": by}}
+    atomic_text(d / "digest.json", json.dumps(digest, ensure_ascii=False, indent=1))
+    session_id = ctx.operation.session_id if ctx.operation else "direct"
+    memory = WorkspaceMemory(ctx.workspace, session_id)
+    entry = memory.register(kind="result", key=full_ref, path=full_ref, tokens=size,
+                            details=_rel(ctx, d / "digest.json"), source=source or what)
+    digest["metadata"]["memory_id"] = entry["id"]
+    atomic_text(d / "digest.json", json.dumps(digest, ensure_ascii=False, indent=1))
     if ctx.operation is not None:
-        ctx.operation.routed = {"by": by, "tokens": size, "folder": _rel(ctx, d)}
+        ctx.operation.routed = {"by": by, "tokens": size, "folder": _rel(ctx, d), "memory_id": entry["id"],
+                                "full_text": full_ref}
     how = f"read {full_ref} with offset/limit (pages of up to {limits(ctx).result:,} tokens), or search it with " \
         "bash (rg -n / grep -n), for the parts you need." + (f" {also}" if also else "")
+    how += f" Index: {memory.relative(memory.index)}; entry {entry['id']}."
     return render(ctx, digest, what=what, size=size, full_ref=full_ref, folder=_rel(ctx, d), how=how)
 
 
 def render(ctx: ToolContext, digest: dict[str, Any], *, what: str, size: int, full_ref: str, folder: str,
            how: str) -> str:
     """The digest as context text, within the digest limit: long lists are cut before anything else."""
-    budget = limits(ctx).digest * CHARS_PER_TOKEN
-    meta = {k: v for k, v in digest.get("metadata", {}).items() if k not in ("full_text", "digest_by") and v}
+    budget = max(1, int(limits(ctx).digest * CHARS_PER_TOKEN / max(1.0, ctx.density)))
+    meta = {k: v for k, v in digest.get("metadata", {}).items()
+            if k not in ("full_text", "source_file", "digest_by", "memory_id") and v}
     insights = [str(x) for x in digest.get("key_insights") or []]
     values = [v for v in digest.get("key_values") or [] if isinstance(v, dict)]
     preview = [str(x) for x in digest.get("preview") or []]
 
     def build(n_ins: int, n_val: int, n_pre: int) -> str:
-        header = (f"[Big result: {what} came to ~{size:,} tokens, so it was stored instead of shown. Full text: "
-                  f"{full_ref}. Digest by {digest['metadata']['digest_by']}: {folder}/digest.json]")
+        header = (f"[Big result: {what}; index entry {digest['metadata'].get('memory_id', '-')}; "
+                  f"~{size:,} tokens stored. Full text: {digest['metadata'].get('source_file') or full_ref}. "
+                  f"Snapshot: {full_ref}. Digest by {digest['metadata']['digest_by']}: {folder}/digest.json]")
         out = [header, f"Summary: {digest.get('summary') or '-'}"]
         if insights[:n_ins]:
             out += ["Key insights:"] + [f"- {x}" for x in insights[:n_ins]]
@@ -170,7 +190,9 @@ def render(ctx: ToolContext, digest: dict[str, Any], *, what: str, size: int, fu
             n_ins -= 1
         text = build(n_ins, n_val, n_pre)
     note = "\n[digest cut to its limit]"
-    return text if len(text) <= budget else text[:budget - len(note)] + note
+    if len(text) <= budget:
+        return text
+    return text[:budget] if budget <= len(note) else text[:budget - len(note)] + note
 
 
 # ---------------------------------------------------------------------- rules digest (no model)
@@ -224,8 +246,8 @@ def rule_digest(text: str, name: str, args: Any) -> dict[str, Any]:
 
 
 def route_text(ctx: ToolContext, text: str, name: str, args: Any, source: str | None = None) -> str:
-    """Rules route for a text result; `source`: the workspace file holding the full text (no copy is made)."""
-    return store(ctx, folder(ctx), what=call_label(name, args), full=None if source else text, source=source,
+    """Snapshot the actual returned text; `source` identifies its original workspace file."""
+    return store(ctx, folder(ctx), what=call_label(name, args), full=text, source=source,
                  digest=rule_digest(text, name, args), by="rules", size=real_tokens(ctx, text))
 
 
@@ -240,12 +262,12 @@ def route_turn(ctx: ToolContext, results: list[CallResult], *, model: bool = Tru
         if r.routed:
             r.routed.setdefault("rule", "file")
             done.add(i)
-        elif not r.error and real_tokens(ctx, r.text) > lim.result:
+        elif real_tokens(ctx, r.text) > lim.result:
             _route(ctx, r, model, "result")
             done.add(i)
     while sum(real_tokens(ctx, r.text) for r in results) > lim.turn:
         movable = [i for i, r in enumerate(results)
-                   if i not in done and not r.error and real_tokens(ctx, r.text) > lim.digest]
+                   if i not in done and real_tokens(ctx, r.text) > lim.digest]
         if not movable:                         # nothing left that a digest would make smaller
             break
         i = max(movable, key=lambda i: real_tokens(ctx, results[i].text))
@@ -261,7 +283,7 @@ def _route(ctx: ToolContext, r: CallResult, model: bool, rule: str) -> None:
     ctx.operation = r.ref                       # the folder and any sub-agent belong to this tool call
     try:
         routed = False
-        if model and r.ref is not None and r.ref.document:
+        if model and not r.error and r.ref is not None and r.ref.document:
             from ..adapters.documents import route_document
             try:
                 r.text = route_document(ctx, ctx.workspace / r.ref.document)
@@ -269,10 +291,13 @@ def _route(ctx: ToolContext, r: CallResult, model: bool, rule: str) -> None:
             except (ToolError, LLMError, OSError, ValueError) as e:
                 ctx.events.status("document", f"{r.ref.document}: digest failed ({e}); using the rules digest")
         if not routed:
-            source = r.ref.source if r.ref is not None and r.ref.source else None
-            full = (ctx.workspace / source).read_text(encoding="utf-8", errors="replace") if source else r.text
+            source = r.ref.source if not r.error and r.ref is not None and r.ref.source else None
+            full = (ctx.workspace / source).read_text(encoding="utf-8", errors="replace") \
+                if source and r.name == "bash" else r.text
             r.text = route_text(ctx, full, r.name, r.args, source)
         if r.routed is not None:
             r.routed["rule"] = rule
+        if r.error:
+            r.text = "Error (full details stored in workspace):\n" + r.text
     finally:
         ctx.operation = prev

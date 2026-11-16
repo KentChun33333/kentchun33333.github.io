@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import json
+import math
+
 from ..adapters.llm import ContextOverflow
-from ..context.compaction import CompactionError, find_cut, shrink_tool_results, summarize
+from ..adapters.session import estimate_tokens
+from ..context.compaction import CompactionError, find_cut, summarize
 
 
 class BudgetMixin:
@@ -11,7 +15,9 @@ class BudgetMixin:
 
     @property
     def window(self) -> int:
-        return self.ctx.llm.info().context_window
+        deployed = self.ctx.llm.info().context_window
+        budget = self.ctx.settings.context_budget_tokens
+        return min(deployed, budget) if self.context_feedback and budget > 0 else deployed
 
     @property
     def reserve(self) -> int:
@@ -40,26 +46,58 @@ class BudgetMixin:
     def room(self) -> int:
         """Tokens left for the reply. The safety margin covers the estimate of the newest messages (chars/4 runs
         low for paths, JSON and code), so prompt + max_tokens stays under the server's limit."""
-        return self.window - self.context_tokens() - max(256, self.window // 20)
+        return self.window - self.context_tokens() - max(256, self.window // 20) - self.feedback_reserve
+
+    @property
+    def feedback_reserve(self) -> int:
+        return math.ceil(512 * self.density) if self.context_feedback else 0
+
+    def _spill_tool_results(self, max_tokens_each: int) -> int:
+        """Archive oversized live results before replacing them with bounded retrieval pointers."""
+        replaced = 0
+        for i, message in enumerate(self.session.messages):
+            text = message.get("content")
+            if message["role"] != "tool" or not isinstance(text, str):
+                continue
+            size = math.ceil(estimate_tokens(message) * self.density)
+            if size <= max_tokens_each:
+                continue
+            entry = self.memory.archive(text, kind="result", tokens=size,
+                                        source=f"message {self.session.ids[i]} / {message['tool_call_id']}")
+            pointer = (f"[Tool result stored in workspace: {entry['path']}; ~{size} tokens. "
+                       "Read with offset/limit or search the file for exact details.]")
+            if estimate_tokens({"content": pointer}) < estimate_tokens(message):
+                self.session.replace_content(i, pointer)
+                replaced += 1
+        return replaced
 
     def compact(self, focus: str | None = None, *, force: bool = False) -> bool:
         """Summarize old history if the context is over budget (or always with `force`). -> compacted?"""
         before = self.context_tokens()
-        if not force and before <= self.window - self.reserve:
+        if not force and before + self.feedback_reserve <= self.window - self.reserve:
             return False
         s = self.ctx.settings
         cut = find_cut(self.session.messages, int(self.keep_recent / self.density))
         if cut == 0 and force and len(self.session.messages) > 1:
             cut = max(i for i, m in enumerate(self.session.messages) if m["role"] in ("user", "assistant"))
+        kept_tokens = sum(estimate_tokens(m) for m in self.session.messages[cut:]) * self.density
+        if force and self.session.messages and self.session.messages[-1]["role"] != "user" and \
+                kept_tokens + self.fixed_tokens + self.feedback_reserve + self.reserve >= self.window:
+            cut = len(self.session.messages)  # a completed tool batch can be archived as one unit
         if cut > 0:
             self.ctx.events.status(self.name, f"compacting context ({before} tokens)...")
+            self.memory.archive(json.dumps({"previous_summary": self.session.summary,
+                                            "messages": self.session.messages[:cut]},
+                                           ensure_ascii=False, indent=1),
+                                kind="history", tokens=before,
+                                source=f"messages through {self.session.ids[cut - 1]}")
             summary = summarize(self.ctx.llm, self.session.messages[:cut], self.session.summary, window=self.window,
                                 reserve_tokens=self.reserve, max_output_tokens=s.max_output_tokens,
                                 effort=s.sub_effort, focus=focus, max_words=self.summary_words,
                                 density=self.density)
             self.session.compact(summary, cut, before)
-        if self.context_tokens() > self.window - self.reserve:
-            shrink_tool_results(self.session.messages, self.keep_recent // 4)
+        if self.context_tokens() + self.feedback_reserve > self.window - self.reserve:
+            self._spill_tool_results(max(200, self.keep_recent // 4))
         after = self.context_tokens()
         self.ctx.events.compaction(self.name, before, after)
         if self._op is not None:
@@ -77,6 +115,6 @@ class BudgetMixin:
             if self._op is not None:
                 self._op.input["compactions"].append({"error": str(e)})
         if force:
-            n = shrink_tool_results(self.session.messages, max(200, self.keep_recent // 4))
+            n = self._spill_tool_results(max(200, self.keep_recent // 4))
             if n:
-                self.ctx.events.status(self.name, f"shortened {n} older tool result(s) instead")
+                self.ctx.events.status(self.name, f"archived {n} older tool result(s) in the workspace")

@@ -25,12 +25,17 @@ from kentc_agent.adapters.web_research import web_search_tool
 from kentc_agent.agent import Aborted, Agent, build_tools, new_session_path
 from kentc_agent.config import STATE_DIR, load_settings
 from kentc_agent.context.compaction import CompactionError
+from kentc_agent.context.memory import WorkspaceMemory
+from kentc_agent.context.task_state import task_state_tool
 from kentc_agent.ui import ConsoleUI, fmt_tokens
 from kentc_agent.workflow import Runner, WorkflowError, find_workflow, load, resolve_inputs, workflow_dirs
 
 CHAT_HELP = """Commands:
   /attach <file> [question]  add a file to your next message (PDFs/images/large documents via the parsing sub-agent)
   /compact [focus]           summarize older history now
+  /require <text>            pin an exact user requirement for this session
+  /requirements             list the active pins
+  /unrequire <number>        remove a pin from the active context
   /tokens                    context usage
   /new                       start a new session
   /tools                     list tools
@@ -47,7 +52,12 @@ def parser() -> argparse.ArgumentParser:
     ap.add_argument("-w", "--workspace", default=".", help="workspace folder (default: current directory)")
 
     g = ap.add_argument_group("model")
-    g.add_argument("--provider", choices=["openai", "qwen38"], help="LLM transport (default: openai)")
+    g.add_argument("--provider", choices=["openai", "qwen38", "openrouter", "ollama"],
+                   help="LLM transport (default: openai)")
+    g.add_argument("--ollama-context-window", type=int, help="verified Ollama num_ctx when the model is not loaded")
+    g.add_argument("--ollama-vision", action=argparse.BooleanOptionalAction, default=None,
+                   help="enable images for an Ollama model with verified vision support")
+    g.add_argument("--context-budget-tokens", type=int, help="working context ceiling, capped by deployed limit")
     g.add_argument("--qwen-backend", choices=["coordinator", "litellm"],
                    help="preferred Qwen backend (default: coordinator; automatic fallback before streamed output)")
     g.add_argument("--qwen-context-window", type=int, help="verified context limit safe for both Qwen backends")
@@ -74,6 +84,8 @@ def parser() -> argparse.ArgumentParser:
     g.add_argument("-c", "--continue", dest="cont", action="store_true", help="continue the latest session")
     g.add_argument("--session", help="session file to continue or create")
     g.add_argument("--no-session", action="store_true", help="do not save the conversation")
+    g.add_argument("--requirement", action="append", default=[], metavar="TEXT",
+                   help="pin an exact chat requirement across compaction and resume; repeatable")
     g.add_argument("-a", "--attach", action="append", default=[], help="file to add to the first message")
     g.add_argument("-s", "--instructions", help="extra system instructions (text or @file)")
 
@@ -113,6 +125,9 @@ def make_context(args: argparse.Namespace, ui: ConsoleUI) -> ToolContext:
     ws = workspace(args)
     settings = load_settings(ws, {"base_url": args.base_url, "model": args.model,
                                   "provider": args.provider, "qwen_backend": args.qwen_backend,
+                                  "ollama_context_window": args.ollama_context_window,
+                                  "ollama_vision": args.ollama_vision,
+                                  "context_budget_tokens": args.context_budget_tokens,
                                   "qwen_context_window": args.qwen_context_window, "qwen_vision": args.qwen_vision,
                                   "verify_tls": args.verify_tls, "trust_env": args.trust_env,
                                   "reasoning_effort": args.effort,
@@ -138,14 +153,14 @@ def open_session(args: argparse.Namespace, ws: Path) -> Session:
 
 
 def make_agent(args: argparse.Namespace, ctx: ToolContext, session: Session) -> Agent:
-    """The chat / one-shot agent: the core tools plus screened web_search, since a human is in the loop here.
-    Workflow steps and studio agents get only the core tools (web through `web:` steps)."""
+    """Build the chat agent with session-scoped task state and screened web search."""
     instructions = args.instructions or ""
     if instructions.startswith("@"):
         instructions = resolve(ctx, instructions[1:]).read_text(encoding="utf-8")
     tools = [t.strip() for t in args.tools.split(",") if t.strip()] if args.tools else None
-    return Agent(ctx, tools=build_tools(tools, {**CORE_TOOLS, "web_search": web_search_tool()}), session=session,
-                 instructions=instructions)
+    task_state = task_state_tool(WorkspaceMemory(ctx.workspace, session.id))
+    available = {**CORE_TOOLS, "web_search": web_search_tool(), task_state.name: task_state}
+    return Agent(ctx, tools=build_tools(tools, available), session=session, instructions=instructions)
 
 
 def attachment(ctx: ToolContext, path: str, question: str | None = None) -> str:
@@ -159,6 +174,8 @@ def run_prompt(args: argparse.Namespace) -> int:
     ctx = make_context(args, ui)
     prompt = sys.stdin.read() if args.prompt == ["-"] else " ".join(args.prompt)
     agent = make_agent(args, ctx, open_session(args, ctx.workspace))
+    for requirement in args.requirement:
+        agent.session.set_requirement(requirement)
     answer = agent.run("\n\n".join([*(attachment(ctx, a) for a in args.attach), prompt]))
     ui.finish()
     if not ui.stream_content:
@@ -177,6 +194,8 @@ def run_chat(args: argparse.Namespace) -> int:
     info = ctx.llm.info()
     session = open_session(args, ctx.workspace)
     agent = make_agent(args, ctx, session)
+    for requirement in args.requirement:
+        session.set_requirement(requirement)
     history = ctx.state_dir / "history"
     if readline is not None:
         history.parent.mkdir(parents=True, exist_ok=True)
@@ -191,7 +210,7 @@ def run_chat(args: argparse.Namespace) -> int:
     print("/help for commands, Ctrl-D to exit")
     while True:
         try:
-            line = input("\n› ").strip()
+            line = input("\n› ")
         except EOFError:
             print()
             break
@@ -200,9 +219,10 @@ def run_chat(args: argparse.Namespace) -> int:
             continue
         if readline is not None:
             readline.write_history_file(history)
-        if not line:
+        if not line.strip():
             continue
         try:
+            line = line.lstrip()
             if line.startswith("/"):
                 cmd, _, rest = line.partition(" ")
                 if cmd in ("/quit", "/exit"):
@@ -216,6 +236,18 @@ def run_chat(args: argparse.Namespace) -> int:
                 elif cmd == "/compact":
                     if not agent.compact(rest or None, force=True):
                         print("nothing to compact")
+                elif cmd == "/require":
+                    session.set_requirement(rest)
+                    print("requirement pinned")
+                elif cmd == "/requirements":
+                    print("\n".join(f"{i}. {text}" for i, text in enumerate(session.requirements, 1))
+                          or "no active requirements")
+                elif cmd == "/unrequire":
+                    number = int(rest)
+                    if not 1 <= number <= len(session.requirements):
+                        raise ValueError("use a pin number from /requirements")
+                    session.set_requirement(session.requirements[number - 1], active=False)
+                    print("requirement unpinned")
                 elif cmd == "/new":
                     session = Session(None if args.no_session else new_session_path(ctx.workspace))
                     agent = make_agent(args, ctx, session)
@@ -232,7 +264,7 @@ def run_chat(args: argparse.Namespace) -> int:
                 else:
                     print(f"unknown command {cmd}; /help")
                 continue
-            prompt = "\n\n".join([*pending, line])
+            prompt = "\n\n".join([*pending, line.rstrip()])
             pending = []
             agent.run(prompt)
             ui.finish()
@@ -319,10 +351,12 @@ def list_workflows(args: argparse.Namespace) -> int:
 def show_info(args: argparse.Namespace) -> int:
     ctx = make_context(args, ConsoleUI())
     info, s = ctx.llm.info(), ctx.settings
+    working_window = min(info.context_window, s.context_budget_tokens or info.context_window)
     print(f"server          {ctx.llm.base}")
     print(f"model           {info.id}  (images: {'yes' if info.vision else 'no'})")
-    print(f"context window  {info.context_window}  (compact above "
-          f"{info.context_window - min(s.reserve_tokens, info.context_window // 4)})")
+    print(f"context window  {info.context_window}")
+    print(f"working budget  {working_window}  (compact above "
+          f"{working_window - min(s.reserve_tokens, working_window // 4)})")
     print(f"workspace       {ctx.workspace}")
     print(f"tools           {', '.join(t.name for t in build_tools(None))}")
     for k, v in vars(s).items():
@@ -341,6 +375,8 @@ def main(argv: list[str] | None = None) -> int:
         if args.validate:
             return validate(args)
         if args.workflow is not None or args.resume:
+            if args.requirement:
+                raise ValueError("--requirement is for chat; put workflow requirements in the workflow instructions")
             return run_workflow(args)
         if args.prompt:
             return run_prompt(args)

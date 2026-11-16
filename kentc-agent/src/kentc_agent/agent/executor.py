@@ -12,7 +12,7 @@ from typing import Any
 
 from ..adapters.tools import CORE_TOOLS, Tool, ToolError
 from ..config import STATE_DIR
-from ..context.bigcontext import CallResult, real_tokens, route_turn
+from ..context.bigcontext import CallResult, limits, real_tokens, route_turn
 from ..context.safety import guard
 from ..errors import Aborted
 
@@ -66,12 +66,15 @@ class ToolExecutorMixin:
         op = self._op
         ref = op.tool_call(call["id"], name, args) if op is not None else None
         prev, self.ctx.operation = self.ctx.operation, ref
+        previous_budget = self.ctx.available_context_tokens
         self.ctx.density = self.density          # the tool and the router size results in real tokens
+        self.ctx.available_context_tokens = max(128, self.room() - self.reserve)
         t0 = time.monotonic()
         try:
             result, error = self._tool(name, args)
         finally:
             self.ctx.operation = prev
+            self.ctx.available_context_tokens = previous_budget
         return CallResult(call["id"], name, args, result, error, round((time.monotonic() - t0) * 1000), ref)
 
     def _persist_result(self, r: CallResult, resolved: set[str]) -> None:
@@ -90,6 +93,7 @@ class ToolExecutorMixin:
         """Route results, check what will enter the context (context/safety.py), then persist; the run's exception
         path repairs any interrupted stage."""
         self.ctx.density = self.density
+        self.ctx.available_context_tokens = max(128, self.room() - self.reserve)
         route_turn(self.ctx, results)
         if self.ctx.settings.safety_check:
             for r in results:
@@ -102,6 +106,39 @@ class ToolExecutorMixin:
             if r.routed:
                 self.ctx.events.big_result(self.name, r.name, r.args, r.routed, real_tokens(self.ctx, r.text))
             self._persist_result(r, resolved)
+        self._shorten_write_arguments(start, results)
+
+    def _shorten_write_arguments(self, start: int, results: list[CallResult]) -> None:
+        """Archive large completed writes before replacing their live arguments with references."""
+        fields = {"write": ("content",), "edit": ("old_text", "new_text")}
+        calls = {call["id"]: call for call in self.session.messages[start]["tool_calls"]}
+        threshold = max(512, limits(self.ctx).result)
+        replacements: dict[str, str] = {}
+        for result in results:
+            name = result.name
+            if result.error or name not in fields or self.tools[name] is not CORE_TOOLS[name]:
+                continue
+            original = calls[result.call_id]["function"]["arguments"]
+            size = real_tokens(self.ctx, original)
+            if size <= threshold:
+                continue
+            try:
+                entry = self.memory.archive(original, kind="arguments", tokens=size,
+                                            source=f"message {self.session.ids[start]} / {result.call_id} / {name}")
+            except OSError as error:
+                self.ctx.events.status(self.name, f"keeping original {name} arguments: archive failed ({error})")
+                continue
+            reference = (f"[Completed {name}. Original arguments: {entry['path']} ({entry['id']}). "
+                         "Read the target file for current content. Do not replay this placeholder.]")
+            shortened = {"path": result.args["path"], **dict.fromkeys(fields[name], reference)}
+            if name == "edit" and "replace_all" in result.args:
+                shortened["replace_all"] = result.args["replace_all"]
+            encoded = json.dumps(shortened, ensure_ascii=False)
+            if len(encoded) < len(original):
+                replacements[result.call_id] = encoded
+        if replacements:
+            with _defer_interrupt():
+                self.session.replace_tool_arguments(start, replacements)
 
     def _repair(self, calls: list[dict[str, Any]], results: list[CallResult], start: int,
                 failure: BaseException) -> None:

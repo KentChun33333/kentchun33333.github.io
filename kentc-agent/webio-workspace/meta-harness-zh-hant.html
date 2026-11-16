@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Meta-Harness 論文的繁體中文圖解，涵蓋搜尋迴圈、原始執行紀錄、分類、數學檢索與代理程式設計實驗。">
+<title>Meta-Harness｜繁體中文論文圖解</title>
+<style>
+:root {
+  --ink:#20272e; --muted:#596570; --paper:#fff; --canvas:#f3f4f0; --line:#dce1df;
+  --blue:#245db2; --blue-soft:#edf3fd; --red:#c92330; --green:#08724f; --green-soft:#e9f5ef;
+  --violet:#6548a6; --violet-soft:#f2eefb; --amber:#865500; --amber-soft:#fff5de;
+  --mono:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans:system-ui, -apple-system, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+}
+* {box-sizing:border-box}
+html {scroll-padding-top:88px}
+body {margin:0; color:var(--ink); background:var(--canvas); font:15px/1.75 var(--sans)}
+a {color:var(--blue); text-underline-offset:3px}
+a:focus-visible, summary:focus-visible {outline:2px solid var(--blue); outline-offset:4px}
+h1,h2,h3,p,figure {margin:0}
+h1 {font-size:clamp(2.7rem,8vw,6.2rem); font-weight:800; letter-spacing:-.075em; line-height:.96}
+h2 {font-size:clamp(1.35rem,3.6vw,2.05rem); letter-spacing:-.035em; line-height:1.28}
+h3 {font-size:1rem; line-height:1.4}
+p+p {margin-top:10px}
+code {font:.88em var(--mono); overflow-wrap:anywhere}
+strong {font-weight:720}
+header {position:sticky; top:0; z-index:1; background:#fffffffa; border-bottom:1px solid var(--line)}
+.header-inner {max-width:1180px; margin:auto; padding:12px 26px; display:flex; align-items:center; justify-content:space-between; gap:16px}
+.brand {display:flex; align-items:center; gap:9px; font:700 13px var(--mono); white-space:nowrap; color:var(--ink); text-decoration:none}
+.brand::before {content:""; width:8px; height:20px; border-radius:2px; background:var(--red)}
+nav {display:flex; flex-wrap:wrap; gap:7px 16px}
+nav a {font-size:12px; color:var(--muted); text-decoration:none}
+nav a:hover {color:var(--blue)}
+main {max-width:1180px; margin:auto; padding:24px 26px 44px}
+.hero,.section {border:1px solid var(--line); border-radius:16px; background:var(--paper)}
+.hero {border-top:5px solid var(--red); padding:clamp(24px,5vw,64px); margin-bottom:16px}
+.kicker {color:var(--red); font:700 12px/1.5 var(--mono); letter-spacing:.025em; margin-bottom:12px}
+.hero-subtitle {font-size:clamp(1.2rem,4vw,2rem); letter-spacing:-.035em; margin:14px 0}
+.lead {font-size:clamp(1rem,2.5vw,1.16rem); max-width:58ch}
+.meta,.source,figcaption,.note {color:var(--muted); font-size:.82rem}
+.meta {margin-top:15px}
+.metrics {display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:26px}
+.metric {padding:15px; background:var(--canvas); border-radius:9px; border-top:2px solid var(--blue)}
+.metric:nth-child(2) {border-color:var(--violet)}
+.metric:nth-child(3) {border-color:var(--green)}
+.metric b {display:block; font:750 clamp(1.8rem,4.1vw,3rem)/1.15 var(--mono); letter-spacing:-.055em}
+.metric span {display:block; font-size:13px; margin-top:4px}
+.metric small {color:var(--muted)}
+.section {padding:clamp(18px,4.2vw,44px); margin-top:16px}
+.section h2 {margin-bottom:12px}
+.section > p:not(.kicker) {max-width:80ch}
+.source,figcaption {margin-top:12px}
+.stack {display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:18px}
+.box {padding:15px 16px; background:var(--blue-soft); border:1px solid var(--line); border-radius:9px}
+.box.alt {background:var(--violet-soft)}
+.box p {font-size:13px; margin-top:5px}
+figure {margin-top:20px}
+.loop {display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:22px; padding:0; margin:0; list-style:none}
+.loop li {position:relative; min-width:0; border:1px solid var(--line); border-top:3px solid var(--blue); border-radius:8px; padding:15px; background:var(--blue-soft)}
+.loop li:nth-child(2) {border-top-color:var(--violet); background:var(--violet-soft)}
+.loop li:nth-child(3) {border-top-color:var(--amber); background:var(--amber-soft)}
+.loop li:nth-child(4) {border-top-color:var(--green); background:var(--green-soft)}
+.loop li:not(:last-child)::after {content:"→"; color:var(--blue); position:absolute; right:-19px; top:41%; font:700 18px var(--mono)}
+.loop b,.loop span {display:block}
+.loop span {margin-top:6px; color:var(--muted); font-size:13px}
+.return {margin-top:10px; border:1px dashed #b7c7dc; border-radius:8px; padding:7px 12px; color:var(--blue); font-size:13px; text-align:center}
+.table-wrap {margin-top:16px; border:1px solid var(--line); border-radius:9px; overflow-x:auto}
+table {width:100%; border-collapse:collapse; font-size:13px}
+caption {padding:10px 12px; background:var(--canvas); font-weight:700; text-align:left}
+th,td {padding:9px 12px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top}
+thead th {background:var(--canvas); color:var(--muted); font-size:12px}
+tbody tr:last-child>* {border-bottom:0}
+tbody th {font-weight:650}
+tbody tr.highlight>* {background:var(--blue-soft)}
+.numeric {font-variant-numeric:tabular-nums; white-space:nowrap}
+.chart {padding:16px; border:1px solid var(--line); border-radius:10px; background:var(--canvas)}
+.chart h3 {margin-bottom:10px}
+.chart-row {display:grid; grid-template-columns:minmax(105px,1fr) minmax(0,3fr) 4rem; align-items:center; gap:9px; margin:8px 0; font-size:13px}
+.track {height:10px; border-radius:6px; background:#dfe5e6; overflow:hidden}
+.fill {display:block; height:100%; border-radius:inherit; background:var(--blue)}
+.chart-row.best .fill {background:var(--violet)}
+.chart-row b {text-align:right; font:650 12px var(--mono)}
+.chart-key {display:flex; gap:18px; flex-wrap:wrap; margin-bottom:8px; color:var(--muted); font-size:12px}
+.chart-key i {display:inline-block; width:9px; height:9px; border-radius:2px; background:var(--blue); margin-right:5px}
+.chart-key span:last-child i {background:var(--violet)}
+.chart-group + .chart-group {border-top:1px solid var(--line); margin-top:11px; padding-top:11px}
+.chart-group .chart-row {margin-block:5px}
+.chart-group .chart-row.best .chart-label {color:var(--muted)}
+.route-top {padding:12px 15px; border-radius:8px; text-align:center; font-weight:650; background:var(--violet-soft)}
+.route-arrow {text-align:center; color:var(--violet); font:650 18px/1.3 var(--mono); padding:5px}
+.routes {display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; list-style:none; padding:0; margin:0}
+.routes li {background:var(--green-soft); border-radius:8px; padding:12px 13px; font-size:13px}
+.routes b {display:block; margin-bottom:3px}
+details {margin-top:16px; border:1px solid var(--line); border-radius:8px; padding:9px 12px}
+summary {cursor:pointer; font-size:13px; font-weight:700}
+.details-table {min-width:455px}
+.boundaries {margin:16px 0 0; padding-left:21px}
+.boundaries li+li {margin-top:10px}
+footer {padding:12px 4px 0; color:var(--muted); font-size:12px}
+@media (max-width:740px) {
+  .header-inner {padding:10px 15px}
+  main {padding:16px 13px 34px}
+  .loop {grid-template-columns:1fr; gap:19px}
+  .loop li:not(:last-child)::after {content:"↓"; right:calc(50% - 4px); top:calc(100% + 2px)}
+  .routes {grid-template-columns:1fr 1fr}
+  .chart-row {grid-template-columns:minmax(86px,1fr) minmax(0,2fr) 3.1rem; gap:6px; font-size:12px}
+  th,td {padding:8px}
+}
+@media (max-width:470px) {
+  .header-inner {gap:8px; align-items:flex-start; flex-direction:column}
+  nav {gap:7px 15px}
+  .hero {padding:22px 17px}
+  .metrics,.stack {grid-template-columns:1fr}
+  .metric {padding:10px 12px; display:grid; grid-template-columns:110px minmax(0,1fr); align-items:center; column-gap:9px}
+  .metric span {margin-top:0}
+  .metric small {grid-column:2}
+  .metric b {grid-row:span 2}
+  .chart {padding:10px}
+}
+@media print {
+  header {position:static}
+  nav {display:none}
+  body {background:white}
+  main {padding:0}
+  .section {break-inside:avoid}
+  .metric,.fill,.loop li,.routes li {print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<header><div class="header-inner">
+  <a href="#top" class="brand">META-HARNESS · 論文圖解</a>
+  <nav aria-label="章節"><a href="#method">方法</a><a href="#evidence">消融</a><a href="#results">實驗</a><a href="#interpretation">結果解讀</a></nav>
+</div></header>
+<main id="top">
+<section class="hero" aria-labelledby="title">
+  <p class="kicker">arXiv:2603.28052v1 · 2026 年 3 月 30 日</p>
+  <h1 id="title">Meta-Harness</h1>
+  <h2 class="hero-subtitle">用執行紀錄搜尋更好的模型 Harness</h2>
+  <p class="lead">Harness 是模型外圍的程式，負責記憶、檢索、工具呼叫與每輪提示的組裝。論文固定受測模型的權重，讓一個程式代理查閱歷次候選的程式碼、分數與執行軌跡，再提出可執行的新版本。</p>
+  <p class="meta">Yoonho Lee、Roshen Nair、Qizheng Zhang、Kangwook Lee、Omar Khattab、Chelsea Finn。<a href="https://arxiv.org/abs/2603.28052v1">論文原文與作者資訊</a></p>
+  <div class="metrics" aria-label="三項代表性實驗結果">
+    <div class="metric"><b>48.6%</b><span>線上分類平均正確率</span><small>ACE 為 40.9%</small></div>
+    <div class="metric"><b>38.8%</b><span>數學平均 pass@1</span><small>無檢索為 34.1%</small></div>
+    <div class="metric"><b>37.6%</b><span>Haiku 4.5 終端任務通過率</span><small>Goose 為 35.5%</small></div>
+  </div>
+  <p class="source">三個數值分別來自不同任務和評分設計。<a href="2603.28052v1.pdf#page=6">原文表 2</a> · <a href="2603.28052v1.pdf#page=8">表 6</a> · <a href="2603.28052v1.pdf#page=9">表 7</a></p>
+</section>
+
+<section class="section" id="method" aria-labelledby="method-title">
+  <p class="kicker">方法</p>
+  <h2 id="method-title">每次評測都為下一輪留下證據</h2>
+  <div class="stack">
+    <div class="box"><h3>內層 · 執行候選 Harness</h3><p>同一個模型接收候選程式組裝的輸入。程式根據回覆更新狀態，評測器為完整執行結果打分。</p></div>
+    <div class="box alt"><h3>外層 · 搜尋候選程式</h3><p>提案代理可查任何已評測候選的檔案，追查失敗，再修改記憶、檢索、提示或控制流程。</p></div>
+  </div>
+  <figure aria-labelledby="loop-caption">
+    <ol class="loop">
+      <li><b>讀取歷史檔案</b><span>依問題搜尋候選程式、分數與工具呼叫軌跡。</span></li>
+      <li><b>提出新程式</b><span>根據觀察修改候選，先檢查介面能否執行。</span></li>
+      <li><b>在搜尋集評測</b><span>固定受測模型，執行候選並計算分數與成本。</span></li>
+      <li><b>保存本輪產物</b><span>將程式、分數與原始軌跡存到新目錄。</span></li>
+    </ol>
+    <div class="return">↶ 下一輪從累積的歷史中選取相關證據</div>
+    <figcaption id="loop-caption">依原文圖 2 與演算法 1 重繪。<a href="2603.28052v1.pdf#page=2">圖 2</a> · <a href="2603.28052v1.pdf#page=5">演算法 1</a></figcaption>
+  </figure>
+  <p class="note">搜尋可同時考慮準確率與上下文成本，最後保留 Pareto 前緣上的候選。這些候選之間的取捨是，要提升一項指標，可能就要增加另一項成本。</p>
+</section>
+
+<section class="section" id="evidence" aria-labelledby="evidence-title">
+  <p class="kicker">消融實驗</p>
+  <h2 id="evidence-title">原始軌跡提供了哪些額外訊號？</h2>
+  <p>分類搜尋的三組提案代理都能讀分數和程式碼。完整組還能讀原始執行軌跡，候選正確率中位數達 <strong>50.0%</strong>。提供摘要的一組中位數為 <strong>34.9%</strong>。軌跡讓代理有機會追到哪次檢索、哪個提示或哪步工具操作出現問題。</p>
+  <figure class="chart" aria-labelledby="ablation-title ablation-caption">
+    <h3 id="ablation-title">分類搜尋集上的候選表現</h3>
+    <div class="chart-key"><span><i aria-hidden="true"></i>中位數</span><span><i aria-hidden="true"></i>最高</span></div>
+    <div class="chart-group">
+      <div class="chart-row"><span class="chart-label">分數＋程式</span><div class="track" aria-hidden="true"><span class="fill" style="width:34.6%"></span></div><b>34.6%</b></div>
+      <div class="chart-row best"><span class="chart-label">最高</span><div class="track" aria-hidden="true"><span class="fill" style="width:41.3%"></span></div><b>41.3%</b></div>
+    </div>
+    <div class="chart-group">
+      <div class="chart-row"><span class="chart-label">加上摘要</span><div class="track" aria-hidden="true"><span class="fill" style="width:34.9%"></span></div><b>34.9%</b></div>
+      <div class="chart-row best"><span class="chart-label">最高</span><div class="track" aria-hidden="true"><span class="fill" style="width:38.7%"></span></div><b>38.7%</b></div>
+    </div>
+    <div class="chart-group">
+      <div class="chart-row"><span class="chart-label">加上原始軌跡</span><div class="track" aria-hidden="true"><span class="fill" style="width:50%"></span></div><b>50.0%</b></div>
+      <div class="chart-row best"><span class="chart-label">最高</span><div class="track" aria-hidden="true"><span class="fill" style="width:56.7%"></span></div><b>56.7%</b></div>
+    </div>
+    <figcaption id="ablation-caption">橫條以 0–100% 為範圍，數值來自搜尋集。<a href="2603.28052v1.pdf#page=7">原文表 3</a></figcaption>
+  </figure>
+  <p class="note">在另一項終端任務搜尋中，作者觀察到代理每輪讀取的檔案中位數為 82 份，其中 41% 是程式碼、40% 是軌跡。這是 Opus 4.6 的 10 輪搜尋紀錄。<a href="2603.28052v1.pdf#page=15">原文表 8</a></p>
+</section>
+
+<section class="section" id="results" aria-labelledby="results-title">
+  <p class="kicker">實驗結果</p>
+  <h2 id="results-title">三種任務，各自找到不同的程式策略</h2>
+  <div class="table-wrap">
+    <table>
+      <caption>線上文字分類 · 三個測試資料集平均</caption>
+      <thead><tr><th scope="col">Harness</th><th scope="col">正確率</th><th scope="col">額外輸入 tokens</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Few-shot（全部）</th><td class="numeric">40.8%</td><td class="numeric">12.3k</td></tr>
+        <tr><th scope="row">MCE</th><td class="numeric">40.0%</td><td class="numeric">28.5k</td></tr>
+        <tr><th scope="row">ACE</th><td class="numeric">40.9%</td><td class="numeric">50.8k</td></tr>
+        <tr class="highlight"><th scope="row">Meta-Harness</th><td class="numeric"><strong>48.6%</strong></td><td class="numeric"><strong>11.4k</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="source">選出的分類程式先列出有效標籤，再用 TF-IDF 找各標籤的代表範例與相似但標籤相異的對照。它在另外九個資料集的平均正確率為 73.1%，ACE 為 70.2%。<a href="2603.28052v1.pdf#page=6">表 2</a> · <a href="2603.28052v1.pdf#page=8">表 5</a> · <a href="2603.28052v1.pdf#page=19">圖 6</a></p>
+
+  <figure aria-labelledby="math-caption">
+    <div class="route-top">數學題目 → 依關鍵字與符號判斷題型</div>
+    <div class="route-arrow" aria-hidden="true">↓</div>
+    <ul class="routes">
+      <li><b>組合</b>BM25 取 20 題，去重後重排，取 3 題。</li>
+      <li><b>幾何</b>1 題固定參考，加上 2 題 BM25 相似範例。</li>
+      <li><b>數論</b>BM25 取 12 題，再考量難度與解法線索，取 3 題。</li>
+      <li><b>代數及其他</b>BM25 取 10 題並重排，依分數選擇範例數。</li>
+    </ul>
+    <div class="route-arrow" aria-hidden="true">↓</div>
+    <div class="route-top">選定一條路徑 → 把該路徑的範例放入解題提示</div>
+    <figcaption id="math-caption">依原文圖 8 重繪。BM25 用詞彙匹配為範例排序。<a href="2603.28052v1.pdf#page=21">圖 8 與附錄 B.2</a></figcaption>
+  </figure>
+  <p class="source">在 200 道未參與搜尋的奧林匹亞等級題目上，五個模型的平均 pass@1 從無檢索的 34.1% 提升至 38.8%，固定 BM25 為 37.5%。這五個模型包含搜尋使用的 GPT-OSS-20B 及四個搜尋時未使用的模型。<a href="2603.28052v1.pdf#page=8">原文表 6</a></p>
+  <details>
+    <summary>展開五個模型的數學結果</summary>
+    <div class="table-wrap"><table class="details-table">
+      <caption>各模型 pass@1（%）</caption>
+      <thead><tr><th scope="col">模型</th><th scope="col">無檢索</th><th scope="col">BM25</th><th scope="col">Meta-Harness</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">GPT-5.4-nano</th><td>23.0</td><td>30.2</td><td>31.7</td></tr>
+        <tr><th scope="row">GPT-5.4-mini</th><td>28.8</td><td>29.2</td><td>30.4</td></tr>
+        <tr><th scope="row">Gemini-3.1-Flash-Lite</th><td>28.6</td><td>32.8</td><td>34.9</td></tr>
+        <tr><th scope="row">Gemini-3-Flash</th><td>42.6</td><td>46.6</td><td>46.3</td></tr>
+        <tr><th scope="row">GPT-OSS-20B</th><td>47.6</td><td>48.9</td><td>50.6</td></tr>
+      </tbody>
+    </table></div>
+  </details>
+
+  <div class="table-wrap">
+    <table>
+      <caption>TerminalBench-2 · 原文報告的通過率</caption>
+      <thead><tr><th scope="col">模型</th><th scope="col">Meta-Harness</th><th scope="col">參考基準</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Claude Opus 4.6</th><td class="numeric">76.4%</td><td>Terminus-KIRA 74.7%，ForgeCode 81.8%</td></tr>
+        <tr><th scope="row">Claude Haiku 4.5</th><td class="numeric">37.6%</td><td>Goose 35.5%，Terminus-KIRA 33.7%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="source">終端任務的代表性改動，是在第一輪前收集工作環境資訊並放入初始提示，讓代理更早知道可用工具。作者以相同 89 個任務搜尋及評測。<a href="2603.28052v1.pdf#page=9">表 7</a> · <a href="2603.28052v1.pdf#page=22">圖 9</a></p>
+</section>
+
+<section class="section" id="interpretation" aria-labelledby="interpretation-title">
+  <p class="kicker">結果解讀</p>
+  <h2 id="interpretation-title">把搜尋成本、推論成本與泛化分開看</h2>
+  <ul class="boundaries">
+    <li><strong>推論成本。</strong>分類的 11.4k 是選出程式的平均額外輸入 tokens。搜尋過程另有提案與多次候選評測成本。<a href="2603.28052v1.pdf#page=5">實作與評測設定</a></li>
+    <li><strong>泛化證據。</strong>分類使用額外的未見資料集，數學使用保留題目與新模型，終端任務採同一批 89 題搜尋和評測。三者支持的結論範圍不同。<a href="2603.28052v1.pdf#page=7">分類</a> · <a href="2603.28052v1.pdf#page=8">數學</a> · <a href="2603.28052v1.pdf#page=9">終端任務</a></li>
+    <li><strong>提案代理的依賴。</strong>論文以 Claude Code 搭配 Opus 4.6 作為提案代理。作者將比較其他提案代理列為後續研究。<a href="2603.28052v1.pdf#page=10">原文討論</a></li>
+  </ul>
+</section>
+<footer>繁體中文圖解依 arXiv v1 整理。圖表及流程依論文重繪。<a href="https://arxiv.org/abs/2603.28052v1">查看原始版本</a></footer>
+</main>
+</body>
+</html>

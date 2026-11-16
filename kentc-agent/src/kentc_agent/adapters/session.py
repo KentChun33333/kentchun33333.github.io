@@ -4,8 +4,10 @@ Log entries:
   {"type": "session", "id": "<session id>", "created": "<iso time>"}      first line; names the trace (trace.py)
   {"type": "message", "id": N, "message": {...}, "usage": {...}?}
   {"type": "compaction", "summary": "...", "first_kept_id": N, "tokens_before": T}
+  {"type": "requirement", "text": "...", "active": true}
+  {"type": "tool_arguments", "id": N, "arguments": {"<tool call id>": "<shortened JSON>"}}
 
-Live context = the latest compaction's summary (as a user message) + the messages with id >= its first_kept_id.
+Live context includes the latest summary, active user requirements, and messages with id >= first_kept_id.
 """
 
 from __future__ import annotations
@@ -23,6 +25,7 @@ from .llm import Usage
 CHARS_PER_TOKEN = 4  # conservative for English/code; CJK runs denser, the server's usage corrects it each turn
 SUMMARY_PREFIX = "The earlier conversation was compacted into this summary:\n\n<summary>\n"
 SUMMARY_SUFFIX = "\n</summary>"
+MAX_REQUIREMENT_CHARS = 4000
 
 
 def image_tokens(width: int, height: int) -> int:
@@ -75,6 +78,8 @@ class Session:
         self.ids: list[int] = []                   # log id of each live message
         self.usage: dict[int, Usage] = {}          # log id of an assistant reply -> what the server counted
         self.next_id = 0
+        self.compactions = 0
+        self.requirements: list[str] = []
 
     # ------------------------------------------------------------------ persistence
     @classmethod
@@ -96,6 +101,13 @@ class Session:
             elif e["type"] == "compaction":
                 s._drop_before(e["first_kept_id"])
                 s.summary = e["summary"]
+                s.compactions += 1
+            elif e["type"] == "requirement":
+                s.set_requirement(e["text"], active=e["active"], persist=False)
+            elif e["type"] == "replacement" and e["id"] in s.ids:
+                s.replace_content(s.ids.index(e["id"]), e["content"], persist=False)
+            elif e["type"] == "tool_arguments" and e["id"] in s.ids:
+                s.replace_tool_arguments(s.ids.index(e["id"]), e["arguments"], persist=False)
         return s
 
     def _write(self, entry: dict[str, Any]) -> None:
@@ -110,6 +122,22 @@ class Session:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
     # ------------------------------------------------------------------ mutation
+    def set_requirement(self, text: str, *, active: bool = True, persist: bool = True) -> None:
+        """Pin user-supplied text independently of the live messages and model summary."""
+        if not text.strip():
+            raise ValueError("requirement text must not be empty")
+        if active == (text in self.requirements):
+            return
+        if active and sum(map(len, self.requirements)) + len(text) > MAX_REQUIREMENT_CHARS:
+            raise ValueError(f"active requirements are limited to {MAX_REQUIREMENT_CHARS} characters total")
+        if persist:
+            self._write({"type": "requirement", "text": text, "active": active})
+        if active:
+            self.requirements.append(text)
+        else:
+            self.requirements.remove(text)
+        self.usage.clear()
+
     def append(self, msg: dict[str, Any], usage: Usage | None = None) -> None:
         mid = self.next_id
         self.next_id += 1
@@ -124,10 +152,28 @@ class Session:
     def compact(self, summary: str, first_kept: int, tokens_before: int) -> None:
         """Replace live messages [0, first_kept) (and any previous summary) by `summary`."""
         first_kept_id = self.ids[first_kept] if first_kept < len(self.ids) else self.next_id
-        self._drop_before(first_kept_id)
-        self.summary = summary
         self._write({"type": "compaction", "summary": summary, "first_kept_id": first_kept_id,
                      "tokens_before": tokens_before})
+        self._drop_before(first_kept_id)
+        self.summary = summary
+        self.compactions += 1
+
+    def replace_content(self, index: int, content: str, *, persist: bool = True) -> None:
+        """Replace an archived message's live payload while retaining its role and tool-call identity."""
+        if persist:
+            self._write({"type": "replacement", "id": self.ids[index], "content": content})
+        self.messages[index] = {**self.messages[index], "content": content}
+        self.usage.clear()  # earlier server counts describe the longer, original payload
+
+    def replace_tool_arguments(self, index: int, arguments: dict[str, str], *, persist: bool = True) -> None:
+        """Shorten selected historical calls while preserving their identity and the original log entry."""
+        message = self.messages[index]
+        calls = [{**call, "function": {**call["function"], "arguments": arguments[call["id"]]}}
+                 if call["id"] in arguments else call for call in message["tool_calls"]]
+        if persist:
+            self._write({"type": "tool_arguments", "id": self.ids[index], "arguments": arguments})
+        self.messages[index] = {**message, "tool_calls": calls}
+        self.usage.clear()
 
     def _drop_before(self, first_kept_id: int) -> None:
         keep = [i for i, mid in enumerate(self.ids) if mid >= first_kept_id]
@@ -139,6 +185,9 @@ class Session:
     def context(self) -> list[dict[str, Any]]:
         """The messages to send after the system prompt."""
         head = [summary_message(self.summary)] if self.summary else []
+        if self.requirements:
+            head.append({"role": "user", "content": "My active requirements for this session (verbatim):\n\n"
+                         + "\n\n".join(self.requirements)})
         return head + self.messages
 
     def token_parts(self, fixed_tokens: int) -> tuple[int, int]:

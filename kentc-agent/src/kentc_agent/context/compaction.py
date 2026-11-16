@@ -22,26 +22,34 @@ FORMAT = """## Goal
 [What the user is trying to accomplish; several items if the session covers several tasks.]
 
 ## Constraints & Preferences
-- [Requirements and preferences the user stated]
+- [Requirements and preferences the user stated. Preserve decisive wording where possible.]
+
+## Completion Requirements
+- [Conditions and checks that must hold before the task is complete]
 
 ## Progress
 ### Done
-- [x] [Completed work]
+- [x] [Completed work and the check that confirmed it. Leave unverified work in progress.]
 ### In Progress
 - [ ] [Current work]
 ### Blocked
 - [Open problems, if any]
 
-## Key Decisions
-- **[Decision]**: [Rationale]
+## Evidence
+- [Relevant observation, its verification status, and exact source path/range or workspace index ID.]
+
+## Decisions & Exploration
+- [Decision and short rationale, failed attempt worth avoiding, or explicitly labeled open hypothesis.]
 
 ## Next Steps
 1. [What should happen next]
 
 ## Critical Context
-- [Facts, data, file paths, function names, numbers and error messages needed to continue]
+- [Facts, data, workspace index and artifact paths, function names, numbers and errors needed for the next steps]
 
-Keep each section concise. Preserve exact file paths, identifiers, numbers and error messages."""
+Keep each section concise. Preserve exact file paths, identifiers, numbers and error messages.
+For saved milestones and evidence, keep useful IDs and refer to the workspace records for details.
+Do not treat a proposed check, an assistant claim, or an open hypothesis as verified evidence."""
 
 NEW_PROMPT = ("The conversation above is to be summarized. Create a structured context checkpoint in EXACTLY this "
               "format:\n\n" + FORMAT)
@@ -49,7 +57,7 @@ NEW_PROMPT = ("The conversation above is to be summarized. Create a structured c
 UPDATE_PROMPT = ("The conversation above holds NEW messages. Update the summary in <previous-summary> with them:\n"
                  "- PRESERVE everything still relevant from the previous summary\n"
                  "- ADD new progress, decisions and context\n"
-                 "- MOVE finished items from In Progress to Done\n"
+                 "- MOVE items from In Progress to Done when the completion check is confirmed\n"
                  "- UPDATE Next Steps\n\nUse EXACTLY this format:\n\n" + FORMAT)
 
 
@@ -96,49 +104,37 @@ def serialize(messages: list[dict[str, Any]]) -> str:
     return "\n\n".join(out)
 
 
-def _chunks(text: str, max_chars: int) -> list[str]:
-    """Split on message boundaries where possible."""
-    parts, cur = [], ""
-    for block in text.split("\n\n"):
-        while len(block) > max_chars:                      # one huge block: hard split
-            if cur:
-                parts.append(cur)
-                cur = ""
-            parts.append(block[:max_chars])
-            block = block[max_chars:]
-        if len(cur) + len(block) + 2 > max_chars and cur:
-            parts.append(cur)
-            cur = ""
-        cur = f"{cur}\n\n{block}" if cur else block
-    if cur:
-        parts.append(cur)
-    return parts
-
-
 def summarize(llm: LLMClient, messages: list[dict[str, Any]], previous: str | None, *, window: int,
               reserve_tokens: int, max_output_tokens: int, effort: str, focus: str | None = None,
               max_words: int = 3000, density: float = 1.0) -> str:
     """Summarize `messages` (updating `previous`) into at most `max_words`. Large histories are folded in chunk by
     chunk; `density` (server tokens per chars/4 token) keeps each chunk inside the window."""
     max_tokens = min(int(0.8 * reserve_tokens), max_output_tokens)
-    overhead = 1000                                   # system prompt + instructions + format
-    budget_tokens = window - max_tokens - overhead - (estimate_tokens({"content": previous}) if previous else 0)
-    budget_tokens = int(budget_tokens / density)
-    if budget_tokens < 500:
-        raise CompactionError(f"context window {window} is too small to summarize into")
+    margin = max(256, window // 20)
+    remaining = serialize(messages)
     summary = previous
-    for chunk in _chunks(serialize(messages), budget_tokens * CHARS_PER_TOKEN):
-        prompt = f"<conversation>\n{chunk}\n</conversation>\n\n"
+    while remaining:
+        prefix = "<conversation>\n"
+        suffix = "\n</conversation>\n\n"
         if summary:
-            prompt += f"<previous-summary>\n{summary}\n</previous-summary>\n\n"
-        prompt += (UPDATE_PROMPT if summary else NEW_PROMPT) + \
+            suffix += f"<previous-summary>\n{summary}\n</previous-summary>\n\n"
+        suffix += (UPDATE_PROMPT if summary else NEW_PROMPT) + \
             f"\n\nThe whole checkpoint must stay under {max_words} words: it replaces the conversation above."
         if focus:
-            prompt += f"\n\nAdditional focus: {focus}"
+            suffix += f"\n\nAdditional focus: {focus}"
+        overhead = sum(estimate_tokens(m) for m in [{"content": SYSTEM}, {"content": prefix + suffix}])
+        budget = int((window - max_tokens - margin) / density) - overhead - 8
+        if budget < 128 or max_tokens <= 0:
+            raise CompactionError(f"context window {window} is too small to summarize into")
+        end = min(len(remaining), budget * CHARS_PER_TOKEN)
+        boundary = remaining.rfind("\n\n", 0, end)
+        if end < len(remaining) and boundary > end // 2:
+            end = boundary + 2
+        prompt = prefix + remaining[:end] + suffix
+        remaining = remaining[end:]
         messages = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt}]
         reply = llm.chat(messages, max_tokens=max_tokens, effort=effort)
         if reply.finish == "length" or not reply.content:     # thinking used the budget: once more without it
-            messages[1]["content"] += f"\n\nBe brief: well under {max_tokens * 2 // 3} tokens in total."
             reply = llm.chat(messages, max_tokens=max_tokens, effort="none")
         if reply.finish == "length" or not reply.content:
             raise CompactionError("summarization was cut off or empty; context left unchanged")

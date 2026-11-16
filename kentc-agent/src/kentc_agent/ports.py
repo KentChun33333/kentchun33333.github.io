@@ -32,3 +32,12 @@ class Events:
         rule}; `shown`: tokens of the digest that entered the context instead."""
     def status(self, agent: str, text: str) -> None: ...
     def turn_end(self, agent: str, tokens: int, window: int) -> None: ...
+    def model_request(self, agent: str, messages: list[dict[str, Any]], *,
+                      prompt_tokens: int, max_tokens: int) -> None:
+        """Observe the messages and budget immediately before a model call."""
+
+    def subagent_start(self, agent: str, session_id: str, label: str) -> None:
+        """A delegated session is about to run."""
+
+    def subagent_end(self, agent: str, session_id: str, outcome: str) -> None:
+        """A delegated session finished, failed, or will be retried."""

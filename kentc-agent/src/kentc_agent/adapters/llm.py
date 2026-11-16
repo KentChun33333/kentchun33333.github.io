@@ -9,13 +9,14 @@ from __future__ import annotations
 import http.client
 import json
 import logging
+import os
 import re
 import ssl
 import time
 import urllib.error
 import urllib.request
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 from ..config import Settings
@@ -115,8 +116,15 @@ class ModelInfo:
 
 class LLMClient:
     def __init__(self, settings: Settings, *, _rate_limit: RollingTokenBudget | None = None) -> None:
-        if settings.provider not in ("openai", "qwen38"):
-            raise LLMError("provider must be openai or qwen38")
+        if settings.provider not in ("openai", "qwen38", "openrouter", "ollama"):
+            raise LLMError("provider must be openai, qwen38, openrouter or ollama")
+        if settings.provider in ("openrouter", "ollama"):
+            remote = settings.provider == "openrouter"
+            default_url = "https://openrouter.ai/api/v1" if remote else "http://127.0.0.1:11434/v1"
+            settings = replace(settings,
+                               base_url=default_url if settings.base_url == Settings.base_url else settings.base_url,
+                               api_key=settings.api_key or (os.getenv("OPENROUTER_API_KEY", "") if remote else ""),
+                               model=settings.model or ("qwen/qwen3.8-flash" if remote else ""))
         try:
             self.settings = connection(settings) if settings.provider == "qwen38" else settings
             self._rate_limit = _rate_limit or RollingTokenBudget(settings.tokens_per_minute,
@@ -154,13 +162,31 @@ class LLMClient:
             raw = (entry.get("meta") or {}).get("n_ctx")
             if raw is None:
                 raw = entry.get("max_model_len")
+            if self.settings.provider == "openrouter":
+                raw = (entry.get("top_provider") or {}).get("context_length") or entry.get("context_length")
+                limits = [value for value in (raw, entry.get("context_length"))
+                          if isinstance(value, int) and not isinstance(value, bool) and value > 0]
+                raw = min(limits) if limits else raw
+            if self.settings.provider == "ollama":
+                running = self._get("/api/ps", native=True).get("models") or []
+                active = next((m for m in running if (m.get("name") or m.get("model")) == model), {})
+                raw = active.get("context_length")
+                configured = self.settings.ollama_context_window
+                if isinstance(configured, bool) or configured < 0:
+                    raise LLMError("ollama_context_window must be a non-negative verified num_ctx")
+                if configured:
+                    raw = min(raw, configured) if isinstance(raw, int) and not isinstance(raw, bool) and raw > 0 \
+                        else configured
             if isinstance(raw, bool) or not isinstance(raw, (int, str)) or not str(raw).isdigit() or int(raw) <= 0:
                 raise LLMError(
                     f"{self.base}/models must report a positive deployed context limit "
-                    f"(meta.n_ctx or max_model_len) for {model!r}; no config override or default is used"
+                    f"(meta.n_ctx or max_model_len) for {model!r}. For Ollama, load the model or set "
+                    "--ollama-context-window to its verified num_ctx"
                 )
             modalities = (entry.get("architecture") or {}).get("input_modalities")
             vision = True if modalities is None else "image" in modalities
+            if self.settings.provider == "ollama":
+                vision = self.settings.ollama_vision
             self._info = ModelInfo(id=model, context_window=int(raw), vision=vision)
         return self._info
 
@@ -175,8 +201,9 @@ class LLMClient:
             return self._opener.open(request, timeout=timeout)
         return urllib.request.urlopen(request, timeout=timeout)
 
-    def _get(self, path: str) -> dict[str, Any]:
-        req = urllib.request.Request(self.base + path, headers=self._headers())
+    def _get(self, path: str, *, native: bool = False) -> dict[str, Any]:
+        base = self.base.removesuffix("/v1") if native else self.base
+        req = urllib.request.Request(base + path, headers=self._headers())
         try:
             with self._open(req, timeout=10) as resp:
                 return json.loads(resp.read())
@@ -251,12 +278,14 @@ class LLMClient:
             "stream": True,
             "stream_options": {"include_usage": True},
         }
-        if s.provider == "qwen38":
+        if s.provider in ("qwen38", "ollama"):
             body.pop("stream_options")
         if tools:
             body["tools"] = tools
         effort = effort if effort is not None else s.reasoning_effort
-        if effort and s.provider != "qwen38":
+        if effort and s.provider == "openrouter":
+            body["reasoning"] = {"effort": effort}
+        elif effort and s.provider != "qwen38":
             body["reasoning_effort"] = effort
         if s.temperature is not None:
             body["temperature"] = s.temperature
@@ -301,7 +330,7 @@ class LLMClient:
                 try:
                     with resp:
                         reply = self._read_stream(resp, on_delta, on_chunk=mark_started,
-                                                  require_complete=s.provider == "qwen38")
+                                                  require_complete=s.provider in ("qwen38", "openrouter", "ollama"))
                 except RateLimitError as e:
                     error = e
                 except (OSError, http.client.HTTPException, ValueError) as e:
@@ -373,10 +402,11 @@ class LLMClient:
                 reply.usage = Usage(u["prompt_tokens"], u["completion_tokens"])
             for choice in chunk.get("choices") or []:
                 delta = choice.get("delta") or {}
-                if delta.get("reasoning_content"):
-                    reasoning.append(delta["reasoning_content"])
+                thought = delta.get("reasoning_content") or delta.get("reasoning")
+                if thought:
+                    reasoning.append(thought)
                     if on_delta:
-                        on_delta("reasoning", delta["reasoning_content"])
+                        on_delta("reasoning", thought)
                 if delta.get("content"):
                     content.append(delta["content"])
                     if on_delta:

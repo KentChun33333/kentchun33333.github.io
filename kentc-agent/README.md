@@ -65,6 +65,97 @@ Chat commands: `/attach <file> [question]`, `/compact [focus]`, `/tokens`, `/new
 the current run and keeps the conversation consistent. `-c` continues the latest session, `--tools read,bash`
 limits the tools (`web_search` is one of them in chat), `-s @rules.md` adds instructions.
 
+### Kent WebIO
+
+Kent WebIO is a local browser chat over KentC Agent. Launch it from this project directory and open
+[the WebIO tab](http://127.0.0.1:8091/).
+
+```sh
+uv run kent-webio --workspace ./webio-workspace --context-budget-tokens 60000
+# With the existing project virtual environment
+PYTHONPATH=src .venv/bin/python -m kent_webio --workspace ./webio-workspace --context-budget-tokens 60000
+```
+
+WebIO reads the regular agent settings. Use `--provider`, `--model`, and `--base-url` to choose a deployment.
+Use `--port` for a different loopback port. Each workspace keeps an active conversation in
+`.kentc-agent/webio/` and uses the agent's workspace archive and checkpoint storage.
+The chat provides workspace file tools, including local extraction of embedded PDF text.
+
+- **Tasks & files → New task** creates a separate workfolder, conversation, and context history. Select a
+  task from the left panel to return to its files and chat. **Close task** and **Reopen task** track case-level
+  status independently of a completed agent reply. The default workspace continues to use the original files.
+- New tasks can select a persona, skills, and a YAML workflow from the trusted server-side profile catalog.
+  The catalog reads `personas/*.md`, `skills/*.md`, `skills/*/SKILL.md`, and `workflows/*.yaml` or the bundled
+  `config/cli/workflows/`. Use `--profile-root /path/to/catalog` to choose another catalog. Selected instructions
+  and workflow definitions are copied into task metadata when the task is created. Uploaded documents remain
+  task files. New tasks load their selected profiles as system instructions.
+- **Inspector → Activity** shows workflow steps, the latest run timeline, and actual document sub-agent
+  sessions with their source/page labels, parent step, retries, outcome, and duration. Workflow activity is
+  retained across human review and server restarts.
+- **Run workflow** collects declared inputs and runs the existing YAML workflow engine within the task folder.
+  Eligible workflows use WebIO file tools and `ask` steps. Workflows needing shell or web tools require task
+  adapters before they can run here. **Review step** in chat or Activity submits an explicit human decision before the workflow
+  continues, including gates that have a suggested default. Failed or interrupted workflows can resume from
+  their first unfinished step. The launch and review controls are disabled while the task is running.
+- Fold or open either side panel from the top bar. Select a folder to upload files into it, or drop files onto
+  the workspace panel. Uploads accept any file type up to 128 MiB per file. Select **+** beside a file to attach
+  its path to the next message. The agent can open supported formats with its existing document tools.
+- On desktop, drag the Inspector divider to resize it. You can also focus the divider and use the arrow keys.
+  The browser remembers your width. Double-click the divider to restore the default.
+- **Current** shows retained context and estimated usage. **Last request** shows the most recent input, including
+  the runtime notice, with reported input tokens when the model supplies usage. The **Context** shortcut by Send
+  shows estimated working usage and opens the inspector. A short notice shows the before and after estimates
+  when context is compressed.
+- **Inspector → Output** previews workspace `.html` and `.htm` files, including slide decks, concept diagrams,
+  interactive visualizations, and reports. The file list updates after uploads and agent runs. Select an HTML
+  filename in the workspace to preview it, or use **Expand** and **Download** in the viewer. Previews support
+  embedded content and relative workspace CSS, classic JavaScript, images, and media. Use self-contained HTML
+  for deliverables that otherwise depend on a CDN or external API.
+- Successful HTML writes and edits appear as **Preview** and **Download** cards below the corresponding chat
+  reply. Open a card to switch the viewer to that file. The cards are saved with the conversation.
+- Chat messages support Markdown headings, emphasis, lists, quotes, code, tables, and HTTP(S) links. Replies
+  stream as text and are formatted when complete. HTML typed into chat appears as literal text.
+- **Thinking** streams the main model's reasoning when the provider returns it and `show_reasoning` is enabled.
+  Expand it to see reasoning as it arrives or revisit it above the reply. The live chat also shows the current
+  stage and elapsed time. Open **Tool details** for the latest tool path or error during the run.
+- PDF text extraction preserves page labels. Visual reads use the document sub-agent and show the current page
+  range, retry, model activity, and elapsed time as the job progresses.
+- **Compression** shows live progress and the before and after token estimates. **Compress now** runs the agent's
+  manual compaction on the current conversation. The chat transcript remains available across compression.
+- **Clear chat** archives the current conversation and starts with an empty context in the same workspace.
+  Previous conversations remain in `.kentc-agent/webio/` and the active chat is restored after a restart.
+
+### Test through OpenRouter or Ollama
+
+OpenRouter uses the existing streaming client, discovers its model/provider context limit, and reads credentials
+from `OPENROUTER_API_KEY` or the usual `KENTC_AGENT_API_KEY`. Set the key in your shell before running:
+
+```sh
+mkdir -p /tmp/kentc-memory-test
+uv run kentc-agent --provider openrouter --model qwen/qwen3.8-flash \
+  --context-budget-tokens 16384 -w /tmp/kentc-memory-test --info
+uv run kentc-agent --provider openrouter --model qwen/qwen3.8-flash \
+  --context-budget-tokens 16384 -w /tmp/kentc-memory-test "Read the evidence files and cite exact locations."
+```
+
+The OpenRouter model catalog maps `qwen/qwen3.8-flash` to `Qwen/Qwen3.8-Flash-Next`.
+Ollama uses `http://127.0.0.1:11434/v1` by default. Its running allocation is read from `/api/ps`:
+
+```sh
+uv run kentc-agent --provider ollama --model qwen3.8-flash-next:125b-mlx \
+  --context-budget-tokens 16384 -w /tmp/kentc-memory-test --info
+```
+
+When the model is unloaded, `--ollama-context-window N` supplies a verified deployment limit. Set it to the
+model's configured `PARAMETER num_ctx N`; the OpenAI compatibility endpoint cannot set this allocation.
+`--ollama-vision` explicitly enables image input. `--context-budget-tokens` caps the main agent's working context
+within the deployment limit. A zero budget uses the discovered limit. All three settings also work in YAML and
+through the corresponding `KENTC_AGENT_*` environment variables.
+
+Model and API references are available in the [OpenRouter catalog](https://openrouter.ai/api/v1/models?q=qwen3.8),
+[Ollama compatibility guide](https://docs.ollama.com/api/openai-compatibility), and
+[Ollama running-model API](https://docs.ollama.com/api/ps).
+
 ## Workspace
 
 `--workspace DIR` (default `.`) is the agent's root: relative paths resolve there, `bash` runs there, `write`/`edit`
@@ -80,7 +171,11 @@ refuse paths outside it. `AGENTS.md` in the workspace is added to the system pro
 | `traces/<session id>.jsonl` | the operation trace of each session, for debugging (see below) |
 | `attachments/<file>-<hash>/` | e-mail attachments and images embedded in Office files |
 | `cache/documents/*` | parsing results (answers; transcriptions + digests), keyed by file content + request |
-| `operations/<session id>/<operation id>/<tool call id>/` | big tool results: `full.md` (when not already a workspace file) and `digest.json` (see *Big tool results*) |
+| `operations/<session id>/<operation id>/<tool call id>/` | big tool results: a complete `full.md` snapshot and `digest.json` |
+| `memory/<session id>/index.md` | complete table of stored inputs, tool results, write arguments and history archives |
+| `memory/<session id>/entries/*.json` | individual index records, retained across compaction and resume |
+| `memory/<session id>/archives/*.txt` | large user inputs, write arguments, history before compaction, emergency result archives and evidence snapshots |
+| `memory/<session id>/milestones/*.json` | chat milestones, completion criteria, status and evidence IDs |
 | `tmp/` | full output of truncated `bash` commands |
 
 ### Operation trace (debugging)
@@ -336,7 +431,7 @@ On a small window the limits scale down: at most 1/20 (result), 1/5 (turn) and 1
 window. At 65,536 tokens the settings apply unchanged; at 15,536 they become 776 / 3,107 / 388.
 
 A routed result keeps its full text in `.kentc-agent/operations/<session id>/<operation id>/<tool call id>/`
-(`full.md`, unless it is already a workspace file such as the text file that was read or bash's full log), with
+(`full.md`, preserved even when the source file later changes), with
 `digest.json`: `summary`, `key_insights`, `key_values` (`field`, `value`, `location`), `metadata` (and `preview`
 for rules digests). The context gets the rendered digest (≤ `big_digest_tokens`, 1500), where the full text is, and
 how to read more:
@@ -362,6 +457,27 @@ The CLI shows both context controls in color (stderr). Hosts get the same throug
 
 ## Context compaction
 
+- Before each main-agent request, one runtime status message reports estimated prompt usage, reply allowance,
+  remaining capacity, compaction count, current tool-output limits, the workspace index path and its latest three
+  entries. This message is rebuilt for each request. Full index records stay on disk. Fixed document and screening
+  prompts retain their existing protocol.
+- Result limits shrink with the available working capacity. Large error outputs follow the same storage route.
+  Before compaction, the messages being removed are archived with their existing workspace references.
+  If summarization fails, emergency shortening stores the original result and keeps a retrieval pointer.
+  Session logs record those replacements so resumed sessions use the same bounded context.
+- After a successful built-in `write` or `edit`, large tool arguments are archived verbatim and replaced in
+  live history with a reference. The call ID, tool result and target path stay in context. Reloading a session
+  applies the replacement, while the original remains in the append-only log and the workspace index.
+  The first generation still uses the model's per-reply budget.
+- When both file tools are available, the main agent builds long artifacts over multiple turns. It starts with
+  a skeleton and fills or splits sections with targeted edits. The suggested chunk is a quarter of the
+  effective output allowance for that request. On truncated replies or malformed write/edit arguments, each
+  retry halves the target proportion and asks the model to preserve saved sections.
+- The `read` tool supports `start_char` / `max_chars` on text files for bounded access to the middle of long
+  lines, including minified JSON. Document character windows use the stored converted `full.md` text.
+- A final preflight includes tool schemas, runtime status, image estimates and retry instructions. An input that
+  still cannot fit after recovery is rejected locally before an oversized request is sent. Token estimates are
+  calibrated from server usage; the existing server-overflow recovery remains available.
 - Token count = the server's `usage` for the newest reply + an estimate of later messages: chars/4 × the session's
   **density**, learned from every server count (paths, JSON and code run about 1.3× chars/4). Without it, the count
   right after a compaction (when nothing is counted yet) ran about a third low. `max_tokens` is the room left minus a
@@ -378,6 +494,20 @@ The CLI shows both context controls in color (stderr). Hosts get the same throug
   density; a prompt that alone is over the window goes straight to compaction.
 - A compaction never ends the run: when it fails, it is reported, and if room is needed anyway, older tool results
   are shortened instead.
+
+### Task memory across compaction
+
+- Pin exact instructions in chat with `/require <text>` or pass a repeatable `--requirement "text"` when
+  starting or resuming a session. Pins are included verbatim in each main request and count toward its context
+  budget. Use `/requirements` and `/unrequire <number>` to review and remove active pins.
+- For multi-step chat tasks, the agent can record milestones with `task_state`. Each milestone has an observable
+  completion criterion and a status. To mark it complete, the agent cites at least one recorded evidence ID.
+  Evidence records capture a matching quote from a workspace text file or archived artifact, its line range and a
+  snapshot. The runtime verifies the quote and location. The agent judges whether the evidence supports the criterion.
+- The checkpoint summarizes remaining work, relevant evidence references, short decision rationales, failed attempts
+  and open hypotheses. The full source excerpts and milestone records survive compaction independently.
+- Workflow runs use their existing `state.json` and configured checks for completion. The runtime reports the
+  active step, completed and skipped counts, and the state path on each request.
 
 ## Workflows
 
