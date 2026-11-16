@@ -30,14 +30,13 @@ dev = [
 kentc-agent = "kentc_agent.cli:main"
 kentc-studio = "kentc_studio.server:main"
 kentc-breezeman = "kentc_breezeman.server:main"
-kent-webio = "kent_webio.server:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/kentc_agent", "src/kentc_studio", "src/kentc_breezeman", "src/kent_webio"]
+packages = ["src/kentc_agent", "src/kentc_studio", "src/kentc_breezeman"]
 
 [tool.hatch.build.targets.wheel.force-include]
 "config/qwen38.yaml" = "kentc_agent/deployment_config/qwen38.yaml"

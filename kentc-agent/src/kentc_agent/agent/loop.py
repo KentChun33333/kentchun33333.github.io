@@ -81,8 +81,6 @@ def load_agents_md(workspace: Path) -> str:
 
 
 class Agent(BudgetMixin, ToolExecutorMixin):
-    include_workspace_instructions = True   # subclasses for isolated tasks skip the workspace AGENTS.md
-
     def __init__(self, ctx: ToolContext, *, tools: list[Tool], session: Session | None = None,
                  instructions: str | None = None, name: str = "main", effort: str | None = None,
                  max_turns: int | None = None, system: str | None = None) -> None:
@@ -134,8 +132,7 @@ class Agent(BudgetMixin, ToolExecutorMixin):
     def _system_prompt(self, instructions: str | None) -> str:
         # tools are described by their schemas, not here: the prompt stays the same when a workflow step changes them
         text = BASE_PROMPT.format(workspace=self.ctx.workspace, date=time.strftime("%Y-%m-%d"))
-        if self.include_workspace_instructions:
-            text += load_agents_md(self.ctx.workspace)
+        text += load_agents_md(self.ctx.workspace)
         persona = self.session.core.get("persona", "")
         if self.ctx.settings.persona_path:
             path = Path(self.ctx.settings.persona_path).expanduser()
@@ -306,7 +303,6 @@ class Agent(BudgetMixin, ToolExecutorMixin):
                                 estimated_prompt_tokens=prompt_estimate)
                 op.model.update(id=self.ctx.llm.info().id, effort=self.effort or self.ctx.settings.reasoning_effort,
                                 max_tokens=max_tokens)
-            self.ctx.events.model_request(self.name, messages, prompt_tokens=prompt_estimate, max_tokens=max_tokens)
             t0 = time.monotonic()
             try:
                 reply = self.ctx.llm.chat(messages, tools=self.tool_schemas or None, effort=self.effort,
