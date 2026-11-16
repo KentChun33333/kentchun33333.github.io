@@ -68,13 +68,16 @@ def ask(ctx: ToolContext, parts: list[dict[str, Any]], label: str, *,
         agent.output_retries = 0
         agent.validate_reply = validate
         agent.density = max(1.0, ctx.density)
-        result = ""
+        result, outcome = "", "failed"
+        ctx.events.subagent_start(agent.name, session.id, label)
         try:
             result = agent.run(parts)
             if agent.last_finish != "stop":
                 raise IncompleteReply(f"document reply did not complete (finish={agent.last_finish!r})")
+            outcome = "done"
         except IncompleteReply as exc:
             if attempt < retries:
+                outcome = "retrying"
                 continue
             raise ToolError(f"{label}: document reply remained incomplete or invalid after "
                             f"{attempt + 1} attempts; incomplete content was not cached.") from exc
@@ -82,6 +85,7 @@ def ask(ctx: ToolContext, parts: list[dict[str, Any]], label: str, *,
             raise ToolError(f"{label}: document request failed; incomplete content was not cached. {exc}") from exc
         finally:
             agent.close()
+            ctx.events.subagent_end(agent.name, session.id, outcome)
         return result
     raise ToolError(f"{label}: no document reply attempts were allowed.")
 

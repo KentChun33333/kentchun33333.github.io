@@ -561,6 +561,34 @@ Settings load as for `kentc-agent` (`~/.config/kentc-agent/config.yaml`,
 `<workspace>/.kentc-agent/config.yaml`, `KENTC_AGENT_*`). The tools are the CLI chat's core
 tools plus `web_search`. Chats run concurrently, and each chat runs one prompt at a time.
 
+## Kent WebIO (workspace chat with tasks and HTML outputs)
+
+A local browser chat over `kentc_agent`, organised around **tasks**: each task has its own work folder,
+conversation and context history, plus an HTML output viewer. Loopback only.
+
+```sh
+uv run kent-webio --workspace ./webio-workspace            # open http://127.0.0.1:8091
+# also: --port, --provider openai|qwen38|openrouter, --model, --base-url, --profile-root DIR
+```
+
+- **Tools:** `read`, `write`, `edit`, `list_files` and `read_pdf_text` (local embedded PDF text with page labels),
+  confined to the workspace; the agent's state folder is protected. No `bash` or `web_search`.
+- **Tasks & files → New task** creates a separate work folder and conversation. New tasks can select a persona,
+  skills and a YAML workflow from the trusted profile catalog: `personas/*.md`, `skills/*.md`,
+  `skills/*/SKILL.md`, `workflows/*.yaml` and the bundled `config/cli/workflows/` (another catalog:
+  `--profile-root`). Selected instructions and workflow definitions are copied into the task when it is created;
+  task agents skip the workspace `AGENTS.md`. **Close task** / **Reopen task** track case status.
+- **Run workflow** collects declared inputs and runs the YAML workflow engine inside the task folder with the
+  WebIO tools; steps needing `bash` or web research cannot run here. **Review step** answers human gates;
+  failed or interrupted workflows resume from their first unfinished step.
+- **Inspector:** *Current* shows retained context and estimated usage; *Last request* the latest model input;
+  *Activity* workflow steps, run timeline and document sub-agent sessions; *Output* previews workspace
+  `.html`/`.htm` files (successful HTML writes also appear as Preview/Download cards under the reply).
+- Uploads: any file type, up to 128 MiB each. Markdown replies are rendered after streaming; typed HTML stays
+  literal. **Compress now** forces compaction; **Clear chat** archives the conversation.
+- State: `.kentc-agent/webio/` (active chat, archived chats, tasks under `webio/tasks/`). Settings load as for
+  `kentc-agent`; compaction, topic notes, preflight and incremental file writes are the same agent runtime.
+
 ## Agentic Studio (web UI)
 
 A web front end in the style of `ter-bank-multi-agent-flow-v15.html` on a FastAPI backend. One studio serves
@@ -1194,6 +1222,7 @@ environment settings are `KENTC_AGENT_VERIFY_TLS` and `KENTC_AGENT_TRUST_ENV`.
 | `src/kentc_studio/{providers,store,models,config,data,report}.py` | local (skills + contract, run on the workflow engine) / HTTP agents, atomic persistence, domain model, studio config, SQL pulls, view → Markdown |
 | `web/` | studio front end: `index.html`, `assets/css/app.css`, `assets/js/app.js` (one block renderer for every app) |
 | `src/kentc_breezeman/` | Breezeman chat (`kentc-breezeman`): `runtime.py` chats (one main agent each, worker-thread runs, event fan-out, stop), `workspace.py` tree/uploads/previews, `app.py` REST + WebSocket |
+| `src/kent_webio/` | Kent WebIO (`kent-webio`): `server.py` FastAPI app + SSE events, `runtime.py` chat/workflow runs and context view, `tasks.py` task folders, `profiles.py` persona/skill/workflow catalog, `workspace.py` confined tools, `markdown.py` safe rendering, `static/` UI |
 | `web/breezeman/` | Breezeman front end: `index.html`, `assets/breezeman.{css,js}` (studio palette, no build step) |
 | `docs/` | design explainer in Traditional Chinese: `index.html`, `asset/css/core.css`, `asset/js/core.js` (interactive calculators run in the browser only) |
 | `config/studio.yaml`, `config/apps/`, `config/cli/workflows/`, `queries/` | studio config (apps, skill library, databases, data pulls); app manifests with their agents; CLI workflows; the pull SQL |

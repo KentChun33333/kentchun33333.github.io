@@ -64,7 +64,7 @@ from jinja2 import StrictUndefined, TemplateError
 from jinja2.sandbox import SandboxedEnvironment
 
 from .adapters.session import Session
-from .adapters.tools import CORE_TOOLS, ToolContext, ToolError, inside, reject_unsupported, rel, resolve
+from .adapters.tools import CORE_TOOLS, Tool, ToolContext, ToolError, inside, reject_unsupported, rel, resolve
 from .adapters.web_research import run_web_agent
 from .agent import Aborted, Agent, build_tools
 from .checks import check_rules
@@ -328,6 +328,8 @@ def _pretty_json(value: Any) -> str:
 
 # ---------------------------------------------------------------------- running
 class Runner:
+    agent_type = Agent   # hooks for embedders (kent_webio): agent class, step tools, output writer
+
     def __init__(self, wf: Workflow, ctx: ToolContext, inputs: dict[str, Any], run_dir: Path, *,
                  ask_user: AskUser | None = None, answers: dict[str, str] | None = None) -> None:
         self.wf, self.ctx, self.inputs, self.dir = wf, ctx, inputs, run_dir
@@ -341,9 +343,18 @@ class Runner:
         self.env.globals.update(glob=self._glob, read_file=self._read_file, documents=self._documents)
         self.env.filters.update(fromjson=json.loads, json=_pretty_json, slug=_slug)
         log = run_dir / "session.jsonl"
-        self.agent = Agent(ctx, tools=[], session=Session.load(log) if log.is_file() else Session(log),
-                           instructions="\n\n".join(t for t in (self.render(wf.instructions), wf.skills) if t),
-                           name=wf.name)
+        self.agent = self.agent_type(ctx, tools=[], session=Session.load(log) if log.is_file() else Session(log),
+                                     instructions="\n\n".join(t for t in (self.render(wf.instructions), wf.skills)
+                                                              if t),
+                                     name=wf.name)
+
+    def _tools(self, names: list[str] | None) -> list[Tool]:
+        return build_tools(names)
+
+    def _write_output(self, path: str, text: str) -> None:
+        target = inside(self.ctx, path)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text, encoding="utf-8")
 
     # -------------------------------------------------------------- template helpers
     def _glob(self, pattern: str) -> list[str]:
@@ -438,9 +449,7 @@ class Runner:
                 else:
                     rec["output"] = self._ask(step)
                 if step.spec.get("output") and step.kind != "web":   # a web step writes its own brief file(s)
-                    target = inside(self.ctx, self.render(step.spec["output"]))
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    target.write_text(rec["output"], encoding="utf-8")
+                    self._write_output(self.render(step.spec["output"]), rec["output"])
                 rec.update(status="done", finished=time.time())
             except NeedsAnswer as e:
                 rec.update(status="waiting")
@@ -463,7 +472,7 @@ class Runner:
         """One step of the main agent, with final JSON validated before it enters the live context."""
         spec, wf = step.spec, self.wf
         names = spec.get("tools", wf.tools)
-        self.agent.set_tools(build_tools(names))
+        self.agent.set_tools(self._tools(names))
         self.agent.name = step.id
         budget = _first(spec.get("max_turns"), wf.max_turns, self.ctx.settings.max_turns)   # 0: no limit
         self.agent.max_turns = budget

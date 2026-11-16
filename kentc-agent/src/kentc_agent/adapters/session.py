@@ -90,6 +90,7 @@ class Session:
         self.next_id = 0
         self.core: dict[str, str] = {}
         self.requirements: list[str] = []  # user-pinned text, kept verbatim across compaction and resume
+        self.compactions = 0                # committed compactions, including replayed ones
         self._root: Path | None = None
         self._topics: dict[str, dict[str, str]] = {}
         self._index: dict[str, str] | None = None
@@ -160,6 +161,7 @@ class Session:
                         raise ValueError("topic index missing from checkpoint")
                     session._drop_before(first)
                     session.summary = summary
+                    session.compactions += 1
                 elif kind == "arguments":
                     if type(entry["id"]) is not int or entry["id"] not in session.ids:
                         raise ValueError("argument replacement for an unknown message")
@@ -376,6 +378,7 @@ class Session:
         self._index = index
         self.summary = result.checkpoint
         self._drop_before(first_id)
+        self.compactions += 1
 
     def _drop_before(self, first_kept_id: int) -> None:
         keep = [i for i, mid in enumerate(self.ids) if mid >= first_kept_id]
