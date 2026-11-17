@@ -17,7 +17,7 @@ from typing import Any
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.concurrency import run_in_threadpool
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from kentc_agent.adapters.llm import LLMError
@@ -96,6 +96,18 @@ def create_app(runtime: Runtime, token: str = "") -> FastAPI:
     @app.get("/api/file")
     def file(path: str) -> dict[str, Any]:
         return bad_request(wsfiles.preview, ws_root, path)
+
+    @app.get("/api/file/raw")
+    def file_raw(path: str) -> Response:
+        resolved = bad_request(wsfiles.inside, ws_root, path)
+        if not resolved.is_file():
+            raise HTTPException(400, f"not a file: {path}")
+        media = "text/html; charset=utf-8" if resolved.suffix.lower() in {".html", ".htm"} else "text/plain; charset=utf-8"
+        return Response(
+            content=resolved.read_bytes(),
+            media_type=media,
+            headers={"Content-Security-Policy": "sandbox allow-scripts"},
+        )
 
     @app.post("/api/upload")
     async def upload(folder: str = Form(""), files: list[UploadFile] = File(...)) -> dict[str, Any]:

@@ -81,11 +81,13 @@
       const l = lines[i];
       let m;
       if (/^\s*```/.test(l)) {
+        const lang = l.replace(/^\s*```/, '').trim().toLowerCase();
         const buf = [];
         i++;
         while (i < lines.length && !/^\s*```\s*$/.test(lines[i])) buf.push(lines[i++]);
         i++;
-        out.push(`<pre><button class="copy" type="button">copy</button><code>${buf.join('\n')}</code></pre>`);
+        const previewBtn = (lang === 'html' || lang === 'htm') ? '<button class="preview-html" type="button">preview</button>' : '';
+        out.push(`<pre><div class="pre-actions">${previewBtn}<button class="copy" type="button">copy</button></div><code>${buf.join('\n')}</code></pre>`);
       } else if (!l.trim()) {
         i++;
       } else if ((m = l.match(/^(#{1,6})\s+(.*)$/))) {
@@ -128,9 +130,17 @@
   }
   const md = src => blocks(esc(src).split('\n'));
   document.addEventListener('click', e => {
-    const b = e.target.closest('pre .copy');
-    if (!b) return;
-    navigator.clipboard?.writeText(b.nextElementSibling.textContent).then(() => toast('Copied'));
+    const copyBtn = e.target.closest('pre .copy');
+    if (copyBtn) {
+      const code = copyBtn.closest('pre')?.querySelector('code')?.textContent ?? '';
+      navigator.clipboard?.writeText(code).then(() => toast('Copied'));
+      return;
+    }
+    const pvBtn = e.target.closest('pre .preview-html');
+    if (pvBtn) {
+      const html = pvBtn.closest('pre')?.querySelector('code')?.textContent ?? '';
+      showHtmlDialog('HTML output', fmtSize(html.length), html);
+    }
   });
 
   // ---------------------------------------------------------------- state
@@ -307,22 +317,63 @@
 
   // preview
   let previewPath = null;
+  let previewHtml = null;
+  function renderPreviewHtml(mode) {
+    const body = $('#pvBody');
+    $$('#pvTabs .seg').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    if (mode === 'render') {
+      body.classList.add('html-mode');
+      body.innerHTML = '';
+      const frame = document.createElement('iframe');
+      frame.className = 'html-frame';
+      frame.sandbox = 'allow-scripts';
+      frame.srcdoc = previewHtml ?? '';
+      body.append(frame);
+    } else {
+      body.classList.remove('html-mode');
+      body.innerHTML = `<pre>${esc(previewHtml ?? '')}</pre>`;
+    }
+  }
   async function openPreview(path) {
     try {
       const f = await api(`/api/file?path=${encodeURIComponent(path)}`);
+      if (!f.binary && (f.ext === '.html' || f.ext === '.htm')) {
+        const html = f.truncated ? await api(`/api/file/raw?path=${encodeURIComponent(path)}`) : f.text;
+        showHtmlDialog(f.path, fmtSize(f.size), html, path);
+        return;
+      }
       showDialog(f.path, `${fmtSize(f.size)}${f.truncated ? ' · preview truncated' : ''}`,
         f.binary ? `<div class="placeholder">${esc(f.ext || 'binary')} file · ${fmtSize(f.size)}<br>No text preview. Attach it: the agent reads PDFs, Office files, images and e-mail through its document sub-agent.</div>`
           : f.ext === '.md' ? `<div class="md">${md(f.text)}</div>` : `<pre>${esc(f.text)}</pre>`, path);
     } catch (e) { toast(e.message, true); }
   }
-  function showDialog(title, meta, html, attachPath = null) {
+  function showHtmlDialog(title, meta, html, attachPath = null) {
     previewPath = attachPath;
+    previewHtml = html;
     $('#pvName').textContent = title;
     $('#pvMeta').textContent = meta;
+    $('#pvTabs').hidden = false;
+    $('#pvAttach').hidden = !attachPath;
+    $('#preview').classList.add('is-html');
+    renderPreviewHtml('render');
+    $('#preview').showModal();
+  }
+  function showDialog(title, meta, html, attachPath = null) {
+    previewPath = attachPath;
+    previewHtml = null;
+    $('#pvName').textContent = title;
+    $('#pvMeta').textContent = meta;
+    $('#pvTabs').hidden = true;
+    $('#preview').classList.remove('is-html');
+    $('#pvBody').classList.remove('html-mode');
     $('#pvBody').innerHTML = html;
     $('#pvAttach').hidden = !attachPath;
     $('#preview').showModal();
   }
+  $('#pvTabs').onclick = e => {
+    const b = e.target.closest('button[data-mode]');
+    if (b && previewHtml != null) renderPreviewHtml(b.dataset.mode);
+  };
   $('#pvClose').onclick = () => $('#preview').close();
   $('#preview').addEventListener('click', e => { if (e.target === $('#preview')) $('#preview').close(); });
   $('#pvAttach').onclick = () => { if (previewPath) attach(previewPath); $('#preview').close(); };

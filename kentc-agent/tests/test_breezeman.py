@@ -171,3 +171,17 @@ def test_attachments_must_be_workspace_files(tmp_path, path):
             ws.send_json({"type": "chat", "text": "read it", "attachments": [path]})
             event = ws.receive_json()
             assert event["type"] == "error" and "run" not in event
+
+
+def test_raw_file_endpoint_serves_sandboxed_html(tmp_path):
+    (tmp_path / "report.html").write_text("<h1>Hello</h1>", encoding="utf-8")
+    (tmp_path / STATE_DIR).mkdir()
+    (tmp_path / STATE_DIR / "secret.html").write_text("secret", encoding="utf-8")
+    with client(tmp_path, StreamingLLM()) as c:
+        r = c.get("/api/file/raw", params={"path": "report.html"})
+        assert r.status_code == 200
+        assert r.text == "<h1>Hello</h1>"
+        assert r.headers["content-type"].startswith("text/html")
+        assert r.headers["content-security-policy"] == "sandbox allow-scripts"
+        assert c.get("/api/file/raw", params={"path": "../etc/passwd"}).status_code == 400
+        assert c.get("/api/file/raw", params={"path": f"{STATE_DIR}/secret.html"}).status_code == 400
