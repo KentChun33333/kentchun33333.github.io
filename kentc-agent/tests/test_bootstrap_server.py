@@ -150,3 +150,37 @@ def test_bash_websocket_requires_auth_and_runs_commands(server_url):
         assert "WS_BASH_OK" in collected
     finally:
         sock.close()
+
+
+def test_root_switching(tmp_path):
+    dir_a = tmp_path / "a"
+    dir_b = tmp_path / "b"
+    dir_a.mkdir()
+    dir_b.mkdir()
+    (dir_b / "hello.txt").write_text("hi")
+
+    # Locked by default
+    srv_locked = ThreadingHTTPServer(("127.0.0.1", 0), MOD.make_handler(dir_a, "tok"))
+    t = threading.Thread(target=srv_locked.serve_forever, daemon=True)
+    t.start()
+    try:
+        h, p = srv_locked.server_address
+        assert req(h, p, "POST", "/api/root", body=json.dumps({"path": str(dir_b)}), headers={"X-Token": "tok"})[0] == 403
+    finally:
+        srv_locked.shutdown()
+        srv_locked.server_close()
+
+    # Enabled when allow_root_switch=True
+    srv_open = ThreadingHTTPServer(("127.0.0.1", 0), MOD.make_handler(dir_a, "tok", allow_root_switch=True))
+    t2 = threading.Thread(target=srv_open.serve_forever, daemon=True)
+    t2.start()
+    try:
+        h, p = srv_open.server_address
+        status, raw = req(h, p, "POST", "/api/root", body=json.dumps({"path": str(dir_b)}), headers={"X-Token": "tok"})
+        assert status == 200
+        status, raw = req(h, p, "GET", "/api/list", headers={"X-Token": "tok"})
+        assert status == 200
+        assert [e["name"] for e in json.loads(raw)["entries"]] == ["hello.txt"]
+    finally:
+        srv_open.shutdown()
+        srv_open.server_close()

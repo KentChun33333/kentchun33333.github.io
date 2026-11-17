@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bootstrap File Server</title>
+<style>
+  :root { --bg: #f6f7f9; --card: #fff; --ink: #181a1f; --muted: #656d76; --line: #d8dee4; --accent: #0969da; --danger: #cf222e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 1160px; margin: 24px auto; padding: 0 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .between { justify-content: space-between; }
+  h1 { margin: 0; font-size: 18px; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }
+  .muted { color: var(--muted); }
+  input[type=text], input[type=password] { padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; font: inherit; }
+  button { padding: 7px 12px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); cursor: pointer; font: inherit; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.danger { color: var(--danger); border-color: #f0b8bd; }
+  button.sm { padding: 4px 8px; font-size: 12px; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .fm-grid { display: grid; grid-template-columns: 260px 1fr; gap: 14px; align-items: start; }
+  @media (max-width: 780px) { .fm-grid { grid-template-columns: 1fr; } }
+  .tree-pane { border: 1px solid var(--line); border-radius: 8px; padding: 10px; max-height: 440px; overflow: auto; background: #fafbfc; }
+  .tree-head { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .04em; }
+  .tree-row { display: flex; align-items: center; gap: 4px; padding: 3px 6px; border-radius: 5px; cursor: pointer; user-select: none; }
+  .tree-row:hover { background: #eaeef2; }
+  .tree-row.active { background: #ddf4ff; color: var(--accent); font-weight: 600; }
+  .tree-tog { width: 16px; text-align: center; font-size: 11px; color: var(--muted); flex: none; }
+  .tree-lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tree-kids { margin-left: 14px; border-left: 1px solid #e1e4e8; padding-left: 4px; }
+  .crumbs { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .crumb { border: 0; background: none; padding: 2px 5px; color: var(--accent); border-radius: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }
+  .crumb:hover { background: #eaeef2; }
+  .root-bar { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .root-bar input { flex: 1; min-width: 220px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+  th { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .name-btn { border: 0; background: none; padding: 0; color: var(--accent); font-weight: 500; text-align: left; }
+  .progress { width: 100%; height: 8px; background: #eaeef2; border-radius: 99px; overflow: hidden; margin-top: 8px; display: none; }
+  .progress > i { display: block; height: 100%; width: 0%; background: var(--accent); transition: width .1s; }
+  .status { margin-top: 8px; font-size: 13px; }
+  .err { color: var(--danger); }
+  .term { background: #14171c; color: #e6edf3; border-radius: 8px; padding: 10px 12px; height: 280px; overflow: auto; margin: 10px 0 8px; white-space: pre-wrap; word-break: break-word; font: 12.5px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .term-bar { display: flex; gap: 8px; }
+  .term-bar input { flex: 1; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="row between">
+      <div>
+        <h1>Bootstrap File Server</h1>
+        <div class="muted mono" id="rootPath"></div>
+      </div>
+      <div class="row">
+        <input id="tokenInput" type="password" placeholder="API Token" size="24">
+        <button id="saveTokenBtn">Connect</button>
+      </div>
+    </div>
+    <div class="row root-bar" id="rootBar" hidden>
+      <strong>Root:</strong>
+      <input id="rootInput" class="mono" type="text" placeholder="Enter root directory (e.g. ~, /, /tmp)">
+      <button id="setRootBtn">Go</button>
+      <button id="homeRootBtn" class="sm" title="Switch root to Home (~)">~</button>
+      <button id="fsRootBtn" class="sm" title="Switch root to /">/</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="fm-grid">
+      <div class="tree-pane">
+        <div class="row between" style="margin-bottom:6px;">
+          <span class="tree-head" style="margin:0;">Folder Tree</span>
+          <button id="treeRefreshBtn" class="sm">↻</button>
+        </div>
+        <div id="treeRoot"></div>
+      </div>
+      <div>
+        <div class="row between">
+          <div class="row">
+            <strong>Path:</strong>
+            <div class="crumbs" id="crumbs"></div>
+            <button id="upBtn" class="sm">.. Up</button>
+            <button id="refreshBtn" class="sm">Refresh</button>
+          </div>
+          <div class="row">
+            <input id="mkdirInput" type="text" placeholder="New folder name">
+            <button id="mkdirBtn">Create Folder</button>
+          </div>
+        </div>
+        <div class="row" style="margin-top: 12px;">
+          <input id="fileInput" type="file" multiple>
+          <label class="row muted"><input id="overwriteChk" type="checkbox" checked> Overwrite existing</label>
+          <button class="primary" id="uploadBtn">Upload Selected</button>
+        </div>
+        <div class="progress" id="progWrap"><i id="progBar"></i></div>
+        <div class="status" id="status"></div>
+        <table>
+          <thead><tr><th>Name</th><th>Type</th><th>Size</th><th>Actions</th></tr></thead>
+          <tbody id="listBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row between">
+      <div class="row">
+        <strong>Bash Terminal</strong>
+        <span class="muted mono" id="termState">disconnected</span>
+      </div>
+      <div class="row">
+        <button id="termConnBtn" class="primary">Connect Bash</button>
+        <button id="termCtrlCBtn" disabled>Ctrl+C</button>
+        <button id="termClearBtn">Clear</button>
+      </div>
+    </div>
+    <pre class="term" id="termOut"></pre>
+    <div class="term-bar">
+      <input id="termIn" type="text" placeholder="Type bash command and press Enter (e.g. ls -la, conda --version)" disabled>
+      <button id="termSendBtn" disabled>Run</button>
+    </div>
+  </div>
+</div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  let cwd = '';
+  const urlToken = new URLSearchParams(location.search).get('token') || '';
+  let token = urlToken || sessionStorage.getItem('bootstrap_token') || '';
+  if (urlToken) sessionStorage.setItem('bootstrap_token', token);
+  $('tokenInput').value = token;
+  const currentToken = () => {
+    const v = $('tokenInput').value.trim();
+    if (v !== token) {
+      token = v;
+      sessionStorage.setItem('bootstrap_token', token);
+    }
+    return token;
+  };
+
+  const setStatus = (msg, isErr = false) => {
+    const el = $('status');
+    el.textContent = msg;
+    el.className = isErr ? 'status err' : 'status muted';
+  };
+  const headers = () => {
+    const t = currentToken();
+    return t ? { 'X-Token': t } : {};
+  };
+  const joinPath = (dir, name) => (dir ? `${dir}/${name}` : name);
+  const fmtSize = n => (n == null ? '—' : n < 1024 ? `${n} B` : n < 1048576 ? `${(n/1024).toFixed(1)} KB` : `${(n/1048576).toFixed(1)} MB`);
+
+  async function api(url, opts = {}) {
+    const res = await fetch(url, { ...opts, headers: { ...headers(), ...(opts.headers || {}) } });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || res.statusText);
+    return data;
+  }
+
+  const openDirs = new Set(['']);
+  function renderCrumbs(dir) {
+    const box = $('crumbs');
+    box.innerHTML = '';
+    const mk = (label, target) => {
+      const b = document.createElement('button');
+      b.className = 'crumb';
+      b.textContent = label;
+      b.onclick = () => load(target);
+      return b;
+    };
+    box.appendChild(mk('root', ''));
+    if (!dir) return;
+    let acc = '';
+    for (const part of dir.split('/')) {
+      acc = acc ? `${acc}/${part}` : part;
+      const sep = document.createElement('span');
+      sep.className = 'muted';
+      sep.textContent = '/';
+      box.append(sep, mk(part, acc));
+    }
+  }
+
+  async function renderTreeNode(dir, label, container) {
+    const row = document.createElement('div');
+    row.className = `tree-row mono${cwd === dir ? ' active' : ''}`;
+    const tog = document.createElement('span');
+    tog.className = 'tree-tog';
+    const isOpen = openDirs.has(dir);
+    tog.textContent = isOpen ? '▾' : '▸';
+    const lbl = document.createElement('span');
+    lbl.className = 'tree-lbl';
+    lbl.textContent = label;
+    row.append(tog, lbl);
+    container.appendChild(row);
+
+    const kids = document.createElement('div');
+    kids.className = 'tree-kids';
+    kids.hidden = !isOpen;
+    container.appendChild(kids);
+
+    const loadKids = async () => {
+      try {
+        const data = await api(`/api/list?path=${encodeURIComponent(dir)}`);
+        kids.innerHTML = '';
+        for (const e of data.entries.filter(x => x.dir)) {
+          await renderTreeNode(e.path, e.name, kids);
+        }
+      } catch { /* ignore */ }
+    };
+
+    tog.onclick = async ev => {
+      ev.stopPropagation();
+      if (openDirs.has(dir)) { openDirs.delete(dir); kids.hidden = true; tog.textContent = '▸'; }
+      else { openDirs.add(dir); kids.hidden = false; tog.textContent = '▾'; await loadKids(); }
+    };
+    row.onclick = () => {
+      openDirs.add(dir);
+      load(dir);
+    };
+    if (isOpen) await loadKids();
+  }
+
+  async function refreshTree() {
+    const rootEl = $('treeRoot');
+    rootEl.innerHTML = '';
+    await renderTreeNode('', '/', rootEl);
+  }
+
+  async function load(dir = cwd) {
+    try {
+      const data = await api(`/api/list?path=${encodeURIComponent(dir)}`);
+      cwd = data.path;
+      $('rootPath').textContent = `root: ${data.root}`;
+      $('rootBar').hidden = !data.allowRootSwitch;
+      if (data.allowRootSwitch) $('rootInput').value = data.root;
+      renderCrumbs(cwd);
+      $('upBtn').disabled = !cwd;
+      const body = $('listBody');
+      body.innerHTML = '';
+      for (const e of data.entries) {
+        const tr = document.createElement('tr');
+        const tdName = document.createElement('td');
+        if (e.dir) {
+          const b = document.createElement('button');
+          b.className = 'name-btn mono';
+          b.textContent = `${e.name}/`;
+          b.onclick = () => { openDirs.add(e.path); load(e.path); };
+          tdName.appendChild(b);
+        } else {
+          const s = document.createElement('span');
+          s.className = 'mono';
+          s.textContent = e.name;
+          tdName.appendChild(s);
+        }
+        const tdType = document.createElement('td');
+        tdType.textContent = e.dir ? 'folder' : 'file';
+        const tdSize = document.createElement('td');
+        tdSize.className = 'mono';
+        tdSize.textContent = fmtSize(e.size);
+        const tdAct = document.createElement('td');
+        const del = document.createElement('button');
+        del.className = 'danger';
+        del.textContent = e.dir ? 'Delete Folder' : 'Delete';
+        del.onclick = async () => {
+          if (!confirm(`Delete ${e.dir ? 'folder' : 'file'} "${e.path}"?`)) return;
+          try {
+            await api(`/api/entry?path=${encodeURIComponent(e.path)}`, { method: 'DELETE' });
+            setStatus(`Deleted ${e.path}`);
+            await load(cwd);
+          } catch (err) { setStatus(err.message, true); }
+        };
+        tdAct.appendChild(del);
+        tr.append(tdName, tdType, tdSize, tdAct);
+        body.appendChild(tr);
+      }
+      if (!data.entries.length) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="4" class="muted">Empty folder</td>';
+        body.appendChild(tr);
+      }
+      await refreshTree();
+    } catch (err) {
+      setStatus(err.message, true);
+    }
+  }
+
+  function uploadOne(file, relPath, overwrite) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('PUT', `/api/file?path=${encodeURIComponent(relPath)}&overwrite=${overwrite ? '1' : '0'}`);
+      if (token) xhr.setRequestHeader('X-Token', token);
+      xhr.upload.onprogress = ev => {
+        if (ev.lengthComputable) $('progBar').style.width = `${Math.round((ev.loaded / ev.total) * 100)}%`;
+      };
+      xhr.onload = () => {
+        const data = (() => { try { return JSON.parse(xhr.responseText); } catch { return {}; } })();
+        if (xhr.status >= 200 && xhr.status < 300) resolve(data);
+        else reject(new Error(data.error || xhr.statusText));
+      };
+      xhr.onerror = () => reject(new Error('Network error during upload'));
+      xhr.send(file);
+    });
+  }
+
+  const switchRoot = async targetPath => {
+    try {
+      const res = await api('/api/root', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: targetPath }),
+      });
+      openDirs.clear();
+      openDirs.add('');
+      setStatus(`Root switched to ${res.root}`);
+      await load('');
+    } catch (err) { setStatus(err.message, true); }
+  };
+  $('setRootBtn').onclick = () => switchRoot($('rootInput').value.trim());
+  $('rootInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('setRootBtn').click(); } });
+  $('homeRootBtn').onclick = () => switchRoot('~');
+  $('fsRootBtn').onclick = () => switchRoot('/');
+  $('treeRefreshBtn').onclick = refreshTree;
+
+  $('saveTokenBtn').onclick = () => {
+    currentToken();
+    setStatus('Token saved');
+    load(cwd);
+  };
+  $('tokenInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('saveTokenBtn').click(); } });
+  $('upBtn').onclick = () => load(cwd.split('/').slice(0, -1).join('/'));
+  $('refreshBtn').onclick = () => load(cwd);
+  $('mkdirBtn').onclick = async () => {
+    const name = $('mkdirInput').value.trim();
+    if (!name) return;
+    try {
+      await api('/api/mkdir', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: joinPath(cwd, name) }) });
+      $('mkdirInput').value = '';
+      setStatus(`Created folder ${name}`);
+      load(cwd);
+    } catch (err) { setStatus(err.message, true); }
+  };
+  $('uploadBtn').onclick = async () => {
+    const files = [...$('fileInput').files];
+    if (!files.length) return setStatus('Select at least one file', true);
+    const overwrite = $('overwriteChk').checked;
+    $('progWrap').style.display = 'block';
+    try {
+      for (const f of files) {
+        $('progBar').style.width = '0%';
+        setStatus(`Uploading ${f.name}...`);
+        await uploadOne(f, joinPath(cwd, f.name), overwrite);
+      }
+      $('fileInput').value = '';
+      setStatus(`Uploaded ${files.length} file(s)`);
+      load(cwd);
+    } catch (err) {
+      setStatus(err.message, true);
+    } finally {
+      setTimeout(() => { $('progWrap').style.display = 'none'; }, 500);
+    }
+  };
+  load('');
+
+  let ws = null;
+  const stripAnsi = s => s.replace(/\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g, '');
+  const appendTerm = txt => {
+    const out = $('termOut');
+    out.textContent += stripAnsi(txt).replace(/\r\n/g, '\n').replace(/\r/g, '');
+    out.scrollTop = out.scrollHeight;
+  };
+  const setTermConnected = on => {
+    $('termState').textContent = on ? 'connected' : 'disconnected';
+    $('termConnBtn').textContent = on ? 'Disconnect' : 'Connect Bash';
+    $('termIn').disabled = !on;
+    $('termSendBtn').disabled = !on;
+    $('termCtrlCBtn').disabled = !on;
+    if (on) $('termIn').focus();
+  };
+  const sendTerm = data => {
+    if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'input', data }));
+  };
+  $('termConnBtn').onclick = () => {
+    if (ws && ws.readyState <= WebSocket.OPEN) { ws.close(); return; }
+    const t = currentToken();
+    if (!t) { appendTerm('\n[enter API token above first]\n'); $('tokenInput').focus(); return; }
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(`${proto}//${location.host}/ws/bash?token=${encodeURIComponent(t)}`);
+    ws.onopen = () => {
+      setTermConnected(true);
+      ws.send(JSON.stringify({ type: 'resize', cols: 110, rows: 28 }));
+    };
+    ws.onmessage = ev => appendTerm(ev.data);
+    ws.onclose = ev => {
+      setTermConnected(false);
+      appendTerm(ev.wasClean ? '\n[disconnected]\n' : '\n[connection closed — check API token]\n');
+    };
+    ws.onerror = () => appendTerm('\n[websocket error — check API token]\n');
+  };
+  const runCmd = () => {
+    const v = $('termIn').value;
+    sendTerm(v + '\n');
+    $('termIn').value = '';
+  };
+  $('termSendBtn').onclick = runCmd;
+  $('termIn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); runCmd(); } });
+  $('termCtrlCBtn').onclick = () => sendTerm('\x03');
+  $('termClearBtn').onclick = () => { $('termOut').textContent = ''; };
+})();
+</script>
+</body>
+</html>

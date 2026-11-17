@@ -31,299 +31,7 @@ from pathlib import Path
 CHUNK_BYTES = 1024 * 1024
 WS_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 
-HTML_UI = r"""<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bootstrap File Server</title>
-<style>
-  :root { --bg: #f6f7f9; --card: #fff; --ink: #181a1f; --muted: #656d76; --line: #d8dee4; --accent: #0969da; --danger: #cf222e; }
-  * { box-sizing: border-box; }
-  body { margin: 0; font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
-  .wrap { max-width: 900px; margin: 28px auto; padding: 0 16px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
-  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .between { justify-content: space-between; }
-  h1 { margin: 0; font-size: 18px; }
-  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }
-  .muted { color: var(--muted); }
-  input[type=text], input[type=password] { padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; font: inherit; }
-  button { padding: 7px 12px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); cursor: pointer; font: inherit; }
-  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-  button.danger { color: var(--danger); border-color: #f0b8bd; }
-  button:disabled { opacity: .5; cursor: not-allowed; }
-  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); }
-  th { font-size: 12px; color: var(--muted); font-weight: 600; }
-  .name-btn { border: 0; background: none; padding: 0; color: var(--accent); font-weight: 500; text-align: left; }
-  .progress { width: 100%; height: 8px; background: #eaeef2; border-radius: 99px; overflow: hidden; margin-top: 8px; display: none; }
-  .progress > i { display: block; height: 100%; width: 0%; background: var(--accent); transition: width .1s; }
-  .status { margin-top: 8px; font-size: 13px; }
-  .err { color: var(--danger); }
-  .term { background: #14171c; color: #e6edf3; border-radius: 8px; padding: 10px 12px; height: 280px; overflow: auto; margin: 10px 0 8px; white-space: pre-wrap; word-break: break-word; font: 12.5px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; }
-  .term-bar { display: flex; gap: 8px; }
-  .term-bar input { flex: 1; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-</style>
-</head>
-<body>
-<div class="wrap">
-  <div class="card">
-    <div class="row between">
-      <div>
-        <h1>Bootstrap File Server</h1>
-        <div class="muted mono" id="rootPath"></div>
-      </div>
-      <div class="row">
-        <input id="tokenInput" type="password" placeholder="API Token" size="24">
-        <button id="saveTokenBtn">Connect</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="row between">
-      <div class="row">
-        <strong>Path:</strong>
-        <span class="mono" id="cwdLabel">/</span>
-        <button id="upBtn">.. Up</button>
-        <button id="refreshBtn">Refresh</button>
-      </div>
-      <div class="row">
-        <input id="mkdirInput" type="text" placeholder="New folder name">
-        <button id="mkdirBtn">Create Folder</button>
-      </div>
-    </div>
-    <div class="row" style="margin-top: 12px;">
-      <input id="fileInput" type="file" multiple>
-      <label class="row muted"><input id="overwriteChk" type="checkbox" checked> Overwrite existing</label>
-      <button class="primary" id="uploadBtn">Upload Selected</button>
-    </div>
-    <div class="progress" id="progWrap"><i id="progBar"></i></div>
-    <div class="status" id="status"></div>
-    <table>
-      <thead><tr><th>Name</th><th>Type</th><th>Size</th><th>Actions</th></tr></thead>
-      <tbody id="listBody"></tbody>
-    </table>
-  </div>
-
-  <div class="card">
-    <div class="row between">
-      <div class="row">
-        <strong>Bash Terminal</strong>
-        <span class="muted mono" id="termState">disconnected</span>
-      </div>
-      <div class="row">
-        <button id="termConnBtn" class="primary">Connect Bash</button>
-        <button id="termCtrlCBtn" disabled>Ctrl+C</button>
-        <button id="termClearBtn">Clear</button>
-      </div>
-    </div>
-    <pre class="term" id="termOut"></pre>
-    <div class="term-bar">
-      <input id="termIn" type="text" placeholder="Type bash command and press Enter (e.g. ls -la, conda --version)" disabled>
-      <button id="termSendBtn" disabled>Run</button>
-    </div>
-  </div>
-</div>
-<script>
-(() => {
-  const $ = id => document.getElementById(id);
-  let cwd = '';
-  const urlToken = new URLSearchParams(location.search).get('token') || '';
-  let token = urlToken || sessionStorage.getItem('bootstrap_token') || '';
-  if (urlToken) sessionStorage.setItem('bootstrap_token', token);
-  $('tokenInput').value = token;
-  const currentToken = () => {
-    const v = $('tokenInput').value.trim();
-    if (v !== token) {
-      token = v;
-      sessionStorage.setItem('bootstrap_token', token);
-    }
-    return token;
-  };
-
-  const setStatus = (msg, isErr = false) => {
-    const el = $('status');
-    el.textContent = msg;
-    el.className = isErr ? 'status err' : 'status muted';
-  };
-  const headers = () => {
-    const t = currentToken();
-    return t ? { 'X-Token': t } : {};
-  };
-  const joinPath = (dir, name) => (dir ? `${dir}/${name}` : name);
-  const fmtSize = n => (n == null ? '—' : n < 1024 ? `${n} B` : n < 1048576 ? `${(n/1024).toFixed(1)} KB` : `${(n/1048576).toFixed(1)} MB`);
-
-  async function api(url, opts = {}) {
-    const res = await fetch(url, { ...opts, headers: { ...headers(), ...(opts.headers || {}) } });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || res.statusText);
-    return data;
-  }
-
-  async function load(dir = cwd) {
-    try {
-      const data = await api(`/api/list?path=${encodeURIComponent(dir)}`);
-      cwd = data.path;
-      $('rootPath').textContent = `root: ${data.root}`;
-      $('cwdLabel').textContent = cwd ? `/${cwd}` : '/';
-      $('upBtn').disabled = !cwd;
-      const body = $('listBody');
-      body.innerHTML = '';
-      for (const e of data.entries) {
-        const tr = document.createElement('tr');
-        const tdName = document.createElement('td');
-        if (e.dir) {
-          const b = document.createElement('button');
-          b.className = 'name-btn mono';
-          b.textContent = `${e.name}/`;
-          b.onclick = () => load(e.path);
-          tdName.appendChild(b);
-        } else {
-          const s = document.createElement('span');
-          s.className = 'mono';
-          s.textContent = e.name;
-          tdName.appendChild(s);
-        }
-        const tdType = document.createElement('td');
-        tdType.textContent = e.dir ? 'folder' : 'file';
-        const tdSize = document.createElement('td');
-        tdSize.className = 'mono';
-        tdSize.textContent = fmtSize(e.size);
-        const tdAct = document.createElement('td');
-        const del = document.createElement('button');
-        del.className = 'danger';
-        del.textContent = e.dir ? 'Delete Folder' : 'Delete';
-        del.onclick = async () => {
-          if (!confirm(`Delete ${e.dir ? 'folder' : 'file'} "${e.path}"?`)) return;
-          try {
-            await api(`/api/entry?path=${encodeURIComponent(e.path)}`, { method: 'DELETE' });
-            setStatus(`Deleted ${e.path}`);
-            load(cwd);
-          } catch (err) { setStatus(err.message, true); }
-        };
-        tdAct.appendChild(del);
-        tr.append(tdName, tdType, tdSize, tdAct);
-        body.appendChild(tr);
-      }
-      if (!data.entries.length) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="4" class="muted">Empty folder</td>';
-        body.appendChild(tr);
-      }
-    } catch (err) {
-      setStatus(err.message, true);
-    }
-  }
-
-  function uploadOne(file, relPath, overwrite) {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('PUT', `/api/file?path=${encodeURIComponent(relPath)}&overwrite=${overwrite ? '1' : '0'}`);
-      if (token) xhr.setRequestHeader('X-Token', token);
-      xhr.upload.onprogress = ev => {
-        if (ev.lengthComputable) $('progBar').style.width = `${Math.round((ev.loaded / ev.total) * 100)}%`;
-      };
-      xhr.onload = () => {
-        const data = (() => { try { return JSON.parse(xhr.responseText); } catch { return {}; } })();
-        if (xhr.status >= 200 && xhr.status < 300) resolve(data);
-        else reject(new Error(data.error || xhr.statusText));
-      };
-      xhr.onerror = () => reject(new Error('Network error during upload'));
-      xhr.send(file);
-    });
-  }
-
-  $('saveTokenBtn').onclick = () => {
-    currentToken();
-    setStatus('Token saved');
-    load(cwd);
-  };
-  $('tokenInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('saveTokenBtn').click(); } });
-  $('upBtn').onclick = () => load(cwd.split('/').slice(0, -1).join('/'));
-  $('refreshBtn').onclick = () => load(cwd);
-  $('mkdirBtn').onclick = async () => {
-    const name = $('mkdirInput').value.trim();
-    if (!name) return;
-    try {
-      await api('/api/mkdir', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ path: joinPath(cwd, name) }) });
-      $('mkdirInput').value = '';
-      setStatus(`Created folder ${name}`);
-      load(cwd);
-    } catch (err) { setStatus(err.message, true); }
-  };
-  $('uploadBtn').onclick = async () => {
-    const files = [...$('fileInput').files];
-    if (!files.length) return setStatus('Select at least one file', true);
-    const overwrite = $('overwriteChk').checked;
-    $('progWrap').style.display = 'block';
-    try {
-      for (const f of files) {
-        $('progBar').style.width = '0%';
-        setStatus(`Uploading ${f.name}...`);
-        await uploadOne(f, joinPath(cwd, f.name), overwrite);
-      }
-      $('fileInput').value = '';
-      setStatus(`Uploaded ${files.length} file(s)`);
-      load(cwd);
-    } catch (err) {
-      setStatus(err.message, true);
-    } finally {
-      setTimeout(() => { $('progWrap').style.display = 'none'; }, 500);
-    }
-  };
-  load('');
-
-  let ws = null;
-  const stripAnsi = s => s.replace(/\x1b\[[0-9;?]*[ -/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g, '');
-  const appendTerm = txt => {
-    const out = $('termOut');
-    out.textContent += stripAnsi(txt).replace(/\r\n/g, '\n').replace(/\r/g, '');
-    out.scrollTop = out.scrollHeight;
-  };
-  const setTermConnected = on => {
-    $('termState').textContent = on ? 'connected' : 'disconnected';
-    $('termConnBtn').textContent = on ? 'Disconnect' : 'Connect Bash';
-    $('termIn').disabled = !on;
-    $('termSendBtn').disabled = !on;
-    $('termCtrlCBtn').disabled = !on;
-    if (on) $('termIn').focus();
-  };
-  const sendTerm = data => {
-    if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'input', data }));
-  };
-  $('termConnBtn').onclick = () => {
-    if (ws && ws.readyState <= WebSocket.OPEN) { ws.close(); return; }
-    const t = currentToken();
-    if (!t) { appendTerm('\n[enter API token above first]\n'); $('tokenInput').focus(); return; }
-    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    ws = new WebSocket(`${proto}//${location.host}/ws/bash?token=${encodeURIComponent(t)}`);
-    ws.onopen = () => {
-      setTermConnected(true);
-      ws.send(JSON.stringify({ type: 'resize', cols: 110, rows: 28 }));
-    };
-    ws.onmessage = ev => appendTerm(ev.data);
-    ws.onclose = ev => {
-      setTermConnected(false);
-      appendTerm(ev.wasClean ? '\n[disconnected]\n' : '\n[connection closed — check API token]\n');
-    };
-    ws.onerror = () => appendTerm('\n[websocket error — check API token]\n');
-  };
-  const runCmd = () => {
-    const v = $('termIn').value;
-    sendTerm(v + '\n');
-    $('termIn').value = '';
-  };
-  $('termSendBtn').onclick = runCmd;
-  $('termIn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); runCmd(); } });
-  $('termCtrlCBtn').onclick = () => sendTerm('\x03');
-  $('termClearBtn').onclick = () => { $('termOut').textContent = ''; };
-})();
-</script>
-</body>
-</html>
-"""
+UI_FILE = Path(__file__).with_name("bootstrap_ui.html")
 
 
 def resolve_inside(root: Path, rel: str) -> Path:
@@ -455,8 +163,8 @@ def run_bash_ws(sock, root: Path) -> None:
         reader.join(timeout=1.0)
 
 
-def make_handler(root: Path, token: str) -> type[BaseHTTPRequestHandler]:
-    root = root.resolve()
+def make_handler(root: Path, token: str, allow_root_switch: bool = False) -> type[BaseHTTPRequestHandler]:
+    state = {"root": root.resolve()}
 
     class Handler(BaseHTTPRequestHandler):
         protocol_version = "HTTP/1.1"
@@ -490,7 +198,7 @@ def make_handler(root: Path, token: str) -> type[BaseHTTPRequestHandler]:
         def do_GET(self) -> None:
             route, qs = self.parse_url()
             if route == "/":
-                body = HTML_UI.encode("utf-8")
+                body = UI_FILE.read_bytes()
                 self.send_response(HTTPStatus.OK)
                 self.send_header("Content-Type", "text/html; charset=utf-8")
                 self.send_header("Content-Length", str(len(body)))
@@ -511,18 +219,19 @@ def make_handler(root: Path, token: str) -> type[BaseHTTPRequestHandler]:
                 self.send_header("Sec-WebSocket-Accept", ws_accept_key(key))
                 self.end_headers()
                 self.close_connection = True
-                run_bash_ws(self.connection, root)
+                run_bash_ws(self.connection, state["root"])
                 return
             if route == "/api/list":
                 rel = qs.get("path", [""])[0]
+                cur_root = state["root"]
                 try:
-                    folder = resolve_inside(root, rel)
+                    folder = resolve_inside(cur_root, rel)
                     if not folder.is_dir():
                         raise ValueError(f"not a folder: {rel}")
                     entries = []
                     for child in folder.iterdir():
                         try:
-                            if not child.resolve().is_relative_to(root):
+                            if not child.resolve().is_relative_to(cur_root):
                                 continue
                             st = child.stat()
                         except OSError:
@@ -530,13 +239,18 @@ def make_handler(root: Path, token: str) -> type[BaseHTTPRequestHandler]:
                         is_dir = child.is_dir()
                         entries.append({
                             "name": child.name,
-                            "path": child.relative_to(root).as_posix(),
+                            "path": child.relative_to(cur_root).as_posix(),
                             "dir": is_dir,
                             "size": None if is_dir else st.st_size,
                         })
                     entries.sort(key=lambda e: (not e["dir"], e["name"].casefold()))
-                    cur = "" if folder == root else folder.relative_to(root).as_posix()
-                    self.send_json(HTTPStatus.OK, {"root": str(root), "path": cur, "entries": entries})
+                    cur = "" if folder == cur_root else folder.relative_to(cur_root).as_posix()
+                    self.send_json(HTTPStatus.OK, {
+                        "root": str(cur_root),
+                        "path": cur,
+                        "entries": entries,
+                        "allowRootSwitch": allow_root_switch,
+                    })
                 except ValueError as e:
                     self.send_json(HTTPStatus.BAD_REQUEST, {"error": str(e)})
                 return
@@ -547,6 +261,25 @@ def make_handler(root: Path, token: str) -> type[BaseHTTPRequestHandler]:
                 self.send_json(HTTPStatus.UNAUTHORIZED, {"error": "unauthorized"})
                 return
             route, _ = self.parse_url()
+            cur_root = state["root"]
+            if route == "/api/root":
+                if not allow_root_switch:
+                    self.send_json(HTTPStatus.FORBIDDEN, {"error": "root switching is disabled (--lock-root)"})
+                    return
+                try:
+                    length = int(self.headers.get("Content-Length", "0"))
+                    data = json.loads(self.rfile.read(length).decode("utf-8"))
+                    raw_path = data.get("path", "")
+                    if not isinstance(raw_path, str) or not raw_path.strip():
+                        raise ValueError("path is required")
+                    candidate = Path(raw_path).expanduser().resolve()
+                    if not candidate.is_dir():
+                        raise ValueError(f"not a folder: {raw_path}")
+                    state["root"] = candidate
+                    self.send_json(HTTPStatus.OK, {"root": str(candidate)})
+                except (ValueError, json.JSONDecodeError) as e:
+                    self.send_json(HTTPStatus.BAD_REQUEST, {"error": str(e)})
+                return
             if route == "/api/mkdir":
                 try:
                     length = int(self.headers.get("Content-Length", "0"))
@@ -554,14 +287,14 @@ def make_handler(root: Path, token: str) -> type[BaseHTTPRequestHandler]:
                     rel = data.get("path", "")
                     if not isinstance(rel, str) or not rel.strip():
                         raise ValueError("path is required")
-                    target = resolve_inside(root, rel)
-                    if target == root:
+                    target = resolve_inside(cur_root, rel)
+                    if target == cur_root:
                         raise ValueError("cannot create root")
                     if target.exists():
                         self.send_json(HTTPStatus.CONFLICT, {"error": f"already exists: {rel}"})
                         return
                     target.mkdir(parents=True, exist_ok=False)
-                    self.send_json(HTTPStatus.CREATED, {"path": target.relative_to(root).as_posix()})
+                    self.send_json(HTTPStatus.CREATED, {"path": target.relative_to(cur_root).as_posix()})
                 except (ValueError, json.JSONDecodeError) as e:
                     self.send_json(HTTPStatus.BAD_REQUEST, {"error": str(e)})
                 return
@@ -585,8 +318,9 @@ def make_handler(root: Path, token: str) -> type[BaseHTTPRequestHandler]:
                         raise ValueError("invalid Content-Length")
                     if not rel.strip():
                         raise ValueError("path is required")
-                    target = resolve_inside(root, rel)
-                    if target == root or target.is_dir():
+                    cur_root = state["root"]
+                    target = resolve_inside(cur_root, rel)
+                    if target == cur_root or target.is_dir():
                         raise ValueError(f"invalid file path: {rel}")
                     if target.exists() and not overwrite:
                         self.send_json(HTTPStatus.CONFLICT, {"error": f"file exists: {rel}"})
@@ -607,7 +341,7 @@ def make_handler(root: Path, token: str) -> type[BaseHTTPRequestHandler]:
                     except Exception:
                         tmp.unlink(missing_ok=True)
                         raise
-                    self.send_json(HTTPStatus.CREATED, {"path": target.relative_to(root).as_posix(), "bytes": written})
+                    self.send_json(HTTPStatus.CREATED, {"path": target.relative_to(cur_root).as_posix(), "bytes": written})
                 except (ValueError, EOFError) as e:
                     self.send_json(HTTPStatus.BAD_REQUEST, {"error": str(e)})
                 return
@@ -620,9 +354,10 @@ def make_handler(root: Path, token: str) -> type[BaseHTTPRequestHandler]:
             route, qs = self.parse_url()
             if route == "/api/entry":
                 rel = qs.get("path", [""])[0]
+                cur_root = state["root"]
                 try:
-                    target = resolve_inside(root, rel)
-                    if target == root:
+                    target = resolve_inside(cur_root, rel)
+                    if target == cur_root:
                         raise ValueError("cannot delete root")
                     if not target.exists():
                         self.send_json(HTTPStatus.NOT_FOUND, {"error": f"not found: {rel}"})
@@ -631,7 +366,7 @@ def make_handler(root: Path, token: str) -> type[BaseHTTPRequestHandler]:
                         shutil.rmtree(target)
                     else:
                         target.unlink()
-                    self.send_json(HTTPStatus.OK, {"deleted": target.relative_to(root).as_posix()})
+                    self.send_json(HTTPStatus.OK, {"deleted": target.relative_to(cur_root).as_posix()})
                 except ValueError as e:
                     self.send_json(HTTPStatus.BAD_REQUEST, {"error": str(e)})
                 return
@@ -642,17 +377,18 @@ def make_handler(root: Path, token: str) -> type[BaseHTTPRequestHandler]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Zero-dependency bootstrap file server")
-    parser.add_argument("--root", default="~/", help="Confined root directory (default: current directory)")
+    parser.add_argument("--root", default="~/", help="Initial root directory (default: ~/)")
+    parser.add_argument("--lock-root", action="store_true", help="Disallow switching root directory from the UI")
     parser.add_argument("--host", default="127.0.0.1", help="Bind host (default: 127.0.0.1)")
     parser.add_argument("--port", type=int, default=8088, help="Bind port (default: 8088)")
     parser.add_argument("--token", default=os.environ.get("BOOTSTRAP_TOKEN", ""), help="API token (auto-generated if empty)")
     args = parser.parse_args()
 
-    root = Path(args.root).resolve()
+    root = Path(args.root).expanduser().resolve()
     root.mkdir(parents=True, exist_ok=True)
     token = args.token or secrets.token_urlsafe(18)
 
-    server = ThreadingHTTPServer((args.host, args.port), make_handler(root, token))
+    server = ThreadingHTTPServer((args.host, args.port), make_handler(root, token, allow_root_switch=not args.lock_root))
     print(f"Bootstrap server listening on http://{args.host}:{args.port}")
     print(f"Root : {root}")
     print(f"Token: {token}")
