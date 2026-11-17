@@ -96,6 +96,54 @@ def test_a_new_chat_is_a_fresh_main_agent_and_old_chats_resume(tmp_path):
         assert [m["content"] for m in context["messages"]] == ["hello A", "first answer"]
 
 
+def test_one_skill_per_chat_switches_cleanly_and_resumes(tmp_path):
+    library = tmp_path / "lib"
+    (library / "alpha").mkdir(parents=True)         # an asset folder beside a skill is not a skill
+    (library / "alpha.md").write_text("---\ndescription: First skill.\n---\nALPHA RULES")
+    (library / "beta.md").write_text("BETA RULES")
+    systems = []
+
+    class Recording(StreamingLLM):
+        def chat(self, messages, **kw):
+            systems.append(messages[0]["content"])
+            return super().chat(messages, **kw)
+
+    def app(llm):
+        return TestClient(create_app(Runtime(tmp_path / "ws", Settings(), llm, library)))
+
+    (tmp_path / "ws").mkdir()
+    with app(Recording("one", "two", "WAIT")) as c:
+        assert c.get("/api/skills").json() == [{"name": "alpha", "description": "First skill."},
+                                               {"name": "beta", "description": ""}]
+        key = c.post("/api/chats").json()["key"]
+        assert c.put(f"/api/chats/{key}/skill", json={"name": "alpha"}).json() == {"skill": "alpha"}
+        with c.websocket_connect(f"/ws/{key}") as ws:
+            assert ws.receive_json()["skill"] == "alpha"
+            ws.send_json({"type": "chat", "text": "q1", "attachments": []})
+            until(ws, "done")
+            assert c.put(f"/api/chats/{key}/skill", json={"name": "beta"}).json() == {"skill": "beta"}
+            ws.send_json({"type": "chat", "text": "q2", "attachments": []})
+            until(ws, "done")
+            ws.send_json({"type": "chat", "text": "q3", "attachments": []})
+            until(ws, "run_start")
+            deadline = time.monotonic() + 5
+            while not c.get("/api/chats").json()[0].get("busy") and time.monotonic() < deadline:
+                time.sleep(0.01)
+            assert c.put(f"/api/chats/{key}/skill", json={"name": None}).status_code == 409   # not while running
+            ws.send_json({"type": "stop"})
+            until(ws, "aborted")
+        assert c.put(f"/api/chats/{key}/skill", json={"name": "../alpha"}).status_code == 400
+        assert "ALPHA RULES" in systems[0] and "BETA RULES" not in systems[0]
+        assert "BETA RULES" in systems[1] and "ALPHA RULES" not in systems[1]          # replaced, not stacked
+        assert [m["content"] for m in c.get(f"/api/chats/{key}/transcript").json()][:4] == ["q1", "one", "q2", "two"]
+
+    with app(StreamingLLM()) as c:                     # a restarted server resumes the chat with its skill
+        context = c.get(f"/api/chats/{key}/context").json()
+        assert context["skill"] == "beta" and "BETA RULES" in context["system"]
+        assert c.put(f"/api/chats/{key}/skill", json={"name": None}).json() == {"skill": None}
+        assert "BETA RULES" not in c.get(f"/api/chats/{key}/context").json()["system"]
+
+
 def test_stop_ends_the_run_and_the_chat_stays_usable(tmp_path):
     llm = StreamingLLM("WAIT", "after stop")
     with client(tmp_path, llm) as c:

@@ -256,6 +256,21 @@ a { color: var(--blue) }
 .ctx-summary b { color: var(--ink) }
 .ctx-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px }
 .ctx-group { font: 700 10px var(--mono); letter-spacing: .1em; color: var(--muted); margin: 10px 0 2px }
+.skill-note { margin: 0 0 10px }
+.skill-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px }
+.skill-opt { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 2px 8px; text-align: left; cursor: pointer;
+  border: 1px solid var(--line2); border-radius: 7px; background: #fff; padding: 9px 10px; color: var(--ink); font: inherit }
+.skill-opt:hover:not(:disabled) { border-color: var(--line); background: var(--panel) }
+.skill-opt.on { border-color: var(--red); background: var(--redsoft) }
+.skill-opt:disabled { opacity: .55; cursor: not-allowed }
+.skill-opt:focus-visible { outline: 2px solid var(--red); outline-offset: 1px }
+.skill-opt .radio { grid-row: 1 / 3; align-self: start; margin-top: 2px; width: 14px; height: 14px; border-radius: 50%;
+  border: 1.5px solid var(--muted); box-sizing: border-box }
+.skill-opt.on .radio { border: 4px solid var(--red) }
+.skill-opt b { font: 600 12.5px var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.skill-opt small { grid-column: 2; font-size: 11.5px; color: var(--muted); line-height: 1.45 }
+.skill-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--red); margin-left: 3px; vertical-align: 2px }
+.skill-dot[hidden] { display: none }
 .ctx-item { border: 1px solid var(--line2); border-radius: 7px; background: #fff; min-width: 0; overflow: hidden }
 .ctx-item > summary { cursor: pointer; padding: 7px 9px; display: flex; align-items: center; gap: 7px; font-size: 12px; list-style: none; min-width: 0 }
 .ctx-item > summary::-webkit-details-marker { display: none }

@@ -138,7 +138,7 @@
     key: null, ws: null, wsWanted: false, retry: 0, busy: null, seq: 0, tokens: 0, window: 0,
     attachments: [], selectedDir: '', openDirs: new Set(JSON.parse(localStorage.getItem('breezeman-open-dirs') || '[]')),
     block: null, lastUserText: null, chats: [], ctx: null, ctxStale: true, unread: 0,
-    pending: {}, lastFeed: null, liveFilter: 'all', ctxFilter: 'all', runStart: 0,
+    pending: {}, lastFeed: null, liveFilter: 'all', ctxFilter: 'all', runStart: 0, skill: null, skills: null,
   };
 
   // ---------------------------------------------------------------- panels
@@ -161,8 +161,10 @@
     $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
     $('#liveTab').hidden = tab !== 'live';
     $('#contextTab').hidden = tab !== 'context';
+    $('#skillsTab').hidden = tab !== 'skills';
     if (tab === 'live') clearUnread();
     if (tab === 'context' && S.ctxStale) loadContext();
+    if (tab === 'skills') loadSkills();
   }
   $$('.tab').forEach(t => { t.onclick = () => showTab(t.dataset.tab); });
   function bumpUnread() {
@@ -382,6 +384,7 @@
     $('#stopBtn').hidden = !S.busy;
     $('#sendBtn').hidden = !!S.busy;
     $('#compactBtn').disabled = !!S.busy;
+    renderSkills();
     connState();
   }
   function meter() {
@@ -667,6 +670,9 @@
       case 'stopping':
         feedCard('status', ev, 'stop requested · ends at the next token or tool call');
         break;
+      case 'skill':
+        feedCard('status', ev, ev.skill ? `◇ skill loaded · ${esc(ev.skill)}` : '◇ skill removed');
+        break;
       case 'error':
         if (ev.run) feedCard('error', ev, `ERROR · ${esc(ev.message)}`);
         break;
@@ -679,7 +685,7 @@
   function contextItems(c) {
     const items = [{ group: 'system', role: 'system', title: 'System prompt', text: c.system }];
     if (c.persona) items.push({ group: 'system', role: 'system', title: 'Persona', text: c.persona });
-    if (c.instructions) items.push({ group: 'system', role: 'system', title: 'Instructions', text: c.instructions });
+    if (c.instructions) items.push({ group: 'system', role: 'system', title: c.skill ? `Skill · ${c.skill}` : 'Instructions', text: c.instructions });
     if (c.checkpoint) items.push({ group: 'memory', role: 'memory', title: 'Checkpoint (compacted history)', text: c.checkpoint });
     c.topics.forEach(t => items.push({ group: 'memory', role: 'memory', title: `topic · ${t.slug}`, text: t.text }));
     if (c.topics_error) items.push({ group: 'memory', role: 'memory', title: 'topic notes unavailable', text: c.topics_error });
@@ -786,6 +792,36 @@
     if (panelOpen('right') && activeTab() === 'context') loadContext();
   }
 
+  // ---------------------------------------------------------------- skill panel (one skill per chat)
+  async function loadSkills() {
+    try { S.skills = await api('/api/skills'); } catch (e) { $('#skillList').innerHTML = `<div class="placeholder">${esc(e.message)}</div>`; return; }
+    renderSkills();
+  }
+  function renderSkills() {
+    $('#skillDot').hidden = !S.skill;
+    if (!S.skills) return;
+    const opts = [{ name: null, description: 'No skill: base prompt, AGENTS.md and persona only.' }, ...S.skills];
+    $('#skillList').innerHTML = opts.map(o => {
+      const on = (o.name || null) === (S.skill || null);
+      return `<button class="skill-opt${on ? ' on' : ''}" role="radio" aria-checked="${on}" data-name="${esc(o.name || '')}"${S.busy ? ' disabled title="The agent is running; change the skill when it is idle"' : ''}>`
+        + `<span class="radio" aria-hidden="true"></span><b>${esc(o.name || 'None')}</b><small>${esc(o.description || '')}</small></button>`;
+    }).join('') + (S.skills.length ? '' : '<div class="placeholder">The skill library has no &lt;name&gt;.md files.</div>');
+  }
+  $('#skillList').onclick = async e => {
+    const b = e.target.closest('.skill-opt');
+    if (!b || b.disabled || !S.key) return;
+    const name = b.dataset.name || null;
+    if (name === S.skill) return;
+    try {
+      const r = await api(`/api/chats/${encodeURIComponent(S.key)}/skill`, {
+        method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name }) });
+      S.skill = r.skill;
+      renderSkills();
+      contextChanged();
+      toast(r.skill ? `Skill “${r.skill}” loaded for this chat` : 'Skill removed from this chat');
+    } catch (err) { toast(err.message, true); }
+  };
+
   // ---------------------------------------------------------------- socket
   function connState() {
     const c = $('#connState');
@@ -822,6 +858,8 @@
   }
   function hello(h) {
     S.seq = h.seq;
+    S.skill = h.skill || null;
+    renderSkills();
     S.tokens = h.tokens || S.tokens;
     S.window = h.window || S.window;
     meter();
@@ -853,6 +891,7 @@
     if (ev.type === 'error' && !ev.run) toast(ev.message, true);
     if (ev.type === 'error' && ev.run) toast(`Agent error: ${ev.message}`, true);
     if (ev.type === 'compaction' || ev.type === 'tool_end') S.ctxStale = true;
+    if (ev.type === 'skill') { S.skill = ev.skill || null; renderSkills(); contextChanged(); }
   }
 
   // ---------------------------------------------------------------- chats

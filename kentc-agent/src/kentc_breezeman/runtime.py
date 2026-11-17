@@ -28,6 +28,7 @@ from kentc_agent.agent import Aborted, Agent, Events, build_tools
 from kentc_agent.config import STATE_DIR, Settings
 from kentc_agent.context.compaction import CompactionError
 from kentc_agent.ports import LLM
+from kentc_agent.skills import FRONT_RE, NAME_RE, load_skills
 
 from .workspace import inside
 
@@ -36,6 +37,22 @@ ATTACHMENT = re.compile(r'<attachment path="([^"\n]*)">\n.*?\n</attachment>(?:\n
 ACTIVITY_LIMIT = 4000           # buffered live events per chat (consecutive deltas are merged into one)
 TOOL_RESULT_PREVIEW = 4000      # characters of a tool result sent to the live panel
 TITLE_CHARS = 80
+# A chat's skill is its saved runtime instructions (`session.core`), one `## Skill: <name>` section from
+# kentc_agent.skills.load_skills; restoring the session restores the skill text that was in effect.
+SKILL_SECTION = re.compile(r"## Skill: ([a-z0-9]+(?:-[a-z0-9]+)*)\n")
+
+
+def list_skills(library: Path) -> list[dict[str, str]]:
+    """The skill library's `<name>.md` files with their front-matter description (asset folders are skipped)."""
+    out = []
+    for path in sorted(library.glob("*.md")) if library.is_dir() else []:
+        if not NAME_RE.match(path.stem):
+            continue
+        front = FRONT_RE.match(path.read_text(encoding="utf-8"))
+        description = next((line.split(":", 1)[1].strip() for line in (front.group(0) if front else "").splitlines()
+                            if line.startswith("description:")), "")
+        out.append({"name": path.stem, "description": description})
+    return out
 
 
 class ChatBusy(RuntimeError):
@@ -162,10 +179,27 @@ class Chat:
             activity = list(self._activity)
             seq = activity[-1]["seq"] if activity else 0
         return {"key": self.key, "session_id": self.session.id, "busy": self.busy, "tokens": self.tokens,
-                "window": self.window, "activity": activity, "seq": seq}
+                "window": self.window, "activity": activity, "seq": seq, "skill": self.skill}
 
     def unsubscribe(self, queue: asyncio.Queue[dict[str, Any]]) -> None:
         self._subscribers.discard(queue)
+
+    # ------------------------------------------------------------------ skill
+    @property
+    def skill(self) -> str | None:
+        """The loaded skill's name; None without one (or when the saved instructions are not a single skill)."""
+        m = SKILL_SECTION.match(self.session.core.get("instructions", ""))
+        return m.group(1) if m else None
+
+    def set_skill(self, name: str | None) -> None:
+        """Load one skill (replacing any other) or none; takes effect from the next model call, history stays."""
+        text = load_skills(self.runtime.skills, [name]) if name else ""
+        with self._lock:
+            if self.busy:
+                raise ChatBusy(f"this chat is running a {self.busy}; change the skill when it is idle")
+            self.agent.system = self.agent._system_prompt(text)   # journals the new instructions (session core)
+            self.agent.set_tools(list(self.agent.tools.values()))  # recount the fixed prompt size
+        self.publish({"type": "skill", "skill": name})
 
     # ------------------------------------------------------------------ runs
     def send(self, text: str, attachments: list[str]) -> None:
@@ -254,6 +288,7 @@ class Chat:
             "tokens": self.agent.context_tokens(), "window": window,
             "system": self.agent.system,
             "persona": s.core.get("persona", ""), "instructions": s.core.get("instructions", ""),
+            "skill": self.skill,
             "checkpoint": s.summary or "",
             "topics": [{"slug": k, "text": v} for k, v in sorted(topics.items())], "topics_error": topics_error,
             "messages": [display_message(m) for m in s.context()],
@@ -267,10 +302,11 @@ class Chat:
 
 
 class Runtime:
-    def __init__(self, workspace: Path, settings: Settings, llm: LLM) -> None:
+    def __init__(self, workspace: Path, settings: Settings, llm: LLM, skills: Path | None = None) -> None:
         self.workspace = workspace
         self.settings = settings
         self.llm = llm
+        self.skills = skills or Path(__file__).resolve().parents[2] / "skills"   # the project's skill library
         self.sessions_dir = workspace / STATE_DIR / "sessions"
         self.loop: asyncio.AbstractEventLoop | None = None
         self._chats: dict[str, Chat] = {}

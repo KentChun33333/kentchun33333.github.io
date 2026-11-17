@@ -83,6 +83,7 @@
       <div class="tabs" role="tablist">
         <button class="tab active" data-tab="live" role="tab">Live <span class="badge" id="liveBadge" hidden></span></button>
         <button class="tab" data-tab="context" role="tab">Context</button>
+        <button class="tab" data-tab="skills" role="tab">Skill <span class="skill-dot" id="skillDot" hidden title="A skill is loaded"></span></button>
       </div>
       <button class="fold" id="rightFold" title="Fold agent panel" aria-label="Fold agent panel">»</button>
     </div>
@@ -110,6 +111,10 @@
       </div>
       <div class="caption ctx-summary" id="ctxSummary"></div>
       <div class="ctx-list" id="ctxList"></div>
+    </div>
+    <div class="tab-body" id="skillsTab" hidden>
+      <div class="caption skill-note">One skill per chat. Its text joins the system prompt from the next message; the conversation stays. Saved with the chat.</div>
+      <div class="skill-list" id="skillList" role="radiogroup" aria-label="Skill for this chat"></div>
     </div>
     <div class="rail-label" aria-hidden="true">AGENT</div>
   </aside>

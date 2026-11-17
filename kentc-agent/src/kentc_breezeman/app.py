@@ -1,6 +1,7 @@
 """HTTP + WebSocket API of kentc-breezeman.
 
-REST: /api/health, /api/tree, /api/file, /api/upload, /api/chats, /api/chats/{key}/transcript|context
+REST: /api/health, /api/tree, /api/file, /api/upload, /api/skills, /api/chats, /api/chats/{key}/transcript|context,
+PUT /api/chats/{key}/skill {"name": <skill> | null} (one skill per chat)
 WebSocket /ws/{key}: client → {"type": "chat", "text", "attachments"} | {"type": "stop"} | {"type": "compact", "focus"};
 server → "hello" (snapshot) then the chat's live events (runtime.py).
 """
@@ -20,9 +21,10 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from kentc_agent.adapters.llm import LLMError
+from kentc_agent.skills import SkillError
 
 from . import workspace as wsfiles
-from .runtime import Chat, ChatBusy, Runtime
+from .runtime import Chat, ChatBusy, Runtime, list_skills
 
 ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "web" / "breezeman"
@@ -119,6 +121,23 @@ def create_app(runtime: Runtime, token: str = "") -> FastAPI:
     @app.get("/api/chats/{key}/context")
     def context(key: str) -> dict[str, Any]:
         return chat_of(key).context()
+
+    @app.get("/api/skills")
+    def skills() -> list[dict[str, str]]:
+        return list_skills(runtime.skills)
+
+    @app.put("/api/chats/{key}/skill")
+    def set_skill(key: str, body: dict[str, Any]) -> dict[str, Any]:
+        chat, name = chat_of(key), body.get("name")
+        if name is not None and not isinstance(name, str):
+            raise HTTPException(400, "name must be a skill name or null")
+        try:
+            chat.set_skill(name or None)
+        except ChatBusy as e:
+            raise HTTPException(409, str(e)) from None
+        except SkillError as e:
+            raise HTTPException(400, str(e)) from None
+        return {"skill": chat.skill}
 
     @app.websocket("/ws/{key}")
     async def socket(ws: WebSocket, key: str) -> None:

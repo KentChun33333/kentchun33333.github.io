@@ -537,7 +537,7 @@ server and the agent runtime in the same process (no separate backend to start):
 
 ```sh
 uv run kentc-breezeman --workspace ~/work --effort low      # open http://127.0.0.1:9001
-# also: --base-url, --model, --persona FILE, --max-turns; non-loopback bind needs --token (or KENTC_BREEZEMAN_TOKEN)
+# also: --base-url, --model, --persona FILE, --max-turns, --skills DIR; non-loopback bind needs --token (or KENTC_BREEZEMAN_TOKEN)
 ```
 
 - **Left, foldable: workspace.** Lazy folder tree of the workspace (`.kentc-agent/`, `.git`,
@@ -556,6 +556,11 @@ uv run kentc-breezeman --workspace ~/work --effort low      # open http://127.0.
   checkpoint, topic notes, live messages and tool schemas. The view is searchable (⌘K; Enter / Shift+Enter
   step through matches) and filterable by group. It shows tool-call arguments shortened, as the model
   sees them; the chat transcript replays the originals from the journal.
+  *Skill* lists the skill library (`skills/<name>.md`, or `--skills DIR`) with each front-matter description.
+  **One skill per chat:** choosing one replaces the previous one (None removes it). Its text joins the
+  system prompt as `## Skill: <name>` from the next model call; the conversation stays. The choice is saved
+  in the session journal and restored on resume (the text as loaded then, not later edits of the file).
+  It cannot change while the chat is running. A dot on the tab marks a loaded skill.
 
 Settings load as for `kentc-agent` (`~/.config/kentc-agent/config.yaml`,
 `<workspace>/.kentc-agent/config.yaml`, `KENTC_AGENT_*`). The tools are the CLI chat's core

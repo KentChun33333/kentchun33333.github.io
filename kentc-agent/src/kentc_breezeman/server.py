@@ -37,6 +37,7 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--effort", choices=["none", "low", "medium", "high"], help="reasoning effort")
     ap.add_argument("--persona", help="persona file for every chat's main agent")
     ap.add_argument("--max-turns", type=int, help="model calls per prompt (0: no limit)")
+    ap.add_argument("--skills", help="skill library folder offered in the Skills panel (default: the project's skills/)")
     args = ap.parse_args(argv)
 
     token = args.token or os.environ.get("KENTC_BREEZEMAN_TOKEN", "")
@@ -58,7 +59,8 @@ def main(argv: list[str] | None = None) -> None:
     except LLMError as e:
         model = f"model offline ({e}); chats fail until it is reachable"
     print(f"kentc-breezeman · {model} · workspace {ws} · http://{args.host}:{args.port}")
-    uvicorn.run(create_app(Runtime(ws, settings, llm), token=token), host=args.host, port=args.port,
+    skills = Path(args.skills).expanduser().resolve() if args.skills else None
+    uvicorn.run(create_app(Runtime(ws, settings, llm, skills), token=token), host=args.host, port=args.port,
                 log_level="warning")
 
 
