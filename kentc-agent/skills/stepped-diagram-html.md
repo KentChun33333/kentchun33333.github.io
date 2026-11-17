@@ -1,6 +1,5 @@
 ---
-name: stepped-diagram-html
-description: Build a self-contained interactive HTML explainer in the style of designed-to-scale.vercel.app — an isometric SVG diagram the reader steps through (Back/Next, keyboard, stepper), with animated packets, live metric chips, a narration panel and light/dark themes. Use when asked for an animated/interactive diagram, step-through tutorial, architecture or flow explainer, or "HTML like that page".
+description: Build a self-contained interactive HTML explainer in the style of designed-to-scale.vercel.app — an isometric SVG diagram stepped through with Back/Next, keyboard and a stepper, animated packets, live metric chips, a narration panel and light/dark themes.
 ---
 
 # Stepped isometric diagram explainers (single-file HTML)
@@ -10,8 +9,10 @@ framework runtime detected, one SVG diagram per lesson (gradients, `feGaussianBl
 markers), motion from CSS keyframes/transitions plus a JS loop. Learn the techniques; do not copy its code,
 copy or images.
 
-Start from [`template.html`](template.html) (runnable, no dependencies, ~270 lines). Copy it, then replace
-`NODES`, `LINKS`, `STEPS`, `CHIPS`. Open it directly from disk: it must work from `file://`.
+Start from the runnable template `skills/stepped-diagram-html/template.html` in the kentc-agent project
+(no dependencies, ~270 lines). If you can read it, copy it into the workspace and replace `NODES`, `LINKS`,
+`STEPS`, `CHIPS`; otherwise build the same structure from the rules below. The result must open directly from
+disk (`file://`) with no network access.
 
 ## The idea that makes it feel good
 
@@ -83,7 +84,7 @@ Use CSS for anything state-driven (class toggles); JS only for path-following mo
 
 ## Verify before delivering
 
-Run it in a real browser (not only by reading the code):
+With a browser tool, run these checks in a real browser (not only by reading the code):
 1. Load from `file://`; console has no errors.
 2. Step through every step with the keyboard; screenshot the final step (all nodes visible): no overlaps,
    labels readable.
@@ -92,3 +93,7 @@ Run it in a real browser (not only by reading the code):
 5. Motion settles: `await Promise.all(document.getAnimations().map(a => a.finished))` resolves (≈ 1.1 s with a
    spotlight). Headless screenshots taken right after a step can show mid-transition frames; wait or measure.
 6. Hash navigation: load with a different `#step-N` using a *reload* (a hash-only `goto` keeps the old page).
+
+Without a browser tool: extract the `<script>` body and run `node --check` on it, confirm every id used by
+`getElementById` exists in the markup, and list checks 2–4 for the user to do visually. Never claim visual or
+motion checks you did not run.
