@@ -10,7 +10,7 @@
   --shadow: 0 12px 34px rgba(25, 25, 25, .08); --shadow-sm: 0 2px 8px rgba(25, 25, 25, .06);
   --radius: 9px;
   --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-  --top: 66px; --left: 290px; --right: 430px; --rail: 42px;
+  --top: 66px; --left: 340px; --right: 430px; --rail: 42px;
 }
 
 * { box-sizing: border-box }
@@ -89,7 +89,7 @@ a { color: var(--blue) }
 .shell.left-closed.right-closed { grid-template-columns: var(--rail) minmax(0, 1fr) var(--rail) }
 
 .side { background: #fff; display: grid; grid-template-rows: auto 1fr; min-height: 0; min-width: 0; position: relative; overflow: hidden }
-.side.left { border-right: 1px solid var(--line) }
+.side.left { border-right: 1px solid var(--line); grid-template-rows: auto auto auto minmax(0, 1fr) }
 .side.right { border-left: 1px solid var(--line) }
 .side-head { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--line2); min-height: 52px }
 .side-head h2 { font-size: 12px; letter-spacing: .1em; margin: 0; flex: 1 }
@@ -99,9 +99,53 @@ a { color: var(--blue) }
 .fold:hover { background: var(--panel); color: var(--red) }
 .rail-label { display: none }
 .side.closed .side-head { padding: 12px 9px; justify-content: center }
-.side.closed .side-head > :not(.fold), .side.closed .side-body, .side.closed .tab-body { display: none !important }
+.side.closed .side-head > :not(.fold), .side.closed .side-body, .side.closed .tab-body, .side.closed .task-manager, .side.closed .side-subhead { display: none !important }
 .side.closed .rail-label { display: block; writing-mode: vertical-rl; font: 600 10px var(--mono); letter-spacing: .2em; color: var(--muted);
   justify-self: center; padding-top: 10px; cursor: pointer }
+
+/* ------------------------------------------------------------------ task manager */
+.task-manager { border-bottom: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; max-height: 36vh; background: var(--panel) }
+.task-form { padding: 8px 10px; border-bottom: 1px solid var(--line2); display: grid; gap: 6px; background: #fff }
+.task-form .input { padding: 6px 8px; font-size: 12px }
+.task-form-actions { display: flex; gap: 6px; justify-content: flex-end }
+.task-table-wrap { overflow-y: auto; min-height: 0 }
+.task-table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed }
+.task-table th { position: sticky; top: 0; background: #f4f4f1; border-bottom: 1px solid var(--line); padding: 5px 8px; text-align: left;
+  font: 600 10px var(--mono); color: var(--muted); letter-spacing: .04em; z-index: 1 }
+.task-table th:nth-child(2) { width: 76px }
+.task-table th:nth-child(3) { width: 46px; padding: 5px 4px }
+.task-row { cursor: pointer; border-bottom: 1px solid var(--line2); background: #fff; transition: background .12s }
+.task-row:hover { background: var(--panel) }
+.task-row.current { background: var(--redsoft) }
+.task-row td { padding: 6px 8px; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.task-row td:last-child { padding: 4px; text-align: right; white-space: nowrap }
+.task-name { font-weight: 600; display: flex; align-items: center; gap: 5px; overflow: hidden }
+.task-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.task-busy { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); flex: none; animation: pulse 1.2s infinite }
+.task-folder { font: 10.5px var(--mono); color: var(--muted) }
+.task-status { border: 1px solid var(--line); border-radius: 99px; background: #fff; font: 600 10px var(--mono); padding: 2px 6px;
+  color: var(--muted); width: 100%; cursor: pointer }
+.task-status.active { color: var(--blue); border-color: #c5d6f5; background: var(--bluesoft) }
+.task-status.done { color: var(--green); border-color: #b7e4d1; background: var(--greensoft) }
+.task-del { border: 0; background: none; color: var(--muted); font-size: 14px; line-height: 1; padding: 2px 4px; border-radius: 4px; opacity: 0 }
+.task-row:hover .task-del, .task-row.current .task-del { opacity: 1 }
+.task-del:hover { color: var(--red); background: var(--redsoft) }
+.task-sched { border: 0; background: none; color: var(--muted); font-size: 12px; line-height: 1; padding: 2px 4px; border-radius: 4px }
+.task-sched:hover { color: var(--ink); background: var(--line2) }
+.task-sched.on { color: var(--green); font-weight: 700 }
+.sched-panel { display: grid; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel) }
+.sched-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; font-size: 13px }
+.sched-head strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 240px }
+.sched-toggle { display: inline-flex; align-items: center; gap: 5px; font: 600 11px var(--mono); color: var(--ink); cursor: pointer; flex: none }
+.sched-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font: 12px var(--mono); color: var(--muted) }
+.sched-row .input { width: 100px; text-align: right }
+.sched-row select.input { width: 190px; text-align: left; padding: 6px 8px; font-size: 12px }
+.sched-field { display: grid; gap: 4px }
+.sched-panel textarea { resize: vertical; min-height: 96px; font-size: 13px; line-height: 1.5 }
+.task-empty { padding: 12px 10px; text-align: center; font-size: 11.5px; color: var(--muted) }
+
+.side-subhead { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 1px solid var(--line2); background: #fff }
+.side-subhead h2 { font-size: 11px; letter-spacing: .1em; margin: 0; flex: 1; color: var(--muted) }
 
 /* ------------------------------------------------------------------ workspace tree */
 .side-body { padding: 8px 8px 14px; display: flex; flex-direction: column; gap: 8px }

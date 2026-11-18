@@ -14,6 +14,7 @@ import json
 import re
 import threading
 import time
+import uuid
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
@@ -40,6 +41,12 @@ TITLE_CHARS = 80
 # A chat's skill is its saved runtime instructions (`session.core`), one `## Skill: <name>` section from
 # kentc_agent.skills.load_skills; restoring the session restores the skill text that was in effect.
 SKILL_SECTION = re.compile(r"## Skill: ([a-z0-9]+(?:-[a-z0-9]+)*)\n")
+TASK_STATUSES = ("open", "active", "done")
+
+
+def _slugify(text: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+    return slug[:48] or "task"
 
 
 def list_skills(library: Path) -> list[dict[str, str]]:
@@ -137,11 +144,12 @@ class WebEvents(Events):
 
 
 class Chat:
-    def __init__(self, runtime: Runtime, key: str, session: Session) -> None:
+    def __init__(self, runtime: Runtime, key: str, session: Session, workspace: Path | None = None) -> None:
         self.runtime = runtime
         self.key = key
         self.session = session
-        self.ctx = ToolContext(runtime.workspace, runtime.settings, runtime.llm, WebEvents(self))
+        self.workspace = (workspace or runtime.workspace).resolve()
+        self.ctx = ToolContext(self.workspace, runtime.settings, runtime.llm, WebEvents(self))
         self.agent = Agent(self.ctx, tools=build_tools(None, {**CORE_TOOLS, "web_search": web_search_tool()}),
                            session=session)
         self.stop_requested = threading.Event()
@@ -207,7 +215,7 @@ class Chat:
         if not text:
             raise ValueError("empty message")
         for a in attachments:
-            if not inside(self.runtime.workspace, a).is_file():
+            if not inside(self.workspace, a).is_file():
                 raise ValueError(f"not a file: {a}")
         self._spawn("chat", lambda: self._chat(text, attachments))
 
@@ -242,7 +250,7 @@ class Chat:
 
     def _chat(self, text: str, attachments: list[str]) -> dict[str, Any]:
         self.publish({"type": "run_start", "run": "chat", "text": text, "attachments": attachments})
-        parts = [attach_document(self.ctx, inside(self.runtime.workspace, a), None, label=a) for a in attachments]
+        parts = [attach_document(self.ctx, inside(self.workspace, a), None, label=a) for a in attachments]
         answer = self.agent.run("\n\n".join([*parts, text]))
         return {"type": "done", "answer": answer, "stopped": self.agent.stopped}
 
@@ -308,14 +316,16 @@ class Runtime:
         self.llm = llm
         self.skills = skills or Path(__file__).resolve().parents[2] / "skills"   # the project's skill library
         self.sessions_dir = workspace / STATE_DIR / "sessions"
+        self.tasks_path = workspace / STATE_DIR / "tasks.json"
         self.loop: asyncio.AbstractEventLoop | None = None
         self._chats: dict[str, Chat] = {}
         self._lock = threading.Lock()
+        self._tasks_lock = threading.Lock()
 
-    def new_chat(self) -> Chat:
+    def new_chat(self, workspace: Path | None = None) -> Chat:
         session = Session()
         session.path = self.sessions_dir / f"{session.id}.jsonl"
-        chat = Chat(self, session.id, session)
+        chat = Chat(self, session.id, session, workspace=workspace)
         with self._lock:
             self._chats[chat.key] = chat
         return chat
@@ -330,8 +340,29 @@ class Runtime:
             path = self.sessions_dir / f"{key}.jsonl"
             if not path.is_file():
                 raise KeyError(key)
-            chat = self._chats[key] = Chat(self, key, Session.load(path))
+            ws = self._workspace_for_chat(key)
+            chat = self._chats[key] = Chat(self, key, Session.load(path), workspace=ws)
             return chat
+
+    def _workspace_for_chat(self, key: str) -> Path | None:
+        with self._tasks_lock:
+            tasks = self._read_tasks()
+        task = next((t for t in tasks if t.get("chat_key") == key), None)
+        if not task:
+            return None
+        try:
+            ws = inside(self.workspace, task["folder"])
+        except ValueError:
+            return None
+        return ws if ws.is_dir() else None
+
+    def task_workspace(self, task_id: str) -> Path:
+        with self._tasks_lock:
+            tasks = self._read_tasks()
+        task = next((t for t in tasks if t["id"] == task_id), None)
+        if task is None:
+            raise KeyError(task_id)
+        return inside(self.workspace, task["folder"])
 
     def list_chats(self) -> list[dict[str, Any]]:
         """Saved sessions with at least one message, plus open chats; newest first."""
@@ -364,3 +395,180 @@ class Runtime:
             self._chats.clear()
         for chat in chats:
             chat.close()
+
+    def _read_tasks(self) -> list[dict[str, Any]]:
+        if not self.tasks_path.is_file():
+            return []
+        try:
+            data = json.loads(self.tasks_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return []
+        return [t for t in data if isinstance(t, dict) and isinstance(t.get("id"), str)] if isinstance(data, list) else []
+
+    def _write_tasks(self, tasks: list[dict[str, Any]]) -> None:
+        self.tasks_path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = self.tasks_path.with_suffix(".tmp")
+        tmp.write_text(json.dumps(tasks, ensure_ascii=False, indent=2), encoding="utf-8")
+        tmp.replace(self.tasks_path)
+
+    def _enrich_tasks(self, tasks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        chats_by_key = {c["key"]: c for c in self.list_chats()}
+        out = []
+        for t in tasks:
+            c = chats_by_key.get(t.get("chat_key", ""), {})
+            out.append({**t, "busy": bool(c.get("busy")), "messages": int(c.get("messages") or 0)})
+        return sorted(out, key=lambda t: t.get("updated", 0), reverse=True)
+
+    def list_tasks(self) -> list[dict[str, Any]]:
+        with self._tasks_lock:
+            tasks = self._read_tasks()
+        return self._enrich_tasks(tasks)
+
+    def create_task(self, name: str, folder: str = "") -> dict[str, Any]:
+        clean = " ".join(name.split())
+        if not clean:
+            raise ValueError("task name is required")
+        ws_real = self.workspace.resolve()
+        with self._tasks_lock:
+            tasks = self._read_tasks()
+            used_folders = {t.get("folder") for t in tasks}
+            if folder.strip():
+                target = inside(self.workspace, folder.strip())
+                if target == ws_real:
+                    raise ValueError("task folder must be a subfolder")
+                if target.exists() and not target.is_dir():
+                    raise ValueError(f"not a folder: {folder}")
+                target.mkdir(parents=True, exist_ok=True)
+                rel_folder = target.relative_to(ws_real).as_posix()
+            else:
+                slug = _slugify(clean)
+                n = 1
+                while True:
+                    candidate = f"tasks/{slug}" if n == 1 else f"tasks/{slug}-{n}"
+                    target = inside(self.workspace, candidate)
+                    if candidate not in used_folders and not target.exists():
+                        break
+                    n += 1
+                target.mkdir(parents=True, exist_ok=True)
+                rel_folder = target.relative_to(ws_real).as_posix()
+            chat = self.new_chat(workspace=target)
+            now = time.time()
+            task = {
+                "id": uuid.uuid4().hex[:10],
+                "name": clean[:120],
+                "folder": rel_folder,
+                "chat_key": chat.key,
+                "status": "open",
+                "created": now,
+                "updated": now,
+            }
+            tasks.append(task)
+            self._write_tasks(tasks)
+        return self._enrich_tasks([task])[0]
+
+    def _normalize_schedule(self, raw: Any, prev: dict[str, Any] | None, now: float) -> dict[str, Any] | None:
+        if raw is None:
+            return None
+        if not isinstance(raw, dict):
+            raise ValueError("schedule must be an object or null")
+        enabled = bool(raw.get("enabled", False))
+        try:
+            interval_min = float(raw.get("interval_min", 60))
+        except (TypeError, ValueError):
+            raise ValueError("interval_min must be a number") from None
+        if interval_min < 1:
+            raise ValueError("interval_min must be at least 1 minute")
+        prompt = str(raw.get("prompt") or "").strip()
+        if enabled and not prompt:
+            raise ValueError("schedule prompt is required when enabled")
+        skill = raw.get("skill")
+        if skill is not None:
+            if not isinstance(skill, str):
+                raise ValueError("schedule skill must be a string or null")
+            skill = skill.strip() or None
+            if skill:
+                load_skills(self.skills, [skill])
+        last_run = prev.get("last_run") if isinstance(prev, dict) else None
+        next_run = None
+        if enabled:
+            same_cfg = isinstance(prev, dict) and prev.get("enabled") and prev.get("interval_min") == interval_min
+            next_run = prev.get("next_run") if same_cfg and isinstance(prev.get("next_run"), (int, float)) else now + interval_min * 60
+        return {"enabled": enabled, "interval_min": interval_min, "prompt": prompt, "skill": skill,
+                "last_run": last_run, "next_run": next_run}
+
+    def update_task(self, task_id: str, *, name: str | None = None, status: str | None = None,
+                    schedule: Any = ...) -> dict[str, Any]:
+        now = time.time()
+        with self._tasks_lock:
+            tasks = self._read_tasks()
+            task = next((t for t in tasks if t["id"] == task_id), None)
+            if task is None:
+                raise KeyError(task_id)
+            if name is not None:
+                clean = " ".join(name.split())
+                if not clean:
+                    raise ValueError("task name cannot be empty")
+                task["name"] = clean[:120]
+            if status is not None:
+                if status not in TASK_STATUSES:
+                    raise ValueError(f"status must be one of {', '.join(TASK_STATUSES)}")
+                task["status"] = status
+            if schedule is not ...:
+                task["schedule"] = self._normalize_schedule(schedule, task.get("schedule"), now)
+                if status is None:
+                    if task["schedule"] and task["schedule"].get("enabled"):
+                        task["status"] = "active"
+                    elif task.get("status") == "active":
+                        task["status"] = "open"
+            task["updated"] = now
+            self._write_tasks(tasks)
+        return self._enrich_tasks([task])[0]
+
+    def tick_schedules(self, now: float | None = None, stagger_sec: float = 300.0) -> list[str]:
+        """Trigger at most one due task now and stagger remaining overdue tasks by `stagger_sec`."""
+        now = time.time() if now is None else now
+        candidate: tuple[str, str, str] | None = None
+        with self._tasks_lock:
+            tasks = self._read_tasks()
+            due: list[dict[str, Any]] = []
+            for t in tasks:
+                sched = t.get("schedule")
+                if not isinstance(sched, dict) or not sched.get("enabled"):
+                    continue
+                prompt = str(sched.get("prompt") or "").strip()
+                next_run = sched.get("next_run")
+                if prompt and isinstance(next_run, (int, float)) and next_run <= now:
+                    due.append(t)
+            if not due:
+                return []
+            due.sort(key=lambda t: float(t["schedule"]["next_run"]))
+            first = due[0]
+            sched0 = first["schedule"]
+            interval_min = float(sched0.get("interval_min") or 60)
+            sched0["next_run"] = now + interval_min * 60
+            sched0["last_run"] = now
+            first["updated"] = now
+            candidate = (first["id"], first["chat_key"], str(sched0["prompt"]).strip(), sched0.get("skill"))
+            for idx, extra in enumerate(due[1:], start=1):
+                extra["schedule"]["next_run"] = now + idx * stagger_sec
+                extra["updated"] = now
+            self._write_tasks(tasks)
+        task_id, chat_key, prompt, sched_skill = candidate
+        try:
+            chat = self.chat(chat_key)
+            if not chat.busy:
+                if sched_skill and chat.skill != sched_skill:
+                    chat.set_skill(sched_skill)
+                chat.send(prompt, [])
+                return [task_id]
+        except (KeyError, ValueError, ChatBusy):
+            pass
+        return []
+
+    def delete_task(self, task_id: str) -> None:
+        with self._tasks_lock:
+            tasks = self._read_tasks()
+            kept = [t for t in tasks if t["id"] != task_id]
+            if len(kept) == len(tasks):
+                raise KeyError(task_id)
+            self._write_tasks(kept)

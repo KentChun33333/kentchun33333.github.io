@@ -34,9 +34,20 @@ def create_app(runtime: Runtime, token: str = "") -> FastAPI:
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
         runtime.loop = asyncio.get_running_loop()
+
+        async def scheduler_loop() -> None:
+            while True:
+                await asyncio.sleep(5)
+                try:
+                    await run_in_threadpool(runtime.tick_schedules)
+                except Exception:  # noqa: BLE001 - keep scheduler alive across transient errors
+                    pass
+
+        sched_task = asyncio.create_task(scheduler_loop())
         try:
             yield
         finally:
+            sched_task.cancel()
             runtime.close()
 
     app = FastAPI(title="kentc-breezeman", docs_url="/api/docs", lifespan=lifespan)
@@ -89,17 +100,27 @@ def create_app(runtime: Runtime, token: str = "") -> FastAPI:
             model = {"online": False, "error": str(e)}
         return {"model": model, "workspace": str(ws_root), "name": ws_root.name}
 
+    def workspace_of(task: str = "") -> Path:
+        if not task:
+            return ws_root
+        try:
+            return runtime.task_workspace(task)
+        except KeyError:
+            raise HTTPException(404, f"no task {task}") from None
+        except ValueError as e:
+            raise HTTPException(400, str(e)) from None
+
     @app.get("/api/tree")
-    def tree(path: str = "") -> list[dict[str, Any]]:
-        return bad_request(wsfiles.list_dir, ws_root, path)
+    def tree(path: str = "", task: str = "") -> list[dict[str, Any]]:
+        return bad_request(wsfiles.list_dir, workspace_of(task), path)
 
     @app.get("/api/file")
-    def file(path: str) -> dict[str, Any]:
-        return bad_request(wsfiles.preview, ws_root, path)
+    def file(path: str, task: str = "") -> dict[str, Any]:
+        return bad_request(wsfiles.preview, workspace_of(task), path)
 
     @app.get("/api/file/raw")
-    def file_raw(path: str) -> Response:
-        resolved = bad_request(wsfiles.inside, ws_root, path)
+    def file_raw(path: str, task: str = "") -> Response:
+        resolved = bad_request(wsfiles.inside, workspace_of(task), path)
         if not resolved.is_file():
             raise HTTPException(400, f"not a file: {path}")
         media = "text/html; charset=utf-8" if resolved.suffix.lower() in {".html", ".htm"} else "text/plain; charset=utf-8"
@@ -110,13 +131,50 @@ def create_app(runtime: Runtime, token: str = "") -> FastAPI:
         )
 
     @app.post("/api/upload")
-    async def upload(folder: str = Form(""), files: list[UploadFile] = File(...)) -> dict[str, Any]:
+    async def upload(folder: str = Form(""), task: str = Form(""), files: list[UploadFile] = File(...)) -> dict[str, Any]:
+        root = workspace_of(task)
         saved = []
         for f in files:
             data = await f.read(wsfiles.MAX_UPLOAD_BYTES + 1)
-            saved.append(await run_in_threadpool(bad_request, wsfiles.save_upload, ws_root, folder,
+            saved.append(await run_in_threadpool(bad_request, wsfiles.save_upload, root, folder,
                                                   f.filename or "", data))
         return {"saved": saved}
+
+    @app.get("/api/tasks")
+    def tasks() -> list[dict[str, Any]]:
+        return runtime.list_tasks()
+
+    @app.post("/api/tasks")
+    def create_task(body: dict[str, Any]) -> dict[str, Any]:
+        name = body.get("name")
+        folder = body.get("folder") or ""
+        if not isinstance(name, str) or not isinstance(folder, str):
+            raise HTTPException(400, "name and folder must be strings")
+        return bad_request(runtime.create_task, name, folder)
+
+    @app.patch("/api/tasks/{task_id}")
+    def update_task(task_id: str, body: dict[str, Any]) -> dict[str, Any]:
+        name = body.get("name")
+        status = body.get("status")
+        schedule = body["schedule"] if "schedule" in body else ...
+        if name is not None and not isinstance(name, str):
+            raise HTTPException(400, "name must be a string")
+        if status is not None and not isinstance(status, str):
+            raise HTTPException(400, "status must be a string")
+        try:
+            return runtime.update_task(task_id, name=name, status=status, schedule=schedule)
+        except KeyError:
+            raise HTTPException(404, f"no task {task_id}") from None
+        except ValueError as e:
+            raise HTTPException(400, str(e)) from None
+
+    @app.delete("/api/tasks/{task_id}")
+    def delete_task(task_id: str) -> dict[str, bool]:
+        try:
+            runtime.delete_task(task_id)
+        except KeyError:
+            raise HTTPException(404, f"no task {task_id}") from None
+        return {"ok": True}
 
     @app.get("/api/chats")
     def chats() -> list[dict[str, Any]]:

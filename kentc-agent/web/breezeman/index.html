@@ -29,10 +29,34 @@
 
 <main class="shell" id="shell">
   <!-- ============================================================ workspace -->
-  <aside class="side left" id="leftPanel" aria-label="Workspace">
+  <aside class="side left" id="leftPanel" aria-label="Tasks and Workspace">
     <div class="side-head">
       <button class="fold" id="leftFold" title="Fold workspace panel" aria-label="Fold workspace panel">«</button>
-      <h2>WORKSPACE</h2>
+      <h2>TASKS</h2>
+      <div class="side-actions">
+        <button class="btn small" id="newTaskBtn" type="button" title="Create a new task with its own folder">+ Task</button>
+      </div>
+    </div>
+    <div class="task-manager" id="taskManager">
+      <form class="task-form" id="taskForm" hidden>
+        <input class="input" id="taskNameInput" type="text" placeholder="Task name (e.g. Q3 KYC Review)" required maxlength="120">
+        <input class="input mono" id="taskFolderInput" type="text" placeholder="Folder (optional, default tasks/<name>)">
+        <div class="task-form-actions">
+          <button class="btn small" type="submit">Create</button>
+          <button class="btn secondary small" id="taskCancelBtn" type="button">Cancel</button>
+        </div>
+      </form>
+      <div class="task-table-wrap">
+        <table class="task-table" aria-label="Task manager">
+          <thead>
+            <tr><th>Task</th><th>Status</th><th></th></tr>
+          </thead>
+          <tbody id="taskList"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="side-subhead">
+      <h2 id="wsLabel">WORKSPACE</h2>
       <div class="side-actions">
         <button class="icon-btn" id="treeRefresh" title="Refresh">↻</button>
         <label class="icon-btn" title="Upload files"><input type="file" id="uploadInput" multiple hidden>⇪</label>
@@ -84,6 +108,7 @@
         <button class="tab active" data-tab="live" role="tab">Live <span class="badge" id="liveBadge" hidden></span></button>
         <button class="tab" data-tab="context" role="tab">Context</button>
         <button class="tab" data-tab="skills" role="tab">Skill <span class="skill-dot" id="skillDot" hidden title="A skill is loaded"></span></button>
+        <button class="tab" data-tab="schedule" role="tab">Schedule <span class="skill-dot" id="schedDot" hidden title="Schedule enabled"></span></button>
       </div>
       <button class="fold" id="rightFold" title="Fold agent panel" aria-label="Fold agent panel">»</button>
     </div>
@@ -115,6 +140,26 @@
     <div class="tab-body" id="skillsTab" hidden>
       <div class="caption skill-note">One skill per chat. Its text joins the system prompt from the next message; the conversation stays. Saved with the chat.</div>
       <div class="skill-list" id="skillList" role="radiogroup" aria-label="Skill for this chat"></div>
+    </div>
+    <div class="tab-body" id="scheduleTab" hidden>
+      <div class="caption skill-note">Run a prompt automatically on an interval inside the active task's workspace.</div>
+      <div class="placeholder" id="schedEmpty">Select or create a task on the left to configure its schedule.</div>
+      <form class="sched-panel" id="taskSchedForm" hidden>
+        <div class="sched-head">
+          <div><strong id="schedTitle"></strong><div class="mono caption" id="schedFolder"></div></div>
+          <label class="sched-toggle"><input type="checkbox" id="schedEnabled"> Enabled</label>
+        </div>
+        <label class="sched-row"><span>Every (minutes)</span><input class="input mono" id="schedInterval" type="number" min="1" step="1" value="60" required></label>
+        <label class="sched-row"><span>Skill</span><select class="input" id="schedSkill"><option value="">(keep chat skill)</option></select></label>
+        <label class="sched-field">
+          <span class="caption">Prompt for this task</span>
+          <textarea class="input" id="schedPrompt" rows="5" placeholder="What should the agent do on each scheduled run in this task's workspace?"></textarea>
+        </label>
+        <div class="caption mono" id="schedMeta"></div>
+        <div class="task-form-actions">
+          <button class="btn small" type="submit">Save schedule</button>
+        </div>
+      </form>
     </div>
     <div class="rail-label" aria-hidden="true">AGENT</div>
   </aside>

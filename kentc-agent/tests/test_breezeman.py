@@ -185,3 +185,163 @@ def test_raw_file_endpoint_serves_sandboxed_html(tmp_path):
         assert r.headers["content-security-policy"] == "sandbox allow-scripts"
         assert c.get("/api/file/raw", params={"path": "../etc/passwd"}).status_code == 400
         assert c.get("/api/file/raw", params={"path": f"{STATE_DIR}/secret.html"}).status_code == 400
+
+
+def test_task_manager_creates_folders_and_persists(tmp_path):
+    with client(tmp_path, StreamingLLM()) as c:
+        t1 = c.post("/api/tasks", json={"name": "Q3 KYC Review"}).json()
+        assert t1["folder"] == "tasks/q3-kyc-review"
+        assert (tmp_path / "tasks" / "q3-kyc-review").is_dir()
+        assert t1["status"] == "open"
+        assert t1["chat_key"]
+
+        # duplicate name gets a distinct folder
+        t2 = c.post("/api/tasks", json={"name": "Q3 KYC Review"}).json()
+        assert t2["folder"] == "tasks/q3-kyc-review-2"
+        assert (tmp_path / "tasks" / "q3-kyc-review-2").is_dir()
+        assert t2["chat_key"] != t1["chat_key"]
+
+        # custom folder inside workspace works; escaping workspace or STATE_DIR is rejected
+        t3 = c.post("/api/tasks", json={"name": "Custom", "folder": "cases/alpha"}).json()
+        assert t3["folder"] == "cases/alpha"
+        assert (tmp_path / "cases" / "alpha").is_dir()
+        for bad in ("../escape", STATE_DIR, "."):
+            assert c.post("/api/tasks", json={"name": "Bad", "folder": bad}).status_code == 400
+
+        # update status & delete (folder stays on disk)
+        updated = c.patch(f"/api/tasks/{t1['id']}", json={"status": "done"}).json()
+        assert updated["status"] == "done"
+        assert c.patch(f"/api/tasks/{t1['id']}", json={"status": "invalid"}).status_code == 400
+        assert c.delete(f"/api/tasks/{t2['id']}").json() == {"ok": True}
+        assert (tmp_path / "tasks" / "q3-kyc-review-2").is_dir()
+
+    # persists across server restart
+    with client(tmp_path, StreamingLLM()) as c:
+        listed = {t["id"]: t for t in c.get("/api/tasks").json()}
+        assert set(listed) == {t1["id"], t3["id"]}
+        assert listed[t1["id"]]["status"] == "done"
+
+
+def test_task_has_isolated_workspace_for_files_and_agent(tmp_path):
+    (tmp_path / "root-only.txt").write_text("root", encoding="utf-8")
+    with client(tmp_path, StreamingLLM("ok", "after restart")) as c:
+        task = c.post("/api/tasks", json={"name": "Isolated"}).json()
+        tid = task["id"]
+        # upload into the task's workspace
+        up = c.post("/api/upload", data={"folder": "", "task": tid}, files=[("files", ("brief.txt", b"hello task"))])
+        assert up.json()["saved"] == ["brief.txt"]
+        assert (tmp_path / "tasks" / "isolated" / "brief.txt").read_bytes() == b"hello task"
+
+        # tree & preview with task=<id> only see the task workspace, not root-only.txt
+        assert [e["name"] for e in c.get("/api/tree", params={"task": tid}).json()] == ["brief.txt"]
+        assert c.get("/api/file", params={"path": "brief.txt", "task": tid}).json()["text"] == "hello task"
+        assert c.get("/api/file", params={"path": "root-only.txt", "task": tid}).status_code == 400
+
+        # task chat runs with its workspace set to the task folder and accepts task-relative attachments
+        with c.websocket_connect(f"/ws/{task['chat_key']}") as ws:
+            ws.receive_json()
+            ws.send_json({"type": "chat", "text": "read brief", "attachments": ["brief.txt"]})
+            assert until(ws, "done")[-1]["answer"] == "ok"
+
+    # after restart, resuming the task chat still uses the task workspace
+    with client(tmp_path, StreamingLLM("after restart")) as c:
+        with c.websocket_connect(f"/ws/{task['chat_key']}") as ws:
+            ws.receive_json()
+            ws.send_json({"type": "chat", "text": "again", "attachments": ["brief.txt"]})
+            assert until(ws, "done")[-1]["answer"] == "after restart"
+
+
+def test_task_scheduler_validates_and_triggers_due_runs(tmp_path):
+    rt = Runtime(tmp_path, Settings(), StreamingLLM("scheduled reply"))
+    with TestClient(create_app(rt)) as c:
+        task = c.post("/api/tasks", json={"name": "Daily Watch"}).json()
+        tid = task["id"]
+
+        # validation
+        assert c.patch(f"/api/tasks/{tid}", json={"schedule": {"enabled": True, "interval_min": 5, "prompt": ""}}).status_code == 400
+        assert c.patch(f"/api/tasks/{tid}", json={"schedule": {"enabled": True, "interval_min": 0, "prompt": "hi"}}).status_code == 400
+
+        # enable schedule
+        updated = c.patch(
+            f"/api/tasks/{tid}",
+            json={"schedule": {"enabled": True, "interval_min": 10, "prompt": "check updates"}},
+        ).json()
+        sched = updated["schedule"]
+        assert updated["status"] == "active"
+        assert sched["enabled"] is True
+        assert sched["interval_min"] == 10
+        assert sched["prompt"] == "check updates"
+        assert isinstance(sched["next_run"], float)
+
+        # not due yet
+        assert rt.tick_schedules(now=sched["next_run"] - 1) == []
+
+        # due -> triggers the task's chat
+        with c.websocket_connect(f"/ws/{task['chat_key']}") as ws:
+            ws.receive_json()
+            assert rt.tick_schedules(now=sched["next_run"] + 1) == [tid]
+            assert until(ws, "done")[-1]["answer"] == "scheduled reply"
+
+        assert [m["content"] for m in c.get(f"/api/chats/{task['chat_key']}/transcript").json()] == [
+            "check updates",
+            "scheduled reply",
+        ]
+
+
+def test_overdue_tasks_stagger_by_5_minutes(tmp_path):
+    rt = Runtime(tmp_path, Settings(), StreamingLLM("first", "second"))
+    with TestClient(create_app(rt)) as c:
+        t1 = c.post("/api/tasks", json={"name": "Task One"}).json()
+        t2 = c.post("/api/tasks", json={"name": "Task Two"}).json()
+        r1 = c.patch(f"/api/tasks/{t1['id']}", json={"schedule": {"enabled": True, "interval_min": 60, "prompt": "p1"}}).json()
+        r2 = c.patch(f"/api/tasks/{t2['id']}", json={"schedule": {"enabled": True, "interval_min": 60, "prompt": "p2"}}).json()
+        # jump past both next_runs so both are overdue
+        now = max(r1["schedule"]["next_run"], r2["schedule"]["next_run"]) + 10
+        with c.websocket_connect(f"/ws/{t1['chat_key']}") as ws1:
+            ws1.receive_json()
+            assert rt.tick_schedules(now=now) == [t1["id"]]
+            assert until(ws1, "done")[-1]["answer"] == "first"
+
+        # t2 should be queued 5 minutes (300s) later
+        tasks = {t["id"]: t for t in c.get("/api/tasks").json()}
+        assert tasks[t2["id"]]["schedule"]["next_run"] == now + 300
+        assert rt.tick_schedules(now=now + 299) == []
+
+        with c.websocket_connect(f"/ws/{t2['chat_key']}") as ws2:
+            ws2.receive_json()
+            assert rt.tick_schedules(now=now + 300) == [t2["id"]]
+            assert until(ws2, "done")[-1]["answer"] == "second"
+
+
+def test_task_scheduler_applies_selected_skill(tmp_path):
+    lib = tmp_path / "skills"
+    lib.mkdir()
+    (lib / "digest.md").write_text("---\ndescription: Daily digest.\n---\nDIGEST RULES", encoding="utf-8")
+    systems = []
+
+    class Recording(StreamingLLM):
+        def chat(self, messages, **kw):
+            systems.append(messages[0]["content"])
+            return super().chat(messages, **kw)
+
+    ws_dir = tmp_path / "ws"
+    ws_dir.mkdir()
+    rt = Runtime(ws_dir, Settings(), Recording("done with skill"), lib)
+    with TestClient(create_app(rt)) as c:
+        task = c.post("/api/tasks", json={"name": "Digest"}).json()
+        tid = task["id"]
+        assert c.patch(
+            f"/api/tasks/{tid}",
+            json={"schedule": {"enabled": True, "interval_min": 15, "prompt": "run", "skill": "missing"}},
+        ).status_code == 400
+        r = c.patch(
+            f"/api/tasks/{tid}",
+            json={"schedule": {"enabled": True, "interval_min": 15, "prompt": "run", "skill": "digest"}},
+        ).json()
+        assert r["schedule"]["skill"] == "digest"
+        with c.websocket_connect(f"/ws/{task['chat_key']}") as ws:
+            ws.receive_json()
+            assert rt.tick_schedules(now=r["schedule"]["next_run"] + 1) == [tid]
+            assert until(ws, "done")[-1]["answer"] == "done with skill"
+        assert "DIGEST RULES" in systems[-1]
+        assert c.get(f"/api/chats/{task['chat_key']}/context").json()["skill"] == "digest"

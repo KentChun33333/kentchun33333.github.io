@@ -147,7 +147,7 @@
   const S = {
     key: null, ws: null, wsWanted: false, retry: 0, busy: null, seq: 0, tokens: 0, window: 0,
     attachments: [], selectedDir: '', openDirs: new Set(JSON.parse(localStorage.getItem('breezeman-open-dirs') || '[]')),
-    block: null, lastUserText: null, chats: [], ctx: null, ctxStale: true, unread: 0,
+    block: null, lastUserText: null, chats: [], tasks: [], activeTaskId: null, ctx: null, ctxStale: true, unread: 0,
     pending: {}, lastFeed: null, liveFilter: 'all', ctxFilter: 'all', runStart: 0, skill: null, skills: null,
   };
 
@@ -172,9 +172,11 @@
     $('#liveTab').hidden = tab !== 'live';
     $('#contextTab').hidden = tab !== 'context';
     $('#skillsTab').hidden = tab !== 'skills';
+    $('#scheduleTab').hidden = tab !== 'schedule';
     if (tab === 'live') clearUnread();
     if (tab === 'context' && S.ctxStale) loadContext();
     if (tab === 'skills') loadSkills();
+    if (tab === 'schedule') renderSchedule();
   }
   $$('.tab').forEach(t => { t.onclick = () => showTab(t.dataset.tab); });
   function bumpUnread() {
@@ -211,6 +213,162 @@
     }
   }
 
+  // ---------------------------------------------------------------- task manager
+  const taskQuery = (prefix = '?') => (S.activeTaskId ? `${prefix}task=${encodeURIComponent(S.activeTaskId)}` : '');
+  function syncWorkspaceHeader(task) {
+    const label = $('#wsLabel');
+    if (label) label.textContent = task ? `WORKSPACE · ${task.folder}` : 'WORKSPACE';
+  }
+  function renderTasks() {
+    const tbody = $('#taskList');
+    if (!S.tasks.length) {
+      tbody.innerHTML = '<tr><td colspan="3" class="task-empty">No tasks yet. Click <b>+ Task</b> to create a task with its own workspace.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = S.tasks.map(t => {
+      const current = t.id === S.activeTaskId || t.chat_key === S.key;
+      const schedOn = !!t.schedule?.enabled;
+      const status = schedOn ? 'active' : t.status;
+      const schedTitle = schedOn ? `Scheduled every ${t.schedule.interval_min}m` : 'Set schedule for this task';
+      return `<tr class="task-row${current ? ' current' : ''}" data-id="${esc(t.id)}" title="${esc(t.name)} (${esc(t.folder)})">
+        <td><div class="task-name">${t.busy ? '<i class="task-busy" title="Agent running"></i>' : ''}<span>${esc(t.name)}</span></div></td>
+        <td><select class="task-status ${esc(status)}" data-id="${esc(t.id)}" aria-label="Task status">
+          <option value="open"${status === 'open' ? ' selected' : ''}>open</option>
+          <option value="active"${status === 'active' ? ' selected' : ''}>active</option>
+          <option value="done"${status === 'done' ? ' selected' : ''}>done</option>
+        </select></td>
+        <td><button class="task-sched${schedOn ? ' on' : ''}" type="button" data-id="${esc(t.id)}" title="${esc(schedTitle)}">⏱</button><button class="task-del" type="button" data-id="${esc(t.id)}" title="Remove task from list (keeps folder)">×</button></td>
+      </tr>`;
+    }).join('');
+  }
+  async function refreshTasks() {
+    try { S.tasks = await api('/api/tasks'); } catch { return; }
+    const match = S.tasks.find(t => t.chat_key === S.key);
+    const prev = S.activeTaskId;
+    S.activeTaskId = match ? match.id : null;
+    syncWorkspaceHeader(match || null);
+    if (prev !== S.activeTaskId) { setTarget(''); renderTree(); }
+    renderTasks();
+    renderSchedule();
+  }
+  async function selectTask(task) {
+    const changed = S.activeTaskId !== task.id;
+    S.activeTaskId = task.id;
+    syncWorkspaceHeader(task);
+    if (changed) {
+      S.attachments = [];
+      renderAttachments();
+      setTarget('');
+      renderTree();
+    }
+    renderTasks();
+    renderSchedule();
+    if (task.chat_key && task.chat_key !== S.key) await openChat(task.chat_key);
+  }
+  $('#newTaskBtn').onclick = () => {
+    const form = $('#taskForm');
+    form.hidden = !form.hidden;
+    if (!form.hidden) $('#taskNameInput').focus();
+  };
+  $('#taskCancelBtn').onclick = () => { $('#taskForm').reset(); $('#taskForm').hidden = true; };
+  $('#taskForm').onsubmit = async e => {
+    e.preventDefault();
+    const name = $('#taskNameInput').value.trim();
+    const folder = $('#taskFolderInput').value.trim();
+    if (!name) return;
+    try {
+      const task = await api('/api/tasks', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, folder }),
+      });
+      $('#taskForm').reset();
+      $('#taskForm').hidden = true;
+      await refreshTasks();
+      await refreshChats();
+      await selectTask(task);
+      toast(`Task “${task.name}” created (${task.folder})`);
+    } catch (err) { toast(err.message, true); }
+  };
+  function renderSchedule() {
+    const task = S.tasks.find(t => t.id === S.activeTaskId);
+    $('#schedDot').hidden = !task?.schedule?.enabled;
+    $('#schedEmpty').hidden = !!task;
+    $('#taskSchedForm').hidden = !task;
+    if (!task) return;
+    if (!S.skills) loadSkills();
+    const sel = $('#schedSkill');
+    const wanted = task.schedule?.skill || '';
+    sel.innerHTML = '<option value="">(keep chat skill)</option>' +
+      (S.skills || []).map(s => `<option value="${esc(s.name)}" title="${esc(s.description || '')}">${esc(s.name)}</option>`).join('');
+    sel.value = wanted;
+    $('#schedTitle').textContent = task.name;
+    $('#schedFolder').textContent = task.folder;
+    $('#schedEnabled').checked = !!task.schedule?.enabled;
+    $('#schedInterval').value = task.schedule?.interval_min || 60;
+    $('#schedPrompt').value = task.schedule?.prompt || '';
+    const parts = [];
+    if (task.schedule?.last_run) parts.push(`last: ${clock(task.schedule.last_run)}`);
+    if (task.schedule?.enabled && task.schedule?.next_run) parts.push(`next: ${clock(task.schedule.next_run)}`);
+    $('#schedMeta').textContent = parts.join(' · ') || 'Not scheduled yet';
+  }
+  $('#taskSchedForm').onsubmit = async e => {
+    e.preventDefault();
+    if (!S.activeTaskId) return;
+    const enabled = $('#schedEnabled').checked;
+    const interval_min = Number($('#schedInterval').value);
+    const prompt = $('#schedPrompt').value.trim();
+    const skill = $('#schedSkill').value || null;
+    try {
+      const updated = await api(`/api/tasks/${encodeURIComponent(S.activeTaskId)}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ schedule: { enabled, interval_min, prompt, skill } }),
+      });
+      await refreshTasks();
+      toast(updated.schedule?.enabled ? `Scheduled every ${updated.schedule.interval_min}m` : 'Schedule paused');
+    } catch (err) { toast(err.message, true); }
+  };
+
+  $('#taskList').addEventListener('click', async e => {
+    if (e.target.closest('.task-status')) return;
+    const sched = e.target.closest('.task-sched');
+    if (sched) {
+      e.stopPropagation();
+      const task = S.tasks.find(t => t.id === sched.dataset.id);
+      if (task) {
+        await selectTask(task);
+        setPanel('right', true);
+        showTab('schedule');
+        $('#schedPrompt').focus();
+      }
+      return;
+    }
+    const del = e.target.closest('.task-del');
+    if (del) {
+      e.stopPropagation();
+      try {
+        await api(`/api/tasks/${encodeURIComponent(del.dataset.id)}`, { method: 'DELETE' });
+        if (S.activeTaskId === del.dataset.id) S.activeTaskId = null;
+        await refreshTasks();
+      } catch (err) { toast(err.message, true); }
+      return;
+    }
+    const row = e.target.closest('.task-row');
+    if (!row) return;
+    const task = S.tasks.find(t => t.id === row.dataset.id);
+    if (task) await selectTask(task);
+  });
+  $('#taskList').addEventListener('change', async e => {
+    const sel = e.target.closest('.task-status');
+    if (!sel) return;
+    try {
+      await api(`/api/tasks/${encodeURIComponent(sel.dataset.id)}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: sel.value }),
+      });
+      await refreshTasks();
+    } catch (err) { toast(err.message, true); await refreshTasks(); }
+  });
+
   // ---------------------------------------------------------------- workspace tree
   const EXT = { pdf: 'pdf', doc: 'doc', docx: 'doc', ppt: 'doc', pptx: 'doc', xls: 'xls', xlsx: 'xls', csv: 'xls', png: 'img', jpg: 'img', jpeg: 'img',
     gif: 'img', webp: 'img', md: 'txt', txt: 'txt', json: 'txt', yaml: 'txt', yml: 'txt', py: 'txt', js: 'txt', html: 'txt', eml: 'doc', msg: 'doc' };
@@ -220,7 +378,7 @@
   async function renderDir(path, container) {
     let entries;
     try {
-      entries = await api(`/api/tree?path=${encodeURIComponent(path)}`);
+      entries = await api(`/api/tree?path=${encodeURIComponent(path)}${taskQuery('&')}`);
     } catch (e) {
       S.openDirs.delete(path);
       saveOpenDirs();
@@ -254,7 +412,14 @@
   function setTarget(dir) {
     S.selectedDir = dir;
     $$('#tree .node.dir').forEach(n => n.classList.toggle('selected', n.dataset.path === dir));
-    $('#uploadTarget').textContent = `upload to: /${dir}`;
+    const el = $('#uploadTarget');
+    el.hidden = !dir;
+    if (dir) {
+      const task = S.tasks.find(t => t.id === S.activeTaskId);
+      el.textContent = `upload to: ${task ? `${task.folder}/` : '/'}${dir}`;
+    } else {
+      el.textContent = '';
+    }
   }
   $('#tree').addEventListener('click', e => {
     const row = e.target.closest('.node');
@@ -282,6 +447,7 @@
     if (!files.length) return [];
     const form = new FormData();
     form.append('folder', folder);
+    if (S.activeTaskId) form.append('task', S.activeTaskId);
     files.forEach(f => form.append('files', f, f.name));
     toast(`Uploading ${files.length} file${files.length > 1 ? 's' : ''}…`);
     try {
@@ -336,9 +502,9 @@
   }
   async function openPreview(path) {
     try {
-      const f = await api(`/api/file?path=${encodeURIComponent(path)}`);
+      const f = await api(`/api/file?path=${encodeURIComponent(path)}${taskQuery('&')}`);
       if (!f.binary && (f.ext === '.html' || f.ext === '.htm')) {
-        const html = f.truncated ? await api(`/api/file/raw?path=${encodeURIComponent(path)}`) : f.text;
+        const html = f.truncated ? await api(`/api/file/raw?path=${encodeURIComponent(path)}${taskQuery('&')}`) : f.text;
         showHtmlDialog(f.path, fmtSize(f.size), html, path);
         return;
       }
@@ -847,6 +1013,7 @@
   async function loadSkills() {
     try { S.skills = await api('/api/skills'); } catch (e) { $('#skillList').innerHTML = `<div class="placeholder">${esc(e.message)}</div>`; return; }
     renderSkills();
+    renderSchedule();
   }
   function renderSkills() {
     $('#skillDot').hidden = !S.skill;
@@ -931,13 +1098,15 @@
   function handle(ev) {
     feedEvent(ev);
     chatEvent(ev);
-    if (ev.type === 'run_start') setBusy(ev.run);
+    if (ev.type === 'run_start') { setBusy(ev.run); refreshTasks(); }
     if (['done', 'aborted', 'compacted'].includes(ev.type) || (ev.type === 'error' && ev.run)) {
       setBusy(null);
       if (ev.tokens != null) { S.tokens = ev.tokens; meter(); }
       contextChanged();
       renderTree();      // the agent may have created or changed files
       refreshChats();
+  refreshTasks();
+      refreshTasks();
     }
     if (ev.type === 'error' && !ev.run) toast(ev.message, true);
     if (ev.type === 'error' && ev.run) toast(`Agent error: ${ev.message}`, true);
@@ -969,6 +1138,18 @@
     connect(key);
     contextChanged();
     updateTitle();
+    const task = S.tasks.find(t => t.chat_key === key);
+    const prev = S.activeTaskId;
+    S.activeTaskId = task ? task.id : null;
+    syncWorkspaceHeader(task || null);
+    if (prev !== S.activeTaskId) {
+      S.attachments = [];
+      renderAttachments();
+      setTarget('');
+      renderTree();
+    }
+    renderTasks();
+    renderSchedule();
     if (!reconnect) prompt_.focus();
   }
   async function newChat() {
@@ -1030,6 +1211,7 @@
   health();
   setInterval(health, 30000);
   refreshChats();
+  refreshTasks();
   const initial = decodeURIComponent(location.hash.slice(1)) || localStorage.getItem('breezeman-chat');
   if (initial) openChat(initial); else newChat();
 })();
