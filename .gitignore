@@ -24,3 +24,6 @@ genesys-adam-images/
 downloads/
 data/
 dataset/
+
+# system-design: source deps (built output in system-design/ is committed)
+system-design-src/node_modules/

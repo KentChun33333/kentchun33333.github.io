@@ -28,11 +28,13 @@
   const isLegacy = n => /\.(doc|xls|ppt)$/i.test(n);
   const BUSY = s => ['queued', 'running'].includes(s);
 
+  const BASE = new URL('.', window.location.href).pathname.replace(/\/$/, '');
+  const apiUrl = p => (p.startsWith('/api/') ? BASE + p : p);
   let token = sessionStorage.getItem('kentc-studio-token') || '';
   async function api(path, opts = {}, retried = false) {
     const headers = new Headers(opts.headers || {});
     if (token) headers.set('x-api-token', token);
-    const res = await fetch(path, { ...opts, headers });
+    const res = await fetch(apiUrl(path), { ...opts, headers });
     if (res.status === 401 && !retried) {
       const entered = prompt('Studio API token');
       if (entered) {
@@ -71,7 +73,7 @@
   // ---------------------------------------------------------------- blocks: the one renderer of agent results
   const BLOCK_KINDS = ['text', 'kv', 'table', 'list', 'chips', 'cards', 'facts'];
   const scoreColor = s => (s >= 85 ? 'var(--red)' : s >= 70 ? 'var(--amber)' : '#9aa0a6');
-  const docLink = (d, name) => `<a href="/api/cases/${enc(d.id)}/docs/${enc(name)}" target="_blank" rel="noopener">${esc(name)}</a>`;
+  const docLink = (d, name) => `<a href="${apiUrl(`/api/cases/${enc(d.id)}/docs/${enc(name)}`)}" target="_blank" rel="noopener">${esc(name)}</a>`;
   const linkify = (d, s) => {
     s = String(s ?? '');
     const hit = d ? arr(d.docs).find(x => s.includes(x.name)) : null;
@@ -332,7 +334,7 @@
     if (c.page) act += `<button class="btn ${!live && c.status !== 'approved' ? '' : 'secondary'} small" data-open="${esc(c.id)}">${!live && c.status === 'ready' ? (fresh3 ? `Open v${c.versions} →` : 'Review →') : 'Detail'}</button>`;
     if (live) act += ` <button class="btn secondary small" data-stop="${esc(c.id)}">Stop</button>`;
     if (c.status === 'failed') act += ` <button class="btn dark small" data-retry="${esc(c.id)}">Retry</button>`;
-    if (c.status === 'approved') act += ` <a class="btn secondary small" href="/api/cases/${enc(c.id)}/export.zip">ZIP</a>`;
+    if (c.status === 'approved') act += ` <a class="btn secondary small" href="${apiUrl(`/api/cases/${enc(c.id)}/export.zip`)}">ZIP</a>`;
     return `<tr class="${fresh ? 'fresh' : ''}">
       <td><span class="case-id">${esc(c.id)}</span><span class="case-sub">${esc(when(c.created))}</span></td>
       <td><span class="chip">${esc(c.app_title)}</span></td>
@@ -564,7 +566,7 @@
         <details class="data-more"><summary>SQL</summary><pre>${esc(r.sql)}</pre></details>` : ''}
       <footer>${live ? `<button class="btn secondary small" data-pull-stop="${esc(p.job)}">Cancel</button>`
         : `<button class="btn ${p.result ? 'secondary' : 'dark'} small" data-pull-run="${i}">${p.result ? 'Re-run' : 'Run'}</button>${arr(p.binds).length ? ` <button class="btn link" data-pull-edit="${i}">Change parameters</button>` : ''}`}
-        ${p.result ? `<a class="btn link" href="/api/cases/${enc(d.id)}/data/${enc(p.name)}">CSV</a>` : ''}</footer>
+        ${p.result ? `<a class="btn link" href="${apiUrl(`/api/cases/${enc(d.id)}/data/${enc(p.name)}`)}">CSV</a>` : ''}</footer>
       ${S.openForms.has(key) && !live ? `<div class="inline-form"><div class="row">
         ${arr(p.binds).map(b => { const f = fieldOf(b); return `<label>${esc(f.label || humanize(b))} <input class="input" type="${f.type === 'date' ? 'date' : 'text'}" name="${esc(b)}" value="${esc(shown[b] ?? obj(d.fields)[b] ?? '')}"></label>`; }).join('')}
         <button class="btn dark small" data-pull-send="${i}">Run with these</button><button class="btn secondary small" data-cancel="${esc(key)}">Cancel</button></div></div>` : ''}
@@ -673,7 +675,7 @@
     const approvedThis = d.approved && rep && d.approved.version === rep.version;
     $('#approveBtn').disabled = !rep || approvedThis || busy.length > 0;
     $('#approveBtn').textContent = approvedThis ? `v${rep.version} approved` : rep ? `Approve v${rep.version}` : 'Approve';
-    $('#zipLink').href = `/api/cases/${enc(d.id)}/export.zip`;
+    $('#zipLink').href = apiUrl(`/api/cases/${enc(d.id)}/export.zip`);
 
     const banner = $('#staleBanner');
     if (busy.length) {

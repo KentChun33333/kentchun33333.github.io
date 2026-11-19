@@ -366,3 +366,21 @@ mark.cur { background: #ff9f43 }
   .side.left:not(.closed) { left: 0 } .side.right:not(.closed) { right: 0 }
   .brand-copy, .pill { display: none }
 }
+
+/* ---------------------------------------------------------------- Studio-in-Breezeman */
+.studio-pill {
+  display: inline-flex; align-items: center; padding: 1px 6px; border-radius: 999px;
+  font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  background: rgba(15, 118, 110, 0.14); color: #0f766e; border: 1px solid rgba(15, 118, 110, 0.28);
+}
+.studio-row td { cursor: pointer; }
+.studio-count { font-size: 11px; color: var(--muted, #666); white-space: nowrap; }
+.studio-stage { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; height: 100%; }
+.studio-stage[hidden] { display: none !important; }
+.studio-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 8px 14px; border-bottom: 1px solid var(--line, #e5e7eb); background: var(--panel, #fafafa);
+}
+.studio-bar-meta { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.studio-bar-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.studio-frame { flex: 1 1 auto; width: 100%; border: 0; min-height: 0; background: #fff; }

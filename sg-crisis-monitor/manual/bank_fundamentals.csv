@@ -1,0 +1,4 @@
+# 每季財報公布後手動填一列。report_date = 財報公布日（不是季末），避免回測偷看未來。
+# credit_cost_bp = 總準備提列 / 平均貸款（年化，基點）；npl_ratio_pct = 不良貸款比率（%）
+# 範例：2026-11-06,3Q26,DBS,17,1.0   ← 數字請以財報為準
+report_date,period,bank,credit_cost_bp,npl_ratio_pct

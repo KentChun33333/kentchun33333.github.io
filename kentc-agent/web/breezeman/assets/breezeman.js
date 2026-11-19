@@ -147,7 +147,7 @@
   const S = {
     key: null, ws: null, wsWanted: false, retry: 0, busy: null, seq: 0, tokens: 0, window: 0,
     attachments: [], selectedDir: '', openDirs: new Set(JSON.parse(localStorage.getItem('breezeman-open-dirs') || '[]')),
-    block: null, lastUserText: null, chats: [], tasks: [], activeTaskId: null, ctx: null, ctxStale: true, unread: 0,
+    block: null, lastUserText: null, chats: [], tasks: [], studios: [], activeTaskId: null, activeStudioId: null, ctx: null, ctxStale: true, unread: 0,
     pending: {}, lastFeed: null, liveFilter: 'all', ctxFilter: 'all', runStart: 0, skill: null, skills: null,
   };
 
@@ -214,19 +214,30 @@
   }
 
   // ---------------------------------------------------------------- task manager
-  const taskQuery = (prefix = '?') => (S.activeTaskId ? `${prefix}task=${encodeURIComponent(S.activeTaskId)}` : '');
+  const taskQuery = (prefix = '?') => (
+    S.activeStudioId ? `${prefix}task=${encodeURIComponent('studio:' + S.activeStudioId)}`
+    : S.activeTaskId ? `${prefix}task=${encodeURIComponent(S.activeTaskId)}` : ''
+  );
   function syncWorkspaceHeader(task) {
     const label = $('#wsLabel');
     if (label) label.textContent = task ? `WORKSPACE · ${task.folder}` : 'WORKSPACE';
   }
   function renderTasks() {
     const tbody = $('#taskList');
-    if (!S.tasks.length) {
-      tbody.innerHTML = '<tr><td colspan="3" class="task-empty">No tasks yet. Click <b>+ Task</b> to create a task with its own workspace.</td></tr>';
+    if (!S.tasks.length && !S.studios.length) {
+      tbody.innerHTML = '<tr><td colspan="3" class="task-empty">No tasks yet. Click <b>+ Task</b> or <b>+ Studio</b> to start.</td></tr>';
       return;
     }
-    tbody.innerHTML = S.tasks.map(t => {
-      const current = t.id === S.activeTaskId || t.chat_key === S.key;
+    const studioRows = S.studios.map(st => {
+      const current = st.id === S.activeStudioId;
+      return `<tr class="studio-row${current ? ' current' : ''}" data-studio-id="${esc(st.id)}" title="${esc(st.name)} (${esc(st.folder)})">
+        <td><div class="task-name"><span class="studio-pill">STUDIO</span><span>${esc(st.name)}</span></div></td>
+        <td><span class="studio-count">${st.cases} case${st.cases === 1 ? '' : 's'}</span></td>
+        <td></td>
+      </tr>`;
+    }).join('');
+    const taskRows = S.tasks.map(t => {
+      const current = !S.activeStudioId && (t.id === S.activeTaskId || t.chat_key === S.key);
       const schedOn = !!t.schedule?.enabled;
       const status = schedOn ? 'active' : t.status;
       const schedTitle = schedOn ? `Scheduled every ${t.schedule.interval_min}m` : 'Set schedule for this task';
@@ -240,6 +251,41 @@
         <td><button class="task-sched${schedOn ? ' on' : ''}" type="button" data-id="${esc(t.id)}" title="${esc(schedTitle)}">⏱</button><button class="task-del" type="button" data-id="${esc(t.id)}" title="Remove task from list (keeps folder)">×</button></td>
       </tr>`;
     }).join('');
+    tbody.innerHTML = studioRows + taskRows;
+  }
+  function openStudio(st) {
+    const changed = S.activeStudioId !== st.id;
+    S.activeStudioId = st.id;
+    S.activeTaskId = null;
+    syncWorkspaceHeader({ folder: st.folder });
+    if (changed) {
+      setTarget('');
+      renderTree();
+    }
+    $('#studioStageName').textContent = st.name;
+    $('#studioStageFolder').textContent = st.folder;
+    $('#studioOpenTab').href = st.url;
+    if ($('#studioFrame').getAttribute('src') !== st.url) $('#studioFrame').setAttribute('src', st.url);
+    $('#studioStage').hidden = false;
+    $('#messages').hidden = true;
+    $('#composer').hidden = true;
+    renderTasks();
+  }
+  function closeStudio() {
+    if (!S.activeStudioId && $('#studioStage').hidden) return;
+    S.activeStudioId = null;
+    $('#studioStage').hidden = true;
+    $('#messages').hidden = false;
+    $('#composer').hidden = false;
+    const match = S.tasks.find(t => t.chat_key === S.key);
+    S.activeTaskId = match ? match.id : null;
+    syncWorkspaceHeader(match || null);
+    setTarget('');
+    renderTree();
+  }
+  async function refreshStudios() {
+    try { S.studios = await api('/api/studios'); } catch { return; }
+    renderTasks();
   }
   async function refreshTasks() {
     try { S.tasks = await api('/api/tasks'); } catch { return; }
@@ -252,6 +298,7 @@
     renderSchedule();
   }
   async function selectTask(task) {
+    closeStudio();
     const changed = S.activeTaskId !== task.id;
     S.activeTaskId = task.id;
     syncWorkspaceHeader(task);
@@ -266,10 +313,44 @@
     if (task.chat_key && task.chat_key !== S.key) await openChat(task.chat_key);
   }
   $('#newTaskBtn').onclick = () => {
+    $('#studioForm').hidden = true;
     const form = $('#taskForm');
     form.hidden = !form.hidden;
     if (!form.hidden) $('#taskNameInput').focus();
   };
+  $('#newStudioBtn').onclick = async () => {
+    $('#taskForm').hidden = true;
+    const form = $('#studioForm');
+    form.hidden = !form.hidden;
+    if (!form.hidden) {
+      try {
+        const list = await api('/api/studios/templates');
+        $('#studioTemplateSelect').innerHTML = list.map(t => `<option value="${esc(t.id)}">${esc(t.title)}</option>`).join('');
+      } catch { /* keep defaults */ }
+      $('#studioNameInput').focus();
+    }
+  };
+  $('#studioCancelBtn').onclick = () => { $('#studioForm').reset(); $('#studioForm').hidden = true; };
+  $('#studioForm').onsubmit = async e => {
+    e.preventDefault();
+    const name = $('#studioNameInput').value.trim();
+    const folder = $('#studioFolderInput').value.trim();
+    const template = $('#studioTemplateSelect').value;
+    if (!name) return;
+    try {
+      const st = await api('/api/studios', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, folder, template }),
+      });
+      $('#studioForm').reset();
+      $('#studioForm').hidden = true;
+      await refreshStudios();
+      renderTree();
+      openStudio(st);
+      toast(`Studio “${st.name}” created (${st.folder})`);
+    } catch (err) { toast(err.message, true); }
+  };
+  $('#studioBackChat').onclick = () => { closeStudio(); renderTasks(); };
   $('#taskCancelBtn').onclick = () => { $('#taskForm').reset(); $('#taskForm').hidden = true; };
   $('#taskForm').onsubmit = async e => {
     e.preventDefault();
@@ -350,6 +431,12 @@
         if (S.activeTaskId === del.dataset.id) S.activeTaskId = null;
         await refreshTasks();
       } catch (err) { toast(err.message, true); }
+      return;
+    }
+    const srow = e.target.closest('.studio-row');
+    if (srow) {
+      const st = S.studios.find(x => x.id === srow.dataset.studioId);
+      if (st) openStudio(st);
       return;
     }
     const row = e.target.closest('.task-row');
@@ -1106,6 +1193,7 @@
       renderTree();      // the agent may have created or changed files
       refreshChats();
   refreshTasks();
+  refreshStudios();
       refreshTasks();
     }
     if (ev.type === 'error' && !ev.run) toast(ev.message, true);
@@ -1153,6 +1241,7 @@
     if (!reconnect) prompt_.focus();
   }
   async function newChat() {
+    closeStudio();
     try {
       const { key } = await api('/api/chats', { method: 'POST' });
       await openChat(key);
@@ -1212,6 +1301,7 @@
   setInterval(health, 30000);
   refreshChats();
   refreshTasks();
+  refreshStudios();
   const initial = decodeURIComponent(location.hash.slice(1)) || localStorage.getItem('breezeman-chat');
   if (initial) openChat(initial); else newChat();
 })();

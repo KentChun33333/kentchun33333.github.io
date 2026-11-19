@@ -17,7 +17,7 @@ from typing import Any
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.concurrency import run_in_threadpool
-from fastapi.responses import HTMLResponse, JSONResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from kentc_agent.adapters.llm import LLMError
@@ -25,12 +25,15 @@ from kentc_agent.skills import SkillError
 
 from . import workspace as wsfiles
 from .runtime import Chat, ChatBusy, Runtime, list_skills
+from .studio import StudioRegistry
 
 ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "web" / "breezeman"
 
 
 def create_app(runtime: Runtime, token: str = "") -> FastAPI:
+    studios = StudioRegistry(runtime.workspace, runtime.skills, effort=runtime.settings.reasoning_effort)
+
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
         runtime.loop = asyncio.get_running_loop()
@@ -48,6 +51,7 @@ def create_app(runtime: Runtime, token: str = "") -> FastAPI:
             yield
         finally:
             sched_task.cancel()
+            studios.close()
             runtime.close()
 
     app = FastAPI(title="kentc-breezeman", docs_url="/api/docs", lifespan=lifespan)
@@ -59,7 +63,8 @@ def create_app(runtime: Runtime, token: str = "") -> FastAPI:
 
     @app.middleware("http")
     async def guard(request: Request, call_next):
-        if request.url.path.startswith("/api"):
+        is_studio_api = request.url.path.startswith("/studios/") and "/api/" in request.url.path
+        if request.url.path.startswith("/api") or is_studio_api:
             supplied = request.headers.get("x-api-token") or ""
             header = request.headers.get("authorization", "")
             if header.lower().startswith("bearer "):
@@ -67,7 +72,7 @@ def create_app(runtime: Runtime, token: str = "") -> FastAPI:
             if not authorized(supplied):
                 return JSONResponse({"detail": "unauthorized"}, status_code=401)
         response = await call_next(request)
-        if not request.url.path.startswith("/api"):
+        if not request.url.path.startswith("/api") and not is_studio_api:
             response.headers["Cache-Control"] = "no-cache"
         return response
 
@@ -104,6 +109,8 @@ def create_app(runtime: Runtime, token: str = "") -> FastAPI:
         if not task:
             return ws_root
         try:
+            if task.startswith("studio:"):
+                return studios.folder_of(task[7:])
             return runtime.task_workspace(task)
         except KeyError:
             raise HTTPException(404, f"no task {task}") from None
@@ -208,6 +215,58 @@ def create_app(runtime: Runtime, token: str = "") -> FastAPI:
         except SkillError as e:
             raise HTTPException(400, str(e)) from None
         return {"skill": chat.skill}
+
+    @app.get("/api/studios")
+    def list_studios() -> list[dict[str, Any]]:
+        return studios.list_studios()
+
+    @app.get("/api/studios/templates")
+    def studio_templates() -> list[dict[str, str]]:
+        return studios.templates()
+
+    @app.post("/api/studios")
+    def create_studio(body: dict[str, Any]) -> dict[str, Any]:
+        name = body.get("name")
+        folder = body.get("folder") or ""
+        template = body.get("template") or "ter"
+        if not isinstance(name, str) or not isinstance(folder, str) or not isinstance(template, str):
+            raise HTTPException(400, "name, folder and template must be strings")
+        return bad_request(studios.create_studio, name, folder, template)
+
+    @app.get("/studios/{studio_id}")
+    def studio_slash(studio_id: str) -> RedirectResponse:
+        return RedirectResponse(url=f"/studios/{studio_id}/", status_code=307)
+
+    @app.api_route("/studios/{studio_id}/{rest:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
+    async def studio_dispatch(studio_id: str, rest: str, request: Request) -> Response:
+        try:
+            mounted = await run_in_threadpool(studios.mount, studio_id)
+        except KeyError:
+            raise HTTPException(404, f"no studio {studio_id}") from None
+        except ValueError as e:
+            raise HTTPException(400, str(e)) from None
+        if rest == "api/cases" and request.method == "GET":
+            await run_in_threadpool(studios.sync_cases, mounted)
+        sub_scope = dict(request.scope)
+        sub_scope["path"] = "/" + rest
+        sub_scope["raw_path"] = ("/" + rest).encode("utf-8")
+        sub_scope["root_path"] = ""
+        sent: list[dict[str, Any]] = []
+
+        async def send(msg: dict[str, Any]) -> None:
+            sent.append(msg)
+
+        await mounted.asgi(sub_scope, request.receive, send)
+        status = 200
+        headers: dict[str, str] = {}
+        chunks: list[bytes] = []
+        for msg in sent:
+            if msg["type"] == "http.response.start":
+                status = msg["status"]
+                headers = {k.decode("latin-1"): v.decode("latin-1") for k, v in msg.get("headers", [])}
+            elif msg["type"] == "http.response.body":
+                chunks.append(msg.get("body", b""))
+        return Response(content=b"".join(chunks), status_code=status, headers=headers)
 
     @app.websocket("/ws/{key}")
     async def socket(ws: WebSocket, key: str) -> None:
