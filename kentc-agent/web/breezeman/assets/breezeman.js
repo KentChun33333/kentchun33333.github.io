@@ -1218,6 +1218,26 @@
   }
   let ctxTimer;
   let markIndex = -1;
+  $('#ctxActions').addEventListener('click', async e => {
+    const btn = e.target.closest('[data-clear]');
+    if (!btn || !S.key) return;
+    const scope = btn.dataset.clear;
+    const label = scope === 'all' ? 'live messages and checkpoint' : scope;
+    if (!confirm(`Clear ${label} from live context? (Session journal on disk is preserved.)`)) return;
+    try {
+      const c = await api(`/api/chats/${encodeURIComponent(S.key)}/context/clear`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scope }),
+      });
+      S.ctx = { ...c, items: contextItems(c) };
+      S.ctxStale = false;
+      S.tokens = c.tokens;
+      if (c.window) S.window = c.window;
+      meter();
+      renderContext();
+      toast(`Cleared ${label} (${fmtTok(c.tokens)} tokens remaining)`);
+    } catch (err) { toast(err.message, true); }
+  });
   $('#ctxSearch').addEventListener('input', () => { clearTimeout(ctxTimer); ctxTimer = setTimeout(renderContext, 140); });
   $('#ctxSearch').addEventListener('keydown', e => {
     if (e.key !== 'Enter') return;

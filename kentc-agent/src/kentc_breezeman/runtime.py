@@ -228,6 +228,15 @@ class Chat:
     def compact(self, focus: str | None) -> None:
         self._spawn("compact", lambda: self._compact(focus))
 
+    def clear_context(self, scope: str = "all") -> dict[str, Any]:
+        """Clear live messages, checkpoint, or both from the active context while keeping the journal."""
+        with self._lock:
+            if self.busy:
+                raise ChatBusy(f"this chat is running a {self.busy}; wait until it is idle")
+            self.session.clear_context(scope)
+            self.tokens = self.agent.context_tokens()
+        return self.context()
+
     def stop(self) -> None:
         if self.busy:
             self.stop_requested.set()

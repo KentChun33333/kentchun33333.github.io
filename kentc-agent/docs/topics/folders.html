@@ -38,11 +38,19 @@
     <tr><td>操作追蹤 Trace</td><td>輸入概況、模型回覆、工具結果、耗時、子代理關聯等除錯證據</td><td>否。預設啟用、可關閉；未持久化 session 不建一般 trace 檔</td></tr>
     <tr><td>文件快取 Cache</td><td>可重用的文件答案、轉錄、摘要，免重複解析</td><td>命中時由讀取路徑使用；非跨 session 知識記憶</td></tr>
     <tr><td>主題筆記 Topic notes</td><td>壓縮時寫出的 Markdown 筆記＋<code>_index.md</code>，位於 <code>.kentc-agent/memory/&lt;session&gt;/&lt;世代&gt;/</code>；每世代不可變、SHA-256 驗證</td><td><strong>否。</strong> 上下文只帶索引路徑＋≤ 8 個主題名；內容須模型自行 <code>read</code>／<code>bash</code></td></tr>
+    <tr><td>跨工作階段全域記憶 Global memory</td><td>Breezeman Dreaming Task 離線蒸餾出的使用者／專案知識（<code>facts/</code>、<code>patterns/</code>、<code>sim/</code>、<code>archive/</code>）與 <code>INDEX.md</code>，位於根目錄 <code>&lt;init_workspace&gt;/memory/</code></td><td><strong>否。</strong> <code>loop.py</code> 維持不變；僅透過 <code>AGENTS.md</code> 與子任務／Studio <code>instructions</code> 提示路徑，由代理按需 <code>read</code>／<code>bash</code></td></tr>
   </tbody></table></div>
   <div class="grid2">
 <pre class="tree"><code>&lt;workspace&gt;/
 ├── evidence/                     <span class="comment"># 原始證據（使用者自訂）</span>
 ├── reports/                      <span class="comment"># 交付成果（使用者自訂）</span>
+├── memory/                       <span class="comment"># Breezeman 跨任務全域記憶（User-level）</span>
+│   ├── INDEX.md                  <span class="comment"># 由 frontmatter 自動重建的輕量目錄</span>
+│   ├── .dream_state.json         <span class="comment"># 增量蒸餾游標與排程設定</span>
+│   ├── facts/                    <span class="comment"># 具時效性的使用者與專案事實（衝突時取代歸檔）</span>
+│   ├── patterns/                 <span class="comment"># 跨 session 驗證後升級的可複用模式</span>
+│   ├── sim/                      <span class="comment"># Self-Improvement Memory 策略成敗帳本（只追加）</span>
+│   └── archive/                  <span class="comment"># 已取代或過時冷記憶歸檔</span>
 └── .kentc-agent/
     ├── sessions/&lt;檔名&gt;.jsonl     <span class="comment"># 檔案標頭記錄 session ID S</span>
     ├── traces/S.jsonl            <span class="comment"># 每個 operation 的追蹤紀錄</span>

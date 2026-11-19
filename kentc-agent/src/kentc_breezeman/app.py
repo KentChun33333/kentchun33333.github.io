@@ -227,6 +227,17 @@ def create_app(runtime: Runtime, token: str = "") -> FastAPI:
     def context(key: str) -> dict[str, Any]:
         return chat_of(key).context()
 
+    @app.post("/api/chats/{key}/context/clear")
+    def clear_context(key: str, body: dict[str, Any] | None = None) -> dict[str, Any]:
+        scope = str((body or {}).get("scope") or "all").strip().lower()
+        chat = chat_of(key)
+        try:
+            return chat.clear_context(scope)
+        except ChatBusy as e:
+            raise HTTPException(409, str(e)) from None
+        except ValueError as e:
+            raise HTTPException(400, str(e)) from None
+
     @app.get("/api/skills")
     def skills() -> list[dict[str, str]]:
         return list_skills(runtime.skills)

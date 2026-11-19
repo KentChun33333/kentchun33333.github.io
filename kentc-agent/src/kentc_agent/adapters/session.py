@@ -383,6 +383,26 @@ class Session:
         self.ids = [self.ids[i] for i in keep]
         self.usage.clear()
 
+    def clear_context(self, scope: str = "all") -> None:
+        """Append a compaction reset record to clear live messages, checkpoint, or both."""
+        if scope not in ("messages", "checkpoint", "all"):
+            raise ValueError(f"invalid clear scope: {scope!r}")
+        new_summary = "" if scope in ("checkpoint", "all") else (self.summary or "")
+        first_id = self.next_id if scope in ("messages", "all") else (self.ids[0] if self.ids else self.next_id)
+        entry: dict[str, Any] = {
+            "type": "compaction",
+            "summary": new_summary,
+            "first_kept_id": first_id,
+            "tokens_before": 0,
+        }
+        if self._root is not None and self._topics:
+            entry.update(topic_root=str(self._root), topics=dict(self._topics))
+            if self._index is not None:
+                entry["topic_index"] = self._index
+        self._write(entry)
+        self.summary = new_summary
+        self._drop_before(first_id)
+
     def context(self) -> list[dict[str, Any]]:
         checkpoint = self.summary
         if checkpoint and self._index is not None:

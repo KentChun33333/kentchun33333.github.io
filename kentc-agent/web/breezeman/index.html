@@ -214,6 +214,11 @@
         <button class="seg" data-f="messages">Messages</button>
         <button class="seg" data-f="tools">Tools</button>
       </div>
+      <div class="ctx-actions" id="ctxActions">
+        <button class="seg" type="button" data-clear="messages" title="Drop live messages from context (keep checkpoint)">Clear messages</button>
+        <button class="seg" type="button" data-clear="checkpoint" title="Clear summary checkpoint from context (keep live messages)">Clear checkpoint</button>
+        <button class="seg ctx-clear-all" type="button" data-clear="all" title="Clear both live messages and checkpoint from context">Clear all</button>
+      </div>
       <div class="caption ctx-summary" id="ctxSummary"></div>
       <div class="ctx-list" id="ctxList"></div>
     </div>

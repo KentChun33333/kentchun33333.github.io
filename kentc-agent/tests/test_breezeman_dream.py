@@ -318,3 +318,44 @@ def test_tick_schedules_pre_compacts_above_half_window(tmp_path: Path, monkeypat
     assert rt.tick_schedules(now=due2) == [task["id"]]
     assert compacted_calls == [True]
     assert sent_prompts == ["check", "check"]
+
+
+def test_clear_context_messages_checkpoint_and_all(tmp_path: Path) -> None:
+    from kentc_agent.adapters.session import Session
+    from kentc_agent.context.compaction import CompactionResult
+
+    rt = Runtime(tmp_path, Settings(), _FakeLLM())
+    chat = rt.new_chat()
+    chat.session.bind_memory(tmp_path, tmp_path / STATE_DIR)
+    chat.session.append({"role": "user", "content": "msg 1"})
+    chat.session.append({"role": "assistant", "content": "reply 1"})
+    chat.session.compact(CompactionResult("Old checkpoint", {"t1": "Topic 1"}), 1, 50)
+    chat.session.append({"role": "user", "content": "msg 2"})
+
+    with TestClient(create_app(rt)) as client:
+        # 1. Clear checkpoint only -> keeps live messages
+        r1 = client.post(f"/api/chats/{chat.key}/context/clear", json={"scope": "checkpoint"})
+        assert r1.status_code == 200
+        assert r1.json()["checkpoint"] == ""
+        assert len(r1.json()["messages"]) == 2
+
+        # 2. Restore a checkpoint, then clear messages only -> keeps checkpoint
+        chat.session.compact(CompactionResult("Kept checkpoint", {}), 0, 50)
+        r2 = client.post(f"/api/chats/{chat.key}/context/clear", json={"scope": "messages"})
+        assert r2.status_code == 200
+        assert r2.json()["checkpoint"] == "Kept checkpoint"
+        assert len(r2.json()["messages"]) == 1
+        assert "Kept checkpoint" in r2.json()["messages"][0]["content"]
+        assert chat.session.messages == []
+
+        # 3. Clear all -> clears both and reloads cleanly from disk
+        chat.session.append({"role": "user", "content": "msg 3"})
+        r3 = client.post(f"/api/chats/{chat.key}/context/clear", json={"scope": "all"})
+        assert r3.status_code == 200
+        assert r3.json()["checkpoint"] == ""
+        assert r3.json()["messages"] == []
+
+    reloaded = Session.load(chat.session.path)
+    assert reloaded.summary == ""
+    assert reloaded.messages == []
+    assert reloaded.read_topics() == {"t1": "Topic 1"}

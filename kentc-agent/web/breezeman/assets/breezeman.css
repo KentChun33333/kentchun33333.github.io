@@ -401,6 +401,8 @@ mark.cur { background: #ff9f43 }
 .shell.dream-mode, .shell.studio-mode { grid-template-columns: var(--left) minmax(0, 1fr); }
 .shell.dream-mode.left-closed, .shell.studio-mode.left-closed { grid-template-columns: var(--rail) minmax(0, 1fr); }
 .shell.dream-mode #rightPanel, .shell.studio-mode #rightPanel { display: none; }
+.ctx-actions { display: flex; gap: 6px; padding: 0 12px 6px; flex-wrap: wrap; }
+.ctx-clear-all { color: var(--red, #dc2626); border-color: rgba(220, 38, 38, 0.25); }
 .dream-stage-body { flex: 1 1 auto; overflow: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .dream-card {
   border: 1px solid var(--line, #e5e7eb); border-radius: 10px; padding: 12px 14px;
