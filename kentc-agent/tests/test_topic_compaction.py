@@ -289,3 +289,28 @@ def test_word_budget_overflow_retries_once():
     assert result.checkpoint == "Short current state"
     assert len(llm.requests) == 2
     assert "exceeded 10 words" in llm.requests[1]["messages"][1]["content"]
+
+
+def test_token_budget_linear_scaling():
+    from kentc_agent.config import Settings
+    from kentc_agent.context.token_budget import compute_token_budget
+
+    s = Settings()
+    b65 = compute_token_budget(65536, s)
+    b100 = compute_token_budget(100000, s)
+    b16 = compute_token_budget(16000, s)
+
+    assert b65.checkpoint_max_words == 600
+    assert b65.reserve_tokens == 16384
+    assert b65.keep_recent_tokens == 20000
+    assert b65.safety_margin == 3276
+
+    # Linearly scaled up at 100k
+    assert b100.checkpoint_max_words > 900
+    assert b100.reserve_tokens == 25000
+    assert b100.keep_recent_tokens > 30000
+    assert b100.safety_margin == 5000
+
+    # Safely floored/capped at 16k
+    assert b16.checkpoint_max_words == 300
+    assert b16.reserve_tokens <= 4000

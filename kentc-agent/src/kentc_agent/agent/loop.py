@@ -19,11 +19,11 @@ from ..adapters.session import Session, estimate_tokens, loggable
 from ..adapters.tools import CORE_TOOLS, Tool, ToolContext
 from ..adapters.trace import Operation, Trace
 from ..context.bigcontext import CallResult
+from ..context.token_budget import MIN_REPLY_TOKENS
 from ..errors import Aborted
 from .budget import BudgetMixin
 from .executor import SeenCall, ToolExecutorMixin, _defer_interrupt
 
-MIN_REPLY_TOKENS = 1024
 # Only a complete, standalone execution envelope is a leaked call. Prose and
 # fenced examples mentioning protocol markers are legitimate answers.
 LEAKED_TOOL_CALL = re.compile(
@@ -281,7 +281,7 @@ class Agent(BudgetMixin, ToolExecutorMixin):
             notice = notice_for(max_tokens)
             prompt_estimate = math.ceil((self.fixed_tokens + sum(estimate_tokens(m) for m in context) +
                                          (estimate_tokens({"content": notice}) if notice else 0)) * self.density)
-            available = self.window - prompt_estimate - max(256, self.window // 20)
+            available = self.window - prompt_estimate - self.token_budget().safety_margin
             if available < MIN_REPLY_TOKENS // 2:
                 if not preflight_compacted:
                     preflight_compacted = True

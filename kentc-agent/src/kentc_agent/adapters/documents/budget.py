@@ -35,16 +35,16 @@ class DocumentBudget:
 
 
 def document_budget(ctx: ToolContext) -> DocumentBudget:
-    from ...agent import MIN_REPLY_TOKENS
+    from ...context.token_budget import compute_token_budget
     s = ctx.settings
     window = ctx.llm.info(refresh=True).context_window
     if window <= 0:
         raise ToolError("The server did not report a usable document context window.")
+    tb = compute_token_budget(window, s)
     output = min(s.max_output_tokens, window // 2)
     # Leave the Agent's compaction/minimum-reply thresholds untouched: a document request must not
     # trigger history summarization, which would replace evidence before it is read.
-    margin = max(256, window // 20)  # Agent.room()'s estimate safety margin
-    reserve = max(max(output, MIN_REPLY_TOKENS) + margin, min(s.reserve_tokens, window // 4))
+    reserve = max(max(output, tb.min_reply_tokens) + tb.safety_margin, tb.reserve_tokens)
     budget = DocumentBudget(window - reserve, output, max(1.0, ctx.density), s.doc_chunk_tokens)
     if output <= 0 or not budget.fits([{"type": "text", "text": ""}]):
         raise ToolError("The inspected context window is too small for a document request and its reply.")

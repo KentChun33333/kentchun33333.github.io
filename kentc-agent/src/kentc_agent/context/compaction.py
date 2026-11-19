@@ -14,6 +14,7 @@ from typing import Any
 
 from ..adapters.llm import LLMClient
 from ..adapters.session import CHARS_PER_TOKEN, estimate_tokens, validate_slug
+from .token_budget import compute_token_budget
 
 TOOL_RESULT_CHARS = 2000
 SYSTEM = (
@@ -171,15 +172,16 @@ def _parse(text: str, max_words: int) -> CompactionResult:
 
 def summarize(llm: LLMClient, messages: list[dict[str, Any]], previous: str | None, *, window: int,
               reserve_tokens: int, max_output_tokens: int, effort: str, focus: str | None = None,
-              max_words: int = 3000, density: float = 1.0,
+              max_words: int | None = None, density: float = 1.0,
               existing_topics: dict[str, str] | None = None) -> CompactionResult:
     """Fold old messages into a short checkpoint and complete touched-topic replacements."""
     if not math.isfinite(density) or density <= 0:
         raise CompactionError("invalid token density")
+    budget = compute_token_budget(window)
     max_tokens = min(int(0.8 * reserve_tokens), max_output_tokens)
     if max_tokens <= 0:
         raise CompactionError("no compression output budget")
-    max_words = min(max_words, 600)
+    max_words = budget.checkpoint_max_words if max_words is None else int(max_words)
     if max_words <= 0:
         raise CompactionError("no checkpoint word budget")
     topics = dict(existing_topics or {})
@@ -198,13 +200,13 @@ def summarize(llm: LLMClient, messages: list[dict[str, Any]], previous: str | No
         estimated = sum(estimate_tokens(message) for message in request_messages)
         # Keep the v1 overhead allowance for server framing, tokenizer variance,
         # and the retry instruction. Complete old notes are never truncated.
-        if math.ceil(estimated * density) + max_tokens + 256 > window:
+        if math.ceil(estimated * density) + max_tokens + budget.compaction_overhead_tokens > window:
             raise CompactionError("complete topic/checkpoint compression request exceeds context window; context left unchanged")
         reply = llm.chat(request_messages, max_tokens=max_tokens, effort=effort)
         if reply.finish == "length" or not reply.content:
             request_messages[1]["content"] += f"\n\nBe brief: well under {max_tokens * 2 // 3} tokens in total."
             retry_estimated = sum(estimate_tokens(message) for message in request_messages)
-            if math.ceil(retry_estimated * density) + max_tokens + 256 > window:
+            if math.ceil(retry_estimated * density) + max_tokens + budget.compaction_overhead_tokens > window:
                 raise CompactionError("compression retry exceeds context window; context left unchanged")
             reply = llm.chat(request_messages, max_tokens=max_tokens, effort="none")
         if reply.finish == "length" or not reply.content:

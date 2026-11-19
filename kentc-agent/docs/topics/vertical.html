@@ -86,7 +86,7 @@ max_tokens = max(512, min(O, room))   主迴圈初步請求值；之後還可能
     <tr><td>記憶回復：匯入 66 則歷史後一次壓縮</td><td>65,594 → 19,741 tokens（failed_repair：65,577 → 19,867）</td><td>超門檻歷史在首次請求前即壓縮</td></tr>
   </tbody></table></div>
   <p class="hint">數值來源：<a href="../compare-run-4rep-1zpd8yum/str.json">STR 原始結果</a>、<a href="../compare-run-4rep-1zpd8yum/memory.json">記憶回復原始結果</a>。字元→token 為粗估；以伺服器 usage 為準。</p>
-  <p class="source">實作對照：<a href="../../src/kentc_agent/context/compaction.py">context/compaction.py</a><a href="../../src/kentc_agent/context/bigcontext.py">context/bigcontext.py</a><a href="../../src/kentc_agent/adapters/session.py">adapters/session.py</a></p>
+  <p class="source">實作對照：<a href="../../src/kentc_agent/context/compaction.py">context/compaction.py</a><a href="../../src/kentc_agent/context/token_budget.py">context/token_budget.py</a><a href="../../src/kentc_agent/context/bigcontext.py">context/bigcontext.py</a><a href="../../src/kentc_agent/adapters/session.py">adapters/session.py</a></p>
 </section>
 </article>
 <nav class="pager" aria-label="上一篇與下一篇" data-pager></nav>

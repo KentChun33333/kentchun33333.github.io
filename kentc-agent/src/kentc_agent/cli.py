@@ -350,8 +350,9 @@ def show_info(args: argparse.Namespace) -> int:
     info, s = ctx.llm.info(), ctx.settings
     print(f"server          {ctx.llm.base}")
     print(f"model           {info.id}  (images: {'yes' if info.vision else 'no'})")
-    print(f"context window  {info.context_window}  (compact above "
-          f"{info.context_window - min(s.reserve_tokens, info.context_window // 4)})")
+    from .context.token_budget import compute_token_budget
+    compact_at = info.context_window - compute_token_budget(info.context_window, s).reserve_tokens
+    print(f"context window  {info.context_window}  (compact above {compact_at})")
     print(f"workspace       {ctx.workspace}")
     print(f"tools           {', '.join(t.name for t in build_tools(None))}")
     for k, v in vars(s).items():

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from ..adapters.llm import ContextOverflow
 from ..context.compaction import CompactionError, find_cut, summarize
+from ..context.token_budget import TokenBudget, compute_token_budget
 
 
 class BudgetMixin:
@@ -12,13 +13,17 @@ class BudgetMixin:
     def window(self) -> int:
         return self.ctx.llm.info().context_window
 
+    def token_budget(self) -> TokenBudget:
+        """Compute window-scaled token & word budgets for this agent."""
+        return compute_token_budget(self.window, self.ctx.settings)
+
     @property
     def reserve(self) -> int:
-        return min(self.ctx.settings.reserve_tokens, self.window // 4)
+        return self.token_budget().reserve_tokens
 
     @property
     def keep_recent(self) -> int:
-        return min(self.ctx.settings.keep_recent_tokens, self.window // 3)
+        return self.token_budget().keep_recent_tokens
 
     def context_tokens(self) -> int:
         return self.session.context_tokens(self.fixed_tokens, self.density)
@@ -32,11 +37,11 @@ class BudgetMixin:
 
     @property
     def summary_words(self) -> int:
-        """About window/16 tokens (300 to 4000), so compression frees real room."""
-        return max(300, min(4000, self.window // 16)) * 3 // 4
+        """Window-scaled checkpoint word budget (600 words at 65k)."""
+        return self.token_budget().checkpoint_max_words
 
     def room(self) -> int:
-        return self.window - self.context_tokens() - max(256, self.window // 20)
+        return self.window - self.context_tokens() - self.token_budget().safety_margin
 
     def compact(self, focus: str | None = None, *, force: bool = False) -> bool:
         """Consolidate older history into topic notes and a short task checkpoint."""
