@@ -43,6 +43,7 @@ def create_app(runtime: Runtime, token: str = "") -> FastAPI:
                 await asyncio.sleep(5)
                 try:
                     await run_in_threadpool(runtime.tick_schedules)
+                    await run_in_threadpool(runtime.tick_dream)
                 except Exception:  # noqa: BLE001 - keep scheduler alive across transient errors
                     pass
 
@@ -182,6 +183,29 @@ def create_app(runtime: Runtime, token: str = "") -> FastAPI:
         except KeyError:
             raise HTTPException(404, f"no task {task_id}") from None
         return {"ok": True}
+
+    @app.get("/api/dream")
+    def dream_status() -> dict[str, Any]:
+        return runtime.dream_status()
+
+    @app.patch("/api/dream")
+    def update_dream(body: dict[str, Any]) -> dict[str, Any]:
+        enabled = body.get("enabled")
+        interval_min = body.get("interval_min")
+        if enabled is not None and not isinstance(enabled, bool):
+            raise HTTPException(400, "enabled must be a boolean")
+        if interval_min is not None:
+            if not isinstance(interval_min, (int, float)) or isinstance(interval_min, bool):
+                raise HTTPException(400, "interval_min must be a number")
+            interval_min = float(interval_min)
+        return bad_request(lambda: runtime.update_dream_schedule(enabled=enabled, interval_min=interval_min))
+
+    @app.post("/api/dream/run")
+    async def trigger_dream() -> dict[str, Any]:
+        try:
+            return await run_in_threadpool(runtime.run_dream_now)
+        except ChatBusy as e:
+            raise HTTPException(409, str(e)) from None
 
     @app.get("/api/chats")
     def chats() -> list[dict[str, Any]]:

@@ -176,7 +176,7 @@
     if (tab === 'live') clearUnread();
     if (tab === 'context' && S.ctxStale) loadContext();
     if (tab === 'skills') loadSkills();
-    if (tab === 'schedule') renderSchedule();
+    if (tab === 'schedule') { renderSchedule(); loadDream(); }
   }
   $$('.tab').forEach(t => { t.onclick = () => showTab(t.dataset.tab); });
   function bumpUnread() {
@@ -372,7 +372,7 @@
   };
   function renderSchedule() {
     const task = S.tasks.find(t => t.id === S.activeTaskId);
-    $('#schedDot').hidden = !task?.schedule?.enabled;
+    $('#schedDot').hidden = !(task?.schedule?.enabled || S.dreamEnabled);
     $('#schedEmpty').hidden = !!task;
     $('#taskSchedForm').hidden = !task;
     if (!task) return;
@@ -392,6 +392,61 @@
     if (task.schedule?.enabled && task.schedule?.next_run) parts.push(`next: ${clock(task.schedule.next_run)}`);
     $('#schedMeta').textContent = parts.join(' · ') || 'Not scheduled yet';
   }
+  function renderDream(d) {
+    if (!d) return;
+    S.dreamEnabled = !!d.enabled;
+    const task = S.tasks.find(t => t.id === S.activeTaskId);
+    $('#schedDot').hidden = !(task?.schedule?.enabled || S.dreamEnabled);
+    $('#dreamEnabled').checked = !!d.enabled;
+    $('#dreamInterval').value = d.interval_min || 60;
+    const c = d.counts || {};
+    $('#dreamCounts').textContent = `Facts: ${c.fact || 0} · Patterns: ${c.pattern || 0} · SIM: ${c.sim || 0}`;
+    $('#dreamIndexBtn').hidden = !d.index_exists;
+    const runBtn = $('#dreamRunBtn');
+    runBtn.disabled = !!d.busy;
+    runBtn.textContent = d.busy ? 'Dreaming…' : 'Run now';
+    const meta = [];
+    if (d.last_run) meta.push(`last: ${clock(d.last_run)}`);
+    if (d.enabled && d.next_run) meta.push(`next: ${clock(d.next_run)}`);
+    if (d.last_summary) {
+      const s = d.last_summary;
+      meta.push(`+${s.created || 0} ~${s.updated || 0} sup:${s.superseded || 0} arch:${s.archived || 0}`);
+    }
+    if (d.last_error) meta.push(`err: ${d.last_error}`);
+    $('#dreamMeta').textContent = meta.join(' · ') || 'Not dreamed yet';
+  }
+  async function loadDream() {
+    try { renderDream(await api('/api/dream')); }
+    catch (err) { toast(err.message, true); }
+  }
+  $('#dreamSchedForm').onsubmit = async e => {
+    e.preventDefault();
+    const enabled = $('#dreamEnabled').checked;
+    const interval_min = Number($('#dreamInterval').value);
+    try {
+      const d = await api('/api/dream', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled, interval_min }),
+      });
+      renderDream(d);
+      toast(d.enabled ? `Dreaming scheduled every ${d.interval_min}m` : 'Dreaming schedule paused');
+    } catch (err) { toast(err.message, true); }
+  };
+  $('#dreamRunBtn').onclick = async () => {
+    const btn = $('#dreamRunBtn');
+    btn.disabled = true;
+    btn.textContent = 'Dreaming…';
+    try {
+      const res = await api('/api/dream/run', { method: 'POST' });
+      renderDream(res.status);
+      const r = res.report || {};
+      toast(`Dreamed ${r.sessions_processed || 0} session(s): +${r.created || 0} ~${r.updated || 0}`);
+    } catch (err) {
+      toast(err.message, true);
+      loadDream();
+    }
+  };
+  $('#dreamIndexBtn').onclick = () => openPreview('memory/INDEX.md', true);
   $('#taskSchedForm').onsubmit = async e => {
     e.preventDefault();
     if (!S.activeTaskId) return;
@@ -587,11 +642,12 @@
       body.innerHTML = `<pre>${esc(previewHtml ?? '')}</pre>`;
     }
   }
-  async function openPreview(path) {
+  async function openPreview(path, rootOnly = false) {
     try {
-      const f = await api(`/api/file?path=${encodeURIComponent(path)}${taskQuery('&')}`);
+      const tq = rootOnly ? '' : taskQuery('&');
+      const f = await api(`/api/file?path=${encodeURIComponent(path)}${tq}`);
       if (!f.binary && (f.ext === '.html' || f.ext === '.htm')) {
-        const html = f.truncated ? await api(`/api/file/raw?path=${encodeURIComponent(path)}${taskQuery('&')}`) : f.text;
+        const html = f.truncated ? await api(`/api/file/raw?path=${encodeURIComponent(path)}${tq}`) : f.text;
         showHtmlDialog(f.path, fmtSize(f.size), html, path);
         return;
       }
@@ -1193,6 +1249,7 @@
       renderTree();      // the agent may have created or changed files
       refreshChats();
   refreshTasks();
+  loadDream();
   refreshStudios();
       refreshTasks();
     }
@@ -1301,6 +1358,7 @@
   setInterval(health, 30000);
   refreshChats();
   refreshTasks();
+  loadDream();
   refreshStudios();
   const initial = decodeURIComponent(location.hash.slice(1)) || localStorage.getItem('breezeman-chat');
   if (initial) openChat(initial); else newChat();

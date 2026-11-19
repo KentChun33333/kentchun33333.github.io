@@ -31,6 +31,8 @@ from kentc_agent.context.compaction import CompactionError
 from kentc_agent.ports import LLM
 from kentc_agent.skills import FRONT_RE, NAME_RE, load_skills
 
+from .dream import run_dream
+from .memory_store import MemoryStore, memory_hint
 from .workspace import inside
 
 CHAT_KEY = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}\Z")
@@ -150,8 +152,10 @@ class Chat:
         self.session = session
         self.workspace = (workspace or runtime.workspace).resolve()
         self.ctx = ToolContext(self.workspace, runtime.settings, runtime.llm, WebEvents(self))
+        hint = memory_hint(runtime.workspace)
+        initial_instructions = None if session.core.get("instructions") else hint
         self.agent = Agent(self.ctx, tools=build_tools(None, {**CORE_TOOLS, "web_search": web_search_tool()}),
-                           session=session)
+                           session=session, instructions=initial_instructions)
         self.stop_requested = threading.Event()
         self.busy: str | None = None             # "chat" | "compact" while a worker runs
         self.tokens = 0
@@ -202,10 +206,12 @@ class Chat:
     def set_skill(self, name: str | None) -> None:
         """Load one skill (replacing any other) or none; takes effect from the next model call, history stays."""
         text = load_skills(self.runtime.skills, [name]) if name else ""
+        hint = memory_hint(self.runtime.workspace)
+        combined = f"{text.rstrip()}\n\n{hint}" if text else hint
         with self._lock:
             if self.busy:
                 raise ChatBusy(f"this chat is running a {self.busy}; change the skill when it is idle")
-            self.agent.system = self.agent._system_prompt(text)   # journals the new instructions (session core)
+            self.agent.system = self.agent._system_prompt(combined)   # journals the new instructions (session core)
             self.agent.set_tools(list(self.agent.tools.values()))  # recount the fixed prompt size
         self.publish({"type": "skill", "skill": name})
 
@@ -317,10 +323,13 @@ class Runtime:
         self.skills = skills or Path(__file__).resolve().parents[2] / "skills"   # the project's skill library
         self.sessions_dir = workspace / STATE_DIR / "sessions"
         self.tasks_path = workspace / STATE_DIR / "tasks.json"
+        self.memory_store = MemoryStore(workspace / "memory")
         self.loop: asyncio.AbstractEventLoop | None = None
         self._chats: dict[str, Chat] = {}
         self._lock = threading.Lock()
         self._tasks_lock = threading.Lock()
+        self._dream_lock = threading.Lock()
+        self._dream_busy = False
 
     def new_chat(self, workspace: Path | None = None) -> Chat:
         session = Session()
@@ -572,3 +581,67 @@ class Runtime:
             if len(kept) == len(tasks):
                 raise KeyError(task_id)
             self._write_tasks(kept)
+
+    def dream_status(self) -> dict[str, Any]:
+        """Return current Dreaming scheduler config, status, and active node counts."""
+        state = self.memory_store.read_dream_state()
+        sched = dict(state["schedule"])
+        nodes = self.memory_store.list_nodes(statuses={"active", "provisional"})
+        counts = {"fact": 0, "pattern": 0, "sim": 0}
+        for n in nodes:
+            if n.type in counts:
+                counts[n.type] += 1
+        return {
+            **sched,
+            "busy": self._dream_busy,
+            "counts": counts,
+            "index_exists": self.memory_store.index_path.is_file(),
+        }
+
+    def update_dream_schedule(self, *, enabled: bool | None = None,
+                              interval_min: float | None = None) -> dict[str, Any]:
+        """Update Dreaming schedule settings in `.dream_state.json`."""
+        now = time.time()
+        with self._dream_lock:
+            state = self.memory_store.read_dream_state()
+            sched = state["schedule"]
+            if interval_min is not None:
+                if interval_min < 1:
+                    raise ValueError("interval_min must be at least 1 minute")
+                sched["interval_min"] = float(interval_min)
+            if enabled is not None:
+                sched["enabled"] = bool(enabled)
+            if sched.get("enabled"):
+                if not isinstance(sched.get("next_run"), (int, float)) or interval_min is not None:
+                    sched["next_run"] = now + float(sched.get("interval_min") or 60) * 60
+            else:
+                sched["next_run"] = None
+            self.memory_store.write_dream_state(state)
+        return self.dream_status()
+
+    def run_dream_now(self, *, now: float | None = None) -> dict[str, Any]:
+        """Run one Dreaming cycle synchronously; raises `ChatBusy` if already running."""
+        if not self._dream_lock.acquire(blocking=False):
+            raise ChatBusy("dreaming task is already running")
+        self._dream_busy = True
+        try:
+            report = run_dream(self.workspace, self.llm, now=now)
+            return {"report": report.to_dict(), "status": self.dream_status()}
+        finally:
+            self._dream_busy = False
+            self._dream_lock.release()
+
+    def tick_dream(self, now: float | None = None) -> bool:
+        """Trigger the Dreaming Task if enabled and due."""
+        now = time.time() if now is None else now
+        if self._dream_busy:
+            return False
+        sched = self.memory_store.read_dream_state()["schedule"]
+        next_run = sched.get("next_run")
+        if not sched.get("enabled") or not isinstance(next_run, (int, float)) or next_run > now:
+            return False
+        try:
+            self.run_dream_now(now=now)
+            return True
+        except ChatBusy:
+            return False

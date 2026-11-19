@@ -170,6 +170,21 @@
       <div class="skill-list" id="skillList" role="radiogroup" aria-label="Skill for this chat"></div>
     </div>
     <div class="tab-body" id="scheduleTab" hidden>
+      <form class="sched-panel dream-panel" id="dreamSchedForm">
+        <div class="sched-head">
+          <div><strong>Memory Dreaming</strong><div class="mono caption">memory/ (root)</div></div>
+          <label class="sched-toggle"><input type="checkbox" id="dreamEnabled"> Enabled</label>
+        </div>
+        <label class="sched-row"><span>Every (minutes)</span><input class="input mono" id="dreamInterval" type="number" min="1" step="1" value="60" required></label>
+        <div class="dream-counts mono caption" id="dreamCounts">Facts: 0 · Patterns: 0 · SIM: 0</div>
+        <div class="caption mono" id="dreamMeta">Not dreamed yet</div>
+        <div class="task-form-actions">
+          <button class="btn small" type="submit">Save</button>
+          <button class="btn secondary small" id="dreamRunBtn" type="button">Run now</button>
+          <button class="btn secondary small" id="dreamIndexBtn" type="button" hidden>View INDEX.md</button>
+        </div>
+      </form>
+      <div class="sched-divider"></div>
       <div class="caption skill-note">Run a prompt automatically on an interval inside the active task's workspace.</div>
       <div class="placeholder" id="schedEmpty">Select or create a task on the left to configure its schedule.</div>
       <form class="sched-panel" id="taskSchedForm" hidden>

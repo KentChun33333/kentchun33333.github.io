@@ -22,6 +22,7 @@ from kentc_studio.models import Case
 from kentc_studio.providers import AgentError
 from kentc_studio.service.cases import CaseService
 
+from .memory_store import memory_hint
 from .workspace import HIDDEN, inside
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -283,6 +284,16 @@ class StudioRegistry:
                 svc = CaseService(target, config_path, self.effort)
             except AgentError as e:
                 raise ValueError(str(e)) from None
+            hint = memory_hint(self.workspace)
+            for app in svc.config.apps.values():
+                providers = [
+                    *(a.provider for a in app.agents.values()),
+                    *app.extras.values(),
+                    app.report.provider,
+                ]
+                for provider in providers:
+                    if hasattr(provider, "skills") and isinstance(provider.skills, str) and hint not in provider.skills:
+                        provider.skills = f"{provider.skills.rstrip()}\n\n{hint}" if provider.skills else hint
             mounted = _MountedStudio(
                 studio_id=studio_id,
                 folder=target,
