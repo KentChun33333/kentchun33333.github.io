@@ -188,6 +188,10 @@ def create_app(runtime: Runtime, token: str = "") -> FastAPI:
     def dream_status() -> dict[str, Any]:
         return runtime.dream_status()
 
+    @app.get("/api/dream/nodes")
+    def dream_nodes(q: str = "", track: str = "", archived: bool = False) -> list[dict[str, Any]]:
+        return runtime.dream_nodes(q=q, track=track, include_archived=archived)
+
     @app.patch("/api/dream")
     def update_dream(body: dict[str, Any]) -> dict[str, Any]:
         enabled = body.get("enabled")

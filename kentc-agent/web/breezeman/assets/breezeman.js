@@ -176,7 +176,7 @@
     if (tab === 'live') clearUnread();
     if (tab === 'context' && S.ctxStale) loadContext();
     if (tab === 'skills') loadSkills();
-    if (tab === 'schedule') { renderSchedule(); loadDream(); }
+    if (tab === 'schedule') renderSchedule();
   }
   $$('.tab').forEach(t => { t.onclick = () => showTab(t.dataset.tab); });
   function bumpUnread() {
@@ -254,6 +254,8 @@
     tbody.innerHTML = studioRows + taskRows;
   }
   function openStudio(st) {
+    closeDreamStage();
+    $('#shell').classList.add('studio-mode');
     const changed = S.activeStudioId !== st.id;
     S.activeStudioId = st.id;
     S.activeTaskId = null;
@@ -274,6 +276,7 @@
   function closeStudio() {
     if (!S.activeStudioId && $('#studioStage').hidden) return;
     S.activeStudioId = null;
+    $('#shell').classList.remove('studio-mode');
     $('#studioStage').hidden = true;
     $('#messages').hidden = false;
     $('#composer').hidden = false;
@@ -299,6 +302,7 @@
   }
   async function selectTask(task) {
     closeStudio();
+    closeDreamStage();
     const changed = S.activeTaskId !== task.id;
     S.activeTaskId = task.id;
     syncWorkspaceHeader(task);
@@ -372,7 +376,7 @@
   };
   function renderSchedule() {
     const task = S.tasks.find(t => t.id === S.activeTaskId);
-    $('#schedDot').hidden = !(task?.schedule?.enabled || S.dreamEnabled);
+    $('#schedDot').hidden = !task?.schedule?.enabled;
     $('#schedEmpty').hidden = !!task;
     $('#taskSchedForm').hidden = !task;
     if (!task) return;
@@ -392,15 +396,62 @@
     if (task.schedule?.enabled && task.schedule?.next_run) parts.push(`next: ${clock(task.schedule.next_run)}`);
     $('#schedMeta').textContent = parts.join(' · ') || 'Not scheduled yet';
   }
+  let dreamTrack = '';
+  const inDreamMode = () => !$('#dreamStage').hidden;
+  function openDreamStage() {
+    closeStudio();
+    $('#shell').classList.add('dream-mode');
+    $('#dreamStage').hidden = false;
+    $('#messages').hidden = true;
+    $('#composer').hidden = true;
+    const btn = $('#dreamBtn');
+    btn.classList.add('active');
+    btn.lastElementChild.textContent = '← Back to Chat';
+    btn.title = 'Return to Chat';
+    renderTree();
+    loadDream();
+    loadDreamNodes();
+  }
+  function closeDreamStage() {
+    if ($('#dreamStage').hidden) return;
+    $('#shell').classList.remove('dream-mode');
+    $('#dreamStage').hidden = true;
+    const btn = $('#dreamBtn');
+    btn.classList.remove('active');
+    btn.lastElementChild.textContent = 'Dreaming';
+    btn.title = 'User-level Memory & Dreaming Scheduler';
+    if ($('#studioStage').hidden) {
+      $('#messages').hidden = false;
+      $('#composer').hidden = false;
+    }
+    renderTree();
+  }
   function renderDream(d) {
     if (!d) return;
-    S.dreamEnabled = !!d.enabled;
-    const task = S.tasks.find(t => t.id === S.activeTaskId);
-    $('#schedDot').hidden = !(task?.schedule?.enabled || S.dreamEnabled);
+    const btn = $('#dreamBtn');
+    btn.classList.toggle('on', !!d.enabled);
+    btn.classList.toggle('busy', !!d.busy);
     $('#dreamEnabled').checked = !!d.enabled;
     $('#dreamInterval').value = d.interval_min || 60;
     const c = d.counts || {};
-    $('#dreamCounts').textContent = `Facts: ${c.fact || 0} · Patterns: ${c.pattern || 0} · SIM: ${c.sim || 0}`;
+    const v = d.volumes || {};
+    const items = [
+      ['fact', 'Facts', c.fact || 0, v.fact || 0],
+      ['pattern', 'Patterns', c.pattern || 0, v.pattern || 0],
+      ['sim', 'SIM', c.sim || 0, v.sim || 0],
+      ['archived', 'Archived', c.archived || 0, v.archived || 0],
+    ];
+    const totalNodes = items.reduce((a, x) => a + x[2], 0);
+    const totalBytes = items.reduce((a, x) => a + x[3], 0);
+    $('#dreamTotalVol').textContent = `${totalNodes} nodes · ${fmtSize(totalBytes)}`;
+    $('#dreamVolumeBar').innerHTML = totalBytes
+      ? items.filter(x => x[3] > 0).map(([k, lbl, , bytes]) =>
+          `<div class="dream-vol-seg ${k}" style="width:${Math.max(3, (bytes / totalBytes) * 100)}%" title="${lbl}: ${fmtSize(bytes)}"></div>`
+        ).join('')
+      : '';
+    $('#dreamCounts').innerHTML = items.map(([k, lbl, cnt, bytes]) =>
+      `<div class="dream-vol-item"><span class="lbl"><i class="${k}"></i>${lbl}</span><span class="val">${cnt}</span><span class="mono caption muted">${fmtSize(bytes)}</span></div>`
+    ).join('');
     $('#dreamIndexBtn').hidden = !d.index_exists;
     const runBtn = $('#dreamRunBtn');
     runBtn.disabled = !!d.busy;
@@ -414,6 +465,30 @@
     }
     if (d.last_error) meta.push(`err: ${d.last_error}`);
     $('#dreamMeta').textContent = meta.join(' · ') || 'Not dreamed yet';
+  }
+  async function loadDreamNodes() {
+    const q = ($('#dreamSearch').value || '').trim();
+    const archived = dreamTrack === 'archived';
+    const qs = new URLSearchParams({ q, track: dreamTrack, archived: String(archived) });
+    try {
+      const nodes = await api(`/api/dream/nodes?${qs.toString()}`);
+      const list = $('#dreamNodeList');
+      if (!nodes.length) {
+        list.innerHTML = `<div class="placeholder">${q ? 'No matching memory nodes.' : 'No memory nodes yet. Click “Run now” to distill sessions.'}</div>`;
+        return;
+      }
+      list.innerHTML = nodes.map(n => `
+        <button class="dream-node-row" type="button" data-path="${esc(n.rel_path)}">
+          <div class="dream-node-top">
+            <span class="dream-node-title">
+              <span class="dream-type-badge ${esc(n.type)}">${esc(n.type)}</span>
+              <strong class="mono">${esc(n.id)}</strong>
+            </span>
+            <span class="mono caption muted">${esc(n.status)} · ${esc(n.updated_at)} · ${fmtSize(n.size)}</span>
+          </div>
+          <div class="dream-node-summary">${esc(n.summary)}</div>
+        </button>`).join('');
+    } catch (err) { toast(err.message, true); }
   }
   async function loadDream() {
     try { renderDream(await api('/api/dream')); }
@@ -439,6 +514,8 @@
     try {
       const res = await api('/api/dream/run', { method: 'POST' });
       renderDream(res.status);
+      loadDreamNodes();
+      renderTree();
       const r = res.report || {};
       toast(`Dreamed ${r.sessions_processed || 0} session(s): +${r.created || 0} ~${r.updated || 0}`);
     } catch (err) {
@@ -447,6 +524,19 @@
     }
   };
   $('#dreamIndexBtn').onclick = () => openPreview('memory/INDEX.md', true);
+  $('#dreamBackChat').onclick = closeDreamStage;
+  $('#dreamSearch').oninput = () => loadDreamNodes();
+  $('#dreamFilters').addEventListener('click', e => {
+    const btn = e.target.closest('[data-track]');
+    if (!btn) return;
+    dreamTrack = btn.dataset.track || '';
+    $$('#dreamFilters .seg').forEach(b => b.classList.toggle('active', b === btn));
+    loadDreamNodes();
+  });
+  $('#dreamNodeList').addEventListener('click', e => {
+    const row = e.target.closest('.dream-node-row');
+    if (row) openPreview(`memory/${row.dataset.path}`, true);
+  });
   $('#taskSchedForm').onsubmit = async e => {
     e.preventDefault();
     if (!S.activeTaskId) return;
@@ -520,7 +610,8 @@
   async function renderDir(path, container) {
     let entries;
     try {
-      entries = await api(`/api/tree?path=${encodeURIComponent(path)}${taskQuery('&')}`);
+      const tq = inDreamMode() ? '' : taskQuery('&');
+      entries = await api(`/api/tree?path=${encodeURIComponent(path)}${tq}`);
     } catch (e) {
       S.openDirs.delete(path);
       saveOpenDirs();
@@ -550,7 +641,17 @@
       }
     }
   }
-  const renderTree = () => renderDir('', $('#tree'));
+  const renderTree = () => {
+    const label = $('#wsLabel');
+    if (inDreamMode()) {
+      if (label) label.textContent = 'MEMORY · memory/';
+      return renderDir('memory', $('#tree'));
+    }
+    const task = S.tasks.find(t => t.id === S.activeTaskId);
+    const st = S.studios.find(s => s.id === S.activeStudioId);
+    if (label) label.textContent = st ? `WORKSPACE · ${st.folder}` : (task ? `WORKSPACE · ${task.folder}` : 'WORKSPACE');
+    return renderDir('', $('#tree'));
+  };
   function setTarget(dir) {
     S.selectedDir = dir;
     $$('#tree .node.dir').forEach(n => n.classList.toggle('selected', n.dataset.path === dir));
@@ -644,7 +745,7 @@
   }
   async function openPreview(path, rootOnly = false) {
     try {
-      const tq = rootOnly ? '' : taskQuery('&');
+      const tq = (rootOnly || inDreamMode()) ? '' : taskQuery('&');
       const f = await api(`/api/file?path=${encodeURIComponent(path)}${tq}`);
       if (!f.binary && (f.ext === '.html' || f.ext === '.htm')) {
         const html = f.truncated ? await api(`/api/file/raw?path=${encodeURIComponent(path)}${tq}`) : f.text;
@@ -1299,16 +1400,14 @@
   }
   async function newChat() {
     closeStudio();
+    closeDreamStage();
     try {
       const { key } = await api('/api/chats', { method: 'POST' });
       await openChat(key);
       await refreshChats();
     } catch (e) { toast(e.message, true); }
   }
-  $('#newChatBtn').onclick = () => {
-    if (S.busy && !confirm('The current chat is still running. It keeps running in the background. Start a new chat?')) return;
-    newChat();
-  };
+  $('#dreamBtn').onclick = () => ($('#dreamStage').hidden ? openDreamStage() : closeDreamStage());
   async function refreshChats() {
     try { S.chats = await api('/api/chats'); } catch { return; }
     updateTitle();

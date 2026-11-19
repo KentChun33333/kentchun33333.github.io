@@ -386,6 +386,61 @@ mark.cur { background: #ff9f43 }
 .studio-frame { flex: 1 1 auto; width: 100%; border: 0; min-height: 0; background: #fff; }
 
 /* ---------------------------------------------------------------- Memory Dreaming */
-.dream-panel { margin-bottom: 10px; }
-.dream-counts { padding: 4px 8px; border-radius: 6px; background: var(--panel, rgba(0, 0, 0, 0.03)); }
-.sched-divider { height: 1px; background: var(--line, #e5e7eb); margin: 8px 0 10px; }
+.dream-top-btn { display: inline-flex; align-items: center; gap: 6px; }
+.dream-top-btn.active { background: #6d28d9; color: #fff; border-color: #6d28d9; }
+.dream-top-btn .dot { width: 7px; height: 7px; border-radius: 999px; background: currentColor; opacity: .35; }
+.dream-top-btn.on .dot { background: #10b981; opacity: 1; }
+.dream-top-btn.busy .dot { background: #f59e0b; opacity: 1; }
+.dream-pill {
+  display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 999px;
+  font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  background: rgba(124, 58, 237, 0.12); color: #6d28d9; border: 1px solid rgba(124, 58, 237, 0.28);
+}
+.dream-stage { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; height: 100%; }
+.dream-stage[hidden] { display: none !important; }
+.shell.dream-mode, .shell.studio-mode { grid-template-columns: var(--left) minmax(0, 1fr); }
+.shell.dream-mode.left-closed, .shell.studio-mode.left-closed { grid-template-columns: var(--rail) minmax(0, 1fr); }
+.shell.dream-mode #rightPanel, .shell.studio-mode #rightPanel { display: none; }
+.dream-stage-body { flex: 1 1 auto; overflow: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.dream-card {
+  border: 1px solid var(--line, #e5e7eb); border-radius: 10px; padding: 12px 14px;
+  background: var(--card, #fff); display: flex; flex-direction: column; gap: 10px;
+}
+.dream-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.dream-sched-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.dream-vol-bar { display: flex; height: 8px; border-radius: 999px; overflow: hidden; background: rgba(0, 0, 0, 0.06); gap: 2px; }
+.dream-vol-seg { height: 100%; min-width: 4px; transition: width .2s ease; }
+.dream-vol-seg.fact { background: #0284c7; }
+.dream-vol-seg.pattern { background: #059669; }
+.dream-vol-seg.sim { background: #7c3aed; }
+.dream-vol-seg.archived { background: #9ca3af; }
+.dream-vol-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.dream-vol-item {
+  border: 1px solid var(--line, #e5e7eb); border-radius: 8px; padding: 8px 10px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.dream-vol-item .val { font-size: 16px; font-weight: 700; }
+.dream-vol-item .lbl { font-size: 11px; color: var(--muted, #666); display: flex; align-items: center; gap: 5px; }
+.dream-vol-item .lbl i { width: 8px; height: 8px; border-radius: 999px; display: inline-block; }
+.dream-vol-item .lbl i.fact { background: #0284c7; }
+.dream-vol-item .lbl i.pattern { background: #059669; }
+.dream-vol-item .lbl i.sim { background: #7c3aed; }
+.dream-vol-item .lbl i.archived { background: #9ca3af; }
+.dream-index-head { display: flex; flex-direction: column; gap: 8px; }
+.dream-node-list { display: flex; flex-direction: column; gap: 6px; }
+.dream-node-row {
+  text-align: left; width: 100%; border: 1px solid var(--line, #e5e7eb); border-radius: 8px;
+  padding: 9px 11px; background: transparent; cursor: pointer; display: flex; flex-direction: column; gap: 4px;
+}
+.dream-node-row:hover { background: rgba(0, 0, 0, 0.025); border-color: rgba(0, 0, 0, 0.2); }
+.dream-node-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.dream-node-title { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.dream-type-badge {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 1px 6px; border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+}
+.dream-type-badge.fact { background: rgba(2, 132, 199, 0.12); color: #0369a1; }
+.dream-type-badge.pattern { background: rgba(5, 150, 105, 0.12); color: #047857; }
+.dream-type-badge.sim { background: rgba(124, 58, 237, 0.12); color: #6d28d9; }
+.dream-node-summary { font-size: 13px; color: var(--fg, #111); }
+@media (max-width: 680px) { .dream-vol-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

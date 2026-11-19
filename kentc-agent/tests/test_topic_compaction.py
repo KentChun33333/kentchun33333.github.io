@@ -224,7 +224,7 @@ def test_duplicate_topic_keys_and_oversize_checkpoint_fail_without_publication()
     with pytest.raises(CompactionError, match="duplicate"):
         compress(ScriptedLLM(duplicate))
     with pytest.raises(CompactionError, match="word budget"):
-        compress(ScriptedLLM(extraction("one two three", {})), max_words=2)
+        compress(ScriptedLLM(extraction("one two three", {}), extraction("one two three", {})), max_words=2)
 
 
 def test_complete_oversized_old_topic_is_not_silently_truncated(tmp_path):
@@ -268,3 +268,24 @@ def test_v1_journals_load_and_tiered_journals_fail_without_modification(tmp_path
     with pytest.raises(ValueError, match="unsupported session record"):
         Session.load(tiered)
     assert tiered.read_bytes() == original
+
+
+def test_word_budget_overflow_retries_once():
+    too_long = " ".join(["word"] * 25)
+    llm = ScriptedLLM(
+        extraction(too_long, {"details": "Moved history"}),
+        extraction("Short current state", {"details": "Moved history"}),
+    )
+    result = summarize(
+        llm,
+        messages=[{"role": "user", "content": "Iterate v1..v20"}],
+        previous=None,
+        window=16000,
+        reserve_tokens=4000,
+        max_output_tokens=4000,
+        effort="low",
+        max_words=10,
+    )
+    assert result.checkpoint == "Short current state"
+    assert len(llm.requests) == 2
+    assert "exceeded 10 words" in llm.requests[1]["messages"][1]["content"]

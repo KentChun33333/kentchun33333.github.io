@@ -42,6 +42,8 @@ EXTRACT = (
     "checkpoint facts, update progress, and extract durable details into separate topic updates. "
     "Reuse an existing topic slug when it is the same topic; otherwise use a descriptive lowercase "
     "alphanumeric slug with hyphens, at most 64 characters. Do not use one catch-all topic. "
+    "Keep the checkpoint strictly for current active state (latest versions, open blockers, immediate next steps); "
+    "move superseded version histories, long check lists, and bulky details into topics. "
     "Each topic value contains the new facts/changes for that topic, including exact IDs/errors and uncertainty. "
     "Give each fact its evidence: source (file path and line/page/range, tool call, or record ID) and whether a "
     "tool result verified it. A proposed check, an assistant claim, or an open hypothesis is not verified evidence. "
@@ -223,7 +225,18 @@ def summarize(llm: LLMClient, messages: list[dict[str, Any]], previous: str | No
         pieces = _chunks(pending.pop(0), available * CHARS_PER_TOKEN)
         chunk = pieces[0]
         pending[0:0] = pieces[1:]
-        result = _parse(request(wrapper + chunk + "\n</conversation>"), max_words)
+        prompt = wrapper + chunk + "\n</conversation>"
+        try:
+            result = _parse(request(prompt), max_words)
+        except CompactionError as exc:
+            if "word budget" not in str(exc):
+                raise
+            tighter = (
+                f"{prompt}\n\nYour previous checkpoint was empty or exceeded {max_words} words. "
+                f"Shorten the checkpoint to strictly under {max_words} words by moving historical "
+                "versions and detailed check lists into topics."
+            )
+            result = _parse(request(tighter), max_words)
         checkpoint = result.checkpoint
         for slug, update in result.topics.items():
             if slug in topics:

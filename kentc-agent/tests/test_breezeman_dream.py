@@ -242,6 +242,22 @@ def test_dream_api_and_scheduler(tmp_path: Path) -> None:
         r2 = client.post("/api/dream/run")
         assert r2.status_code == 200
         assert r2.json()["status"]["index_exists"] is True
+        assert "volumes" in r2.json()["status"]
+
+        # Nodes listing & search endpoint
+        rt.memory_store.write_node(
+            MemoryNode(
+                id="fact-ui-test",
+                type="fact",
+                summary="User prefers Dreaming stage in topbar.",
+                rel_path="facts/user/ui-test.md",
+                tags=["ui"],
+            )
+        )
+        nodes_all = client.get("/api/dream/nodes").json()
+        assert any(n["id"] == "fact-ui-test" for n in nodes_all)
+        nodes_filtered = client.get("/api/dream/nodes?q=topbar&track=fact").json()
+        assert len(nodes_filtered) == 1 and nodes_filtered[0]["id"] == "fact-ui-test"
 
         # Due tick triggers dream
         due_now = r2.json()["status"]["next_run"] + 1
@@ -275,3 +291,30 @@ def test_task_chat_and_studio_receive_root_memory_hint(tmp_path: Path) -> None:
         assert skills_seen and all(expected_index in s for s in skills_seen)
     finally:
         reg.close()
+
+
+def test_tick_schedules_pre_compacts_above_half_window(tmp_path: Path, monkeypatch) -> None:
+    rt = Runtime(tmp_path, Settings(), _FakeLLM())
+    task = rt.create_task("Scheduled Task")
+    rt.update_dream_schedule(enabled=False)
+    rt.update_task(task["id"], schedule={"enabled": True, "interval_min": 5, "prompt": "check"})
+    chat = rt.chat(task["chat_key"])
+
+    compacted_calls: list[bool] = []
+    sent_prompts: list[str] = []
+    monkeypatch.setattr(chat.agent, "_try_compact", lambda *, force=False: compacted_calls.append(force))
+    monkeypatch.setattr(chat, "send", lambda text, atts: sent_prompts.append(text))
+
+    # Below 50% window -> no pre-compact
+    monkeypatch.setattr(chat.agent, "context_tokens", lambda: chat.agent.window // 2)
+    due = rt.list_tasks()[0]["schedule"]["next_run"] + 1
+    assert rt.tick_schedules(now=due) == [task["id"]]
+    assert compacted_calls == []
+    assert sent_prompts == ["check"]
+
+    # Above 50% window -> pre-compact with force=True before send
+    monkeypatch.setattr(chat.agent, "context_tokens", lambda: chat.agent.window // 2 + 1)
+    due2 = rt.list_tasks()[0]["schedule"]["next_run"] + 1
+    assert rt.tick_schedules(now=due2) == [task["id"]]
+    assert compacted_calls == [True]
+    assert sent_prompts == ["check", "check"]

@@ -568,6 +568,8 @@ class Runtime:
             if not chat.busy:
                 if sched_skill and chat.skill != sched_skill:
                     chat.set_skill(sched_skill)
+                if chat.agent.context_tokens() > chat.agent.window // 2:
+                    chat.agent._try_compact(force=True)
                 chat.send(prompt, [])
                 return [task_id]
         except (KeyError, ValueError, ChatBusy):
@@ -583,20 +585,66 @@ class Runtime:
             self._write_tasks(kept)
 
     def dream_status(self) -> dict[str, Any]:
-        """Return current Dreaming scheduler config, status, and active node counts."""
+        """Return current Dreaming scheduler config, status, active node counts, and byte volumes."""
         state = self.memory_store.read_dream_state()
         sched = dict(state["schedule"])
-        nodes = self.memory_store.list_nodes(statuses={"active", "provisional"})
-        counts = {"fact": 0, "pattern": 0, "sim": 0}
-        for n in nodes:
+        active_nodes = self.memory_store.list_nodes(statuses={"active", "provisional"})
+        archived_nodes = self.memory_store.list_nodes(statuses={"archived"}, tracks=("archive",))
+        counts = {"fact": 0, "pattern": 0, "sim": 0, "archived": len(archived_nodes)}
+        volumes = {"fact": 0, "pattern": 0, "sim": 0, "archived": 0}
+        for n in active_nodes:
             if n.type in counts:
                 counts[n.type] += 1
+                path = self.memory_store.root / n.rel_path
+                if path.is_file():
+                    volumes[n.type] += path.stat().st_size
+        for n in archived_nodes:
+            path = self.memory_store.root / n.rel_path
+            if path.is_file():
+                volumes["archived"] += path.stat().st_size
         return {
             **sched,
             "busy": self._dream_busy,
             "counts": counts,
+            "volumes": volumes,
             "index_exists": self.memory_store.index_path.is_file(),
         }
+
+    def dream_nodes(self, q: str = "", track: str = "", include_archived: bool = False) -> list[dict[str, Any]]:
+        """List and search user-level memory nodes for the Dreaming UI."""
+        tracks: tuple[str, ...] = ("facts", "patterns", "sim", "archive") if include_archived else ("facts", "patterns", "sim")
+        nodes = self.memory_store.list_nodes(tracks=tracks)
+        needle = " ".join(q.split()).lower()
+        clean_track = track.strip().lower()
+        out: list[dict[str, Any]] = []
+        for n in nodes:
+            if clean_track == "archived":
+                if n.status != "archived":
+                    continue
+            elif clean_track in ("fact", "pattern", "sim"):
+                if n.type != clean_track or n.status == "archived":
+                    continue
+            elif not include_archived and n.status == "archived":
+                continue
+            if needle:
+                hay = f"{n.id} {n.summary} {' '.join(n.tags)} {n.body}".lower()
+                if needle not in hay:
+                    continue
+            path = self.memory_store.root / n.rel_path
+            size = path.stat().st_size if path.is_file() else 0
+            out.append({
+                "id": n.id,
+                "type": n.type,
+                "summary": n.summary,
+                "rel_path": n.rel_path,
+                "tags": n.tags,
+                "status": n.status,
+                "confidence": n.confidence,
+                "verified_count": n.verified_count,
+                "updated_at": n.updated_at,
+                "size": size,
+            })
+        return sorted(out, key=lambda item: (item["status"] == "archived", item["updated_at"]), reverse=False)
 
     def update_dream_schedule(self, *, enabled: bool | None = None,
                               interval_min: float | None = None) -> dict[str, Any]:

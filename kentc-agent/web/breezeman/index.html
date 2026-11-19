@@ -22,7 +22,7 @@
         <div class="picker-list" id="chatList" role="listbox"></div>
       </div>
     </div>
-    <button class="btn small" id="newChatBtn" title="Start a new chat with a fresh main agent">+ New chat</button>
+    <button class="btn small dream-top-btn" id="dreamBtn" type="button" title="User-level Memory & Dreaming Scheduler"><span class="dot" id="dreamTopDot"></span><span>Dreaming</span></button>
     <span class="pill" id="modelPill" title="LLM server"><span class="dot"></span><span>connecting…</span></span>
   </div>
 </header>
@@ -100,6 +100,58 @@
       </div>
       <iframe class="studio-frame" id="studioFrame" title="Agentic Studio"></iframe>
     </div>
+    <div class="dream-stage" id="dreamStage" hidden>
+      <div class="studio-bar">
+        <div class="studio-bar-meta">
+          <span class="dream-pill">DREAMING</span>
+          <strong>User-Level Memory</strong>
+          <small class="mono muted">memory/ (root)</small>
+        </div>
+        <div class="studio-bar-actions">
+          <button class="btn secondary small" id="dreamIndexBtn" type="button" hidden>View INDEX.md</button>
+          <button class="btn small" id="dreamBackChat" type="button">← Chat</button>
+        </div>
+      </div>
+      <div class="dream-stage-body">
+        <form class="dream-card sched-panel" id="dreamSchedForm">
+          <div class="sched-head">
+            <div><strong>Dreaming Scheduler</strong><div class="caption muted">Distills all sessions &amp; resolves memory conflicts automatically.</div></div>
+            <label class="sched-toggle"><input type="checkbox" id="dreamEnabled"> Enabled</label>
+          </div>
+          <div class="dream-sched-controls">
+            <label class="sched-row"><span>Every (minutes)</span><input class="input mono" id="dreamInterval" type="number" min="1" step="1" value="60" required></label>
+            <div class="task-form-actions">
+              <button class="btn small" type="submit">Save</button>
+              <button class="btn secondary small" id="dreamRunBtn" type="button">Run now</button>
+            </div>
+          </div>
+          <div class="caption mono" id="dreamMeta">Not dreamed yet</div>
+        </form>
+
+        <div class="dream-card">
+          <div class="dream-card-head">
+            <strong>Memory Volumes</strong>
+            <span class="mono caption muted" id="dreamTotalVol">0 nodes · 0 B</span>
+          </div>
+          <div class="dream-vol-bar" id="dreamVolumeBar" aria-label="Memory volume distribution"></div>
+          <div class="dream-vol-grid" id="dreamCounts"></div>
+        </div>
+
+        <div class="dream-card dream-index-card">
+          <div class="dream-index-head">
+            <input class="input" id="dreamSearch" type="search" placeholder="Search memory index (id, summary, tags, content)…" aria-label="Search memory">
+            <div class="filter-row" id="dreamFilters">
+              <button class="seg active" type="button" data-track="">All</button>
+              <button class="seg" type="button" data-track="fact">Facts</button>
+              <button class="seg" type="button" data-track="pattern">Patterns</button>
+              <button class="seg" type="button" data-track="sim">SIM</button>
+              <button class="seg" type="button" data-track="archived">Archived</button>
+            </div>
+          </div>
+          <div class="dream-node-list" id="dreamNodeList"></div>
+        </div>
+      </div>
+    </div>
     <div class="messages" id="messages">
       <div class="empty" id="emptyState">
         <div class="empty-logo">B</div>
@@ -170,21 +222,6 @@
       <div class="skill-list" id="skillList" role="radiogroup" aria-label="Skill for this chat"></div>
     </div>
     <div class="tab-body" id="scheduleTab" hidden>
-      <form class="sched-panel dream-panel" id="dreamSchedForm">
-        <div class="sched-head">
-          <div><strong>Memory Dreaming</strong><div class="mono caption">memory/ (root)</div></div>
-          <label class="sched-toggle"><input type="checkbox" id="dreamEnabled"> Enabled</label>
-        </div>
-        <label class="sched-row"><span>Every (minutes)</span><input class="input mono" id="dreamInterval" type="number" min="1" step="1" value="60" required></label>
-        <div class="dream-counts mono caption" id="dreamCounts">Facts: 0 · Patterns: 0 · SIM: 0</div>
-        <div class="caption mono" id="dreamMeta">Not dreamed yet</div>
-        <div class="task-form-actions">
-          <button class="btn small" type="submit">Save</button>
-          <button class="btn secondary small" id="dreamRunBtn" type="button">Run now</button>
-          <button class="btn secondary small" id="dreamIndexBtn" type="button" hidden>View INDEX.md</button>
-        </div>
-      </form>
-      <div class="sched-divider"></div>
       <div class="caption skill-note">Run a prompt automatically on an interval inside the active task's workspace.</div>
       <div class="placeholder" id="schedEmpty">Select or create a task on the left to configure its schedule.</div>
       <form class="sched-panel" id="taskSchedForm" hidden>
