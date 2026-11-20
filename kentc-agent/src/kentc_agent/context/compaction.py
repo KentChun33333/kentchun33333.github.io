@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from dataclasses import dataclass
 from typing import Any
 
@@ -60,6 +61,30 @@ MERGE = (
     "from current facts when a change is explicit. Never silently discard old facts just to shorten output. "
     "Do not append an unbounded transcript. Return ONLY the complete replacement Markdown, without fences."
 )
+ROLL_TOPIC = (
+    "The existing topic note has grown large and has been archived verbatim into a sealed cold era note. "
+    "Create a compact new active head Markdown note (concise, focused on current active state, latest versions, "
+    "open blockers, exact key IDs/paths, and the new facts). Include an explicit pointer line at the top referencing "
+    "the sealed cold era slug given in the input so another agent can inspect full earlier history on demand. "
+    "Return ONLY the new active head Markdown, without fences."
+)
+_ERA_SLUG_RE = re.compile(r"-era-\d{3}\Z")
+
+
+def topic_seal_threshold(window: int, max_tokens: int) -> int:
+    """Token threshold at which an active topic note triggers LSM Seal & Roll."""
+    return max(256, min(int(0.65 * max_tokens), window // 8))
+
+
+def _next_era_slug(slug: str, existing: dict[str, str]) -> str:
+    """Pick the next unused `<slug>-era-NNN` cold shard slug within the 64-char slug limit."""
+    base = slug[:56].rstrip("-") or "topic"
+    n = 1
+    while True:
+        candidate = f"{base}-era-{n:03d}"
+        if candidate not in existing:
+            return candidate
+        n += 1
 
 
 class CompactionError(RuntimeError):
@@ -219,7 +244,8 @@ def summarize(llm: LLMClient, messages: list[dict[str, Any]], previous: str | No
         instructions = EXTRACT + f"\n\nThe checkpoint must stay under {max_words} words."
         if focus:
             instructions += f"\nAdditional focus (user request): {focus}"
-        prefix = json.dumps({"previous_checkpoint": checkpoint, "existing_topic_slugs": sorted(topics)}, ensure_ascii=False)
+        active_slugs = sorted(s for s in topics if not _ERA_SLUG_RE.search(s))
+        prefix = json.dumps({"previous_checkpoint": checkpoint, "existing_topic_slugs": active_slugs}, ensure_ascii=False)
         wrapper = f"<historical-data>\n{prefix}\n</historical-data>\n\n{instructions}\n\n<conversation>\n"
         available = int((window - max_tokens - 1000) / density) - estimate_tokens({"content": SYSTEM + wrapper})
         if available < 500:
@@ -240,12 +266,34 @@ def summarize(llm: LLMClient, messages: list[dict[str, Any]], previous: str | No
             )
             result = _parse(request(tighter), max_words)
         checkpoint = result.checkpoint
+        seal_limit = topic_seal_threshold(window, max_tokens)
         for slug, update in result.topics.items():
             if slug in topics:
+                existing_toks = math.ceil(estimate_tokens({"content": topics[slug]}) * density)
+                update_toks = math.ceil(estimate_tokens({"content": update}) * density)
                 # JSON encoding makes the data boundary explicit, but it is the
                 # system instruction, not the delimiter, that sets authority.
-                data = json.dumps({"topic": slug, "existing_note": topics[slug], "new_facts": update}, ensure_ascii=False)
-                body = request(MERGE + "\n\n<historical-data>\n" + data + "\n</historical-data>").strip()
+                if existing_toks + update_toks > seal_limit:
+                    era_slug = _next_era_slug(slug, topics)
+                    data = json.dumps(
+                        {
+                            "topic": slug,
+                            "sealed_era_slug": era_slug,
+                            "sealed_era_file": f"{era_slug}.md",
+                            "existing_note": topics[slug],
+                            "new_facts": update,
+                        },
+                        ensure_ascii=False,
+                    )
+                    # Call request() first so oversized notes still fail atomically without mutating topics.
+                    body = request(ROLL_TOPIC + "\n\n<historical-data>\n" + data + "\n</historical-data>").strip()
+                    if era_slug not in body:
+                        body = f"> Earlier history sealed in: `{era_slug}.md` (topic `{era_slug}`)\n\n{body}"
+                    topics[era_slug] = topics[slug]
+                    changed[era_slug] = topics[slug]
+                else:
+                    data = json.dumps({"topic": slug, "existing_note": topics[slug], "new_facts": update}, ensure_ascii=False)
+                    body = request(MERGE + "\n\n<historical-data>\n" + data + "\n</historical-data>").strip()
             else:
                 body = update.strip()
             topics[slug] = body

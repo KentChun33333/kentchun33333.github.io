@@ -93,6 +93,7 @@ class Agent(BudgetMixin, ToolExecutorMixin):
         self.name = name
         self.effort = effort
         self.max_turns = ctx.settings.max_turns if max_turns is None else max_turns   # 0: no limit
+        self._date = time.strftime("%Y-%m-%d")
         self.system = system if system is not None else self._system_prompt(instructions)
         self.set_tools(tools)
         self.parent = ctx.operation              # set when a tool call starts this agent (a parsing sub-agent)
@@ -131,7 +132,8 @@ class Agent(BudgetMixin, ToolExecutorMixin):
 
     def _system_prompt(self, instructions: str | None) -> str:
         # tools are described by their schemas, not here: the prompt stays the same when a workflow step changes them
-        text = BASE_PROMPT.format(workspace=self.ctx.workspace, date=time.strftime("%Y-%m-%d"))
+        self._date = time.strftime("%Y-%m-%d")
+        text = BASE_PROMPT.format(workspace=self.ctx.workspace, date=self._date)
         text += load_agents_md(self.ctx.workspace)
         persona = self.session.core.get("persona", "")
         if self.ctx.settings.persona_path:
@@ -147,13 +149,25 @@ class Agent(BudgetMixin, ToolExecutorMixin):
             text += f"\n\n# Instructions\n\n{effective}"
         return text
 
+    def _refresh_date(self) -> None:
+        """Keep the Date header current for long-lived foreground agents across midnight."""
+        if not self._foreground:
+            return
+        today = time.strftime("%Y-%m-%d")
+        if today != self._date:
+            self.system = self.system.replace(f"\nDate: {self._date}\n", f"\nDate: {today}\n", 1)
+            self._date = today
+
     # ------------------------------------------------------------------ the loop
     def run(self, prompt: str | list[dict[str, Any]]) -> str:
         """One prompt to an answer. Each turn of the loop is one operation in the trace."""
         self.last_finish, self.stopped, self.turns = None, None, 0
         self._seen_calls = {}
+        self._refresh_date()
         self.ctx.llm.info(refresh=True)
-        self.session.append({"role": "user", "content": prompt})
+        last_msg = self.session.messages[-1] if self.session.messages else None
+        if not (isinstance(last_msg, dict) and last_msg.get("role") == "user" and last_msg.get("content") == prompt):
+            self.session.append({"role": "user", "content": prompt})
         run = self.trace.next_run() if self.trace else 0
         reply = Reply()
         try:

@@ -100,6 +100,7 @@ class LocalAgentProvider(Provider):
     checks: list[Rule] = field(default_factory=list)
     inputs: set[str] = field(default_factory=set)
     source: Path = Path()                             # the app manifest declaring the agent
+    allowed_read_roots: tuple[Path, ...] = ()         # extra read-only roots (e.g. shared global memory/)
 
     @property
     def local(self) -> bool:
@@ -119,8 +120,9 @@ class LocalAgentProvider(Provider):
                         self.max_turns, self.effort, [step], self.source, self.skills)
 
     def run(self, *, case_dir, job_dir, inputs, events, settings, llm, request):
-        """Uploaded documents are untrusted: the agent's reads stay inside the case folder."""
-        ctx = ToolContext(case_dir, settings, llm, events, confine_reads=True)
+        """Uploaded documents are untrusted: the agent's reads stay inside the case folder (plus read-only roots)."""
+        ctx = ToolContext(case_dir, settings, llm, events, confine_reads=True,
+                          allowed_read_roots=self.allowed_read_roots)
         given = {k: inputs.get(k) or "" for k in self.inputs}
         state = Runner(self.workflow(), ctx, given, job_dir).run()
         return state["steps"][self.name]["data"]

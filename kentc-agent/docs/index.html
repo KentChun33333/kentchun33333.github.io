@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="kentc_agent 核心方法論：單一主代理、伺服器能力偵測、上下文預算、文件解析、工具結果安全檢查、工作流程中的網路研究子代理、工作區與工作階段的分工，以及主題筆記壓縮與歷史 A/B 實測。">
-<title>kentc_agent｜核心方法論與執行設計</title>
+<meta name="description" content="kentc_agent 單任務引擎與 Breezeman 長程常駐平台核心方法論：上下文預算、主題筆記壓縮、LSM 分層封存、FastAPI 宿主、排程狀態機與熔斷、全域記憶 Dreaming 與 Folder-as-Studio 整合。">
+<title>kentc_agent × Breezeman｜核心方法論與長程執行設計</title>
 <link rel="stylesheet" href="asset/css/core.css">
 <link rel="stylesheet" href="asset/css/shell.css">
 </head>
@@ -12,7 +12,8 @@
 <div class="progress" aria-hidden="true"><span id="progress"></span></div>
 <a class="sr-only" href="#view">跳至主要內容</a>
 <header class="top"><div class="top-in">
-  <a class="brand" href="#" data-home>kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
+  <a class="brand" href="#tab=agent" data-home>kentc_agent</a>
+  <div class="doc-tabs" id="docTabs" role="tablist" aria-label="文件分頁"></div>
   <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
 </div></header>
 <div class="reader">
@@ -20,44 +21,89 @@
   <main id="view" tabindex="-1">
   <noscript>
   <p class="noscript">閱讀器需要 JavaScript；每個主題也都是獨立頁面，可直接開啟：</p>
+  <h3>Tab 1 · kentc_agent（單任務引擎與上下文控制）</h3>
   <ol>
-    <li><a href="topics/layers.html">00 · 三種使用層</a> — 越無人看管，權限越收斂</li>
-    <li><a href="topics/principles.html">01 · 方法論</a> — 把任務拆成「證據、行動、控制、紀錄」</li>
-    <li><a href="topics/loop.html">02 · 執行迴圈</a> — 一次 run 可以包含多個 operation</li>
-    <li><a href="topics/capabilities.html">03 · 能力與策略</a> — 伺服器能力 ≠ 代理設定</li>
-    <li><a href="topics/vertical.html">04 · 上下文視窗</a> — 跨回合壓縮歷史；單回合控制新資料</li>
-    <li><a href="topics/documents.html">05 · 文件解析</a> — 先轉換，再依預算解析；只接受完整結果</li>
-    <li><a href="topics/folders.html">06 · 記憶分工</a> — 「存在哪裡」與「模型看得到什麼」是兩個問題</li>
-    <li><a href="topics/eval.html">07 · 長任務記憶：摘要 → 主題筆記</a> — 舊版（v1）把舊歷史壓成單一摘要；長任務的精確細節在壓縮中流失，代理被迫重找證據。</li>
-    <li><a href="topics/workflows.html">08 · 工作流程</a> — 同一個 Agent，依階段改變指示與工具清單</li>
-    <li><a href="topics/web.html">09 · 網路研究</a> — 網路資料以「步驟」取得，像文件一樣交付</li>
-    <li><a href="topics/studio.html">10 · Studio 應用</a> — 一個三頁非同步迴圈；換一份 YAML，就是新的應用</li>
-    <li><a href="topics/example.html">11 · 完整範例</a> — 一份掃描發票，從檔案到可核對的回答</li>
-    <li><a href="topics/reference.html">12 · 實作索引</a> — 責任索引與閱讀檢查表</li>
+    <li><a href="topics/layers.html">00 · 使用層與權限</a></li>
+    <li><a href="topics/principles.html">01 · 方法論</a></li>
+    <li><a href="topics/loop.html">02 · 執行迴圈（loop.py）</a></li>
+    <li><a href="topics/capabilities.html">03 · 能力與策略</a></li>
+    <li><a href="topics/vertical.html">04 · 上下文視窗</a></li>
+    <li><a href="topics/documents.html">05 · 文件解析</a></li>
+    <li><a href="topics/folders.html">06 · 記憶分工</a></li>
+    <li><a href="topics/eval.html">07 · 摘要 → 主題筆記</a></li>
+    <li><a href="topics/lsm-memory.html">08 · LSM 分層封存</a></li>
+    <li><a href="topics/workflows.html">09 · 工作流程</a></li>
+    <li><a href="topics/web.html">10 · 網路研究</a></li>
+    <li><a href="topics/example.html">11 · 完整範例</a></li>
+    <li><a href="topics/reference.html">12 · 實作索引</a></li>
+  </ol>
+  <h3>Tab 2 · Breezeman（長程常駐、排程、全域記憶與 Studio 整合）</h3>
+  <ol>
+    <li><a href="topics/breezeman-architecture.html">B0 · 系統架構與 FastAPI 層</a></li>
+    <li><a href="topics/breezeman-long-horizon.html">B1 · 排程狀態機與長程韌性</a></li>
+    <li><a href="topics/breezeman-memory.html">B2 · 全域記憶與 Dreaming 蒸餾</a></li>
+    <li><a href="topics/studio.html">B3 · Folder-as-Studio 整合</a></li>
   </ol>
   </noscript>
   </main>
   <aside class="outline" id="outline" aria-label="本頁內容"></aside>
 </div>
-<template id="homeTpl">
+
+<!-- ==================== TAB 1 HOME: kentc_agent ==================== -->
+<template id="homeTpl-agent">
 <section class="hero" aria-labelledby="title">
-  <p class="eyebrow">核心設計說明 · 依目前程式實作整理</p>
+  <p class="eyebrow">TAB 1 · kentc_agent 單任務核心引擎（src/kentc_agent/）</p>
   <h1 id="title">不是堆疊更多代理，<br>而是讓每一步都<em>有邊界、有依據、可追查。</em></h1>
-  <p class="lead">目標：以<b>小型本機模型</b>完成需讀取上百份文件、上百次工具往返的<b>長任務</b>，且每個結論可回溯來源。三個約束貫穿全部設計：視窗有限、模型會出錯、輸入不可信。</p>
+  <p class="lead">專注於<b>單一任務的長程可靠執行</b>：以小型本機模型完成需讀取上百份文件、上百次工具往返的長任務。三個約束貫穿全部設計：<b>視窗有限、模型會出錯、輸入不可信</b>。</p>
   <div class="psd">
-    <div class="psd-item problem"><span>問題</span><p>W = 62,536 tokens。一件 40 人審查案：121 檔、約 242,000 字元，原始資料 ≈ 一個視窗；執行期累積 ≈ 200 萬 prompt tokens。模型會漏步、心算錯、重複指令、誤把注入文字當指令。</p></div>
-    <div class="psd-item idea"><span>核心想法</span><p>單一主代理、四個工具。上下文由執行環境控制：縱向壓縮歷史、橫向外存大型結果、文件交隔離子代理；外部資料走受控步驟；權限隨看管程度收斂。</p></div>
-    <div class="psd-item data"><span>依據</span><p>歷史 A/B（舊版 v1 已移除），同模型、同任務各 4 次：STR 中位數 v1 0.65、v2（現行 runtime 前身）0.60，不分勝負（v2 交檔較穩、v1 較守格式）；剩餘次數提醒使記憶回復 0/4 → 3/4。見 <a href="topics/eval.html" data-slug="eval">07 · 長任務記憶：摘要 → 主題筆記</a>。</p></div>
+    <div class="psd-item problem"><span>問題</span><p>W = 62,536 tokens。一件 40 人審查案：121 檔、約 242,000 字元，執行期累積 ≈ 200 萬 prompt tokens。小模型會漏步、心算錯、截斷寫檔、跨日日期漂移、重試堆疊重複提示。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>單一主代理迴圈（<code>loop.py</code>）＋ 四個核心工具。縱向採前景主題筆記壓縮與 <b>LSM Seal &amp; Roll</b>，橫向採大型結果外存與隔離文件子代理，並以固定需求釘選與原子 journal 守住不變量。</p></div>
+    <div class="psd-item data"><span>依據</span><p>完整實作於 <code>src/kentc_agent/</code>（唯一 runtime；舊版單摘要 v1 已移除），由 285 項自動化回歸測試與歷史 A/B 實測驗證。</p></div>
   </div>
-  <div class="pills"><span class="pill">1 個主代理迴圈</span><span class="pill">4 個核心工具</span><span class="pill">2 個上下文方向：縱向／橫向</span><span class="pill">CLI · 工作流程 · Studio 三層</span><span class="pill">checkpoint ＋ 主題筆記壓縮</span><span class="pill">工作區 ＋ 工作階段記憶</span></div>
-  <p class="scope"><b>範圍：</b><code>kentc-agent/src/kentc_agent/</code>（唯一 runtime，主題筆記壓縮；舊版摘要壓縮 v1 已移除），及其在 CLI 對話、工作流程、Studio 三種使用層的權限差異；含工作流程編排、網路研究步驟、Studio 應用框架（<code>src/kentc_studio/</code>）。不涵蓋各應用的業務判斷。</p>
+  <div class="pills">
+    <span class="pill">loop.py 單主代理迴圈</span>
+    <span class="pill">縱向主題壓縮 ＋ LSM 封存</span>
+    <span class="pill">橫向大結果外存</span>
+    <span class="pill">原子 append-only journal</span>
+    <span class="pill">固定需求釘選 ＋ 跨日刷新</span>
+    <span class="pill">4 核心工具 ＋ 隔離文件子代理</span>
+  </div>
+  <p class="scope"><b>本分頁範圍：</b>單任務引擎 <code>src/kentc_agent/</code>（<code>agent/loop.py</code>、<code>budget.py</code>、<code>executor.py</code>、<code>context/compaction.py</code>、<code>bigcontext.py</code>、<code>adapters/session.py</code>、<code>documents/</code>、<code>workflow.py</code>）。欲了解跨會話排程、全域記憶與 Studio 掛載，請切換上方 <b>Breezeman</b> 分頁。</p>
 </section>
-<section class="topic-index" id="topicIndex" aria-label="全部主題">
-  <h2>依問題閱讀</h2>
+<section class="topic-index" id="topicIndex" aria-label="kentc_agent 全部主題">
+  <h2>kentc_agent · 依問題閱讀</h2>
   <p>每個主題依序：<b>問題</b>（缺此設計時的失效）→ <b>核心想法</b>（機制與取捨）→ <b>依據</b>（實測或程式與測試）。<kbd>←</kbd> <kbd>→</kbd> 依序閱讀，<kbd>/</kbd> 搜尋。</p>
 </section>
 </template>
-<footer>kentc_agent · 核心方法論與執行設計 · 繁體中文<br>先確認事實，再安排工具；先保留證據，再壓縮脈絡。</footer>
+
+<!-- ==================== TAB 2 HOME: Breezeman ==================== -->
+<template id="homeTpl-breezeman">
+<section class="hero breezeman" aria-labelledby="title">
+  <p class="eyebrow">TAB 2 · Breezeman 長程常駐平台（src/kentc_breezeman/）</p>
+  <h1 id="title">單一 FastAPI 宿主，<br>把單任務引擎升級為<em>跨週排程與自我蒸餾系統。</em></h1>
+  <p class="lead">Breezeman 不另造多代理框架，而是直接以 <code>kentc_agent</code> 作為每個 Task 的主代理，加上 <b>FastAPI/WebSocket 宿主層、雙獨立排程迴圈、非同步 Worker 熔斷結算、三軌全域記憶（Dreaming）與 Folder-as-Studio 內嵌掛載</b>。</p>
+  <div class="psd">
+    <div class="psd-item problem"><span>問題</span><p>系統常駐數週後同時面對四道失效：排程只看同步派發漏接 worker 故障、固定提示過大引發每次強制壓縮、數百份歷史 <code>.jsonl</code> 全量掃描拖垮 I/O、<code>INDEX.md</code> 撐爆視窗。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>排程與 Dreaming 雙迴圈隔離；<code>Chat._worker</code> 透過 <code>on_complete</code> + <code>settled_run_id</code> 無競態結算並觸發退避熔斷；Dreaming 採 O(1) <code>stat()</code> 快篩 ＋ BM25 兩階段檢索 ＋ 三軌冪等寫入；Studio 以資料夾內嵌掛載。</p></div>
+    <div class="psd-item data"><span>依據</span><p>涵蓋 <code>src/kentc_breezeman/</code>（<code>app.py</code>、<code>runtime.py</code>、<code>dream.py</code>、<code>memory_store.py</code>、<code>studio.py</code>），由 <code>test_breezeman.py</code>、<code>test_breezeman_dream.py</code>、<code>test_breezeman_studio.py</code> 完整驗證。</p></div>
+  </div>
+  <div class="pills">
+    <span class="pill">FastAPI + WebSocket 單一宿主</span>
+    <span class="pill">Daemon Thread + on_complete 結算</span>
+    <span class="pill">指數退避 ＋ 連續失敗熔斷</span>
+    <span class="pill">O(1) stat 快篩 ＋ BM25 Top-K</span>
+    <span class="pill">Fact / Pattern / SIM 三軌記憶</span>
+    <span class="pill">Folder-as-Studio 唯讀記憶白名單</span>
+  </div>
+  <p class="scope"><b>本分頁範圍：</b><code>src/kentc_breezeman/</code> 的宿主架構、排程狀態機、離線 Dreaming 蒸餾管線，以及取代獨立伺服器的 <b>Folder-as-Studio</b>（<code>/studios/{id}/</code>）整合機制。底層上下文壓縮與工具迴圈請見 <b>kentc_agent</b> 分頁。</p>
+</section>
+<section class="topic-index" id="topicIndex" aria-label="Breezeman 全部主題">
+  <h2>Breezeman · 依模組閱讀</h2>
+  <p>從 FastAPI 宿主與併發模型出發，一路拆解排程狀態機、Dreaming 全域記憶，到 Folder-as-Studio 整合。<kbd>←</kbd> <kbd>→</kbd> 依序閱讀，<kbd>/</kbd> 搜尋。</p>
+</section>
+</template>
+
+<footer>kentc_agent × Breezeman · 核心方法論與長程執行設計 · 繁體中文<br>先確認事實，再安排工具；先保留證據，再壓縮脈絡；先驗證結算，再推進狀態。</footer>
 <script src="asset/js/topics.js"></script>
 <script src="asset/js/core.js"></script>
 <script src="asset/js/shell.js"></script>

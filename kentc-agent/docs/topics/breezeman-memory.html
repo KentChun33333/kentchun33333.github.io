@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Breezeman 全域記憶與 Dreaming 蒸餾管線：O(1) stat 快篩、視窗預算分塊、純 Python BM25 Top-K 兩階段檢索、三軌冪等寫入、SIM LSM 封存與 Dreaming 退避熔斷。">
+<title>B2 · 全域記憶與 Dreaming 蒸餾｜Breezeman 核心方法論</title>
+<link rel="stylesheet" href="../asset/css/core.css">
+<link rel="stylesheet" href="../asset/css/shell.css">
+</head>
+<body class="topic-page">
+<a class="sr-only" href="#topic">跳至主要內容</a>
+<header class="top"><div class="top-in">
+  <a class="brand" href="../index.html#tab=breezeman">kentc_agent</a><span class="top-note">Breezeman · 繁體中文</span>
+  <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
+</div></header>
+<div class="reader">
+<aside class="sidebar" aria-label="主題目錄"><nav class="side-nav" id="sideNav" aria-label="主題"></nav></aside>
+<main id="topic" data-slug="breezeman-memory">
+<article class="topic">
+<section class="card" id="breezeman-memory" aria-labelledby="mem-title">
+  <p class="eyebrow">B2 · 跨會話長期記憶與離線 Dreaming 蒸餾</p>
+  <h2 id="mem-title">O(1) 快篩、BM25 兩階段檢索與三軌冪等寫入</h2>
+  <div class="psd">
+    <div class="psd-item problem"><span>問題</span><p>跨會話運行數月後會同時撞上三道牆：數百份 <code>.jsonl</code> 全量重讀拖垮 I/O；<code>memory/INDEX.md</code> 膨脹撐爆視窗；分塊重跑灌水 <code>verified_count</code>；Dreaming 故障時每 5 秒無限空轉。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>離線 Dreaming 採 <b>O(1) <code>stat()</code> 快篩 → 視窗預算分塊 → 純 Python BM25 Top-K → 三軌冪等寫入（Fact / Pattern / SIM）→ 有界 L0 Manifest</b>，並具備獨立退避與熔斷；零外部向量庫依賴。</p></div>
+    <div class="psd-item data"><span>依據</span><p>實作於 <code>memory_store.py</code>、<code>dream.py</code> 與 <code>runtime.py</code>，由 <code>test_breezeman_dream.py</code> 完整驗證。</p></div>
+  </div>
+
+  <h3 class="part problem" id="problem" data-step="1">問題：跨會話記憶與單任務記憶的本質差異</h3>
+  <p><code>kentc_agent</code> 內部的 session topic notes 只服務「單一任務的壓縮回溯」；但使用者偏好、專案架構決策、跨任務可重用的除錯配方，以及不同本機模型的失敗教訓（SIM），需要<b>跨所有 Task 與 Studio 共享</b>。然而一旦跨月累積，直接把所有筆記塞進提示或全量掃描所有歷史 journal 都會迅速失控。</p>
+
+  <h3 class="part idea" id="pipeline" data-step="2">核心想法一：五階段 Dreaming 離線蒸餾管線</h3>
+
+  <div class="diagram-box">
+    <svg viewBox="0 0 860 326" width="860" height="326" role="img" aria-label="五階段 Dreaming 離線蒸餾管線：O(1) 快篩、分塊、BM25 粗篩、三軌冪等寫入與有界 Manifest" style="font-family:var(--sans)">
+      <defs>
+        <marker id="dm-arr" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#475569"/>
+        </marker>
+      </defs>
+
+      <!-- Stage 1 -->
+      <rect x="16" y="18" width="192" height="114" rx="10" fill="#edf3fd" stroke="#245db2" stroke-width="1.5"/>
+      <text x="28" y="40" font-size="12" font-weight="700" fill="#1e3a8a">1. O(1) 快篩與 Delta</text>
+      <text x="28" y="60" font-size="11" fill="#334155">• 比對 journal size/mtime</text>
+      <text x="28" y="77" font-size="11" fill="#334155">  未變動直接 O(1) 跳過</text>
+      <text x="28" y="94" font-size="11" fill="#334155">• 讀最後 compaction</text>
+      <text x="28" y="111" font-size="11" fill="#334155">  topic_root + sha256</text>
+
+      <line x1="208" y1="75" x2="228" y2="75" stroke="#475569" stroke-width="1.6" marker-end="url(#dm-arr)"/>
+
+      <!-- Stage 2 -->
+      <rect x="230" y="18" width="192" height="114" rx="10" fill="#fff5de" stroke="#d97706" stroke-width="1.5"/>
+      <text x="242" y="40" font-size="12" font-weight="700" fill="#865500">2. 視窗預算分塊</text>
+      <text x="242" y="60" font-size="11" fill="#334155">• 讀模型視窗 W</text>
+      <text x="242" y="77" font-size="11" fill="#334155">• 扣系統提示、輸出與</text>
+      <text x="242" y="94" font-size="11" fill="#334155">  索引預算</text>
+      <text x="242" y="111" font-size="11" fill="#334155">• 依段落切 chunk_1..m</text>
+
+      <line x1="422" y1="75" x2="442" y2="75" stroke="#475569" stroke-width="1.6" marker-end="url(#dm-arr)"/>
+
+      <!-- Stage 3 -->
+      <rect x="444" y="18" width="192" height="114" rx="10" fill="#e9f5ef" stroke="#08724f" stroke-width="1.5"/>
+      <text x="456" y="40" font-size="12" font-weight="700" fill="#08724f">3. BM25 Stage-1 粗篩</text>
+      <text x="456" y="60" font-size="11" fill="#334155">• 以當前 chunk 當 query</text>
+      <text x="456" y="77" font-size="11" fill="#334155">• ASCII 詞 + 中文 bigram</text>
+      <text x="456" y="94" font-size="11" fill="#334155">• 只取 Top-K（≤ 20 筆）</text>
+      <text x="456" y="111" font-size="11" fill="#334155">  送進 EXTRACT 提示</text>
+
+      <line x1="636" y1="75" x2="656" y2="75" stroke="#475569" stroke-width="1.6" marker-end="url(#dm-arr)"/>
+
+      <!-- Stage 4 -->
+      <rect x="658" y="18" width="186" height="114" rx="10" fill="#f2eefb" stroke="#6548a6" stroke-width="1.5"/>
+      <text x="670" y="40" font-size="12" font-weight="700" fill="#6548a6">4. 三軌冪等寫入</text>
+      <text x="670" y="60" font-size="11" fill="#334155">• 跨塊合併去重候選</text>
+      <text x="670" y="77" font-size="11" fill="#334155">• Fact 覆寫歸檔舊版</text>
+      <text x="670" y="94" font-size="11" fill="#334155">• Pattern session 去重</text>
+      <text x="670" y="111" font-size="11" fill="#334155">• SIM 超限 Seal &amp; Roll</text>
+
+      <!-- Arrow down to Stage 5 -->
+      <line x1="751" y1="132" x2="751" y2="168" stroke="#475569" stroke-width="1.6" marker-end="url(#dm-arr)"/>
+
+      <!-- Stage 5: Bounded Manifest -->
+      <rect x="16" y="170" width="828" height="138" rx="12" fill="#f8fafc" stroke="#334155" stroke-width="1.5"/>
+      <text x="34" y="196" font-size="13" font-weight="700" fill="#20272e">5. 有界 L0 Manifest 與全量分軌索引（線上代理 O(1) 讀取）</text>
+
+      <rect x="34" y="210" width="254" height="82" rx="8" fill="#fff" stroke="#93c5fd"/>
+      <text x="46" y="230" font-size="11.5" font-weight="700" fill="#245db2">memory/INDEX.md（L0 入口）</text>
+      <text x="46" y="248" font-size="11" fill="#334155">每軌上限 Top-20（active 優先、</text>
+      <text x="46" y="264" font-size="11" fill="#334155">updated_at、verified_count 排序）</text>
+      <text x="46" y="280" font-size="10.5" fill="#596570">超出顯示子索引與 rg 指標</text>
+
+      <rect x="304" y="210" width="256" height="82" rx="8" fill="#fff" stroke="#86efac"/>
+      <text x="316" y="230" font-size="11.5" font-weight="700" fill="#08724f">各軌全量索引（按需讀取）</text>
+      <text x="316" y="248" font-size="11" fill="#334155">• facts/INDEX.md</text>
+      <text x="316" y="264" font-size="11" fill="#334155">• patterns/INDEX.md</text>
+      <text x="316" y="280" font-size="11" fill="#334155">• sim/INDEX.md</text>
+
+      <rect x="576" y="210" width="252" height="82" rx="8" fill="#fff" stroke="#fca5a5"/>
+      <text x="588" y="230" font-size="11.5" font-weight="700" fill="#c92330">.dream_state.json 韌性狀態</text>
+      <text x="588" y="248" font-size="11" fill="#334155">• 每 session 記 size / mtime / hash</text>
+      <text x="588" y="264" font-size="11" fill="#334155">• 失敗指數退避（60s→3,600s）</text>
+      <text x="588" y="280" font-size="11" fill="#334155">• 連錯 5 次 paused_error 熔斷</text>
+    </svg>
+    <p class="diagram-cap">圖 B2-1：Dreaming 離線蒸餾管線。無須外部向量資料庫，僅靠純 Python Okapi BM25 與 O(1) stat 快篩即可穩定支撐長程擴展。</p>
+  </div>
+
+  <h3 class="part idea" id="tracks" data-step="3">核心想法二：三軌知識模型與各自生命週期</h3>
+  <div class="grid3">
+    <div class="box">
+      <span class="tag">Track A · Facts</span>
+      <h3>事實與偏好（<code>facts/</code>）</h3>
+      <p>記錄使用者偏好、角色、專案架構與長期決策。新事實若宣告 <code>supersedes_id</code>，舊節點會標記 <code>superseded</code>、寫入 <code>valid_until</code> 與 <code>superseded_by</code> 並自動移入 <code>archive/</code>。</p>
+      <p class="why">語法：<code>&lt;Subject&gt; is/uses/prefers &lt;value&gt;.</code></p>
+    </div>
+    <div class="box">
+      <span class="tag green">Track B · Patterns</span>
+      <h3>可重用配方（<code>patterns/</code>）</h3>
+      <p>首次抽取為 <code>provisional</code>；透過 <code>verified_sessions</code> 記錄來源 session ID，同一 session 重跑不會重複灌水，必須在不同 session 驗證達 <code>verified_count ≥ 2</code> 才升級為 <code>active / verified</code>。</p>
+      <p class="why">超過 60 天未更新的 <code>provisional</code> 節點會由 <code>optimize_memory()</code> 自動歸檔。</p>
+    </div>
+    <div class="box">
+      <span class="tag violet">Track C · SIM</span>
+      <h3>自我改進記憶（<code>sim/</code>）</h3>
+      <p>記錄模型與工具策略的成功／失敗帳本（含 <code>models_tested</code>），採純追加 <code>### [YYYY-MM-DD]</code>。當超過 2,000 tokens 或 8 條紀錄時觸發 <b>LSM Seal &amp; Roll</b>：舊紀錄封存至 <code>archive/sim/&lt;slug&gt;-log.md</code>，活頭蒸餾為 <code>Active Strategy</code> ＋ <code>Known Pitfalls</code> ＋ 最近 3 筆。</p>
+      <p class="why">詳見 kentc_agent 分頁 <a href="lsm-memory.html">08 · LSM 分層封存</a>。</p>
+    </div>
+  </div>
+
+  <h3 class="part data" id="data" data-step="4">依據：程式對照與驗證</h3>
+  <div class="tablewrap"><table><caption>全域記憶與 Dreaming 實作對照表</caption><thead><tr><th scope="col">能力</th><th scope="col">實作位置</th><th scope="col">回歸測試（test_breezeman_dream.py）</th></tr></thead><tbody>
+    <tr><td>O(1) <code>stat()</code> 快篩跳過未變動 journal</td><td><code>dream.py</code>（<code>collect_session_delta</code>、<code>run_dream</code>）</td><td><code>test_dream_scheduler_backoff_circuit_breaker_and_stat_fast_path</code></td></tr>
+    <tr><td>巢狀世代 <code>topic_root</code> 讀取</td><td><code>dream.py</code>（<code>collect_session_delta</code>）</td><td><code>test_collect_session_delta_reads_nested_generation_topics_from_task_subfolder</code></td></tr>
+    <tr><td>Okapi BM25 Top-K、分塊抽取與冪等升級</td><td><code>memory_store.py</code>（<code>bm25_search</code>）、<code>dream.py</code></td><td><code>test_bm25_topk_bounded_index_chunking_and_idempotent_pattern_verification</code></td></tr>
+    <tr><td>SIM LSM Seal &amp; Roll 冷檔封存</td><td><code>dream.py</code>（<code>seal_and_roll_sim</code>）</td><td><code>test_sim_seal_and_roll_archives_older_attempts_and_distills_head</code></td></tr>
+    <tr><td>Dreaming 指數退避與連續失敗熔斷</td><td><code>dream.py</code>（<code>apply_dream_error</code>）、<code>runtime.py</code>（<code>tick_dream</code>）</td><td><code>test_dream_scheduler_backoff_circuit_breaker_and_stat_fast_path</code></td></tr>
+  </tbody></table></div>
+  <p class="source">實作對照：<a href="../../src/kentc_breezeman/memory_store.py">memory_store.py</a><a href="../../src/kentc_breezeman/dream.py">dream.py</a><a href="../../src/kentc_breezeman/runtime.py">runtime.py</a></p>
+</section>
+</article>
+<nav class="pager" aria-label="上一篇與下一篇" data-pager></nav>
+</main>
+</div>
+<script src="../asset/js/topics.js"></script>
+<script src="../asset/js/core.js"></script>
+</body>
+</html>

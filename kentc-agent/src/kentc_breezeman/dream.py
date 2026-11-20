@@ -18,12 +18,21 @@ from .memory_store import (
     MEMORY_TYPES,
     MemoryNode,
     MemoryStore,
+    bm25_search,
     slugify_id,
     today_iso,
 )
 
 TAIL_TOOL_CHARS = 1200
+DREAM_BM25_TOP_K = 20
+SIM_MAX_TOKENS = 2000
+SIM_MAX_ENTRIES = 8
+SIM_KEEP_RECENT = 3
+DREAM_MAX_CONSECUTIVE_ERRORS = 5
+DREAM_RETRY_SEC = 60.0
+DREAM_MAX_BACKOFF_SEC = 3600.0
 _FENCE_RE = re.compile(r"\A```(?:json)?\s*\n(.*?)\n```\s*\Z", re.DOTALL)
+_SIM_ENTRY_RE = re.compile(r"(?m)^(?=### \[\d{4}-\d{2}-\d{2}\])")
 
 DREAM_SYSTEM = (
     "You are an offline knowledge-distillation assistant (Dreaming Task). "
@@ -67,6 +76,14 @@ MERGE_PROMPT = """Consolidate the existing memory note body with the new candida
 - For "pattern": Merge new verification details or edge cases without duplicating steps.
 - Return ONLY the consolidated Markdown body (no YAML frontmatter, no outer code fences)."""
 
+SIM_ROLL_PROMPT = """Distill the archived Self-Improvement Memory (SIM) attempts below into a concise head summary (<= 500 words).
+Use ONLY these two Markdown sections:
+## Active Strategy
+- Current verified strategy to retain (with models tested).
+## Known Pitfalls (Do Not Repeat)
+- Concise bullet list of failed/discarded approaches and why they failed.
+Return ONLY the Markdown sections (no YAML frontmatter, no outer code fences)."""
+
 
 @dataclass
 class SessionDelta:
@@ -77,6 +94,9 @@ class SessionDelta:
     tail_messages: list[dict[str, Any]]
     next_msg_id: int
     topic_hashes: dict[str, str]
+    journal_size: int | None = None
+    journal_mtime_ns: int | None = None
+    mem_dir_mtime_ns: int | None = None
 
 
 @dataclass
@@ -136,9 +156,30 @@ def collect_session_delta(
     prev_msg_id = int(prev.get("last_msg_id") or 0)
     prev_hashes = prev.get("topic_hashes") if isinstance(prev.get("topic_hashes"), dict) else {}
 
+    journal_size: int | None = None
+    journal_mtime_ns: int | None = None
+    mem_dir_mtime_ns: int | None = None
+    if journal_path.is_file():
+        st = journal_path.stat()
+        journal_size = st.st_size
+        journal_mtime_ns = st.st_mtime_ns
+    if session_memory_dir.is_dir():
+        mem_dir_mtime_ns = session_memory_dir.stat().st_mtime_ns
+
+    # O(1) fast path: skip reading/parsing the journal when neither the journal nor flat memory dir changed.
+    if (
+        journal_size is not None
+        and prev.get("journal_size") == journal_size
+        and prev.get("journal_mtime_ns") == journal_mtime_ns
+        and prev.get("mem_dir_mtime_ns") == mem_dir_mtime_ns
+    ):
+        return None
+
     first_kept_id = 0
     messages: list[tuple[int, dict[str, Any]]] = []
     next_msg_id = 0
+    latest_topic_root: Path | None = None
+    latest_topics: dict[str, Any] = {}
 
     if journal_path.is_file():
         for line in journal_path.read_text(encoding="utf-8").splitlines():
@@ -153,6 +194,9 @@ def collect_session_delta(
                 kept = row.get("first_kept_id")
                 if isinstance(kept, int) and kept > first_kept_id:
                     first_kept_id = kept
+                if isinstance(row.get("topic_root"), str) and isinstance(row.get("topics"), dict):
+                    latest_topic_root = Path(row["topic_root"])
+                    latest_topics = row["topics"]
             elif kind == "message":
                 mid = row.get("id")
                 msg = row.get("message")
@@ -165,9 +209,30 @@ def collect_session_delta(
 
     topic_hashes: dict[str, str] = {}
     changed_topics: dict[str, str] = {}
-    if session_memory_dir.is_dir():
+    if latest_topic_root is not None and latest_topics:
+        root = latest_topic_root.resolve()
+        for slug, record in sorted(latest_topics.items()):
+            if not isinstance(record, dict) or not isinstance(record.get("path"), str):
+                continue
+            tpath = (root / record["path"]).resolve()
+            if not tpath.is_relative_to(root) or not tpath.is_file():
+                continue
+            key = f"{slug}.md"
+            sha = record.get("sha256")
+            if isinstance(sha, str) and sha:
+                digest = sha[:16]
+                topic_hashes[key] = digest
+                if prev_hashes.get(key) != digest:
+                    changed_topics[key] = tpath.read_text(encoding="utf-8")
+            else:
+                text = tpath.read_text(encoding="utf-8")
+                digest = _hash_text(text)
+                topic_hashes[key] = digest
+                if prev_hashes.get(key) != digest:
+                    changed_topics[key] = text
+    elif session_memory_dir.is_dir():
         for path in sorted(session_memory_dir.glob("*.md")):
-            if path.name.startswith(".") or path.name.lower() == "index.md":
+            if path.name.startswith(".") or path.name.lower() in ("index.md", "_index.md"):
                 continue
             text = path.read_text(encoding="utf-8")
             digest = _hash_text(text)
@@ -184,14 +249,14 @@ def collect_session_delta(
         tail_messages=tail_messages,
         next_msg_id=next_msg_id,
         topic_hashes=topic_hashes,
+        journal_size=journal_size,
+        journal_mtime_ns=journal_mtime_ns,
+        mem_dir_mtime_ns=mem_dir_mtime_ns,
     )
 
 
-def _format_delta_for_llm(delta: SessionDelta, index_text: str) -> str:
-    sections = [
-        f"## Current Global Memory Index\n{index_text.strip() or '(empty)'}",
-        f"## Session: {delta.session_id}",
-    ]
+def _format_delta_body(delta: SessionDelta) -> str:
+    sections = [f"## Session: {delta.session_id}"]
     if delta.changed_topics:
         sections.append("### Updated Session Topic Notes")
         for name, text in delta.changed_topics.items():
@@ -208,26 +273,180 @@ def _format_delta_for_llm(delta: SessionDelta, index_text: str) -> str:
     return "\n\n".join(sections)
 
 
-def _llm_text(llm: LLM, system: str, user_prompt: str) -> str:
+def _format_delta_for_llm(delta: SessionDelta, index_text: str) -> str:
+    return f"## Current Global Memory Index\n{index_text.strip() or '(empty)'}\n\n{_format_delta_body(delta)}"
+
+
+def _chunk_text(text: str, max_chars: int) -> list[str]:
+    """Split text into bounded chunks <= `max_chars` at paragraph boundaries."""
+    max_chars = max(512, max_chars)
+    parts: list[str] = []
+    current = ""
+    for block in text.split("\n\n"):
+        while len(block) > max_chars:
+            if current:
+                parts.append(current)
+                current = ""
+            parts.append(block[:max_chars])
+            block = block[max_chars:]
+        if current and len(current) + len(block) + 2 > max_chars:
+            parts.append(current)
+            current = ""
+        current = f"{current}\n\n{block}" if current else block
+    if current:
+        parts.append(current)
+    return parts or [""]
+
+
+def _format_index_nodes(nodes: list[MemoryNode], max_chars: int) -> str:
+    if not nodes:
+        return "(empty)"
+    lines: list[str] = []
+    used = 0
+    for node in nodes:
+        badge = f"{node.status}, {node.confidence}"
+        if node.type == "pattern":
+            badge += f", verified_count: {node.verified_count}"
+        line = f"- [{node.id}]({node.rel_path}) [{node.type}] — {node.summary} ({badge}, updated: {node.updated_at})"
+        if lines and used + len(line) + 1 > max_chars:
+            break
+        lines.append(line)
+        used += len(line) + 1
+    return "\n".join(lines)
+
+
+def _llm_window(llm: LLM) -> int:
+    try:
+        w = int(llm.info().context_window)
+        return w if w > 0 else 32768
+    except Exception:  # noqa: BLE001 - fallback when test/fake LLM lacks window info
+        return 32768
+
+
+def _llm_text(llm: LLM, system: str, user_prompt: str, *, max_tokens: int = 2048) -> str:
     response = llm.chat(
         messages=[
             {"role": "system", "content": system},
             {"role": "user", "content": user_prompt},
         ],
         tools=[],
-        max_tokens=2048,
+        max_tokens=max_tokens,
     )
     return _text_content(response.content)
 
 
-def extract_candidates(llm: LLM, delta: SessionDelta, index_text: str) -> list[dict[str, Any]]:
-    """Ask the LLM to extract typed memory candidates from a `SessionDelta`."""
-    payload = _format_delta_for_llm(delta, index_text)
-    raw = _llm_text(llm, DREAM_SYSTEM, f"{EXTRACT_PROMPT}\n\n---\n\n{payload}")
-    data = json.loads(_strip_json_fences(raw))
-    if not isinstance(data, dict) or not isinstance(data.get("candidates"), list):
-        return []
-    return [c for c in data["candidates"] if isinstance(c, dict)]
+def extract_candidates(
+    llm: LLM,
+    delta: SessionDelta,
+    index_text: str,
+    *,
+    active_nodes: list[MemoryNode] | None = None,
+    top_k: int = DREAM_BM25_TOP_K,
+) -> list[dict[str, Any]]:
+    """Extract typed memory candidates using window-budgeted chunking and BM25 Top-K index retrieval."""
+    window = _llm_window(llm)
+    out_tokens = min(2048, max(512, window // 8))
+    index_budget_chars = min(2000, max(400, window // 16)) * 4
+    overhead_chars = (out_tokens + 1024) * 4 + len(DREAM_SYSTEM) + len(EXTRACT_PROMPT) + index_budget_chars
+    delta_budget_chars = max(2000, window * 4 - overhead_chars)
+
+    raw_delta = _format_delta_body(delta)
+    chunks = _chunk_text(raw_delta, delta_budget_chars)
+
+    merged: dict[tuple[str, str], dict[str, Any]] = {}
+    ordered: list[dict[str, Any]] = []
+    for chunk in chunks:
+        if active_nodes is not None:
+            ranked = bm25_search(active_nodes, chunk, top_k=top_k)
+            idx_snippet = _format_index_nodes(ranked, index_budget_chars)
+        else:
+            idx_snippet = index_text[:index_budget_chars]
+        payload = f"## Relevant Existing Memory Nodes (BM25 Top-{top_k})\n{idx_snippet.strip() or '(empty)'}\n\n{chunk}"
+        raw = _llm_text(llm, DREAM_SYSTEM, f"{EXTRACT_PROMPT}\n\n---\n\n{payload}", max_tokens=out_tokens)
+        data = json.loads(_strip_json_fences(raw))
+        if not isinstance(data, dict) or not isinstance(data.get("candidates"), list):
+            continue
+        for cand in data["candidates"]:
+            if not isinstance(cand, dict):
+                continue
+            key = (
+                str(cand.get("type") or "").strip().lower(),
+                str(cand.get("target_rel_path") or cand.get("id") or cand.get("summary") or "").strip(),
+            )
+            if key in merged:
+                prev = merged[key]
+                prev_body = str(prev.get("body") or "").strip()
+                new_body = str(cand.get("body") or "").strip()
+                if new_body and new_body not in prev_body:
+                    prev["body"] = f"{prev_body}\n\n{new_body}".strip() if prev_body else new_body
+                for field_name in ("tags", "models_tested", "related"):
+                    prev[field_name] = sorted(
+                        set(prev.get(field_name) or []) | set(cand.get(field_name) or [])
+                    )
+                if cand.get("supersedes_id") and not prev.get("supersedes_id"):
+                    prev["supersedes_id"] = cand["supersedes_id"]
+            else:
+                copy = dict(cand)
+                merged[key] = copy
+                ordered.append(copy)
+    return ordered
+
+
+def _split_sim_entries(body: str) -> tuple[str, list[str]]:
+    """Split a SIM body into (leading_header, list_of_dated_entries)."""
+    parts = _SIM_ENTRY_RE.split(body.strip()) if body.strip() else []
+    if not parts:
+        return "", []
+    if parts[0].startswith("### ["):
+        return "", [p.strip() for p in parts if p.strip()]
+    return parts[0].strip(), [p.strip() for p in parts[1:] if p.strip()]
+
+
+def seal_and_roll_sim(
+    llm: LLM,
+    store: MemoryStore,
+    node: MemoryNode,
+    today: str,
+    *,
+    max_tokens: int = SIM_MAX_TOKENS,
+    max_entries: int = SIM_MAX_ENTRIES,
+    keep_recent: int = SIM_KEEP_RECENT,
+) -> bool:
+    """LSM Seal & Roll for SIM: move older attempts to cold audit log and distill a bounded active head."""
+    header, entries = _split_sim_entries(node.body)
+    approx_tokens = len(node.body) // 4
+    if len(entries) <= keep_recent or (approx_tokens <= max_tokens and len(entries) <= max_entries):
+        return False
+
+    cold = entries[:-keep_recent]
+    recent = entries[-keep_recent:]
+    stem = Path(node.rel_path).stem
+    cold_rel = f"archive/sim/{stem}-log.md"
+    cold_path = store.root / cold_rel
+    cold_path.parent.mkdir(parents=True, exist_ok=True)
+    prior_cold = cold_path.read_text(encoding="utf-8").strip() if cold_path.is_file() else f"# Cold SIM Audit Log: {node.id}"
+    appended_cold = f"{prior_cold}\n\n" + "\n\n".join(cold) + "\n"
+    tmp = cold_path.with_name(f".{cold_path.name}.tmp")
+    tmp.write_text(appended_cold, encoding="utf-8")
+    tmp.replace(cold_path)
+
+    distill_input = "\n\n".join(filter(None, [header, *cold]))
+    distilled = _llm_text(
+        llm,
+        DREAM_SYSTEM,
+        f"{SIM_ROLL_PROMPT}\n\n## SIM Node: {node.id}\n\n{distill_input}",
+        max_tokens=1024,
+    ).strip()
+    if not distilled:
+        distilled = header or "## Active Strategy\n- See recent attempts below."
+
+    node.body = (
+        f"{distilled}\n\n"
+        "## Recent Attempts\n\n"
+        + "\n\n".join(recent)
+        + f"\n\n## Cold Audit Log\n- Earlier attempts sealed in: `{cold_rel}` (updated {today})"
+    ).strip()
+    return True
 
 
 def _normalize_target_path(kind: str, raw_path: str, candidate_id: str) -> str:
@@ -260,6 +479,8 @@ def apply_candidate(
     candidate: dict[str, Any],
     report: DreamReport,
     today: str,
+    *,
+    session_id: str | None = None,
 ) -> None:
     """Apply a single extracted candidate to `store` using track-specific merge rules."""
     kind = str(candidate.get("type") or "").strip().lower()
@@ -313,6 +534,7 @@ def apply_candidate(
             valid_from=today,
             models_tested=models_tested,
             related=related,
+            verified_sessions=[session_id] if session_id else [],
             updated_at=today,
         )
         store.write_node(node)
@@ -327,13 +549,17 @@ def apply_candidate(
     existing.updated_at = today
 
     if kind == "sim":
-        # Append-only attempt ledger: never erase prior failed attempts
+        # Append-only attempt ledger with LSM Seal & Roll when size/entry cap is exceeded
         if raw_body and raw_body not in existing.body:
             existing.body = f"{existing.body.rstrip()}\n\n### [{today}]\n{raw_body}".strip()
+        seal_and_roll_sim(llm, store, existing, today)
         existing.status = "active"
         existing.confidence = "verified"
     elif kind == "pattern":
-        existing.verified_count += 1
+        if session_id is None or session_id not in existing.verified_sessions:
+            existing.verified_count += 1
+            if session_id:
+                existing.verified_sessions = sorted(set(existing.verified_sessions) | {session_id})
         if existing.verified_count >= 2:
             existing.confidence = "verified"
             existing.status = "active"
@@ -361,12 +587,38 @@ def optimize_memory(store: MemoryStore, today: str, *, stale_days: int = 60) -> 
     return archived
 
 
+def apply_dream_error(
+    sched: dict[str, Any],
+    error_msg: str,
+    now: float,
+    *,
+    retry_sec: float = DREAM_RETRY_SEC,
+    max_consecutive_errors: int = DREAM_MAX_CONSECUTIVE_ERRORS,
+) -> None:
+    """Update Dreaming schedule state with exponential backoff and circuit breaker on failure."""
+    errs = int(sched.get("consecutive_errors") or 0) + 1
+    sched["consecutive_errors"] = errs
+    sched["last_error"] = error_msg
+    sched["last_run"] = now
+    if errs >= max_consecutive_errors:
+        sched["enabled"] = False
+        sched["next_run"] = None
+        sched["last_status"] = "paused_error"
+    else:
+        sched["last_status"] = "error"
+        if sched.get("enabled"):
+            backoff = min(DREAM_MAX_BACKOFF_SEC, retry_sec * (2 ** (errs - 1)))
+            sched["next_run"] = now + backoff
+
+
 def run_dream(
     workspace: Path,
     llm: LLM,
     *,
     stale_days: int = 60,
     now: float | None = None,
+    retry_sec: float = DREAM_RETRY_SEC,
+    max_consecutive_errors: int = DREAM_MAX_CONSECUTIVE_ERRORS,
 ) -> DreamReport:
     """Execute one full incremental Dreaming cycle on `<workspace>/memory/`."""
     workspace = Path(workspace).resolve()
@@ -391,14 +643,18 @@ def run_dream(
         if delta is None:
             continue
 
+        active_nodes = store.list_nodes(statuses={"active", "provisional"})
         index_text = store.index_path.read_text(encoding="utf-8") if store.index_path.is_file() else ""
         try:
-            candidates = extract_candidates(llm, delta, index_text)
+            candidates = extract_candidates(llm, delta, index_text, active_nodes=active_nodes)
             for cand in candidates:
-                apply_candidate(llm, store, cand, report, today)
+                apply_candidate(llm, store, cand, report, today, session_id=sid)
             sessions_state[sid] = {
                 "last_msg_id": delta.next_msg_id,
                 "topic_hashes": delta.topic_hashes,
+                "journal_size": delta.journal_size,
+                "journal_mtime_ns": delta.journal_mtime_ns,
+                "mem_dir_mtime_ns": delta.mem_dir_mtime_ns,
                 "last_dream_at": time.time() if now is None else now,
             }
             report.sessions_processed += 1
@@ -411,10 +667,21 @@ def run_dream(
 
     ts = time.time() if now is None else now
     sched = state["schedule"]
-    sched["last_run"] = ts
     sched["last_summary"] = report.to_dict()
-    sched["last_error"] = "; ".join(report.errors) if report.errors else None
-    if sched.get("enabled"):
-        sched["next_run"] = ts + float(sched.get("interval_min") or 60) * 60
+    if report.errors and report.sessions_processed == 0:
+        apply_dream_error(
+            sched,
+            "; ".join(report.errors),
+            ts,
+            retry_sec=retry_sec,
+            max_consecutive_errors=max_consecutive_errors,
+        )
+    else:
+        sched["last_run"] = ts
+        sched["last_error"] = "; ".join(report.errors) if report.errors else None
+        sched["last_status"] = "partial_error" if report.errors else "ok"
+        sched["consecutive_errors"] = 0
+        if sched.get("enabled"):
+            sched["next_run"] = ts + float(sched.get("interval_min") or 60) * 60
     store.write_dream_state(state)
     return report

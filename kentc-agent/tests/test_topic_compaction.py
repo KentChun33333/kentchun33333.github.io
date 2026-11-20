@@ -246,6 +246,54 @@ def test_large_history_is_chunked_and_each_request_obeys_window_budget():
     result = compress(llm, messages=[{"role": "user", "content": "x" * 140000}], density=1.5)
     assert result.checkpoint == "Task in progress"
     assert len(llm.requests) > 1
+
+
+def test_topic_note_lsm_seal_and_roll_preserves_cold_era_and_shrinks_active_head(tmp_path):
+    session = bound_session(tmp_path)
+    # Large enough to cross topic_seal_threshold (~65% of max_output) while still fitting inside window
+    old_body = ("Detailed verified evidence block with ID-404.\n" * 600).strip()
+    session.compact(CompactionResult("checkpoint 1", {"launch": old_body}), 1, 100)
+    session.append({"role": "user", "content": "New milestone reached."})
+
+    llm = ScriptedLLM(
+        extraction("checkpoint 2", {"launch": "Milestone 2 approved."}),
+        "## Active Head\nMilestone 2 approved. Earlier details sealed in launch-era-001.md.",
+    )
+    result = summarize(
+        llm,
+        session.messages,
+        session.summary,
+        window=32768,
+        reserve_tokens=4096,
+        max_output_tokens=2048,
+        effort="none",
+        existing_topics=session.read_topics(),
+    )
+    assert "launch-era-001" in result.topics
+    assert result.topics["launch-era-001"] == old_body
+    assert "launch-era-001" in result.topics["launch"]
+    assert len(result.topics["launch"]) < len(old_body)
+
+    # Committing to Session persists the sealed cold era with full sha256 verification
+    session.compact(result, len(session.messages), 200)
+    reloaded = Session.load(session.path)
+    assert reloaded.read_topics()["launch-era-001"] == old_body
+
+    # Subsequent extraction excludes sealed *-era-NNN from active existing_topic_slugs
+    llm2 = ScriptedLLM(extraction("checkpoint 3", {}))
+    summarize(
+        llm2,
+        [{"role": "user", "content": "follow up"}],
+        reloaded.summary,
+        window=32768,
+        reserve_tokens=4096,
+        max_output_tokens=2048,
+        effort="none",
+        existing_topics=reloaded.read_topics(),
+    )
+    extract_prompt = llm2.requests[0]["messages"][1]["content"]
+    assert '"launch"' in extract_prompt
+    assert '"launch-era-001"' not in extract_prompt
     for request in llm.requests:
         estimated = sum(estimate_tokens(message) for message in request["messages"])
         assert estimated * 1.5 + request["max_tokens"] <= 16000

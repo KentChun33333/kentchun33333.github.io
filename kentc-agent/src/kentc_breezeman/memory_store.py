@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+import math
 import re
+from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
@@ -15,10 +17,73 @@ MEMORY_TYPES = ("fact", "pattern", "sim")
 MEMORY_STATUSES = ("active", "provisional", "superseded", "archived")
 MEMORY_CONFIDENCES = ("verified", "provisional")
 TRACK_DIRS = ("facts", "patterns", "sim")
-DEFAULT_SUBDIRS = ("facts/user", "facts/project", "patterns", "sim", "proposals", "archive")
+DEFAULT_SUBDIRS = ("facts/user", "facts/project", "patterns", "sim", "archive")
+DEFAULT_INDEX_MAX_PER_TRACK = 20
 
 _FRONTMATTER_RE = re.compile(r"\A---\s*\n(.*?)\n---\s*\n?(.*)\Z", re.DOTALL)
 _SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+_ASCII_TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9_.-]*")
+_CJK_RUN_RE = re.compile(r"[\u4e00-\u9fff]+")
+
+
+def tokenize_for_bm25(text: str) -> list[str]:
+    """Tokenize mixed English/code and CJK text into lexical terms (words + CJK unigrams/bigrams)."""
+    lowered = text.lower()
+    tokens = _ASCII_TOKEN_RE.findall(lowered)
+    for run in _CJK_RUN_RE.findall(lowered):
+        tokens.extend(run)
+        if len(run) >= 2:
+            tokens.extend(run[i : i + 2] for i in range(len(run) - 1))
+    return tokens
+
+
+def bm25_search(
+    nodes: list[MemoryNode],
+    query: str,
+    *,
+    top_k: int = 20,
+    k1: float = 1.5,
+    b: float = 0.75,
+) -> list[MemoryNode]:
+    """Rank `nodes` by Okapi BM25 over (id, summary, tags) with zero external dependencies."""
+    if not nodes or top_k <= 0:
+        return []
+    q_terms = tokenize_for_bm25(query)
+    if not q_terms:
+        return sorted(nodes, key=lambda n: (n.status != "active", n.updated_at), reverse=False)[:top_k]
+
+    docs: list[Counter[str]] = []
+    lengths: list[int] = []
+    df: Counter[str] = Counter()
+    for node in nodes:
+        text = f"{node.id} {node.summary} {' '.join(node.tags)} {' '.join(node.models_tested)}"
+        terms = tokenize_for_bm25(text)
+        counts = Counter(terms)
+        docs.append(counts)
+        lengths.append(len(terms))
+        for term in counts:
+            df[term] += 1
+
+    n_docs = len(nodes)
+    avgdl = sum(lengths) / n_docs if n_docs else 1.0
+    q_unique = set(q_terms)
+    scored: list[tuple[float, int, MemoryNode]] = []
+    for idx, (node, counts, dl) in enumerate(zip(nodes, docs, lengths)):
+        score = 0.0
+        for term in q_unique:
+            tf = counts.get(term, 0)
+            if tf == 0:
+                continue
+            idf = math.log(1.0 + (n_docs - df[term] + 0.5) / (df[term] + 0.5))
+            denom = tf + k1 * (1.0 - b + b * (dl / avgdl)) if avgdl > 0 else tf + k1
+            score += idf * ((tf * (k1 + 1.0)) / denom)
+        if score > 0.0:
+            scored.append((score, -idx, node))
+
+    if not scored:
+        return sorted(nodes, key=lambda n: (n.status == "active", n.updated_at, n.verified_count), reverse=True)[:top_k]
+    scored.sort(key=lambda item: (item[0], item[1]), reverse=True)
+    return [node for _, _, node in scored[:top_k]]
 
 
 def today_iso() -> str:
@@ -76,6 +141,7 @@ class MemoryNode:
     superseded_by: str | None = None
     models_tested: list[str] = field(default_factory=list)
     related: list[str] = field(default_factory=list)
+    verified_sessions: list[str] = field(default_factory=list)
     updated_at: str = field(default_factory=today_iso)
 
     def __post_init__(self) -> None:
@@ -106,6 +172,7 @@ class MemoryNode:
             "superseded_by": self.superseded_by,
             "models_tested": list(self.models_tested),
             "related": list(self.related),
+            "verified_sessions": list(self.verified_sessions),
             "updated_at": self.updated_at,
         }
 
@@ -140,6 +207,7 @@ def parse_memory_markdown(raw: str, rel_path: str) -> MemoryNode:
         superseded_by=str(meta["superseded_by"]) if meta.get("superseded_by") else None,
         models_tested=[str(m) for m in (meta.get("models_tested") or [])],
         related=[str(r) for r in (meta.get("related") or [])],
+        verified_sessions=[str(s) for s in (meta.get("verified_sessions") or [])],
         updated_at=str(meta.get("updated_at") or today_iso()),
     )
 
@@ -183,6 +251,8 @@ class MemoryStore:
             if not base.is_dir():
                 continue
             for path in sorted(base.rglob("*.md")):
+                if path.name.lower() == "index.md":
+                    continue
                 rel = path.relative_to(self.root).as_posix()
                 try:
                     node = parse_memory_markdown(path.read_text(encoding="utf-8"), rel)
@@ -208,8 +278,13 @@ class MemoryStore:
             src.unlink()
         return arch_rel
 
-    def rebuild_index(self, *, last_dreamed: str | None = None) -> Path:
-        """Deterministically regenerate `INDEX.md` from active and provisional nodes."""
+    def rebuild_index(
+        self,
+        *,
+        last_dreamed: str | None = None,
+        max_per_track: int = DEFAULT_INDEX_MAX_PER_TRACK,
+    ) -> Path:
+        """Regenerate bounded L0 `INDEX.md` manifest plus full per-track `<track>/INDEX.md` files."""
         self.ensure_layout()
         nodes = self.list_nodes(statuses={"active", "provisional"})
         by_type: dict[str, list[MemoryNode]] = {t: [] for t in MEMORY_TYPES}
@@ -223,17 +298,37 @@ class MemoryStore:
             "",
         ]
         sections = (
-            ("fact", "Facts"),
-            ("pattern", "Patterns"),
-            ("sim", "SIM (Strategy & Pitfalls)"),
+            ("fact", "Facts", "facts"),
+            ("pattern", "Patterns", "patterns"),
+            ("sim", "SIM (Strategy & Pitfalls)", "sim"),
         )
-        for kind, title in sections:
+        for kind, title, track_dir in sections:
             lines.append(f"## {title}")
-            items = sorted(by_type.get(kind, []), key=lambda n: (n.status != "active", n.id))
+            items = sorted(
+                by_type.get(kind, []),
+                key=lambda n: (n.status == "active", n.updated_at, n.verified_count, n.id),
+                reverse=True,
+            )
+            # Emit full per-track manifest so online agents can inspect everything on demand
+            track_lines = [
+                f"# {title} — Full Index",
+                f"> Last dreamed: {stamp} | Nodes: {len(items)}",
+                "",
+            ]
             if not items:
                 lines.append("- *(none)*")
+                track_lines.append("- *(none)*")
             else:
                 for node in items:
+                    badge = f"{node.status}, {node.confidence}"
+                    if node.type == "pattern":
+                        badge += f", verified_count: {node.verified_count}"
+                    entry = (
+                        f"- [{node.id}]({node.rel_path}) — {node.summary} "
+                        f"({badge}, updated: {node.updated_at})"
+                    )
+                    track_lines.append(entry)
+                for node in items[:max_per_track]:
                     badge = f"{node.status}, {node.confidence}"
                     if node.type == "pattern":
                         badge += f", verified_count: {node.verified_count}"
@@ -241,7 +336,13 @@ class MemoryStore:
                         f"- [{node.id}]({node.rel_path}) — {node.summary} "
                         f"({badge}, updated: {node.updated_at})"
                     )
+                if len(items) > max_per_track:
+                    overflow = len(items) - max_per_track
+                    lines.append(
+                        f"- *(... and {overflow} more — see `{track_dir}/INDEX.md` or search with `rg`)*"
+                    )
             lines.append("")
+            _atomic_write(self.root / track_dir / "INDEX.md", "\n".join(track_lines).rstrip() + "\n")
 
         _atomic_write(self.index_path, "\n".join(lines).rstrip() + "\n")
         return self.index_path
@@ -257,6 +358,8 @@ class MemoryStore:
                 "next_run": None,
                 "last_summary": None,
                 "last_error": None,
+                "last_status": None,
+                "consecutive_errors": 0,
             },
         }
         if not self.state_path.is_file():

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="以 LSM 分層封存（Seal & Roll）解決長程主題筆記與 SIM 帳本的無限膨脹，同時完整保留不可變審計紀錄。">
+<title>08 · LSM 分層封存與抗膨脹｜kentc_agent 核心方法論</title>
+<link rel="stylesheet" href="../asset/css/core.css">
+<link rel="stylesheet" href="../asset/css/shell.css">
+</head>
+<body class="topic-page">
+<a class="sr-only" href="#topic">跳至主要內容</a>
+<header class="top"><div class="top-in">
+  <a class="brand" href="../index.html#tab=agent">kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
+  <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
+</div></header>
+<div class="reader">
+<aside class="sidebar" aria-label="主題目錄"><nav class="side-nav" id="sideNav" aria-label="主題"></nav></aside>
+<main id="topic" data-slug="lsm-memory">
+<article class="topic">
+<section class="card" id="lsm-memory" aria-labelledby="lsm-title">
+  <p class="eyebrow">08 · 單任務長程記憶的抗膨脹演算法</p>
+  <h2 id="lsm-title">LSM 分層封存：活頭有界，冷檔不可變</h2>
+  <div class="psd">
+    <div class="psd-item problem"><span>問題</span><p>長任務跨天／跨週執行後，單一主題筆記與 SIM 失敗帳本會持續膨脹，最終超過 <code>compaction_max_output_tokens</code> 或視窗上限，導致壓縮永久失敗或讀取失控。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>借鏡資料庫 <b>LSM-Tree（Log-Structured Merge-Tree）</b>：寫入永遠落在有界熱段（L0），超過門檻即 <b>Seal（封存為不可變冷分片 L2）＋ Roll（滾動蒸餾輕量活頭）</b>，零靜默刪改。</p></div>
+    <div class="psd-item data"><span>依據</span><p>由 <code>compaction.py</code>（<code>topic_seal_threshold</code>）、<code>dream.py</code>（<code>seal_and_roll_sim</code>）實作，並由 <code>test_topic_compaction.py</code> 與 <code>test_breezeman_dream.py</code> 回歸驗證。</p></div>
+  </div>
+
+  <h3 class="part problem" id="problem" data-step="1">問題：為什麼需要 MERGE？又為什麼不能只靠 MERGE？</h3>
+  <p>先分清楚兩個動作各自解決什麼問題：</p>
+  <ul class="problem-list">
+    <li><b>為什麼需要 <code>MERGE</code>（筆記還小時）</b>：如果不做原地合併、每次壓縮都只往筆記後面純追加，<code>api.md</code> 很快會堆滿重複敘述與互相打架的舊值（例如 <code>port=8000</code> 後面又寫 <code>port=9000</code>）。主代理之後 <code>read</code> 會浪費大量 token 甚至抓錯舊值。<b><code>MERGE</code> 的價值是優化讀取品質</b>——在筆記還小時，把舊筆記＋新更新整理成一份去重、乾淨、標明取代關係的現行版。</li>
+    <li><b>為什麼不能只靠 <code>MERGE</code>（筆記長大後）</b>：<code>MERGE</code> 要求模型在單次回覆吐出整份替換後的完整 Markdown。一旦長任務跨天／跨週累積大量無法刪除的獨立事實，筆記逼近<b>輸出預算</b> <code>compaction_max_output_tokens</code>（例如 8,192 tokens），合併就會被 <code>finish == "length"</code> 截斷而報 <code>CompactionError</code>。</li>
+  </ul>
+
+  <h3 class="part idea" id="tiers" data-step="2">白話看懂 L0 / L1 / L2（白板、目錄、檔案櫃）</h3>
+  <div class="grid3">
+    <div class="box">
+      <span class="tag">L0 · 熱層（活頭）</span>
+      <h3>桌上的白板</h3>
+      <p>模型平常直接讀寫的活躍筆記（例如 <code>api.md</code> 或 SIM 活頭）。永遠維持輕量有界，確保每次 <code>read</code> 都快、準、不爆視窗。</p>
+    </div>
+    <div class="box">
+      <span class="tag green">L1 · 溫層（索引）</span>
+      <h3>目錄頁（O(1) 路由）</h3>
+      <p><code>_index.md</code> 與 <code>memory/INDEX.md</code>。只列標題與路徑指標，讓代理一眼知道「最新狀態在活頭、上週細節在 <code>era-001</code>」。</p>
+    </div>
+    <div class="box">
+      <span class="tag violet">L2 · 冷層（封存）</span>
+      <h3>上鎖的檔案櫃</h3>
+      <p>不可變的歷史快照（<code>api-era-001.md</code>、<code>archive/sim/*-log.md</code>）。零靜默刪除、永不再改寫，只有需要核對細節時才用 <code>read/rg</code> 去翻。</p>
+    </div>
+  </div>
+
+  <h3 class="part idea" id="animation" data-step="3">互動動畫：一步步看懂 MERGE → SEAL → ROLL</h3>
+  <p class="sub">點選下方步驟或按「▶ 自動播放」，觀察同一份 <code>api.md</code> 如何在 L0 / L1 / L2 之間流動：</p>
+  <div class="lsm-sim" id="lsmSim">
+    <div class="lsm-sim-bar">
+      <div class="steps" id="lsmStepBtns" role="group" aria-label="LSM 演練步驟"></div>
+      <button type="button" class="btn lsm-play" id="lsmPlayBtn">▶ 自動播放</button>
+    </div>
+    <div class="lsm-layers">
+      <div class="lsm-tier" id="lsmL0Box">
+        <div class="lsm-tier-head">
+          <b>L0 熱層（活躍白板 · api.md）</b>
+          <span class="lsm-role">平常讀寫與 MERGE 的地方</span>
+          <span class="lsm-badge" id="lsmTokens">1,100 / 5,000 tokens</span>
+        </div>
+        <div class="lsm-meter" aria-label="L0 活頭容量條">
+          <div class="lsm-meter-fill" id="lsmMeterFill"></div>
+          <div class="lsm-meter-limit" title="封存門檻 T_topic"></div>
+        </div>
+        <div class="lsm-meter-label"><span>0 tokens</span><span style="color:var(--red)">▲ 紅線：門檻 T_topic（超過即觸發 Seal &amp; Roll）</span></div>
+        <pre class="lsm-code" id="lsmL0Code"></pre>
+      </div>
+      <div class="lsm-tier" id="lsmL1Box">
+        <div class="lsm-tier-head">
+          <b>L1 溫層（索引目錄 · _index.md）</b>
+          <span class="lsm-role">O(1) 路由指標</span>
+          <span class="lsm-badge">INDEX</span>
+        </div>
+        <pre class="lsm-code" id="lsmL1Code"></pre>
+      </div>
+      <div class="lsm-tier" id="lsmL2Box">
+        <div class="lsm-tier-head">
+          <b>L2 冷層（不可變封存 · api-era-001.md）</b>
+          <span class="lsm-role">完整審計紀錄 · 永不改寫</span>
+          <span class="lsm-badge">IMMUTABLE</span>
+        </div>
+        <pre class="lsm-code" id="lsmL2Code"></pre>
+      </div>
+    </div>
+    <div class="lsm-explain" id="lsmExplain" aria-live="polite"></div>
+  </div>
+
+  <h3 class="part idea" id="solution" data-step="4">靜態對照圖：Session Topic 與 Global SIM 的統一架構</h3>
+  <p class="sub">將有限 Context Window 視為記憶體、磁碟視為無限冷儲存，把寫入、壓縮與審計統一在同一條分層管線：</p>
+
+  <div class="diagram-box">
+    <svg viewBox="0 0 860 352" width="860" height="352" role="img" aria-label="LSM 三層分層封存架構圖：同時對照 Session Topic 與 Global SIM 的 Seal &amp; Roll 管線" style="font-family:var(--sans)">
+      <defs>
+        <marker id="lsm-arr" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#475569"/>
+        </marker>
+      </defs>
+
+      <!-- Column headers -->
+      <text x="235" y="20" text-anchor="middle" font-size="12" font-weight="700" fill="#245db2">單任務會話（kentc_agent · compaction.py）</text>
+      <text x="640" y="20" text-anchor="middle" font-size="12" font-weight="700" fill="#08724f">跨會話全域記憶（Breezeman · dream.py）</text>
+
+      <!-- L0 Band -->
+      <rect x="16" y="32" width="828" height="86" rx="10" fill="#edf3fd" stroke="#245db2" stroke-width="1.5"/>
+      <text x="30" y="54" font-size="12.5" font-weight="700" fill="#1e3a8a">L0 熱層（有界活頭 · 永遠受輸出／token 上限保護）</text>
+      <rect x="30" y="64" width="390" height="44" rx="6" fill="#fff" stroke="#93c5fd"/>
+      <text x="42" y="82" font-size="11.5" font-weight="700" fill="#20272e">活躍主題活頭：&lt;slug&gt;.md + Checkpoint + 固定需求</text>
+      <text x="42" y="99" font-size="10.5" fill="#596570">門檻 T = max(256, min(0.65 × max_output, W // 8))</text>
+
+      <rect x="438" y="64" width="392" height="44" rx="6" fill="#fff" stroke="#86efac"/>
+      <text x="450" y="82" font-size="11.5" font-weight="700" fill="#20272e">SIM 活頭：Active Strategy + Pitfalls + 最近 3 筆</text>
+      <text x="450" y="99" font-size="10.5" fill="#596570">門檻：approx_tokens &gt; 2,000 或 條目數 &gt; 8</text>
+
+      <!-- Transition L0 -> L1 -->
+      <line x1="225" y1="118" x2="225" y2="148" stroke="#475569" stroke-width="1.6" marker-end="url(#lsm-arr)"/>
+      <text x="235" y="138" font-size="10.5" fill="#475569">超過 T → Seal &amp; Roll（ROLL_TOPIC）</text>
+      <line x1="634" y1="118" x2="634" y2="148" stroke="#475569" stroke-width="1.6" marker-end="url(#lsm-arr)"/>
+      <text x="644" y="138" font-size="10.5" fill="#475569">超限 → Seal &amp; Roll（SIM_ROLL_PROMPT）</text>
+
+      <!-- L1 Band -->
+      <rect x="16" y="150" width="828" height="74" rx="10" fill="#e9f5ef" stroke="#08724f" stroke-width="1.5"/>
+      <text x="30" y="172" font-size="12.5" font-weight="700" fill="#08724f">L1 溫層（有界索引與指標 · O(1) 路由）</text>
+      <text x="30" y="193" font-size="11.5" fill="#1e293b">• Session _index.md：列出活躍主題與 *-era-NNN.md 指標（EXTRACT 自動過濾冷分片不重寫）</text>
+      <text x="30" y="211" font-size="11.5" fill="#1e293b">• Global memory/INDEX.md（每軌 Top-20）＋ facts/patterns/sim/INDEX.md ＋ BM25 粗篩</text>
+
+      <!-- Transition L1 -> L2 -->
+      <line x1="225" y1="224" x2="225" y2="254" stroke="#475569" stroke-width="1.6" marker-end="url(#lsm-arr)"/>
+      <text x="235" y="244" font-size="10.5" fill="#475569">按需 read offset/limit 或 rg 查核</text>
+      <line x1="634" y1="224" x2="634" y2="254" stroke="#475569" stroke-width="1.6" marker-end="url(#lsm-arr)"/>
+      <text x="644" y="244" font-size="10.5" fill="#475569">完整歷史審計回溯</text>
+
+      <!-- L2 Band -->
+      <rect x="16" y="256" width="828" height="82" rx="10" fill="#f8fafc" stroke="#64748b" stroke-width="1.5"/>
+      <text x="30" y="278" font-size="12.5" font-weight="700" fill="#334155">L2 冷層（不可變封存分片 · 零靜默刪改 Audit Log）</text>
+      <rect x="30" y="288" width="390" height="38" rx="6" fill="#fff" stroke="#cbd5e1"/>
+      <text x="42" y="311" font-size="11" fill="#334155">&lt;slug&gt;-era-001.md（SHA-256 驗證）＋ .jsonl 原始紀錄</text>
+
+      <rect x="438" y="288" width="392" height="38" rx="6" fill="#fff" stroke="#cbd5e1"/>
+      <text x="450" y="311" font-size="11" fill="#334155">memory/archive/sim/&lt;slug&gt;-log.md ＋ 歸檔舊事實</text>
+    </svg>
+    <p class="diagram-cap">圖 08-1：單任務會話（左）與全域記憶（右）共用同一套 LSM 分層思想：L0 活頭有界、L1 O(1) 索引、L2 不可變冷分片。</p>
+  </div>
+
+  <div class="grid2" style="margin-top:16px">
+    <div class="box">
+      <h3>1. Topic Note Seal &amp; Roll</h3>
+      <p>觸發門檻由輸出預算與視窗共同決定：</p>
+      <div class="formula">T_topic = max(256, min(floor(0.65 * max_output_tokens), W // 8))</div>
+      <p>當 <code>existing_tokens + update_tokens &gt; T_topic</code> 時：</p>
+      <ul class="problem-list">
+        <li><b>Seal</b>：原封不動把舊筆記寫成 <code>&lt;slug&gt;-era-001.md</code>（自動進入 Session 世代與 SHA-256 校驗）。</li>
+        <li><b>Roll</b>：以 <code>ROLL_TOPIC</code> 蒸餾出精簡活頭並置頂冷檔指標；後續 <code>EXTRACT</code> 自動過濾 <code>*-era-NNN</code>，確保冷分片永不被改寫。</li>
+        <li><b>安全底線</b>：若單份舊筆記本身已大到連 <code>ROLL_TOPIC</code> 都放不進視窗，仍原子失敗並拋出 <code>CompactionError</code>，絕不靜默截斷。</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>2. SIM 帳本 Seal &amp; Roll</h3>
+      <p>觸發條件（任一成立且條目數 &gt; 3）：</p>
+      <div class="formula">approx_tokens(body) &gt; 2,000  OR  entries &gt; 8</div>
+      <p>執行步驟（<code>seal_and_roll_sim</code>）：</p>
+      <ul class="problem-list">
+        <li><b>Seal</b>：將最舊的 <code>N - 3</code> 條 <code>### [YYYY-MM-DD]</code> 紀錄追加寫入 <code>memory/archive/sim/&lt;slug&gt;-log.md</code>。</li>
+        <li><b>Distill Head</b>：以 <code>SIM_ROLL_PROMPT</code> 整理為 <code>## Active Strategy</code> ＋ <code>## Known Pitfalls (Do Not Repeat)</code>，接上最近 3 筆原文與冷檔路徑。</li>
+        <li><b>審計保留</b>：舊嘗試與舊世代快照均保留於磁碟，不作破壞性刪除。</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="part data" id="data" data-step="5">依據：程式對照與驗證</h3>
+  <div class="tablewrap"><table><caption>LSM 實作對照表</caption><thead><tr><th scope="col">機制</th><th scope="col">實作位置</th><th scope="col">回歸測試</th></tr></thead><tbody>
+    <tr><td>Topic Note 門檻計算與冷分片封存</td><td><code>context/compaction.py</code>（<code>topic_seal_threshold</code>、<code>_next_era_slug</code>、<code>ROLL_TOPIC</code>）</td><td><code>test_topic_compaction.py::test_topic_note_lsm_seal_and_roll_preserves_cold_era_and_shrinks_active_head</code></td></tr>
+    <tr><td>既有超大筆記零截斷保護</td><td><code>context/compaction.py</code>（先呼叫 <code>request()</code> 再寫入 <code>topics</code>）</td><td><code>test_topic_compaction.py::test_complete_oversized_old_topic_is_not_silently_truncated</code></td></tr>
+    <tr><td>SIM 帳本冷檔追加與活頭蒸餾</td><td><code>kentc_breezeman/dream.py</code>（<code>seal_and_roll_sim</code>、<code>SIM_ROLL_PROMPT</code>）</td><td><code>test_breezeman_dream.py::test_sim_seal_and_roll_archives_older_attempts_and_distills_head</code></td></tr>
+  </tbody></table></div>
+  <p class="source">實作對照：<a href="../../src/kentc_agent/context/compaction.py">context/compaction.py</a><a href="../../src/kentc_breezeman/dream.py">kentc_breezeman/dream.py</a><a href="../../src/kentc_agent/adapters/session.py">adapters/session.py</a></p>
+</section>
+</article>
+<nav class="pager" aria-label="上一篇與下一篇" data-pager></nav>
+</main>
+</div>
+<script src="../asset/js/topics.js"></script>
+<script src="../asset/js/core.js"></script>
+</body>
+</html>

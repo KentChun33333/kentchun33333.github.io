@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="分析師需可核對的結構化結果，輸入不可信；代理直接產生頁面不安全，逐情境複製前端不可維護。">
-<title>10 · Studio 應用｜kentc_agent 核心方法論</title>
+<title>B3 · Folder-as-Studio 整合｜Breezeman 核心方法論</title>
 <link rel="stylesheet" href="../asset/css/core.css">
 <link rel="stylesheet" href="../asset/css/shell.css">
 </head>
 <body class="topic-page">
 <a class="sr-only" href="#topic">跳至主要內容</a>
 <header class="top"><div class="top-in">
-  <a class="brand" href="../index.html">kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
+  <a class="brand" href="../index.html#tab=breezeman">kentc_agent</a><span class="top-note">Breezeman · 繁體中文</span>
   <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
 </div></header>
 <div class="reader">
@@ -19,12 +19,63 @@
 <main id="topic" data-slug="studio">
 <article class="topic">
 <section class="card" id="studio" aria-labelledby="studio-title">
-  <p class="eyebrow">10 · Studio 應用框架</p>
-  <h2 id="studio-title">一個三頁非同步迴圈；換一份 YAML，就是新的應用</h2>
+  <p class="eyebrow">B3 · Breezeman × Studio（資料夾即應用）</p>
+  <h2 id="studio-title">在 Breezeman 內掛載三頁結構化案件流程</h2>
   <div class="psd">
-    <div class="psd-item problem"><span>問題</span><p>上傳文件不可信：代理直接產生報告頁，注入文字可進入畫面。每個情境各寫一份前端 ≈ 750 行 JS。</p></div>
-    <div class="psd-item idea"><span>核心想法</span><p>共用三頁非同步迴圈，差異只寫在 <code>app.yaml</code>。代理只回傳通過 schema 與 checks 的 JSON，前端以固定區塊呈現；設定錯誤啟動即拒。</p></div>
-    <div class="psd-item data"><span>依據</span><p>同一套程式跑 TER 審查與 RM 洞察兩個應用。本機實測：標記錯誤值只重跑該檔；失敗明確顯示，重試成功（見 ③）。</p></div>
+    <div class="psd-item problem"><span>問題</span><p>分析師需要針對不可信上傳文件執行嚴格的三步結構化審查（Intake → Verify → Report）；但另起獨立伺服器會割裂工作區檔案與全域記憶。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>Studio 不再是獨立宿主，而是 <b>Folder-as-Studio</b>：工作區內任何含 <code>app.yaml</code>／<code>studio.yaml</code> 的資料夾都由 Breezeman 的 <code>StudioRegistry</code> 自動掛載於 <code>/studios/{id}/</code>，並透過 <code>allowed_read_roots</code> 唯讀存取全域 <code>memory/</code>。</p></div>
+    <div class="psd-item data"><span>依據</span><p>整合實作於 <code>kentc_breezeman/studio.py</code>、<code>app.py</code> 與 <code>kentc_agent/adapters/tools.py</code>，引擎位於 <code>src/kentc_studio/</code>，由 <code>test_breezeman_studio.py</code> 與 <code>test_breezeman_dream.py</code> 驗證。</p></div>
+  </div>
+  <h3 class="part idea" id="breezeman-bridge" data-step="0">Breezeman 掛載架構與唯讀全域記憶邊界</h3>
+  <p class="sub">Breezeman 維持單一 HTTP/WebSocket 入口；當使用者存取 <code>/studios/{id}/*</code> 時，<code>StudioRegistry</code> 懶載入對應資料夾的 <code>CaseService</code> 並注入全域記憶提示與唯讀白名單：</p>
+  <div class="diagram-box">
+    <svg viewBox="0 0 860 220" width="860" height="220" role="img" aria-label="Breezeman 掛載 Studio 資料夾與唯讀全域記憶邊界圖" style="font-family:var(--sans)">
+      <defs>
+        <marker id="st-arr" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#475569"/>
+        </marker>
+        <marker id="st-green" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#08724f"/>
+        </marker>
+      </defs>
+
+      <rect x="16" y="24" width="210" height="170" rx="10" fill="#edf3fd" stroke="#245db2" stroke-width="1.5"/>
+      <text x="30" y="50" font-size="12.5" font-weight="700" fill="#1e3a8a">Breezeman 宿主</text>
+      <text x="30" y="72" font-size="11" fill="#334155">• 掃描含 app.yaml 資料夾</text>
+      <text x="30" y="92" font-size="11" fill="#334155">• ASGI 代理 /studios/{id}/*</text>
+      <text x="30" y="112" font-size="11" fill="#334155">• 注入 memory_hint()</text>
+      <text x="30" y="132" font-size="11" fill="#334155">• 注入 allowed_read_roots</text>
+      <text x="30" y="152" font-size="11" fill="#334155">• 自動同步磁碟新案件</text>
+      <text x="30" y="176" font-size="10.5" fill="#596570">studio.py · StudioRegistry</text>
+
+      <line x1="226" y1="109" x2="278" y2="109" stroke="#475569" stroke-width="1.6" marker-end="url(#st-arr)"/>
+      <text x="252" y="100" text-anchor="middle" font-size="10.5" fill="#475569">mount</text>
+
+      <rect x="280" y="24" width="270" height="170" rx="10" fill="#f2eefb" stroke="#6548a6" stroke-width="1.5"/>
+      <text x="294" y="50" font-size="12.5" font-weight="700" fill="#6548a6">Studio 資料夾（CaseService）</text>
+      <text x="294" y="72" font-size="11" fill="#334155">1. Intake：表單 + 檔案通道 + SQL</text>
+      <text x="294" y="92" font-size="11" fill="#334155">2. Verify：逐檔抽取 JSON + checks</text>
+      <text x="294" y="112" font-size="11" fill="#334155">3. Report：固定區塊呈現 + 版本迭代</text>
+      <rect x="294" y="128" width="242" height="52" rx="6" fill="#fff" stroke="#c4b5fd"/>
+      <text x="304" y="147" font-size="11" font-weight="700" fill="#6548a6">權限收斂（ToolContext）</text>
+      <text x="304" y="165" font-size="10.5" fill="#334155">confine_reads=True · 永無 bash/網路</text>
+
+      <!-- Two permission arrows -->
+      <line x1="550" y1="68" x2="618" y2="68" stroke="#475569" stroke-width="1.5" marker-end="url(#st-arr)"/>
+      <text x="584" y="60" text-anchor="middle" font-size="10" fill="#334155">讀寫</text>
+      <rect x="620" y="24" width="224" height="76" rx="10" fill="#f7f8f5" stroke="#64748b" stroke-width="1.4"/>
+      <text x="634" y="48" font-size="12" font-weight="700" fill="#20272e">cases/&lt;case_id&gt;/</text>
+      <text x="634" y="68" font-size="11" fill="#334155">上傳文件、materials.json、</text>
+      <text x="634" y="85" font-size="11" fill="#334155">報告版本（寫入嚴格鎖死於此）</text>
+
+      <line x1="550" y1="150" x2="618" y2="150" stroke="#08724f" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#st-green)"/>
+      <text x="584" y="142" text-anchor="middle" font-size="10" font-weight="700" fill="#08724f">唯讀白名單</text>
+      <rect x="620" y="114" width="224" height="80" rx="10" fill="#e9f5ef" stroke="#08724f" stroke-width="1.4"/>
+      <text x="634" y="138" font-size="12" font-weight="700" fill="#08724f">&lt;root&gt;/memory/INDEX.md</text>
+      <text x="634" y="158" font-size="11" fill="#334155">共享 Fact / Pattern / SIM 教訓</text>
+      <text x="634" y="176" font-size="10.5" fill="#c92330">write / edit 絕對拒絕</text>
+    </svg>
+    <p class="diagram-cap">圖 B3-1：Folder-as-Studio 掛載與權限邊界。Studio 代理能讀取根目錄全域記憶，但寫入與其餘磁碟讀取仍嚴格鎖死於案件資料夾內。</p>
   </div>
   <h3 class="part problem" id="problem" data-step="1">問題：網頁應用面對不可信輸入與不斷增加的情境</h3>
   <ul class="problem-list">

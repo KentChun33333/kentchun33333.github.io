@@ -285,6 +285,7 @@ class StudioRegistry:
             except AgentError as e:
                 raise ValueError(str(e)) from None
             hint = memory_hint(self.workspace)
+            mem_root = (self.workspace / "memory").resolve()
             for app in svc.config.apps.values():
                 providers = [
                     *(a.provider for a in app.agents.values()),
@@ -294,6 +295,8 @@ class StudioRegistry:
                 for provider in providers:
                     if hasattr(provider, "skills") and isinstance(provider.skills, str) and hint not in provider.skills:
                         provider.skills = f"{provider.skills.rstrip()}\n\n{hint}" if provider.skills else hint
+                    if hasattr(provider, "allowed_read_roots") and mem_root not in provider.allowed_read_roots:
+                        provider.allowed_read_roots = (*provider.allowed_read_roots, mem_root)
             mounted = _MountedStudio(
                 studio_id=studio_id,
                 folder=target,

@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Breezeman 系統架構與 FastAPI 層：單一宿主承載 HTTP/WebSocket、雙背景排程協程、Chat Daemon Worker 執行緒模型、工作區隔離與 Folder-as-Studio 掛載。">
+<title>B0 · 系統架構與 FastAPI 層｜Breezeman 核心方法論</title>
+<link rel="stylesheet" href="../asset/css/core.css">
+<link rel="stylesheet" href="../asset/css/shell.css">
+</head>
+<body class="topic-page">
+<a class="sr-only" href="#topic">跳至主要內容</a>
+<header class="top"><div class="top-in">
+  <a class="brand" href="../index.html#tab=breezeman">kentc_agent</a><span class="top-note">Breezeman · 繁體中文</span>
+  <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
+</div></header>
+<div class="reader">
+<aside class="sidebar" aria-label="主題目錄"><nav class="side-nav" id="sideNav" aria-label="主題"></nav></aside>
+<main id="topic" data-slug="breezeman-architecture">
+<article class="topic">
+<section class="card" id="breezeman-architecture" aria-labelledby="ba-title">
+  <p class="eyebrow">B0 · Breezeman 宿主總覽與 FastAPI 執行層</p>
+  <h2 id="ba-title">單一宿主承載長程對話、排程、記憶與 Studio</h2>
+  <div class="psd">
+    <div class="psd-item problem"><span>問題</span><p><code>kentc_agent</code> 是同步單任務迴圈，無法直接承載常駐網頁 UI、即時串流、多任務子工作區、定時排程、跨會話記憶蒸餾與結構化案件介面。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>以單一 FastAPI 宿主（<code>app.py</code>）統一對外：雙獨立背景協程驅動排程與 Dreaming；每個 Task 綁定一隻 <code>Chat</code>（同一個 <code>Agent</code> + <code>Session</code>），透過 <code>daemon=True</code> worker 執行緒非同步跑動；Studio 以資料夾內嵌掛載於 <code>/studios/{id}/</code>。</p></div>
+    <div class="psd-item data"><span>依據</span><p>實作於 <code>src/kentc_breezeman/app.py</code>、<code>runtime.py</code>、<code>server.py</code>、<code>studio.py</code> 與 <code>workspace.py</code>，由 <code>test_breezeman.py</code> 與 <code>test_breezeman_studio.py</code> 驗證。</p></div>
+  </div>
+
+  <h3 class="part problem" id="problem" data-step="1">問題：為什麼需要 Breezeman 宿主層（而非另造多代理框架）</h3>
+  <ul class="problem-list">
+    <li><b>同步核心 vs. 非同步服務</b>：<code>kentc_agent.Agent.run()</code> 為同步阻塞呼叫（含檔案讀取、bash 與多輪模型往返）；若直接放進 FastAPI event loop 會凍結整個伺服器。</li>
+    <li><b>人機與排程共享同一脈絡</b>：長程任務需要定時自主推進，但使用者隨時可能打開介面查看進度、按 Stop 中止、或直接插話接手——若排程另開隔離子代理，人機上下文就會割裂。</li>
+    <li><b>過去獨立 Studio 的割裂問題</b>：過去若把 Studio 當成獨立伺服器啟動，會與日常 Task 工作區、檔案樹及全域記憶（<code>memory/INDEX.md</code>）脫節；現在統一由 Breezeman 內嵌掛載。</li>
+  </ul>
+
+  <h3 class="part idea" id="topology" data-step="2">核心架構圖：FastAPI 宿主、雙排程迴圈與執行緒邊界</h3>
+  <p class="sub">所有外部請求、WebSocket 串流、排程派發與 Studio 子應用都收口於單一進程內，明確區分 <code>asyncio</code> 主迴圈與同步背景執行緒：</p>
+
+  <div class="diagram-box">
+    <svg viewBox="0 0 860 470" width="860" height="470" role="img" aria-label="Breezeman 系統架構圖：FastAPI、雙排程迴圈、Chat Daemon Worker、Session 與 Studio 掛載" style="font-family:var(--sans)">
+      <defs>
+        <marker id="ba-arr" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#475569"/>
+        </marker>
+        <marker id="ba-arr-blue" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#245db2"/>
+        </marker>
+        <marker id="ba-arr-green" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#08724f"/>
+        </marker>
+      </defs>
+
+      <!-- Layer 1: FastAPI asyncio Event Loop -->
+      <rect x="16" y="14" width="828" height="122" rx="12" fill="#f8fafc" stroke="#245db2" stroke-width="1.6"/>
+      <text x="32" y="38" font-size="13" font-weight="700" fill="#245db2">FastAPI / Uvicorn · asyncio Event Loop（app.py）</text>
+      <text x="640" y="38" font-size="11" fill="#596570">Bearer / X-API-Token Guard</text>
+
+      <!-- 4 boxes inside FastAPI -->
+      <rect x="32" y="50" width="186" height="72" rx="8" fill="#edf3fd" stroke="#93c5fd" stroke-width="1.2"/>
+      <text x="44" y="70" font-size="12" font-weight="700" fill="#1e3a8a">REST API</text>
+      <text x="44" y="88" font-size="11" fill="#334155">/api/tasks · /api/chats</text>
+      <text x="44" y="105" font-size="11" fill="#334155">/api/dream · /api/tree · /file</text>
+
+      <rect x="234" y="50" width="186" height="72" rx="8" fill="#edf3fd" stroke="#93c5fd" stroke-width="1.2"/>
+      <text x="246" y="70" font-size="12" font-weight="700" fill="#1e3a8a">WebSocket /ws/{key}</text>
+      <text x="246" y="88" font-size="11" fill="#334155">chat / stop / compact</text>
+      <text x="246" y="105" font-size="11" fill="#334155">hello 快照 + 即時事件串流</text>
+
+      <rect x="436" y="50" width="194" height="72" rx="8" fill="#fff5de" stroke="#f59e0b" stroke-width="1.2"/>
+      <text x="448" y="70" font-size="12" font-weight="700" fill="#865500">雙獨立背景協程（5s）</text>
+      <text x="448" y="88" font-size="11" fill="#334155">① task_scheduler_loop</text>
+      <text x="448" y="105" font-size="11" fill="#334155">② dream_scheduler_loop</text>
+
+      <rect x="646" y="50" width="182" height="72" rx="8" fill="#f2eefb" stroke="#a78bfa" stroke-width="1.2"/>
+      <text x="658" y="70" font-size="12" font-weight="700" fill="#6548a6">Studio ASGI 掛載</text>
+      <text x="658" y="88" font-size="11" fill="#334155">/studios/{id}/*</text>
+      <text x="658" y="105" font-size="11" fill="#334155">StudioRegistry 動態發現</text>
+
+      <!-- Arrows from Layer 1 to Layer 2 -->
+      <line x1="327" y1="122" x2="327" y2="174" stroke="#245db2" stroke-width="1.6" marker-end="url(#ba-arr-blue)"/>
+      <text x="206" y="155" font-size="10.5" fill="#245db2">call_soon_threadsafe 雙向串流</text>
+
+      <line x1="485" y1="122" x2="485" y2="174" stroke="#475569" stroke-width="1.6" marker-end="url(#ba-arr)"/>
+      <text x="415" y="155" font-size="10.5" fill="#475569">tick_schedules</text>
+
+      <line x1="585" y1="122" x2="585" y2="174" stroke="#08724f" stroke-width="1.6" marker-end="url(#ba-arr-green)"/>
+      <text x="536" y="155" font-size="10.5" fill="#08724f">tick_dream</text>
+
+      <line x1="737" y1="122" x2="737" y2="174" stroke="#6548a6" stroke-width="1.6" marker-end="url(#ba-arr)"/>
+
+      <!-- Layer 2: Execution Threads -->
+      <rect x="16" y="176" width="440" height="148" rx="12" fill="#fff" stroke="#334155" stroke-width="1.5"/>
+      <text x="32" y="200" font-size="13" font-weight="700" fill="#20272e">Chat + Daemon Worker Thread（runtime.py）</text>
+      <text x="32" y="218" font-size="11" fill="#596570">每個 Task 唯一一隻主代理（無額外 subagent 層）；self.busy 互斥保護</text>
+
+      <rect x="32" y="230" width="196" height="80" rx="8" fill="#fff0f1" stroke="#fca5a5" stroke-width="1.2"/>
+      <text x="44" y="250" font-size="12" font-weight="700" fill="#c92330">kentc_agent.Agent</text>
+      <text x="44" y="268" font-size="11" fill="#334155">• loop.py 同步執行迴圈</text>
+      <text x="44" y="284" font-size="11" fill="#334155">• 前景主題壓縮 + LSM 封存</text>
+      <text x="44" y="300" font-size="11" fill="#334155">• 固定需求 + 跨日 Date 刷新</text>
+
+      <rect x="242" y="230" width="198" height="80" rx="8" fill="#f7f8f5" stroke="#cbd5e1" stroke-width="1.2"/>
+      <text x="254" y="250" font-size="12" font-weight="700" fill="#20272e">Worker 生命週期</text>
+      <text x="254" y="268" font-size="11" fill="#334155">• _chat() 鎖內預壓縮檢查</text>
+      <text x="254" y="284" font-size="11" fill="#334155">• WebEvents 廣播給訂閱者</text>
+      <text x="254" y="300" font-size="11" fill="#334155">• on_complete 回寫排程結果</text>
+
+      <!-- Dreaming Box -->
+      <rect x="472" y="176" width="182" height="148" rx="12" fill="#e9f5ef" stroke="#08724f" stroke-width="1.5"/>
+      <text x="486" y="200" font-size="12.5" font-weight="700" fill="#08724f">Dreaming Thread</text>
+      <text x="486" y="220" font-size="11" fill="#334155">dream.py（獨立鎖）</text>
+      <text x="486" y="242" font-size="11" fill="#334155">• O(1) stat 快篩</text>
+      <text x="486" y="260" font-size="11" fill="#334155">• 視窗分塊 + BM25</text>
+      <text x="486" y="278" font-size="11" fill="#334155">• Fact / Pattern / SIM</text>
+      <text x="486" y="296" font-size="11" fill="#334155">• 失敗退避與熔斷</text>
+
+      <!-- Studio CaseService Box -->
+      <rect x="668" y="176" width="176" height="148" rx="12" fill="#f2eefb" stroke="#6548a6" stroke-width="1.5"/>
+      <text x="682" y="200" font-size="12.5" font-weight="700" fill="#6548a6">CaseService</text>
+      <text x="682" y="220" font-size="11" fill="#334155">studio.py（按需掛載）</text>
+      <text x="682" y="242" font-size="11" fill="#334155">• app.yaml 嚴格契約</text>
+      <text x="682" y="260" font-size="11" fill="#334155">• confine_reads=True</text>
+      <text x="682" y="278" font-size="11" fill="#334155">• 唯讀 memory/ 白名單</text>
+      <text x="682" y="296" font-size="11" fill="#334155">• 寫入鎖死於 case_dir</text>
+
+      <!-- Arrows Layer 2 -> Layer 3 -->
+      <line x1="150" y1="324" x2="150" y2="364" stroke="#475569" stroke-width="1.5" marker-end="url(#ba-arr)"/>
+      <line x1="350" y1="324" x2="350" y2="364" stroke="#475569" stroke-width="1.5" marker-end="url(#ba-arr)"/>
+      <line x1="563" y1="324" x2="563" y2="364" stroke="#08724f" stroke-width="1.5" marker-end="url(#ba-arr-green)"/>
+      <line x1="756" y1="324" x2="756" y2="364" stroke="#6548a6" stroke-width="1.5" marker-end="url(#ba-arr)"/>
+      <!-- Studio read-only arrow to Global Memory -->
+      <path d="M 685 324 L 685 344 L 615 344 L 615 364" fill="none" stroke="#08724f" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#ba-arr-green)"/>
+      <text x="622" y="340" font-size="10" fill="#08724f">唯讀</text>
+
+      <!-- Layer 3: Persistent Workspace Storage -->
+      <rect x="16" y="366" width="828" height="88" rx="12" fill="#f7f8f5" stroke="#64748b" stroke-width="1.5"/>
+      <text x="32" y="388" font-size="12.5" font-weight="700" fill="#334155">持久化工作區（&lt;workspace&gt;/）</text>
+
+      <rect x="32" y="398" width="196" height="44" rx="6" fill="#fff" stroke="#cbd5e1"/>
+      <text x="42" y="416" font-size="11" font-weight="700" fill="#20272e">.kentc-agent/sessions/</text>
+      <text x="42" y="432" font-size="10.5" fill="#596570">&lt;sid&gt;.jsonl + tasks.json</text>
+
+      <rect x="242" y="398" width="210" height="44" rx="6" fill="#fff" stroke="#cbd5e1"/>
+      <text x="252" y="416" font-size="11" font-weight="700" fill="#20272e">tasks/&lt;slug&gt;/</text>
+      <text x="252" y="432" font-size="10.5" fill="#596570">工作區檔案 + .kentc-agent/memory/</text>
+
+      <rect x="466" y="398" width="196" height="44" rx="6" fill="#fff" stroke="#86efac"/>
+      <text x="476" y="416" font-size="11" font-weight="700" fill="#08724f">memory/（全域記憶）</text>
+      <text x="476" y="432" font-size="10.5" fill="#596570">INDEX.md · facts · patterns · sim</text>
+
+      <rect x="676" y="398" width="152" height="44" rx="6" fill="#fff" stroke="#c4b5fd"/>
+      <text x="686" y="416" font-size="11" font-weight="700" fill="#6548a6">&lt;studio&gt;/cases/</text>
+      <text x="686" y="432" font-size="10.5" fill="#596570">app.yaml + case.json</text>
+    </svg>
+    <p class="diagram-cap">圖 B0-1：Breezeman 單一進程內的執行緒邊界與磁碟責任劃分。所有同步工作都在 worker thread 或 threadpool 執行，絕不阻塞 FastAPI event loop。</p>
+  </div>
+
+  <h3 class="part idea" id="concurrency" data-step="3">併發模型設計：單一 Chat ＋ Daemon Worker（零多餘抽象）</h3>
+  <div class="grid2">
+    <div class="box">
+      <span class="tag">互斥與串流</span>
+      <h3>為什麼排程不開 Subagent，而是用同一個 Chat？</h3>
+      <p>每個 Task 在 <code>tasks.json</code> 對應唯一 <code>chat_key</code> 與專屬子資料夾（<code>tasks/&lt;slug&gt;/</code>）。無論是使用者從 WebSocket 送訊息，還是排程器透過 <code>tick_schedules()</code> 觸發，都呼叫同一隻 <code>Chat.send()</code>，在 <code>self._lock</code> 下檢查 <code>self.busy</code> 後啟動 <code>daemon=True</code> 執行緒。</p>
+      <p class="why">好處：排程與人機互動共享同一份對話歷史、checkpoint、主題筆記與即時 WebSocket 事件流，零狀態同步成本。</p>
+    </div>
+    <div class="box">
+      <span class="tag violet">鎖隔離</span>
+      <h3>四把細粒度鎖，避免互相阻塞</h3>
+      <ul class="problem-list">
+        <li><code>Chat._lock</code>：保護單一對話的 <code>busy</code> 狀態與事件環形緩衝區（最多 4,000 筆，連續 delta 自動合併）。</li>
+        <li><code>Runtime._lock</code>：保護已開啟的 <code>_chats</code> 字典快取。</li>
+        <li><code>Runtime._tasks_lock</code>：保護 <code>tasks.json</code> 的原子讀寫（<code>.tmp</code> → <code>replace</code>）。</li>
+        <li><code>Runtime._dream_lock</code>：非阻塞獲取，確保同時只跑一輪 Dreaming 且不卡住任何 Task 排程。</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="part data" id="api" data-step="4">FastAPI 端點與模組責任對照</h3>
+  <div class="tablewrap"><table><caption>Breezeman HTTP / WebSocket 介面一覽</caption><thead><tr><th scope="col">端點</th><th scope="col">方法</th><th scope="col">職責</th><th scope="col">實作位置</th></tr></thead><tbody>
+    <tr><td><code>/api/tasks</code>、<code>/api/tasks/{id}</code></td><td>GET / POST / PATCH / DELETE</td><td>管理任務資料夾、排程設定（<code>interval_min</code>、<code>prompt</code>、<code>skill</code>）與固定需求（<code>requirements</code>）</td><td><code>app.py</code> → <code>runtime.py</code></td></tr>
+    <tr><td><code>/api/chats/{key}/transcript</code> · <code>/context</code></td><td>GET / POST <code>/context/clear</code></td><td>檢視完整 append-only 歷史、目前模型上下文視窗內容，或清理活對話／checkpoint</td><td><code>app.py</code> → <code>Chat</code></td></tr>
+    <tr><td><code>/api/chats/{key}/requirements</code> · <code>/skill</code></td><td>GET / POST / PUT</td><td>管理固定需求釘選（跨壓縮保留）與單一載入技能（保留 <code>memory_hint</code>）</td><td><code>app.py</code> → <code>Chat</code></td></tr>
+    <tr><td><code>/ws/{key}</code></td><td>WebSocket</td><td>推播 <code>hello</code> 快照與即時事件（<code>delta</code>、<code>tool_start/end</code>、<code>compaction</code>、<code>turn_end</code>）；接收 <code>chat</code> / <code>stop</code> / <code>compact</code></td><td><code>app.py</code> → <code>WebEvents</code></td></tr>
+    <tr><td><code>/api/dream</code> · <code>/api/dream/nodes</code> · <code>/run</code></td><td>GET / PATCH / POST</td><td>查詢三軌記憶統計與體積、搜尋節點、設定 Dreaming 排程或手動觸發蒸餾</td><td><code>app.py</code> → <code>dream.py</code></td></tr>
+    <tr><td><code>/api/studios</code> · <code>/studios/{id}/{rest}</code></td><td>GET / POST / ASGI 代理</td><td>發現或建立 Studio 資料夾，並將 <code>/studios/{id}/*</code> 轉發給內嵌 <code>kentc_studio</code> ASGI 應用</td><td><code>app.py</code> → <code>studio.py</code></td></tr>
+  </tbody></table></div>
+  <p class="source">實作對照：<a href="../../src/kentc_breezeman/app.py">app.py</a><a href="../../src/kentc_breezeman/runtime.py">runtime.py</a><a href="../../src/kentc_breezeman/studio.py">studio.py</a><a href="../../src/kentc_breezeman/workspace.py">workspace.py</a></p>
+</section>
+</article>
+<nav class="pager" aria-label="上一篇與下一篇" data-pager></nav>
+</main>
+</div>
+<script src="../asset/js/topics.js"></script>
+<script src="../asset/js/core.js"></script>
+</body>
+</html>

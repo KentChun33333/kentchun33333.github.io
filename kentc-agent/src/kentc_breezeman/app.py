@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -29,6 +30,7 @@ from .studio import StudioRegistry
 
 ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "web" / "breezeman"
+logger = logging.getLogger(__name__)
 
 
 def create_app(runtime: Runtime, token: str = "") -> FastAPI:
@@ -38,20 +40,29 @@ def create_app(runtime: Runtime, token: str = "") -> FastAPI:
     async def lifespan(_app: FastAPI):
         runtime.loop = asyncio.get_running_loop()
 
-        async def scheduler_loop() -> None:
+        async def task_scheduler_loop() -> None:
             while True:
                 await asyncio.sleep(5)
                 try:
                     await run_in_threadpool(runtime.tick_schedules)
-                    await run_in_threadpool(runtime.tick_dream)
                 except Exception:  # noqa: BLE001 - keep scheduler alive across transient errors
-                    pass
+                    logger.exception("task scheduler tick failed")
 
-        sched_task = asyncio.create_task(scheduler_loop())
+        async def dream_scheduler_loop() -> None:
+            while True:
+                await asyncio.sleep(5)
+                try:
+                    await run_in_threadpool(runtime.tick_dream)
+                except Exception:  # noqa: BLE001 - keep dreaming loop alive across transient errors
+                    logger.exception("dream scheduler tick failed")
+
+        task_sched = asyncio.create_task(task_scheduler_loop())
+        dream_sched = asyncio.create_task(dream_scheduler_loop())
         try:
             yield
         finally:
-            sched_task.cancel()
+            task_sched.cancel()
+            dream_sched.cancel()
             studios.close()
             runtime.close()
 
@@ -165,12 +176,13 @@ def create_app(runtime: Runtime, token: str = "") -> FastAPI:
         name = body.get("name")
         status = body.get("status")
         schedule = body["schedule"] if "schedule" in body else ...
+        requirements = body["requirements"] if "requirements" in body else ...
         if name is not None and not isinstance(name, str):
             raise HTTPException(400, "name must be a string")
         if status is not None and not isinstance(status, str):
             raise HTTPException(400, "status must be a string")
         try:
-            return runtime.update_task(task_id, name=name, status=status, schedule=schedule)
+            return runtime.update_task(task_id, name=name, status=status, schedule=schedule, requirements=requirements)
         except KeyError:
             raise HTTPException(404, f"no task {task_id}") from None
         except ValueError as e:
@@ -254,6 +266,37 @@ def create_app(runtime: Runtime, token: str = "") -> FastAPI:
         except SkillError as e:
             raise HTTPException(400, str(e)) from None
         return {"skill": chat.skill}
+
+    @app.get("/api/chats/{key}/requirements")
+    def get_requirements(key: str) -> dict[str, Any]:
+        return {"requirements": list(chat_of(key).session.requirements)}
+
+    @app.post("/api/chats/{key}/requirements")
+    def toggle_requirement(key: str, body: dict[str, Any]) -> dict[str, Any]:
+        chat = chat_of(key)
+        text = body.get("text")
+        active = body.get("active", True)
+        if not isinstance(text, str) or not isinstance(active, bool):
+            raise HTTPException(400, "text must be a string and active must be a boolean")
+        try:
+            reqs = chat.set_requirement(text, active=active)
+        except ChatBusy as e:
+            raise HTTPException(409, str(e)) from None
+        except ValueError as e:
+            raise HTTPException(400, str(e)) from None
+        return {"requirements": reqs}
+
+    @app.put("/api/chats/{key}/requirements")
+    def put_requirements(key: str, body: dict[str, Any]) -> dict[str, Any]:
+        chat = chat_of(key)
+        items = body.get("requirements")
+        try:
+            reqs = chat.sync_requirements(items)
+        except ChatBusy as e:
+            raise HTTPException(409, str(e)) from None
+        except ValueError as e:
+            raise HTTPException(400, str(e)) from None
+        return {"requirements": reqs}
 
     @app.get("/api/studios")
     def list_studios() -> list[dict[str, Any]]:

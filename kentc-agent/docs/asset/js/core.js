@@ -148,8 +148,51 @@
     root.querySelectorAll('h3').forEach((heading, index) => { if (!heading.id) heading.id = `${slug}-${index + 1}`; });
   }
 
+  // ---------- 2-tab helpers (kentc_agent vs Breezeman) ----------
+  const TAB_KEY = 'kentc-docs-tab';
+  const tabsList = () => window.KENTC_TABS || [
+    {id: 'agent', label: 'kentc_agent', short: '單任務引擎'},
+    {id: 'breezeman', label: 'Breezeman', short: '長程常駐與記憶'}
+  ];
+  const tabOf = slug => (window.KENTC_TOPICS || []).find(t => t.slug === slug)?.tab || 'agent';
+  const topicsForTab = tab => (window.KENTC_TOPICS || []).filter(t => (t.tab || 'agent') === tab);
+  const loadTab = () => {
+    try { const v = sessionStorage.getItem(TAB_KEY); if (v && tabsList().some(t => t.id === v)) return v; } catch {}
+    return 'agent';
+  };
+  const saveTab = tab => { try { sessionStorage.setItem(TAB_KEY, tab); } catch {} };
+
+  function renderTabsBar(activeTab, {onSelect, hrefForTab} = {}) {
+    const topIn = document.querySelector('.top-in');
+    if (!topIn) return null;
+    let bar = topIn.querySelector('#docTabs');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'docTabs';
+      bar.className = 'doc-tabs';
+      bar.setAttribute('role', 'tablist');
+      bar.setAttribute('aria-label', '文件分頁');
+      const search = topIn.querySelector('.search');
+      topIn.insertBefore(bar, search || null);
+    }
+    bar.innerHTML = tabsList().map(t => {
+      const selected = t.id === activeTab;
+      if (hrefForTab) {
+        return `<a class="tab-btn" role="tab" data-tab="${t.id}" aria-selected="${selected}" href="${hrefForTab(t.id)}">${escape(t.label)} <small>${escape(t.short)}</small></a>`;
+      }
+      return `<button type="button" class="tab-btn" role="tab" data-tab="${t.id}" aria-selected="${selected}">${escape(t.label)} <small>${escape(t.short)}</small></button>`;
+    }).join('');
+    if (onSelect) {
+      bar.querySelectorAll('[data-tab]').forEach(btn => {
+        btn.addEventListener('click', () => onSelect(btn.dataset.tab));
+      });
+    }
+    return bar;
+  }
+
   function pager(slug, hrefFor) {
-    const topics = window.KENTC_TOPICS || [], at = topics.findIndex(topic => topic.slug === slug);
+    const tab = tabOf(slug);
+    const topics = topicsForTab(tab), at = topics.findIndex(topic => topic.slug === slug);
     const link = (topic, rel, label) => topic
       ? `<a class="pager-link ${rel}" rel="${rel}" href="${hrefFor(topic.slug)}" data-slug="${topic.slug}"><small>${label}</small><b>${escape(topic.num)} · ${escape(topic.nav)}</b><span>${escape(topic.title)}</span></a>`
       : '<span></span>';
@@ -157,12 +200,13 @@
   }
 
   // ---------- topic sidebar: the same panel on the reader and on every standalone topic page ----------
-  const searchText = topic => `${topic.num} ${topic.nav} ${topic.kicker} ${topic.title} ${topic.problem}`.toLowerCase();
-  function sidebar(nav, {href, home}) {
-    const topics = window.KENTC_TOPICS || [];
+  const searchText = topic => `${topic.num} ${topic.nav} ${topic.kicker} ${topic.title} ${topic.problem} ${topic.tab || ''}`.toLowerCase();
+  function sidebar(nav, {href, home, activeTab = 'agent'}) {
+    const topics = topicsForTab(activeTab);
+    const tabMeta = tabsList().find(t => t.id === activeTab);
     const groups = topics.reduce((map, topic) => map.set(topic.group, [...(map.get(topic.group) || []), topic]), new Map());
-    const link = topic => `<a class="side-link" href="${href(topic.slug)}" data-slug="${topic.slug}" data-search="${escape(searchText(topic))}"><span class="num">${escape(topic.num)}</span><span>${escape(topic.nav)}</span></a>`;
-    nav.innerHTML = `<a class="side-link home" href="${home}" data-home><span class="num">◆</span><span>首頁 · 全部主題</span></a>` +
+    const link = topic => `<a class="side-link" href="${href(topic.slug)}" data-slug="${topic.slug}" data-tab="${topic.tab || 'agent'}" data-search="${escape(searchText(topic))}"><span class="num">${escape(topic.num)}</span><span>${escape(topic.nav)}</span></a>`;
+    nav.innerHTML = `<a class="side-link home" href="${home}" data-home><span class="num">◆</span><span>${escape(tabMeta ? tabMeta.label : '首頁')} · 總覽</span></a>` +
       [...groups].map(([group, list]) => `<div class="side-group"><h2>${escape(group)}</h2>${list.map(link).join('')}</div>`).join('') +
       '<p class="side-empty" hidden>沒有符合的主題</p><p class="kbd-hint"><kbd>←</kbd> <kbd>→</kbd> 切換主題 · <kbd>/</kbd> 搜尋</p>';
   }
@@ -203,17 +247,134 @@
     update();
   }
 
-  function mount(root, slug) {
-    anchorHeadings(root, slug);
-    mountLoop(root); mountBudget(root); mountDocument(root); mountWorkflow(root);
+  const LSM_STEPS = [
+    {
+      label: '1. 初次寫入',
+      op: 'CREATE', opClass: '',
+      pct: 22, barClass: '', l0Tokens: '1,100 / 5,000 tokens',
+      l0State: 'is-active', l1State: '', l2State: '',
+      l0: '# api.md（活頭）\n- port = 8000（未驗證，來源：turn 4）\n- auth = bearer token',
+      l1: '_index.md：\n- api.md（活躍活頭）',
+      l2: '（尚無冷封存分片）',
+      what: '任務剛開始，第一次壓縮建立主題筆記 api.md，直接寫進 L0 熱層，並在 L1 索引登記。',
+      why: '筆記還很小，不需要封存；主代理之後 read api.md 一次就能看到完整現況。'
+    },
+    {
+      label: '2. 正常 MERGE',
+      op: 'MERGE', opClass: '',
+      pct: 36, barClass: '', l0Tokens: '1,800 / 5,000 tokens',
+      l0State: 'is-active', l1State: '', l2State: '',
+      l0: '# api.md（活頭 · 已去重整理）\n- port = 9000（已驗證，取代舊值 8000）\n- auth = bearer token（已確認）\n- timeout = 30s（來源：turn 18）',
+      l1: '_index.md：\n- api.md（活躍活頭）',
+      l2: '（尚無冷封存分片）',
+      what: '新回合把 port 改成 9000。因為「舊筆記 + 新更新 ≤ 門檻 T」，系統呼叫 MERGE，在 L0 原地整合、去重並標明取代關係。',
+      why: '這就是為什麼需要 MERGE：把零散重複的對話整理成「單一乾淨現行版」，之後讀起來省 token 又不會誤用舊值 8000。'
+    },
+    {
+      label: '3. 長程累積超限',
+      op: 'OVERFLOW > T', opClass: 'warn',
+      pct: 100, barClass: 'over', l0Tokens: '5,600 / 5,000 tokens（超過門檻 T！）',
+      l0State: 'is-warn', l1State: '', l2State: '',
+      l0: '# api.md（活頭 · 跨週累積 40+ 條獨立事實與除錯紀錄）\n- port = 9000 ...\n- retry 策略 v1 → v2 → v3 ...\n- 歷次 502 / 429 錯誤碼與對應 trace ...\n+ [本輪新事實 800 tokens]  ⚠ 合併後將撞爆輸出上限！',
+      l1: '_index.md：\n- api.md（活躍活頭）',
+      l2: '（尚未封存）',
+      what: '任務跑了好幾天，無法刪掉的獨立事實越積越多。此時「既有筆記 + 本輪更新 > 門檻 T_topic」，若硬做原地 MERGE 會被輸出上限截斷而失敗。',
+      why: '單靠 MERGE 撐不住無限長程任務——這正是觸發 LSM「Seal & Roll」的瞬間。'
+    },
+    {
+      label: '4. SEAL 封存 L2',
+      op: 'SEAL', opClass: 'seal',
+      pct: 100, barClass: 'over', l0Tokens: '準備封存舊版快照 → L2',
+      l0State: '', l1State: 'is-active', l2State: 'is-seal',
+      l0: '# api.md（舊版完整內容待捲動...）',
+      l1: '_index.md：\n- api.md（活躍活頭）\n- api-era-001.md（🔒 不可變冷分片，EXTRACT 自動忽略）',
+      l2: '🔒 api-era-001.md（SHA-256 鎖定 · 永不改寫）\n原封不動保存第 1～3 步累積的完整 40+ 條歷史紀錄與來源證據',
+      what: '系統先把舊版 api.md 一字不漏地寫進 L2 冷層命名為 api-era-001.md，並更新 L1 索引登記這個冷分片。',
+      why: '「零靜默刪改」：所有歷史證據與除錯細節完整保留在硬碟上供日後查核，而且未來壓縮不會再去重寫這份冷檔。'
+    },
+    {
+      label: '5. ROLL 瘦身 L0',
+      op: 'ROLL', opClass: 'roll',
+      pct: 24, barClass: 'slim', l0Tokens: '1,200 / 5,000 tokens（活頭瘦身完成！）',
+      l0State: 'is-seal', l1State: '', l2State: '',
+      l0: '# api.md（精簡新活頭）\n> 歷史完整紀錄已封存於：api-era-001.md（按需 read/rg）\n- 現行狀態：port=9000, retry v3, timeout=30s\n- 未解問題：429 限流調優中\n- 本輪新事實：已加入指數退避',
+      l1: '_index.md：\n- api.md（活躍活頭）\n- api-era-001.md（🔒 冷分片指標）',
+      l2: '🔒 api-era-001.md（靜置於磁碟，不佔用 L0 活頭預算）',
+      what: '呼叫 ROLL_TOPIC，把「現行活躍狀態 + 本輪新事實 + 冷檔指標」蒸餾成一份全新的輕量 api.md 放回 L0。',
+      why: '活頭體積瞬間從 5,600 降回 1,200 tokens，永遠保持在輸出上限內，平時讀取快、精準、不爆窗。'
+    },
+    {
+      label: '6. 回到正常 MERGE',
+      op: 'MERGE', opClass: '',
+      pct: 34, barClass: '', l0Tokens: '1,700 / 5,000 tokens',
+      l0State: 'is-active', l1State: '', l2State: '',
+      l0: '# api.md（活頭 · 繼續安全 MERGE）\n> 歷史完整紀錄已封存於：api-era-001.md\n- 現行狀態：port=9000, retry v3, timeout=30s\n- 本輪更新：429 限流已通過壓測 ✓',
+      l1: '_index.md：\n- api.md（活躍活頭）\n- api-era-001.md（🔒 冷分片指標）',
+      l2: '🔒 api-era-001.md（需要查上週細節時，代理才用 read/rg 去翻）',
+      what: '因為 L0 活頭已經瘦身，後續新回合又可以安全地做原地 MERGE；等未來再次超過門檻 T，再封存成 api-era-002.md。',
+      why: '循環運作：MERGE 維持平常讀取乾淨，Seal & Roll 保證長程永不膨脹失控。'
+    }
+  ];
+
+  function mountLSM(root) {
+    const {$} = scoped(root), host = $('#lsmSim');
+    if (!host) return;
+    let idx = 0, timer = null;
+    const btns = $('#lsmStepBtns'), playBtn = $('#lsmPlayBtn');
+    const stopPlay = () => { if (timer) { clearInterval(timer); timer = null; } if (playBtn) playBtn.textContent = '▶ 自動播放'; };
+    const render = i => {
+      idx = (i + LSM_STEPS.length) % LSM_STEPS.length;
+      const s = LSM_STEPS[idx];
+      [...btns.children].forEach((b, bi) => b.setAttribute('aria-pressed', String(bi === idx)));
+      $('#lsmL0Box').className = 'lsm-tier ' + s.l0State;
+      $('#lsmL1Box').className = 'lsm-tier ' + s.l1State;
+      $('#lsmL2Box').className = 'lsm-tier ' + s.l2State;
+      const fill = $('#lsmMeterFill');
+      fill.style.width = `${s.pct}%`;
+      fill.className = 'lsm-meter-fill ' + s.barClass;
+      $('#lsmTokens').textContent = s.l0Tokens;
+      $('#lsmL0Code').textContent = s.l0;
+      $('#lsmL1Code').textContent = s.l1;
+      $('#lsmL2Code').textContent = s.l2;
+      $('#lsmExplain').innerHTML = `<span class="lsm-op ${s.opClass}">${escape(s.op)}</span><b>發生了什麼：</b>${escape(s.what)}<br><b>為什麼：</b>${escape(s.why)}`;
+    };
+    LSM_STEPS.forEach((s, i) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'btn'; b.textContent = s.label;
+      b.onclick = () => { stopPlay(); render(i); };
+      btns.appendChild(b);
+    });
+    if (playBtn) {
+      playBtn.onclick = () => {
+        if (timer) { stopPlay(); return; }
+        playBtn.textContent = '⏸ 暫停播放';
+        render(idx === LSM_STEPS.length - 1 ? 0 : idx + 1);
+        timer = setInterval(() => {
+          if (idx === LSM_STEPS.length - 1) { stopPlay(); return; }
+          render(idx + 1);
+        }, 2600);
+      };
+    }
+    render(0);
   }
 
-  window.KentcDocs = {mount, pager, escape, sidebar, markCurrent, filter, trackStickyHeight};
+  function mount(root, slug) {
+    anchorHeadings(root, slug);
+    mountLoop(root); mountBudget(root); mountDocument(root); mountWorkflow(root); mountLSM(root);
+  }
+
+  window.KentcDocs = {mount, pager, escape, sidebar, markCurrent, filter, trackStickyHeight, tabsList, tabOf, topicsForTab, loadTab, saveTab, renderTabsBar};
 
   if (document.body.classList.contains('topic-page')) {
     const main = document.getElementById('topic'), slug = main.dataset.slug, nav = document.getElementById('sideNav');
-    const search = document.getElementById('search'), topics = window.KENTC_TOPICS || [];
-    sidebar(nav, {href: target => `${target}.html`, home: '../index.html'});
+    const search = document.getElementById('search');
+    const activeTab = tabOf(slug);
+    saveTab(activeTab);
+    const topics = topicsForTab(activeTab);
+    renderTabsBar(activeTab, {
+      hrefForTab: tab => `../index.html#tab=${tab}`
+    });
+    sidebar(nav, {href: target => `${target}.html`, home: `../index.html#tab=${activeTab}`, activeTab});
     trackStickyHeight();
     markCurrent(nav, slug);
     mount(main, slug);

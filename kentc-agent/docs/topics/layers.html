@@ -33,9 +33,9 @@
   <div class="grid3">
     <article class="box"><span class="number">CLI 對話</span><h3>人在迴圈中，逐回合確認</h3><p><code>read</code>、<code>write</code>、<code>edit</code>、<code>bash</code> ＋ <b>經篩選的 <code>web_search</code></b>（提問觸發；結果經篩選子代理與安全檢查才進對話）。<code>--tools</code> 可縮減。</p><p class="why">成果：直接回答、工作區檔案。</p></article>
     <article class="box"><span class="number">工作流程</span><h3>長時間、自主執行</h3><p>主代理僅四個核心工具，<b>無</b> <code>web_search</code>；外部資料走 <code>web:</code> 步驟，由網路代理篩選、限搜尋預算、查核連結、人工核准。</p><p class="why">成果：檔案（<code>research/</code>、<code>notes/</code>、<code>reports/</code>），可 <code>--resume</code>。</p></article>
-    <article class="box"><span class="number">Studio</span><h3>網頁體驗，系統定義輸入與輸出</h3><p>讀上傳文件與 SQL 擷取資料；<b>只讀案件資料夾</b>、永無 <code>bash</code>、無網路。每應用一份 <code>config/apps/&lt;name&gt;/app.yaml</code> 即工作流程：宣告代理契約、技能、<code>output</code> 與 <code>checks</code>，由 <code>view</code> 以固定區塊呈現。</p><p class="why">成果：結構化 JSON → 前端區塊（代理不產生 HTML）。</p></article>
+    <article class="box"><span class="number">Breezeman × Studio 資料夾</span><h3>內嵌於 Breezeman 的受限結構化工作台</h3><p>由 Breezeman 依 <code>app.yaml</code> 掛載於 <code>/studios/{id}/</code>：讀上傳文件與 SQL 擷取資料、<b>唯讀白名單存取根目錄 <code>memory/</code></b>、寫入嚴格鎖死於案件資料夾、永無 <code>bash</code> 與網路。</p><p class="why">成果：通過 <code>checks</code> 的結構化 JSON → 固定前端區塊（詳見 Breezeman 分頁）。</p></article>
   </div>
-  <div class="callout">頁面流程、技能路徑、報告框架欄位、view 檢查：詳見 <a href="studio.html">10 · Studio 應用</a>。</div>
+  <div class="callout">長程排程、全域記憶與 Folder-as-Studio 掛載細節：請切換上方 <b>Breezeman</b> 分頁，見 <a href="breezeman-architecture.html">B0 · 系統架構</a> 與 <a href="studio.html">B3 · Folder-as-Studio 整合</a>。</div>
   <h3 class="part data" id="data" data-step="3">依據：載入時強制，不靠提示</h3>
   <ul class="problem-list">
     <li><b>工作流程</b>：外部資料只經 <code>web:</code> 步驟（詳見 <a href="web.html">09 · 網路研究</a>）。</li>

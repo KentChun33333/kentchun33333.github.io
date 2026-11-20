@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import itertools
 import json
+import logging
 import re
 import threading
 import time
@@ -22,7 +23,7 @@ from typing import Any
 
 from kentc_agent.adapters.documents import attach_document
 from kentc_agent.adapters.llm import LLMError
-from kentc_agent.adapters.session import Session
+from kentc_agent.adapters.session import MAX_REQUIREMENT_CHARS, Session
 from kentc_agent.adapters.tools import CORE_TOOLS, ToolContext, ToolError
 from kentc_agent.adapters.web_research import web_search_tool
 from kentc_agent.agent import Aborted, Agent, Events, build_tools
@@ -31,9 +32,11 @@ from kentc_agent.context.compaction import CompactionError
 from kentc_agent.ports import LLM
 from kentc_agent.skills import FRONT_RE, NAME_RE, load_skills
 
-from .dream import run_dream
+from .dream import DREAM_MAX_CONSECUTIVE_ERRORS, DREAM_RETRY_SEC, apply_dream_error, run_dream
 from .memory_store import MemoryStore, memory_hint
 from .workspace import inside
+
+logger = logging.getLogger(__name__)
 
 CHAT_KEY = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}\Z")
 ATTACHMENT = re.compile(r'<attachment path="([^"\n]*)">\n.*?\n</attachment>(?:\n\n)?', re.DOTALL)   # attach_document
@@ -44,11 +47,29 @@ TITLE_CHARS = 80
 # kentc_agent.skills.load_skills; restoring the session restores the skill text that was in effect.
 SKILL_SECTION = re.compile(r"## Skill: ([a-z0-9]+(?:-[a-z0-9]+)*)\n")
 TASK_STATUSES = ("open", "active", "done")
+SCHEDULE_MAX_CONSECUTIVE_ERRORS = 5
+SCHEDULE_MAX_BACKOFF_SEC = 3600.0
 
 
 def _slugify(text: str) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
     return slug[:48] or "task"
+
+
+def _normalize_requirements(raw: Any) -> list[str]:
+    if not isinstance(raw, list) or any(not isinstance(item, str) for item in raw):
+        raise ValueError("requirements must be a list of strings")
+    cleaned: list[str] = []
+    seen: set[str] = set()
+    for item in raw:
+        text = item.strip()
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        cleaned.append(text)
+    if sum(map(len, cleaned)) > MAX_REQUIREMENT_CHARS:
+        raise ValueError(f"active requirements are limited to {MAX_REQUIREMENT_CHARS} characters in total")
+    return cleaned
 
 
 def list_skills(library: Path) -> list[dict[str, str]]:
@@ -191,7 +212,8 @@ class Chat:
             activity = list(self._activity)
             seq = activity[-1]["seq"] if activity else 0
         return {"key": self.key, "session_id": self.session.id, "busy": self.busy, "tokens": self.tokens,
-                "window": self.window, "activity": activity, "seq": seq, "skill": self.skill}
+                "window": self.window, "activity": activity, "seq": seq, "skill": self.skill,
+                "requirements": list(self.session.requirements)}
 
     def unsubscribe(self, queue: asyncio.Queue[dict[str, Any]]) -> None:
         self._subscribers.discard(queue)
@@ -215,15 +237,57 @@ class Chat:
             self.agent.set_tools(list(self.agent.tools.values()))  # recount the fixed prompt size
         self.publish({"type": "skill", "skill": name})
 
+    # ------------------------------------------------------------------ requirements
+    def set_requirement(self, text: str, *, active: bool = True) -> list[str]:
+        """Pin or unpin one verbatim requirement on this chat's session (persists across compaction)."""
+        with self._lock:
+            if self.busy:
+                raise ChatBusy(f"this chat is running a {self.busy}; change requirements when it is idle")
+            self.session.set_requirement(text.strip(), active=active)
+            self.tokens = self.agent.context_tokens()
+            reqs = list(self.session.requirements)
+        self.publish({"type": "requirements", "requirements": reqs})
+        return reqs
+
+    def sync_requirements(self, items: list[str]) -> list[str]:
+        """Replace active session requirements with `items` (validated before mutating the journal)."""
+        cleaned = _normalize_requirements(items)
+        with self._lock:
+            if self.busy:
+                raise ChatBusy(f"this chat is running a {self.busy}; change requirements when it is idle")
+            if self.session.requirements == cleaned:
+                return list(self.session.requirements)
+            for old in list(self.session.requirements):
+                if old not in cleaned:
+                    self.session.set_requirement(old, active=False)
+            for req in cleaned:
+                if req not in self.session.requirements:
+                    self.session.set_requirement(req, active=True)
+            self.tokens = self.agent.context_tokens()
+            reqs = list(self.session.requirements)
+        self.publish({"type": "requirements", "requirements": reqs})
+        return reqs
+
     # ------------------------------------------------------------------ runs
-    def send(self, text: str, attachments: list[str]) -> None:
+    def send(
+        self,
+        text: str,
+        attachments: list[str],
+        *,
+        pre_compact_ratio: float | None = None,
+        on_complete: Callable[[dict[str, Any]], None] | None = None,
+    ) -> None:
         text = text.strip()
         if not text:
             raise ValueError("empty message")
         for a in attachments:
             if not inside(self.workspace, a).is_file():
                 raise ValueError(f"not a file: {a}")
-        self._spawn("chat", lambda: self._chat(text, attachments))
+        self._spawn(
+            "chat",
+            lambda: self._chat(text, attachments, pre_compact_ratio=pre_compact_ratio),
+            on_complete=on_complete,
+        )
 
     def compact(self, focus: str | None) -> None:
         self._spawn("compact", lambda: self._compact(focus))
@@ -242,15 +306,31 @@ class Chat:
             self.stop_requested.set()
             self.publish({"type": "stopping"})
 
-    def _spawn(self, kind: str, work: Callable[[], dict[str, Any]]) -> None:
+    def _spawn(
+        self,
+        kind: str,
+        work: Callable[[], dict[str, Any]],
+        *,
+        on_complete: Callable[[dict[str, Any]], None] | None = None,
+    ) -> None:
         with self._lock:
             if self.busy:
                 raise ChatBusy(f"this chat is already running a {self.busy}")
             self.busy = kind
             self.stop_requested.clear()
-        threading.Thread(target=self._worker, args=(kind, work), name=f"breezeman-{self.key}", daemon=True).start()
+        threading.Thread(
+            target=self._worker,
+            args=(kind, work, on_complete),
+            name=f"breezeman-{self.key}",
+            daemon=True,
+        ).start()
 
-    def _worker(self, kind: str, work: Callable[[], dict[str, Any]]) -> None:
+    def _worker(
+        self,
+        kind: str,
+        work: Callable[[], dict[str, Any]],
+        on_complete: Callable[[dict[str, Any]], None] | None = None,
+    ) -> None:
         try:
             outcome = work()
         except Aborted:
@@ -261,10 +341,26 @@ class Chat:
             outcome = {"type": "error", "message": f"{type(e).__name__}: {e}"}
         with self._lock:
             self.busy = None
+        if on_complete is not None:
+            try:
+                on_complete(outcome)
+            except Exception:  # noqa: BLE001 - callback errors must not suppress UI notifications
+                logger.exception("worker completion callback failed for chat %s", self.key)
         self.publish({**outcome, "run": kind, "tokens": self.agent.context_tokens(), "window": self.window})
 
-    def _chat(self, text: str, attachments: list[str]) -> dict[str, Any]:
+    def _chat(self, text: str, attachments: list[str], *, pre_compact_ratio: float | None = None) -> dict[str, Any]:
         self.publish({"type": "run_start", "run": "chat", "text": text, "attachments": attachments})
+        if pre_compact_ratio is not None:
+            try:
+                window = self.agent.window
+            except LLMError:
+                window = 0
+            if window > 0:
+                fixed = self.agent.fixed_tokens
+                dynamic_window = max(1, window - fixed)
+                dynamic_tokens = max(0, self.agent.context_tokens() - fixed)
+                if dynamic_tokens > int(dynamic_window * pre_compact_ratio):
+                    self.agent._try_compact(force=True)
         parts = [attach_document(self.ctx, inside(self.workspace, a), None, label=a) for a in attachments]
         answer = self.agent.run("\n\n".join([*parts, text]))
         return {"type": "done", "answer": answer, "stopped": self.agent.stopped}
@@ -312,6 +408,7 @@ class Chat:
             "system": self.agent.system,
             "persona": s.core.get("persona", ""), "instructions": s.core.get("instructions", ""),
             "skill": self.skill,
+            "requirements": list(s.requirements),
             "checkpoint": s.summary or "",
             "topics": [{"slug": k, "text": v} for k, v in sorted(topics.items())], "topics_error": topics_error,
             "messages": [display_message(m) for m in s.context()],
@@ -339,6 +436,20 @@ class Runtime:
         self._tasks_lock = threading.Lock()
         self._dream_lock = threading.Lock()
         self._dream_busy = False
+        self._recover_interrupted_tasks()
+
+    def _recover_interrupted_tasks(self) -> None:
+        """Mark tasks left in `running` from a previous process as `interrupted`."""
+        with self._tasks_lock:
+            tasks = self._read_tasks()
+            changed = False
+            for t in tasks:
+                sched = t.get("schedule")
+                if isinstance(sched, dict) and sched.get("last_status") == "running":
+                    sched["last_status"] = "interrupted"
+                    changed = True
+            if changed:
+                self._write_tasks(tasks)
 
     def new_chat(self, workspace: Path | None = None) -> Chat:
         session = Session()
@@ -512,11 +623,13 @@ class Runtime:
             same_cfg = isinstance(prev, dict) and prev.get("enabled") and prev.get("interval_min") == interval_min
             next_run = prev.get("next_run") if same_cfg and isinstance(prev.get("next_run"), (int, float)) else now + interval_min * 60
         return {"enabled": enabled, "interval_min": interval_min, "prompt": prompt, "skill": skill,
-                "last_run": last_run, "next_run": next_run}
+                "last_run": last_run, "next_run": next_run, "consecutive_errors": 0,
+                "last_status": None, "last_error": None}
 
     def update_task(self, task_id: str, *, name: str | None = None, status: str | None = None,
-                    schedule: Any = ...) -> dict[str, Any]:
+                    schedule: Any = ..., requirements: Any = ...) -> dict[str, Any]:
         now = time.time()
+        sync_target: tuple[str, list[str]] | None = None
         with self._tasks_lock:
             tasks = self._read_tasks()
             task = next((t for t in tasks if t["id"] == task_id), None)
@@ -538,14 +651,87 @@ class Runtime:
                         task["status"] = "active"
                     elif task.get("status") == "active":
                         task["status"] = "open"
+            if requirements is not ...:
+                reqs = [] if requirements is None else _normalize_requirements(requirements)
+                task["requirements"] = reqs
+                sync_target = (task["chat_key"], reqs)
             task["updated"] = now
             self._write_tasks(tasks)
+        if sync_target is not None:
+            chat_key, reqs = sync_target
+            try:
+                self.chat(chat_key).sync_requirements(reqs)
+            except (KeyError, ValueError, ChatBusy):
+                pass
         return self._enrich_tasks([task])[0]
 
-    def tick_schedules(self, now: float | None = None, stagger_sec: float = 300.0) -> list[str]:
+    @staticmethod
+    def _apply_schedule_error(
+        target: dict[str, Any],
+        tsched: dict[str, Any],
+        now: float,
+        error_msg: str | None,
+        retry_sec: float,
+        max_consecutive_errors: int,
+    ) -> None:
+        errs = int(tsched.get("consecutive_errors") or 0) + 1
+        tsched["consecutive_errors"] = errs
+        tsched["last_error"] = error_msg
+        if errs >= max_consecutive_errors:
+            tsched["enabled"] = False
+            tsched["next_run"] = None
+            tsched["last_status"] = "paused_error"
+            if target.get("status") == "active":
+                target["status"] = "open"
+        else:
+            backoff = min(SCHEDULE_MAX_BACKOFF_SEC, retry_sec * (2 ** (errs - 1)))
+            tsched["next_run"] = now + backoff
+            tsched["last_status"] = "error"
+
+    def _on_schedule_complete(
+        self,
+        task_id: str,
+        outcome: dict[str, Any],
+        *,
+        run_id: str,
+        now: float | None = None,
+        retry_sec: float = 60.0,
+        max_consecutive_errors: int = SCHEDULE_MAX_CONSECUTIVE_ERRORS,
+    ) -> None:
+        """Settle a scheduled task's outcome when its worker thread finishes."""
+        ts = time.time() if now is None else now
+        kind = outcome.get("type")
+        with self._tasks_lock:
+            tasks = self._read_tasks()
+            target = next((t for t in tasks if t["id"] == task_id), None)
+            if not target or not isinstance(target.get("schedule"), dict):
+                return
+            tsched = target["schedule"]
+            tsched["settled_run_id"] = run_id
+            if kind == "done":
+                tsched["consecutive_errors"] = 0
+                tsched["last_error"] = None
+                tsched["last_status"] = "max_turns" if outcome.get("stopped") else "ok"
+            elif kind == "aborted":
+                tsched["last_status"] = "aborted"
+            else:
+                self._apply_schedule_error(
+                    target,
+                    tsched,
+                    ts,
+                    str(outcome.get("message") or "scheduled run failed"),
+                    retry_sec,
+                    max_consecutive_errors,
+                )
+            target["updated"] = max(float(target.get("updated") or 0), ts)
+            self._write_tasks(tasks)
+
+    def tick_schedules(self, now: float | None = None, stagger_sec: float = 300.0,
+                       retry_sec: float = 60.0,
+                       max_consecutive_errors: int = SCHEDULE_MAX_CONSECUTIVE_ERRORS) -> list[str]:
         """Trigger at most one due task now and stagger remaining overdue tasks by `stagger_sec`."""
+        explicit_now = now is not None
         now = time.time() if now is None else now
-        candidate: tuple[str, str, str] | None = None
         with self._tasks_lock:
             tasks = self._read_tasks()
             due: list[dict[str, Any]] = []
@@ -563,27 +749,72 @@ class Runtime:
             first = due[0]
             sched0 = first["schedule"]
             interval_min = float(sched0.get("interval_min") or 60)
-            sched0["next_run"] = now + interval_min * 60
-            sched0["last_run"] = now
-            first["updated"] = now
-            candidate = (first["id"], first["chat_key"], str(sched0["prompt"]).strip(), sched0.get("skill"))
-            for idx, extra in enumerate(due[1:], start=1):
-                extra["schedule"]["next_run"] = now + idx * stagger_sec
-                extra["updated"] = now
-            self._write_tasks(tasks)
-        task_id, chat_key, prompt, sched_skill = candidate
+            task_reqs = first.get("requirements") if isinstance(first.get("requirements"), list) else None
+            candidate = (first["id"], first["chat_key"], str(sched0["prompt"]).strip(), sched0.get("skill"), task_reqs)
+            extra_ids = [extra["id"] for extra in due[1:]]
+
+        task_id, chat_key, prompt, sched_skill, task_reqs = candidate
+        run_id = uuid.uuid4().hex[:8]
+        dispatched = False
+        status = "running"
+        error_msg: str | None = None
         try:
             chat = self.chat(chat_key)
-            if not chat.busy:
+            if chat.busy:
+                status = "deferred_busy"
+            else:
                 if sched_skill and chat.skill != sched_skill:
                     chat.set_skill(sched_skill)
-                if chat.agent.context_tokens() > chat.agent.window // 2:
-                    chat.agent._try_compact(force=True)
-                chat.send(prompt, [])
-                return [task_id]
-        except (KeyError, ValueError, ChatBusy):
-            pass
-        return []
+                if task_reqs is not None and chat.session.requirements != task_reqs:
+                    chat.sync_requirements(task_reqs)
+                chat.send(
+                    prompt,
+                    [],
+                    pre_compact_ratio=0.5,
+                    on_complete=lambda outcome, tid=task_id, rid=run_id: self._on_schedule_complete(
+                        tid,
+                        outcome,
+                        run_id=rid,
+                        now=now if explicit_now else None,
+                        retry_sec=retry_sec,
+                        max_consecutive_errors=max_consecutive_errors,
+                    ),
+                )
+                dispatched = True
+        except ChatBusy:
+            status = "deferred_busy"
+        except (KeyError, ValueError, LLMError) as exc:
+            status = "error"
+            error_msg = str(exc)
+
+        with self._tasks_lock:
+            tasks = self._read_tasks()
+            by_id = {t["id"]: t for t in tasks}
+            target = by_id.get(task_id)
+            if target and isinstance(target.get("schedule"), dict):
+                tsched = target["schedule"]
+                if dispatched:
+                    tsched["last_run"] = now
+                    if tsched.get("settled_run_id") != run_id:
+                        tsched["next_run"] = now + interval_min * 60
+                        tsched["last_status"] = status
+                    elif tsched.get("last_status") in ("ok", "max_turns", "aborted"):
+                        tsched["next_run"] = now + interval_min * 60
+                elif status == "deferred_busy":
+                    tsched["next_run"] = now + retry_sec
+                    tsched["last_status"] = status
+                    tsched["last_error"] = None
+                else:
+                    self._apply_schedule_error(target, tsched, now, error_msg, retry_sec, max_consecutive_errors)
+                target["updated"] = max(float(target.get("updated") or 0), now)
+            if dispatched:
+                for idx, eid in enumerate(extra_ids, start=1):
+                    extra = by_id.get(eid)
+                    if extra and isinstance(extra.get("schedule"), dict):
+                        extra["schedule"]["next_run"] = now + idx * stagger_sec
+                        extra["updated"] = now
+            self._write_tasks(tasks)
+        return [task_id] if dispatched else []
 
     def delete_task(self, task_id: str) -> None:
         with self._tasks_lock:
@@ -669,6 +900,8 @@ class Runtime:
             if enabled is not None:
                 sched["enabled"] = bool(enabled)
             if sched.get("enabled"):
+                sched["consecutive_errors"] = 0
+                sched["last_error"] = None
                 if not isinstance(sched.get("next_run"), (int, float)) or interval_min is not None:
                     sched["next_run"] = now + float(sched.get("interval_min") or 60) * 60
             else:
@@ -676,19 +909,50 @@ class Runtime:
             self.memory_store.write_dream_state(state)
         return self.dream_status()
 
-    def run_dream_now(self, *, now: float | None = None) -> dict[str, Any]:
+    def run_dream_now(
+        self,
+        *,
+        now: float | None = None,
+        retry_sec: float = DREAM_RETRY_SEC,
+        max_consecutive_errors: int = DREAM_MAX_CONSECUTIVE_ERRORS,
+    ) -> dict[str, Any]:
         """Run one Dreaming cycle synchronously; raises `ChatBusy` if already running."""
         if not self._dream_lock.acquire(blocking=False):
             raise ChatBusy("dreaming task is already running")
         self._dream_busy = True
         try:
-            report = run_dream(self.workspace, self.llm, now=now)
+            try:
+                report = run_dream(
+                    self.workspace,
+                    self.llm,
+                    now=now,
+                    retry_sec=retry_sec,
+                    max_consecutive_errors=max_consecutive_errors,
+                )
+            except Exception as exc:
+                ts = time.time() if now is None else now
+                state = self.memory_store.read_dream_state()
+                apply_dream_error(
+                    state["schedule"],
+                    f"{type(exc).__name__}: {exc}",
+                    ts,
+                    retry_sec=retry_sec,
+                    max_consecutive_errors=max_consecutive_errors,
+                )
+                self.memory_store.write_dream_state(state)
+                raise
             return {"report": report.to_dict(), "status": self.dream_status()}
         finally:
             self._dream_busy = False
             self._dream_lock.release()
 
-    def tick_dream(self, now: float | None = None) -> bool:
+    def tick_dream(
+        self,
+        now: float | None = None,
+        *,
+        retry_sec: float = DREAM_RETRY_SEC,
+        max_consecutive_errors: int = DREAM_MAX_CONSECUTIVE_ERRORS,
+    ) -> bool:
         """Trigger the Dreaming Task if enabled and due."""
         now = time.time() if now is None else now
         if self._dream_busy:
@@ -698,7 +962,10 @@ class Runtime:
         if not sched.get("enabled") or not isinstance(next_run, (int, float)) or next_run > now:
             return False
         try:
-            self.run_dream_now(now=now)
+            self.run_dream_now(now=now, retry_sec=retry_sec, max_consecutive_errors=max_consecutive_errors)
             return True
         except ChatBusy:
+            return False
+        except Exception:  # noqa: BLE001 - error and backoff already recorded in .dream_state.json
+            logger.exception("scheduled dreaming run failed")
             return False

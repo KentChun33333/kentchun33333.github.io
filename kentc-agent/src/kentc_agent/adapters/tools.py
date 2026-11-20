@@ -37,6 +37,7 @@ class ToolContext:
     operation: OpRef | None = None   # the tool call running now (trace.py): a sub-agent's parent
     density: float = 1.0             # server tokens per chars/4 token, from the agent whose tools run (agent.py)
     confine_reads: bool = False      # read refuses paths outside the workspace (studio agents on uploaded documents)
+    allowed_read_roots: tuple[Path, ...] = ()   # extra read-only roots allowed even when confine_reads is True
 
     @property
     def state_dir(self) -> Path:
@@ -67,9 +68,11 @@ def resolve(ctx: ToolContext, path: str) -> Path:
 
 def inside(ctx: ToolContext, path: str, what: str = "writes") -> Path:
     p = resolve(ctx, path)
-    if not p.is_relative_to(ctx.workspace.resolve()):
-        raise ToolError(f"{path}: outside the workspace {ctx.workspace}; {what} are limited to the workspace")
-    return p
+    if p.is_relative_to(ctx.workspace.resolve()):
+        return p
+    if what == "reads" and any(p.is_relative_to(root.resolve()) for root in ctx.allowed_read_roots):
+        return p
+    raise ToolError(f"{path}: outside the workspace {ctx.workspace}; {what} are limited to the workspace")
 
 
 def rel(ctx: ToolContext, p: Path) -> str:

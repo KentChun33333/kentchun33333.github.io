@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Breezeman 排程狀態機與長程韌性：非同步 worker on_complete 結算與 run_id 防競態、指數退避與連續失敗熔斷、動態視窗預壓縮、防髒重試與重啟中斷恢復。">
+<title>B1 · 排程狀態機與長程韌性｜Breezeman 核心方法論</title>
+<link rel="stylesheet" href="../asset/css/core.css">
+<link rel="stylesheet" href="../asset/css/shell.css">
+</head>
+<body class="topic-page">
+<a class="sr-only" href="#topic">跳至主要內容</a>
+<header class="top"><div class="top-in">
+  <a class="brand" href="../index.html#tab=breezeman">kentc_agent</a><span class="top-note">Breezeman · 繁體中文</span>
+  <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
+</div></header>
+<div class="reader">
+<aside class="sidebar" aria-label="主題目錄"><nav class="side-nav" id="sideNav" aria-label="主題"></nav></aside>
+<main id="topic" data-slug="breezeman-long-horizon">
+<article class="topic">
+<section class="card" id="breezeman-long-horizon" aria-labelledby="bm-title">
+  <p class="eyebrow">B1 · Breezeman 排程核心與長程韌性</p>
+  <h2 id="bm-title">非同步 Worker 結算、指數退避與防壓縮震盪</h2>
+  <div class="psd">
+    <div class="psd-item problem"><span>問題</span><p>排程在背景跑數週會遇到五種真實失效：只看同步派發漏接 worker 內的 LLM／超限失敗；失敗重試把相同 <code>user</code> prompt 疊滿 session；大系統提示觸發每次強制壓縮震盪；跨午夜日期過期；進程重啟留下殭屍 <code>running</code> 狀態。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>將派發（<code>running</code>）與結算（<code>on_complete</code> + <code>settled_run_id</code>）分離，讓 worker 故障真正觸發指數退避與熔斷；預壓縮改算動態剩餘視窗；重試去重尾端未回覆提示；重啟自動標記 <code>interrupted</code>。</p></div>
+    <div class="psd-item data"><span>依據</span><p>實作於 <code>runtime.py</code>、<code>app.py</code> 與 <code>agent/loop.py</code>，由 <code>test_breezeman_dream.py</code> 新增的 5 組長程回歸測試完整覆蓋。</p></div>
+  </div>
+
+  <h3 class="part problem" id="problem" data-step="1">問題：為什麼「失敗了下一輪重跑一樣」在長程代理不成立</h3>
+  <ul class="problem-list">
+    <li><b>Fire-and-forget 斷層</b>：<code>Chat.send()</code> 啟動背景 <code>daemon</code> thread 就立刻返回。若排程器在派發當下就把 <code>consecutive_errors</code> 歸零，則 worker 裡發生的 <code>LLMError</code>、<code>ContextOverflow</code>、<code>CompactionError</code> 或 429 限流完全不會觸發熔斷，儀表板還會顯示假綠燈。</li>
+    <li><b>失敗會污染 Session 狀態</b>：<code>Agent.run()</code> 會在呼叫模型前把 <code>user</code> 訊息寫進 session。若未做尾端去重，連續失敗 10 次就會在上下文堆出 10 份一模一樣的未回覆指令，讓 <code>ContextOverflow</code> 越重試越嚴重。</li>
+    <li><b>固定提示引發預壓縮震盪</b>：若 <code>pre_compact_ratio = 0.5</code> 直接拿總 <code>context_tokens()</code> 跟 <code>window * 0.5</code> 比，只要系統提示（<code>AGENTS.md</code> + persona + skill + tools）本身佔掉一半視窗，每一次排程觸發都會強制壓縮上一輪對話。</li>
+    <li><b>長駐執行體的時間與重啟漂移</b>：常駐多天的 <code>Chat</code> 實例若在建構時寫死 <code>Date: YYYY-MM-DD</code>，跨天後日期就過期；伺服器重啟時，中斷在半路的排程若不清理會永遠卡在 <code>running</code>。</li>
+  </ul>
+
+  <h3 class="part idea" id="settlement" data-step="2">核心想法一：非同步派發與無競態結算（run_id 護欄）</h3>
+  <p class="sub">排程器不再「派發即結案」，而是把每次派發綁上唯一 <code>run_id</code>，由 <code>Chat._worker</code> 跑完後透過 <code>on_complete</code> 回寫最終結果；即使 worker 在 1 毫秒內極快結束，也不會被派發段的鎖覆寫狀態：</p>
+
+  <div class="diagram-box">
+    <svg viewBox="0 0 860 330" width="860" height="330" role="img" aria-label="非同步排程派發與 Worker 結算時序圖" style="font-family:var(--sans)">
+      <defs>
+        <marker id="sq-arr" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#334155"/>
+        </marker>
+        <marker id="sq-red" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#c92330"/>
+        </marker>
+        <marker id="sq-green" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#08724f"/>
+        </marker>
+      </defs>
+
+      <!-- Lifelines header -->
+      <rect x="30" y="14" width="190" height="40" rx="8" fill="#edf3fd" stroke="#245db2" stroke-width="1.5"/>
+      <text x="125" y="39" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e3a8a">tick_schedules()</text>
+
+      <rect x="335" y="14" width="190" height="40" rx="8" fill="#fff0f1" stroke="#c92330" stroke-width="1.5"/>
+      <text x="430" y="39" text-anchor="middle" font-size="12.5" font-weight="700" fill="#c92330">Chat._worker (Daemon)</text>
+
+      <rect x="640" y="14" width="190" height="40" rx="8" fill="#e9f5ef" stroke="#08724f" stroke-width="1.5"/>
+      <text x="735" y="39" text-anchor="middle" font-size="12.5" font-weight="700" fill="#08724f">tasks.json (_tasks_lock)</text>
+
+      <!-- Vertical lifelines -->
+      <line x1="125" y1="54" x2="125" y2="312" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="5 4"/>
+      <line x1="430" y1="54" x2="430" y2="312" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="5 4"/>
+      <line x1="735" y1="54" x2="735" y2="312" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="5 4"/>
+
+      <!-- Step 1: Pick due[0], align skill & requirements -->
+      <line x1="735" y1="80" x2="132" y2="80" stroke="#334155" stroke-width="1.5" marker-end="url(#sq-arr)"/>
+      <text x="430" y="73" text-anchor="middle" font-size="11.5" fill="#334155">1. 取最早到期 due[0]（對齊 skill 與 pinned requirements，產生 run_id）</text>
+
+      <!-- Step 2: chat.send with on_complete -->
+      <line x1="125" y1="116" x2="423" y2="116" stroke="#334155" stroke-width="1.5" marker-end="url(#sq-arr)"/>
+      <text x="275" y="109" text-anchor="middle" font-size="11.5" font-weight="600" fill="#20272e">2. chat.send(prompt, pre_compact_ratio=0.5, on_complete)</text>
+
+      <!-- Step 3: Dispatch write -->
+      <line x1="125" y1="154" x2="728" y2="154" stroke="#334155" stroke-width="1.5" marker-end="url(#sq-arr)"/>
+      <rect x="205" y="138" width="465" height="22" rx="4" fill="#fff"/>
+      <text x="437" y="153" text-anchor="middle" font-size="11" fill="#334155">3. 若 settled_run_id != run_id → 標記 running、暫推 next_run（不歸零錯誤數）+ 錯開其餘任務</text>
+
+      <!-- Step 4: Worker runs Agent.run() -->
+      <rect x="342" y="176" width="176" height="44" rx="7" fill="#fff5de" stroke="#f59e0b" stroke-width="1.2"/>
+      <text x="430" y="195" text-anchor="middle" font-size="11" font-weight="700" fill="#865500">4. _chat() → Agent.run()</text>
+      <text x="430" y="211" text-anchor="middle" font-size="10.5" fill="#475569">動態視窗預壓縮 · 跨日刷新</text>
+
+      <!-- Step 5a: Success -->
+      <line x1="430" y1="246" x2="728" y2="246" stroke="#08724f" stroke-width="1.6" marker-end="url(#sq-green)"/>
+      <text x="580" y="239" text-anchor="middle" font-size="11" font-weight="600" fill="#08724f">5a. done → ok / max_turns，errs = 0，寫 settled_run_id</text>
+
+      <!-- Step 5b: Error -->
+      <line x1="430" y1="284" x2="728" y2="284" stroke="#c92330" stroke-width="1.6" marker-end="url(#sq-red)"/>
+      <text x="580" y="277" text-anchor="middle" font-size="11" font-weight="600" fill="#c92330">5b. error → errs += 1，指數退避或 paused_error 熔斷</text>
+    </svg>
+    <p class="diagram-cap">圖 B1-1：派發與結算分離。透過 <code>settled_run_id == run_id</code> 檢查，無論是慢 worker 或 1ms 秒敗 worker，都不會互相覆寫 <code>next_run</code> 與 <code>last_status</code>。</p>
+  </div>
+
+  <h3 class="part idea" id="state-machine" data-step="3">核心想法二：排程完整狀態機與熔斷策略</h3>
+
+  <div class="diagram-box">
+    <svg viewBox="0 0 860 286" width="860" height="286" role="img" aria-label="排程狀態機：idle、running、deferred_busy、ok、aborted、error 退避與 paused_error 熔斷" style="font-family:var(--sans)">
+      <defs>
+        <marker id="sm-arr" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#475569"/>
+        </marker>
+        <marker id="sm-red" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#c92330"/>
+        </marker>
+      </defs>
+
+      <!-- Idle / Due -->
+      <rect x="20" y="106" width="124" height="58" rx="10" fill="#f8fafc" stroke="#64748b" stroke-width="1.5"/>
+      <text x="82" y="131" text-anchor="middle" font-size="12.5" font-weight="700" fill="#20272e">idle / due</text>
+      <text x="82" y="149" text-anchor="middle" font-size="10.5" fill="#596570">next_run ≤ now</text>
+
+      <!-- Deferred Busy -->
+      <rect x="20" y="16" width="150" height="52" rx="10" fill="#fff5de" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="95" y="38" text-anchor="middle" font-size="12" font-weight="700" fill="#865500">deferred_busy</text>
+      <text x="95" y="55" text-anchor="middle" font-size="10.5" fill="#596570">+60s 重試 · 不計錯</text>
+      <line x1="82" y1="106" x2="82" y2="70" stroke="#475569" stroke-width="1.4" marker-end="url(#sm-arr)"/>
+      <text x="90" y="92" font-size="10" fill="#865500">chat.busy</text>
+
+      <!-- Running -->
+      <rect x="218" y="106" width="132" height="58" rx="10" fill="#edf3fd" stroke="#245db2" stroke-width="1.8"/>
+      <text x="284" y="131" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a8a">running</text>
+      <text x="284" y="149" text-anchor="middle" font-size="10.5" fill="#334155">daemon worker</text>
+      <line x1="144" y1="135" x2="216" y2="135" stroke="#475569" stroke-width="1.6" marker-end="url(#sm-arr)"/>
+      <text x="180" y="128" text-anchor="middle" font-size="10.5" fill="#334155">dispatch</text>
+
+      <!-- Restart Interrupted -->
+      <rect x="218" y="212" width="132" height="54" rx="10" fill="#f2eefb" stroke="#6548a6" stroke-width="1.4"/>
+      <text x="284" y="235" text-anchor="middle" font-size="12" font-weight="700" fill="#6548a6">interrupted</text>
+      <text x="284" y="252" text-anchor="middle" font-size="10.5" fill="#596570">重啟自動恢復標記</text>
+      <line x1="284" y1="164" x2="284" y2="210" stroke="#6548a6" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#sm-arr)"/>
+      <text x="292" y="191" font-size="10" fill="#6548a6">進程重啟</text>
+
+      <!-- OK / Max Turns -->
+      <rect x="444" y="16" width="166" height="58" rx="10" fill="#e9f5ef" stroke="#08724f" stroke-width="1.5"/>
+      <text x="527" y="39" text-anchor="middle" font-size="12.5" font-weight="700" fill="#08724f">ok / max_turns</text>
+      <text x="527" y="57" text-anchor="middle" font-size="10.5" fill="#334155">errs = 0 · 照常排下輪</text>
+      <path d="M 350 120 L 395 120 L 395 45 L 442 45" fill="none" stroke="#08724f" stroke-width="1.5" marker-end="url(#sm-arr)"/>
+      <text x="401" y="78" font-size="10.5" fill="#08724f">done</text>
+
+      <!-- Aborted -->
+      <rect x="444" y="106" width="166" height="58" rx="10" fill="#f8fafc" stroke="#64748b" stroke-width="1.4"/>
+      <text x="527" y="130" text-anchor="middle" font-size="12.5" font-weight="700" fill="#334155">aborted</text>
+      <text x="527" y="148" text-anchor="middle" font-size="10.5" fill="#596570">人為中止 · 不計錯誤</text>
+      <line x1="350" y1="135" x2="442" y2="135" stroke="#475569" stroke-width="1.4" marker-end="url(#sm-arr)"/>
+      <text x="396" y="128" text-anchor="middle" font-size="10.5" fill="#475569">Stop</text>
+
+      <!-- Error with Exponential Backoff -->
+      <rect x="444" y="200" width="166" height="66" rx="10" fill="#fff0f1" stroke="#c92330" stroke-width="1.5"/>
+      <text x="527" y="222" text-anchor="middle" font-size="12.5" font-weight="700" fill="#c92330">error (errs &lt; 5)</text>
+      <text x="527" y="239" text-anchor="middle" font-size="10.5" fill="#334155">退避 60 · 2^(errs-1) 秒</text>
+      <text x="527" y="255" text-anchor="middle" font-size="10.5" fill="#596570">上限 3,600s</text>
+      <path d="M 350 150 L 395 150 L 395 233 L 442 233" fill="none" stroke="#c92330" stroke-width="1.5" marker-end="url(#sm-red)"/>
+      <text x="401" y="202" font-size="10.5" fill="#c92330">exception</text>
+
+      <!-- Circuit Breaker Paused -->
+      <rect x="678" y="200" width="162" height="66" rx="10" fill="#c92330" stroke="#991b1b" stroke-width="1.5"/>
+      <text x="759" y="224" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fff">paused_error</text>
+      <text x="759" y="242" text-anchor="middle" font-size="10.5" fill="#ffe4e6">enabled = False</text>
+      <text x="759" y="257" text-anchor="middle" font-size="10.5" fill="#ffe4e6">等人工檢查後重啟</text>
+      <line x1="610" y1="233" x2="676" y2="233" stroke="#c92330" stroke-width="1.8" marker-end="url(#sm-red)"/>
+      <text x="643" y="224" text-anchor="middle" font-size="10.5" font-weight="700" fill="#c92330">errs ≥ 5</text>
+    </svg>
+    <p class="diagram-cap">圖 B1-2：排程狀態轉換與熔斷機制。瞬斷給 4 次指數退避自癒機會，連續失敗 5 次自動停用避免空轉燒算力。</p>
+  </div>
+
+  <h3 class="part idea" id="protections" data-step="4">長程防漂移四道護欄</h3>
+  <div class="grid2">
+    <div class="box">
+      <span class="tag">防壓縮震盪</span>
+      <h3>動態視窗預壓縮（扣除 <code>fixed_tokens</code>）</h3>
+      <div class="formula">dynamic_window = max(1, W - fixed_tokens)
+dynamic_tokens = max(0, context_tokens - fixed_tokens)
+if dynamic_tokens &gt; floor(dynamic_window * 0.5):
+    agent._try_compact(force=True)</div>
+      <p>在 worker 鎖內執行，消除鎖外競態；且系統提示、<code>AGENTS.md</code>、persona 與工具 schema 再大也不會單獨觸發震盪壓縮。</p>
+    </div>
+    <div class="box">
+      <span class="tag violet">防狀態與時間漂移</span>
+      <h3>重試去重 ＋ 跨日刷新 ＋ 固定需求釘選</h3>
+      <ul class="problem-list">
+        <li><b>尾端重複提示去重</b>：<code>Agent.run()</code> 若偵測 <code>session.messages[-1]</code> 已是完全相同的未回覆 <code>user</code> prompt，直接沿用不重複寫入，守住 append-only journal 不變量。</li>
+        <li><b>跨日 <code>Date</code> 刷新</b>：<code>Agent._refresh_date()</code> 每輪檢查日期，跨午夜自動更新 system prompt 的 <code>Date:</code> 標頭。</li>
+        <li><b>固定需求釘選</b>：排程觸發前自動 <code>sync_requirements()</code>，verbatim 需求跨壓縮與重啟零漂移。</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="part data" id="data" data-step="5">依據：程式對照與回歸測試</h3>
+  <div class="tablewrap"><table><caption>排程韌性機制與驗證對照表</caption><thead><tr><th scope="col">能力</th><th scope="col">實作位置</th><th scope="col">回歸測試（test_breezeman_dream.py）</th></tr></thead><tbody>
+    <tr><td>非同步 worker 結算、退避、熔斷與恢復</td><td><code>runtime.py</code>（<code>_on_schedule_complete</code>、<code>settled_run_id</code>、<code>_worker</code>）</td><td><code>test_async_worker_failure_triggers_backoff_circuit_breaker_and_recovery</code></td></tr>
+    <tr><td>同步派發錯誤退避與熔斷</td><td><code>runtime.py</code>（<code>_apply_schedule_error</code>、<code>tick_schedules</code>）</td><td><code>test_schedule_exponential_backoff_and_circuit_breaker</code></td></tr>
+    <tr><td>動態視窗預壓縮（防大 fixed_tokens 震盪）</td><td><code>runtime.py</code>（<code>Chat._chat</code>）</td><td><code>test_tick_schedules_pre_compacts_above_half_window</code></td></tr>
+    <tr><td>重啟中斷任務自動標記 <code>interrupted</code></td><td><code>runtime.py</code>（<code>_recover_interrupted_tasks</code>）</td><td><code>test_runtime_recovers_interrupted_running_tasks_on_restart</code></td></tr>
+    <tr><td>尾端重複提示去重與跨日 <code>Date</code> 刷新</td><td><code>agent/loop.py</code>（<code>Agent.run</code>、<code>_refresh_date</code>）</td><td><code>test_agent_run_dedupes_dangling_user_prompt_and_refreshes_date</code></td></tr>
+    <tr><td>忙碌延遲不漏跑與固定需求釘選</td><td><code>runtime.py</code>（<code>tick_schedules</code>、<code>sync_requirements</code>）</td><td><code>test_tick_schedules_defers_when_chat_busy_without_advancing_last_run</code>、<code>test_task_and_chat_requirements_pin_persist_across_compaction</code></td></tr>
+  </tbody></table></div>
+  <p class="source">實作對照：<a href="../../src/kentc_breezeman/runtime.py">runtime.py</a><a href="../../src/kentc_breezeman/app.py">app.py</a><a href="../../src/kentc_agent/agent/loop.py">agent/loop.py</a></p>
+</section>
+</article>
+<nav class="pager" aria-label="上一篇與下一篇" data-pager></nav>
+</main>
+</div>
+<script src="../asset/js/topics.js"></script>
+<script src="../asset/js/core.js"></script>
+</body>
+</html>
