@@ -5,7 +5,6 @@ description: >
   inventory -> key_values -> analysis -> human review -> report -> deterministic exit_gate.
 
 inputs:
-  task: {required: true, description: "what to find out or decide"}
   case_id: {default: "CASE-001"}
 
 runtime:
@@ -13,7 +12,7 @@ runtime:
   max_retries_per_state: 2
 
 instructions: |
-  Case {{ inputs.case_id }}. Task: {{ inputs.task }}
+  Case {{ inputs.case_id }}. Task: {{ prompt }}
   Cite [file, location] for every material fact, keep stated facts apart from inferences, and do all arithmetic
   with bash (python3 -c).
 

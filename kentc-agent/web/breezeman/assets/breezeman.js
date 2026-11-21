@@ -380,10 +380,7 @@
   let plActiveName = '';
   const PL_STARTER_YAML = `name: custom-workflow
 version: 2
-description: Custom Finite-State Workflow (100% fresh agent per state).
-
-inputs:
-  goal: {required: true, description: "task goal"}
+description: Custom Finite-State Workflow (100% fresh agent per state, zero caller assumptions).
 
 runtime:
   max_cycles: 10
@@ -397,13 +394,15 @@ states:
   plan:
     macro_phase: PLAN
     tools: [read, bash]
-    prompt: "Plan the work for: {{ inputs.goal }}"
+    prompt: "Plan the work for: {{ prompt }}"
     routes:
       default: execute
 
   execute:
     macro_phase: EXECUTE
     prompt: |
+      Task: {{ prompt }}
+
       Plan:
       {{ steps.plan.output }}
       Execute the plan and save key output to reports/result.md.
@@ -439,10 +438,10 @@ states:
     $('#schedWorkflowBox').hidden = schedMode !== 'workflow';
     $('#schedRunWfBtn').hidden = schedMode !== 'workflow';
     $('#schedPromptLabel').textContent = schedMode === 'workflow'
-      ? 'Additional prompt / task instructions (optional)'
+      ? 'Task prompt (available as {{ prompt }} in workflow)'
       : 'Prompt for this task';
     $('#schedPrompt').placeholder = schedMode === 'workflow'
-      ? 'Optional extra instructions injected into every workflow state…'
+      ? 'Describe the task goal for this workflow (injected as {{ prompt }})…'
       : "What should the agent do on each scheduled run in this task's workspace?";
   }
 
@@ -458,7 +457,7 @@ states:
     statesEl.textContent = `${wf.states.join(' → ')} (${wf.source})`;
     const entries = Object.entries(wf.inputs || {});
     if (!entries.length) {
-      box.innerHTML = '<div class="caption muted">No inputs required for this workflow.</div>';
+      box.innerHTML = '';
       return;
     }
     box.innerHTML = entries.map(([k, spec]) => {

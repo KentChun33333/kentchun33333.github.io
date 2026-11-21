@@ -293,7 +293,8 @@ def run_workflow(args: argparse.Namespace) -> int:
         inputs = resolve_inputs(wf, pairs(args.input, "--input"))
         run_dir = runs / f"{time.strftime('%Y%m%d-%H%M%S')}-{wf.name}"
     ui.status("workflow", f"{wf.name}: {len(wf.states)} states (entry={wf.entry}) → {run_dir}")
-    runner = Runner(wf, ctx, inputs, run_dir, answers=pairs(args.answer, "--answer"),
+    prompt_text = " ".join(args.prompt).strip() if getattr(args, "prompt", None) else ""
+    runner = Runner(wf, ctx, inputs, run_dir, prompt=prompt_text, answers=pairs(args.answer, "--answer"),
                     ask_user=ui.ask if sys.stdin.isatty() else None)
     try:
         state = runner.run()

@@ -400,3 +400,41 @@ states:
         assert client.delete("/api/workflows/custom-ui").status_code == 200
         assert not (tmp_path / "workflows" / "custom-ui.yaml").exists()
 
+
+def test_workflow_native_prompt_variable_without_inputs_boilerplate(make_ctx, tmp_path: Path):
+    wf_path = tmp_path / "pure.yaml"
+    wf_path.write_text(
+        """
+name: pure-fsm
+entry: work
+tools: []
+states:
+  work:
+    prompt: "Execute objective: {{ prompt }}"
+    routes:
+      default: exit_gate
+  exit_gate:
+    gate: true
+    validators:
+      - expr: "steps.work.output != ''"
+    routes:
+      passed: DONE
+      failed: work
+""",
+        encoding="utf-8",
+    )
+    seen_user: list[str] = []
+
+    def script(messages, tools):
+        seen_user.append(messages[-1]["content"])
+        return Reply(content="completed", finish="stop")
+
+    wf = load(wf_path)
+    assert wf.inputs == {}
+    runner = Runner(wf, make_ctx(FakeLLM(script)), {}, tmp_path / "run", prompt="Audit API latency")
+    state = runner.run()
+    runner.close()
+    assert state["status"] == "DONE"
+    assert state["prompt"] == "Audit API latency"
+    assert "Execute objective: Audit API latency" in seen_user[0]
+

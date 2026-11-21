@@ -4,9 +4,6 @@ description: >
   Pattern 2, documents first (PromptLoop FSM): workspace files -> working notes -> planned web research
   (approved by human) -> deliver artifact -> deterministic exit_gate.
 
-inputs:
-  question: {required: true, description: "the ask: what to find out, and what to deliver (report, HTML, code, ...)"}
-
 runtime:
   max_cycles: 10
   max_retries_per_state: 2
@@ -27,7 +24,7 @@ states:
     macro_phase: PLAN
     tools: [read, bash]
     prompt: |
-      The ask: {{ inputs.question }}
+      The ask: {{ prompt }}
       Workspace files: {{ documents('.') | join(', ') }}.
       Read the ones that are source material for the ask; skip the rest (scripts, earlier outputs). When the
       sources hold data, compute the key figures with bash. Reply with working notes in markdown: the key facts and
@@ -48,7 +45,7 @@ states:
     tools: [read, write, edit, bash]
     max_turns: 0
     prompt: |
-      The ask: {{ inputs.question }}
+      The ask: {{ prompt }}
       Deliver exactly what the ask wants, in the form it asks for:
       - a report or insight: markdown, reports/insight.md, unless the ask names another form;
       - HTML (a page, dashboard, interactive view): one self-contained file under reports/ (inline CSS and

@@ -426,9 +426,12 @@ class Chat:
             resolved_inputs = resolve_workflow_inputs(wf, {k: str(v) for k, v in inputs.items()})
             run_dir = runs_dir / f"{time.strftime('%Y%m%d-%H%M%S')}-{wf.name}-{uuid.uuid4().hex[:4]}"
 
-        # Inject optional task-specific prompt and root global memory hint into every fresh state
-        if prompt:
-            extra = f"## Additional Task Prompt\n{prompt}"
+        # Inject optional task prompt into instructions only when the workflow does not already template {{ prompt }}
+        uses_prompt_var = "prompt" in wf.instructions and "{{ prompt" in wf.instructions
+        if not uses_prompt_var:
+            uses_prompt_var = any("{{ prompt" in str(st.spec.get("prompt") or "") for st in wf.steps)
+        if prompt and not uses_prompt_var:
+            extra = f"## Task Prompt\n{prompt}"
             if extra not in wf.instructions:
                 wf.instructions = f"{wf.instructions.rstrip()}\n\n{extra}" if wf.instructions else extra
         hint = memory_hint(self.runtime.workspace)
@@ -438,7 +441,7 @@ class Chat:
         label = f"/workflow {wf.name}" + (f" --resume {resume}" if resume else "")
         self.publish({"type": "run_start", "run": "workflow", "text": label, "attachments": []})
 
-        runner = WorkflowRunner(wf, self.ctx, resolved_inputs, run_dir, answers=answers)
+        runner = WorkflowRunner(wf, self.ctx, resolved_inputs, run_dir, prompt=prompt, answers=answers)
         try:
             state = runner.run()
         except NeedsAnswer as exc:

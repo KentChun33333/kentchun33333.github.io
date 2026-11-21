@@ -462,12 +462,13 @@ class Runner:
     """Deterministic PromptLoop FSM controller running one fresh Agent per prompt state."""
 
     def __init__(self, wf: Workflow, ctx: ToolContext, inputs: dict[str, Any], run_dir: Path, *,
-                 ask_user: AskUser | None = None, answers: dict[str, str] | None = None) -> None:
+                 prompt: str = "", ask_user: AskUser | None = None, answers: dict[str, str] | None = None) -> None:
         self.wf, self.ctx, self.inputs, self.dir = wf, ctx, inputs, run_dir
         self.ask_user, self.answers = ask_user, answers or {}
         self.state: dict[str, Any] = {
             "workflow": str(wf.path),
             "name": wf.name,
+            "prompt": prompt,
             "inputs": inputs,
             "status": "running",
             "current_state": wf.entry,
@@ -489,6 +490,8 @@ class Runner:
             loaded = json.loads(state_file.read_text(encoding="utf-8"))
             self.state.update(loaded)
             self.state["inputs"] = inputs
+            if prompt:
+                self.state["prompt"] = prompt
         self.env = _Env(undefined=StrictUndefined, keep_trailing_newline=True)
         self.env.globals.update(glob=self._glob, read_file=self._read_file, documents=self._documents)
         self.env.filters.update(fromjson=json.loads, json=_pretty_json, slug=_slug)
@@ -554,6 +557,7 @@ class Runner:
             if isinstance(s.get("data"), dict):
                 data.update(s["data"])
         return {
+            "prompt": self.state.get("prompt", ""),
             "inputs": self.inputs,
             "steps": steps,
             "data": data,

@@ -5,7 +5,6 @@ description: >
   Each state runs in a fresh isolated Agent session with explicit disk artifacts and objective runtime validators.
 
 inputs:
-  goal: {required: true, description: "engineering goal to implement and verify"}
   test_cmd: {default: "uv run pytest", description: "deterministic test command executed by runtime validators"}
 
 runtime:
@@ -16,7 +15,7 @@ runtime:
   fail_closed_on_unknown_event: true
 
 instructions: |
-  Goal: {{ inputs.goal }}
+  Goal: {{ prompt }}
   - Work strictly inside the workspace. Keep changes minimal, clean, and well-tested.
   - Separate observed evidence from assumptions; never claim tests passed without real command output.
 

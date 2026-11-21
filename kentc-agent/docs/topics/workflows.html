@@ -294,7 +294,7 @@
     <tr><td><code>docs-first-insight</code> / <code>web-first-insight</code></td><td>檔案／網路研究 → <code>notes/evidence.md</code> → <code>deliver</code> → <code>exit_gate</code></td><td>驗證 <code>reports/summary.md</code> 落盤</td></tr>
     <tr><td><code>pdf-brief</code></td><td><code>read → draft → check → exit_gate</code></td><td>驗證 <code>brief.md</code> 落盤</td></tr>
   </tbody></table></div>
-  <div class="callout"><b>在 Breezeman 介面中使用：</b>可由頂部列 <b>Workflows</b> 設定專區檢視／新增／驗證儲存 <code>workflows/*.yaml</code>，並在任務右側 <b>Schedule → Finite-State Workflow</b> 填入動態 inputs 與選填額外 prompt 定時或立即執行（詳見 <a href="breezeman-long-horizon.html">B1 · 排程狀態機與長程韌性</a>）。</div>
+  <div class="callout"><b>零呼叫端假設（原生 <code>{{ prompt }}</code>）：</b>Finite-State Workflow YAML 不假設呼叫端是 CLI、Breezeman 排程或 Studio。引擎原生內建 <code>{{ prompt }}</code> 與 <code>{{ workspace }}</code>，通用流程（如 <code>coding-loop</code>、<code>case-review</code>、<code>docs-first-insight</code>）<b>不需宣告多餘的 <code>inputs:</code></b>；CLI 可直接執行 <code>kentc-agent --workflow coding-loop "目標描述"</code>，Breezeman 則由頂部列 <b>Workflows</b> 專區管理 YAML，並在任務右側 <b>Schedule → Finite-State Workflow</b> 以單一 Task Prompt 定時或立即觸發（詳見 <a href="breezeman-long-horizon.html">B1 · 排程狀態機與長程韌性</a>）。</div>
   <p class="source">實作對照：<a href="../../src/kentc_agent/fsm_workflow.py">fsm_workflow.py</a><a href="../../src/kentc_agent/cli.py">cli.py</a><a href="../../config/cli/workflows/coding-loop.yaml">coding-loop.yaml</a><a href="../../tests/test_fsm_workflow.py">test_fsm_workflow.py</a></p>
 </section>
 </article>
