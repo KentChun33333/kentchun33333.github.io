@@ -27,7 +27,7 @@ from kentc_agent.checks import Rule, parse_checks
 from kentc_agent.config import Settings
 from kentc_agent.ports import Events
 from kentc_agent.skills import SkillError, load_skills
-from kentc_agent.workflow import Runner, Step, Workflow
+from kentc_agent.promptloop import Runner, Step, Workflow
 
 from .models import LANE_MAX_CHARS
 

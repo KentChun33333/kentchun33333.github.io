@@ -16,7 +16,7 @@ from kentc_agent.adapters.tools import CORE_TOOLS
 from kentc_agent.adapters.web import ProviderError, web_search
 from kentc_agent.adapters.web_research import SCREEN_SYSTEM, WEB_AGENT_SYSTEM, research, run_web_agent
 from kentc_agent.config import Settings
-from kentc_agent.workflow import Runner, WorkflowError, load, resolve_inputs
+from kentc_agent.promptloop import Runner, WorkflowError, load, resolve_inputs
 
 from .conftest import FakeLLM, call
 
@@ -357,7 +357,10 @@ def test_web_plan_and_resume(make_ctx, tmp_path, ddgs_fake):
     researched: list[str] = []
     runner = foreach_runner(make_ctx, tmp_path, researched, wf=PLAN_WF)
     state = runner.run()
-    plans = [m for m in runner.agent.session.messages if m["role"] == "user" and "Plan web research" in str(m["content"])]
+    from kentc_agent.adapters.session import Session
+    plan_sessions = sorted((runner.dir / "sessions").glob("*webplan-research*.jsonl"))
+    assert len(plan_sessions) == 1
+    plans = [m for m in Session.load(plan_sessions[0]).messages if m["role"] == "user" and "Plan web research" in str(m["content"])]
     assert len(plans) == 1 and "at most 4 tasks" in plans[0]["content"]
     assert state["web_plan"]["research"] == TASKS["web_tasks"]
     assert [i["file"] for i in state["steps"]["research"]["data"]["items"]] == [

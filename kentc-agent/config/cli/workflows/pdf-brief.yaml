@@ -1,22 +1,56 @@
 name: pdf-brief
-description: Read a PDF through the parsing sub-agent, draft a brief, then check it against the source.
+version: 2
+description: Read a PDF through the parsing sub-agent, draft a brief, verify it against the source, and pass exit_gate.
 
 inputs:
   pdf: {required: true, description: path to the PDF}
   audience: {default: engineers}
   pages: {default: "", description: "page ranges, e.g. 1-10 (empty: all)"}
 
-max_turns: 20
+runtime:
+  max_cycles: 8
+  max_retries_per_state: 2
 
-steps:
-  - id: read
+max_turns: 20
+entry: read
+
+states:
+  read:
+    macro_phase: PLAN
     tools: [read]
     prompt: "Read {{ inputs.pdf }}{% if inputs.pages %} (pages {{ inputs.pages }}){% endif %}: problem, approach, key results with numbers, limitations."
+    routes:
+      default: draft
 
-  - id: draft
+  draft:
+    macro_phase: EXECUTE
     tools: [write]
-    prompt: "Write a one-page brief for {{ inputs.audience }} to brief.md, then reply with it."
+    prompt: |
+      Extracted PDF notes:
+      {{ steps.read.output }}
 
-  - id: check
+      Write a one-page brief for {{ inputs.audience }} to brief.md, then reply with it.
+    routes:
+      default: check
+
+  check:
+    macro_phase: EVALUATE
     tools: [read, edit]
-    prompt: "Check brief.md against what you read: fix wrong or missing numbers and vague claims with edit, then summarize the changes."
+    prompt: |
+      Source PDF notes:
+      {{ steps.read.output }}
+
+      Check brief.md against the source notes (and re-read {{ inputs.pdf }} if unsure): fix wrong or missing
+      numbers and vague claims with edit, then summarize the changes.
+    routes:
+      default: exit_gate
+
+  exit_gate:
+    macro_phase: EXIT
+    gate: true
+    validators:
+      - name: brief_exists
+        file_exists: "brief.md"
+    routes:
+      passed: DONE
+      failed: draft

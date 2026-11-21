@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from ...context.bigcontext import folder, limits, note_document, real_tokens, store, tokens
-from ...workflow import parse_json_object
+from ...promptloop import parse_json_object
 from ...errors import ToolError
 from ..filetypes import DOC_SUFFIXES, reject_unsupported
 from ..tools import ToolContext, page, rel

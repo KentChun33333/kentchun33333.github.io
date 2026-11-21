@@ -1,9 +1,9 @@
 name: rm-client-insight
+version: 2
 description: >
-  Relationship-management wealth insight, as in AURA v3-3: frame the question -> read every source (CRM/T24
-  exports, RM notes, trust documents, e-mails, news) -> relationship graph (stated vs inferred) -> human boundary
-  review -> target clients with evidence chains -> evidence QA -> pillar report -> human review (done / finetune).
-  One agent does every step; each step only gets the tools it needs.
+  Relationship-management wealth insight (PromptLoop FSM, 100% fresh per state):
+  scope -> evidence -> graph -> human boundary_review -> analysis -> qa -> report ->
+  human review (done -> exit_gate | feedback -> report_v2 -> exit_gate).
 
 inputs:
   question: {required: true, description: "the RM's question in plain language"}
@@ -13,6 +13,10 @@ inputs:
   region: {default: "All regions"}
   task_type: {default: "Opportunity focus", description: "Investigation | Opportunity focus | Risk focus"}
   audience: {default: "Relationship manager", description: "Relationship manager | Investment advisor | Compliance reviewer"}
+
+runtime:
+  max_cycles: 20
+  max_retries_per_state: 3
 
 instructions: |
   You support a private-bank relationship manager on case {{ inputs.case_id }}.
@@ -26,9 +30,11 @@ instructions: |
 
 tools: [read, bash]
 max_turns: 25
+entry: scope
 
-steps:
-  - id: scope
+states:
+  scope:
+    macro_phase: PLAN
     tools: [bash]
     prompt: |
       Question: {{ inputs.question }}
@@ -43,10 +49,16 @@ steps:
       exclusions: [string]
       guardrails: [string]
       hypothesis: string
+    routes:
+      default: evidence
 
-  - id: evidence
+  evidence:
+    macro_phase: EXECUTE
     tools: [bash, read]
     prompt: |
+      Search contract:
+      {{ steps.scope.data | json }}
+
       Read every source file: {{ documents('.') | join(', ') }}.
       For each file note its source system and the facts that matter: clients (name, ID, region, segment, AUM, RM,
       age), entities (companies, trusts, SPVs), relationships (from, relation, to, stated or inferred, quote),
@@ -55,10 +67,16 @@ steps:
     format: json
     schema:
       sources: [{file: string, system: "CRM|FileNet|T24|HELIOS|Other", facts: [{fact: string, location: string}]}]
+    routes:
+      default: graph
 
-  - id: graph
+  graph:
+    macro_phase: EXECUTE
     tools: []
     prompt: |
+      Extracted evidence:
+      {{ steps.evidence.data | json }}
+
       Build the relationship graph: resolve aliases without inventing relationships; keep stated and inferred
       links apart with their source; group people and entities into client groups; find bridge clients (the only
       link between clusters); rank groups by combined AUM and relevance to the question.
@@ -68,8 +86,10 @@ steps:
       groups: [{name: string, members: [string], combined_aum: string, why: string}]
       bridge_clients: [string]
       hidden_links: [{link: string, source: string, confidence: "high|medium|low"}]
+    routes:
+      default: boundary_review
 
-  - id: boundary_review
+  boundary_review:
     ask: |
       SHAPE THE SEARCH · {{ inputs.case_id }}
       {{ data.restated_question }}
@@ -81,9 +101,17 @@ steps:
       Hidden links: {% for h in data.hidden_links %}{{ h.link }} [{{ h.confidence }}]; {% endfor %}
       Guidance for the analysis (focus, exclusions, corrections), or "go":
     default: go
+    routes:
+      default: analysis
 
-  - id: analysis
+  analysis:
+    macro_phase: EXECUTE
     prompt: |
+      Relationship graph & sources:
+      {{ data | json }}
+
+      Boundary review guidance: {{ steps.boundary_review.output }}
+
       Answer the question with named target clients (at most 5, ranked). For each: metric (e.g. estimated
       unallocated liquidity = inflows minus earmarked/known uses, computed with bash and shown), score 0-100, why
       this target, caveats, advisory next RM actions, and the evidence chain CRM -> FileNet -> T24 -> HELIOS with
@@ -96,10 +124,16 @@ steps:
                  score: number, why: [string], caveats: [string], actions: [string],
                  evidence_chain: [{system: string, claim: string, source: string, kind: "stated|inferred"}]}]
       coordination: [string]
+    routes:
+      default: qa
 
-  - id: qa
+  qa:
+    macro_phase: EVALUATE
     tools: [read]
     prompt: |
+      Analysis to QA:
+      {{ steps.analysis.data | json }}
+
       Evidence QA: check every claim in the analysis against its cited file (re-read with a question when unsure).
       Mark each verified, inferred or unsupported; flag inferred statements written as facts, numbers that do not
       match the source, missing caveats, and any trading instruction taken from a meeting mention.
@@ -108,10 +142,16 @@ steps:
       checks: [{target: string, claim: string, status: "verified|inferred|unsupported", note: string}]
       corrections: [string]
       confidence: number
+    routes:
+      default: report
 
-  - id: report
+  report:
+    macro_phase: EXECUTE
     tools: []
     prompt: |
+      Graph, analysis and QA corrections:
+      {{ data | json }}
+
       Write the RM report in markdown for a {{ inputs.audience }}, applying every QA correction and dropping
       unsupported claims:
       # AURA Wealth Intelligence · <answer title>
@@ -124,15 +164,39 @@ steps:
       ## Source provenance  (table: source system | files | evidence items | control)
       Mark estimates as estimates; actions stay advisory. Reply with the report only.
     output: "reports/{{ inputs.case_id }}-insight.md"
+    routes:
+      default: review
 
-  - id: review
+  review:
     ask: |
       Report saved to reports/{{ inputs.case_id }}-insight.md (QA confidence {{ data.confidence }}).
       Reply "done", or finetune feedback (depth, tone, audience, focus) for a new version:
     default: done
+    routes:
+      done: exit_gate
+      default: report_v2
 
-  - id: report_v2
-    when: "steps.review.output | lower != 'done'"
+  report_v2:
+    macro_phase: EXECUTE
     tools: []
-    prompt: "Produce a new version of the report following the reviewer's feedback; keep the pillars, citations and caveats. Reply with the report only."
+    prompt: |
+      Current report:
+      {{ read_file("reports/" + inputs.case_id + "-insight.md") }}
+
+      Reviewer feedback: {{ steps.review.output }}
+
+      Produce a new version of the report following the reviewer's feedback; keep the pillars, citations and caveats.
+      Reply with the report only.
     output: "reports/{{ inputs.case_id }}-insight-v2.md"
+    routes:
+      default: exit_gate
+
+  exit_gate:
+    macro_phase: EXIT
+    gate: true
+    validators:
+      - name: report_exists
+        file_exists: "reports/{{ inputs.case_id }}-insight.md"
+    routes:
+      passed: DONE
+      failed: report

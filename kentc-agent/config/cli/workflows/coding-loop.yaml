@@ -1,0 +1,119 @@
+name: coding-loop
+version: 2
+description: >
+  PromptLoop deterministic 5-state coding workflow (PLAN -> BUILD -> TEST -> REVIEW -> IMPROVE -> EXIT_GATE).
+  Each state runs in a fresh isolated Agent session with explicit disk artifacts and objective runtime validators.
+
+inputs:
+  goal: {required: true, description: "engineering goal to implement and verify"}
+  test_cmd: {default: "uv run pytest", description: "deterministic test command executed by runtime validators"}
+
+runtime:
+  max_cycles: 15
+  max_retries_per_state: 3
+  no_progress_limit: 2
+  max_step_seconds: 300
+  fail_closed_on_unknown_event: true
+
+instructions: |
+  Goal: {{ inputs.goal }}
+  - Work strictly inside the workspace. Keep changes minimal, clean, and well-tested.
+  - Separate observed evidence from assumptions; never claim tests passed without real command output.
+
+tools: [read, write, edit, bash]
+max_turns: 25
+entry: plan
+
+states:
+  plan:
+    macro_phase: PLAN
+    tools: [read, bash]
+    prompt: |
+      Inspect the repository and select the highest-priority bounded task toward the goal.
+      {% if steps.review is defined and steps.review.output %}Previous review: {{ steps.review.output }}{% endif %}
+      Return a concise plan with testable acceptance criteria.
+    format: json
+    schema:
+      status: "task_ready|goal_candidate"
+      task: string
+      files: [string]
+      acceptance_criteria: [string]
+    route_on: "step_data.status"
+    routes:
+      task_ready: build
+      goal_candidate: exit_gate
+
+  build:
+    macro_phase: EXECUTE
+    tools: [read, write, edit, bash]
+    prompt: |
+      Implement the planned task:
+      {{ steps.plan.data | json }}
+      Keep edits focused and run quick sanity checks before replying.
+    validators:
+      - name: relevant_diff
+        git_diff: true
+    routes:
+      passed: test
+      failed: improve
+
+  test:
+    macro_phase: EVALUATE
+    tools: [read, bash]
+    prompt: |
+      Run or verify tests for task: {{ steps.plan.data.task }}.
+      Summarize test coverage and any failures observed.
+    validators:
+      - name: required_tests
+        command: "{{ inputs.test_cmd }}"
+    routes:
+      passed: review
+      failed: improve
+
+  review:
+    macro_phase: EVALUATE
+    tools: [read, bash]
+    prompt: |
+      Independently inspect `git diff` against the goal and acceptance criteria:
+      {{ steps.plan.data.acceptance_criteria | json }}
+      Check correctness, edge cases, and regressions. Do NOT modify files.
+    format: json
+    schema:
+      verdict: "approved|issues_found"
+      blocking_findings: [string]
+      summary: string
+    validators:
+      - name: no_blocking_findings
+        expr: "step_data.verdict == 'approved' and not step_data.blocking_findings"
+    routes:
+      passed: exit_gate
+      failed: improve
+
+  improve:
+    macro_phase: EXECUTE
+    tools: [read, write, edit, bash]
+    prompt: |
+      Fix the failures or review findings below:
+      {% if steps.test is defined and steps.test.evidence %}Test evidence: {{ steps.test.evidence | json }}{% endif %}
+      {% if steps.review is defined and steps.review.data %}Review: {{ steps.review.data | json }}{% endif %}
+      Apply the minimal fix, or indicate if replanning is required.
+    format: json
+    schema:
+      action: "fixed|needs_replan"
+      changes: [string]
+    route_on: "step_data.action"
+    routes:
+      fixed: test
+      needs_replan: plan
+
+  exit_gate:
+    macro_phase: EXIT
+    gate: true
+    validators:
+      - name: tests_pass
+        command: "{{ inputs.test_cmd }}"
+      - name: review_approved
+        expr: "steps.review is defined and steps.review.data and steps.review.data.verdict == 'approved' and not steps.review.data.blocking_findings"
+    routes:
+      passed: DONE
+      failed: improve

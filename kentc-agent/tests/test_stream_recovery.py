@@ -8,7 +8,7 @@ from kentc_agent.adapters.llm import IncompleteReply, Reply
 from kentc_agent.adapters.session import Session
 from kentc_agent.adapters.tools import CORE_TOOLS
 from kentc_agent.agent import Agent
-from kentc_agent.workflow import Runner, load, parse_json_object
+from kentc_agent.promptloop import Runner, load, parse_json_object
 
 from .conftest import FakeLLM, call
 

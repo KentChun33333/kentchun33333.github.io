@@ -26,7 +26,7 @@ from .agent import Aborted, Agent, build_tools, new_session_path
 from .config import STATE_DIR, load_settings
 from .context.compaction import CompactionError
 from .ui import ConsoleUI, fmt_tokens
-from .workflow import Runner, WorkflowError, find_workflow, load, resolve_inputs, workflow_dirs
+from .promptloop import Runner, WorkflowError, find_workflow, load, resolve_inputs, workflow_dirs
 
 CHAT_HELP = """Commands:
   /attach <file> [question]  add a file to your next message (PDFs/images/large documents via the parsing sub-agent)
@@ -292,37 +292,43 @@ def run_workflow(args: argparse.Namespace) -> int:
         wf = load(find_workflow(ctx.workspace, args.workflow))
         inputs = resolve_inputs(wf, pairs(args.input, "--input"))
         run_dir = runs / f"{time.strftime('%Y%m%d-%H%M%S')}-{wf.name}"
-    ui.status("workflow", f"{wf.name}: {len(wf.steps)} steps → {run_dir}")
+    ui.status("workflow", f"{wf.name}: {len(wf.states)} states (entry={wf.entry}) → {run_dir}")
     runner = Runner(wf, ctx, inputs, run_dir, answers=pairs(args.answer, "--answer"),
                     ask_user=ui.ask if sys.stdin.isatty() else None)
     try:
         state = runner.run()
     finally:
-        runner.agent.close()
+        runner.close()
     ui.finish()
-    last = wf.steps[-1]
-    if not ui.stream_content or last.kind != "prompt":
-        print(state["steps"][last.id].get("output", ""))
-    ui.status("workflow", f"done; run state in {run_dir}")
+    last_id = state["history"][-1]["from"] if state.get("history") else wf.steps[-1].id
+    last_step = wf.states.get(last_id)
+    if last_step and (not ui.stream_content or last_step.kind != "prompt"):
+        print(state["steps"].get(last_id, {}).get("output", ""))
+    ui.status("workflow", f"{state.get('status', 'done')}; run state in {run_dir}")
     return 0
 
 
 def validate(args: argparse.Namespace) -> int:
     wf = load(find_workflow(workspace(args), args.validate))
-    print(f"{wf.name}: {len(wf.steps)} steps, valid")
+    print(f"{wf.name}: {len(wf.states)} states (entry={wf.entry}), valid")
     for st in wf.steps:
         tools = st.spec.get("tools", wf.tools) if st.kind == "prompt" else None
         if st.kind == "ask":
             detail = "human gate"
+        elif st.kind == "gate":
+            n_val = len(st.spec.get("validators") or [])
+            detail = f"deterministic gate ({n_val} validator(s))"
         elif st.kind == "web":
             mode = "plans its tasks" if str(st.spec["web"]).strip() == "plan" else \
                 f"foreach {st.spec['foreach']}" if "foreach" in st.spec else "one task"
             detail = f"web agent ({mode}) -> {st.spec.get('output', 'research/')}" + \
                 ("  [approve]" if st.spec.get("approve") else "")
         else:
-            detail = f"tools: {(', '.join(tools) or 'none') if tools is not None else 'all'}"
+            skills = f"  skills: {','.join(st.spec['skills'])}" if st.spec.get("skills") else ""
+            detail = f"tools: {(', '.join(tools) or 'none') if tools is not None else 'all'}{skills}"
+        routes = "  routes: " + ", ".join(f"{k}->{v}" for k, v in (st.spec.get("routes") or {}).items())
         when = f"  when {st.spec['when']}" if "when" in st.spec else ""
-        print(f"  {st.id:24} {detail}{when}")
+        print(f"  {st.id:24} {detail}{routes}{when}")
     if wf.inputs:
         print("inputs: " + ", ".join(k + ("" if "default" in v else " (required)") for k, v in wf.inputs.items()))
     return 0

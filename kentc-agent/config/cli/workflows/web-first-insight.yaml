@@ -1,30 +1,37 @@
 name: web-first-insight
+version: 2
 description: >
-  Pattern 1, web first: the outside information is known up front. The web agent researches it into a cited
-  brief, the main agent reviews the brief with the workspace files into working notes, and the last step delivers
-  whatever the ask wants: a markdown report, an HTML page or dashboard, code, or other files.
+  Pattern 1, web first (PromptLoop FSM): web brief -> review with workspace files into working notes ->
+  deliver artifact -> deterministic exit_gate.
 
 inputs:
   question: {required: true, description: "the ask: what to find out, and what to deliver (report, HTML, code, ...)"}
   research: {required: true, description: "what to look up on the web, in one or two sentences (no confidential data)"}
+
+runtime:
+  max_cycles: 10
+  max_retries_per_state: 2
 
 instructions: |
   You turn source material into an evidence-based deliverable.
   - Cite every material fact: [file, location] for a document, [brief file, source n] for a web brief.
   - Keep what a source states apart from what you infer; mark web facts that are dated or come only from vendors.
   - Compute every total and ratio with bash (python3); never add up in your head.
-  - Your context is long-lived but limited: keep working notes in files, re-read only what you need.
+  - Keep working notes in files and re-read only what you need.
 
 tools: [read, bash]
 max_turns: 30
+entry: research
 
-steps:
-  # ---------------------------------------------------------------- collect
-  - id: research
+states:
+  research:
     web: "{{ inputs.research }}"
     output: research/web-brief.md
+    routes:
+      default: review
 
-  - id: review
+  review:
+    macro_phase: PLAN
     tools: [read, bash]
     prompt: |
       The ask: {{ inputs.question }}
@@ -33,11 +40,13 @@ steps:
       sources hold data, compute the key figures with bash. Reply with working notes in markdown: the key facts and
       figures with their sources, where the files and the web brief agree or conflict, and the open questions.
     output: notes/evidence.md
+    routes:
+      default: deliver
 
-  # ---------------------------------------------------------------- deliver (same step in docs-first-insight)
-  - id: deliver
+  deliver:
+    macro_phase: EXECUTE
     tools: [read, write, edit, bash]
-    max_turns: 0                # no limit: works until the ask is delivered
+    max_turns: 0
     prompt: |
       The ask: {{ inputs.question }}
       Deliver exactly what the ask wants, in the form it asks for:
@@ -55,3 +64,15 @@ steps:
       Then check every file (read it back, or run it) and fix what is wrong.
       Reply with a short summary: each file delivered and what it holds, and the key findings.
     output: reports/summary.md
+    routes:
+      default: exit_gate
+
+  exit_gate:
+    macro_phase: EXIT
+    gate: true
+    validators:
+      - name: summary_written
+        file_exists: "reports/summary.md"
+    routes:
+      passed: DONE
+      failed: deliver

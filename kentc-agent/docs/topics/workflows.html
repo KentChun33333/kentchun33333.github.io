@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="長任務需固定順序、人工審核與斷點續跑；單一大提示會漏步、權限不分、失敗即全部重來。">
-<title>08 · 工作流程｜kentc_agent 核心方法論</title>
+<meta name="description" content="PromptLoop 確定性 FSM 引擎（promptloop.py）：100% 純 fresh 每階段獨立 Agent、客觀 Runtime Validator、零模型呼叫 exit_gate、無進展偵測與崩潰重啟對帳。">
+<title>09 · PromptLoop FSM（promptloop.py）｜kentc_agent 核心方法論</title>
 <link rel="stylesheet" href="../asset/css/core.css">
 <link rel="stylesheet" href="../asset/css/shell.css">
 </head>
 <body class="topic-page">
 <a class="sr-only" href="#topic">跳至主要內容</a>
 <header class="top"><div class="top-in">
-  <a class="brand" href="../index.html">kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
+  <a class="brand" href="../index.html#tab=agent">kentc_agent</a><span class="top-note">核心方法論 · 繁體中文</span>
   <label class="search"><span class="sr-only">搜尋主題</span><input id="search" type="search" placeholder="搜尋主題（按 / ）" autocomplete="off"></label>
 </div></header>
 <div class="reader">
@@ -19,58 +19,214 @@
 <main id="topic" data-slug="workflows">
 <article class="topic">
 <section class="card" id="workflows" aria-labelledby="wf-title">
-  <p class="eyebrow">08 · 用工作流程約束方法，不建立代理團隊</p>
-  <h2 id="wf-title">同一個 Agent，依階段改變指示與工具清單</h2>
+  <p class="eyebrow">09 · PromptLoop 確定性單代理狀態機（src/kentc_agent/promptloop.py）</p>
+  <h2 id="wf-title">控制器管流程、Skill 管方法、每階段一隻新鮮 Agent、證據決定結案</h2>
   <div class="psd">
-    <div class="psd-item problem"><span>問題</span><p>長任務需要固定順序、人工審核與中斷續跑。單一大提示 → 步驟遺漏、權限無法分段、失敗只能重來。</p></div>
-    <div class="psd-item idea"><span>核心想法</span><p>YAML 定義步驟，Runner 依序執行<b>同一個</b>代理，每步只換指示、工具與輸出約定。人類決策用 <code>ask</code>；狀態存檔，可從未完成步驟續跑；不建多代理團隊。</p></div>
-    <div class="psd-item data"><span>依據</span><p>回歸測試涵蓋：呼叫次數用盡即失敗且不寫 <code>output</code>；輸入錯誤明確報錯，<code>--resume</code> 可覆寫輸入。實際使用問題已修正（見 ③）。</p></div>
+    <div class="psd-item problem"><span>問題</span><p>線性步驟無法回跳修正；共用長對話會造成 <code>REVIEW</code> 球員兼裁判與上下文膨脹；小型本機模型常出現 <b>false DONE</b>（自稱測試通過但真實 exit code 非 0）。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>以 <b>PromptLoop FSM（<code>promptloop.py</code>）</b> 取代舊線性工作流程：<b>100% 純 <code>fresh</code></b>（每 state 開獨立短 Session，靠磁碟 Artifact 交接）、獨立 Runtime Validator 取真實證據、零模型呼叫 <code>exit_gate</code> 把關 <code>DONE</code>。</p></div>
+    <div class="psd-item data"><span>依據</span><p>實作於 <code>src/kentc_agent/promptloop.py</code>，涵蓋 7 份內建 YAML（含 <code>coding-loop.yaml</code>），由 <code>tests/test_promptloop.py</code> 完整驗證。</p></div>
   </div>
-  <h3 class="part problem" id="problem" data-step="1">問題：單一大提示撐不起長任務</h3>
+
+  <h3 class="part problem" id="problem" data-step="1">設計原則：四層權責邊界（不靠模型自律）</h3>
   <ul class="problem-list">
-    <li><b>順序與完整性</b>：「讀文件、核對數字、等人確認、寫報告」交由模型安排 → 小模型常跳過核對直接撰寫。</li>
-    <li><b>權限不分</b>：撰寫不需 <code>bash</code>，擷取不需寫檔；全程同一組工具 → 敏感階段無法收緊。</li>
-    <li><b>人工審核</b>：模型不得自稱「已獲批准」→ 需要真正停下等人的點。</li>
-    <li><b>中斷</b>：一小時的任務在第四步失敗，不應從第一步重來。</li>
+    <li><b>Runtime Controller 擁有控制權</b>：巨觀狀態跳轉（<code>routes:</code>）、迴圈上限（<code>max_cycles</code>）、重試熔斷、無進展偵測與終止態（<code>DONE / PAUSE / ESCALATE</code>）全由確定性程式執行；任何 <code>prompt</code> state 不得繞過 <code>gate</code> 直跳 <code>DONE</code>。</li>
+    <li><b>100% 純 <code>fresh</code>（One Phase = One Fresh Agent）</b>：每個 state 啟動一隻全新隔離的 <code>Agent</code> 與專屬 <code>sessions/&lt;exec_id&gt;-&lt;state&gt;.jsonl</code>，跨 state 只透過 <code>state.json</code>（<code>steps.&lt;id&gt;.output/data</code>）與工作區檔案交接，徹底消除自我錨定偏誤與長迴圈噪音。</li>
+    <li><b>Skills 擁有標準程序（Lazy Loading）</b>：每個 state 透過 <code>skills: [...]</code> 只載入該階段需要的 <code>skills/*.md</code>，節省小視窗 token。</li>
+    <li><b>獨立 Validator 確立客觀證據</b>：由 runtime 直接執行測試命令（取真實 OS <code>exit_code</code>）、檢查 <code>file_exists</code>、<code>git_diff</code>、JSON <code>schema</code> ＋ <code>checks.py</code>；模型自稱通過但實際 <code>exit_code != 0</code> 一律退回。</li>
   </ul>
-  <p>多代理分工 → 每次交接重傳脈絡，資訊散落、責任不清，小模型更吃力（見 <a href="principles.html">01 · 方法論</a>）。</p>
-  <h3 class="part idea" id="solution" data-step="2">核心想法：步驟化的同一個代理</h3>
-  <p class="sub">對話脈絡全程沿用，必要時壓縮。分支用 <code>when</code>，網路研究用 <code>web</code>（見下一篇）。有 <code>output</code> 的步驟告知代理「最終回覆由 Runner 存檔」，後續步驟直接讀。</p>
-  <div class="widget">
-    <div class="widget-head"><h3>示範：從證據到一份可核對的摘要</h3><span class="tag">教學流程 · 非內建業務流程</span></div>
-    <div class="timeline" id="timeline" role="group" aria-label="工作流程步驟"></div><div class="step-panel" id="wfPanel" aria-live="polite"></div>
+
+  <h3 class="part idea" id="arch" data-step="2">核心架構圖：PromptLoop 執行與證據閉環</h3>
+
+  <div class="diagram-box">
+    <svg viewBox="0 0 860 330" width="860" height="330" role="img" aria-label="PromptLoop 確定性 FSM 執行架構圖：Controller、Fresh Agent、Objective Validator 與 Atomic State" style="font-family:var(--sans)">
+      <defs>
+        <marker id="pl-arr" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#475569"/>
+        </marker>
+        <marker id="pl-green" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#08724f"/>
+        </marker>
+        <marker id="pl-red" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#c92330"/>
+        </marker>
+      </defs>
+
+      <!-- Step 1: YAML + Controller -->
+      <rect x="16" y="22" width="212" height="126" rx="10" fill="#edf3fd" stroke="#245db2" stroke-width="1.6"/>
+      <text x="30" y="46" font-size="12.5" font-weight="700" fill="#1e3a8a">1. Deterministic Controller</text>
+      <text x="30" y="66" font-size="11" fill="#334155">• 讀取 YAML states + routes</text>
+      <text x="30" y="84" font-size="11" fill="#334155">• 檢查 max_cycles / token 預算</text>
+      <text x="30" y="102" font-size="11" fill="#334155">• 寫入 in_flight（崩潰可對帳）</text>
+      <text x="30" y="120" font-size="11" fill="#334155">• 決定下一個 state（allowlist）</text>
+      <text x="30" y="138" font-size="10.5" fill="#245db2">promptloop.py · Runner</text>
+
+      <line x1="228" y1="85" x2="264" y2="85" stroke="#475569" stroke-width="1.6" marker-end="url(#pl-arr)"/>
+
+      <!-- Step 2: Fresh Agent -->
+      <rect x="266" y="22" width="248" height="126" rx="10" fill="#fff0f1" stroke="#c92330" stroke-width="1.6"/>
+      <text x="280" y="46" font-size="12.5" font-weight="700" fill="#c92330">2. Fresh Agent（100% 隔離）</text>
+      <text x="280" y="66" font-size="11" fill="#334155">• 每 state 建新 Agent + 短 Session</text>
+      <text x="280" y="84" font-size="11" fill="#334155">• 只懶載入本 state 的 skills/*.md</text>
+      <text x="280" y="102" font-size="11" fill="#334155">• 只給本 state 允許的 tools</text>
+      <text x="280" y="120" font-size="11" fill="#334155">• 透過 Jinja 讀取前步 Artifact</text>
+      <text x="280" y="138" font-size="10.5" fill="#596570">sessions/exec-NNNN-&lt;state&gt;.jsonl</text>
+
+      <line x1="514" y1="85" x2="550" y2="85" stroke="#475569" stroke-width="1.6" marker-end="url(#pl-arr)"/>
+
+      <!-- Step 3: Objective Validator -->
+      <rect x="552" y="22" width="292" height="126" rx="10" fill="#e9f5ef" stroke="#08724f" stroke-width="1.6"/>
+      <text x="566" y="46" font-size="12.5" font-weight="700" fill="#08724f">3. Independent Runtime Validator</text>
+      <text x="566" y="66" font-size="11" fill="#334155">• command：直接跑測試取真實 exit_code</text>
+      <text x="566" y="84" font-size="11" fill="#334155">• file_exists / git_diff：核對實體檔案</text>
+      <text x="566" y="102" font-size="11" fill="#334155">• schema + checks.py + expr：結構驗證</text>
+      <text x="566" y="120" font-size="11" fill="#334155">• 連續相同失敗簽章 → no_progress</text>
+      <text x="566" y="138" font-size="10.5" fill="#08724f">模型自稱「已通過」≠ 證據</text>
+
+      <!-- Down arrow to Persistence -->
+      <line x1="698" y1="148" x2="698" y2="188" stroke="#475569" stroke-width="1.6" marker-end="url(#pl-arr)"/>
+
+      <!-- Step 4: Persistence -->
+      <rect x="266" y="190" width="578" height="120" rx="10" fill="#f8fafc" stroke="#334155" stroke-width="1.5"/>
+      <text x="282" y="214" font-size="12.5" font-weight="700" fill="#20272e">4. 原子持久化與審計鏈（.kentc-agent/runs/&lt;run&gt;/）</text>
+      <rect x="282" y="226" width="174" height="68" rx="6" fill="#fff" stroke="#cbd5e1"/>
+      <text x="292" y="246" font-size="11.5" font-weight="700" fill="#245db2">state.json（原子替換）</text>
+      <text x="292" y="264" font-size="10.5" fill="#334155">current_state · cycles</text>
+      <text x="292" y="280" font-size="10.5" fill="#334155">steps · in_flight 對帳</text>
+
+      <rect x="468" y="226" width="174" height="68" rx="6" fill="#fff" stroke="#cbd5e1"/>
+      <text x="478" y="246" font-size="11.5" font-weight="700" fill="#08724f">events.jsonl（純追加）</text>
+      <text x="478" y="264" font-size="10.5" fill="#334155">單調遞增 seq · transition</text>
+      <text x="478" y="280" font-size="10.5" fill="#334155">evidence · reconciled_crash</text>
+
+      <rect x="654" y="226" width="174" height="68" rx="6" fill="#fff" stroke="#cbd5e1"/>
+      <text x="664" y="246" font-size="11.5" font-weight="700" fill="#6548a6">sessions/ &amp; Artifacts</text>
+      <text x="664" y="264" font-size="10.5" fill="#334155">每階段獨立 .jsonl</text>
+      <text x="664" y="280" font-size="10.5" fill="#334155">reports/ · notes/ · diff</text>
+
+      <!-- Loop back arrow to Controller -->
+      <path d="M 266 250 L 122 250 L 122 150" fill="none" stroke="#245db2" stroke-width="1.6" marker-end="url(#pl-arr)"/>
+      <text x="132" y="242" font-size="10.5" font-weight="600" fill="#245db2">回報證據 → 決定下個 State</text>
+
+      <!-- Terminal Box -->
+      <rect x="16" y="190" width="90" height="120" rx="10" fill="#fff5de" stroke="#d97706" stroke-width="1.4"/>
+      <text x="61" y="218" text-anchor="middle" font-size="11.5" font-weight="700" fill="#08724f">DONE</text>
+      <text x="61" y="246" text-anchor="middle" font-size="11.5" font-weight="700" fill="#865500">PAUSE</text>
+      <text x="61" y="274" text-anchor="middle" font-size="11.5" font-weight="700" fill="#c92330">ESCALATE</text>
+      <text x="61" y="298" text-anchor="middle" font-size="10" fill="#596570">終止態</text>
+      <line x1="61" y1="148" x2="61" y2="188" stroke="#c92330" stroke-width="1.5" marker-end="url(#pl-red)"/>
+    </svg>
+    <p class="diagram-cap">圖 09-1：PromptLoop 核心迴圈。Controller 透過磁碟 Artifact 驅動每階段一隻新鮮 Agent，並由獨立 Validator 裁決跳轉。</p>
   </div>
-  <div class="grid2" style="margin-top:16px">
-<pre><code><span class="comment"># 示範 YAML：所有模板變數均有定義</span>
-name: evidence-brief
-<span class="comment"># 文件就是工作區（-w）裡的檔案：不需要資料夾參數</span>
-instructions: |
-  使用繁體中文。區分原文明示與推論。
-  每個重要事實標示檔名與位置；數值用工具計算。
-tools: [read, bash]
-steps:
-  - id: extract
-    tools: [read, bash]
-    prompt: "讀取 {{ documents('.') | join(', ') }}，整理事實、位置與缺口。"
-  - id: check
-    tools: [read, bash]
-    prompt: "核對前一步的關鍵數字與引文；不確定之處明確列出。"
-  - id: review
-    ask: "請確認核對結果，或輸入修正要求："
-  - id: brief
-    tools: []
-    prompt: "依證據與審閱意見撰寫摘要；不足之處不可補猜。"
-    output: reports/brief.md</code></pre>
-    <div class="box"><h3>步驟切分的理由</h3><ol class="recipe"><li><b>擷取與核對需要工具</b>查找與精確計算有實際執行路徑。</li><li><b>審閱是明確決策點</b>未答即停、之後恢復；模型不得冒充批准。</li><li><b>撰稿只用已得證據</b><code>tools: []</code>；<code>output</code> 由 Runner 存，無需 write。</li></ol><p>結構化輸出：<code>format: json</code> ＋ <code>schema</code>；不符重試一次。</p><p><code>state.json</code>（步驟結果、決策）＋ <code>session.jsonl</code>（對話）→ <code>--resume</code> 從未完成步驟續跑。</p></div>
+
+  <h3 class="part idea" id="coding-loop" data-step="3">實戰狀態機：5-State Coding Loop（coding-loop.yaml）</h3>
+  <p class="sub">以標準程式開發迴圈為例，<code>test</code> 與 <code>exit_gate</code> 直接由 runtime 跑測試指令，失敗自動回跳 <code>improve</code>，唯有通過零模型呼叫的 <code>exit_gate</code> 才能進入 <code>DONE</code>：</p>
+
+  <div class="diagram-box">
+    <svg viewBox="0 0 860 245" width="860" height="245" role="img" aria-label="5-State Coding Loop 狀態機：plan、build、test、review、improve 與 exit_gate" style="font-family:var(--sans)">
+      <defs>
+        <marker id="cl-arr" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#475569"/>
+        </marker>
+        <marker id="cl-red" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#c92330"/>
+        </marker>
+        <marker id="cl-green" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#08724f"/>
+        </marker>
+      </defs>
+
+      <!-- Top row: PLAN -> BUILD -> TEST -> REVIEW -> EXIT_GATE -> DONE -->
+      <rect x="14" y="34" width="106" height="58" rx="9" fill="#edf3fd" stroke="#245db2" stroke-width="1.5"/>
+      <text x="67" y="58" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e3a8a">PLAN</text>
+      <text x="67" y="76" text-anchor="middle" font-size="10.5" fill="#475569">挑最高優先任務</text>
+
+      <line x1="120" y1="63" x2="148" y2="63" stroke="#475569" stroke-width="1.5" marker-end="url(#cl-arr)"/>
+
+      <rect x="150" y="34" width="110" height="58" rx="9" fill="#fff0f1" stroke="#c92330" stroke-width="1.5"/>
+      <text x="205" y="58" text-anchor="middle" font-size="12.5" font-weight="700" fill="#c92330">BUILD</text>
+      <text x="205" y="76" text-anchor="middle" font-size="10.5" fill="#475569">驗 git_diff</text>
+
+      <line x1="260" y1="63" x2="288" y2="63" stroke="#475569" stroke-width="1.5" marker-end="url(#cl-arr)"/>
+
+      <rect x="290" y="34" width="116" height="58" rx="9" fill="#e9f5ef" stroke="#08724f" stroke-width="1.5"/>
+      <text x="348" y="58" text-anchor="middle" font-size="12.5" font-weight="700" fill="#08724f">TEST</text>
+      <text x="348" y="76" text-anchor="middle" font-size="10.5" fill="#475569">真實 exit_code</text>
+
+      <line x1="406" y1="63" x2="434" y2="63" stroke="#08724f" stroke-width="1.5" marker-end="url(#cl-green)"/>
+
+      <rect x="436" y="34" width="116" height="58" rx="9" fill="#f2eefb" stroke="#6548a6" stroke-width="1.5"/>
+      <text x="494" y="58" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6548a6">REVIEW</text>
+      <text x="494" y="76" text-anchor="middle" font-size="10.5" fill="#475569">獨立新鮮視角</text>
+
+      <line x1="552" y1="63" x2="580" y2="63" stroke="#08724f" stroke-width="1.5" marker-end="url(#cl-green)"/>
+
+      <rect x="582" y="28" width="142" height="70" rx="10" fill="#fff5de" stroke="#d97706" stroke-width="1.8"/>
+      <text x="653" y="54" text-anchor="middle" font-size="12.5" font-weight="700" fill="#865500">EXIT_GATE</text>
+      <text x="653" y="72" text-anchor="middle" font-size="10.5" fill="#334155">零 LLM 確定性驗證</text>
+      <text x="653" y="88" text-anchor="middle" font-size="10" fill="#596570">tests + review approved</text>
+
+      <line x1="724" y1="63" x2="758" y2="63" stroke="#08724f" stroke-width="1.8" marker-end="url(#cl-green)"/>
+
+      <rect x="760" y="34" width="84" height="58" rx="9" fill="#08724f" stroke="#065f46" stroke-width="1.5"/>
+      <text x="802" y="68" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">DONE</text>
+
+      <!-- Bottom: IMPROVE node -->
+      <rect x="332" y="160" width="176" height="62" rx="10" fill="#fff0f1" stroke="#c92330" stroke-width="1.6"/>
+      <text x="420" y="185" text-anchor="middle" font-size="12.5" font-weight="700" fill="#c92330">IMPROVE（修正）</text>
+      <text x="420" y="204" text-anchor="middle" font-size="10.5" fill="#475569">接收失敗 evidence / review</text>
+
+      <!-- Failure arrows into IMPROVE -->
+      <path d="M 348 92 L 348 158" fill="none" stroke="#c92330" stroke-width="1.5" marker-end="url(#cl-red)"/>
+      <text x="308" y="132" font-size="10.5" fill="#c92330">failed</text>
+
+      <path d="M 494 92 L 494 158" fill="none" stroke="#c92330" stroke-width="1.5" marker-end="url(#cl-red)"/>
+      <text x="502" y="132" font-size="10.5" fill="#c92330">issues_found</text>
+
+      <path d="M 653 98 L 653 191 L 510 191" fill="none" stroke="#c92330" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#cl-red)"/>
+      <text x="585" y="183" font-size="10.5" fill="#c92330">gate failed</text>
+
+      <!-- IMPROVE back to TEST (fixed) or PLAN (needs_replan) -->
+      <path d="M 380 160 L 380 94" fill="none" stroke="#08724f" stroke-width="1.5" marker-end="url(#cl-green)"/>
+      <text x="386" y="132" font-size="10.5" fill="#08724f">fixed</text>
+
+      <path d="M 332 191 L 67 191 L 67 94" fill="none" stroke="#245db2" stroke-width="1.5" marker-end="url(#cl-arr)"/>
+      <text x="155" y="183" font-size="10.5" fill="#245db2">needs_replan → 重新規劃</text>
+    </svg>
+    <p class="diagram-cap">圖 09-2：<code>coding-loop.yaml</code> 狀態轉換圖。連續失敗簽章不變達 <code>no_progress_limit</code> 自動 <code>PAUSE</code>；重試超限自動 <code>ESCALATE</code>。</p>
   </div>
-  <div class="callout warn"><b>工具清單不是作業系統沙箱。</b> 只限本步驟可用工具；<code>write</code>／<code>edit</code> 受工作區路徑限制，<code>bash</code> 仍具執行程序權限。</div>
-  <h3 class="part data" id="data" data-step="3">依據：測試與實際使用後的修正</h3>
-  <ul class="problem-list">
-    <li><b>失敗不留半成品</b>：用完 <code>max_turns</code> → 「no final answer within max_turns」失敗，不寫 <code>output</code>（<a href="../../tests/test_untrusted_inputs.py">test_untrusted_inputs.py</a>）。</li>
-    <li><b>輸入錯誤可修正續跑</b>：文件資料夾不存在 → 明確報錯；<code>--resume latest -i KEY=VALUE</code> 覆寫輸入，已完成步驟保留（同上）。</li>
-    <li><b>實際使用的修正</b>：「工作區即文件資料夾」（移除 <code>docs_dir</code> 等路徑參數）、有 <code>output</code> 步驟告知「回覆由 Runner 存檔」。詳見 <a href="web.html">09 · 網路研究</a>。</li>
-  </ul>
-  <p class="source">實作對照：<a href="../../src/kentc_agent/workflow.py">workflow.py · Runner</a><a href="../../tests/test_tools_workflow.py">tests/test_tools_workflow.py</a><a href="../../tests/test_untrusted_inputs.py">tests/test_untrusted_inputs.py</a></p>
+
+  <h3 class="part idea" id="states" data-step="4">四種 State 類型與客觀 Validator 清單</h3>
+  <div class="grid2">
+    <div class="box">
+      <h3>四種 State 類型</h3>
+      <ul class="problem-list">
+        <li><code>prompt:</code> — 新鮮 <code>Agent</code> 執行任務，可搭 <code>skills:</code>、<code>tools:</code>、<code>format: json</code>、<code>schema:</code>、<code>checks:</code>、<code>output:</code>。</li>
+        <li><code>gate: true</code> — <b>零模型呼叫</b>的確定性閘門，僅跑 <code>validators:</code> 決定 <code>passed / failed</code>。</li>
+        <li><code>ask:</code> — 人工審核門（非互動時拋 <code>NeedsAnswer</code>，以 <code>--resume --answer</code> 續跑），依回答直接路由。</li>
+        <li><code>web:</code> — 隔離網路研究子代理（支援 <code>plan</code>、<code>foreach</code> 與 <code>approve: true</code>），簡報落盤交付。</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>獨立 Runtime Validators</h3>
+      <ul class="problem-list">
+        <li><code>command:</code> — 由 runtime 在工作區直接執行命令，<code>exit_code == 0</code> 才算通過。</li>
+        <li><code>file_exists:</code> — 驗證目標產出檔確實存在於工作區且非空。</li>
+        <li><code>git_diff: true</code> — 驗證工作區確實有實際變更。</li>
+        <li><code>expr:</code> — 針對 <code>step_data</code>、<code>data</code>、<code>steps</code> 與 <code>evidence</code> 的確定性布林檢查。</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="part data" id="data" data-step="5">依據：內建 7 份 PromptLoop YAML 與驗收測試</h3>
+  <div class="tablewrap"><table><caption>全部遷移至 PromptLoop FSM 的內建流程（config/cli/workflows/）</caption><thead><tr><th scope="col">名稱</th><th scope="col">主要狀態與回跳</th><th scope="col">確定性 exit_gate</th></tr></thead><tbody>
+    <tr><td><code>coding-loop</code></td><td><code>plan → build → test → review → exit_gate</code>（失敗回跳 <code>improve → test / plan</code>）</td><td>真實測試 <code>exit_code == 0</code> ＋ <code>review.verdict == 'approved'</code></td></tr>
+    <tr><td><code>ter-case-review</code></td><td>14 個狀態含 <code>approval: Return → comments → str_revision → approval</code> 閉環重審</td><td>驗證 STR 與 3 份匯出檔全數落盤</td></tr>
+    <tr><td><code>rm-client-insight</code></td><td><code>scope → evidence → graph → boundary_review → analysis → qa → report → review</code></td><td>驗證洞察報告落盤</td></tr>
+    <tr><td><code>case-review</code></td><td><code>inventory → key_values → analysis → review → report → exit_gate</code></td><td>驗證案件報告落盤</td></tr>
+    <tr><td><code>docs-first-insight</code> / <code>web-first-insight</code></td><td>檔案／網路研究 → <code>notes/evidence.md</code> → <code>deliver</code> → <code>exit_gate</code></td><td>驗證 <code>reports/summary.md</code> 落盤</td></tr>
+    <tr><td><code>pdf-brief</code></td><td><code>read → draft → check → exit_gate</code></td><td>驗證 <code>brief.md</code> 落盤</td></tr>
+  </tbody></table></div>
+  <p class="source">實作對照：<a href="../../src/kentc_agent/promptloop.py">promptloop.py</a><a href="../../src/kentc_agent/cli.py">cli.py</a><a href="../../config/cli/workflows/coding-loop.yaml">coding-loop.yaml</a><a href="../../tests/test_promptloop.py">test_promptloop.py</a></p>
 </section>
 </article>
 <nav class="pager" aria-label="上一篇與下一篇" data-pager></nav>
