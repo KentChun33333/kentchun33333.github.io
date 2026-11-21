@@ -16,8 +16,7 @@ from .conftest import FakeLLM
 def test_all_bundled_workflows_load_cleanly():
     files = sorted(BUNDLED.glob("*.yaml"))
     names = {f.stem for f in files}
-    assert {"coding-loop", "case-review", "ter-case-review", "rm-client-insight",
-            "docs-first-insight", "web-first-insight", "pdf-brief"} <= names
+    assert {"coding-loop", "case-review", "docs-first-insight", "web-first-insight", "pdf-brief"} == names
     for f in files:
         wf = load(f)
         assert wf.entry in wf.states

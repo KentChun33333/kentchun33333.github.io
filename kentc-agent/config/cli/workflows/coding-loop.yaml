@@ -1,7 +1,7 @@
 name: coding-loop
 version: 2
 description: >
-  PromptLoop deterministic 5-state coding workflow (PLAN -> BUILD -> TEST -> REVIEW -> IMPROVE -> EXIT_GATE).
+  Deterministic 5-state coding Finite-State Workflow (PLAN -> BUILD -> TEST -> REVIEW -> IMPROVE -> EXIT_GATE).
   Each state runs in a fresh isolated Agent session with explicit disk artifacts and objective runtime validators.
 
 inputs:

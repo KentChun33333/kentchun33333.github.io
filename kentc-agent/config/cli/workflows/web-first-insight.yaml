@@ -1,12 +1,8 @@
 name: web-first-insight
 version: 2
 description: >
-  Pattern 1, web first (PromptLoop FSM): web brief -> review with workspace files into working notes ->
-  deliver artifact -> deterministic exit_gate.
-
-inputs:
-  question: {required: true, description: "the ask: what to find out, and what to deliver (report, HTML, code, ...)"}
-  research: {required: true, description: "what to look up on the web, in one or two sentences (no confidential data)"}
+  Web-first Finite-State Workflow (100% fresh per state): web research brief -> review with workspace files
+  into working notes -> deliver artifact -> deterministic exit_gate.
 
 runtime:
   max_cycles: 10
@@ -25,7 +21,7 @@ entry: research
 
 states:
   research:
-    web: "{{ inputs.research }}"
+    web: "{{ prompt }}"
     output: research/web-brief.md
     routes:
       default: review
@@ -34,7 +30,7 @@ states:
     macro_phase: PLAN
     tools: [read, bash]
     prompt: |
-      The ask: {{ inputs.question }}
+      The ask: {{ prompt }}
       Read the web brief research/web-brief.md. Workspace files: {{ documents('.') | join(', ') }}.
       Read the ones that are source material for the ask; skip the rest (scripts, earlier outputs). When the
       sources hold data, compute the key figures with bash. Reply with working notes in markdown: the key facts and
@@ -48,7 +44,7 @@ states:
     tools: [read, write, edit, bash]
     max_turns: 0
     prompt: |
-      The ask: {{ inputs.question }}
+      The ask: {{ prompt }}
       Deliver exactly what the ask wants, in the form it asks for:
       - a report or insight: markdown, reports/insight.md, unless the ask names another form;
       - HTML (a page, dashboard, interactive view): one self-contained file under reports/ (inline CSS and

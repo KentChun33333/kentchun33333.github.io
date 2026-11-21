@@ -1,11 +1,8 @@
 name: pdf-brief
 version: 2
-description: Read a PDF through the parsing sub-agent, draft a brief, verify it against the source, and pass exit_gate.
-
-inputs:
-  pdf: {required: true, description: path to the PDF}
-  audience: {default: engineers}
-  pages: {default: "", description: "page ranges, e.g. 1-10 (empty: all)"}
+description: >
+  PDF briefing Finite-State Workflow (100% fresh per state): read PDF(s) via parsing sub-agent ->
+  draft brief.md -> verify numbers against source -> deterministic exit_gate.
 
 runtime:
   max_cycles: 8
@@ -18,7 +15,10 @@ states:
   read:
     macro_phase: PLAN
     tools: [read]
-    prompt: "Read {{ inputs.pdf }}{% if inputs.pages %} (pages {{ inputs.pages }}){% endif %}: problem, approach, key results with numbers, limitations."
+    prompt: |
+      Task: {{ prompt }}
+      Workspace PDFs: {{ glob('*.pdf') | join(', ') }}.
+      Read the relevant PDF(s) with the read tool: problem, approach, key results with numbers, and limitations.
     routes:
       default: draft
 
@@ -26,10 +26,11 @@ states:
     macro_phase: EXECUTE
     tools: [write]
     prompt: |
+      Task: {{ prompt }}
       Extracted PDF notes:
       {{ steps.read.output }}
 
-      Write a one-page brief for {{ inputs.audience }} to brief.md, then reply with it.
+      Write a concise one-page brief to brief.md, then reply with it.
     routes:
       default: check
 
@@ -40,7 +41,7 @@ states:
       Source PDF notes:
       {{ steps.read.output }}
 
-      Check brief.md against the source notes (and re-read {{ inputs.pdf }} if unsure): fix wrong or missing
+      Check brief.md against the source notes (re-read the PDF if unsure): fix wrong or missing
       numbers and vague claims with edit, then summarize the changes.
     routes:
       default: exit_gate

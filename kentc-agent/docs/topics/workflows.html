@@ -285,12 +285,10 @@
     </div>
   </div>
 
-  <h3 class="part data" id="data" data-step="5">依據：內建 7 份 Finite-State Workflow YAML 與驗收測試</h3>
-  <div class="tablewrap"><table><caption>全部遷移至 Finite-State Workflow 的內建流程（config/cli/workflows/）</caption><thead><tr><th scope="col">名稱</th><th scope="col">主要狀態與回跳</th><th scope="col">確定性 exit_gate</th></tr></thead><tbody>
+  <h3 class="part data" id="data" data-step="5">依據：內建 5 份純粹通用 Finite-State Workflow YAML 與驗收測試</h3>
+  <div class="tablewrap"><table><caption>內建通用 Finite-State Workflow 清單（config/cli/workflows/；TER／RM 等領域工作台改歸 Studio app.yaml）</caption><thead><tr><th scope="col">名稱</th><th scope="col">主要狀態與回跳</th><th scope="col">確定性 exit_gate</th></tr></thead><tbody>
     <tr><td><code>coding-loop</code></td><td><code>plan → build → test → review → exit_gate</code>（失敗回跳 <code>improve → test / plan</code>）</td><td>真實測試 <code>exit_code == 0</code> ＋ <code>review.verdict == 'approved'</code></td></tr>
-    <tr><td><code>ter-case-review</code></td><td>14 個狀態含 <code>approval: Return → comments → str_revision → approval</code> 閉環重審</td><td>驗證 STR 與 3 份匯出檔全數落盤</td></tr>
-    <tr><td><code>rm-client-insight</code></td><td><code>scope → evidence → graph → boundary_review → analysis → qa → report → review</code></td><td>驗證洞察報告落盤</td></tr>
-    <tr><td><code>case-review</code></td><td><code>inventory → key_values → analysis → review → report → exit_gate</code></td><td>驗證案件報告落盤</td></tr>
+    <tr><td><code>case-review</code></td><td><code>inventory → key_values → analysis → review → report → exit_gate</code></td><td>驗證 <code>reports/case-report.md</code> 落盤</td></tr>
     <tr><td><code>docs-first-insight</code> / <code>web-first-insight</code></td><td>檔案／網路研究 → <code>notes/evidence.md</code> → <code>deliver</code> → <code>exit_gate</code></td><td>驗證 <code>reports/summary.md</code> 落盤</td></tr>
     <tr><td><code>pdf-brief</code></td><td><code>read → draft → check → exit_gate</code></td><td>驗證 <code>brief.md</code> 落盤</td></tr>
   </tbody></table></div>

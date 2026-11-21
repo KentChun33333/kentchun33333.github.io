@@ -1,8 +1,8 @@
 name: docs-first-insight
 version: 2
 description: >
-  Pattern 2, documents first (PromptLoop FSM): workspace files -> working notes -> planned web research
-  (approved by human) -> deliver artifact -> deterministic exit_gate.
+  Documents-first Finite-State Workflow (100% fresh per state): workspace files -> working notes ->
+  planned web research (approved by human) -> deliver artifact -> deterministic exit_gate.
 
 runtime:
   max_cycles: 10
