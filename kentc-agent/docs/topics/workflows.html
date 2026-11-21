@@ -285,7 +285,105 @@
     </div>
   </div>
 
-  <h3 class="part data" id="data" data-step="5">依據：內建 5 份純粹通用 Finite-State Workflow YAML 與驗收測試</h3>
+  <h3 class="part idea" id="authoring" data-step="5">實戰撰寫指南：如何寫一份 Finite-State Workflow YAML</h3>
+  <p class="sub">把 YAML 放進工作區的 <code>workflows/&lt;name&gt;.yaml</code>（或在 Breezeman 頂部 <b>Workflows → + New Workflow</b> 編輯並按 <b>Validate &amp; Save</b>），引擎載入時會自動檢查所有路由、工具與 <code>exit_gate</code> 不變量：</p>
+
+  <div class="grid2">
+<pre><code><span class="comment"># workflows/my-feature-loop.yaml（完整最小範本）</span>
+name: my-feature-loop
+version: 2
+description: Plan -&gt; Implement -&gt; Test -&gt; Exit Gate
+
+runtime:
+  max_cycles: 12             <span class="comment"># 總狀態執行次數上限 → PAUSE</span>
+  max_retries_per_state: 3   <span class="comment"># 單狀態連敗上限 → ESCALATE</span>
+  no_progress_limit: 2       <span class="comment"># 連續相同失敗簽章 → PAUSE</span>
+  max_total_tokens: 300000   <span class="comment"># 選填 token 上限（0 = 不限）</span>
+  max_step_seconds: 300      <span class="comment"># 驗證命令逾時秒數</span>
+
+instructions: |
+  Objective: {{ prompt }}
+  Keep edits minimal and cite exact file paths.
+
+tools: [read, write, edit, bash]  <span class="comment"># 預設工具白名單</span>
+max_turns: 20                     <span class="comment"># 每 state 模型呼叫上限</span>
+entry: plan                       <span class="comment"># 狀態機起點</span>
+
+states:
+  plan:
+    tools: [read, bash]           <span class="comment"># 覆寫為唯讀＋查檔</span>
+    skills: [document-extraction] <span class="comment"># 懶載入 skills/&lt;name&gt;.md</span>
+    prompt: "Plan the work for: {{ prompt }}"
+    format: json
+    schema:
+      task: string
+      files: [string]
+    routes:
+      default: implement
+
+  implement:
+    prompt: |
+      Task: {{ prompt }}
+      Plan: {{ steps.plan.data | json }}
+      {% if steps.test is defined and steps.test.evidence %}
+      Previous test failure: {{ steps.test.evidence | json }}
+      {% endif %}
+    validators:
+      - name: has_changes
+        git_diff: true
+    routes:
+      passed: test
+      failed: implement
+
+  test:
+    tools: [read, bash]
+    prompt: "Verify the implementation."
+    validators:
+      - name: unit_tests
+        command: "uv run pytest -q"  <span class="comment"># Runtime 直接執行取 exit_code</span>
+    routes:
+      passed: exit_gate
+      failed: implement
+
+  exit_gate:
+    gate: true                    <span class="comment"># 零 LLM 呼叫的確定性閘門</span>
+    validators:
+      - name: final_tests
+        command: "uv run pytest -q"
+    routes:
+      passed: DONE
+      failed: implement</code></pre>
+    <div class="box">
+      <h3>模板變數與內建工具速查</h3>
+      <p>因為每個 state 都是 <b>100% 純 <code>fresh</code></b>，跨狀態交接一律靠以下模板變數：</p>
+      <ul class="problem-list">
+        <li><code>{{ prompt }}</code>：呼叫端傳入的任務目標（CLI 位置參數或 Breezeman <code>Schedule</code> Prompt 框），<b>不需宣告 <code>inputs:</code></b>。</li>
+        <li><code>{{ steps.&lt;id&gt;.output }}</code>：前面某 state 的文字回覆。</li>
+        <li><code>{{ steps.&lt;id&gt;.data | json }}</code>：前面某 JSON state 通過 schema 驗證的結構化資料。</li>
+        <li><code>{{ steps.&lt;id&gt;.evidence | json }}</code>：前面 state 的客觀 validator 輸出（含真實 <code>exit_code</code>、<code>stderr</code>）。</li>
+        <li><code>{{ data.&lt;key&gt; }}</code>：所有前面 JSON state 合併後的快捷鍵。</li>
+        <li><code>{{ workspace }}</code>、<code>{{ run_dir }}</code>、<code>{{ cycles }}</code>：目前工作區路徑、執行目錄與週期數。</li>
+        <li>內建函式：<code>documents('.')</code>、<code>glob('*.pdf')</code>、<code>read_file('notes/a.md')</code>；filter：<code>| json</code>、<code>| fromjson</code>、<code>| slug</code>。</li>
+      </ul>
+      <h3 style="margin-top:14px">撰寫避坑檢查表</h3>
+      <ul class="problem-list">
+        <li><b>不可繞過 <code>exit_gate</code></b>：只要有任一 <code>gate: true</code> 狀態，任何 <code>prompt</code> 狀態的 <code>routes</code> 都不得直接指到 <code>DONE</code>（載入即拒）。</li>
+        <li><b>避開 YAML 1.1 布林鍵</b>：<code>routes:</code> 不要寫未加引號的 <code>yes:</code> / <code>no:</code>（會被解析成布林），請寫 <code>approve:</code> / <code>reject:</code> 或加引號。</li>
+        <li><b><code>expr:</code> 用 Jinja2 語法</b>：請寫 <code>steps.work.output != ''</code> 或 <code>step_data.verdict == 'approved'</code>（不要用 Python 內建 <code>bool()</code>）。</li>
+        <li><b>自訂條件路由</b>：若要依 JSON 欄位值分支，加 <code>route_on: "step_data.action"</code> 並在 <code>routes:</code> 列出白名單鍵值（未知值預設 fail-closed → <code>ESCALATE</code>）。</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="tablewrap" style="margin-top:14px"><table><caption>YAML 欄位完整速查表（fsm_workflow.py）</caption><thead><tr><th scope="col">層級</th><th scope="col">欄位</th><th scope="col">說明</th></tr></thead><tbody>
+    <tr><td>頂層</td><td><code>name</code>、<code>description</code>、<code>entry</code>、<code>states</code></td><td>工作流名稱、說明、起點 state id（預設第一個 state）與所有狀態定義。</td></tr>
+    <tr><td>頂層（選配）</td><td><code>instructions</code>、<code>tools</code>、<code>max_turns</code>、<code>effort</code>、<code>skills_dir</code>、<code>inputs</code></td><td>全狀態共用系統指令與預設上限；<code>inputs:</code> 僅在確實需要額外結構化參數（如 <code>test_cmd</code> 預設值）時選用。</td></tr>
+    <tr><td><code>runtime:</code></td><td><code>max_cycles</code>、<code>max_retries_per_state</code>、<code>no_progress_limit</code>、<code>max_total_tokens</code>、<code>max_step_seconds</code>、<code>fail_closed_on_unknown_event</code></td><td>確定性資源與迴圈護欄；超限自動進入 <code>PAUSE</code> 或 <code>ESCALATE</code>。</td></tr>
+    <tr><td><code>states.&lt;id&gt;</code></td><td>四選一：<code>prompt</code>｜<code>gate: true</code>｜<code>ask</code>｜<code>web</code></td><td>決定該 state 類型；<code>prompt</code> 可搭 <code>tools</code>、<code>skills</code>、<code>format: json</code>、<code>schema</code>、<code>checks</code>、<code>output</code>、<code>validators</code>、<code>route_on</code>、<code>routes</code>。</td></tr>
+    <tr><td>終止態</td><td><code>DONE</code>、<code>PAUSE</code>、<code>ESCALATE</code></td><td>保留字，不可作為 state id；由 <code>routes</code> 或 runtime 護欄進入。</td></tr>
+  </tbody></table></div>
+
+  <h3 class="part data" id="data" data-step="6">依據：內建 5 份純粹通用 Finite-State Workflow YAML 與驗收測試</h3>
   <div class="tablewrap"><table><caption>內建通用 Finite-State Workflow 清單（config/cli/workflows/；TER／RM 等領域工作台改歸 Studio app.yaml）</caption><thead><tr><th scope="col">名稱</th><th scope="col">主要狀態與回跳</th><th scope="col">確定性 exit_gate</th></tr></thead><tbody>
     <tr><td><code>coding-loop</code></td><td><code>plan → build → test → review → exit_gate</code>（失敗回跳 <code>improve → test / plan</code>）</td><td>真實測試 <code>exit_code == 0</code> ＋ <code>review.verdict == 'approved'</code></td></tr>
     <tr><td><code>case-review</code></td><td><code>inventory → key_values → analysis → review → report → exit_gate</code></td><td>驗證 <code>reports/case-report.md</code> 落盤</td></tr>
