@@ -74,9 +74,9 @@ window.KENTC_TOPICS = [
     "problem": "單一任務跨天／跨週運行後，主題筆記與 SIM 帳本無限膨脹，最終超過輸出預算導致壓縮失敗。"
   },
   {
-    "tab": "agent", "slug": "workflows", "num": "09", "nav": "PromptLoop FSM", "group": "編排、外部資料與參考",
-    "kicker": "PromptLoop 確定性單代理狀態機（promptloop.py）",
-    "title": "控制器管流程、每階段一隻新鮮 Agent、證據決定結案",
+    "tab": "agent", "slug": "workflows", "num": "09", "nav": "Finite-State Workflow", "group": "編排、外部資料與參考",
+    "kicker": "Finite-State Workflow 確定性狀態機（fsm_workflow.py）",
+    "title": "同一隻 Agent 加上前後護欄：從 Main Agent 到 State-Machine Agent",
     "problem": "線性步驟無法回跳修正、共用長對話會球員兼裁判，小模型常自稱完成卻未通過客觀驗證。"
   },
   {

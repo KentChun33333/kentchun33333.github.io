@@ -378,9 +378,9 @@
   };
   let schedMode = 'prompt';
   let plActiveName = '';
-  const PL_STARTER_YAML = `name: custom-loop
+  const PL_STARTER_YAML = `name: custom-workflow
 version: 2
-description: Custom PromptLoop FSM workflow (100% fresh per state).
+description: Custom Finite-State Workflow (100% fresh agent per state).
 
 inputs:
   goal: {required: true, description: "task goal"}
@@ -442,7 +442,7 @@ states:
       ? 'Additional prompt / task instructions (optional)'
       : 'Prompt for this task';
     $('#schedPrompt').placeholder = schedMode === 'workflow'
-      ? 'Optional extra instructions injected into every PromptLoop state…'
+      ? 'Optional extra instructions injected into every workflow state…'
       : "What should the agent do on each scheduled run in this task's workspace?";
   }
 
@@ -451,7 +451,7 @@ states:
     const statesEl = $('#schedWorkflowStates');
     const box = $('#schedWorkflowInputs');
     if (!wf) {
-      statesEl.textContent = wfName ? `Custom path: ${wfName}` : 'Pick a PromptLoop YAML';
+      statesEl.textContent = wfName ? `Custom path: ${wfName}` : 'Pick a Finite-State Workflow YAML';
       box.innerHTML = '';
       return;
     }
@@ -498,7 +498,7 @@ states:
     const wfSel = $('#schedWorkflow');
     const wantedWf = task.schedule?.workflow || '';
     const wfs = S.workflows || [];
-    wfSel.innerHTML = '<option value="">(select PromptLoop YAML)</option>' +
+    wfSel.innerHTML = '<option value="">(select Finite-State Workflow)</option>' +
       wfs.map(w => `<option value="${esc(w.name)}">${esc(w.name)} (${w.states.length} states · ${w.source})</option>`).join('');
     if (wantedWf && !wfs.some(w => w.name === wantedWf)) {
       wfSel.insertAdjacentHTML('beforeend', `<option value="${esc(wantedWf)}">${esc(wantedWf)}</option>`);
@@ -546,7 +546,7 @@ states:
     $('#promptloopStage').hidden = true;
     const btn = $('#promptloopBtn');
     btn.classList.remove('active');
-    btn.firstElementChild.textContent = 'PromptLoops';
+    btn.firstElementChild.textContent = 'Workflows';
     if ($('#studioStage').hidden && $('#dreamStage').hidden) {
       $('#messages').hidden = false;
       $('#composer').hidden = false;
@@ -556,7 +556,7 @@ states:
     const list = $('#plList');
     const wfs = S.workflows || [];
     if (!wfs.length) {
-      list.innerHTML = '<div class="placeholder">No PromptLoop YAMLs found. Click + New PromptLoop.</div>';
+      list.innerHTML = '<div class="placeholder">No Finite-State Workflow YAMLs found. Click + New Workflow.</div>';
       return;
     }
     list.innerHTML = wfs.map(w => `
@@ -595,9 +595,9 @@ states:
   function startNewPromptLoop() {
     plActiveName = '';
     renderPromptLoopList();
-    $('#plEditorTitle').textContent = 'New PromptLoop YAML';
+    $('#plEditorTitle').textContent = 'New Finite-State Workflow YAML';
     $('#plEditorSource').textContent = 'workflows/<name>.yaml';
-    $('#plNameInput').value = 'custom-loop';
+    $('#plNameInput').value = 'custom-workflow';
     $('#plYamlInput').value = PL_STARTER_YAML;
     $('#plStatesPreview').textContent = 'entry: plan · states: plan → execute → exit_gate';
     $('#plDeleteBtn').hidden = true;
@@ -768,7 +768,7 @@ states:
       plActiveName = saved.name;
       await loadWorkflows();
       await selectPromptLoop(saved.name);
-      toast(`PromptLoop “${saved.name}” validated & saved`);
+      toast(`Workflow “${saved.name}” validated & saved`);
     } catch (err) {
       $('#plStatusMsg').textContent = `Validation error: ${err.message}`;
       toast(err.message, true);
@@ -810,7 +810,7 @@ states:
         body: JSON.stringify({ workflow, inputs, prompt }),
       });
       showTab('live');
-      toast(`Started PromptLoop “${workflow}”`);
+      toast(`Started workflow “${workflow}”`);
     } catch (err) { toast(err.message, true); }
   };
 
@@ -828,7 +828,7 @@ states:
       });
       $('#schedResumeAnswers').value = '';
       showTab('live');
-      toast('Resumed paused PromptLoop workflow');
+      toast('Resumed paused workflow');
     } catch (err) { toast(err.message, true); }
   };
 

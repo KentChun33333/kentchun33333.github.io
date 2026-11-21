@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 from kentc_agent.adapters.llm import LLMError
 from kentc_agent.adapters.tools import ToolError
 from kentc_agent.errors import Aborted
-from kentc_agent.promptloop import WorkflowError
+from kentc_agent.fsm_workflow import WorkflowError
 
 from ..data import DataError
 from ..models import SETTLED, Job, JobEvents

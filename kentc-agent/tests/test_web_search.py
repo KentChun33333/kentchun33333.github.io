@@ -16,7 +16,7 @@ from kentc_agent.adapters.tools import CORE_TOOLS
 from kentc_agent.adapters.web import ProviderError, web_search
 from kentc_agent.adapters.web_research import SCREEN_SYSTEM, WEB_AGENT_SYSTEM, research, run_web_agent
 from kentc_agent.config import Settings
-from kentc_agent.promptloop import Runner, WorkflowError, load, resolve_inputs
+from kentc_agent.fsm_workflow import Runner, WorkflowError, load, resolve_inputs
 
 from .conftest import FakeLLM, call
 

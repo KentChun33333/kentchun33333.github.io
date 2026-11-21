@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="PromptLoop 確定性 FSM 引擎（promptloop.py）：100% 純 fresh 每階段獨立 Agent、客觀 Runtime Validator、零模型呼叫 exit_gate、無進展偵測與崩潰重啟對帳。">
-<title>09 · PromptLoop FSM（promptloop.py）｜kentc_agent 核心方法論</title>
+<meta name="description" content="Finite-State Workflow 確定性狀態機（fsm_workflow.py）：全系統多層代理層級圖（Main Agent / State-Machine Agent / Read & Web Sub-Agents / Studio Agent）、100% 純 fresh 隔離、客觀 Validator 與 exit_gate。">
+<title>09 · Finite-State Workflow（fsm_workflow.py）｜kentc_agent 核心方法論</title>
 <link rel="stylesheet" href="../asset/css/core.css">
 <link rel="stylesheet" href="../asset/css/shell.css">
 </head>
@@ -19,32 +19,104 @@
 <main id="topic" data-slug="workflows">
 <article class="topic">
 <section class="card" id="workflows" aria-labelledby="wf-title">
-  <p class="eyebrow">09 · PromptLoop 確定性單代理狀態機（src/kentc_agent/promptloop.py）</p>
-  <h2 id="wf-title">控制器管流程、Skill 管方法、每階段一隻新鮮 Agent、證據決定結案</h2>
+  <p class="eyebrow">09 · Finite-State Workflow 確定性狀態機（src/kentc_agent/fsm_workflow.py）</p>
+  <h2 id="wf-title">同一隻 Agent 加上前後護欄：從 Main Agent 到 State-Machine Agent</h2>
   <div class="psd">
     <div class="psd-item problem"><span>問題</span><p>線性步驟無法回跳修正；共用長對話會造成 <code>REVIEW</code> 球員兼裁判與上下文膨脹；小型本機模型常出現 <b>false DONE</b>（自稱測試通過但真實 exit code 非 0）。</p></div>
-    <div class="psd-item idea"><span>核心想法</span><p>以 <b>PromptLoop FSM（<code>promptloop.py</code>）</b> 取代舊線性工作流程：<b>100% 純 <code>fresh</code></b>（每 state 開獨立短 Session，靠磁碟 Artifact 交接）、獨立 Runtime Validator 取真實證據、零模型呼叫 <code>exit_gate</code> 把關 <code>DONE</code>。</p></div>
-    <div class="psd-item data"><span>依據</span><p>實作於 <code>src/kentc_agent/promptloop.py</code>，涵蓋 7 份內建 YAML（含 <code>coding-loop.yaml</code>），由 <code>tests/test_promptloop.py</code> 完整驗證。</p></div>
+    <div class="psd-item idea"><span>核心想法</span><p>以 <b>Finite-State Workflow（<code>fsm_workflow.py</code>）</b> 統一工作流程引擎：<b>100% 純 <code>fresh</code></b>（每個 state 是套上 Precondition / Postcondition 的同一隻 <code>kentc_agent.Agent</code>，靠磁碟 Artifact 交接）、獨立 Runtime Validator 取真實證據、零模型呼叫 <code>exit_gate</code> 把關 <code>DONE</code>。</p></div>
+    <div class="psd-item data"><span>依據</span><p>實作於 <code>src/kentc_agent/fsm_workflow.py</code>，涵蓋 7 份內建 YAML（含 <code>coding-loop.yaml</code>），整合進 Breezeman 排程與頂部 <b>Workflows</b> 設定專區，由 <code>tests/test_fsm_workflow.py</code> 完整驗證。</p></div>
   </div>
 
-  <h3 class="part problem" id="problem" data-step="1">設計原則：四層權責邊界（不靠模型自律）</h3>
-  <ul class="problem-list">
-    <li><b>Runtime Controller 擁有控制權</b>：巨觀狀態跳轉（<code>routes:</code>）、迴圈上限（<code>max_cycles</code>）、重試熔斷、無進展偵測與終止態（<code>DONE / PAUSE / ESCALATE</code>）全由確定性程式執行；任何 <code>prompt</code> state 不得繞過 <code>gate</code> 直跳 <code>DONE</code>。</li>
-    <li><b>100% 純 <code>fresh</code>（One Phase = One Fresh Agent）</b>：每個 state 啟動一隻全新隔離的 <code>Agent</code> 與專屬 <code>sessions/&lt;exec_id&gt;-&lt;state&gt;.jsonl</code>，跨 state 只透過 <code>state.json</code>（<code>steps.&lt;id&gt;.output/data</code>）與工作區檔案交接，徹底消除自我錨定偏誤與長迴圈噪音。</li>
-    <li><b>Skills 擁有標準程序（Lazy Loading）</b>：每個 state 透過 <code>skills: [...]</code> 只載入該階段需要的 <code>skills/*.md</code>，節省小視窗 token。</li>
-    <li><b>獨立 Validator 確立客觀證據</b>：由 runtime 直接執行測試命令（取真實 OS <code>exit_code</code>）、檢查 <code>file_exists</code>、<code>git_diff</code>、JSON <code>schema</code> ＋ <code>checks.py</code>；模型自稱通過但實際 <code>exit_code != 0</code> 一律退回。</li>
-  </ul>
-
-  <h3 class="part idea" id="arch" data-step="2">核心架構圖：PromptLoop 執行與證據閉環</h3>
+  <h3 class="part idea" id="agent-hierarchy" data-step="1">全系統多層代理層級圖：同一套引擎的四種角色</h3>
+  <p class="sub">全系統從頭到尾只有<b>一種 <code>kentc_agent.Agent</code> 實作</b>（同一個 <code>loop.py</code>、前景壓縮／LSM），靠外層控制邊界衍生出四種代理層級：</p>
 
   <div class="diagram-box">
-    <svg viewBox="0 0 860 330" width="860" height="330" role="img" aria-label="PromptLoop 確定性 FSM 執行架構圖：Controller、Fresh Agent、Objective Validator 與 Atomic State" style="font-family:var(--sans)">
+    <svg viewBox="0 0 860 400" width="860" height="400" role="img" aria-label="全系統多層代理層級圖：Main Agent、State-Machine Agent、Read Sub-Agent、Web Sub-Agent 與 Studio Agent" style="font-family:var(--sans)">
+      <defs>
+        <marker id="ah-arr" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#475569"/>
+        </marker>
+        <marker id="ah-blue" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#245db2"/>
+        </marker>
+        <marker id="ah-green" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#08724f"/>
+        </marker>
+      </defs>
+
+      <!-- Level 0: Breezeman / CLI Host -->
+      <rect x="16" y="14" width="828" height="58" rx="10" fill="#f8fafc" stroke="#334155" stroke-width="1.5"/>
+      <text x="32" y="38" font-size="12.5" font-weight="700" fill="#20272e">Level 0 · 宿主與排程層（Breezeman FastAPI + Scheduler / CLI）</text>
+      <text x="32" y="57" font-size="11" fill="#596570">決定「何時跑」（排程退避熔斷、WebSocket 串流、Dreaming 全域記憶 memory/INDEX.md）</text>
+
+      <!-- Arrows from Level 0 to Level 1 & Level 2 -->
+      <line x1="210" y1="72" x2="210" y2="104" stroke="#245db2" stroke-width="1.6" marker-end="url(#ah-blue)"/>
+      <text x="220" y="92" font-size="10.5" fill="#245db2">自由對話 / schedule.prompt</text>
+
+      <line x1="620" y1="72" x2="620" y2="104" stroke="#c92330" stroke-width="1.6" marker-end="url(#ah-arr)"/>
+      <text x="630" y="92" font-size="10.5" fill="#c92330">確定性流程 / schedule.workflow</text>
+
+      <!-- Level 1: Main Agent -->
+      <rect x="16" y="106" width="386" height="128" rx="10" fill="#edf3fd" stroke="#245db2" stroke-width="1.6"/>
+      <text x="32" y="130" font-size="12.5" font-weight="700" fill="#1e3a8a">Level 1 · Main Agent（自由對話主代理）</text>
+      <text x="32" y="150" font-size="11" fill="#334155">• 長駐單一 Session（跨輪累積歷史＋前景主題壓縮／LSM）</text>
+      <text x="32" y="168" font-size="11" fill="#334155">• 工具：read / write / edit / bash ＋ 經篩選 web_search</text>
+      <text x="32" y="186" font-size="11" fill="#334155">• 適用：人在迴圈中探索、除錯、跨日例行巡檢</text>
+      <text x="32" y="204" font-size="11" fill="#334155">• 具備固定需求釘選（requirements）與跨日 Date 刷新</text>
+      <text x="32" y="222" font-size="10.5" fill="#245db2">src/kentc_agent/agent/loop.py</text>
+
+      <!-- Level 2: State-Machine Agent -->
+      <rect x="422" y="106" width="422" height="128" rx="10" fill="#fff0f1" stroke="#c92330" stroke-width="1.6"/>
+      <text x="438" y="130" font-size="12.5" font-weight="700" fill="#c92330">Level 2 · State-Machine Agent（Finite-State Workflow）</text>
+      <text x="438" y="150" font-size="11" fill="#334155">• <tspan font-weight="700">Precondition</tspan>：100% 純 fresh 短 Session ＋ 專用 skills ＋ 縮減 tools</text>
+      <text x="438" y="168" font-size="11" fill="#334155">• <tspan font-weight="700">Core</tspan>：底層仍是同一隻 kentc_agent.Agent（含壓縮／LSM）</text>
+      <text x="438" y="186" font-size="11" fill="#334155">• <tspan font-weight="700">Postcondition</tspan>：schema/checks ＋ 客觀 Validator（exit_code）＋ exit_gate</text>
+      <text x="438" y="204" font-size="11" fill="#334155">• 跨 state 只靠 state.json 與實體檔案交接（零球員兼裁判）</text>
+      <text x="438" y="222" font-size="10.5" fill="#c92330">src/kentc_agent/fsm_workflow.py</text>
+
+      <!-- Arrows down to Level 3 Sub-Agents -->
+      <line x1="150" y1="234" x2="150" y2="274" stroke="#08724f" stroke-width="1.5" marker-end="url(#ah-green)"/>
+      <line x1="510" y1="234" x2="210" y2="274" stroke="#08724f" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#ah-green)"/>
+      <text x="158" y="260" font-size="10" fill="#08724f">read 工具自動觸發</text>
+
+      <line x1="560" y1="234" x2="430" y2="274" stroke="#475569" stroke-width="1.5" marker-end="url(#ah-arr)"/>
+      <text x="458" y="259" font-size="10" fill="#475569">獨立 web: state 觸發</text>
+
+      <line x1="720" y1="234" x2="720" y2="274" stroke="#6548a6" stroke-width="1.5" marker-end="url(#ah-arr)"/>
+      <text x="728" y="259" font-size="10" fill="#6548a6">1-state 單步包裝</text>
+
+      <!-- Level 3: Specialized Isolated Sub-Agents -->
+      <rect x="16" y="276" width="268" height="108" rx="10" fill="#e9f5ef" stroke="#08724f" stroke-width="1.5"/>
+      <text x="30" y="299" font-size="12" font-weight="700" fill="#08724f">Read Parsing Sub-Agent</text>
+      <text x="30" y="319" font-size="11" fill="#334155">• 藏在 CORE_TOOLS["read"] 裡</text>
+      <text x="30" y="336" font-size="11" fill="#334155">• 處理 PDF / 影像 / 超大文件</text>
+      <text x="30" y="353" font-size="11" fill="#334155">• 獨立短 Session，回傳精準頁碼事實</text>
+      <text x="30" y="372" font-size="10.5" fill="#08724f">Main 與 State-Machine 皆自動可用</text>
+
+      <rect x="298" y="276" width="264" height="108" rx="10" fill="#fff5de" stroke="#d97706" stroke-width="1.5"/>
+      <text x="312" y="299" font-size="12" font-weight="700" fill="#865500">Web Research Sub-Agent</text>
+      <text x="312" y="319" font-size="11" fill="#334155">• FSM 中走獨立 web: state（不放工具）</text>
+      <text x="312" y="336" font-size="11" fill="#334155">• 限搜尋次數、篩選防注入、驗連結</text>
+      <text x="312" y="353" font-size="11" fill="#334155">• 支援 approve: true 人工放行</text>
+      <text x="312" y="372" font-size="10.5" fill="#865500">產出 research/*.md 交給下個 state</text>
+
+      <rect x="576" y="276" width="268" height="108" rx="10" fill="#f2eefb" stroke="#6548a6" stroke-width="1.5"/>
+      <text x="590" y="299" font-size="12" font-weight="700" fill="#6548a6">Studio Case Agent</text>
+      <text x="590" y="319" font-size="11" fill="#334155">• 底層呼叫 fsm_workflow.Runner</text>
+      <text x="590" y="336" font-size="11" fill="#334155">• confine_reads=True · 永無 bash</text>
+      <text x="590" y="353" font-size="11" fill="#334155">• 唯讀白名單存取 root memory/</text>
+      <text x="590" y="372" font-size="10.5" fill="#6548a6">僅輸出通過 checks 的結構化 JSON</text>
+    </svg>
+    <p class="diagram-cap">圖 09-1：全系統四層代理架構。State-Machine Agent 本質上就是套上 Precondition（skills + tools + fresh session）與 Postcondition（Validator + exit_gate）的 Main Agent，並能無縫調用 Read / Web 隔離子代理。</p>
+  </div>
+
+  <h3 class="part idea" id="arch" data-step="2">Finite-State Workflow 執行與證據閉環</h3>
+
+  <div class="diagram-box">
+    <svg viewBox="0 0 860 330" width="860" height="330" role="img" aria-label="Finite-State Workflow 執行架構圖：Controller、Fresh Agent、Objective Validator 與 Atomic State" style="font-family:var(--sans)">
       <defs>
         <marker id="pl-arr" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
           <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#475569"/>
-        </marker>
-        <marker id="pl-green" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
-          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#08724f"/>
         </marker>
         <marker id="pl-red" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
           <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#c92330"/>
@@ -58,13 +130,13 @@
       <text x="30" y="84" font-size="11" fill="#334155">• 檢查 max_cycles / token 預算</text>
       <text x="30" y="102" font-size="11" fill="#334155">• 寫入 in_flight（崩潰可對帳）</text>
       <text x="30" y="120" font-size="11" fill="#334155">• 決定下一個 state（allowlist）</text>
-      <text x="30" y="138" font-size="10.5" fill="#245db2">promptloop.py · Runner</text>
+      <text x="30" y="138" font-size="10.5" fill="#245db2">fsm_workflow.py · Runner</text>
 
       <line x1="228" y1="85" x2="264" y2="85" stroke="#475569" stroke-width="1.6" marker-end="url(#pl-arr)"/>
 
       <!-- Step 2: Fresh Agent -->
       <rect x="266" y="22" width="248" height="126" rx="10" fill="#fff0f1" stroke="#c92330" stroke-width="1.6"/>
-      <text x="280" y="46" font-size="12.5" font-weight="700" fill="#c92330">2. Fresh Agent（100% 隔離）</text>
+      <text x="280" y="46" font-size="12.5" font-weight="700" fill="#c92330">2. State-Machine Agent（fresh）</text>
       <text x="280" y="66" font-size="11" fill="#334155">• 每 state 建新 Agent + 短 Session</text>
       <text x="280" y="84" font-size="11" fill="#334155">• 只懶載入本 state 的 skills/*.md</text>
       <text x="280" y="102" font-size="11" fill="#334155">• 只給本 state 允許的 tools</text>
@@ -115,7 +187,7 @@
       <text x="61" y="298" text-anchor="middle" font-size="10" fill="#596570">終止態</text>
       <line x1="61" y1="148" x2="61" y2="188" stroke="#c92330" stroke-width="1.5" marker-end="url(#pl-red)"/>
     </svg>
-    <p class="diagram-cap">圖 09-1：PromptLoop 核心迴圈。Controller 透過磁碟 Artifact 驅動每階段一隻新鮮 Agent，並由獨立 Validator 裁決跳轉。</p>
+    <p class="diagram-cap">圖 09-2：Finite-State Workflow 核心迴圈。Controller 透過磁碟 Artifact 驅動每階段新鮮 Agent，並由獨立 Validator 裁決跳轉。</p>
   </div>
 
   <h3 class="part idea" id="coding-loop" data-step="3">實戰狀態機：5-State Coding Loop（coding-loop.yaml）</h3>
@@ -135,7 +207,6 @@
         </marker>
       </defs>
 
-      <!-- Top row: PLAN -> BUILD -> TEST -> REVIEW -> EXIT_GATE -> DONE -->
       <rect x="14" y="34" width="106" height="58" rx="9" fill="#edf3fd" stroke="#245db2" stroke-width="1.5"/>
       <text x="67" y="58" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e3a8a">PLAN</text>
       <text x="67" y="76" text-anchor="middle" font-size="10.5" fill="#475569">挑最高優先任務</text>
@@ -170,12 +241,10 @@
       <rect x="760" y="34" width="84" height="58" rx="9" fill="#08724f" stroke="#065f46" stroke-width="1.5"/>
       <text x="802" y="68" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">DONE</text>
 
-      <!-- Bottom: IMPROVE node -->
       <rect x="332" y="160" width="176" height="62" rx="10" fill="#fff0f1" stroke="#c92330" stroke-width="1.6"/>
       <text x="420" y="185" text-anchor="middle" font-size="12.5" font-weight="700" fill="#c92330">IMPROVE（修正）</text>
       <text x="420" y="204" text-anchor="middle" font-size="10.5" fill="#475569">接收失敗 evidence / review</text>
 
-      <!-- Failure arrows into IMPROVE -->
       <path d="M 348 92 L 348 158" fill="none" stroke="#c92330" stroke-width="1.5" marker-end="url(#cl-red)"/>
       <text x="308" y="132" font-size="10.5" fill="#c92330">failed</text>
 
@@ -185,14 +254,13 @@
       <path d="M 653 98 L 653 191 L 510 191" fill="none" stroke="#c92330" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#cl-red)"/>
       <text x="585" y="183" font-size="10.5" fill="#c92330">gate failed</text>
 
-      <!-- IMPROVE back to TEST (fixed) or PLAN (needs_replan) -->
       <path d="M 380 160 L 380 94" fill="none" stroke="#08724f" stroke-width="1.5" marker-end="url(#cl-green)"/>
       <text x="386" y="132" font-size="10.5" fill="#08724f">fixed</text>
 
       <path d="M 332 191 L 67 191 L 67 94" fill="none" stroke="#245db2" stroke-width="1.5" marker-end="url(#cl-arr)"/>
       <text x="155" y="183" font-size="10.5" fill="#245db2">needs_replan → 重新規劃</text>
     </svg>
-    <p class="diagram-cap">圖 09-2：<code>coding-loop.yaml</code> 狀態轉換圖。連續失敗簽章不變達 <code>no_progress_limit</code> 自動 <code>PAUSE</code>；重試超限自動 <code>ESCALATE</code>。</p>
+    <p class="diagram-cap">圖 09-3：<code>coding-loop.yaml</code> 狀態轉換圖。連續失敗簽章不變達 <code>no_progress_limit</code> 自動 <code>PAUSE</code>；重試超限自動 <code>ESCALATE</code>。</p>
   </div>
 
   <h3 class="part idea" id="states" data-step="4">四種 State 類型與客觀 Validator 清單</h3>
@@ -202,7 +270,7 @@
       <ul class="problem-list">
         <li><code>prompt:</code> — 新鮮 <code>Agent</code> 執行任務，可搭 <code>skills:</code>、<code>tools:</code>、<code>format: json</code>、<code>schema:</code>、<code>checks:</code>、<code>output:</code>。</li>
         <li><code>gate: true</code> — <b>零模型呼叫</b>的確定性閘門，僅跑 <code>validators:</code> 決定 <code>passed / failed</code>。</li>
-        <li><code>ask:</code> — 人工審核門（非互動時拋 <code>NeedsAnswer</code>，以 <code>--resume --answer</code> 續跑），依回答直接路由。</li>
+        <li><code>ask:</code> — 人工審核門（非互動時拋 <code>NeedsAnswer</code>，以 <code>--resume --answer</code> 或 Breezeman UI 續跑），依回答直接路由。</li>
         <li><code>web:</code> — 隔離網路研究子代理（支援 <code>plan</code>、<code>foreach</code> 與 <code>approve: true</code>），簡報落盤交付。</li>
       </ul>
     </div>
@@ -217,8 +285,8 @@
     </div>
   </div>
 
-  <h3 class="part data" id="data" data-step="5">依據：內建 7 份 PromptLoop YAML 與驗收測試</h3>
-  <div class="tablewrap"><table><caption>全部遷移至 PromptLoop FSM 的內建流程（config/cli/workflows/）</caption><thead><tr><th scope="col">名稱</th><th scope="col">主要狀態與回跳</th><th scope="col">確定性 exit_gate</th></tr></thead><tbody>
+  <h3 class="part data" id="data" data-step="5">依據：內建 7 份 Finite-State Workflow YAML 與驗收測試</h3>
+  <div class="tablewrap"><table><caption>全部遷移至 Finite-State Workflow 的內建流程（config/cli/workflows/）</caption><thead><tr><th scope="col">名稱</th><th scope="col">主要狀態與回跳</th><th scope="col">確定性 exit_gate</th></tr></thead><tbody>
     <tr><td><code>coding-loop</code></td><td><code>plan → build → test → review → exit_gate</code>（失敗回跳 <code>improve → test / plan</code>）</td><td>真實測試 <code>exit_code == 0</code> ＋ <code>review.verdict == 'approved'</code></td></tr>
     <tr><td><code>ter-case-review</code></td><td>14 個狀態含 <code>approval: Return → comments → str_revision → approval</code> 閉環重審</td><td>驗證 STR 與 3 份匯出檔全數落盤</td></tr>
     <tr><td><code>rm-client-insight</code></td><td><code>scope → evidence → graph → boundary_review → analysis → qa → report → review</code></td><td>驗證洞察報告落盤</td></tr>
@@ -226,7 +294,8 @@
     <tr><td><code>docs-first-insight</code> / <code>web-first-insight</code></td><td>檔案／網路研究 → <code>notes/evidence.md</code> → <code>deliver</code> → <code>exit_gate</code></td><td>驗證 <code>reports/summary.md</code> 落盤</td></tr>
     <tr><td><code>pdf-brief</code></td><td><code>read → draft → check → exit_gate</code></td><td>驗證 <code>brief.md</code> 落盤</td></tr>
   </tbody></table></div>
-  <p class="source">實作對照：<a href="../../src/kentc_agent/promptloop.py">promptloop.py</a><a href="../../src/kentc_agent/cli.py">cli.py</a><a href="../../config/cli/workflows/coding-loop.yaml">coding-loop.yaml</a><a href="../../tests/test_promptloop.py">test_promptloop.py</a></p>
+  <div class="callout"><b>在 Breezeman 介面中使用：</b>可由頂部列 <b>Workflows</b> 設定專區檢視／新增／驗證儲存 <code>workflows/*.yaml</code>，並在任務右側 <b>Schedule → Finite-State Workflow</b> 填入動態 inputs 與選填額外 prompt 定時或立即執行（詳見 <a href="breezeman-long-horizon.html">B1 · 排程狀態機與長程韌性</a>）。</div>
+  <p class="source">實作對照：<a href="../../src/kentc_agent/fsm_workflow.py">fsm_workflow.py</a><a href="../../src/kentc_agent/cli.py">cli.py</a><a href="../../config/cli/workflows/coding-loop.yaml">coding-loop.yaml</a><a href="../../tests/test_fsm_workflow.py">test_fsm_workflow.py</a></p>
 </section>
 </article>
 <nav class="pager" aria-label="上一篇與下一篇" data-pager></nav>

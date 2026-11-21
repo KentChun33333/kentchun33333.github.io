@@ -10,7 +10,7 @@ import pytest
 from kentc_agent.adapters.documents.common import Source
 from kentc_agent.adapters.llm import Reply
 from kentc_agent.adapters.tools import CORE_TOOLS, ToolError
-from kentc_agent.promptloop import Runner, WorkflowError, load
+from kentc_agent.fsm_workflow import Runner, WorkflowError, load
 
 from .conftest import FakeLLM, call
 

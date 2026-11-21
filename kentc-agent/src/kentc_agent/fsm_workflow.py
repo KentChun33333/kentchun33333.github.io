@@ -1,4 +1,4 @@
-"""PromptLoop FSM Workflow Engine: deterministic macro controller + fresh single-agent states.
+"""Finite-State Workflow (FSM) engine: deterministic macro controller + fresh single-agent states.
 
 Design principle:
 - The runtime owns control (macro states, allowlisted transitions, budgets, retries, no-progress detection, exit gates).

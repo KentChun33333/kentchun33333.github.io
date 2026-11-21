@@ -22,7 +22,7 @@
         <div class="picker-list" id="chatList" role="listbox"></div>
       </div>
     </div>
-    <button class="btn small promptloop-top-btn" id="promptloopBtn" type="button" title="PromptLoop FSM YAML Settings"><span>PromptLoops</span></button>
+    <button class="btn small promptloop-top-btn" id="promptloopBtn" type="button" title="Finite-State Workflow YAML Settings"><span>Workflows</span></button>
     <button class="btn small dream-top-btn" id="dreamBtn" type="button" title="User-level Memory & Dreaming Scheduler"><span class="dot" id="dreamTopDot"></span><span>Dreaming</span></button>
     <span class="pill" id="modelPill" title="LLM server"><span class="dot"></span><span>connecting…</span></span>
   </div>
@@ -104,12 +104,12 @@
     <div class="promptloop-stage" id="promptloopStage" hidden>
       <div class="studio-bar">
         <div class="studio-bar-meta">
-          <span class="promptloop-pill">PROMPTLOOP</span>
-          <strong>PromptLoop FSM Settings</strong>
+          <span class="promptloop-pill">FSM WORKFLOW</span>
+          <strong>Finite-State Workflows</strong>
           <small class="mono muted">workflows/*.yaml + bundled</small>
         </div>
         <div class="studio-bar-actions">
-          <button class="btn secondary small" id="plNewBtn" type="button">+ New PromptLoop</button>
+          <button class="btn secondary small" id="plNewBtn" type="button">+ New Workflow</button>
           <button class="btn small" id="plBackChat" type="button">← Chat</button>
         </div>
       </div>
@@ -124,17 +124,17 @@
           </div>
           <form class="dream-card pl-editor-card" id="plEditorForm">
             <div class="dream-card-head">
-              <strong id="plEditorTitle">Select or create a PromptLoop YAML</strong>
+              <strong id="plEditorTitle">Select or create a Finite-State Workflow YAML</strong>
               <span class="mono caption muted" id="plEditorSource"></span>
             </div>
             <label class="sched-row">
               <span>Name</span>
-              <input class="input mono" id="plNameInput" type="text" placeholder="my-coding-loop" required pattern="[A-Za-z0-9][A-Za-z0-9_-]{0,63}">
+              <input class="input mono" id="plNameInput" type="text" placeholder="my-fsm-workflow" required pattern="[A-Za-z0-9][A-Za-z0-9_-]{0,63}">
             </label>
             <div class="caption mono muted" id="plStatesPreview"></div>
             <label class="sched-field pl-yaml-field">
-              <span class="caption">YAML Definition (validated by PromptLoop FSM engine on save)</span>
-              <textarea class="input mono pl-yaml" id="plYamlInput" rows="18" spellcheck="false" placeholder="name: my-loop&#10;entry: plan&#10;states: ..."></textarea>
+              <span class="caption">YAML Definition (validated by Finite-State Workflow engine on save)</span>
+              <textarea class="input mono pl-yaml" id="plYamlInput" rows="18" spellcheck="false" placeholder="name: my-workflow&#10;entry: plan&#10;states: ..."></textarea>
             </label>
             <div class="caption mono" id="plStatusMsg"></div>
             <div class="task-form-actions">
@@ -272,7 +272,7 @@
       <div class="skill-list" id="skillList" role="radiogroup" aria-label="Skill for this chat"></div>
     </div>
     <div class="tab-body" id="scheduleTab" hidden>
-      <div class="caption skill-note">Run a free-form prompt or a deterministic PromptLoop FSM YAML on an interval inside the active task's workspace.</div>
+      <div class="caption skill-note">Run a free-form prompt or a deterministic Finite-State Workflow YAML on an interval inside the active task's workspace.</div>
       <div class="placeholder" id="schedEmpty">Select or create a task on the left to configure its schedule.</div>
       <form class="sched-panel" id="taskSchedForm" hidden>
         <div class="sched-head">
@@ -281,7 +281,7 @@
         </div>
         <div class="filter-row sched-mode-row" id="schedModeRow">
           <button class="seg active" type="button" data-mode="prompt">Prompt</button>
-          <button class="seg" type="button" data-mode="workflow">PromptLoop FSM</button>
+          <button class="seg" type="button" data-mode="workflow">Finite-State Workflow</button>
         </div>
         <label class="sched-row"><span>Every (minutes)</span><input class="input mono" id="schedInterval" type="number" min="1" step="1" value="60" required></label>
         <div id="schedPromptBox">
@@ -290,7 +290,7 @@
         <div id="schedWorkflowBox" hidden>
           <label class="sched-row">
             <span>Workflow</span>
-            <select class="input mono" id="schedWorkflow"><option value="">(select PromptLoop YAML)</option></select>
+            <select class="input mono" id="schedWorkflow"><option value="">(select Finite-State Workflow)</option></select>
           </label>
           <div class="sched-wf-meta">
             <span class="caption mono muted" id="schedWorkflowStates"></span>

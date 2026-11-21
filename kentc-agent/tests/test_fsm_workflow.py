@@ -1,4 +1,4 @@
-"""Acceptance tests for the unified PromptLoop FSM engine in kentc_agent.workflow."""
+"""Acceptance tests for the unified Finite-State Workflow (FSM) engine in kentc_agent.fsm_workflow."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 from kentc_agent.adapters.llm import Reply, Usage
-from kentc_agent.promptloop import BUNDLED, Runner, WorkflowError, load, resolve_inputs
+from kentc_agent.fsm_workflow import BUNDLED, Runner, WorkflowError, load, resolve_inputs
 
 from .conftest import FakeLLM
 
@@ -369,7 +369,7 @@ states:
         assert str((tmp_path / "memory" / "INDEX.md").resolve()) in seen_systems[0]
         assert "Focus strictly on Q4 liquidity metrics." in seen_systems[0]
         # Compact summary appended to task Chat.session (visible to UI & Dreaming)
-        assert any("[PromptLoop · gated-loop] status=waiting_human" in str(m["content"]) for m in chat.session.messages)
+        assert any("[FSM Workflow · gated-loop] status=waiting_human" in str(m["content"]) for m in chat.session.messages)
 
         # 4. Resume via API with human answer -> completes to DONE and appends DONE summary
         r_res = client.post(
@@ -380,7 +380,7 @@ states:
         deadline = _time.monotonic() + 3.0
         while _time.monotonic() < deadline and chat.busy:
             _time.sleep(0.01)
-        assert any("[PromptLoop · gated-loop] status=DONE" in str(m["content"]) for m in chat.session.messages)
+        assert any("[FSM Workflow · gated-loop] status=DONE" in str(m["content"]) for m in chat.session.messages)
 
         # 5. PromptLoop YAML Setting Zone API: GET / PUT (validate & save) / DELETE
         got = client.get("/api/workflows/coding-loop")

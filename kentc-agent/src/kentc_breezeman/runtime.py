@@ -30,7 +30,7 @@ from kentc_agent.agent import Aborted, Agent, Events, build_tools
 from kentc_agent.config import STATE_DIR, Settings
 from kentc_agent.context.compaction import CompactionError
 from kentc_agent.ports import LLM
-from kentc_agent.promptloop import (
+from kentc_agent.fsm_workflow import (
     NeedsAnswer,
     Runner as WorkflowRunner,
     WorkflowError,
@@ -443,7 +443,7 @@ class Chat:
             state = runner.run()
         except NeedsAnswer as exc:
             summary = (
-                f"[PromptLoop · {wf.name}] status=waiting_human step={exc.gate['step']} "
+                f"[FSM Workflow · {wf.name}] status=waiting_human step={exc.gate['step']} "
                 f"run_dir={run_dir.relative_to(self.workspace).as_posix() if run_dir.is_relative_to(self.workspace) else run_dir}"
             )
             self.session.append({"role": "assistant", "content": summary})
@@ -455,7 +455,7 @@ class Chat:
         status = str(state.get("status") or "DONE")
         cycles = int(state.get("cycles") or 0)
         summary = (
-            f"[PromptLoop · {wf.name}] status={status} cycles={cycles} "
+            f"[FSM Workflow · {wf.name}] status={status} cycles={cycles} "
             f"tokens={state.get('total_tokens', 0)} run_dir={rel_run}"
         )
         self.session.append({"role": "assistant", "content": summary})

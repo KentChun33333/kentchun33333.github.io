@@ -208,7 +208,7 @@ def screen(ctx: ToolContext, query: str, raw: list[WebResult], flags: list[list[
            ) -> dict[int, tuple[str, str, str]]:
     """The screening sub-agent's verdict: result index -> (title, info, removed). Raises ToolError when it fails."""
     from ..agent import Agent
-    from ..promptloop import parse_json_object
+    from ..fsm_workflow import parse_json_object
     from .session import Session
 
     blocks = []

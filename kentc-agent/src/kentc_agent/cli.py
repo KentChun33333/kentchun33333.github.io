@@ -26,7 +26,7 @@ from .agent import Aborted, Agent, build_tools, new_session_path
 from .config import STATE_DIR, load_settings
 from .context.compaction import CompactionError
 from .ui import ConsoleUI, fmt_tokens
-from .promptloop import Runner, WorkflowError, find_workflow, load, resolve_inputs, workflow_dirs
+from .fsm_workflow import Runner, WorkflowError, find_workflow, load, resolve_inputs, workflow_dirs
 
 CHAT_HELP = """Commands:
   /attach <file> [question]  add a file to your next message (PDFs/images/large documents via the parsing sub-agent)
