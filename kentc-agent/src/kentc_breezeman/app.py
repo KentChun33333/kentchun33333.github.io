@@ -196,6 +196,68 @@ def create_app(runtime: Runtime, token: str = "") -> FastAPI:
             raise HTTPException(404, f"no task {task_id}") from None
         return {"ok": True}
 
+    @app.get("/api/workflows")
+    def list_workflows(task: str = "") -> list[dict[str, Any]]:
+        return runtime.list_workflows(workspace_of(task) if task else None)
+
+    @app.get("/api/workflows/{name}")
+    def get_workflow(name: str, task: str = "") -> dict[str, Any]:
+        try:
+            return runtime.get_workflow(name, workspace_of(task) if task else None)
+        except KeyError as e:
+            raise HTTPException(404, str(e)) from None
+
+    @app.put("/api/workflows/{name}")
+    def save_workflow(name: str, body: dict[str, Any]) -> dict[str, Any]:
+        content = body.get("content")
+        if not isinstance(content, str):
+            raise HTTPException(400, "content must be a YAML string")
+        try:
+            return runtime.save_workflow(name, content)
+        except ValueError as e:
+            raise HTTPException(400, str(e)) from None
+
+    @app.delete("/api/workflows/{name}")
+    def delete_workflow(name: str) -> dict[str, bool]:
+        try:
+            runtime.delete_workflow(name)
+        except KeyError as e:
+            raise HTTPException(404, str(e)) from None
+        except ValueError as e:
+            raise HTTPException(400, str(e)) from None
+        return {"ok": True}
+
+    @app.post("/api/tasks/{task_id}/workflow/run")
+    def run_task_workflow(task_id: str, body: dict[str, Any]) -> dict[str, Any]:
+        workflow = body.get("workflow")
+        resume = body.get("resume")
+        prompt = body.get("prompt") or ""
+        inputs = body.get("inputs") or {}
+        answers = body.get("answers") or {}
+        if workflow is not None and not isinstance(workflow, str):
+            raise HTTPException(400, "workflow must be a string")
+        if resume is not None and not isinstance(resume, str):
+            raise HTTPException(400, "resume must be a string")
+        if not isinstance(prompt, str):
+            raise HTTPException(400, "prompt must be a string")
+        if not isinstance(inputs, dict) or not isinstance(answers, dict):
+            raise HTTPException(400, "inputs and answers must be objects")
+        try:
+            return runtime.run_task_workflow(
+                task_id,
+                workflow=workflow,
+                inputs=inputs,
+                prompt=prompt,
+                resume=resume,
+                answers={str(k): str(v) for k, v in answers.items()},
+            )
+        except KeyError:
+            raise HTTPException(404, f"no task {task_id}") from None
+        except ChatBusy as e:
+            raise HTTPException(409, str(e)) from None
+        except ValueError as e:
+            raise HTTPException(400, str(e)) from None
+
     @app.get("/api/dream")
     def dream_status() -> dict[str, Any]:
         return runtime.dream_status()

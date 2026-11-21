@@ -30,6 +30,15 @@ from kentc_agent.agent import Aborted, Agent, Events, build_tools
 from kentc_agent.config import STATE_DIR, Settings
 from kentc_agent.context.compaction import CompactionError
 from kentc_agent.ports import LLM
+from kentc_agent.promptloop import (
+    NeedsAnswer,
+    Runner as WorkflowRunner,
+    WorkflowError,
+    find_workflow,
+    load as load_workflow,
+    resolve_inputs as resolve_workflow_inputs,
+    workflow_dirs,
+)
 from kentc_agent.skills import FRONT_RE, NAME_RE, load_skills
 
 from .dream import DREAM_MAX_CONSECUTIVE_ERRORS, DREAM_RETRY_SEC, apply_dream_error, run_dream
@@ -292,6 +301,25 @@ class Chat:
     def compact(self, focus: str | None) -> None:
         self._spawn("compact", lambda: self._compact(focus))
 
+    def run_workflow(
+        self,
+        workflow: str | None = None,
+        inputs: dict[str, Any] | None = None,
+        *,
+        prompt: str = "",
+        answers: dict[str, str] | None = None,
+        resume: str | None = None,
+        on_complete: Callable[[dict[str, Any]], None] | None = None,
+    ) -> None:
+        """Run or resume a PromptLoop FSM workflow inside this chat's workspace on the worker thread."""
+        if not workflow and not resume:
+            raise ValueError("workflow or resume is required")
+        self._spawn(
+            "workflow",
+            lambda: self._run_workflow(workflow, inputs or {}, prompt=prompt.strip(), answers=answers or {}, resume=resume),
+            on_complete=on_complete,
+        )
+
     def clear_context(self, scope: str = "all") -> dict[str, Any]:
         """Clear live messages, checkpoint, or both from the active context while keeping the journal."""
         with self._lock:
@@ -370,6 +398,72 @@ class Chat:
                       "attachments": []})
         compacted = self.agent.compact(focus or None, force=True)
         return {"type": "compacted", "compacted": compacted}
+
+    def _run_workflow(
+        self,
+        workflow: str | None,
+        inputs: dict[str, Any],
+        *,
+        prompt: str = "",
+        answers: dict[str, str],
+        resume: str | None,
+    ) -> dict[str, Any]:
+        runs_dir = self.workspace / STATE_DIR / "runs"
+        if resume:
+            if resume == "latest":
+                candidates = [p for p in runs_dir.iterdir() if p.is_dir() and (p / "state.json").is_file()] if runs_dir.is_dir() else []
+                if not candidates:
+                    raise WorkflowError("no workflow runs to resume in this task workspace")
+                run_dir = max(candidates, key=lambda p: p.stat().st_mtime)
+            else:
+                run_dir = inside(self.workspace, resume)
+            saved = json.loads((run_dir / "state.json").read_text(encoding="utf-8"))
+            wf = load_workflow(Path(saved["workflow"]))
+            resolved_inputs = {**saved.get("inputs", {}), **{k: str(v) for k, v in inputs.items()}}
+        else:
+            assert workflow is not None
+            wf = load_workflow(find_workflow(self.workspace, workflow))
+            resolved_inputs = resolve_workflow_inputs(wf, {k: str(v) for k, v in inputs.items()})
+            run_dir = runs_dir / f"{time.strftime('%Y%m%d-%H%M%S')}-{wf.name}-{uuid.uuid4().hex[:4]}"
+
+        # Inject optional task-specific prompt and root global memory hint into every fresh state
+        if prompt:
+            extra = f"## Additional Task Prompt\n{prompt}"
+            if extra not in wf.instructions:
+                wf.instructions = f"{wf.instructions.rstrip()}\n\n{extra}" if wf.instructions else extra
+        hint = memory_hint(self.runtime.workspace)
+        if hint not in wf.instructions:
+            wf.instructions = f"{wf.instructions.rstrip()}\n\n{hint}" if wf.instructions else hint
+
+        label = f"/workflow {wf.name}" + (f" --resume {resume}" if resume else "")
+        self.publish({"type": "run_start", "run": "workflow", "text": label, "attachments": []})
+
+        runner = WorkflowRunner(wf, self.ctx, resolved_inputs, run_dir, answers=answers)
+        try:
+            state = runner.run()
+        except NeedsAnswer as exc:
+            summary = (
+                f"[PromptLoop · {wf.name}] status=waiting_human step={exc.gate['step']} "
+                f"run_dir={run_dir.relative_to(self.workspace).as_posix() if run_dir.is_relative_to(self.workspace) else run_dir}"
+            )
+            self.session.append({"role": "assistant", "content": summary})
+            return {"type": "paused", "status": "waiting_human", "waiting": exc.gate, "run_dir": str(run_dir)}
+        finally:
+            runner.close()
+
+        rel_run = run_dir.relative_to(self.workspace).as_posix() if run_dir.is_relative_to(self.workspace) else str(run_dir)
+        status = str(state.get("status") or "DONE")
+        cycles = int(state.get("cycles") or 0)
+        summary = (
+            f"[PromptLoop · {wf.name}] status={status} cycles={cycles} "
+            f"tokens={state.get('total_tokens', 0)} run_dir={rel_run}"
+        )
+        self.session.append({"role": "assistant", "content": summary})
+        if status == "DONE":
+            return {"type": "done", "status": status, "answer": summary, "cycles": cycles, "run_dir": str(run_dir)}
+        if status == "PAUSE":
+            return {"type": "paused", "status": "paused", "cycles": cycles, "run_dir": str(run_dir)}
+        return {"type": "error", "message": f"workflow {wf.name} ended with status {status}", "run_dir": str(run_dir)}
 
     # ------------------------------------------------------------------ views
     def transcript(self) -> list[dict[str, Any]]:
@@ -595,7 +689,9 @@ class Runtime:
             self._write_tasks(tasks)
         return self._enrich_tasks([task])[0]
 
-    def _normalize_schedule(self, raw: Any, prev: dict[str, Any] | None, now: float) -> dict[str, Any] | None:
+    def _normalize_schedule(
+        self, raw: Any, prev: dict[str, Any] | None, now: float, *, task_workspace: Path | None = None
+    ) -> dict[str, Any] | None:
         if raw is None:
             return None
         if not isinstance(raw, dict):
@@ -608,8 +704,25 @@ class Runtime:
         if interval_min < 1:
             raise ValueError("interval_min must be at least 1 minute")
         prompt = str(raw.get("prompt") or "").strip()
-        if enabled and not prompt:
-            raise ValueError("schedule prompt is required when enabled")
+        workflow = raw.get("workflow")
+        if workflow is not None:
+            if not isinstance(workflow, str):
+                raise ValueError("schedule workflow must be a string or null")
+            workflow = workflow.strip() or None
+        wf_inputs = raw.get("inputs")
+        if wf_inputs is None:
+            wf_inputs = {}
+        elif not isinstance(wf_inputs, dict):
+            raise ValueError("schedule inputs must be an object")
+        if workflow:
+            try:
+                ws = task_workspace or self.workspace
+                wf_obj = load_workflow(find_workflow(ws, workflow))
+                resolve_workflow_inputs(wf_obj, {k: str(v) for k, v in wf_inputs.items()})
+            except WorkflowError as exc:
+                raise ValueError(f"invalid schedule workflow: {exc}") from None
+        if enabled and not prompt and not workflow:
+            raise ValueError("schedule prompt or workflow is required when enabled")
         skill = raw.get("skill")
         if skill is not None:
             if not isinstance(skill, str):
@@ -622,9 +735,20 @@ class Runtime:
         if enabled:
             same_cfg = isinstance(prev, dict) and prev.get("enabled") and prev.get("interval_min") == interval_min
             next_run = prev.get("next_run") if same_cfg and isinstance(prev.get("next_run"), (int, float)) else now + interval_min * 60
-        return {"enabled": enabled, "interval_min": interval_min, "prompt": prompt, "skill": skill,
-                "last_run": last_run, "next_run": next_run, "consecutive_errors": 0,
-                "last_status": None, "last_error": None}
+        return {
+            "enabled": enabled,
+            "interval_min": interval_min,
+            "prompt": prompt,
+            "workflow": workflow,
+            "inputs": dict(wf_inputs),
+            "skill": skill,
+            "last_run": last_run,
+            "next_run": next_run,
+            "consecutive_errors": 0,
+            "last_status": None,
+            "last_error": None,
+            "last_run_dir": None,
+        }
 
     def update_task(self, task_id: str, *, name: str | None = None, status: str | None = None,
                     schedule: Any = ..., requirements: Any = ...) -> dict[str, Any]:
@@ -645,7 +769,11 @@ class Runtime:
                     raise ValueError(f"status must be one of {', '.join(TASK_STATUSES)}")
                 task["status"] = status
             if schedule is not ...:
-                task["schedule"] = self._normalize_schedule(schedule, task.get("schedule"), now)
+                try:
+                    task_ws = inside(self.workspace, task["folder"])
+                except ValueError:
+                    task_ws = self.workspace
+                task["schedule"] = self._normalize_schedule(schedule, task.get("schedule"), now, task_workspace=task_ws)
                 if status is None:
                     if task["schedule"] and task["schedule"].get("enabled"):
                         task["status"] = "active"
@@ -708,10 +836,19 @@ class Runtime:
                 return
             tsched = target["schedule"]
             tsched["settled_run_id"] = run_id
+            if outcome.get("run_dir"):
+                tsched["last_run_dir"] = outcome["run_dir"]
             if kind == "done":
                 tsched["consecutive_errors"] = 0
                 tsched["last_error"] = None
                 tsched["last_status"] = "max_turns" if outcome.get("stopped") else "ok"
+            elif kind == "paused":
+                tsched["last_status"] = str(outcome.get("status") or "paused")
+                tsched["last_error"] = None
+                tsched["enabled"] = False
+                tsched["next_run"] = None
+                if target.get("status") == "active":
+                    target["status"] = "open"
             elif kind == "aborted":
                 tsched["last_status"] = "aborted"
             else:
@@ -740,8 +877,9 @@ class Runtime:
                 if not isinstance(sched, dict) or not sched.get("enabled"):
                     continue
                 prompt = str(sched.get("prompt") or "").strip()
+                workflow = str(sched.get("workflow") or "").strip()
                 next_run = sched.get("next_run")
-                if prompt and isinstance(next_run, (int, float)) and next_run <= now:
+                if (prompt or workflow) and isinstance(next_run, (int, float)) and next_run <= now:
                     due.append(t)
             if not due:
                 return []
@@ -750,10 +888,18 @@ class Runtime:
             sched0 = first["schedule"]
             interval_min = float(sched0.get("interval_min") or 60)
             task_reqs = first.get("requirements") if isinstance(first.get("requirements"), list) else None
-            candidate = (first["id"], first["chat_key"], str(sched0["prompt"]).strip(), sched0.get("skill"), task_reqs)
+            candidate = (
+                first["id"],
+                first["chat_key"],
+                str(sched0.get("prompt") or "").strip(),
+                str(sched0.get("workflow") or "").strip() or None,
+                dict(sched0.get("inputs") or {}) if isinstance(sched0.get("inputs"), dict) else {},
+                sched0.get("skill"),
+                task_reqs,
+            )
             extra_ids = [extra["id"] for extra in due[1:]]
 
-        task_id, chat_key, prompt, sched_skill, task_reqs = candidate
+        task_id, chat_key, prompt, sched_workflow, sched_inputs, sched_skill, task_reqs = candidate
         run_id = uuid.uuid4().hex[:8]
         dispatched = False
         status = "running"
@@ -767,23 +913,22 @@ class Runtime:
                     chat.set_skill(sched_skill)
                 if task_reqs is not None and chat.session.requirements != task_reqs:
                     chat.sync_requirements(task_reqs)
-                chat.send(
-                    prompt,
-                    [],
-                    pre_compact_ratio=0.5,
-                    on_complete=lambda outcome, tid=task_id, rid=run_id: self._on_schedule_complete(
-                        tid,
-                        outcome,
-                        run_id=rid,
-                        now=now if explicit_now else None,
-                        retry_sec=retry_sec,
-                        max_consecutive_errors=max_consecutive_errors,
-                    ),
+                on_done = lambda outcome, tid=task_id, rid=run_id: self._on_schedule_complete(
+                    tid,
+                    outcome,
+                    run_id=rid,
+                    now=now if explicit_now else None,
+                    retry_sec=retry_sec,
+                    max_consecutive_errors=max_consecutive_errors,
                 )
+                if sched_workflow:
+                    chat.run_workflow(sched_workflow, sched_inputs, prompt=prompt, on_complete=on_done)
+                else:
+                    chat.send(prompt, [], pre_compact_ratio=0.5, on_complete=on_done)
                 dispatched = True
         except ChatBusy:
             status = "deferred_busy"
-        except (KeyError, ValueError, LLMError) as exc:
+        except (KeyError, ValueError, LLMError, WorkflowError) as exc:
             status = "error"
             error_msg = str(exc)
 
@@ -823,6 +968,109 @@ class Runtime:
             if len(kept) == len(tasks):
                 raise KeyError(task_id)
             self._write_tasks(kept)
+
+    def list_workflows(self, workspace: Path | None = None) -> list[dict[str, Any]]:
+        """List available PromptLoop YAML workflows visible to Breezeman."""
+        ws = (workspace or self.workspace).resolve()
+        ws_root = self.workspace.resolve()
+        seen: set[str] = set()
+        out: list[dict[str, Any]] = []
+        for d in workflow_dirs(ws):
+            if not d.is_dir():
+                continue
+            for f in sorted([*d.glob("*.yaml"), *d.glob("*.yml")]):
+                resolved = f.resolve()
+                try:
+                    wf = load_workflow(resolved)
+                except WorkflowError:
+                    continue
+                if wf.name in seen:
+                    continue
+                seen.add(wf.name)
+                in_ws = resolved.is_relative_to(ws_root)
+                out.append({
+                    "name": wf.name,
+                    "description": wf.description.strip(),
+                    "entry": wf.entry,
+                    "states": list(wf.states.keys()),
+                    "source": "workspace" if in_ws else "bundled",
+                    "path": resolved.relative_to(ws_root).as_posix() if in_ws else str(resolved),
+                    "inputs": {k: {"required": "default" not in v, "default": v.get("default"),
+                                   "description": v.get("description", "")} for k, v in wf.inputs.items()},
+                })
+        return out
+
+    def get_workflow(self, name: str, workspace: Path | None = None) -> dict[str, Any]:
+        """Read a PromptLoop YAML workflow's raw content and parsed metadata."""
+        ws = (workspace or self.workspace).resolve()
+        ws_root = self.workspace.resolve()
+        try:
+            path = find_workflow(ws, name).resolve()
+            wf = load_workflow(path)
+        except WorkflowError as exc:
+            raise KeyError(str(exc)) from None
+        in_ws = path.is_relative_to(ws_root)
+        return {
+            "name": wf.name,
+            "description": wf.description.strip(),
+            "entry": wf.entry,
+            "states": list(wf.states.keys()),
+            "source": "workspace" if in_ws else "bundled",
+            "path": path.relative_to(ws_root).as_posix() if in_ws else str(path),
+            "content": path.read_text(encoding="utf-8"),
+            "inputs": {k: {"required": "default" not in v, "default": v.get("default"),
+                           "description": v.get("description", "")} for k, v in wf.inputs.items()},
+        }
+
+    def save_workflow(self, name: str, content: str) -> dict[str, Any]:
+        """Validate and atomically save a PromptLoop YAML into `<workspace>/workflows/<name>.yaml`."""
+        clean = name.strip()
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,63}", clean):
+            raise ValueError("workflow name must use letters, digits, hyphens or underscores (1-64 chars)")
+        if not isinstance(content, str) or not content.strip():
+            raise ValueError("workflow YAML content cannot be empty")
+        wf_dir = (self.workspace / "workflows").resolve()
+        wf_dir.mkdir(parents=True, exist_ok=True)
+        target = wf_dir / f"{clean}.yaml"
+        tmp = wf_dir / f".{clean}.yaml.tmp"
+        tmp.write_text(content.rstrip() + "\n", encoding="utf-8")
+        try:
+            load_workflow(tmp)
+        except WorkflowError as exc:
+            tmp.unlink(missing_ok=True)
+            raise ValueError(str(exc)) from None
+        tmp.replace(target)
+        return self.get_workflow(clean)
+
+    def delete_workflow(self, name: str) -> None:
+        """Delete a workspace-level PromptLoop YAML (bundled defaults cannot be deleted)."""
+        clean = name.strip()
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,63}", clean):
+            raise ValueError("invalid workflow name")
+        target = (self.workspace / "workflows" / f"{clean}.yaml").resolve()
+        if not target.is_file():
+            raise KeyError(f"no workspace workflow {clean!r} (bundled defaults are read-only)")
+        target.unlink()
+
+    def run_task_workflow(
+        self,
+        task_id: str,
+        *,
+        workflow: str | None = None,
+        inputs: dict[str, Any] | None = None,
+        prompt: str = "",
+        resume: str | None = None,
+        answers: dict[str, str] | None = None,
+    ) -> dict[str, Any]:
+        """Trigger or resume a PromptLoop FSM workflow inside a task's chat worker."""
+        with self._tasks_lock:
+            tasks = self._read_tasks()
+            task = next((t for t in tasks if t["id"] == task_id), None)
+        if task is None:
+            raise KeyError(task_id)
+        chat = self.chat(task["chat_key"])
+        chat.run_workflow(workflow, inputs, prompt=prompt, answers=answers, resume=resume)
+        return {"ok": True, "task_id": task_id, "chat_key": chat.key, "busy": chat.busy}
 
     def dream_status(self) -> dict[str, Any]:
         """Return current Dreaming scheduler config, status, active node counts, and byte volumes."""

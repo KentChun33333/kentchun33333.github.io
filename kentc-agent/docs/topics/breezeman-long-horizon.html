@@ -190,8 +190,49 @@ if dynamic_tokens &gt; floor(dynamic_window * 0.5):
     </div>
   </div>
 
-  <h3 class="part data" id="data" data-step="5">依據：程式對照與回歸測試</h3>
-  <div class="tablewrap"><table><caption>排程韌性機制與驗證對照表</caption><thead><tr><th scope="col">能力</th><th scope="col">實作位置</th><th scope="col">回歸測試（test_breezeman_dream.py）</th></tr></thead><tbody>
+  <h3 class="part idea" id="promptloop-bridge" data-step="5">Breezeman 排程 × PromptLoop FSM 合流與三層記憶分工</h3>
+  <p class="sub">排程支援雙模式：自由對話（<code>schedule.prompt</code>）或確定性多階段 FSM（<code>schedule.workflow</code> + <code>inputs</code>），兩者共用同一條 <code>Chat._worker</code>、<code>WebEvents</code> 串流與 P0 熔斷管線：</p>
+
+  <div class="diagram-box">
+    <svg viewBox="0 0 860 278" width="860" height="278" role="img" aria-label="Breezeman 排程與 PromptLoop FSM 合流及三層記憶分工圖" style="font-family:var(--sans)">
+      <defs>
+        <marker id="bp-arr" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#475569"/>
+        </marker>
+        <marker id="bp-green" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+          <path d="M 0 1.2 L 9 5 L 0 8.8 z" fill="#08724f"/>
+        </marker>
+      </defs>
+
+      <!-- Layer 1 -->
+      <rect x="16" y="16" width="828" height="72" rx="10" fill="#fff0f1" stroke="#c92330" stroke-width="1.5"/>
+      <text x="32" y="39" font-size="12.5" font-weight="700" fill="#c92330">Layer 1 · 單次執行內的單一 Phase（N 個獨立新鮮 Agent · runs/&lt;run_id&gt;/sessions/）</text>
+      <text x="32" y="59" font-size="11.5" fill="#334155">• 若單一階段讀檔量過大，該階段獨立觸發自身前景壓縮與 topic notes，結束即封存，不污染下一階段。</text>
+      <text x="32" y="76" font-size="11" fill="#596570">• 跨階段只靠 state.json 與工作區實體檔案交接；遇 ask: 人工門標記 waiting_human（暫停排程、不計錯誤）。</text>
+
+      <line x1="220" y1="88" x2="220" y2="112" stroke="#475569" stroke-width="1.5" marker-end="url(#bp-arr)"/>
+      <text x="232" y="104" font-size="10.5" fill="#475569">每輪結束寫入 1 筆精簡結案摘要（status / cycles / tokens / run_dir）</text>
+
+      <!-- Layer 2 -->
+      <rect x="16" y="114" width="828" height="68" rx="10" fill="#edf3fd" stroke="#245db2" stroke-width="1.5"/>
+      <text x="32" y="137" font-size="12.5" font-weight="700" fill="#1e3a8a">Layer 2 · 跨多次排程的 Task 長程對話（Chat.session · .kentc-agent/sessions/&lt;key&gt;.jsonl）</text>
+      <text x="32" y="157" font-size="11.5" fill="#334155">• 只承載每輪 1 筆摘要與使用者插話，跨週累積後由 Task 自己的前景壓縮＋LSM topic notes 有界收斂。</text>
+      <text x="32" y="173" font-size="11" fill="#596570">• UI 對話流直接可見每次排程成果，可透過 POST /api/tasks/{id}/workflow/run 帶 answers 續跑人工門。</text>
+
+      <line x1="220" y1="182" x2="220" y2="206" stroke="#08724f" stroke-width="1.5" marker-end="url(#bp-green)"/>
+      <text x="232" y="198" font-size="10.5" fill="#08724f">Dreaming O(1) stat 快篩蒸餾 → 注入下次每個 PromptLoop phase（memory_hint）</text>
+
+      <!-- Layer 3 -->
+      <rect x="16" y="208" width="828" height="56" rx="10" fill="#e9f5ef" stroke="#08724f" stroke-width="1.5"/>
+      <text x="32" y="231" font-size="12.5" font-weight="700" fill="#08724f">Layer 3 · 跨所有 Task 的全域記憶（&lt;root&gt;/memory/INDEX.md · Fact / Pattern / SIM）</text>
+      <text x="32" y="251" font-size="11.5" fill="#334155">• 每次排程啟動 PromptLoop 時自動將 memory_hint() 注入 wf.instructions，讓所有新鮮階段共享全域教訓。</text>
+    </svg>
+    <p class="diagram-cap">圖 B1-3：排程多次執行 N 階段 PromptLoop 時的三層記憶邊界——各層皆 O(1) 有界、零噪音外溢。</p>
+  </div>
+
+  <h3 class="part data" id="data" data-step="6">依據：程式對照與回歸測試</h3>
+  <div class="tablewrap"><table><caption>排程韌性機制與驗證對照表</caption><thead><tr><th scope="col">能力</th><th scope="col">實作位置</th><th scope="col">回歸測試</th></tr></thead><tbody>
+    <tr><td>排程與 API 整合 PromptLoop（含 <code>waiting_human</code> 續跑）</td><td><code>runtime.py</code>（<code>Chat.run_workflow</code>、<code>tick_schedules</code>）、<code>app.py</code></td><td><code>test_promptloop.py::test_breezeman_scheduler_and_api_promptloop_integration</code></td></tr>
     <tr><td>非同步 worker 結算、退避、熔斷與恢復</td><td><code>runtime.py</code>（<code>_on_schedule_complete</code>、<code>settled_run_id</code>、<code>_worker</code>）</td><td><code>test_async_worker_failure_triggers_backoff_circuit_breaker_and_recovery</code></td></tr>
     <tr><td>同步派發錯誤退避與熔斷</td><td><code>runtime.py</code>（<code>_apply_schedule_error</code>、<code>tick_schedules</code>）</td><td><code>test_schedule_exponential_backoff_and_circuit_breaker</code></td></tr>
     <tr><td>動態視窗預壓縮（防大 fixed_tokens 震盪）</td><td><code>runtime.py</code>（<code>Chat._chat</code>）</td><td><code>test_tick_schedules_pre_compacts_above_half_window</code></td></tr>

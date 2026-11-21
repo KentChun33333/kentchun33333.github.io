@@ -178,7 +178,8 @@
 
   <h3 class="part data" id="api" data-step="4">FastAPI 端點與模組責任對照</h3>
   <div class="tablewrap"><table><caption>Breezeman HTTP / WebSocket 介面一覽</caption><thead><tr><th scope="col">端點</th><th scope="col">方法</th><th scope="col">職責</th><th scope="col">實作位置</th></tr></thead><tbody>
-    <tr><td><code>/api/tasks</code>、<code>/api/tasks/{id}</code></td><td>GET / POST / PATCH / DELETE</td><td>管理任務資料夾、排程設定（<code>interval_min</code>、<code>prompt</code>、<code>skill</code>）與固定需求（<code>requirements</code>）</td><td><code>app.py</code> → <code>runtime.py</code></td></tr>
+    <tr><td><code>/api/tasks</code>、<code>/api/tasks/{id}</code></td><td>GET / POST / PATCH / DELETE</td><td>管理任務資料夾、排程設定（自由 <code>prompt</code> 或 <code>workflow</code> + <code>inputs</code>）與固定需求（<code>requirements</code>）</td><td><code>app.py</code> → <code>runtime.py</code></td></tr>
+    <tr><td><code>/api/workflows</code> · <code>/api/tasks/{id}/workflow/run</code></td><td>GET / POST</td><td>列出可用 PromptLoop FSM 流程；手動觸發或帶 <code>resume</code> + <code>answers</code> 續跑停在人工門的任務</td><td><code>app.py</code> → <code>runtime.py</code> → <code>promptloop.py</code></td></tr>
     <tr><td><code>/api/chats/{key}/transcript</code> · <code>/context</code></td><td>GET / POST <code>/context/clear</code></td><td>檢視完整 append-only 歷史、目前模型上下文視窗內容，或清理活對話／checkpoint</td><td><code>app.py</code> → <code>Chat</code></td></tr>
     <tr><td><code>/api/chats/{key}/requirements</code> · <code>/skill</code></td><td>GET / POST / PUT</td><td>管理固定需求釘選（跨壓縮保留）與單一載入技能（保留 <code>memory_hint</code>）</td><td><code>app.py</code> → <code>Chat</code></td></tr>
     <tr><td><code>/ws/{key}</code></td><td>WebSocket</td><td>推播 <code>hello</code> 快照與即時事件（<code>delta</code>、<code>tool_start/end</code>、<code>compaction</code>、<code>turn_end</code>）；接收 <code>chat</code> / <code>stop</code> / <code>compact</code></td><td><code>app.py</code> → <code>WebEvents</code></td></tr>

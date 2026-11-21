@@ -255,6 +255,7 @@
   }
   function openStudio(st) {
     closeDreamStage();
+    closePromptLoopStage();
     $('#shell').classList.add('studio-mode');
     const changed = S.activeStudioId !== st.id;
     S.activeStudioId = st.id;
@@ -303,6 +304,7 @@
   async function selectTask(task) {
     closeStudio();
     closeDreamStage();
+    closePromptLoopStage();
     const changed = S.activeTaskId !== task.id;
     S.activeTaskId = task.id;
     syncWorkspaceHeader(task);
@@ -374,6 +376,111 @@
       toast(`Task “${task.name}” created (${task.folder})`);
     } catch (err) { toast(err.message, true); }
   };
+  let schedMode = 'prompt';
+  let plActiveName = '';
+  const PL_STARTER_YAML = `name: custom-loop
+version: 2
+description: Custom PromptLoop FSM workflow (100% fresh per state).
+
+inputs:
+  goal: {required: true, description: "task goal"}
+
+runtime:
+  max_cycles: 10
+  max_retries_per_state: 3
+  no_progress_limit: 2
+
+tools: [read, write, edit, bash]
+entry: plan
+
+states:
+  plan:
+    macro_phase: PLAN
+    tools: [read, bash]
+    prompt: "Plan the work for: {{ inputs.goal }}"
+    routes:
+      default: execute
+
+  execute:
+    macro_phase: EXECUTE
+    prompt: |
+      Plan:
+      {{ steps.plan.output }}
+      Execute the plan and save key output to reports/result.md.
+    output: reports/result.md
+    routes:
+      default: exit_gate
+
+  exit_gate:
+    macro_phase: EXIT
+    gate: true
+    validators:
+      - name: result_written
+        file_exists: reports/result.md
+    routes:
+      passed: DONE
+      failed: execute
+`;
+
+  async function loadWorkflows() {
+    try {
+      S.workflows = await api('/api/workflows');
+    } catch {
+      S.workflows = S.workflows || [];
+    }
+    if (!$('#scheduleTab').hidden) renderSchedule();
+    if (!$('#promptloopStage').hidden) renderPromptLoopList();
+  }
+
+  function setSchedMode(mode) {
+    schedMode = mode === 'workflow' ? 'workflow' : 'prompt';
+    $$('#schedModeRow .seg').forEach(b => b.classList.toggle('active', b.dataset.mode === schedMode));
+    $('#schedPromptBox').hidden = schedMode !== 'prompt';
+    $('#schedWorkflowBox').hidden = schedMode !== 'workflow';
+    $('#schedRunWfBtn').hidden = schedMode !== 'workflow';
+    $('#schedPromptLabel').textContent = schedMode === 'workflow'
+      ? 'Additional prompt / task instructions (optional)'
+      : 'Prompt for this task';
+    $('#schedPrompt').placeholder = schedMode === 'workflow'
+      ? 'Optional extra instructions injected into every PromptLoop state…'
+      : "What should the agent do on each scheduled run in this task's workspace?";
+  }
+
+  function renderScheduleWorkflowInputs(wfName, savedInputs = {}) {
+    const wf = (S.workflows || []).find(w => w.name === wfName);
+    const statesEl = $('#schedWorkflowStates');
+    const box = $('#schedWorkflowInputs');
+    if (!wf) {
+      statesEl.textContent = wfName ? `Custom path: ${wfName}` : 'Pick a PromptLoop YAML';
+      box.innerHTML = '';
+      return;
+    }
+    statesEl.textContent = `${wf.states.join(' → ')} (${wf.source})`;
+    const entries = Object.entries(wf.inputs || {});
+    if (!entries.length) {
+      box.innerHTML = '<div class="caption muted">No inputs required for this workflow.</div>';
+      return;
+    }
+    box.innerHTML = entries.map(([k, spec]) => {
+      const val = savedInputs && savedInputs[k] !== undefined ? savedInputs[k] : (spec.default ?? '');
+      const req = spec.required ? ' *' : '';
+      const ph = spec.description || (spec.default != null ? `default: ${spec.default}` : '');
+      return `<label class="sched-field">
+        <span class="caption mono">${esc(k)}${req}</span>
+        <input class="input mono" data-wf-input="${esc(k)}" type="text" value="${esc(String(val))}" placeholder="${esc(ph)}"${spec.required ? ' data-req="1"' : ''}>
+      </label>`;
+    }).join('');
+  }
+
+  function readScheduleWorkflowInputs() {
+    const out = {};
+    $$('#schedWorkflowInputs [data-wf-input]').forEach(el => {
+      const val = el.value.trim();
+      if (val !== '') out[el.dataset.wfInput] = val;
+    });
+    return out;
+  }
+
   function renderSchedule() {
     const task = S.tasks.find(t => t.id === S.activeTaskId);
     $('#schedDot').hidden = !task?.schedule?.enabled;
@@ -381,25 +488,128 @@
     $('#taskSchedForm').hidden = !task;
     if (!task) return;
     if (!S.skills) loadSkills();
+    if (!S.workflows) loadWorkflows();
     const sel = $('#schedSkill');
     const wanted = task.schedule?.skill || '';
     sel.innerHTML = '<option value="">(keep chat skill)</option>' +
       (S.skills || []).map(s => `<option value="${esc(s.name)}" title="${esc(s.description || '')}">${esc(s.name)}</option>`).join('');
     sel.value = wanted;
+
+    const wfSel = $('#schedWorkflow');
+    const wantedWf = task.schedule?.workflow || '';
+    const wfs = S.workflows || [];
+    wfSel.innerHTML = '<option value="">(select PromptLoop YAML)</option>' +
+      wfs.map(w => `<option value="${esc(w.name)}">${esc(w.name)} (${w.states.length} states · ${w.source})</option>`).join('');
+    if (wantedWf && !wfs.some(w => w.name === wantedWf)) {
+      wfSel.insertAdjacentHTML('beforeend', `<option value="${esc(wantedWf)}">${esc(wantedWf)}</option>`);
+    }
+    wfSel.value = wantedWf;
+
+    setSchedMode(wantedWf ? 'workflow' : 'prompt');
+    renderScheduleWorkflowInputs(wantedWf, task.schedule?.inputs || {});
+
     $('#schedTitle').textContent = task.name;
     $('#schedFolder').textContent = task.folder;
     $('#schedEnabled').checked = !!task.schedule?.enabled;
     $('#schedInterval').value = task.schedule?.interval_min || 60;
     $('#schedPrompt').value = task.schedule?.prompt || '';
     const parts = [];
+    if (task.schedule?.last_status) parts.push(`status: ${task.schedule.last_status}`);
     if (task.schedule?.last_run) parts.push(`last: ${clock(task.schedule.last_run)}`);
     if (task.schedule?.enabled && task.schedule?.next_run) parts.push(`next: ${clock(task.schedule.next_run)}`);
+    if (task.schedule?.consecutive_errors) parts.push(`errors: ${task.schedule.consecutive_errors}`);
+    if (task.schedule?.last_error) parts.push(`err: ${task.schedule.last_error}`);
     $('#schedMeta').textContent = parts.join(' · ') || 'Not scheduled yet';
+
+    const canResume = task.schedule?.last_status === 'waiting_human' || task.schedule?.last_status === 'paused';
+    $('#schedResumeBox').hidden = !canResume;
   }
+
+  const inPromptLoopMode = () => !$('#promptloopStage').hidden;
+  function openPromptLoopStage() {
+    closeStudio();
+    closeDreamStage();
+    $('#shell').classList.add('promptloop-mode');
+    $('#promptloopStage').hidden = false;
+    $('#messages').hidden = true;
+    $('#composer').hidden = true;
+    const btn = $('#promptloopBtn');
+    btn.classList.add('active');
+    btn.firstElementChild.textContent = '← Back to Chat';
+    loadWorkflows().then(() => {
+      if (!plActiveName && S.workflows?.length) selectPromptLoop(S.workflows[0].name);
+    });
+  }
+  function closePromptLoopStage() {
+    if ($('#promptloopStage').hidden) return;
+    $('#shell').classList.remove('promptloop-mode');
+    $('#promptloopStage').hidden = true;
+    const btn = $('#promptloopBtn');
+    btn.classList.remove('active');
+    btn.firstElementChild.textContent = 'PromptLoops';
+    if ($('#studioStage').hidden && $('#dreamStage').hidden) {
+      $('#messages').hidden = false;
+      $('#composer').hidden = false;
+    }
+  }
+  function renderPromptLoopList() {
+    const list = $('#plList');
+    const wfs = S.workflows || [];
+    if (!wfs.length) {
+      list.innerHTML = '<div class="placeholder">No PromptLoop YAMLs found. Click + New PromptLoop.</div>';
+      return;
+    }
+    list.innerHTML = wfs.map(w => `
+      <button class="dream-node-row${w.name === plActiveName ? ' pl-row-active' : ''}" type="button" data-wf="${esc(w.name)}">
+        <div class="dream-node-top">
+          <span class="dream-node-title">
+            <span class="dream-type-badge ${w.source === 'workspace' ? 'pattern' : 'fact'}">${esc(w.source)}</span>
+            <strong class="mono">${esc(w.name)}</strong>
+          </span>
+          <span class="caption mono muted">${w.states.length} states</span>
+        </div>
+        <div class="caption mono muted">${esc(w.states.join(' → '))}</div>
+      </button>
+    `).join('');
+  }
+  async function selectPromptLoop(name) {
+    plActiveName = name;
+    renderPromptLoopList();
+    $('#plStatusMsg').textContent = 'Loading…';
+    try {
+      const wf = await api(`/api/workflows/${encodeURIComponent(name)}`);
+      $('#plEditorTitle').textContent = wf.name;
+      $('#plEditorSource').textContent = `${wf.source} · ${wf.path}`;
+      $('#plNameInput').value = wf.name;
+      $('#plYamlInput').value = wf.content;
+      $('#plStatesPreview').textContent = `entry: ${wf.entry} · states: ${wf.states.join(' → ')}`;
+      $('#plDeleteBtn').hidden = wf.source !== 'workspace';
+      $('#plStatusMsg').textContent = wf.source === 'bundled'
+        ? 'Bundled default (saving creates a workspace override in workflows/)'
+        : 'Workspace workflow (editable)';
+    } catch (err) {
+      $('#plStatusMsg').textContent = err.message;
+      toast(err.message, true);
+    }
+  }
+  function startNewPromptLoop() {
+    plActiveName = '';
+    renderPromptLoopList();
+    $('#plEditorTitle').textContent = 'New PromptLoop YAML';
+    $('#plEditorSource').textContent = 'workflows/<name>.yaml';
+    $('#plNameInput').value = 'custom-loop';
+    $('#plYamlInput').value = PL_STARTER_YAML;
+    $('#plStatesPreview').textContent = 'entry: plan · states: plan → execute → exit_gate';
+    $('#plDeleteBtn').hidden = true;
+    $('#plStatusMsg').textContent = 'Edit YAML and click Validate & Save.';
+    $('#plNameInput').focus();
+  }
+
   let dreamTrack = '';
   const inDreamMode = () => !$('#dreamStage').hidden;
   function openDreamStage() {
     closeStudio();
+    closePromptLoopStage();
     $('#shell').classList.add('dream-mode');
     $('#dreamStage').hidden = false;
     $('#messages').hidden = true;
@@ -537,20 +747,107 @@
     const row = e.target.closest('.dream-node-row');
     if (row) openPreview(`memory/${row.dataset.path}`, true);
   });
+  $('#promptloopBtn').onclick = () => (inPromptLoopMode() ? closePromptLoopStage() : openPromptLoopStage());
+  $('#plBackChat').onclick = closePromptLoopStage;
+  $('#plNewBtn').onclick = startNewPromptLoop;
+  $('#plRefreshBtn').onclick = () => loadWorkflows();
+  $('#plList').addEventListener('click', e => {
+    const row = e.target.closest('.dream-node-row');
+    if (row?.dataset.wf) selectPromptLoop(row.dataset.wf);
+  });
+  $('#plEditorForm').onsubmit = async e => {
+    e.preventDefault();
+    const name = $('#plNameInput').value.trim();
+    const content = $('#plYamlInput').value;
+    $('#plStatusMsg').textContent = 'Validating…';
+    try {
+      const saved = await api(`/api/workflows/${encodeURIComponent(name)}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
+      });
+      plActiveName = saved.name;
+      await loadWorkflows();
+      await selectPromptLoop(saved.name);
+      toast(`PromptLoop “${saved.name}” validated & saved`);
+    } catch (err) {
+      $('#plStatusMsg').textContent = `Validation error: ${err.message}`;
+      toast(err.message, true);
+    }
+  };
+  $('#plDeleteBtn').onclick = async () => {
+    const name = $('#plNameInput').value.trim();
+    if (!name) return;
+    try {
+      await api(`/api/workflows/${encodeURIComponent(name)}`, { method: 'DELETE' });
+      plActiveName = '';
+      await loadWorkflows();
+      if (S.workflows?.length) selectPromptLoop(S.workflows[0].name);
+      else startNewPromptLoop();
+      toast(`Deleted workspace workflow “${name}”`);
+    } catch (err) { toast(err.message, true); }
+  };
+
+  $('#schedModeRow').addEventListener('click', e => {
+    const btn = e.target.closest('.seg');
+    if (!btn) return;
+    setSchedMode(btn.dataset.mode);
+  });
+  $('#schedWorkflow').onchange = () => {
+    const task = S.tasks.find(t => t.id === S.activeTaskId);
+    renderScheduleWorkflowInputs($('#schedWorkflow').value, task?.schedule?.inputs || {});
+  };
+  $('#schedManageWfBtn').onclick = () => openPromptLoopStage();
+
+  $('#schedRunWfBtn').onclick = async () => {
+    if (!S.activeTaskId) return;
+    const workflow = $('#schedWorkflow').value;
+    if (!workflow) { toast('Select a PromptLoop workflow first', true); return; }
+    const inputs = readScheduleWorkflowInputs();
+    const prompt = $('#schedPrompt').value.trim();
+    try {
+      await api(`/api/tasks/${encodeURIComponent(S.activeTaskId)}/workflow/run`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workflow, inputs, prompt }),
+      });
+      showTab('live');
+      toast(`Started PromptLoop “${workflow}”`);
+    } catch (err) { toast(err.message, true); }
+  };
+
+  $('#schedResumeBtn').onclick = async () => {
+    if (!S.activeTaskId) return;
+    const answers = {};
+    ($('#schedResumeAnswers').value || '').split('\n').forEach(line => {
+      const idx = line.indexOf('=');
+      if (idx > 0) answers[line.slice(0, idx).trim()] = line.slice(idx + 1).trim();
+    });
+    try {
+      await api(`/api/tasks/${encodeURIComponent(S.activeTaskId)}/workflow/run`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resume: 'latest', answers }),
+      });
+      $('#schedResumeAnswers').value = '';
+      showTab('live');
+      toast('Resumed paused PromptLoop workflow');
+    } catch (err) { toast(err.message, true); }
+  };
+
   $('#taskSchedForm').onsubmit = async e => {
     e.preventDefault();
     if (!S.activeTaskId) return;
     const enabled = $('#schedEnabled').checked;
     const interval_min = Number($('#schedInterval').value);
-    const prompt = $('#schedPrompt').value.trim();
-    const skill = $('#schedSkill').value || null;
+    const payload = schedMode === 'workflow'
+      ? { enabled, interval_min, prompt: $('#schedPrompt').value.trim(), workflow: $('#schedWorkflow').value || null, inputs: readScheduleWorkflowInputs() }
+      : { enabled, interval_min, prompt: $('#schedPrompt').value.trim(), workflow: null, inputs: {}, skill: $('#schedSkill').value || null };
     try {
       const updated = await api(`/api/tasks/${encodeURIComponent(S.activeTaskId)}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ schedule: { enabled, interval_min, prompt, skill } }),
+        body: JSON.stringify({ schedule: payload }),
       });
       await refreshTasks();
-      toast(updated.schedule?.enabled ? `Scheduled every ${updated.schedule.interval_min}m` : 'Schedule paused');
+      renderSchedule();
+      toast(updated.schedule?.enabled ? `Scheduled every ${updated.schedule.interval_min}m` : 'Schedule saved (paused)');
     } catch (err) { toast(err.message, true); }
   };
 
@@ -1421,6 +1718,7 @@
   async function newChat() {
     closeStudio();
     closeDreamStage();
+    closePromptLoopStage();
     try {
       const { key } = await api('/api/chats', { method: 'POST' });
       await openChat(key);

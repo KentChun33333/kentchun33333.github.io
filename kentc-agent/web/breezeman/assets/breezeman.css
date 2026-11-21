@@ -446,3 +446,28 @@ mark.cur { background: #ff9f43 }
 .dream-type-badge.sim { background: rgba(124, 58, 237, 0.12); color: #6d28d9; }
 .dream-node-summary { font-size: 13px; color: var(--fg, #111); }
 @media (max-width: 680px) { .dream-vol-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ---------------------------------------------------------------- PromptLoop Settings & Schedule */
+.promptloop-top-btn.active { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+.promptloop-pill {
+  display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 999px;
+  font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  background: rgba(29, 78, 216, 0.12); color: #1d4ed8; border: 1px solid rgba(29, 78, 216, 0.28);
+}
+.promptloop-stage { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; height: 100%; }
+.promptloop-stage[hidden] { display: none !important; }
+.shell.promptloop-mode { grid-template-columns: var(--left) minmax(0, 1fr); }
+.shell.promptloop-mode.left-closed { grid-template-columns: var(--rail) minmax(0, 1fr); }
+.shell.promptloop-mode #rightPanel { display: none; }
+.pl-stage-body { flex: 1 1 auto; overflow: auto; padding: 16px; display: flex; flex-direction: column; }
+.pl-grid { display: grid; grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); gap: 12px; flex: 1 1 auto; min-height: 0; }
+.pl-list-card { overflow: auto; }
+.pl-editor-card { display: flex; flex-direction: column; min-height: 0; }
+.pl-yaml-field { flex: 1 1 auto; display: flex; flex-direction: column; }
+.pl-yaml { flex: 1 1 auto; min-height: 300px; font-size: 12px; line-height: 1.55; resize: vertical; }
+.pl-row-active { border-color: #1d4ed8 !important; background: rgba(29, 78, 216, 0.05) !important; }
+.sched-mode-row { margin: 2px 0 4px; }
+.sched-wf-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0 6px; }
+.sched-wf-inputs { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.sched-resume-box { display: flex; flex-direction: column; gap: 6px; padding: 9px 10px; border-radius: 8px; background: rgba(245, 158, 11, 0.09); border: 1px solid rgba(245, 158, 11, 0.35); }
+@media (max-width: 900px) { .pl-grid { grid-template-columns: 1fr; } }

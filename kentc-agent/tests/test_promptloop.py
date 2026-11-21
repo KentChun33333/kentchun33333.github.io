@@ -271,3 +271,132 @@ states:
     assert state["status"] == "DONE"
     assert "ALPHA_SKILL_BODY" in systems[0] and "BETA_SKILL_BODY" not in systems[0]
     assert "BETA_SKILL_BODY" in systems[1] and "ALPHA_SKILL_BODY" not in systems[1]
+
+
+def test_breezeman_scheduler_and_api_promptloop_integration(tmp_path: Path):
+    import time as _time
+    from fastapi.testclient import TestClient
+    from kentc_agent.config import Settings
+    from kentc_breezeman.app import create_app
+    from kentc_breezeman.runtime import Runtime
+
+    # Create a small PromptLoop YAML in root workspace with a human gate
+    wf_dir = tmp_path / "workflows"
+    wf_dir.mkdir(parents=True, exist_ok=True)
+    (wf_dir / "gated-loop.yaml").write_text(
+        """
+name: gated-loop
+inputs:
+  topic: {required: true}
+entry: draft
+tools: []
+states:
+  draft:
+    prompt: "Draft note on {{ inputs.topic }}"
+    routes:
+      default: approve
+  approve:
+    ask: "Approve draft?"
+    options: ["approve", "reject"]
+    routes:
+      approve: exit_gate
+      reject: PAUSE
+  exit_gate:
+    gate: true
+    validators:
+      - expr: "steps.approve.output == 'approve'"
+    routes:
+      passed: DONE
+      failed: PAUSE
+""",
+        encoding="utf-8",
+    )
+
+    seen_systems: list[str] = []
+
+    def script(messages, tools):
+        seen_systems.append(messages[0]["content"])
+        return Reply(content="draft body ready", finish="stop")
+
+    rt = Runtime(tmp_path, Settings(), FakeLLM(script))
+    with TestClient(create_app(rt)) as client:
+        # 1. /api/workflows lists bundled coding-loop and workspace gated-loop
+        wfs = client.get("/api/workflows").json()
+        names = {w["name"] for w in wfs}
+        assert "coding-loop" in names and "gated-loop" in names
+
+        task = client.post("/api/tasks", json={"name": "Scheduled PromptLoop"}).json()
+        tid, key = task["id"], task["chat_key"]
+        chat = rt.chat(key)
+
+        # 2. Fail-fast validation: missing required input rejected at PATCH time
+        bad = client.patch(
+            f"/api/tasks/{tid}",
+            json={"schedule": {"enabled": True, "interval_min": 10, "workflow": str(wf_dir / "gated-loop.yaml")}},
+        )
+        assert bad.status_code == 400
+
+        # 3. Valid PromptLoop schedule -> tick_schedules dispatches workflow -> pauses cleanly at ask: gate
+        ok = client.patch(
+            f"/api/tasks/{tid}",
+            json={
+                "schedule": {
+                    "enabled": True,
+                    "interval_min": 10,
+                    "workflow": str(wf_dir / "gated-loop.yaml"),
+                    "inputs": {"topic": "Q4"},
+                    "prompt": "Focus strictly on Q4 liquidity metrics.",
+                }
+            },
+        )
+        assert ok.status_code == 200
+        due = ok.json()["schedule"]["next_run"] + 1
+        assert rt.tick_schedules(now=due) == [tid]
+
+        deadline = _time.monotonic() + 3.0
+        while _time.monotonic() < deadline:
+            sched = rt.list_tasks()[0]["schedule"]
+            if not chat.busy and sched.get("last_status") == "waiting_human":
+                break
+            _time.sleep(0.01)
+
+        sched = rt.list_tasks()[0]["schedule"]
+        assert sched["last_status"] == "waiting_human"
+        assert sched["consecutive_errors"] == 0
+        assert sched["enabled"] is False
+        assert sched["last_run_dir"] is not None
+        # Global memory hint and optional task prompt were injected into the fresh PromptLoop state
+        assert str((tmp_path / "memory" / "INDEX.md").resolve()) in seen_systems[0]
+        assert "Focus strictly on Q4 liquidity metrics." in seen_systems[0]
+        # Compact summary appended to task Chat.session (visible to UI & Dreaming)
+        assert any("[PromptLoop · gated-loop] status=waiting_human" in str(m["content"]) for m in chat.session.messages)
+
+        # 4. Resume via API with human answer -> completes to DONE and appends DONE summary
+        r_res = client.post(
+            f"/api/tasks/{tid}/workflow/run",
+            json={"resume": "latest", "answers": {"approve": "approve"}},
+        )
+        assert r_res.status_code == 200
+        deadline = _time.monotonic() + 3.0
+        while _time.monotonic() < deadline and chat.busy:
+            _time.sleep(0.01)
+        assert any("[PromptLoop · gated-loop] status=DONE" in str(m["content"]) for m in chat.session.messages)
+
+        # 5. PromptLoop YAML Setting Zone API: GET / PUT (validate & save) / DELETE
+        got = client.get("/api/workflows/coding-loop")
+        assert got.status_code == 200
+        assert got.json()["source"] == "bundled" and "exit_gate" in got.json()["content"]
+
+        # Invalid YAML (bypassing exit_gate) rejected with 400
+        bad_yaml = "name: bad\nentry: s1\nstates:\n  s1:\n    prompt: hi\n    routes: {default: DONE}\n  g:\n    gate: true\n    validators: [{expr: 'true'}]\n    routes: {passed: DONE, failed: s1}\n"
+        assert client.put("/api/workflows/bad-loop", json={"content": bad_yaml}).status_code == 400
+
+        # Valid custom YAML saved to workspace workflows/
+        good_yaml = "name: custom-ui\nentry: s1\nstates:\n  s1:\n    prompt: hi\n    routes: {default: g}\n  g:\n    gate: true\n    validators: [{expr: 'true'}]\n    routes: {passed: DONE, failed: s1}\n"
+        saved = client.put("/api/workflows/custom-ui", json={"content": good_yaml})
+        assert saved.status_code == 200 and saved.json()["source"] == "workspace"
+        assert (tmp_path / "workflows" / "custom-ui.yaml").is_file()
+
+        assert client.delete("/api/workflows/custom-ui").status_code == 200
+        assert not (tmp_path / "workflows" / "custom-ui.yaml").exists()
+
