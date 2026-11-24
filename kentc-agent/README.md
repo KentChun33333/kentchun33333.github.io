@@ -40,6 +40,39 @@ blocks, never agent-written HTML. See *Agentic Studio* below.
 
 ## Install and run
 
+### Portable Linux ARM64 ZIP (no uv)
+
+Build on glibc-based ARM64 Linux with Miniforge and `conda-pack`.
+From a clean checkout, run `python scripts/build_linux_arm64.py`. On an Apple Silicon
+Mac with Docker, run the same build in an ARM64 Linux container:
+
+```sh
+docker run --rm --platform linux/arm64 -v "$PWD:/project" -w /project \
+  condaforge/miniforge3:latest bash -ec \
+  'python -m pip install conda-pack && python scripts/build_linux_arm64.py'
+```
+
+Copy `dist/kentc-agent-*-linux-arm64.zip` to the target. The target needs Bash, `tar`
+with gzip, `flock`, and a writable Linux filesystem with symlinks and file locking.
+No target-side Python, Conda, uv, or network access is needed to unpack the runtime.
+
+```sh
+unzip kentc-agent-0.1.0-linux-arm64.zip
+cd kentc-agent-0.1.0-linux-arm64
+bash run.sh agent --help
+bash run.sh agent --workspace /path/to/workspace --base-url http://llm-host:8081/v1
+bash run.sh studio --workspace /path/to/workspace       # http://127.0.0.1:8090
+bash run.sh breezeman --workspace /path/to/workspace    # http://127.0.0.1:9001
+```
+
+The first launch unpacks and relocates the environment beside `run.sh`. To move
+the app, extract the original ZIP at the new path rather than moving the initialized
+folder. Workspaces, credentials, the model server, and Studio's external
+data-pull database are not bundled. Configure a reachable LLM endpoint to run
+prompts. This ZIP does not run on Alpine/musl, x86-64, or macOS.
+
+### Run from a development checkout
+
 ```sh
 cd kentc-agent
 uv sync

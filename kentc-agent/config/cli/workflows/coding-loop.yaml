@@ -5,7 +5,7 @@ description: >
   Each state runs in a fresh isolated Agent session with explicit disk artifacts and objective runtime validators.
 
 inputs:
-  test_cmd: {default: "uv run pytest", description: "deterministic test command executed by runtime validators"}
+  test_cmd: {default: "python -m pytest", description: "deterministic test command executed by runtime validators"}
 
 runtime:
   max_cycles: 15
