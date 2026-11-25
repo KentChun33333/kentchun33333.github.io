@@ -305,8 +305,9 @@ def run_workflow(args: argparse.Namespace) -> int:
     last_step = wf.states.get(last_id)
     if last_step and (not ui.stream_content or last_step.kind != "prompt"):
         print(state["steps"].get(last_id, {}).get("output", ""))
-    ui.status("workflow", f"{state.get('status', 'done')}; run state in {run_dir}")
-    return 0
+    status = state["status"]
+    ui.status("workflow", f"{status}; run state in {run_dir}")
+    return 0 if status == "DONE" else 1
 
 
 def validate(args: argparse.Namespace) -> int:

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -11,6 +13,41 @@ from kentc_agent.adapters.llm import Reply, Usage
 from kentc_agent.fsm_workflow import BUNDLED, Runner, WorkflowError, load, resolve_inputs
 
 from .conftest import FakeLLM
+
+
+@pytest.mark.parametrize(("report_written", "failed_route", "status", "exit_code"), [
+    (True, "ESCALATE", "DONE", 0),
+    (False, "PAUSE", "PAUSE", 1),
+    (False, "ESCALATE", "ESCALATE", 1),
+])
+def test_cli_workflow_exit_status(tmp_path: Path, report_written, failed_route, status, exit_code):
+    wf_path = tmp_path / "workflow.yaml"
+    wf_path.write_text(
+        f"""
+name: check-report
+entry: verify
+states:
+  verify:
+    gate: true
+    validators:
+      - file_exists: report.md
+    routes:
+      passed: DONE
+      failed: {failed_route}
+""",
+        encoding="utf-8",
+    )
+    if report_written:
+        (tmp_path / "report.md").write_text("report", encoding="utf-8")
+
+    result = subprocess.run(
+        [sys.executable, "-m", "kentc_agent.cli", "--workflow", str(wf_path)],
+        cwd=tmp_path, env={"HOME": str(tmp_path), "PYTHONPATH": str(Path(__file__).resolve().parents[1] / "src")},
+        capture_output=True, text=True, timeout=10,
+    )
+    state_file, = (tmp_path / ".kentc-agent" / "runs").glob("*/state.json")
+    assert json.loads(state_file.read_text(encoding="utf-8"))["status"] == status
+    assert result.returncode == exit_code, result.stderr
 
 
 def test_all_bundled_workflows_load_cleanly():

@@ -534,6 +534,10 @@ continues there (state and the agent's session are reloaded). `--resume latest -
 input for the steps still to run (finished steps keep their results); a step is saved as running when it starts,
 so a killed process resumes at that step.
 
+For `--workflow` and `--resume`, exit code `0` means `DONE`; terminal `PAUSE` and `ESCALATE` return `1`.
+An unanswered human gate also returns `1`, but its saved `waiting` state can continue with `--answer`.
+`--resume` does not continue a terminal `PAUSE` run.
+
 ### Bundled workflows
 
 The bundled CLI workflows live in `config/cli/workflows/` (a workspace's own `workflows/` and
