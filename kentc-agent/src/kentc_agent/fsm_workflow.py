@@ -710,6 +710,9 @@ class Runner:
 
         if self.state.get("status") in TERMINAL_SET:
             return self.state
+        if self.state["current_state"] in TERMINAL_SET:
+            self._commit_terminal(self.state["current_state"], "reconciled previously committed terminal transition")
+            return self.state
 
         self.state["status"] = "running"
         self.save()
@@ -718,9 +721,7 @@ class Runner:
         while self.state["current_state"] not in TERMINAL_SET:
             cur_id = self.state["current_state"]
             if cur_id not in self.wf.states:
-                self.state["status"] = "ESCALATE"
-                self.trace("SYS", cur_id, "unknown current_state -> ESCALATE")
-                self.save()
+                self._commit_terminal("ESCALATE", f"unknown current_state {cur_id!r}")
                 break
 
             # Global budget guards before starting a new cycle
@@ -798,12 +799,16 @@ class Runner:
                         self.state["no_progress_count"] = 1
 
                     if policy.max_retries_per_state and fails[cur_id] >= policy.max_retries_per_state:
-                        self._finish_transition(cur_id, exec_id, "retry_limit", "ESCALATE", evidence)
-                        self._commit_terminal("ESCALATE", f"{cur_id}: max_retries_per_state ({policy.max_retries_per_state}) reached")
+                        self._finish_transition(
+                            cur_id, exec_id, "retry_limit", "ESCALATE", evidence,
+                            terminal_reason=f"{cur_id}: max_retries_per_state ({policy.max_retries_per_state}) reached",
+                        )
                         break
                     if policy.no_progress_limit and self.state["no_progress_count"] >= policy.no_progress_limit:
-                        self._finish_transition(cur_id, exec_id, "no_progress", "PAUSE", evidence)
-                        self._commit_terminal("PAUSE", f"{cur_id}: no progress across {policy.no_progress_limit} attempts")
+                        self._finish_transition(
+                            cur_id, exec_id, "no_progress", "PAUSE", evidence,
+                            terminal_reason=f"{cur_id}: no progress across {policy.no_progress_limit} attempts",
+                        )
                         break
                 else:
                     self.state.setdefault("state_failures", {})[cur_id] = 0
@@ -812,9 +817,6 @@ class Runner:
 
                 next_state = self._choose_next_state(step, event)
                 self._finish_transition(cur_id, exec_id, event, next_state, evidence)
-                if next_state in TERMINAL_SET:
-                    self._commit_terminal(next_state, f"transitioned from {cur_id} on {event!r}")
-                    break
 
             except NeedsAnswer as e:
                 rec.update(status="waiting")
@@ -841,7 +843,8 @@ class Runner:
         return self.state
 
     def _finish_transition(
-        self, from_state: str, exec_id: str, event: str, to_state: str, evidence: list[dict[str, Any]]
+        self, from_state: str, exec_id: str, event: str, to_state: str, evidence: list[dict[str, Any]],
+        *, terminal_reason: str | None = None,
     ) -> None:
         self.state["in_flight"] = None
         self.state["current_state"] = to_state
@@ -860,7 +863,10 @@ class Runner:
             "evidence": evidence,
             "total_tokens": self.state["total_tokens"],
         })
-        self.save()
+        if to_state in TERMINAL_SET:
+            self._commit_terminal(to_state, terminal_reason or f"transitioned from {from_state} on {event!r}")
+        else:
+            self.save()
 
     def _commit_terminal(self, terminal: str, reason: str) -> None:
         self.state["status"] = terminal
