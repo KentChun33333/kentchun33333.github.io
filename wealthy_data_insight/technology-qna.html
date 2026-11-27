@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1720">
+<title>Technology Q&A · Animated Architecture</title>
+<meta name="description" content="Animated slide-style explainer for LLM cache mechanics, offline knowledge graph updates, and a simple retrieval-driven agent loop.">
+<style>
+  :root{
+    --bg:#f4f5f3;
+    --paper:#ffffff;
+    --ink:#111820;
+    --muted:#68717a;
+    --line:#dfe3e5;
+    --navy:#132231;
+    --blue:#416b93;
+    --red:#c92a2a;
+    --green:#18845f;
+    --amber:#b27a16;
+    --purple:#7256a8;
+    --soft-blue:#eef5fb;
+    --soft-red:#fff1f1;
+    --soft-green:#edf8f3;
+    --soft-amber:#fff8e9;
+    --shadow:0 18px 46px rgba(20,31,42,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    color:var(--ink); background:var(--bg); overflow:hidden;
+  }
+  button{font:inherit}
+  .deck{height:100%;display:grid;grid-template-rows:68px 1fr 58px}
+  .topbar{
+    display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:24px;
+    padding:0 28px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);
+    backdrop-filter:blur(12px);z-index:10;
+  }
+  .brand{display:flex;align-items:center;gap:10px}
+  .mark{
+    width:34px;height:34px;border-radius:9px;background:var(--navy);color:#fff;
+    display:grid;place-items:center;font-weight:800;letter-spacing:.04em;
+  }
+  .brand-copy b{display:block;font-size:14px}
+  .brand-copy small{display:block;color:var(--muted);font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+  .slide-tabs{display:flex;justify-content:center;gap:8px}
+  .tab{
+    border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;
+    padding:8px 12px;font-size:10px;font-weight:700;cursor:pointer;transition:.2s ease;
+  }
+  .tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .mode{font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+
+  .viewport{position:relative;overflow:hidden}
+  .slides{
+    height:100%;display:flex;transition:transform .52s cubic-bezier(.22,.7,.25,1);
+  }
+  .slide{
+    min-width:100%;height:100%;padding:26px 34px 22px;overflow:auto;
+  }
+  .slide-inner{max-width:1400px;margin:0 auto}
+  .slide-head{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end;margin-bottom:18px;
+  }
+  .eyebrow{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+  .slide-head h1{font-size:30px;line-height:1.08;margin:5px 0 5px;letter-spacing:-.025em}
+  .slide-head p{margin:0;color:var(--muted);font-size:12px;line-height:1.55;max-width:820px}
+  .question{
+    min-width:290px;max-width:380px;padding:13px 15px;border-radius:12px;background:var(--navy);color:#fff;
+    box-shadow:var(--shadow)
+  }
+  .question small{display:block;color:#b9c4cd;font-size:8px;letter-spacing:.12em;text-transform:uppercase}
+  .question b{display:block;margin-top:5px;font-size:13px;line-height:1.35}
+
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px}
+  .panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+  .stage{padding:18px;min-height:520px;position:relative;overflow:hidden}
+  .side{padding:16px;display:flex;flex-direction:column;gap:12px}
+  .panel-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .panel-title h2{margin:0;font-size:14px}
+  .chip{
+    padding:5px 8px;border-radius:999px;background:#eef0f1;color:#4f5860;font-size:8px;font-weight:800;letter-spacing:.05em
+  }
+  .chip.live{background:var(--soft-green);color:var(--green)}
+  .chip.warn{background:var(--soft-amber);color:var(--amber)}
+  .answer{
+    border:1px solid var(--line);border-radius:10px;padding:12px;background:#fafbfa
+  }
+  .answer small{display:block;color:var(--muted);font-size:8px;letter-spacing:.09em;text-transform:uppercase}
+  .answer b{display:block;margin-top:5px;font-size:11px}
+  .answer p{margin:6px 0 0;color:#555e66;font-size:9px;line-height:1.52}
+  .step-list{display:grid;gap:7px}
+  .step-item{
+    display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:start;
+    padding:8px;border:1px solid var(--line);border-radius:9px;background:#fff;transition:.22s ease
+  }
+  .step-item.active{border-color:#a9bed0;background:var(--soft-blue);transform:translateX(3px)}
+  .step-item.done{border-color:#b9decf;background:var(--soft-green)}
+  .step-num{
+    width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#eef0f1;
+    color:#68717a;font-size:9px;font-weight:800
+  }
+  .step-item.active .step-num{background:var(--blue);color:#fff}
+  .step-item.done .step-num{background:var(--green);color:#fff}
+  .step-item b{display:block;font-size:9px}
+  .step-item span{display:block;margin-top:2px;color:var(--muted);font-size:8px;line-height:1.35}
+  .note{padding:9px 10px;border-radius:9px;background:#f4f5f4;color:#5e666e;font-size:8px;line-height:1.45}
+
+  /* cache */
+  .cache-scene{height:455px;position:relative}
+  .request-box,.cache-box,.model-box,.decode-box{
+    position:absolute;border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px;box-shadow:0 8px 20px rgba(20,31,42,.06)
+  }
+  .request-box{left:2%;top:10%;width:28%}
+  .cache-box{left:36%;top:6%;width:27%;height:72%}
+  .model-box{right:2%;top:10%;width:28%;height:30%}
+  .decode-box{right:2%;bottom:8%;width:28%;height:32%}
+  .box-label{font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:800}
+  .request-title,.model-title{margin-top:5px;font-size:13px;font-weight:800}
+  .tokens{display:flex;gap:4px;flex-wrap:wrap;margin-top:12px}
+  .tok{
+    padding:5px 6px;border-radius:5px;background:#edf0f2;color:#48525b;font:8px ui-monospace,SFMono-Regular,Menlo,monospace;
+    transition:.2s ease
+  }
+  .tok.hit{background:#dff4e9;color:#126c4e}
+  .tok.miss{background:#fff0f0;color:#a52323}
+  .cache-slots{display:grid;gap:7px;margin-top:10px}
+  .cache-slot{
+    border:1px solid var(--line);border-radius:8px;padding:8px;background:#fafafa;transition:.25s ease
+  }
+  .cache-slot.active{border-color:var(--green);background:var(--soft-green);box-shadow:0 0 0 2px rgba(24,132,95,.08)}
+  .cache-slot.evict{border-color:var(--amber);background:var(--soft-amber)}
+  .cache-slot b{font-size:9px}
+  .cache-slot small{display:block;color:var(--muted);font-size:7px;margin-top:2px}
+  .metric-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:11px}
+  .metric{padding:8px;border-radius:8px;background:#f5f7f8}
+  .metric small{display:block;font-size:7px;color:var(--muted)}
+  .metric b{display:block;margin-top:3px;font:13px ui-monospace,SFMono-Regular,Menlo,monospace}
+  .flow{
+    position:absolute;height:2px;background:#b6c0c8;transform-origin:left center;opacity:.45
+  }
+  .flow::after{
+    content:"";position:absolute;right:-1px;top:-3px;border-left:7px solid currentColor;border-top:4px solid transparent;border-bottom:4px solid transparent;color:#b6c0c8
+  }
+  .flow.active{background:var(--red);opacity:1;animation:pulseLine 1s infinite}
+  .flow.active::after{color:var(--red)}
+  .f1{left:30%;top:25%;width:7%}
+  .f2{left:63%;top:25%;width:9%}
+  .f3{right:16%;top:40%;height:31%;width:2px;transform:none}
+  .f3::after{top:auto;bottom:-2px;left:-3px;right:auto;border-left:4px solid transparent;border-right:4px solid transparent;border-top:7px solid currentColor;border-bottom:0}
+  .f4{left:63%;bottom:24%;width:9%;transform:rotate(180deg);transform-origin:right center}
+  @keyframes pulseLine{0%,100%{filter:brightness(1)}50%{filter:brightness(1.5)}}
+
+  /* KG */
+  .kg-scene{height:455px;display:grid;grid-template-columns:1fr 1.1fr 1.05fr;gap:12px;align-items:stretch}
+  .kg-col{border:1px solid var(--line);border-radius:12px;padding:11px;background:#fbfbfa;position:relative;overflow:hidden}
+  .kg-col h3{margin:3px 0 8px;font-size:11px}
+  .record{
+    padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;margin-bottom:6px;transition:.25s ease
+  }
+  .record.active{border-color:var(--blue);background:var(--soft-blue);transform:translateX(4px)}
+  .record.dup{border-color:var(--amber);background:var(--soft-amber)}
+  .record.conflict{border-color:var(--red);background:var(--soft-red)}
+  .record.merged{border-color:var(--green);background:var(--soft-green)}
+  .record b{display:block;font-size:9px}
+  .record small{display:block;margin-top:2px;color:var(--muted);font-size:7px}
+  .rule-grid{display:grid;gap:6px;margin-top:8px}
+  .rule{
+    display:grid;grid-template-columns:22px 1fr;gap:7px;align-items:start;padding:7px;border-radius:8px;border:1px solid var(--line);background:#fff
+  }
+  .rule i{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:8px;background:#eef0f1}
+  .rule.active{border-color:#a9bed0;background:var(--soft-blue)}
+  .rule b{font-size:8px}.rule span{display:block;color:var(--muted);font-size:7px;margin-top:2px}
+  .graph-mini{height:275px;position:relative;margin-top:4px}
+  .node{
+    position:absolute;min-width:64px;padding:8px 9px;border:1px solid var(--line);border-radius:999px;background:#fff;
+    text-align:center;font-size:8px;font-weight:700;z-index:2;transition:.25s ease
+  }
+  .node.canon{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .node.new{border-color:var(--green);background:var(--soft-green)}
+  .node.conflict{border-color:var(--red);background:var(--soft-red)}
+  .edge{position:absolute;height:2px;background:#c7cdd1;transform-origin:left center;z-index:1}
+  .edge.active{background:var(--green);height:3px}
+  .version{
+    position:absolute;left:10px;right:10px;bottom:10px;padding:8px;border-radius:8px;background:#f0f3f5;
+    font:8px ui-monospace,SFMono-Regular,Menlo,monospace;color:#4d5962
+  }
+
+  /* Agent */
+  .agent-scene{height:455px;position:relative}
+  .agent-node{
+    position:absolute;width:142px;min-height:72px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff;
+    box-shadow:0 8px 18px rgba(20,31,42,.06);transition:.25s ease;z-index:2
+  }
+  .agent-node.active{border-color:var(--red);box-shadow:0 0 0 3px rgba(201,42,42,.08),0 10px 22px rgba(20,31,42,.08);transform:scale(1.03)}
+  .agent-node.done{border-color:var(--green);background:var(--soft-green)}
+  .agent-node small{display:block;font-size:7px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+  .agent-node b{display:block;margin-top:4px;font-size:10px}
+  .agent-node p{margin:4px 0 0;color:var(--muted);font-size:7px;line-height:1.35}
+  .nq{left:3%;top:39%}.np{left:21%;top:12%}.nr{left:42%;top:12%}.nk{left:63%;top:12%}.ne{right:3%;top:39%}.na{left:42%;bottom:10%}.nw{left:21%;bottom:10%}
+  .agent-edge{
+    position:absolute;height:2px;background:#c9ced2;transform-origin:left center;z-index:1;opacity:.7
+  }
+  .agent-edge.active{background:var(--red);height:3px;animation:pulseLine 1s infinite}
+  .agent-edge.loop{background:transparent;border-top:2px dashed #9ea8af}
+  .e-qp{left:14%;top:43%;width:13%;transform:rotate(-28deg)}
+  .e-pr{left:31%;top:23%;width:11%}
+  .e-rk{left:52%;top:23%;width:11%}
+  .e-ke{left:73%;top:28%;width:16%;transform:rotate(31deg)}
+  .e-ea{left:73%;top:60%;width:17%;transform:rotate(148deg)}
+  .e-aw{left:31%;bottom:21%;width:11%;transform:rotate(180deg)}
+  .e-wp{left:29%;top:44%;height:29%;width:2px;transform:none}
+  .e-we{left:31%;bottom:21%;width:48%}
+  .thought{
+    position:absolute;left:42%;top:39%;width:31%;padding:12px;border:1px dashed #bcc3c7;border-radius:12px;background:#fafbfa
+  }
+  .thought small{font-size:7px;color:var(--muted);letter-spacing:.08em}
+  .thought b{display:block;margin-top:5px;font-size:10px}
+  .thought p{margin:5px 0 0;color:#56616a;font-size:8px;line-height:1.45}
+  .thought .cursor{display:inline-block;width:6px;height:12px;background:var(--red);vertical-align:-2px;animation:blink .8s infinite}
+  @keyframes blink{50%{opacity:0}}
+
+  .footer{
+    display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;padding:0 28px;background:#fff;border-top:1px solid var(--line)
+  }
+  .controls{display:flex;align-items:center;gap:7px}
+  .ctrl{
+    border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:8px;padding:7px 10px;font-size:9px;font-weight:700;cursor:pointer
+  }
+  .ctrl.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .progress{height:5px;background:#eef0f1;border-radius:99px;overflow:hidden}
+  .progress i{display:block;height:100%;background:var(--red);width:0;transition:width .35s ease}
+  .status{font:8px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);white-space:nowrap}
+
+  @media(max-width:980px){
+    body{overflow:auto}
+    .deck{height:auto;min-height:100vh;grid-template-rows:auto auto auto}
+    .topbar{grid-template-columns:1fr;padding:12px 18px;gap:10px}
+    .slide-tabs{justify-content:flex-start;overflow:auto}
+    .mode{display:none}
+    .viewport{overflow:visible}
+    .slides{display:block;transform:none!important}
+    .slide{display:none;height:auto;padding:18px}
+    .slide.active-mobile{display:block}
+    .slide-head{grid-template-columns:1fr}
+    .layout{grid-template-columns:1fr}
+    .stage{min-height:540px}
+    .footer{position:sticky;bottom:0;z-index:20}
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+  <header class="topbar">
+    <div class="brand">
+      <div class="mark">TQ</div>
+      <div class="brand-copy"><b>Technology Q&A</b><small>Animated architecture explainer</small></div>
+    </div>
+    <nav class="slide-tabs" aria-label="Technology Q&A slides">
+      <button class="tab active" data-slide="0">01 · LLM Cache</button>
+      <button class="tab" data-slide="1">02 · Offline KG Update</button>
+      <button class="tab" data-slide="2">03 · Agent Loop</button>
+    </nav>
+    <div class="mode">SELF-CONTAINED · SLIDE MODE</div>
+  </header>
+
+  <main class="viewport">
+    <div class="slides" id="slides">
+
+      <section class="slide active-mobile" data-index="0">
+        <div class="slide-inner">
+          <header class="slide-head">
+            <div>
+              <div class="eyebrow">01 · Cache mechanics in an LLM server</div>
+              <h1>Reuse computation before generating the next token.</h1>
+              <p>Most serving stacks accelerate repeated prefixes by reusing previously-computed key/value attention states. The exact cache policy is implementation-specific, but the mechanics are broadly the same.</p>
+            </div>
+            <aside class="question"><small>TECH Q&A</small><b>What actually happens when an LLM server gets a request that partially matches something it has already processed?</b></aside>
+          </header>
+
+          <div class="layout">
+            <section class="panel stage">
+              <div class="panel-title"><h2>Request → Prefix lookup → Prefill reuse → Decode</h2><span class="chip live" id="cacheStageChip">READY</span></div>
+              <div class="cache-scene">
+                <article class="request-box">
+                  <div class="box-label">Incoming request</div>
+                  <div class="request-title">User + system prefix</div>
+                  <div class="tokens" id="requestTokens">
+                    <span class="tok">system:</span><span class="tok">You are</span><span class="tok">a bank</span><span class="tok">assistant</span>
+                    <span class="tok">user:</span><span class="tok">Summarise</span><span class="tok">client</span><span class="tok">activity</span>
+                  </div>
+                  <div class="metric-grid">
+                    <div class="metric"><small>Prompt tokens</small><b>8</b></div>
+                    <div class="metric"><small>Potential reuse</small><b id="reuseMetric">0</b></div>
+                  </div>
+                </article>
+
+                <article class="cache-box">
+                  <div class="box-label">Prefix / KV cache</div>
+                  <div class="cache-slots">
+                    <div class="cache-slot" data-cache-slot="0"><b>hash: 7F2A</b><small>system: You are a bank assistant</small></div>
+                    <div class="cache-slot" data-cache-slot="1"><b>hash: 19BC</b><small>system: coding assistant</small></div>
+                    <div class="cache-slot" data-cache-slot="2"><b>hash: A811</b><small>old prefix · low recency</small></div>
+                  </div>
+                  <div class="metric-grid">
+                    <div class="metric"><small>Cache hit</small><b id="hitMetric">NO</b></div>
+                    <div class="metric"><small>Eviction</small><b id="evictMetric">—</b></div>
+                  </div>
+                </article>
+
+                <article class="model-box">
+                  <div class="box-label">Model prefill</div>
+                  <div class="model-title">Only compute the unmatched suffix</div>
+                  <div class="tokens" id="prefillTokens">
+                    <span class="tok">system:</span><span class="tok">You are</span><span class="tok">a bank</span><span class="tok">assistant</span>
+                    <span class="tok">user:</span><span class="tok">Summarise</span><span class="tok">client</span><span class="tok">activity</span>
+                  </div>
+                </article>
+
+                <article class="decode-box">
+                  <div class="box-label">Autoregressive decode</div>
+                  <div class="model-title">Append one token at a time</div>
+                  <div class="tokens" id="decodeTokens">
+                    <span class="tok">The</span><span class="tok">client</span><span class="tok">showed</span><span class="tok">...</span>
+                  </div>
+                  <div class="metric-grid">
+                    <div class="metric"><small>Saved prefill</small><b id="savedPrefill">0%</b></div>
+                    <div class="metric"><small>New KV appended</small><b id="appendMetric">0</b></div>
+                  </div>
+                </article>
+
+                <i class="flow f1" id="cf1"></i><i class="flow f2" id="cf2"></i><i class="flow f3" id="cf3"></i><i class="flow f4" id="cf4"></i>
+              </div>
+            </section>
+
+            <aside class="panel side">
+              <div class="panel-title"><h2>What to explain</h2><span class="chip">SERVER VIEW</span></div>
+              <div class="step-list" id="cacheSteps">
+                <div class="step-item" data-step="0"><span class="step-num">1</span><div><b>Tokenise and hash prefixes</b><span>The server identifies reusable prompt prefixes, often at block/page granularity.</span></div></div>
+                <div class="step-item" data-step="1"><span class="step-num">2</span><div><b>Find the longest cache hit</b><span>Matching KV states can skip equivalent prefill compute.</span></div></div>
+                <div class="step-item" data-step="2"><span class="step-num">3</span><div><b>Prefill only the suffix</b><span>Unmatched prompt tokens still need normal model execution.</span></div></div>
+                <div class="step-item" data-step="3"><span class="step-num">4</span><div><b>Decode and append KV</b><span>Each generated token extends the cache state for the active request.</span></div></div>
+                <div class="step-item" data-step="4"><span class="step-num">5</span><div><b>Evict under memory pressure</b><span>Policies vary: recency, reference counts, block reuse and scheduler constraints all matter.</span></div></div>
+              </div>
+              <div class="answer"><small>SHORT ANSWER</small><b>Cache saves repeated prefill, not reasoning itself.</b><p>A cache hit means the server can reuse attention states for an identical prefix. It does not mean the model remembers the answer; it means the same prefix does not need to be recomputed.</p></div>
+              <div class="note">Implementation detail: vLLM, SGLang, TensorRT-LLM, llama.cpp and others differ in paging, hashing, eviction and scheduler behavior. This slide intentionally shows the shared conceptual model.</div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-index="1">
+        <div class="slide-inner">
+          <header class="slide-head">
+            <div>
+              <div class="eyebrow">02 · Offline knowledge graph update</div>
+              <h1>Do not “overwrite the graph.” Reconcile evidence into a new version.</h1>
+              <p>An offline graph refresh should separate raw observations from canonical entities, deduplicate candidate matches, explicitly resolve conflicts, and retain provenance so the resulting graph is auditable.</p>
+            </div>
+            <aside class="question"><small>TECH Q&A</small><b>How do we update a knowledge graph offline without creating duplicates or silently overwriting conflicting facts?</b></aside>
+          </header>
+
+          <div class="layout">
+            <section class="panel stage">
+              <div class="panel-title"><h2>Staging → Entity resolution → Conflict handling → Versioned merge</h2><span class="chip warn" id="kgStageChip">READY</span></div>
+              <div class="kg-scene">
+                <section class="kg-col">
+                  <div class="box-label">Incoming observations</div><h3>Staging area</h3>
+                  <div class="record" data-kg-record="0"><b>Eleanor Tan · Client ID 1842</b><small>CRM · Singapore · updated 2026-11-26</small></div>
+                  <div class="record" data-kg-record="1"><b>E. Tan · Passport ****921A</b><small>FileNet · trust memorandum</small></div>
+                  <div class="record" data-kg-record="2"><b>Eleanor Tan · Team ASEAN</b><small>Coverage file · updated 2026-11-25</small></div>
+                  <div class="record" data-kg-record="3"><b>Eleanor Tan · Team GCNA</b><small>Legacy export · updated 2024-06-08</small></div>
+                  <div class="record" data-kg-record="4"><b>Eleanor Tann</b><small>External file · spelling variant</small></div>
+                </section>
+
+                <section class="kg-col">
+                  <div class="box-label">Resolution policy</div><h3>Deduplicate + de-conflict</h3>
+                  <div class="rule-grid">
+                    <div class="rule" data-kg-rule="0"><i>1</i><div><b>Normalize</b><span>Case, punctuation, aliases, IDs, dates.</span></div></div>
+                    <div class="rule" data-kg-rule="1"><i>2</i><div><b>Generate match candidates</b><span>Exact IDs first; fuzzy names only as supporting evidence.</span></div></div>
+                    <div class="rule" data-kg-rule="2"><i>3</i><div><b>Score entity identity</b><span>Strong identifiers outweigh text similarity.</span></div></div>
+                    <div class="rule" data-kg-rule="3"><i>4</i><div><b>Detect conflicting claims</b><span>Same predicate, incompatible values, overlapping validity.</span></div></div>
+                    <div class="rule" data-kg-rule="4"><i>5</i><div><b>Resolve by policy</b><span>Source authority + recency + confidence + human override.</span></div></div>
+                    <div class="rule" data-kg-rule="5"><i>6</i><div><b>Commit a new graph version</b><span>Keep provenance, old facts and audit trail.</span></div></div>
+                  </div>
+                </section>
+
+                <section class="kg-col">
+                  <div class="box-label">Canonical graph</div><h3>Versioned result</h3>
+                  <div class="graph-mini">
+                    <div class="node canon" style="left:33%;top:40%">Eleanor Tan</div>
+                    <div class="node new" style="left:5%;top:8%">Client 1842</div>
+                    <div class="node new" style="right:4%;top:8%">Team ASEAN</div>
+                    <div class="node" style="left:4%;bottom:25%">Tan Family Trust</div>
+                    <div class="node conflict" style="right:3%;bottom:25%">Team GCNA</div>
+                    <i class="edge active" style="left:26%;top:25%;width:82px;transform:rotate(37deg)"></i>
+                    <i class="edge active" style="left:58%;top:25%;width:82px;transform:rotate(143deg)"></i>
+                    <i class="edge" style="left:27%;top:63%;width:80px;transform:rotate(-30deg)"></i>
+                    <i class="edge" style="left:58%;top:62%;width:83px;transform:rotate(30deg)"></i>
+                    <div class="version" id="kgVersion">graph_v41 · staged changes not committed</div>
+                  </div>
+                </section>
+              </div>
+            </section>
+
+            <aside class="panel side">
+              <div class="panel-title"><h2>What to explain</h2><span class="chip">OFFLINE PIPELINE</span></div>
+              <div class="step-list" id="kgSteps">
+                <div class="step-item" data-step="0"><span class="step-num">1</span><div><b>Land raw records first</b><span>Never mutate canonical entities directly from untrusted raw input.</span></div></div>
+                <div class="step-item" data-step="1"><span class="step-num">2</span><div><b>Resolve entity identity</b><span>Use IDs and high-quality identifiers before fuzzy name matching.</span></div></div>
+                <div class="step-item" data-step="2"><span class="step-num">3</span><div><b>Deduplicate observations</b><span>Multiple records can support one canonical entity or edge.</span></div></div>
+                <div class="step-item" data-step="3"><span class="step-num">4</span><div><b>Surface conflicts explicitly</b><span>Do not collapse incompatible claims into one value without policy.</span></div></div>
+                <div class="step-item" data-step="4"><span class="step-num">5</span><div><b>Resolve with provenance</b><span>Authority, recency, confidence and human overrides remain inspectable.</span></div></div>
+                <div class="step-item" data-step="5"><span class="step-num">6</span><div><b>Publish a new snapshot</b><span>Downstream systems read a consistent version, not a half-updated graph.</span></div></div>
+              </div>
+              <div class="answer"><small>SHORT ANSWER</small><b>Deduplicate entities; version facts.</b><p>Entity resolution decides whether two records refer to the same thing. Conflict resolution decides which claims are currently trusted. These are separate problems and should remain separately auditable.</p></div>
+              <div class="note">A practical production pattern is “raw observation → canonical entity → versioned claims,” with effective dates and source lineage retained for every important relationship.</div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-index="2">
+        <div class="slide-inner">
+          <header class="slide-head">
+            <div>
+              <div class="eyebrow">03 · Simple retrieval-driven agent loop</div>
+              <h1>Plan, retrieve, reason, evaluate — and only loop when evidence is insufficient.</h1>
+              <p>A reliable agent loop keeps the deterministic control flow outside the LLM where possible. The model proposes actions, retrieval supplies evidence, and an evaluator decides whether another loop is actually necessary.</p>
+            </div>
+            <aside class="question"><small>TECH Q&A</small><b>How does a simple AI agent use knowledge retrieval without turning into an uncontrolled infinite loop?</b></aside>
+          </header>
+
+          <div class="layout">
+            <section class="panel stage">
+              <div class="panel-title"><h2>Question → Plan → Retrieve → Context → Reason → Evaluate → Answer</h2><span class="chip live" id="agentStageChip">READY</span></div>
+              <div class="agent-scene">
+                <div class="agent-node nq" data-agent-node="question"><small>Input</small><b>User question</b><p>“Which clients are exposed to the same liquidity risk?”</p></div>
+                <div class="agent-node np" data-agent-node="plan"><small>Control</small><b>Planner / router</b><p>Decides what evidence is needed.</p></div>
+                <div class="agent-node nr" data-agent-node="retrieve"><small>Tool</small><b>Retriever</b><p>Search KG, docs and approved data.</p></div>
+                <div class="agent-node nk" data-agent-node="knowledge"><small>Evidence</small><b>Knowledge context</b><p>Returns cited facts, not conclusions.</p></div>
+                <div class="agent-node ne" data-agent-node="evaluate"><small>Control</small><b>Evaluator</b><p>Enough evidence? Safe? Complete?</p></div>
+                <div class="agent-node na" data-agent-node="answer"><small>Output</small><b>Final answer</b><p>Grounded answer + evidence links.</p></div>
+                <div class="agent-node nw" data-agent-node="working"><small>LLM</small><b>Working reasoning</b><p>Synthesize only from current context.</p></div>
+
+                <div class="thought" id="thoughtBox">
+                  <small>CURRENT AGENT STATE</small>
+                  <b id="thoughtTitle">Waiting for a question</b>
+                  <p id="thoughtCopy">The loop begins only when a task arrives.<span class="cursor"></span></p>
+                </div>
+
+                <i class="agent-edge e-qp" id="ae1"></i><i class="agent-edge e-pr" id="ae2"></i><i class="agent-edge e-rk" id="ae3"></i>
+                <i class="agent-edge e-ke" id="ae4"></i><i class="agent-edge e-ea" id="ae5"></i><i class="agent-edge e-aw" id="ae6"></i>
+                <i class="agent-edge e-wp loop" id="ae7"></i><i class="agent-edge e-we" id="ae8"></i>
+              </div>
+            </section>
+
+            <aside class="panel side">
+              <div class="panel-title"><h2>What to explain</h2><span class="chip">AGENT CONTROL</span></div>
+              <div class="step-list" id="agentSteps">
+                <div class="step-item" data-step="0"><span class="step-num">1</span><div><b>Frame the task</b><span>Translate the user request into explicit information needs and exit criteria.</span></div></div>
+                <div class="step-item" data-step="1"><span class="step-num">2</span><div><b>Retrieve evidence</b><span>Use tools to fetch relevant facts instead of asking the model to “remember.”</span></div></div>
+                <div class="step-item" data-step="2"><span class="step-num">3</span><div><b>Synthesize with citations</b><span>Reason over the retrieved context, not over an unbounded hidden state.</span></div></div>
+                <div class="step-item" data-step="3"><span class="step-num">4</span><div><b>Evaluate against exit rules</b><span>Enough evidence? Conflicts resolved? Required fields complete?</span></div></div>
+                <div class="step-item" data-step="4"><span class="step-num">5</span><div><b>Loop or answer</b><span>Loop only when a specific evidence gap remains; otherwise exit.</span></div></div>
+              </div>
+              <div class="answer"><small>SHORT ANSWER</small><b>The loop should be controlled by explicit state and exit conditions.</b><p>The LLM can decide what to investigate next, but the workflow should know why it is looping, how many times it may loop, and what conditions allow it to stop.</p></div>
+              <div class="note">This is intentionally a minimal architecture: one planner/router, one retrieval layer, one reasoning step, one evaluator. More agents do not automatically make the system better.</div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="controls">
+      <button class="ctrl" id="prevSlide">← Slide</button>
+      <button class="ctrl primary" id="playPause">Pause</button>
+      <button class="ctrl" id="nextStep">Next step</button>
+      <button class="ctrl" id="nextSlide">Slide →</button>
+    </div>
+    <div class="progress"><i id="progressBar"></i></div>
+    <div class="status" id="statusText">SLIDE 1 / 3 · STEP 1</div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  var slideIndex = 0;
+  var stepIndex = 0;
+  var playing = true;
+  var timer = null;
+
+  var slideSteps = [5,6,5];
+  var slides = document.getElementById('slides');
+  var slideEls = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  var progressBar = document.getElementById('progressBar');
+  var statusText = document.getElementById('statusText');
+  var playPause = document.getElementById('playPause');
+
+  function clearTimer(){
+    if(timer){ clearTimeout(timer); timer = null; }
+  }
+
+  function schedule(){
+    clearTimer();
+    if(!playing) return;
+    timer = setTimeout(function(){
+      if(stepIndex < slideSteps[slideIndex]-1){
+        stepIndex += 1;
+      } else {
+        stepIndex = 0;
+        slideIndex = (slideIndex + 1) % slideEls.length;
+      }
+      render();
+      schedule();
+    }, 2600);
+  }
+
+  function setActiveStep(containerId, step){
+    var items = Array.prototype.slice.call(document.querySelectorAll('#'+containerId+' .step-item'));
+    items.forEach(function(item,idx){
+      item.classList.toggle('active', idx===step);
+      item.classList.toggle('done', idx<step);
+    });
+  }
+
+  function resetClasses(selector){
+    Array.prototype.slice.call(document.querySelectorAll(selector)).forEach(function(el){
+      el.classList.remove('active','done','hit','miss','evict','dup','conflict','merged');
+    });
+  }
+
+  function renderCache(step){
+    setActiveStep('cacheSteps',step);
+    resetClasses('.cache-slot');
+    resetClasses('#requestTokens .tok');
+    resetClasses('#prefillTokens .tok');
+    ['cf1','cf2','cf3','cf4'].forEach(function(id){document.getElementById(id).classList.remove('active')});
+
+    var chip=document.getElementById('cacheStageChip');
+    var hit=document.getElementById('hitMetric');
+    var reuse=document.getElementById('reuseMetric');
+    var saved=document.getElementById('savedPrefill');
+    var append=document.getElementById('appendMetric');
+    var evict=document.getElementById('evictMetric');
+    var req=Array.prototype.slice.call(document.querySelectorAll('#requestTokens .tok'));
+    var pref=Array.prototype.slice.call(document.querySelectorAll('#prefillTokens .tok'));
+
+    chip.textContent=['HASH PREFIX','CACHE HIT','PREFILL SUFFIX','DECODE','EVICT'][step];
+    if(step>=0) document.getElementById('cf1').classList.add('active');
+
+    if(step>=1){
+      document.querySelector('[data-cache-slot="0"]').classList.add('active');
+      hit.textContent='YES'; reuse.textContent='4';
+      req.slice(0,4).forEach(function(t){t.classList.add('hit')});
+      req.slice(4).forEach(function(t){t.classList.add('miss')});
+    } else {
+      hit.textContent='NO'; reuse.textContent='0';
+    }
+
+    if(step>=2){
+      document.getElementById('cf2').classList.add('active');
+      pref.slice(0,4).forEach(function(t){t.classList.add('hit')});
+      pref.slice(4).forEach(function(t){t.classList.add('miss')});
+      saved.textContent='50%';
+    } else saved.textContent='0%';
+
+    if(step>=3){
+      document.getElementById('cf3').classList.add('active');
+      append.textContent='4+';
+    } else append.textContent='0';
+
+    if(step>=4){
+      document.getElementById('cf4').classList.add('active');
+      document.querySelector('[data-cache-slot="2"]').classList.add('evict');
+      evict.textContent='A811';
+    } else evict.textContent='—';
+  }
+
+  function renderKG(step){
+    setActiveStep('kgSteps',step);
+    resetClasses('[data-kg-record]');
+    resetClasses('[data-kg-rule]');
+    var chip=document.getElementById('kgStageChip');
+    var version=document.getElementById('kgVersion');
+    chip.textContent=['STAGING','ENTITY MATCH','DEDUP','CONFLICT','RESOLVE','COMMIT'][step];
+
+    var rules=document.querySelectorAll('[data-kg-rule]');
+    for(var i=0;i<=step;i++){ if(rules[i]) rules[i].classList.add(i===step?'active':'done'); }
+
+    var records=document.querySelectorAll('[data-kg-record]');
+    if(step===0){ records[0].classList.add('active'); }
+    if(step===1){ records[0].classList.add('active'); records[1].classList.add('active'); records[4].classList.add('active'); }
+    if(step===2){ records[1].classList.add('dup'); records[4].classList.add('dup'); }
+    if(step===3){ records[2].classList.add('conflict'); records[3].classList.add('conflict'); }
+    if(step===4){ records[2].classList.add('merged'); records[3].classList.add('conflict'); }
+    if(step===5){
+      records[0].classList.add('merged'); records[1].classList.add('merged'); records[2].classList.add('merged'); records[4].classList.add('merged');
+      version.textContent='graph_v42 · committed · provenance retained';
+    } else {
+      version.textContent='graph_v41 · staged changes not committed';
+    }
+  }
+
+  function renderAgent(step){
+    setActiveStep('agentSteps',step);
+    resetClasses('[data-agent-node]');
+    ['ae1','ae2','ae3','ae4','ae5','ae6','ae7','ae8'].forEach(function(id){document.getElementById(id).classList.remove('active')});
+
+    var chip=document.getElementById('agentStageChip');
+    var title=document.getElementById('thoughtTitle');
+    var copy=document.getElementById('thoughtCopy');
+    var nodes={
+      question:document.querySelector('[data-agent-node="question"]'),
+      plan:document.querySelector('[data-agent-node="plan"]'),
+      retrieve:document.querySelector('[data-agent-node="retrieve"]'),
+      knowledge:document.querySelector('[data-agent-node="knowledge"]'),
+      working:document.querySelector('[data-agent-node="working"]'),
+      evaluate:document.querySelector('[data-agent-node="evaluate"]'),
+      answer:document.querySelector('[data-agent-node="answer"]')
+    };
+
+    if(step===0){
+      chip.textContent='FRAME TASK'; nodes.question.classList.add('active'); nodes.plan.classList.add('active');
+      document.getElementById('ae1').classList.add('active');
+      title.textContent='Define evidence needs and exit criteria';
+      copy.innerHTML='Need: client exposure, liquidity signal, relationship owner. Exit when each claim has a governed source.<span class="cursor"></span>';
+    }
+    if(step===1){
+      chip.textContent='RETRIEVE'; nodes.retrieve.classList.add('active'); nodes.knowledge.classList.add('active');
+      document.getElementById('ae2').classList.add('active'); document.getElementById('ae3').classList.add('active');
+      title.textContent='Retrieve only the evidence required by the plan';
+      copy.innerHTML='Search KG + documents + approved data. Return facts, timestamps and provenance — not a guessed conclusion.<span class="cursor"></span>';
+    }
+    if(step===2){
+      chip.textContent='SYNTHESIZE'; nodes.working.classList.add('active'); nodes.knowledge.classList.add('done');
+      document.getElementById('ae4').classList.add('active'); document.getElementById('ae6').classList.add('active');
+      title.textContent='Reason over the retrieved context';
+      copy.innerHTML='Combine the evidence into a candidate answer. Preserve uncertainty and distinguish observed facts from inference.<span class="cursor"></span>';
+    }
+    if(step===3){
+      chip.textContent='EVALUATE'; nodes.evaluate.classList.add('active'); nodes.working.classList.add('done');
+      document.getElementById('ae5').classList.add('active');
+      title.textContent='Check completeness, conflicts and safety';
+      copy.innerHTML='Evidence gap found: one client has a liquidity claim without a current source. Loop for that specific missing fact.<span class="cursor"></span>';
+    }
+    if(step===4){
+      chip.textContent='ANSWER'; nodes.answer.classList.add('active'); nodes.evaluate.classList.add('done');
+      document.getElementById('ae8').classList.add('active');
+      title.textContent='Exit when the explicit criteria are met';
+      copy.innerHTML='Return the grounded answer with citations. No extra loop is needed once the evidence requirements are satisfied.<span class="cursor"></span>';
+    }
+  }
+
+  function render(){
+    var isMobile=window.matchMedia('(max-width:980px)').matches;
+    if(isMobile){
+      slideEls.forEach(function(s,idx){s.classList.toggle('active-mobile',idx===slideIndex)});
+    } else {
+      slides.style.transform='translateX(-'+(slideIndex*100)+'%)';
+    }
+    tabs.forEach(function(tab,idx){tab.classList.toggle('active',idx===slideIndex)});
+    if(slideIndex===0) renderCache(stepIndex);
+    if(slideIndex===1) renderKG(stepIndex);
+    if(slideIndex===2) renderAgent(stepIndex);
+
+    var stepCount=slideSteps[slideIndex];
+    progressBar.style.width=((stepIndex+1)/stepCount*100)+'%';
+    statusText.textContent='SLIDE '+(slideIndex+1)+' / '+slideEls.length+' · STEP '+(stepIndex+1)+' / '+stepCount;
+    playPause.textContent=playing?'Pause':'Play';
+  }
+
+  tabs.forEach(function(tab){
+    tab.addEventListener('click',function(){
+      slideIndex=Number(tab.dataset.slide);stepIndex=0;render();schedule();
+    });
+  });
+
+  document.getElementById('prevSlide').addEventListener('click',function(){
+    slideIndex=(slideIndex-1+slideEls.length)%slideEls.length;stepIndex=0;render();schedule();
+  });
+  document.getElementById('nextSlide').addEventListener('click',function(){
+    slideIndex=(slideIndex+1)%slideEls.length;stepIndex=0;render();schedule();
+  });
+  document.getElementById('nextStep').addEventListener('click',function(){
+    if(stepIndex<slideSteps[slideIndex]-1){stepIndex+=1}else{stepIndex=0}
+    render();schedule();
+  });
+  playPause.addEventListener('click',function(){
+    playing=!playing;render();schedule();
+  });
+  window.addEventListener('resize',render);
+
+  render();
+  schedule();
+})();
+</script>
+</body>
+</html>
