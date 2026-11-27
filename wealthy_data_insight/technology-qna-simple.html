@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Technology Q&A · Simple</title>
+<style>
+:root{--bg:#f5f6f4;--paper:#fff;--ink:#111820;--muted:#6c747c;--line:#dfe3e5;--navy:#132231;--red:#c92a2a;--green:#18845f;--blue:#416b93;--amber:#b27a16}
+*{box-sizing:border-box}html,body{margin:0;height:100%}body{font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--ink);overflow:hidden}
+.deck{height:100%;display:grid;grid-template-rows:64px 1fr 54px}.top{display:flex;align-items:center;justify-content:space-between;padding:0 26px;background:#fff;border-bottom:1px solid var(--line)}
+.brand{font-weight:800}.tabs{display:flex;gap:8px}.tab,.btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-size:10px;font-weight:700;cursor:pointer}.tab.active,.btn.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.viewport{overflow:hidden}.slides{height:100%;display:flex;transition:transform .45s ease}.slide{min-width:100%;padding:28px 34px}.inner{max-width:1180px;margin:auto}
+.head{text-align:center;margin-bottom:22px}.eyebrow{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--red);font-weight:800}.head h1{font-size:30px;margin:6px 0}.head p{margin:0 auto;max-width:760px;color:var(--muted);font-size:12px;line-height:1.5}
+.qa{display:grid;grid-template-columns:1fr 260px;gap:16px}.stage,.side{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.flow-title{font-size:13px;font-weight:800;margin-bottom:20px}.flow{display:flex;align-items:center;justify-content:center;gap:14px;min-height:320px;flex-wrap:wrap}
+.node{width:150px;min-height:94px;border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;text-align:center;transition:.25s ease}.node small{display:block;color:var(--muted);font-size:8px}.node b{display:block;margin-top:6px;font-size:13px}.node p{font-size:8px;line-height:1.4;color:var(--muted);margin:6px 0 0}
+.node.active{border-color:var(--red);box-shadow:0 0 0 3px rgba(201,42,42,.08);transform:translateY(-3px)}.node.done{background:#edf8f3;border-color:#b9decf}
+.arrow{font-size:24px;color:#a4acb2}.arrow.active{color:var(--red)}
+.steps{display:grid;gap:8px}.step{padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:9px}.step b{display:block}.step span{display:block;color:var(--muted);margin-top:3px;line-height:1.4}.step.active{background:#eef5fb;border-color:#a9bed0}.step.done{background:#edf8f3;border-color:#b9decf}
+.takeaway{margin-top:12px;padding:12px;border-radius:10px;background:var(--navy);color:#fff}.takeaway small{font-size:8px;color:#bac5ce}.takeaway b{display:block;margin-top:5px;font-size:12px;line-height:1.4}
+.footer{display:flex;align-items:center;gap:10px;padding:0 24px;background:#fff;border-top:1px solid var(--line)}.progress{flex:1;height:5px;background:#eef0f1;border-radius:999px;overflow:hidden}.progress i{display:block;height:100%;background:var(--red);width:0;transition:.3s}.status{font-size:8px;color:var(--muted)}
+@media(max-width:850px){body{overflow:auto}.deck{height:auto}.tabs{overflow:auto}.qa{grid-template-columns:1fr}.slide{padding:18px}.viewport{overflow:visible}.slides{display:block;transform:none!important}.slide{display:none}.slide.mobile-active{display:block}.footer{position:sticky;bottom:0}}
+</style>
+</head>
+<body>
+<div class="deck">
+<header class="top">
+  <div class="brand">Technology Q&A</div>
+  <div class="tabs">
+    <button class="tab active" data-slide="0">LLM Cache</button>
+    <button class="tab" data-slide="1">Knowledge Graph</button>
+    <button class="tab" data-slide="2">Agent Loop</button>
+  </div>
+</header>
+
+<main class="viewport">
+<div class="slides" id="slides">
+
+<section class="slide mobile-active">
+<div class="inner">
+  <div class="head">
+    <div class="eyebrow">01 · LLM SERVER CACHE</div>
+    <h1>Reuse repeated prompt work.</h1>
+    <p>If part of a prompt was already processed, the server can reuse that cached prefix and only compute the new part.</p>
+  </div>
+  <div class="qa">
+    <div class="stage">
+      <div class="flow-title">Prompt → Cache → Model → Answer</div>
+      <div class="flow">
+        <div class="node" data-s0="0"><small>1</small><b>Prompt arrives</b><p>System prompt + user request</p></div>
+        <div class="arrow" data-a0="0">→</div>
+        <div class="node" data-s0="1"><small>2</small><b>Cache check</b><p>Find matching prefix</p></div>
+        <div class="arrow" data-a0="1">→</div>
+        <div class="node" data-s0="2"><small>3</small><b>Compute only new part</b><p>Skip repeated prefill</p></div>
+        <div class="arrow" data-a0="2">→</div>
+        <div class="node" data-s0="3"><small>4</small><b>Generate answer</b><p>Decode normally</p></div>
+      </div>
+    </div>
+    <aside class="side">
+      <div class="steps" id="steps0">
+        <div class="step"><b>Prompt</b><span>Request enters the server.</span></div>
+        <div class="step"><b>Cache hit?</b><span>Look for a matching prefix.</span></div>
+        <div class="step"><b>Reuse</b><span>Reuse saved KV states for that prefix.</span></div>
+        <div class="step"><b>Continue</b><span>Compute only the unmatched tokens and generate output.</span></div>
+      </div>
+      <div class="takeaway"><small>KEY IDEA</small><b>Cache saves repeated computation. It is not long-term memory.</b></div>
+    </aside>
+  </div>
+</div>
+</section>
+
+<section class="slide">
+<div class="inner">
+  <div class="head">
+    <div class="eyebrow">02 · OFFLINE KNOWLEDGE GRAPH UPDATE</div>
+    <h1>Merge carefully, not blindly.</h1>
+    <p>New offline data should be staged, matched to existing entities, checked for duplicates and conflicts, then committed as a new graph version.</p>
+  </div>
+  <div class="qa">
+    <div class="stage">
+      <div class="flow-title">New data → Match → Resolve → Update graph</div>
+      <div class="flow">
+        <div class="node" data-s1="0"><small>1</small><b>New records</b><p>Raw offline files</p></div>
+        <div class="arrow" data-a1="0">→</div>
+        <div class="node" data-s1="1"><small>2</small><b>Match entities</b><p>Same person or duplicate?</p></div>
+        <div class="arrow" data-a1="1">→</div>
+        <div class="node" data-s1="2"><small>3</small><b>Resolve conflicts</b><p>Prefer trusted + newer evidence</p></div>
+        <div class="arrow" data-a1="2">→</div>
+        <div class="node" data-s1="3"><small>4</small><b>Versioned merge</b><p>Update graph with provenance</p></div>
+      </div>
+    </div>
+    <aside class="side">
+      <div class="steps" id="steps1">
+        <div class="step"><b>Stage</b><span>Load new records without touching the canonical graph.</span></div>
+        <div class="step"><b>Deduplicate</b><span>Identify records that refer to the same entity.</span></div>
+        <div class="step"><b>De-conflict</b><span>Compare source authority, recency and confidence.</span></div>
+        <div class="step"><b>Commit</b><span>Publish a new graph version and keep provenance.</span></div>
+      </div>
+      <div class="takeaway"><small>KEY IDEA</small><b>Deduplicate entities. Version conflicting facts.</b></div>
+    </aside>
+  </div>
+</div>
+</section>
+
+<section class="slide">
+<div class="inner">
+  <div class="head">
+    <div class="eyebrow">03 · SIMPLE AGENT LOOP</div>
+    <h1>Retrieve evidence, reason, check, then stop.</h1>
+    <p>A simple agent does not need many agents. One loop with explicit retrieval and exit conditions is often enough.</p>
+  </div>
+  <div class="qa">
+    <div class="stage">
+      <div class="flow-title">Question → Retrieve → Reason → Check → Answer</div>
+      <div class="flow">
+        <div class="node" data-s2="0"><small>1</small><b>Question</b><p>What does the user want?</p></div>
+        <div class="arrow" data-a2="0">→</div>
+        <div class="node" data-s2="1"><small>2</small><b>Retrieve</b><p>Get facts from KG / docs</p></div>
+        <div class="arrow" data-a2="1">→</div>
+        <div class="node" data-s2="2"><small>3</small><b>Reason + Check</b><p>Enough evidence?</p></div>
+        <div class="arrow" data-a2="2">→</div>
+        <div class="node" data-s2="3"><small>4</small><b>Answer</b><p>If not enough, loop back to retrieval</p></div>
+      </div>
+    </div>
+    <aside class="side">
+      <div class="steps" id="steps2">
+        <div class="step"><b>Understand task</b><span>Define what evidence is needed.</span></div>
+        <div class="step"><b>Retrieve</b><span>Fetch current knowledge instead of guessing.</span></div>
+        <div class="step"><b>Evaluate</b><span>If evidence is missing, retrieve again.</span></div>
+        <div class="step"><b>Exit</b><span>Return the answer when exit conditions are met.</span></div>
+      </div>
+      <div class="takeaway"><small>KEY IDEA</small><b>Loop only for a specific missing piece of evidence.</b></div>
+    </aside>
+  </div>
+</div>
+</section>
+
+</div>
+</main>
+
+<footer class="footer">
+  <button class="btn" id="prev">←</button>
+  <button class="btn primary" id="play">Pause</button>
+  <button class="btn" id="next">→</button>
+  <div class="progress"><i id="bar"></i></div>
+  <div class="status" id="status">1 / 3</div>
+</footer>
+</div>
+
+<script>
+(function(){
+  var slide=0,step=0,playing=true,timer=null,totalSlides=3,stepsPerSlide=4;
+  var slides=document.getElementById('slides');
+  var slideEls=[].slice.call(document.querySelectorAll('.slide'));
+  var tabs=[].slice.call(document.querySelectorAll('.tab'));
+  var bar=document.getElementById('bar'),status=document.getElementById('status'),play=document.getElementById('play');
+
+  function render(){
+    var mobile=window.matchMedia('(max-width:850px)').matches;
+    if(mobile){slideEls.forEach(function(el,i){el.classList.toggle('mobile-active',i===slide)})}
+    else{slides.style.transform='translateX(-'+(slide*100)+'%)'}
+    tabs.forEach(function(t,i){t.classList.toggle('active',i===slide)});
+    for(var s=0;s<3;s++){
+      var nodes=[].slice.call(document.querySelectorAll('[data-s'+s+']'));
+      var arrows=[].slice.call(document.querySelectorAll('[data-a'+s+']'));
+      var side=[].slice.call(document.querySelectorAll('#steps'+s+' .step'));
+      nodes.forEach(function(n,i){n.classList.toggle('active',s===slide&&i===step);n.classList.toggle('done',s===slide&&i<step)});
+      arrows.forEach(function(a,i){a.classList.toggle('active',s===slide&&i<step)});
+      side.forEach(function(x,i){x.classList.toggle('active',s===slide&&i===step);x.classList.toggle('done',s===slide&&i<step)});
+    }
+    bar.style.width=((step+1)/stepsPerSlide*100)+'%';
+    status.textContent='Slide '+(slide+1)+' / 3 · Step '+(step+1)+' / 4';
+    play.textContent=playing?'Pause':'Play';
+  }
+  function schedule(){clearTimeout(timer);if(!playing)return;timer=setTimeout(function(){if(step<3)step++;else{step=0;slide=(slide+1)%3}render();schedule()},2200)}
+  tabs.forEach(function(t){t.onclick=function(){slide=Number(t.dataset.slide);step=0;render();schedule()}});
+  document.getElementById('next').onclick=function(){if(step<3)step++;else{step=0;slide=(slide+1)%3}render();schedule()};
+  document.getElementById('prev').onclick=function(){if(step>0)step--;else{slide=(slide+2)%3;step=3}render();schedule()};
+  play.onclick=function(){playing=!playing;render();schedule()};
+  window.addEventListener('resize',render);
+  render();schedule();
+})();
+</script>
+</body>
+</html>
