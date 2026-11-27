@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#0f1720">
+<title>Technology Q&A · Visual Walkthrough</title>
+<meta name="description" content="Progressive visual walkthrough for LLM cache mechanics, offline knowledge graph updates, and retrieval-driven agent loops.">
+<style>
+:root{
+  --bg:#f5f6f4;--paper:#fff;--ink:#121820;--muted:#69737c;--line:#dfe3e5;
+  --navy:#132231;--red:#c92a2a;--green:#18845f;--blue:#416b93;--amber:#b27a16;
+  --soft-blue:#edf4fa;--soft-green:#edf8f3;--soft-red:#fff1f1;--soft-amber:#fff7e8;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);overflow:hidden}
+button{font:inherit}
+.deck{height:100%;display:grid;grid-template-rows:64px minmax(0,1fr) 58px}
+.topbar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:20px;padding:0 26px;background:rgba(255,255,255,.97);border-bottom:1px solid var(--line);z-index:5}
+.brand{display:flex;align-items:center;gap:10px}.brand-mark{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;background:var(--navy);color:#fff;font-weight:800;font-size:12px}
+.brand b{font-size:13px}.brand small{display:block;color:var(--muted);font-size:8px;letter-spacing:.1em;text-transform:uppercase}
+.tabs{display:flex;justify-content:center;gap:7px}.tab{border:1px solid var(--line);background:#fff;color:#64707a;border-radius:999px;padding:7px 11px;font-size:9px;font-weight:800;cursor:pointer;transition:.2s}
+.tab.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.mode{font-size:8px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+
+.viewport{overflow:hidden;position:relative}.slides{height:100%;display:flex;transition:transform .46s cubic-bezier(.22,.7,.25,1)}
+.slide{min-width:100%;height:100%;padding:22px 28px;overflow:auto}.inner{max-width:1360px;margin:0 auto}
+.head{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:24px;align-items:end;margin-bottom:14px}
+.eyebrow{font-size:8px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--red)}
+.head h1{font-size:28px;line-height:1.08;margin:4px 0 4px;letter-spacing:-.02em}.head p{font-size:11px;line-height:1.5;margin:0;color:var(--muted);max-width:800px}
+.question{padding:12px 14px;border-radius:11px;background:var(--navy);color:#fff}.question small{display:block;font-size:7px;color:#b8c4cd;letter-spacing:.11em;text-transform:uppercase}.question b{display:block;margin-top:4px;font-size:12px;line-height:1.4}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:14px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px}.diagram-panel{padding:14px 14px 12px}.side{padding:14px}
+.diagram-top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:7px}.diagram-top b{font-size:12px}.stage-chip{font-size:7px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:5px 8px;border-radius:999px;background:#eef0f2;color:#59646d}
+.diagram{height:470px;position:relative;overflow:hidden;border-radius:10px;background:
+linear-gradient(#f6f7f5 1px,transparent 1px),linear-gradient(90deg,#f6f7f5 1px,transparent 1px),#fff;background-size:28px 28px}
+.delta{margin-top:8px;display:grid;grid-template-columns:auto 1fr;gap:9px;align-items:start;padding:9px 10px;border-left:3px solid var(--red);background:#fafafa;border-radius:6px}
+.delta .frame{font:8px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--red);white-space:nowrap}.delta b{display:block;font-size:10px}.delta p{margin:3px 0 0;font-size:8px;color:var(--muted);line-height:1.42}
+
+.side h2{font-size:13px;margin:0 0 10px}.now{padding:12px;border:1px solid var(--line);border-radius:10px;background:#fafbfa;min-height:100px}
+.now small{font-size:7px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}.now b{display:block;margin-top:5px;font-size:12px}.now p{font-size:9px;line-height:1.5;color:#58626a;margin:5px 0 0}
+.key{margin-top:10px;padding:12px;border-radius:10px;background:var(--navy);color:#fff}.key small{font-size:7px;color:#b9c5ce;letter-spacing:.08em}.key b{display:block;margin-top:5px;font-size:11px;line-height:1.45}
+.legend{display:grid;gap:6px;margin-top:10px}.legend-row{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:8px}.dot{width:8px;height:8px;border-radius:50%;background:#c4cbd0}.dot.active{background:var(--red)}.dot.done{background:var(--green)}.dot.data{background:var(--blue)}.dot.warn{background:var(--amber)}
+
+.node{position:absolute;z-index:3;min-width:122px;max-width:170px;padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:#fff;box-shadow:0 5px 14px rgba(18,24,32,.04);transition:.3s ease}
+.node small{display:block;font-size:6px;color:var(--muted);letter-spacing:.09em;text-transform:uppercase}.node b{display:block;margin-top:3px;font-size:10px}.node p{margin:4px 0 0;color:var(--muted);font-size:7px;line-height:1.36}
+.node.dim{opacity:.36}.node.active{border-color:var(--red);background:var(--soft-red);box-shadow:0 0 0 3px rgba(201,42,42,.07)}.node.done{border-color:#b9decf;background:var(--soft-green)}.node.data{border-color:#b8cbdb;background:var(--soft-blue)}.node.warn{border-color:#e2c98d;background:var(--soft-amber)}
+.edge{position:absolute;z-index:1;height:2px;background:#cbd1d5;transform-origin:left center;transition:.3s ease;opacity:.65}.edge::after{content:"";position:absolute;right:-1px;top:-3px;border-left:7px solid #cbd1d5;border-top:4px solid transparent;border-bottom:4px solid transparent}.edge.active{background:var(--red);opacity:1;height:3px}.edge.active::after{border-left-color:var(--red)}.edge.done{background:var(--green);opacity:.9}.edge.done::after{border-left-color:var(--green)}.edge.dashed{background:transparent;border-top:2px dashed #aeb7bd;height:0}.edge.dashed::after{top:-4px}
+.badge{display:inline-flex;align-items:center;gap:4px;margin-top:6px;padding:4px 6px;border-radius:999px;font-size:7px;font-weight:800;background:#f0f2f3;color:#59636c}.node.active .badge{background:#ffe4e4;color:#9f2020}.node.done .badge{background:#dff1e9;color:#12694d}
+.mini-stack{display:grid;gap:4px;margin-top:6px}.mini-row{height:18px;border:1px solid #dfe3e5;border-radius:5px;padding:3px 5px;font:6px ui-monospace,SFMono-Regular,Menlo,monospace;color:#616b74;background:#fafafa;transition:.25s}.mini-row.hit{background:#e6f6ee;border-color:#b8dece;color:#126b4e}.mini-row.miss{background:#fff0f0;border-color:#efc2c2;color:#9e2020}.mini-row.evict{background:#fff7e8;border-color:#e6cd91;color:#95640e}
+
+.footer{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;padding:0 24px;background:#fff;border-top:1px solid var(--line)}
+.controls{display:flex;gap:7px}.ctrl{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 10px;font-size:9px;font-weight:800;cursor:pointer}.ctrl.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.progress{height:5px;border-radius:999px;background:#eef0f1;overflow:hidden}.progress i{display:block;height:100%;background:var(--red);width:20%;transition:.3s}.status{font:8px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);white-space:nowrap}
+
+@media(max-width:900px){
+ body{overflow:auto}.deck{height:auto;min-height:100vh}.topbar{grid-template-columns:1fr;padding:10px 16px;gap:9px}.tabs{justify-content:flex-start;overflow:auto}.mode{display:none}
+ .viewport{overflow:visible}.slides{display:block;transform:none!important}.slide{display:none;height:auto;padding:18px}.slide.mobile-active{display:block}.head{grid-template-columns:1fr}.layout{grid-template-columns:1fr}
+ .diagram{height:560px}.footer{position:sticky;bottom:0;z-index:10}
+}
+</style>
+</head>
+<body>
+<div class="deck">
+<header class="topbar">
+  <div class="brand"><div class="brand-mark">TQ</div><div><b>Technology Q&A</b><small>Progressive visual walkthrough</small></div></div>
+  <nav class="tabs">
+    <button class="tab active" data-slide="0">01 · LLM Cache</button>
+    <button class="tab" data-slide="1">02 · Offline KG</button>
+    <button class="tab" data-slide="2">03 · Agent Loop</button>
+  </nav>
+  <div class="mode">ONE MESSAGE PER FRAME</div>
+</header>
+
+<main class="viewport">
+<div class="slides" id="slides">
+
+<!-- SLIDE 1 -->
+<section class="slide mobile-active">
+<div class="inner">
+<header class="head">
+  <div><div class="eyebrow">01 · CACHE MECHANICS IN AN LLM SERVER</div><h1>Same prefix? Reuse the work.</h1><p>The whole architecture stays visible. Each frame changes only one thing so the audience can build the mental model progressively.</p></div>
+  <aside class="question"><small>QUESTION</small><b>How does an LLM server avoid recomputing the same prompt prefix again?</b></aside>
+</header>
+<div class="layout">
+  <section class="panel diagram-panel">
+    <div class="diagram-top"><b>Stable system diagram</b><span class="stage-chip" id="cacheChip">REQUEST</span></div>
+    <div class="diagram" id="cacheDiagram">
+      <article class="node" id="cRequest" style="left:3%;top:35%"><small>Request</small><b>Prompt arrives</b><p>System prompt + user message</p><div class="badge">8 prompt tokens</div></article>
+      <article class="node" id="cToken" style="left:22%;top:35%"><small>Step A</small><b>Token / prefix blocks</b><p>Split prompt into reusable blocks</p><div class="mini-stack"><div class="mini-row">system: You are...</div><div class="mini-row">user: Summarise...</div></div></article>
+      <article class="node" id="cLookup" style="left:43%;top:10%"><small>Step B</small><b>Cache lookup</b><p>Find longest matching prefix</p><div class="badge" id="cacheHitBadge">not checked</div></article>
+      <article class="node" id="cCache" style="left:43%;top:60%"><small>Stored KV</small><b>Prefix cache</b><p>Previously computed attention states</p><div class="mini-stack"><div class="mini-row" id="cacheRow1">block A · bank assistant</div><div class="mini-row" id="cacheRow2">block B · coding assistant</div><div class="mini-row" id="cacheRow3">block C · old prefix</div></div></article>
+      <article class="node" id="cPrefill" style="left:66%;top:20%"><small>Step C</small><b>Prefill</b><p>Compute only unmatched prompt tokens</p><div class="badge" id="prefillBadge">8 tokens</div></article>
+      <article class="node" id="cDecode" style="left:66%;top:60%"><small>Step D</small><b>Decode</b><p>Generate tokens one by one</p><div class="badge">normal generation</div></article>
+      <article class="node" id="cWrite" style="right:2%;top:39%"><small>Step E</small><b>Update cache</b><p>Append new KV / evict if needed</p><div class="badge" id="writeBadge">idle</div></article>
+
+      <i class="edge" id="ce1" style="left:15%;top:44%;width:8%"></i>
+      <i class="edge" id="ce2" style="left:35%;top:40%;width:13%;transform:rotate(-34deg)"></i>
+      <i class="edge dashed" id="ce3" style="left:50%;top:60%;width:17%;transform:rotate(-57deg)"></i>
+      <i class="edge" id="ce4" style="left:55%;top:20%;width:13%;transform:rotate(17deg)"></i>
+      <i class="edge" id="ce5" style="left:74%;top:41%;width:19%;transform:rotate(55deg)"></i>
+      <i class="edge" id="ce6" style="left:78%;top:68%;width:12%"></i>
+      <i class="edge dashed" id="ce7" style="left:91%;top:61%;width:31%;transform:rotate(168deg)"></i>
+    </div>
+    <div class="delta"><div class="frame" id="cacheFrame">FRAME 1</div><div><b id="cacheDeltaTitle">A new request enters the server.</b><p id="cacheDeltaCopy">Nothing has been reused yet. We first need a stable representation of the prompt.</p></div></div>
+  </section>
+  <aside class="panel side">
+    <h2>Current message</h2>
+    <div class="now"><small id="cacheNowLabel">STEP 1</small><b id="cacheNowTitle">Prompt arrives</b><p id="cacheNowCopy">The server receives the full prompt exactly as usual.</p></div>
+    <div class="key"><small>KEY IDEA</small><b>Prefix cache reuses compute. It does not “remember the answer.”</b></div>
+    <div class="legend"><div class="legend-row"><i class="dot active"></i>Current frame</div><div class="legend-row"><i class="dot done"></i>Already established</div><div class="legend-row"><i class="dot"></i>Not active yet</div></div>
+  </aside>
+</div>
+</div>
+</section>
+
+<!-- SLIDE 2 -->
+<section class="slide">
+<div class="inner">
+<header class="head">
+  <div><div class="eyebrow">02 · OFFLINE KNOWLEDGE GRAPH UPDATE</div><h1>Stage first. Resolve identity. Resolve facts. Then publish.</h1><p>The graph never visually resets. We progressively show what happens to the same records as they move from raw input into a trusted graph snapshot.</p></div>
+  <aside class="question"><small>QUESTION</small><b>How do we update a knowledge graph without duplicates or silent fact conflicts?</b></aside>
+</header>
+<div class="layout">
+  <section class="panel diagram-panel">
+    <div class="diagram-top"><b>Stable reconciliation diagram</b><span class="stage-chip" id="kgChip">STAGE</span></div>
+    <div class="diagram" id="kgDiagram">
+      <article class="node" id="kSources" style="left:2%;top:31%;width:150px"><small>Raw sources</small><b>New offline data</b><div class="mini-stack"><div class="mini-row">CRM: Eleanor Tan</div><div class="mini-row">File: E. Tan</div><div class="mini-row">Legacy: Team GCNA</div></div></article>
+      <article class="node" id="kStage" style="left:23%;top:31%"><small>Step A</small><b>Staging area</b><p>Raw observations remain unchanged</p><div class="badge">no graph mutation</div></article>
+      <article class="node" id="kIdentity" style="left:44%;top:8%"><small>Step B</small><b>Entity resolution</b><p>Do these records refer to the same entity?</p><div class="badge" id="identityBadge">pending</div></article>
+      <article class="node" id="kDedupe" style="left:44%;top:60%"><small>Step C</small><b>Deduplicate</b><p>Collapse duplicate identity records</p><div class="badge" id="dedupeBadge">pending</div></article>
+      <article class="node" id="kConflict" style="left:66%;top:8%"><small>Step D</small><b>Conflict check</b><p>Same predicate, incompatible value?</p><div class="mini-stack"><div class="mini-row" id="claimA">Team ASEAN · 2026</div><div class="mini-row" id="claimB">Team GCNA · 2024</div></div></article>
+      <article class="node" id="kPolicy" style="left:66%;top:60%"><small>Step E</small><b>Resolution policy</b><p>Authority + recency + confidence</p><div class="badge" id="policyBadge">pending</div></article>
+      <article class="node" id="kGraph" style="right:2%;top:31%"><small>Published graph</small><b>Eleanor Tan</b><p id="kgFact">Team: —</p><div class="badge" id="kgVersion">graph_v41</div></article>
+
+      <i class="edge" id="ke1" style="left:16%;top:40%;width:8%"></i>
+      <i class="edge" id="ke2" style="left:35%;top:37%;width:12%;transform:rotate(-35deg)"></i>
+      <i class="edge" id="ke3" style="left:35%;top:47%;width:12%;transform:rotate(35deg)"></i>
+      <i class="edge" id="ke4" style="left:56%;top:18%;width:11%"></i>
+      <i class="edge" id="ke5" style="left:56%;top:67%;width:11%"></i>
+      <i class="edge" id="ke6" style="left:77%;top:18%;width:17%;transform:rotate(30deg)"></i>
+      <i class="edge" id="ke7" style="left:77%;top:67%;width:17%;transform:rotate(-30deg)"></i>
+    </div>
+    <div class="delta"><div class="frame" id="kgFrame">FRAME 1</div><div><b id="kgDeltaTitle">Raw observations land in staging.</b><p id="kgDeltaCopy">The canonical graph is untouched. This preserves auditability and gives us a safe reconciliation boundary.</p></div></div>
+  </section>
+  <aside class="panel side">
+    <h2>Current message</h2>
+    <div class="now"><small id="kgNowLabel">STEP 1</small><b id="kgNowTitle">Stage before merge</b><p id="kgNowCopy">Never write raw offline records directly into the canonical graph.</p></div>
+    <div class="key"><small>KEY IDEA</small><b>Deduplication answers “same entity?” Conflict resolution answers “which fact is trusted?”</b></div>
+    <div class="legend"><div class="legend-row"><i class="dot data"></i>Evidence / raw data</div><div class="legend-row"><i class="dot warn"></i>Conflict</div><div class="legend-row"><i class="dot done"></i>Resolved / published</div></div>
+  </aside>
+</div>
+</div>
+</section>
+
+<!-- SLIDE 3 -->
+<section class="slide">
+<div class="inner">
+<header class="head">
+  <div><div class="eyebrow">03 · SIMPLE AGENT LOOP WITH KNOWLEDGE RETRIEVAL</div><h1>Loop only when the evaluator can name the missing evidence.</h1><p>The diagram remains fixed while control moves through it. The audience sees one state transition at a time rather than a different picture every frame.</p></div>
+  <aside class="question"><small>QUESTION</small><b>How does an agent retrieve knowledge, reason, and avoid looping forever?</b></aside>
+</header>
+<div class="layout">
+  <section class="panel diagram-panel">
+    <div class="diagram-top"><b>Stable agent state machine</b><span class="stage-chip" id="agentChip">FRAME TASK</span></div>
+    <div class="diagram" id="agentDiagram">
+      <article class="node" id="aQuestion" style="left:2%;top:36%"><small>Input</small><b>User question</b><p>Which clients share the same liquidity risk?</p></article>
+      <article class="node" id="aPlan" style="left:21%;top:9%"><small>Control</small><b>Plan / Router</b><p>Define needed evidence + exit criteria</p></article>
+      <article class="node" id="aRetrieve" style="left:42%;top:9%"><small>Tool</small><b>Retrieve</b><p>Query KG, docs, approved data</p></article>
+      <article class="node data" id="aContext" style="left:63%;top:9%"><small>Evidence</small><b>Knowledge context</b><p>Facts + provenance + timestamps</p></article>
+      <article class="node" id="aReason" style="left:42%;top:62%"><small>LLM</small><b>Reason</b><p>Build candidate answer from current evidence</p></article>
+      <article class="node" id="aEval" style="left:63%;top:62%"><small>Control</small><b>Evaluate</b><p>Enough? Conflicts? Missing field?</p><div class="badge" id="evalBadge">not checked</div></article>
+      <article class="node" id="aAnswer" style="right:2%;top:36%"><small>Output</small><b>Final answer</b><p>Grounded answer + citations</p></article>
+
+      <i class="edge" id="ae1" style="left:14%;top:40%;width:12%;transform:rotate(-31deg)"></i>
+      <i class="edge" id="ae2" style="left:33%;top:18%;width:10%"></i>
+      <i class="edge" id="ae3" style="left:54%;top:18%;width:10%"></i>
+      <i class="edge" id="ae4" style="left:69%;top:30%;width:31%;transform:rotate(150deg)"></i>
+      <i class="edge" id="ae5" style="left:54%;top:69%;width:10%"></i>
+      <i class="edge" id="ae6" style="left:75%;top:66%;width:21%;transform:rotate(-40deg)"></i>
+      <i class="edge dashed" id="ae7" style="left:64%;top:71%;width:46%;transform:rotate(191deg)"></i>
+    </div>
+    <div class="delta"><div class="frame" id="agentFrame">FRAME 1</div><div><b id="agentDeltaTitle">First define what “done” means.</b><p id="agentDeltaCopy">The planner turns the question into evidence requirements and explicit exit conditions before any retrieval happens.</p></div></div>
+  </section>
+  <aside class="panel side">
+    <h2>Current message</h2>
+    <div class="now"><small id="agentNowLabel">STEP 1</small><b id="agentNowTitle">Frame the task</b><p id="agentNowCopy">Need client exposure, liquidity signal, and source evidence. Exit only when all three are present.</p></div>
+    <div class="key"><small>KEY IDEA</small><b>The loop is controlled by explicit state and exit criteria, not by “keep thinking.”</b></div>
+    <div class="legend"><div class="legend-row"><i class="dot active"></i>Current control point</div><div class="legend-row"><i class="dot data"></i>Retrieved evidence</div><div class="legend-row"><i class="dot done"></i>Completed state</div></div>
+  </aside>
+</div>
+</div>
+</section>
+
+</div>
+</main>
+
+<footer class="footer">
+  <div class="controls">
+    <button class="ctrl" id="prev">←</button>
+    <button class="ctrl primary" id="play">Pause</button>
+    <button class="ctrl" id="next">Next frame</button>
+    <button class="ctrl" id="nextSlide">Next topic →</button>
+  </div>
+  <div class="progress"><i id="progress"></i></div>
+  <div class="status" id="status">TOPIC 1 / 3 · FRAME 1 / 5</div>
+</footer>
+</div>
+
+<script>
+(function(){
+'use strict';
+var slide=0,frame=0,playing=true,timer=null;
+var frameCounts=[5,5,5];
+var slides=document.getElementById('slides');
+var slideEls=[].slice.call(document.querySelectorAll('.slide'));
+var tabs=[].slice.call(document.querySelectorAll('.tab'));
+var progress=document.getElementById('progress'),status=document.getElementById('status'),play=document.getElementById('play');
+
+function q(id){return document.getElementById(id)}
+function clearTimer(){if(timer){clearTimeout(timer);timer=null}}
+function schedule(){clearTimer();if(!playing)return;timer=setTimeout(function(){advance();schedule()},2700)}
+function setNode(id,state){var el=q(id);el.classList.remove('active','done','dim','data','warn');if(state)el.classList.add(state)}
+function setEdge(id,state){var el=q(id);el.classList.remove('active','done');if(state)el.classList.add(state)}
+function resetGroup(ids,edgeIds){
+  ids.forEach(function(id){var el=q(id);el.classList.remove('active','done','dim','warn');if(id!=='aContext')el.classList.remove('data')});
+  edgeIds.forEach(function(id){q(id).classList.remove('active','done')});
+}
+function dimFuture(ids,activeIndex){
+  ids.forEach(function(id,i){if(i>activeIndex)q(id).classList.add('dim')});
+}
+
+var cacheCopy=[
+ ['REQUEST','FRAME 1','A new request enters the server.','Nothing has been reused yet. We first need a stable representation of the prompt.','STEP 1','Prompt arrives','The server receives the full prompt exactly as usual.'],
+ ['LOOKUP','FRAME 2','The server checks whether the prefix already exists.','Only the lookup changes in this frame. The rest of the architecture stays still.','STEP 2','Find the longest prefix hit','A previously seen system prefix matches a cached KV block.'],
+ ['REUSE','FRAME 3','The matching KV block is reused.','Those prefix tokens no longer need prefill compute. The request itself is unchanged.','STEP 3','Reuse cached computation','The cache saves repeated attention-state computation for the matching prefix.'],
+ ['PREFILL','FRAME 4','Only the unmatched suffix is computed.','The model still processes the new user tokens normally; only repeated prefix work is skipped.','STEP 4','Compute the delta','Prefill shrinks from the full prompt to only the unmatched tokens.'],
+ ['DECODE + WRITE','FRAME 5','Generation continues normally, then the cache is updated.','New KV states are appended. If memory is full, an older cache block may be evicted.','STEP 5','Generate and maintain cache','Decode is normal autoregressive generation; cache management happens around it.']
+];
+function renderCache(f){
+ var nodes=['cRequest','cToken','cLookup','cCache','cPrefill','cDecode','cWrite'],edges=['ce1','ce2','ce3','ce4','ce5','ce6','ce7'];resetGroup(nodes,edges);
+ var sequence=[0,2,3,4,6];dimFuture(nodes,f===0?0:f===1?2:f===2?3:f===3?4:6);
+ setNode('cRequest',f===0?'active':'done'); if(f>=0)setEdge('ce1',f===0?'active':'done');
+ if(f>=1){setNode('cToken','done');setNode('cLookup',f===1?'active':'done');setEdge('ce2',f===1?'active':'done');q('cacheHitBadge').textContent='HIT: block A';q('cacheRow1').className='mini-row hit'}
+ else{q('cacheHitBadge').textContent='not checked';q('cacheRow1').className='mini-row'}
+ if(f>=2){setNode('cCache',f===2?'active':'done');setEdge('ce3',f===2?'active':'done')}
+ if(f>=3){setNode('cPrefill',f===3?'active':'done');setEdge('ce4',f===3?'active':'done');q('prefillBadge').textContent='4 new tokens'}
+ else q('prefillBadge').textContent='8 tokens';
+ if(f>=4){setNode('cDecode','done');setNode('cWrite','active');setEdge('ce5','done');setEdge('ce6','active');setEdge('ce7','active');q('writeBadge').textContent='append + possible eviction';q('cacheRow3').className='mini-row evict'}
+ else{q('writeBadge').textContent='idle';q('cacheRow3').className='mini-row'}
+ var c=cacheCopy[f];q('cacheChip').textContent=c[0];q('cacheFrame').textContent=c[1];q('cacheDeltaTitle').textContent=c[2];q('cacheDeltaCopy').textContent=c[3];q('cacheNowLabel').textContent=c[4];q('cacheNowTitle').textContent=c[5];q('cacheNowCopy').textContent=c[6];
+}
+
+var kgCopy=[
+ ['STAGE','FRAME 1','Raw observations land in staging.','The canonical graph is untouched. This preserves auditability and creates a safe reconciliation boundary.','STEP 1','Stage before merge','Never write raw offline records directly into the canonical graph.'],
+ ['IDENTITY','FRAME 2','Resolve whether multiple records describe the same entity.','Strong identifiers establish identity first; fuzzy name similarity is only supporting evidence.','STEP 2','Same entity?','Eleanor Tan and E. Tan are resolved to one canonical person.'],
+ ['DEDUP','FRAME 3','Duplicate identity records collapse into one canonical entity.','We deduplicate records without deleting their provenance. Multiple observations may still support the same entity.','STEP 3','Deduplicate identity','One entity can retain many source observations.'],
+ ['CONFLICT','FRAME 4','Now resolve incompatible facts separately.','Team ASEAN and Team GCNA cannot both be current. Source authority and recency decide which claim is trusted.','STEP 4','De-conflict facts','A conflict is about claims, not entity identity.'],
+ ['PUBLISH','FRAME 5','Publish a new graph snapshot with provenance.','The trusted fact becomes current while the older conflicting claim remains traceable in history.','STEP 5','Versioned commit','Downstream users see one consistent graph version.']
+];
+function renderKG(f){
+ var nodes=['kSources','kStage','kIdentity','kDedupe','kConflict','kPolicy','kGraph'],edges=['ke1','ke2','ke3','ke4','ke5','ke6','ke7'];resetGroup(nodes,edges);
+ setNode('kSources',f===0?'data':'done');setEdge('ke1',f===0?'active':'done');
+ if(f>=0)setNode('kStage',f===0?'active':'done');
+ if(f>=1){setNode('kIdentity',f===1?'active':'done');setEdge('ke2',f===1?'active':'done');q('identityBadge').textContent='same person: 0.98'}
+ else q('identityBadge').textContent='pending';
+ if(f>=2){setNode('kDedupe',f===2?'active':'done');setEdge('ke3',f===2?'active':'done');q('dedupeBadge').textContent='3 records → 1 entity'}
+ else q('dedupeBadge').textContent='pending';
+ if(f>=3){setNode('kConflict',f===3?'active':'done');setEdge('ke4',f===3?'active':'done');q('claimA').className='mini-row hit';q('claimB').className='mini-row evict'}
+ else{q('claimA').className='mini-row';q('claimB').className='mini-row'}
+ if(f>=4){setNode('kPolicy','done');setNode('kGraph','active');setEdge('ke5','done');setEdge('ke6','done');setEdge('ke7','done');q('policyBadge').textContent='ASEAN wins';q('kgFact').textContent='Team: ASEAN';q('kgVersion').textContent='graph_v42'}
+ else{if(f>=3){setNode('kPolicy','active');setEdge('ke5','active');q('policyBadge').textContent='authority + recency'}else q('policyBadge').textContent='pending';q('kgFact').textContent='Team: —';q('kgVersion').textContent='graph_v41';q('kGraph').classList.add('dim')}
+ var c=kgCopy[f];q('kgChip').textContent=c[0];q('kgFrame').textContent=c[1];q('kgDeltaTitle').textContent=c[2];q('kgDeltaCopy').textContent=c[3];q('kgNowLabel').textContent=c[4];q('kgNowTitle').textContent=c[5];q('kgNowCopy').textContent=c[6];
+}
+
+var agentCopy=[
+ ['FRAME TASK','FRAME 1','First define what “done” means.','The planner converts the question into explicit evidence requirements and exit criteria before any retrieval happens.','STEP 1','Frame the task','Need client exposure, liquidity signal, and governed evidence.'],
+ ['RETRIEVE','FRAME 2','Retrieve the missing knowledge.','The retriever gets facts from the KG, documents, and approved data sources. It returns evidence, not a conclusion.','STEP 2','Retrieve evidence','Knowledge comes back with provenance and timestamps.'],
+ ['REASON','FRAME 3','Build a candidate answer from the retrieved context.','The LLM reasons only over the evidence currently available and keeps inference separate from observed facts.','STEP 3','Reason over context','The model synthesizes, but does not decide whether it is done.'],
+ ['EVALUATE','FRAME 4','The evaluator checks the answer against the exit criteria.','If it can name a concrete missing fact, the loop goes back to retrieval. Otherwise, it exits.','STEP 4','Check completeness','Example gap: one liquidity claim has no current source.'],
+ ['ANSWER','FRAME 5','Exit once the evidence requirements are satisfied.','The final answer is returned with its supporting evidence. No extra loop is needed.','STEP 5','Return grounded answer','The loop ends because the explicit completion conditions are met.']
+];
+function renderAgent(f){
+ var nodes=['aQuestion','aPlan','aRetrieve','aContext','aReason','aEval','aAnswer'],edges=['ae1','ae2','ae3','ae4','ae5','ae6','ae7'];resetGroup(nodes,edges);q('aContext').classList.add('data');
+ setNode('aQuestion',f===0?'done':'done');setNode('aPlan',f===0?'active':'done');setEdge('ae1',f===0?'active':'done');
+ if(f>=1){setNode('aRetrieve',f===1?'active':'done');setNode('aContext',f===1?'active':'data');setEdge('ae2',f===1?'active':'done');setEdge('ae3',f===1?'active':'done')}
+ if(f>=2){setNode('aReason',f===2?'active':'done');setEdge('ae4',f===2?'active':'done')}
+ if(f>=3){setNode('aEval',f===3?'active':'done');setEdge('ae5',f===3?'active':'done');q('evalBadge').textContent=f===3?'gap found':'complete'}
+ else q('evalBadge').textContent='not checked';
+ if(f===3)setEdge('ae7','active');
+ if(f>=4){setNode('aAnswer','active');setEdge('ae6','active')}
+ else q('aAnswer').classList.add('dim');
+ var c=agentCopy[f];q('agentChip').textContent=c[0];q('agentFrame').textContent=c[1];q('agentDeltaTitle').textContent=c[2];q('agentDeltaCopy').textContent=c[3];q('agentNowLabel').textContent=c[4];q('agentNowTitle').textContent=c[5];q('agentNowCopy').textContent=c[6];
+}
+
+function render(){
+ var mobile=window.matchMedia('(max-width:900px)').matches;
+ if(mobile)slideEls.forEach(function(el,i){el.classList.toggle('mobile-active',i===slide)});
+ else slides.style.transform='translateX(-'+slide*100+'%)';
+ tabs.forEach(function(t,i){t.classList.toggle('active',i===slide)});
+ if(slide===0)renderCache(frame); if(slide===1)renderKG(frame); if(slide===2)renderAgent(frame);
+ progress.style.width=((frame+1)/frameCounts[slide]*100)+'%';
+ status.textContent='TOPIC '+(slide+1)+' / 3 · FRAME '+(frame+1)+' / '+frameCounts[slide];
+ play.textContent=playing?'Pause':'Play';
+}
+function advance(){if(frame<frameCounts[slide]-1)frame++;else{frame=0;slide=(slide+1)%3}render()}
+tabs.forEach(function(t){t.addEventListener('click',function(){slide=Number(t.dataset.slide);frame=0;render();schedule()})});
+q('next').addEventListener('click',function(){advance();schedule()});
+q('prev').addEventListener('click',function(){if(frame>0)frame--;else{slide=(slide+2)%3;frame=frameCounts[slide]-1}render();schedule()});
+q('nextSlide').addEventListener('click',function(){slide=(slide+1)%3;frame=0;render();schedule()});
+play.addEventListener('click',function(){playing=!playing;render();schedule()});
+window.addEventListener('resize',render);
+render();schedule();
+})();
+</script>
+</body>
+</html>
