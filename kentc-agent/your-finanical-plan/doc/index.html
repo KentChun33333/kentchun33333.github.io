@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>your-finanical-plan — Architecture Walkthrough</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #f5f6f5;
+      color: #152636;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    header {
+      border-bottom: 1px solid #dce2e5;
+      background: #ffffff;
+      padding: 15px 4%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    header .left { display: flex; align-items: center; gap: 10px; }
+    header .left span { color: #687780; font-weight: 500; }
+    nav { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    nav a {
+      text-decoration: none;
+      color: #536675;
+      font-weight: 600;
+      font-size: 12.5px;
+      padding: 6px 11px;
+      border-radius: 7px;
+      border: 1px solid transparent;
+      transition: all .15s;
+    }
+    nav a:hover { background: #f1f4f6; color: #152636; }
+    nav a.active {
+      background: #fff1f1;
+      color: #b72828;
+      border-color: #ebc2c2;
+    }
+
+    main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 14px 24px 32px;
+    }
+
+    /* Two-column layout: Left control/vertical stepper + Right 2D diagram stage */
+    .workspace {
+      display: grid;
+      grid-template-columns: 310px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    /* Left Panel: Controls + Vertical Step 1..7 */
+    .sidebar {
+      background: #ffffff;
+      border: 1px solid #dce2e5;
+      border-radius: 16px;
+      padding: 16px;
+      position: sticky;
+      top: 16px;
+    }
+    .ctrl-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .ctrl-head small {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .09em;
+      color: #627381;
+      text-transform: uppercase;
+    }
+    .count {
+      font-size: 12px;
+      font-weight: 700;
+      color: #b72828;
+      font-variant-numeric: tabular-nums;
+    }
+    .progress {
+      width: 100%;
+      height: 5px;
+      background: #e1e5e7;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .progress i {
+      display: block;
+      background: #c52c2c;
+      height: 100%;
+      transition: width .3s ease;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 6px;
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #e6ebee;
+    }
+    button {
+      background: #ffffff;
+      color: #152636;
+      border: 1px solid #cfd7de;
+      border-radius: 8px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font: 600 12.5px system-ui, sans-serif;
+      min-height: 36px;
+      transition: all .15s;
+    }
+    button:hover:not(:disabled) { border-color: #152636; }
+    button.primary {
+      background: #152636;
+      color: #ffffff;
+      border-color: #152636;
+    }
+    button.primary:hover { background: #233849; }
+    button:disabled { opacity: .38; cursor: default; }
+
+    /* Vertical Step 1 -> Step 7 list */
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      position: relative;
+    }
+    .step-item {
+      width: 100%;
+      text-align: left;
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      gap: 10px;
+      align-items: center;
+      padding: 9px 10px;
+      border-radius: 10px;
+      border: 1px solid #e2e7ea;
+      background: #f9fbfb;
+      min-height: 0;
+    }
+    .step-item:hover {
+      background: #f1f5f7;
+      border-color: #b7c5d0;
+    }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font: 700 11.5px ui-monospace, SFMono-Regular, Menlo, monospace;
+      background: #eef2f5;
+      color: #536675;
+      border: 1px solid #d4dde3;
+      transition: all .2s;
+    }
+    .step-body b {
+      display: block;
+      font-size: 13px;
+      color: #152636;
+      line-height: 1.25;
+    }
+    .step-body span {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: #627381;
+      margin-top: 2px;
+      line-height: 1.25;
+    }
+
+    /* Active (red) & Completed (green) vertical step states */
+    .step-item.active {
+      background: #fff1f1;
+      border-color: #c52c2c;
+      box-shadow: 0 2px 10px rgba(197, 44, 44, .08);
+    }
+    .step-item.active .step-num {
+      background: #c52c2c;
+      color: #ffffff;
+      border-color: #c52c2c;
+    }
+    .step-item.active .step-body b { color: #9c1f1f; }
+
+    .step-item.done {
+      background: #edf8f2;
+      border-color: #88c7ad;
+    }
+    .step-item.done .step-num {
+      background: #449675;
+      color: #ffffff;
+      border-color: #449675;
+    }
+
+    .kbd-hint {
+      margin-top: 12px;
+      font-size: 11.5px;
+      color: #72828e;
+      text-align: center;
+    }
+
+    /* Right Panel: 2D SVG Stage + Caption */
+    .stage {
+      background: #ffffff;
+      border: 1px solid #dce2e5;
+      border-radius: 16px;
+      padding: 14px 16px 12px;
+    }
+    .diagram {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 72vh;
+      margin: 0 auto;
+    }
+
+    svg text { font-family: system-ui, -apple-system, sans-serif; fill: #233849; }
+    svg .label { font-size: 15px; font-weight: 700; }
+    svg .sublabel { font-size: 12px; fill: #627381; }
+    svg .lane-title { font-size: 11.5px; font-weight: 700; fill: #627381; letter-spacing: .06em; }
+    svg .lane { fill: #f7f9fa; stroke: #dce2e5; stroke-width: 1.2; }
+    svg .box { fill: #ffffff; stroke: #aab9c5; stroke-width: 1.5; transition: fill .25s, stroke .25s; }
+    svg .wire { fill: none; stroke: #b9c3cb; stroke-width: 2; marker-end: url(#arrow); transition: stroke .25s, stroke-width .25s; }
+
+    svg .part { transition: opacity .3s ease; cursor: pointer; }
+    svg .muted { opacity: .34; }
+    svg .focus .box { fill: #fff1f1; stroke: #c52c2c; stroke-width: 2.5; }
+    svg .past .box { fill: #edf8f2; stroke: #449675; stroke-width: 1.8; }
+    svg .focus.wire { stroke: #c52c2c; stroke-width: 3; marker-end: url(#redArrow); }
+    svg .past.wire { stroke: #449675; stroke-width: 2.2; marker-end: url(#greenArrow); }
+
+    svg .chip rect { fill: #f1f4f6; stroke: #b7c5d0; stroke-width: 1.2; transition: all .25s; }
+    svg .chip text { font: 600 11.5px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #516270; }
+    svg .chip.keep rect { fill: #e1f3e9; stroke: #449675; }
+    svg .chip.keep text { fill: #176947; }
+    svg .chip.active rect { fill: #eaf2fc; stroke: #5283b0; }
+    svg .chip.active text { fill: #285b88; }
+    svg .chip.drop rect { fill: #f5f6f7; stroke: #d4dce2; stroke-dasharray: 3 2; }
+    svg .chip.drop text { fill: #9aa7b2; }
+
+    .caption {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 12px;
+      align-items: center;
+      border-top: 1px solid #e2e7e9;
+      padding: 14px 8px 4px;
+      margin-top: 10px;
+      min-height: 76px;
+    }
+    .caption small {
+      font-size: 11px;
+      color: #b72828;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .caption strong {
+      font-size: clamp(16px, 1.7vw, 20px);
+      display: block;
+      color: #152636;
+    }
+    .caption p {
+      margin: 4px 0 0;
+      font-size: 13.5px;
+      color: #61717d;
+      line-height: 1.45;
+    }
+
+    .takeaway {
+      text-align: center;
+      font-size: 14px;
+      margin: 20px 0 18px;
+      color: #536675;
+    }
+    .takeaway b { color: #152636; }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 12px;
+    }
+    .mini-card {
+      background: #ffffff;
+      border: 1px solid #dce2e5;
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .mini-card small {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #627381;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .mini-card strong {
+      display: block;
+      font-size: 14.5px;
+      color: #152636;
+      margin-bottom: 4px;
+    }
+    .mini-card p {
+      margin: 0;
+      font-size: 13px;
+      color: #60717e;
+      line-height: 1.45;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      background: #f1f4f6;
+      color: #152636;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 920px) {
+      .workspace { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .diagram { max-height: none; }
+    }
+    @media (max-width: 600px) {
+      main { padding: 14px 10px 28px; }
+      .caption { grid-template-columns: 1fr; gap: 4px; }
+      .takeaway { text-align: left; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="left">
+      <b>your-finanical-plan</b>
+      <span>Local Financial Extraction &middot; &lt;50s SLA</span>
+    </div>
+    <nav>
+      <a href="index.html" class="active">Architecture Walkthrough</a>
+      <a href="prompts_and_schema.html">Prompts &amp; Key Schema</a>
+      <a href="api_and_ops.html">API &amp; Benchmarks</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="workspace">
+      <!-- LEFT PANEL: Animation Controls + Vertical Steps 1..7 -->
+      <aside class="sidebar" aria-label="Animation controls and steps">
+        <div class="ctrl-head">
+          <small>Walkthrough Controls</small>
+          <span id="count" class="count">Step 1 / 7</span>
+        </div>
+        <div class="progress"><i id="bar"></i></div>
+        <div class="controls">
+          <button id="play" class="primary">Play</button>
+          <button id="prev" title="Previous step">&larr;</button>
+          <button id="next" title="Next step">&rarr;</button>
+          <button id="restart" title="Restart">&#8634;</button>
+        </div>
+
+        <div class="step-list" id="stepList">
+          <button class="step-item" onclick="go(0)">
+            <span class="step-num">01</span>
+            <span class="step-body"><b>Intake &amp; 50s SLA</b><span>name + file &middot; config.yaml</span></span>
+          </button>
+          <button class="step-item" onclick="go(1)">
+            <span class="step-num">02</span>
+            <span class="step-body"><b>Excel Parser</b><span>Cell-only &middot; 0 OCR &middot; Qwen3.8</span></span>
+          </button>
+          <button class="step-item" onclick="go(2)">
+            <span class="step-num">03</span>
+            <span class="step-body"><b>Small PDF (&le; 9 pages)</b><span>Markdown tables + scan OCR</span></span>
+          </button>
+          <button class="step-item" onclick="go(3)">
+            <span class="step-num">04</span>
+            <span class="step-body"><b>Large PDF (&gt; 9p Triage)</b><span>60&ndash;100p &middot; PaddleOCR scorer</span></span>
+          </button>
+          <button class="step-item" onclick="go(4)">
+            <span class="step-num">05</span>
+            <span class="step-body"><b>Images &amp; WebM</b><span>HEIC/WEBM/JPG &rarr; &le;1024px</span></span>
+          </button>
+          <button class="step-item" onclick="go(5)">
+            <span class="step-num">06</span>
+            <span class="step-body"><b>Local Qwen3.8 Chunks</b><span>3&ndash;5p/call &middot; --workers 1..4</span></span>
+          </button>
+          <button class="step-item" onclick="go(6)">
+            <span class="step-num">07</span>
+            <span class="step-body"><b>Standardized CSV</b><span>15 cols &middot; dedup &middot; &lt;50s SLA</span></span>
+          </button>
+        </div>
+
+        <div class="kbd-hint">Use &uarr;/&darr; or &larr;/&rarr; keys, or click any box</div>
+      </aside>
+
+      <!-- RIGHT PANEL: 2D Interactive SVG Diagram + Caption -->
+      <section class="stage">
+        <svg class="diagram" viewBox="0 0 960 640" role="img" aria-labelledby="dt dd">
+          <title id="dt">Layered financial extraction pipeline architecture</title>
+          <desc id="dd">Incoming documents enter a 50-second SLA router, branch into four specialized modality parsers (Excel, small PDF, large PDF with PaddleOCR triage, and images/WebM), converge into chunked local Qwen3.8 inference, and output standardized CSV.</desc>
+
+          <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0 0 L8 4 L0 8Z" fill="#b9c3cb" />
+            </marker>
+            <marker id="redArrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0 0 L8 4 L0 8Z" fill="#c52c2c" />
+            </marker>
+            <marker id="greenArrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+              <path d="M0 0 L8 4 L0 8Z" fill="#449675" />
+            </marker>
+          </defs>
+
+          <!-- TOP INPUT NODE -->
+          <g id="input" class="part" onclick="go(0)">
+            <rect class="box" x="285" y="10" width="390" height="46" rx="10" />
+            <text class="label" x="480" y="31" text-anchor="middle">Client Upload: name + file</text>
+            <text class="sublabel" x="480" y="47" text-anchor="middle">document_type optional &middot; POST /extract or batch_run.py</text>
+          </g>
+
+          <!-- LANE 01: INTAKE & CONTROL -->
+          <rect class="lane" x="14" y="74" width="932" height="94" rx="12" />
+          <text class="lane-title" x="32" y="96">01 / INTAKE &amp; SLA CONTROL</text>
+
+          <path id="w_in" class="wire part" d="M480 56 V96" />
+
+          <g id="router" class="part" onclick="go(0)">
+            <rect class="box" x="220" y="100" width="520" height="54" rx="10" />
+            <text class="label" x="480" y="124" text-anchor="middle">Format Router + 50s DeadlineBudget</text>
+            <text class="sublabel" x="480" y="143" text-anchor="middle">config.yaml (no config.py) &middot; extraction_schema.yaml (8 doc types, 61 keys)</text>
+          </g>
+
+          <!-- BRANCHING WIRES FROM ROUTER TO 4 SOLUTIONS -->
+          <path id="w_xl" class="wire part" d="M310 154 V178 H132 V214" />
+          <path id="w_spdf" class="wire part" d="M425 154 V178 H364 V214" />
+          <path id="w_lpdf" class="wire part" d="M535 154 V178 H596 V214" />
+          <path id="w_img" class="wire part" d="M650 154 V178 H828 V214" />
+
+          <!-- LANE 02: MODALITY SOLUTIONS -->
+          <rect class="lane" x="14" y="186" width="932" height="194" rx="12" />
+          <text class="lane-title" x="32" y="208">02 / MODALITY SOLUTIONS (SPECIALIZED PARSERS)</text>
+
+          <!-- Solution A: Excel -->
+          <g id="s_excel" class="part" onclick="go(1)">
+            <rect class="box" x="32" y="218" width="200" height="146" rx="10" />
+            <text class="label" x="132" y="242" text-anchor="middle">Excel Parser</text>
+            <text class="sublabel" x="132" y="260" text-anchor="middle">.xlsx / .xlsm · cell-only</text>
+            <text class="sublabel" x="132" y="278" text-anchor="middle">openpyxl (no images)</text>
+            <g id="c_xl1" class="chip"><rect x="48" y="294" width="78" height="24" rx="5" /><text x="87" y="310" text-anchor="middle">Sheets</text></g>
+            <g id="c_xl2" class="chip"><rect x="134" y="294" width="82" height="24" rx="5" /><text x="175" y="310" text-anchor="middle">0 OCR</text></g>
+            <text class="sublabel" x="132" y="346" text-anchor="middle">Direct to Qwen3.8 only</text>
+          </g>
+
+          <!-- Solution B: Small PDF (Table-Aware Markdown + Scan OCR) -->
+          <g id="s_spdf" class="part" onclick="go(2)">
+            <rect class="box" x="264" y="218" width="200" height="146" rx="10" />
+            <text class="label" x="364" y="242" text-anchor="middle">Small PDF (&le;9p)</text>
+            <text class="sublabel" x="364" y="260" text-anchor="middle">PyMuPDF find_tables() &rarr; MD</text>
+            <text class="sublabel" x="364" y="278" text-anchor="middle">OCR only if scanned (&lt;60 ch)</text>
+            <g id="c_sp1" class="chip"><rect x="278" y="294" width="56" height="24" rx="5" /><text x="306" y="310" text-anchor="middle">MD Tbl</text></g>
+            <g id="c_sp2" class="chip"><rect x="340" y="294" width="52" height="24" rx="5" /><text x="366" y="310" text-anchor="middle">Sorted</text></g>
+            <g id="c_sp3" class="chip"><rect x="398" y="294" width="52" height="24" rx="5" /><text x="424" y="310" text-anchor="middle">OCR</text></g>
+            <text class="sublabel" x="364" y="346" text-anchor="middle">Column-locked · 0 VLM bloat</text>
+          </g>
+
+          <!-- Solution C: Large PDF (>9p Triage) -->
+          <g id="s_lpdf" class="part" onclick="go(3)">
+            <rect class="box" x="496" y="218" width="200" height="146" rx="10" />
+            <text class="label" x="596" y="242" text-anchor="middle">Large PDF (&gt;9p)</text>
+            <text class="sublabel" x="596" y="260" text-anchor="middle">60&ndash;100p · PaddleOCR (:8866)</text>
+            <text class="sublabel" x="596" y="278" text-anchor="middle">Score financial density</text>
+            <g id="c_lp1" class="chip"><rect x="510" y="294" width="34" height="24" rx="5" /><text x="527" y="310" text-anchor="middle">P1</text></g>
+            <g id="c_lp2" class="chip"><rect x="549" y="294" width="34" height="24" rx="5" /><text x="566" y="310" text-anchor="middle">P2</text></g>
+            <g id="c_lp_drop" class="chip"><rect x="588" y="294" width="44" height="24" rx="5" /><text x="610" y="310" text-anchor="middle">T&amp;C</text></g>
+            <g id="c_lp3" class="chip"><rect x="637" y="294" width="44" height="24" rx="5" /><text x="659" y="310" text-anchor="middle">P60</text></g>
+            <text class="sublabel" x="596" y="346" text-anchor="middle">Drop legal · keep top-K</text>
+          </g>
+
+          <!-- Solution D: Images & WebM -->
+          <g id="s_img" class="part" onclick="go(4)">
+            <rect class="box" x="728" y="218" width="200" height="146" rx="10" />
+            <text class="label" x="828" y="242" text-anchor="middle">Images &amp; WebM</text>
+            <text class="sublabel" x="828" y="260" text-anchor="middle">HEIC · WEBM · JPG · PNG</text>
+            <text class="sublabel" x="828" y="278" text-anchor="middle">Clamp longest edge &le;1024px</text>
+            <g id="c_im1" class="chip"><rect x="744" y="294" width="80" height="24" rx="5" /><text x="784" y="310" text-anchor="middle">1024px</text></g>
+            <g id="c_im2" class="chip"><rect x="832" y="294" width="80" height="24" rx="5" /><text x="872" y="310" text-anchor="middle">OCR+VL</text></g>
+            <text class="sublabel" x="828" y="346" text-anchor="middle">PaddleOCR + Qwen Vision</text>
+          </g>
+
+          <!-- CONVERGING WIRES INTO INFERENCE LANE -->
+          <path id="w_m_xl" class="wire part" d="M132 364 V392 H480 V418" />
+          <path id="w_m_spdf" class="wire part" d="M364 364 V392 H480 V418" />
+          <path id="w_m_lpdf" class="wire part" d="M596 364 V392 H480 V418" />
+          <path id="w_m_img" class="wire part" d="M828 364 V392 H480 V418" />
+
+          <!-- LANE 03: LOCAL INFERENCE -->
+          <rect class="lane" x="14" y="400" width="932" height="162" rx="12" />
+          <text class="lane-title" x="32" y="422">03 / LOCAL QWEN3.8 INFERENCE (BOUNDED CONTEXT &amp; CONCURRENCY)</text>
+
+          <g id="qwen" class="part" onclick="go(5)">
+            <rect class="box" x="72" y="432" width="816" height="114" rx="10" />
+            <text class="label" x="96" y="462">Local Qwen3.8</text>
+            <text class="sublabel" x="96" y="482">127.0.0.1:8081/v1</text>
+            <text class="sublabel" x="96" y="502">enable_thinking: false</text>
+            <text class="sublabel" x="96" y="522">--workers 1..4 semaphore</text>
+
+            <text class="sublabel" x="302" y="458" font-weight="700">CHUNK WINDOW (3&ndash;5 PAGES / CALL)</text>
+            <g id="ck1" class="chip"><rect x="302" y="468" width="112" height="32" rx="6" /><text x="358" y="489" text-anchor="middle">Chunk 1 (4p)</text></g>
+            <g id="ck2" class="chip"><rect x="424" y="468" width="112" height="32" rx="6" /><text x="480" y="489" text-anchor="middle">Chunk 2 (4p)</text></g>
+            <g id="ck3" class="chip"><rect x="546" y="468" width="142" height="32" rx="6" /><text x="617" y="489" text-anchor="middle">YAML Key Prompt</text></g>
+            <g id="ck4" class="chip"><rect x="698" y="468" width="166" height="32" rx="6" /><text x="781" y="489" text-anchor="middle">{"r":[[...]]}</text></g>
+            <text class="sublabel" x="302" y="524">Per-row mixed doc_type tagging &middot; compact JSON cuts output tokens ~75%</text>
+          </g>
+
+          <!-- OUTPUT WIRE & NODE -->
+          <path id="w_out" class="wire part" d="M480 546 V576" />
+          <g id="output" class="part" onclick="go(6)">
+            <rect class="box" x="220" y="580" width="520" height="48" rx="10" />
+            <text class="label" x="480" y="601" text-anchor="middle">Standardized Key-Value Financial CSV</text>
+            <text class="sublabel" x="480" y="618" text-anchor="middle">15 columns · numeric parsing + dedup · X-Within-SLA: true</text>
+          </g>
+        </svg>
+
+        <div class="caption" aria-live="polite">
+          <small id="stageLabel">STEP 01</small>
+          <div>
+            <strong id="headline">Receive minimal client input.</strong>
+            <p id="message">Accepts only name and file (document_type is optional) and starts the 50-second SLA budget.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <p class="takeaway">
+      <b>PaddleOCR</b> filters large scans &amp; reads images in seconds. <b>Local Qwen3.8</b> extracts every financial key-value pair cleanly within the 50s SLA.
+    </p>
+
+    <section class="summary-grid">
+      <div class="mini-card">
+        <small>Single Config Source</small>
+        <strong><code>config.yaml</code> + <code>extraction_schema.yaml</code></strong>
+        <p>No redundant <code>config.py</code>. Edit YAML to tune SLA, 1024px clamp, 3&ndash;5 page chunks, or add new document keys.</p>
+      </div>
+      <div class="mini-card">
+        <small>Self-Hosted OCR</small>
+        <strong>PaddleOCR on <code>:8866</code></strong>
+        <p>Runs PP-OCR ONNX at ~3.9 pages/sec (65-page scanned insurance PDF triaged in 16.6s, full API in 36.8s).</p>
+      </div>
+      <div class="mini-card">
+        <small>Multi-Format Media</small>
+        <strong>HEIC · WEBM · JPG · PNG · WEBP</strong>
+        <p>Apple HEIC via <code>pillow-heif</code>, WebM sharpest keyframe via OpenCV, all clamped to <code>&le;1024px</code>.</p>
+      </div>
+      <div class="mini-card">
+        <small>Batch Concurrency</small>
+        <strong><code>batch_run.py --workers 1..4</code></strong>
+        <p>One global semaphore caps simultaneous Qwen3.8 calls across all files and chunks.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const frames = [
+      {
+        title: 'Receive minimal client input and start the 50s SLA clock.',
+        message: 'Only name and file are required (document_type is optional). DeadlineBudget tracks wall-clock time while config.yaml and extraction_schema.yaml configure routing and keys.',
+        focus: ['w_in', 'router'],
+        past: ['input'],
+        chips: {}
+      },
+      {
+        title: 'Solution A — Personal Excel: cell-only multi-sheet parser (Qwen3.8 only).',
+        message: 'openpyxl(data_only=True) reads every sheet without embedded images, strips blank rows, and formats pipe-delimited tables straight to local Qwen3.8 with zero OCR calls.',
+        focus: ['w_xl', 's_excel'],
+        past: ['input', 'w_in', 'router'],
+        chips: { c_xl1: 'active', c_xl2: 'keep' }
+      },
+      {
+        title: 'Solution B — Small PDF (<= 9 pages): Markdown table extraction + scan OCR.',
+        message: 'Digital pages use PyMuPDF find_tables() to lock columns into Markdown tables (falling back to visual sort=True text when unruled). Scanned pages (<60 chars) route to local PaddleOCR — fast, deterministic, and zero vision-token bloat.',
+        focus: ['w_spdf', 's_spdf'],
+        past: ['input', 'w_in', 'router'],
+        chips: { c_sp1: 'keep', c_sp2: 'keep', c_sp3: 'active' }
+      },
+      {
+        title: 'Solution C — Large PDF (> 9 pages, 60–100p insurance): PaddleOCR triage.',
+        message: 'Local PaddleOCR (:8866) scans pages bounded to <=1024px; YAML keyword scoring keeps high-signal schedules & cash-value tables (P1, P2, P60) and drops legal boilerplate.',
+        focus: ['w_lpdf', 's_lpdf'],
+        past: ['input', 'w_in', 'router'],
+        chips: { c_lp1: 'keep', c_lp2: 'keep', c_lp_drop: 'drop', c_lp3: 'keep' }
+      },
+      {
+        title: 'Solution D — Images & WebM: universal decode + 1024px clamp.',
+        message: 'Decodes HEIC/HEIF (pillow-heif), WebM sharpest keyframe (OpenCV), JPG, PNG, WEBP, and TIFF. Clamps longest side to <=1024px, then fuses row-aligned PaddleOCR with Qwen3.8 Vision.',
+        focus: ['w_img', 's_img'],
+        past: ['input', 'w_in', 'router'],
+        chips: { c_im1: 'active', c_im2: 'keep' }
+      },
+      {
+        title: 'Bounded local Qwen3.8 inference (3–5 pages/call, compact JSON).',
+        message: 'All lanes converge through the global concurrency semaphore (--workers 1..4). Disabling thinking tokens and emitting compact {"r":[[...]]} rows cuts output tokens ~75% to stay under 50s.',
+        focus: ['w_m_xl', 'w_m_spdf', 'w_m_lpdf', 'w_m_img', 'qwen'],
+        past: ['input', 'w_in', 'router', 's_excel', 's_spdf', 's_lpdf', 's_img'],
+        chips: { ck1: 'keep', ck2: 'keep', ck3: 'active', ck4: 'active', c_lp1: 'keep', c_lp2: 'keep', c_lp_drop: 'drop', c_lp3: 'keep' }
+      },
+      {
+        title: 'Return standardized, deduplicated financial CSV within 50 seconds.',
+        message: 'Deterministic Python numeric parsing (-$4,923.16 -> -4923.16) and cross-chunk deduplication produce a clean 15-column CSV with SLA telemetry headers.',
+        focus: ['w_out', 'output'],
+        past: ['input', 'w_in', 'router', 'w_xl', 'w_spdf', 'w_lpdf', 'w_img', 's_excel', 's_spdf', 's_lpdf', 's_img', 'w_m_xl', 'w_m_spdf', 'w_m_lpdf', 'w_m_img', 'qwen'],
+        chips: { ck1: 'keep', ck2: 'keep', ck3: 'keep', ck4: 'keep', c_xl2: 'keep', c_lp1: 'keep', c_lp2: 'keep', c_lp_drop: 'drop', c_lp3: 'keep', c_im2: 'keep' }
+      }
+    ];
+
+    let index = 0;
+    let timer = null;
+    const q = id => document.getElementById(id);
+
+    function render() {
+      const f = frames[index];
+      document.querySelectorAll('.part').forEach(el => {
+        el.classList.remove('focus', 'past', 'muted');
+        if (f.focus.includes(el.id)) el.classList.add('focus');
+        else if (f.past.includes(el.id)) el.classList.add('past');
+        else el.classList.add('muted');
+      });
+
+      document.querySelectorAll('.chip').forEach(el => {
+        el.classList.remove('keep', 'active', 'drop');
+        if (f.chips && f.chips[el.id]) el.classList.add(f.chips[el.id]);
+      });
+
+      document.querySelectorAll('.step-item').forEach((btn, i) => {
+        btn.classList.toggle('active', i === index);
+        btn.classList.toggle('done', i < index);
+      });
+
+      q('headline').textContent = f.title;
+      q('message').textContent = f.message;
+      q('stageLabel').textContent = 'STEP ' + String(index + 1).padStart(2, '0');
+      q('count').textContent = 'Step ' + (index + 1) + ' / ' + frames.length;
+      q('bar').style.width = (100 * (index + 1) / frames.length) + '%';
+      q('prev').disabled = index === 0;
+      q('next').disabled = index === frames.length - 1;
+      q('play').textContent = timer ? 'Pause' : 'Play';
+    }
+
+    function stop() { clearInterval(timer); timer = null; }
+    function step(delta) { stop(); index = Math.max(0, Math.min(frames.length - 1, index + delta)); render(); }
+    function go(target) { stop(); index = target; render(); }
+
+    q('prev').onclick = () => step(-1);
+    q('next').onclick = () => step(1);
+    q('restart').onclick = () => { stop(); index = 0; render(); };
+    q('play').onclick = () => {
+      if (timer) { stop(); render(); return; }
+      if (index === frames.length - 1) index = 0;
+      render();
+      timer = setInterval(() => {
+        if (index < frames.length - 1) { index++; render(); }
+        else { stop(); render(); }
+      }, 3600);
+      render();
+    };
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); step(1); }
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); step(-1); }
+    });
+
+    render();
+  </script>
+</body>
+</html>

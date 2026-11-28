@@ -1,0 +1,88 @@
+# =============================================================================
+# your-finanical-plan — Financial Document Key-Value Extraction Configuration
+# =============================================================================
+
+server:
+  host: "127.0.0.1"
+  port: 8000
+  sla_timeout_sec: 50.0          # Hard sync API SLA target (seconds)
+  soft_deadline_margin_sec: 4.0  # Reserve margin for merge + CSV serialization
+  max_upload_mb: 100
+
+llm:
+  # Local Qwen3.8 OpenAI-compatible server (Strata / llama.cpp / vLLM / Ollama)
+  base_url: "http://127.0.0.1:8081/v1"
+  api_key: "local-no-key"
+  model: "qwen3.8-flash-next-iq3_s"
+  temperature: 0.0
+  max_tokens: 1536
+  request_timeout_sec: 44.0
+  enable_thinking: false         # Critical for <50s SLA on Qwen3.8 reasoning models
+  # Context-window guardrails
+  pages_per_call: 4              # Max PDF pages per single Qwen3.8 call (recommended 3-5)
+  max_chars_per_call: 12000      # Max text characters per Excel/text chunk call
+  max_concurrent_calls: 1        # Sync API concurrency (1 for single-slot local Strata; raise to 2-4 for multi-slot vLLM)
+  prefer_vision_for_pdf: false   # false = send OCR/extracted text (faster, fits SLA); true = send 1024px page images to VLM
+  vision_for_images: true        # Use Qwen3.8 vision (+ PaddleOCR text hint) for standalone image uploads
+
+paddle_ocr:
+  # Self-hosted local PaddleOCR HTTP microservice (started via solutions/paddle_ocr_server.py)
+  base_url: "http://127.0.0.1:8866"
+  host: "127.0.0.1"
+  port: 8866
+  # Engine inside paddle_ocr_server.py:
+  #   "rapidocr"          -> Official PaddleOCR PP-OCRv4/v5 models on ONNXRuntime (fastest on Apple Silicon CPU)
+  #   "paddleocr"         -> Native PaddlePaddle PaddleOCR Python package
+  #   "ollama_paddleocr"  -> Local Ollama MedAIBase/PaddleOCR-VL:0.9b
+  engine: "rapidocr"
+  ollama_base_url: "http://127.0.0.1:11434"
+  ollama_model: "MedAIBase/PaddleOCR-VL:0.9b"
+  timeout_sec: 25.0
+  batch_concurrency: 4           # Parallel OCR calls when scanning multi-page PDFs
+
+pdf:
+  large_pdf_page_threshold: 9    # PDFs with > 9 pages trigger PaddleOCR triage & page selection
+  max_selected_pages: 8          # Cap high-signal pages sent to Qwen3.8 for large PDFs (2 calls x 4 pages fits <50s SLA)
+  min_embedded_chars_per_page: 60 # If PyMuPDF text < 60 chars, treat page as scanned and run PaddleOCR
+  force_paddle_ocr_for_large_pdf: false # Set true to run PaddleOCR even on digital-text PDFs
+  render_dpi: 150                # Initial render DPI before max_dimension clamp
+  triage_render_max_dim: 1024    # Max image side during PaddleOCR triage scan
+  min_page_signal_score: 2.0     # Minimum financial relevance score to retain a page in large PDFs
+  table_aware_extraction: true   # Digital pages: PyMuPDF find_tables() -> Markdown (fallback: sort=True text)
+
+image:
+  max_dimension: 1024            # Resize any image/page exceeding 1024px (width or height) to max 1024px
+  jpeg_quality: 85               # Compression quality for transport to PaddleOCR / Qwen3.8 VLM
+
+excel:
+  max_rows_per_sheet: 2000       # Safety cap per sheet
+  max_cols_per_sheet: 40         # Safety cap per sheet
+  skip_empty_sheets: true
+  drop_empty_rows: true
+
+batch:
+  default_workers: 2             # Range: 1 to 4 (strictly caps global concurrent calls to Qwen3.8)
+  max_workers: 4
+  per_file_timeout_sec: 180.0    # Generous per-file timeout for offline batch runs with --workers 1..4
+  output_dir: "outputs"
+
+extraction:
+  schema_file: "extraction_schema.yaml"  # Configurable document types, key definitions & prompt templates
+
+csv:
+  columns:
+    - "record_id"
+    - "client_name"
+    - "source_file"
+    - "document_type"
+    - "section_or_sheet"
+    - "page_number"
+    - "entity_or_ticker"
+    - "metric_key"
+    - "value_raw"
+    - "value_numeric"
+    - "currency"
+    - "unit"
+    - "as_of_date"
+    - "confidence"
+    - "notes"

@@ -1,0 +1,285 @@
+# =============================================================================
+# your-finanical-plan — Configurable Financial Key & Prompt Schema (YAML)
+# =============================================================================
+# Edit this file to add, rename, or redefine extraction keys by document_type
+# without touching Python code. Both Qwen3.8 prompts and PaddleOCR large-PDF
+# page triage dynamically read from this file.
+
+prompt_settings:
+  role_instruction: >-
+    You are a high-speed, precision financial key-value extraction engine.
+    Extract ALL key financial numbers from EVERY provided page, spreadsheet sheet, or image.
+  global_rules:
+    - "Assign the best-fitting `document_type` PER ROW — a single PDF or Excel file may contain mixed categories."
+    - "Extract concrete numbers from ALL provided sections (do not stop after the first page or sheet). Never invent numbers."
+    - "Prefer the standardized `metric_key` names defined under each document_type below; use concise snake_case only if a clear financial metric is not listed."
+    - "Preserve the exact `value_raw` string (including currency symbol, sign, or %) and set ISO `currency` (USD, HKD, CAD, SGD, EUR, CNY, etc.) or empty string for counts/percentages."
+    - "Put short disambiguating context (e.g., funding round, broker, payment term, or share price) in `notes`."
+  output_format_instruction: >-
+    Output ONLY compact minified JSON (no markdown code fences, no commentary, no extra newlines)
+    using this exact 10-element row array format:
+    {"r":[["doc_type","section_or_sheet",page_int,"entity_or_ticker","metric_key","value_raw","currency","unit","as_of_date","notes"],...]}
+  few_shot_example: >-
+    {"r":[["investment","Investments",1,"NVDA","market_value","$59,556.00","USD","","2026-10-31","420 shares @ $141.80"],["funding","Startup_Fundings",2,"NovaAI Labs","investment_amount","$150,000.00","USD","","2025-06-15","Series A Preferred"],["insurance","Page 1",1,"PGL-2025-770912","sum_assured","$2,000,000.00","USD","","2025-03-01","Whole Life"]]}
+
+  # Per-solution user prompt preamble (explains source structure to Qwen3.8)
+  solution_contexts:
+    excel: >-
+      Source is a multi-sheet cell-only Excel workbook (no embedded images) formatted as pipe-delimited tables.
+      Each sheet may represent a different financial category (e.g., investments, fundings, bank accounts, insurance).
+      Extract key numeric columns for every row and total across ALL sheets shown.
+    small_pdf: >-
+      Source is a financial PDF (<=9 pages) parsed via PyMuPDF text extraction (with PaddleOCR fallback for scanned pages).
+      Extract all material financial metrics and classify each row accurately even if pages mix multiple document types.
+    large_pdf_triage: >-
+      Source consists of the highest-signal financial pages selected by PaddleOCR triage from a large PDF (>9 pages, e.g. 60-100p insurance policy or brokerage report).
+      Focus strictly on policy schedules, benefit/rider limits, premiums, cash/surrender value tables, holdings, and account summaries.
+    image_media: >-
+      Source is a normalized image or WebM keyframe (clamped to <=1024px) paired with row-aligned local PaddleOCR text.
+      Cross-check visual table columns with the OCR text to ensure exact ticker, share count, valuation, and amount alignment.
+
+document_types:
+  investment:
+    description: "Public equities, ETFs, mutual funds, bonds, and brokerage portfolio statements."
+    extraction_rule: "Extract per-ticker/security holdings plus consolidated account totals and cash sweep balances."
+    triage_keywords:
+      market value: 3.0
+      cost basis: 2.5
+      unrealized: 2.0
+      holdings: 2.5
+      portfolio summary: 3.5
+      account value: 3.5
+      asset allocation: 2.5
+      total value: 3.0
+      equities: 2.0
+      fixed income: 2.0
+      dividend: 2.0
+      ticker: 2.5
+      symbol: 1.8
+      cusip: 2.0
+      shares: 2.0
+      quantity: 1.8
+      nav: 1.8
+    keys:
+      shares: "Number of shares, units, or contracts held for a ticker/security"
+      avg_cost: "Average unit purchase price / cost per share"
+      market_price: "Current market price or NAV per share/unit"
+      market_value: "Current total market value of the holding"
+      cost_basis: "Total original acquisition cost basis of the holding"
+      unrealized_pl: "Unrealized gain or loss (amount or percentage)"
+      realized_pl: "Realized gain or loss during the reporting period"
+      dividend: "Dividends, coupons, or distributions received or estimated annually"
+      yield_pct: "Annualized dividend, SEC, or distribution yield (%)"
+      allocation_pct: "Portfolio weight or asset class allocation (%)"
+      cash_sweep: "Cash or money market sweep balance inside the brokerage account"
+      principal_amount: "Face value, par amount, or initial principal (e.g., T-Bill, SSB, structured note, bond)"
+      maturity_value: "Payout amount at maturity (e.g., T-Bill or fixed-income maturity value)"
+      total_portfolio_value: "Consolidated total value of the investment account or portfolio"
+
+  funding:
+    description: "Private startup investments, SAFE/convertible notes, angel checks, and VC/PE fund commitments."
+    extraction_rule: "Include company/fund name as entity and funding round/vehicle (e.g., Series A, Seed SAFE, LP) in notes."
+    triage_keywords:
+      funding: 2.5
+      series a: 2.5
+      series b: 2.5
+      series c: 2.5
+      seed round: 2.5
+      safe: 2.0
+      valuation: 2.5
+      commitment: 2.5
+      capital call: 2.5
+      invested amount: 3.0
+      investment amount: 3.0
+    keys:
+      investment_amount: "Principal capital invested into a startup round or private deal"
+      commitment: "Total LP capital commitment to a VC/PE fund"
+      called_capital: "Cumulative capital called or funded to date"
+      uncalled_capital: "Remaining uncalled commitment balance"
+      pre_money_valuation: "Pre-money valuation at the investment round"
+      post_money_valuation: "Post-money valuation or latest mark valuation"
+      ownership_pct: "Equity ownership percentage held (%)"
+      current_nav: "Latest reported fair value / NAV of the private holding"
+      distribution: "Cash or stock distributions returned to investor (DPI)"
+      tvpi: "Total Value to Paid-In multiple (e.g., 1.85x) for a private fund"
+      irr_pct: "Net or gross Internal Rate of Return (%) for a private fund"
+
+  bank_statement:
+    description: "Checking, savings, multi-currency bank accounts, and fixed/term deposit statements."
+    extraction_rule: "Always extract account summary balances/totals, interest, and major transfers/payroll; skip tiny routine retail purchases (<$200) when summary totals exist."
+    triage_keywords:
+      beginning balance: 3.5
+      ending balance: 3.5
+      opening balance: 3.5
+      closing balance: 3.5
+      account summary: 3.5
+      total deposits: 3.0
+      total withdrawals: 3.0
+      checking: 1.8
+      savings: 1.8
+      interest earned: 2.0
+      statement period: 2.0
+    keys:
+      beginning_balance: "Account balance at the start of the statement period"
+      ending_balance: "Account balance at the end of the statement period"
+      average_daily_balance: "Average daily balance over the statement period"
+      total_deposits: "Total deposits and credits during the statement period"
+      total_withdrawals: "Total withdrawals and debits during the statement period"
+      interest_earned: "Interest paid or accrued during the period"
+      apy_pct: "Annual percentage yield or deposit interest rate (%)"
+      fees: "Total service, maintenance, or wire fees charged"
+      deposit: "Material individual credit, salary payroll, or incoming transfer"
+      withdrawal: "Material individual debit, rent, bill pay, or outgoing transfer"
+      fixed_deposit_principal: "Principal amount locked in a term or fixed deposit"
+
+  insurance:
+    description: "Whole life, term life, savings, critical illness, medical, and annuity policies (including 60-100p contracts)."
+    extraction_rule: "Use policy number or benefit/rider name as entity; capture both guaranteed cash value and total surrender value across key policy years when tables are present."
+    triage_keywords:
+      policy schedule: 4.5
+      schedule of benefits: 4.5
+      benefit summary: 4.0
+      policy summary: 4.0
+      sum assured: 4.5
+      face amount: 4.0
+      death benefit: 3.5
+      annual premium: 4.5
+      modal premium: 3.5
+      total premium: 4.0
+      planned premium: 3.5
+      cash value: 4.0
+      surrender value: 4.0
+      guaranteed value: 3.5
+      non-guaranteed: 2.5
+      policy number: 3.0
+      maturity date: 2.5
+      deductible: 2.5
+      coverage limit: 3.0
+      rider: 2.0
+      table of values: 4.5
+      illustration: 2.5
+    keys:
+      sum_assured: "Base sum assured, face amount, or core insured amount"
+      death_benefit: "Total payable death benefit including bonuses/dividends"
+      annual_premium: "Recurring annual premium cost"
+      modal_premium: "Periodic premium (monthly, quarterly, or semi-annual)"
+      total_planned_premium: "Total planned premiums over the entire payment term"
+      premiums_paid_to_date: "Cumulative premiums paid as of the statement date"
+      cash_value: "Guaranteed or accumulated policy cash value"
+      surrender_value: "Total cash surrender value (guaranteed + non-guaranteed)"
+      accumulated_dividends: "Accumulated policy dividends or reversionary bonuses"
+      coverage_limit: "Rider or medical coverage limit (e.g., critical illness, AD&D, hospital)"
+      deductible: "Annual deductible or out-of-pocket excess"
+      policy_fee: "Annual policy administration fee"
+      policy_loan: "Outstanding policy loan balance"
+      maturity_value: "Projected or guaranteed payout at policy maturity"
+
+  liability:
+    description: "Mortgages, personal/auto loans, credit cards, and margin debt."
+    extraction_rule: "Extract unpaid principal, credit limits, APR/interest rate, and scheduled repayments."
+    triage_keywords:
+      mortgage: 2.5
+      loan balance: 3.0
+      credit limit: 2.5
+      apr: 2.0
+      monthly payment: 2.5
+    keys:
+      principal_balance: "Remaining unpaid principal or statement balance owed"
+      credit_limit: "Total revolving credit limit"
+      monthly_payment: "Scheduled monthly repayment amount"
+      interest_rate_pct: "Loan interest rate or APR (%)"
+      minimum_payment: "Minimum payment due for the billing cycle"
+
+  income_tax:
+    description: "Tax filings, W-2/1099/IR8A/BIR60 compensation statements, and tax assessments."
+    extraction_rule: "Extract gross income, taxable income, tax withheld, and net tax due or refund."
+    triage_keywords:
+      taxable income: 3.0
+      gross income: 2.5
+      tax withheld: 2.5
+      tax due: 2.5
+      tax refund: 2.5
+    keys:
+      gross_income: "Total gross compensation or income before deductions"
+      taxable_income: "Net assessable / taxable income"
+      tax_withheld: "Total tax withheld or prepaid"
+      tax_due: "Net tax payable"
+      tax_refund: "Net tax refund receivable"
+
+  real_estate:
+    description: "Property appraisals, mortgage equity summaries, and rental income statements."
+    extraction_rule: "Extract property valuation, rental cash flow, and recurring property expenses."
+    triage_keywords:
+      property value: 2.5
+      rental income: 2.5
+      property tax: 2.0
+      appraised value: 2.5
+    keys:
+      property_value: "Estimated or appraised market value of the property"
+      rental_income: "Monthly or annual gross rental income"
+      property_tax: "Annual property tax or rates"
+      management_fee: "HOA or property management fee"
+
+  other:
+    description: "Any other material financial metric not fitting the categories above."
+    extraction_rule: "Use clear snake_case metric_key for any material monetary figure or rate."
+    triage_keywords: {}
+    keys:
+      financial_metric: "Material monetary figure, rate, or count not covered by other document types"
+
+# =============================================================================
+# On-Demand Domain Glossary (Matched Dynamically Per Chunk — Zero Token Bloat!)
+# =============================================================================
+# Only glossary entries whose aliases appear in a given document chunk are
+# injected into Qwen3.8's prompt. Add APAC/SG/HK/US wealth terms freely here.
+domain_glossary:
+  - term: "SRS"
+    aliases: ["srs", "supplementary retirement scheme"]
+    document_type: "investment"
+    definition: "Singapore Supplementary Retirement Scheme tax-advantaged account (NOT a stock ticker). Tag SRS holdings/T-Bills/funds as `investment` (or `bank_statement` if idle SRS cash) and preserve 'SRS' in entity_or_ticker or notes."
+
+  - term: "T-Bill"
+    aliases: ["t-bill", "tbill", "t bill", "treasury bill", "mas bill", "bs2"]
+    document_type: "investment"
+    definition: "Short-term government Treasury Bill (e.g., 6-Month / 1-Year MAS or US T-Bill). Tag as `investment`; extract principal_amount (face value), cost_basis (purchase/allotted price), yield_pct (cut-off/discount yield %), and maturity_value with maturity date in notes/as_of_date."
+
+  - term: "SSB / SGS"
+    aliases: ["ssb", "singapore savings bond", "sgs bond", "sgs"]
+    document_type: "investment"
+    definition: "Singapore Savings Bond or Singapore Government Securities. Tag as `investment`; extract principal_amount / market_value and yield_pct."
+
+  - term: "Private Fund / PE / VC / Feeder / SPV"
+    aliases: ["private fund", "feeder fund", "private equity", "hedge fund", "spv", "tvpi", "dpi", "irr", "capital call", "uncalled", "gp", "lp commitment"]
+    document_type: "funding"
+    definition: "Private investment fund, PE/VC/hedge/feeder fund, or SPV. Tag as `funding` (or `investment` if listed inside a brokerage portfolio); extract commitment, called_capital, uncalled_capital, current_nav, distribution, tvpi, and irr_pct."
+
+  - term: "CPF / CPFIS"
+    aliases: ["cpf", "cpf-oa", "cpf-sa", "cpf-ma", "cpfis", "cpf oa", "cpf sa", "cpf ma"]
+    document_type: "investment"
+    definition: "Singapore Central Provident Fund (Ordinary/Special/MediSave Accounts) or CPF Investment Scheme. Tag invested CPFIS assets as `investment` and CPF cash balances as `bank_statement`."
+
+  - term: "Structured Note (ELN / FCN / DCI)"
+    aliases: ["eln", "fcn", "dci", "structured note", "equity-linked", "fixed coupon note", "dual currency"]
+    document_type: "investment"
+    definition: "Bank-issued structured investment note (Equity-Linked Note, Fixed Coupon Note, Dual Currency Investment). Tag as `investment`; extract principal_amount, market_value, yield_pct (coupon p.a.), and put underlying/maturity in notes."
+
+  - term: "ILP"
+    aliases: ["ilp", "investment-linked", "investment linked policy"]
+    document_type: "insurance"
+    definition: "Investment-Linked Insurance Policy combining life protection and sub-fund value. Tag as `insurance`; extract sum_assured, annual_premium, cash_value / account_value, and surrender_value."
+
+  - term: "UT / MMF / REIT"
+    aliases: ["unit trust", "mmf", "money market fund", "reit"]
+    document_type: "investment"
+    definition: "Unit Trust, Money Market Fund, or Real Estate Investment Trust. Tag as `investment`; extract shares/units, market_value, cost_basis, dividend, and yield_pct."
+
+  - term: "FD / TD"
+    aliases: ["fixed deposit", "time deposit", "fd ", "td "]
+    document_type: "bank_statement"
+    definition: "Bank Fixed Deposit or Time Deposit placement. Tag as `bank_statement`; extract fixed_deposit_principal and apy_pct."
+
+  - term: "MPF"
+    aliases: ["mpf", "mandatory provident fund"]
+    document_type: "investment"
+    definition: "Hong Kong Mandatory Provident Fund retirement investment account. Tag as `investment` and extract market_value / total_portfolio_value."
+

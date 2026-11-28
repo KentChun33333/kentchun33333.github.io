@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>your-finanical-plan · API, PaddleOCR Hosting &amp; Benchmarks</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      --red: #d71920;
+      --red2: #a80f16;
+      --red-soft: #fff5f5;
+      --red-line: #f1c4c6;
+      --ink: #202124;
+      --muted: #6d7278;
+      --line: #dedfdf;
+      --paper: #ffffff;
+      --bg: #f4f4f1;
+      --green: #087f5b;
+      --green-soft: #edf9f4;
+      --amber: #b76b00;
+      --blue: #3569c8;
+      --navy: #202b3a;
+      --shadow: 0 12px 34px rgba(25, 25, 25, .07);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--ink);
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+      line-height: 1.55;
+    }
+    .topbar {
+      height: 66px; background: var(--paper); border-bottom: 4px solid var(--red);
+      padding: 0 28px; display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 30;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .logo {
+      display: flex; align-items: center; gap: 9px;
+      color: var(--red); font-size: 22px; font-weight: 700; letter-spacing: -.03em;
+    }
+    .logo i {
+      font-style: normal; width: 32px; height: 32px;
+      border: 4px double var(--red); border-radius: 50%;
+      display: grid; place-items: center; font-size: 13px; font-weight: 700;
+    }
+    .subbrand { border-left: 1px solid var(--line); padding-left: 14px; color: var(--muted); font-size: 13px; }
+    .nav-links { display: flex; align-items: center; gap: 8px; }
+    .nav-links a {
+      text-decoration: none; color: var(--muted); font-size: 13px; font-weight: 600;
+      padding: 7px 13px; border-radius: 5px; border: 1px solid transparent; transition: all .15s;
+    }
+    .nav-links a:hover { color: var(--ink); background: var(--bg); }
+    .nav-links a.active { color: var(--red); background: var(--red-soft); border-color: var(--red-line); }
+    .mode-pill { font: 500 11px 'IBM Plex Mono', monospace; padding: 5px 9px; border-radius: 4px; background: #f0f0ed; color: var(--muted); }
+
+    .app { max-width: 1200px; margin: 0 auto; padding: 28px 24px 64px; }
+    .eyebrow { color: var(--red); font-size: 11px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+    h1 { font-size: 32px; letter-spacing: -.035em; margin: 4px 0 8px; }
+    p.lead { color: var(--muted); font-size: 14px; margin-bottom: 22px; max-width: 780px; }
+    .card {
+      background: var(--paper); border: 1px solid var(--line);
+      border-radius: 9px; box-shadow: var(--shadow); padding: 20px 22px; margin-bottom: 20px;
+    }
+    .card h2 { font-size: 18px; letter-spacing: -.02em; margin-bottom: 10px; }
+    .card h3 { font-size: 14px; margin-bottom: 6px; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    @media (max-width: 820px) { .grid-2 { grid-template-columns: 1fr; } }
+    pre {
+      background: #202b3a; color: #e8eef7; border-radius: 7px; padding: 14px 16px;
+      overflow-x: auto; font: 12px/1.55 'IBM Plex Mono', monospace; margin-top: 10px;
+    }
+    code {
+      font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
+      background: #f0f0ed; color: var(--navy); padding: 2px 6px; border-radius: 4px;
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12.5px; }
+    th { text-align: left; color: var(--muted); background: var(--bg); padding: 9px 10px; border-bottom: 1px solid var(--line); }
+    td { padding: 10px 10px; border-bottom: 1px solid var(--line); }
+    tr:hover td { background: #fafaf8; }
+    .pill-pass {
+      display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 11px; font-weight: 700;
+      background: var(--green-soft); color: var(--green); border: 1px solid #b8e6d5;
+    }
+    footer {
+      margin-top: 32px; text-align: center; color: var(--muted); font-size: 12px;
+      border-top: 1px solid var(--line); padding-top: 18px;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo"><i>FP</i> your-finanical-plan</div>
+      <div class="subbrand">Operations, Local PaddleOCR Hosting &amp; Live Benchmarks</div>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">Architecture &amp; 2D Diagrams</a>
+      <a href="prompts_and_schema.html">Prompts &amp; Key Schema</a>
+      <a href="api_and_ops.html" class="active">API, PaddleOCR &amp; Benchmarks</a>
+      <span class="mode-pill">PORT :8000 · OCR :8866</span>
+    </nav>
+  </header>
+
+  <main class="app">
+    <div class="eyebrow">Verified Telemetry &middot; Local Apple Silicon Deployment</div>
+    <h1>API Reference, Local PaddleOCR Hosting &amp; Benchmarks</h1>
+    <p class="lead">
+      Measured end-to-end against local <code>qwen3.8-flash-next-iq3_s</code> (<code>127.0.0.1:8081</code>)
+      and self-hosted PaddleOCR PP-OCR ONNX (<code>127.0.0.1:8866</code>). All configuration lives directly in <code>config.yaml</code> (no separate <code>config.py</code>).
+    </p>
+
+    <section class="card" style="overflow-x:auto;">
+      <h2>Verified Sync API Benchmark Results (&lt; 50s SLA)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Sample File</th>
+            <th>Category / Format</th>
+            <th>Units Selected</th>
+            <th>PaddleOCR</th>
+            <th>LLM Calls</th>
+            <th>Rows</th>
+            <th>Detected Types</th>
+            <th>Elapsed</th>
+            <th>SLA</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>builders_bank_sample_statement.pdf</code></td><td>Web real 2p bank PDF</td><td>2 &rarr; 2</td><td>0</td><td>1</td><td>12</td><td><code>bank_statement</code></td><td>11.27s</td><td><span class="pill-pass">PASS</span></td></tr>
+          <tr><td><code>mixed_financial_bundle.pdf</code></td><td>4p mixed PDF</td><td>4 &rarr; 4</td><td>0</td><td>1</td><td>27</td><td><code>bank, funding, insurance, investment</code></td><td>17.51s</td><td><span class="pill-pass">PASS</span></td></tr>
+          <tr><td><code>highres_brokerage_2048px.png</code></td><td>2048&times;2560 &rarr; 819&times;1024 PNG</td><td>1 &rarr; 1</td><td>1</td><td>1</td><td>25</td><td><code>funding, investment</code></td><td>19.22s</td><td><span class="pill-pass">PASS</span></td></tr>
+          <tr><td><code>sample_brokerage_iphone.heic</code></td><td>Apple HEIC &rarr; 819&times;1024</td><td>1 &rarr; 1</td><td>1 (0.75s)</td><td>1</td><td>25</td><td><code>funding, investment</code></td><td>18.51s</td><td><span class="pill-pass">PASS</span></td></tr>
+          <tr><td><code>sample_brokerage_clip.webm</code></td><td>WebM keyframe &rarr; 819&times;1024</td><td>1 &rarr; 1</td><td>1 (0.57s)</td><td>1</td><td>25</td><td><code>funding, investment</code></td><td>18.16s</td><td><span class="pill-pass">PASS</span></td></tr>
+          <tr><td><code>personal_wealth_multisheet.xlsx</code></td><td>4-sheet cell-only Excel</td><td>4 &rarr; 4</td><td>0 (Qwen3.8 only)</td><td>1</td><td>45</td><td><code>bank, funding, insurance, investment</code></td><td>28.50s</td><td><span class="pill-pass">PASS</span></td></tr>
+          <tr><td><code>equitable_sample_insurance_policy.pdf</code></td><td>Web real 57p insurance PDF</td><td>57 &rarr; 12</td><td>1</td><td>4</td><td>3</td><td><code>insurance</code></td><td>13.42s</td><td><span class="pill-pass">PASS</span></td></tr>
+          <tr><td><code>scanned_insurance_65pages.pdf</code></td><td>65p pure scanned PDF</td><td>65 &rarr; 4</td><td>65 (16.6s)</td><td>1</td><td>35</td><td><code>insurance</code></td><td>36.80s</td><td><span class="pill-pass">PASS</span></td></tr>
+          <tr><td><code>schwab_sample_investment_statement.pdf</code></td><td>Web real 19p Schwab PDF</td><td>19 &rarr; 8</td><td>0</td><td>2</td><td>58</td><td><code>bank_statement, investment</code></td><td>43.58s</td><td><span class="pill-pass">PASS</span></td></tr>
+          <tr><td><code>ubs_sample_portfolio.pdf</code></td><td>Web real 13p UBS PDF</td><td>13 &rarr; 8</td><td>0</td><td>2</td><td>34</td><td><code>investment</code></td><td>48.51s</td><td><span class="pill-pass">PASS</span></td></tr>
+        </tbody>
+      </table>
+      <p class="muted" style="margin-top:12px;">
+        <strong>Batch Run (<code>batch_run.py --workers 4</code>):</strong> 4 mixed modalities processed under a single global 4-worker Qwen3.8 semaphore &rarr; <strong>4/4 succeeded, 99 deduplicated CSV rows in 66.57s</strong>.
+      </p>
+    </section>
+
+    <div class="grid-2">
+      <section class="card">
+        <h3>1. Local PaddleOCR Microservice (Port 8866)</h3>
+        <p class="muted">Hosts official PaddleOCR PP-OCR ONNX models (<code>rapidocr</code>) with HEIC/HEIF/WebM/JPG/PNG/WEBP decoding. Switchable to native <code>paddleocr</code> or Ollama <code>MedAIBase/PaddleOCR-VL:0.9b</code> in <code>config.yaml</code>.</p>
+        <pre>cd your-finanical-plan
+.venv/bin/python -m solutions.paddle_ocr_server
+curl http://127.0.0.1:8866/health</pre>
+      </section>
+      <section class="card">
+        <h3>2. FastAPI Sync Extraction Server (Port 8000)</h3>
+        <p class="muted">Connects directly to local Qwen3.8 (<code>:8081/v1</code>) and local PaddleOCR (<code>:8866</code>).</p>
+        <pre>cd your-finanical-plan
+.venv/bin/python app.py
+curl http://127.0.0.1:8000/health</pre>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>API &amp; Batch CLI Examples</h2>
+      <pre># Sync API — CSV output (only name + file required; supports PDF, XLSX, HEIC, WEBM, JPG, PNG, WEBP)
+curl -X POST "http://127.0.0.1:8000/extract" \
+  -F "name=Kent Chiu" \
+  -F "file=@dataset/sample_brokerage_iphone.heic" \
+  -o extracted.csv
+
+# Sync API — JSON envelope with optional document_type hint
+curl -X POST "http://127.0.0.1:8000/extract?format=json" \
+  -F "name=Kent Chiu" \
+  -F "document_type=insurance" \
+  -F "file=@dataset/scanned_insurance_65pages.pdf"
+
+# Batch CLI — workers strictly bounded to 1..4 concurrent local Qwen3.8 calls
+.venv/bin/python batch_run.py \
+  --input-dir dataset \
+  --output-dir outputs/run1 \
+  --name "Kent Chiu" \
+  --workers 4</pre>
+    </section>
+
+    <footer>your-finanical-plan &middot; Executive Editorial Theme aligned with wealthy_data_insight v2</footer>
+  </main>
+</body>
+</html>

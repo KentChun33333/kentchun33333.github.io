@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>your-finanical-plan · Prompt Strategy &amp; YAML Key Schema</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      --red: #d71920;
+      --red-soft: #fff5f5;
+      --red-line: #f1c4c6;
+      --ink: #202124;
+      --muted: #6d7278;
+      --line: #dedfdf;
+      --paper: #ffffff;
+      --bg: #f4f4f1;
+      --green: #087f5b;
+      --green-soft: #edf9f4;
+      --amber: #b76b00;
+      --amber-soft: #fff8eb;
+      --blue: #3569c8;
+      --blue-soft: #eef4ff;
+      --navy: #202b3a;
+      --shadow: 0 12px 34px rgba(25, 25, 25, .07);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--ink);
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+      line-height: 1.55;
+    }
+    .topbar {
+      height: 66px; background: var(--paper); border-bottom: 4px solid var(--red);
+      padding: 0 28px; display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 30;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .logo {
+      display: flex; align-items: center; gap: 9px;
+      color: var(--red); font-size: 22px; font-weight: 700; letter-spacing: -.03em;
+    }
+    .logo i {
+      font-style: normal; width: 32px; height: 32px;
+      border: 4px double var(--red); border-radius: 50%;
+      display: grid; place-items: center; font-size: 13px; font-weight: 700;
+    }
+    .subbrand { border-left: 1px solid var(--line); padding-left: 14px; color: var(--muted); font-size: 13px; }
+    .nav-links { display: flex; align-items: center; gap: 8px; }
+    .nav-links a {
+      text-decoration: none; color: var(--muted); font-size: 13px; font-weight: 600;
+      padding: 7px 13px; border-radius: 5px; border: 1px solid transparent; transition: all .15s;
+    }
+    .nav-links a:hover { color: var(--ink); background: var(--bg); }
+    .nav-links a.active { color: var(--red); background: var(--red-soft); border-color: var(--red-line); }
+    .mode-pill { font: 500 11px 'IBM Plex Mono', monospace; padding: 5px 9px; border-radius: 4px; background: #f0f0ed; color: var(--muted); }
+
+    .app { max-width: 1200px; margin: 0 auto; padding: 28px 24px 64px; }
+    .eyebrow { color: var(--red); font-size: 11px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+    h1 { font-size: 32px; letter-spacing: -.035em; margin: 4px 0 8px; }
+    p.lead { color: var(--muted); font-size: 14px; margin-bottom: 22px; max-width: 820px; }
+
+    .card {
+      background: var(--paper); border: 1px solid var(--line);
+      border-radius: 9px; box-shadow: var(--shadow); padding: 20px 22px; margin-bottom: 20px;
+    }
+    .card h2 { font-size: 18px; letter-spacing: -.02em; margin-bottom: 8px; }
+    .caption { color: var(--muted); font-size: 12.5px; margin-bottom: 14px; }
+
+    .sol-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+    .sol-card {
+      background: #fafaf8; border: 1px solid var(--line); border-radius: 8px;
+      padding: 15px 16px; border-top: 3px solid var(--navy);
+    }
+    .sol-card.excel { border-top-color: var(--green); }
+    .sol-card.smallpdf { border-top-color: var(--blue); }
+    .sol-card.largepdf { border-top-color: var(--red); }
+    .sol-card.image { border-top-color: var(--amber); }
+    .sol-card h3 { font-size: 14px; margin-bottom: 6px; }
+    .sol-card p { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .sol-card .tag {
+      display: inline-block; font: 600 10.5px 'IBM Plex Mono', monospace;
+      padding: 3px 7px; border-radius: 4px; background: var(--paper); border: 1px solid var(--line);
+      color: var(--ink); margin-right: 4px; margin-top: 4px;
+    }
+
+    pre {
+      background: #202b3a; color: #e8eef7; border-radius: 7px; padding: 15px 16px;
+      overflow-x: auto; font: 12px/1.55 'IBM Plex Mono', monospace; margin-top: 8px;
+      white-space: pre-wrap;
+    }
+    code {
+      font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
+      background: #f0f0ed; color: var(--navy); padding: 2px 6px; border-radius: 4px;
+    }
+
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .tab-btn {
+      border: 1px solid var(--line); background: #fafaf8; color: var(--ink);
+      font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 99px;
+      cursor: pointer; transition: all .15s;
+    }
+    .tab-btn.active { background: var(--red); color: #fff; border-color: var(--red); }
+    .tab-btn:hover:not(.active) { border-color: var(--ink); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    th { text-align: left; color: var(--muted); background: var(--bg); padding: 9px 10px; border-bottom: 1px solid var(--line); }
+    td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    tr:hover td { background: #fafaf8; }
+
+    .rule-box {
+      background: var(--red-soft); border: 1px solid var(--red-line); border-radius: 7px;
+      padding: 11px 14px; font-size: 12.5px; margin-bottom: 12px;
+    }
+    footer {
+      margin-top: 32px; text-align: center; color: var(--muted); font-size: 12px;
+      border-top: 1px solid var(--line); padding-top: 18px;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo"><i>FP</i> your-finanical-plan</div>
+      <div class="subbrand">Dynamic Prompt Compiler &amp; Configurable YAML Key Schema</div>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">Architecture &amp; 2D Diagrams</a>
+      <a href="prompts_and_schema.html" class="active">Prompts &amp; Key Schema</a>
+      <a href="api_and_ops.html">API, PaddleOCR &amp; Benchmarks</a>
+      <span class="mode-pill">extraction_schema.yaml</span>
+    </nav>
+  </header>
+
+  <main class="app">
+    <div class="eyebrow">Prompt Engineering &middot; Declarative YAML Governance</div>
+    <h1>All Solution Prompts &amp; Configurable Key Definitions</h1>
+    <p class="lead">
+      Every key definition, extraction rule, PaddleOCR triage keyword weight, and per-solution prompt preamble is declared in
+      <code>extraction_schema.yaml</code> (linked from <code>config.yaml</code>). Updating YAML immediately updates both
+      local Qwen3.8 extraction prompts and large-PDF PaddleOCR page scoring — with zero Python edits.
+      Inspect live compiled prompts anytime via <code>GET /prompts</code> and <code>GET /schema</code>.
+    </p>
+
+    <!-- PART 1: HOW EACH SOLUTION CONSTRUCTS ITS PROMPT -->
+    <section class="card">
+      <h2>1. How Each Solution Path Handles Prompt Construction</h2>
+      <p class="caption">All 4 lanes share the same YAML-compiled System Prompt and compact JSON output protocol, while injecting a tailored <code>solution_contexts</code> preamble and input payload format.</p>
+
+      <div class="sol-grid">
+        <div class="sol-card excel">
+          <h3>Lane A &middot; Excel Cell-Only Parser</h3>
+          <p>Serializes every non-empty worksheet into pipe-delimited Markdown rows (<code>col1 | col2 | ...</code>), repeating sheet title &amp; header row on split chunks (&le;12,000 chars). Zero OCR and zero vision tokens.</p>
+          <span class="tag">solution_mode: excel</span>
+          <span class="tag">text-only</span>
+          <span class="tag">Qwen3.8 only</span>
+        </div>
+        <div class="sol-card smallpdf">
+          <h3>Lane B &middot; Small PDF (&le; 9 pages)</h3>
+          <p>Extracts embedded text via PyMuPDF (calling PaddleOCR only if a page has &lt;60 chars). Packs 3&ndash;5 pages per call with explicit <code>### [Page N | page=N]</code> boundaries so mixed pages classify independently.</p>
+          <span class="tag">solution_mode: small_pdf</span>
+          <span class="tag">pages_per_call: 4</span>
+          <span class="tag">mixed-doc aware</span>
+        </div>
+        <div class="sol-card largepdf">
+          <h3>Lane C &middot; Large PDF (&gt; 9p Triage)</h3>
+          <p>Loads <code>triage_keywords</code> from <code>extraction_schema.yaml</code> to score PaddleOCR/PyMuPDF pages, drops legal T&amp;C, and sends only top-K numeric pages (3&ndash;5 pages/chunk) with a focused insurance/brokerage preamble.</p>
+          <span class="tag">solution_mode: large_pdf_triage</span>
+          <span class="tag">PaddleOCR triage</span>
+          <span class="tag">top-8 pages</span>
+        </div>
+        <div class="sol-card image">
+          <h3>Lane D &middot; Images &amp; WebM Media</h3>
+          <p>Decodes HEIC/WEBM/JPG/PNG/WEBP, clamps to &le;1024px, runs row-aligned local PaddleOCR, and sends <strong>both</strong> the aligned OCR text and the 1024px JPEG image URL to Qwen3.8 multimodal vision for column cross-checking.</p>
+          <span class="tag">solution_mode: image_media</span>
+          <span class="tag">OCR + Vision</span>
+          <span class="tag">&le;1024px JPEG</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PART 2: PROMPT TEMPLATES SUMMARY -->
+    <section class="card">
+      <h2>2. Prompt Architecture Summary (System + Per-Solution User + Output Protocol)</h2>
+      <p class="caption">Compiled dynamically at runtime by <code>build_system_prompt()</code> and <code>build_user_prompt()</code> in <code>solutions/qwen_client.py</code>.</p>
+
+      <h3 style="font-size:13.5px; margin-top:8px;">A. Compiled System Prompt Structure</h3>
+      <pre>[role_instruction from extraction_schema.yaml]
+Allowed `document_type` categories: investment | funding | bank_statement | insurance | liability | income_tax | real_estate | other
+
+Key Definitions by `document_type`:
+- &lt;primary hinted doc_type first (full key: definition list + extraction_rule)&gt;
+- &lt;all other doc_types (full definitions when auto-detect, or compact key list when hinted, so mixed pages still classify accurately)&gt;
+
+Rules:
+1. Assign best-fitting `document_type` PER ROW (supports mixed PDF/Excel).
+2. Extract concrete numbers from ALL sections shown; never invent numbers.
+3. Prefer standardized `metric_key` names from YAML definitions.
+4. Preserve exact `value_raw` + ISO `currency` + `unit` + `as_of_date`.
+5. Put concise context (round, broker, term, unit price) in `notes`.
+
+Output ONLY compact minified JSON (cuts output tokens ~75% for &lt;50s SLA):
+{"r":[["doc_type","section_or_sheet",page_int,"entity_or_ticker","metric_key","value_raw","currency","unit","as_of_date","notes"],...]}</pre>
+
+      <h3 style="font-size:13.5px; margin-top:16px;">B. Per-Solution User Prompt Payload Template</h3>
+      <pre>Client: {client_name} | File: {source_file} | Pipeline: {excel | small_pdf | large_pdf_triage | image_media}
+Optional hint: document_type='{doc_type_hint}' (or Auto-detect per row)
+Context: {prompt_settings.solution_contexts[solution_mode]}
+Extract key financial numbers from ALL sections below into compact JSON {"r":[[...]]}:
+
+### [{section_or_sheet} | page={page_number}]
+{pipe-delimited Excel rows OR PyMuPDF text OR row-bucketed PaddleOCR text}
+[+ base64 1024px JPEG image_url when solution_mode == image_media]</pre>
+
+      <h3 style="font-size:13.5px; margin-top:16px;">C. Local PaddleOCR Prompt (Optional Ollama PaddleOCR-VL Engine)</h3>
+      <pre>Default engine (`rapidocr`): Deterministic PP-OCR ONNX det + rec + row-bucketing (y_bucket = round(y / 14px), joined by " | ") — zero LLM tokens.
+Optional Ollama engine (`ollama_paddleocr` / MedAIBase/PaddleOCR-VL:0.9b): prompt = "OCR:", temperature = 0, image &lt;= 1024px.</pre>
+    </section>
+
+    <!-- PART 3: INTERACTIVE KEY DEFINITIONS BY DOCUMENT TYPE -->
+    <section class="card">
+      <h2>3. Configurable Key Definitions by <code>document_type</code> (<code>extraction_schema.yaml</code>)</h2>
+      <p class="caption">Select a document type to inspect all standardized keys, business definitions, extraction rules, and PaddleOCR triage keywords.</p>
+
+      <div class="tabs" id="docTabs"></div>
+      <div id="schemaRule" class="rule-box"></div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:24%">Standardized <code>metric_key</code></th>
+            <th>Definition (injected into Qwen3.8 prompt)</th>
+          </tr>
+        </thead>
+        <tbody id="schemaRows"></tbody>
+      </table>
+      <p class="caption" id="triageKws" style="margin-top:12px;"></p>
+    </section>
+
+    <footer>
+      your-finanical-plan &middot; Edit <code>extraction_schema.yaml</code> to customize keys &amp; rules &middot; Inspect live via <code>GET /prompts</code>
+    </footer>
+  </main>
+
+  <script>
+    const SCHEMA = {
+      investment: {
+        desc: "Public equities, ETFs, mutual funds, bonds, and brokerage portfolio statements.",
+        rule: "Extract per-ticker/security holdings plus consolidated account totals and cash sweep balances.",
+        triage: "market value (3.0), portfolio summary (3.5), account value (3.5), total value (3.0), cost basis (2.5), holdings (2.5), ticker (2.5), shares (2.0), dividend (2.0), cusip (2.0)",
+        keys: [
+          ["shares", "Number of shares, units, or contracts held for a ticker/security"],
+          ["avg_cost", "Average unit purchase price / cost per share"],
+          ["market_price", "Current market price or NAV per share/unit"],
+          ["market_value", "Current total market value of the holding"],
+          ["cost_basis", "Total original acquisition cost basis of the holding"],
+          ["unrealized_pl", "Unrealized gain or loss (amount or percentage)"],
+          ["realized_pl", "Realized gain or loss during the reporting period"],
+          ["dividend", "Dividends, coupons, or distributions received or estimated annually"],
+          ["yield_pct", "Annualized dividend, SEC, or distribution yield (%)"],
+          ["allocation_pct", "Portfolio weight or asset class allocation (%)"],
+          ["cash_sweep", "Cash or money market sweep balance inside the brokerage account"],
+          ["total_portfolio_value", "Consolidated total value of the investment account or portfolio"]
+        ]
+      },
+      funding: {
+        desc: "Private startup investments, SAFE/convertible notes, angel checks, and VC/PE fund commitments.",
+        rule: "Include company/fund name as entity and funding round/vehicle (e.g., Series A, Seed SAFE, LP) in notes.",
+        triage: "investment amount (3.0), invested amount (3.0), funding (2.5), series a/b/c (2.5), valuation (2.5), commitment (2.5), capital call (2.5), safe (2.0)",
+        keys: [
+          ["investment_amount", "Principal capital invested into a startup round or private deal"],
+          ["commitment", "Total LP capital commitment to a VC/PE fund"],
+          ["called_capital", "Cumulative capital called or funded to date"],
+          ["uncalled_capital", "Remaining uncalled commitment balance"],
+          ["pre_money_valuation", "Pre-money valuation at the investment round"],
+          ["post_money_valuation", "Post-money valuation or latest mark valuation"],
+          ["ownership_pct", "Equity ownership percentage held (%)"],
+          ["current_nav", "Latest reported fair value / NAV of the private holding"],
+          ["distribution", "Cash or stock distributions returned to investor"]
+        ]
+      },
+      bank_statement: {
+        desc: "Checking, savings, multi-currency bank accounts, and fixed/term deposit statements.",
+        rule: "Always extract account summary balances/totals, interest, and major transfers/payroll; skip tiny routine retail purchases (<$200) when summary totals exist.",
+        triage: "beginning balance (3.5), ending balance (3.5), opening/closing balance (3.5), account summary (3.5), total deposits (3.0), total withdrawals (3.0), interest earned (2.0)",
+        keys: [
+          ["beginning_balance", "Account balance at the start of the statement period"],
+          ["ending_balance", "Account balance at the end of the statement period"],
+          ["average_daily_balance", "Average daily balance over the statement period"],
+          ["total_deposits", "Total deposits and credits during the statement period"],
+          ["total_withdrawals", "Total withdrawals and debits during the statement period"],
+          ["interest_earned", "Interest paid or accrued during the period"],
+          ["apy_pct", "Annual percentage yield or deposit interest rate (%)"],
+          ["fees", "Total service, maintenance, or wire fees charged"],
+          ["deposit", "Material individual credit, salary payroll, or incoming transfer"],
+          ["withdrawal", "Material individual debit, rent, bill pay, or outgoing transfer"],
+          ["fixed_deposit_principal", "Principal amount locked in a term or fixed deposit"]
+        ]
+      },
+      insurance: {
+        desc: "Whole life, term life, savings, critical illness, medical, and annuity policies (including 60-100p contracts).",
+        rule: "Use policy number or benefit/rider name as entity; capture both guaranteed cash value and total surrender value across key policy years when tables are present.",
+        triage: "policy schedule (4.5), schedule of benefits (4.5), sum assured (4.5), annual premium (4.5), table of values (4.5), cash value (4.0), surrender value (4.0), face amount (4.0), death benefit (3.5), coverage limit (3.0)",
+        keys: [
+          ["sum_assured", "Base sum assured, face amount, or core insured amount"],
+          ["death_benefit", "Total payable death benefit including bonuses/dividends"],
+          ["annual_premium", "Recurring annual premium cost"],
+          ["modal_premium", "Periodic premium (monthly, quarterly, or semi-annual)"],
+          ["total_planned_premium", "Total planned premiums over the entire payment term"],
+          ["premiums_paid_to_date", "Cumulative premiums paid as of the statement date"],
+          ["cash_value", "Guaranteed or accumulated policy cash value"],
+          ["surrender_value", "Total cash surrender value (guaranteed + non-guaranteed)"],
+          ["accumulated_dividends", "Accumulated policy dividends or reversionary bonuses"],
+          ["coverage_limit", "Rider or medical coverage limit (e.g., critical illness, AD&D, hospital)"],
+          ["deductible", "Annual deductible or out-of-pocket excess"],
+          ["policy_fee", "Annual policy administration fee"],
+          ["policy_loan", "Outstanding policy loan balance"],
+          ["maturity_value", "Projected or guaranteed payout at policy maturity"]
+        ]
+      },
+      liability: {
+        desc: "Mortgages, personal/auto loans, credit cards, and margin debt.",
+        rule: "Extract unpaid principal, credit limits, APR/interest rate, and scheduled repayments.",
+        triage: "loan balance (3.0), mortgage (2.5), credit limit (2.5), monthly payment (2.5), apr (2.0)",
+        keys: [
+          ["principal_balance", "Remaining unpaid principal or statement balance owed"],
+          ["credit_limit", "Total revolving credit limit"],
+          ["monthly_payment", "Scheduled monthly repayment amount"],
+          ["interest_rate_pct", "Loan interest rate or APR (%)"],
+          ["minimum_payment", "Minimum payment due for the billing cycle"]
+        ]
+      },
+      income_tax: {
+        desc: "Tax filings, W-2/1099/IR8A/BIR60 compensation statements, and tax assessments.",
+        rule: "Extract gross income, taxable income, tax withheld, and net tax due or refund.",
+        triage: "taxable income (3.0), gross income (2.5), tax withheld (2.5), tax due (2.5), tax refund (2.5)",
+        keys: [
+          ["gross_income", "Total gross compensation or income before deductions"],
+          ["taxable_income", "Net assessable / taxable income"],
+          ["tax_withheld", "Total tax withheld or prepaid"],
+          ["tax_due", "Net tax payable"],
+          ["tax_refund", "Net tax refund receivable"]
+        ]
+      },
+      real_estate: {
+        desc: "Property appraisals, mortgage equity summaries, and rental income statements.",
+        rule: "Extract property valuation, rental cash flow, and recurring property expenses.",
+        triage: "property value (2.5), rental income (2.5), appraised value (2.5), property tax (2.0)",
+        keys: [
+          ["property_value", "Estimated or appraised market value of the property"],
+          ["rental_income", "Monthly or annual gross rental income"],
+          ["property_tax", "Annual property tax or rates"],
+          ["management_fee", "HOA or property management fee"]
+        ]
+      },
+      other: {
+        desc: "Any other material financial metric not fitting the categories above.",
+        rule: "Use clear snake_case metric_key for any material monetary figure or rate.",
+        triage: "(Fallback category — no extra keyword weight)",
+        keys: [
+          ["financial_metric", "Material monetary figure, rate, or count not covered by other document types"]
+        ]
+      }
+    };
+
+    const tabsEl = document.getElementById('docTabs');
+    Object.keys(SCHEMA).forEach((k, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'tab-btn' + (idx === 0 ? ' active' : '');
+      btn.textContent = `${k} (${SCHEMA[k].keys.length})`;
+      btn.onclick = () => selectType(k, btn);
+      tabsEl.appendChild(btn);
+    });
+
+    function selectType(key, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      const s = SCHEMA[key];
+      document.getElementById('schemaRule').innerHTML =
+        `<strong>${key}</strong> — ${s.desc}<br><span style="color:var(--muted)">Extraction rule: ${s.rule}</span>`;
+      document.getElementById('schemaRows').innerHTML = s.keys
+        .map(([k, def]) => `<tr><td><code>${k}</code></td><td>${def}</td></tr>`)
+        .join('');
+      document.getElementById('triageKws').innerHTML =
+        `<strong>PaddleOCR Triage Keywords (weight):</strong> ${s.triage}`;
+    }
+    selectType('investment', tabsEl.firstChild);
+  </script>
+</body>
+</html>
